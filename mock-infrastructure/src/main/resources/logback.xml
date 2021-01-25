@@ -13,7 +13,7 @@
     <appender name="MOCK_INFRASTRUCTURE_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>mock-infrastructure-log/mock-infrastructure.log</file>
         <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
+            <level>${MOCK_INFRA_FILE_LOG_LEVEL:-DEBUG}</level>
         </filter>
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
             <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">

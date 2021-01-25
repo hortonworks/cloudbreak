@@ -2,9 +2,10 @@ package com.sequenceiq.mock;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = QuartzAutoConfiguration.class)
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class MockInfrastructureApplication {
 

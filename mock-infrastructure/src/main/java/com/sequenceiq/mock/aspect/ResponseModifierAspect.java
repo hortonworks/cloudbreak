@@ -50,7 +50,7 @@ public class ResponseModifierAspect {
         appendValueOrPathIfNotBlank(AnnotationUtils.findAnnotation(method, PostMapping.class), sb);
         appendValueOrPathIfNotBlank(AnnotationUtils.findAnnotation(method, PutMapping.class), sb);
         appendValueOrPathIfNotBlank(AnnotationUtils.findAnnotation(method, DeleteMapping.class), sb);
-        LOGGER.debug("Called method: {}", method);
+        LOGGER.trace("Called method: {}", method);
         String resolvedPath = resolvePath(method, proceedingJoinPoint.getArgs(), sb.toString());
         String mockUuid = getArgByName(method, proceedingJoinPoint.getArgs(), Set.of("mock_uuid", "mockuuid", "mockUuid"));
         responseModifierService.handleProfiles(mockUuid, resolvedPath);
