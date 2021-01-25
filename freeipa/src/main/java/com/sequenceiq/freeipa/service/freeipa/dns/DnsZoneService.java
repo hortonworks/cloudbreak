@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.dns;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,6 +15,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
@@ -104,11 +104,11 @@ public class DnsZoneService {
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnetIds(AddDnsZoneForSubnetIdsRequest request, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
-        Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack,
+        Multimap<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack,
                 request.getAddDnsZoneNetwork().getNetworkId(), request.getAddDnsZoneNetwork().getSubnetIds());
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
-        for (Entry<String, String> subnet : subnetWithCidr.entrySet()) {
+        for (Entry<String, String> subnet : subnetWithCidr.entries()) {
             try {
                 LOGGER.info("Add subnet's [{}] reverse DNS zone", subnet);
                 String subnetCidr = subnet.getValue();
@@ -122,8 +122,8 @@ public class DnsZoneService {
             } catch (RetryableFreeIpaClientException e) {
                 throw e;
             } catch (FreeIpaClientException e) {
-                LOGGER.warn("Can't add subnet's [{}] reverse DNS zone", subnet, e);
-                response.getFailed().put(subnet.getKey(), e.getMessage());
+                LOGGER.warn("Can't add subnet's [{}] reverse DNS zone with cidr [{}]", subnet, subnet.getValue(), e);
+                response.getFailed().putIfAbsent(subnet.getKey(), e.getMessage());
             }
         }
         return response;
@@ -132,7 +132,8 @@ public class DnsZoneService {
     public void deleteDnsZoneBySubnetId(String environmentCrn, String accountId, String networkId, String subnetId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(environmentCrn, stack, networkId, Collections.singletonList(subnetId));
+        Multimap<String, String> subnetWithCidr =
+                networkService.getFilteredSubnetWithCidr(environmentCrn, stack, networkId, Collections.singletonList(subnetId));
         for (String cidr : subnetWithCidr.values()) {
             deleteDnsZoneBySubnet(environmentCrn, accountId, cidr);
         }

@@ -5,7 +5,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.env.Environment;
+
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -20,17 +34,8 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
-import java.util.Map;
-import java.util.Set;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.core.env.Environment;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class FreeIpaConfigServiceTest {
 
     private static final String DOMAIN = "cloudera.com";
@@ -41,11 +46,11 @@ public class FreeIpaConfigServiceTest {
 
     private static final String ADMIN = "admin";
 
-    private static final Map<String, String> SUBNET_WITH_CIDR = Map.of("10.117.0.0", "16");
-
     private static final String REVERSE_ZONE = "117.10.in-addr.arpa.";
 
     private static final String PRIVATE_IP = "10.117.0.69";
+
+    private Multimap<String, String> subnetWithCidr;
 
     @Spy
     private S3BackupConfigGenerator s3ConfigGenerator;
@@ -74,6 +79,12 @@ public class FreeIpaConfigServiceTest {
     @InjectMocks
     private FreeIpaConfigService freeIpaConfigService;
 
+    @BeforeEach
+    public void init() {
+        subnetWithCidr = ArrayListMultimap.create();
+        subnetWithCidr.put("10.117.0.0", "16");
+    }
+
     @Test
     public void testCreateFreeIpaConfigs() {
         String backupLocation = "s3://mybucket/test";
@@ -89,7 +100,7 @@ public class FreeIpaConfigServiceTest {
 
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
-        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(SUBNET_WITH_CIDR);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
         when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
