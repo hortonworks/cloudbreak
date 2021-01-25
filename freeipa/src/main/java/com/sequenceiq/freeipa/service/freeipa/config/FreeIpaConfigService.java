@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -10,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -51,7 +51,7 @@ public class FreeIpaConfigService {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
-        Map<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
+        Multimap<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
         LOGGER.debug("Subnets for reverse zone calculation : {}", subnetWithCidr);
         String reverseZones = reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
         LOGGER.debug("Reverse zones : {}", reverseZones);

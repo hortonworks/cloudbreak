@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.PrefixList;
 import com.amazonaws.waiters.Waiter;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNetworkCfTemplateProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
@@ -210,8 +212,9 @@ public class AwsLaunchService {
         return modelContext;
     }
 
+    @VisibleForTesting
     @SuppressWarnings("ParameterNumber")
-    private void updateCloudformationWithLoadBalancers(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
+    void updateCloudformationWithLoadBalancers(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             ModelContext modelContext, List<CloudResource> instances, String regionName, AmazonEC2Client amazonEC2Client,
             Network network, AwsNetworkView awsNetworkView, boolean mapPublicIpOnLaunch) {
 
@@ -222,68 +225,126 @@ public class AwsLaunchService {
                     ac, stack, resourceNotifier, regionName, amazonEC2Client, network, awsNetworkView, mapPublicIpOnLaunch);
             }
 
-            List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
-            for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
-                AwsLoadBalancer loadBalancer = convertLoadBalancer(cloudLoadBalancer, instances, awsNetworkView, amazonEC2Client, awsLoadBalancers);
-                if (!awsLoadBalancers.contains(loadBalancer)) {
-                    awsLoadBalancers.add(loadBalancer);
-                }
-            }
+            List<AwsLoadBalancer> awsLoadBalancers = getAwsLoadBalancers(cloudLoadBalancers, instances, awsNetworkView, amazonEC2Client);
 
             modelContext.withLoadBalancers(awsLoadBalancers);
+            LOGGER.debug("Starting CloudFormation update to create load balancer and target groups.");
             ListStackResourcesResult result = updateCloudFormationStack(ac, stack, modelContext);
 
-            for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
-                for (AwsListener listener : loadBalancer.getListeners()) {
-                    Optional<StackResourceSummary> targetGroupSummary = result.getStackResourceSummaries().stream()
-                        .filter(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()))
-                        .findFirst();
-                    if (targetGroupSummary.isEmpty()) {
-                        throw new CloudConnectorException("Could not create load balancer listeners: target group not found.");
-                    }
-                    listener.getTargetGroup().setArn(targetGroupSummary.get().getPhysicalResourceId());
-                }
-                Optional<StackResourceSummary> loadBalancerSummary = result.getStackResourceSummaries().stream()
-                    .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()))
-                    .findFirst();
-                if (loadBalancerSummary.isEmpty()) {
-                    throw new CloudConnectorException("Could not create load balancer listeners: load balancer not found.");
-                }
-                loadBalancer.setArn(loadBalancerSummary.get().getPhysicalResourceId());
-                loadBalancer.validateListenerConfigIsSet();
-            }
+            setLoadBalancerMetadata(awsLoadBalancers, result);
 
+            LOGGER.debug("Starting CloudFormation update to create listeners.");
             updateCloudFormationStack(ac, stack, modelContext);
         }
     }
 
-    private AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
-            AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client, List<AwsLoadBalancer> awsLoadBalancers) {
-        // Check and see if we already have a load balancer whose scheme matches this one.
-        Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLoadBalancer.getType(), awsNetworkView);
-        AwsLoadBalancerScheme scheme = determinePublicVsPrivateSchema(subnetIds, awsNetworkView.getExistingVpc(), amazonEC2Client);
-        Optional<AwsLoadBalancer> existingLoadBalancer = awsLoadBalancers.stream()
-            .filter(lb -> lb.getScheme() == scheme)
-            .findFirst();
-
-        AwsLoadBalancer currentLoadBalancer;
-        if (existingLoadBalancer.isPresent()) {
-            currentLoadBalancer = existingLoadBalancer.get();
-        } else {
-            currentLoadBalancer = new AwsLoadBalancer(scheme);
+    private List<AwsLoadBalancer> getAwsLoadBalancers(List<CloudLoadBalancer> cloudLoadBalancers, List<CloudResource> instances,
+            AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+        LOGGER.debug("Converting internal load balancer model to AWS cloud provider model.");
+        List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
+        for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
+            LOGGER.debug("Found load balancer model of type {}", cloudLoadBalancer.getType());
+            AwsLoadBalancer loadBalancer = convertLoadBalancer(cloudLoadBalancer, instances, awsNetworkView, amazonEC2Client, awsLoadBalancers);
+            if (loadBalancer != null && !awsLoadBalancers.contains(loadBalancer)) {
+                awsLoadBalancers.add(loadBalancer);
+            }
         }
 
-        currentLoadBalancer.addSubnets(subnetIds);
-        setupLoadBalancer(cloudLoadBalancer, instances, currentLoadBalancer);
+        Set<String> requestedTypes = cloudLoadBalancers.stream()
+            .map(lb -> lb.getType().name())
+            .collect(Collectors.toSet());
+        Set<String> awsTypes = awsLoadBalancers.stream()
+            .map(lb -> AwsLoadBalancerScheme.INTERNAL.awsScheme().equals(lb.getAwsScheme()) ? "PRIVATE" : "PUBLIC")
+            .collect(Collectors.toSet());
+        if (!requestedTypes.equals(awsTypes)) {
+            throw new CloudConnectorException(String.format("Can not create all requested AWS load balancers. " +
+                "Types requested: [%s]; type to be created: [%s]", requestedTypes, awsTypes));
+        }
+
+        return awsLoadBalancers;
+    }
+
+    @VisibleForTesting
+    void setLoadBalancerMetadata(List<AwsLoadBalancer> awsLoadBalancers, ListStackResourcesResult result) {
+        for (AwsLoadBalancer loadBalancer : awsLoadBalancers) {
+            LOGGER.debug("Processing load balancer {}", loadBalancer.getName());
+            for (AwsListener listener : loadBalancer.getListeners()) {
+                LOGGER.debug("Processing listener {} and target group {}", listener.getName(), listener.getTargetGroup().getName());
+                Optional<StackResourceSummary> targetGroupSummary = result.getStackResourceSummaries().stream()
+                    .filter(stackResourceSummary -> listener.getTargetGroup().getName().equals(stackResourceSummary.getLogicalResourceId()))
+                    .findFirst();
+                if (targetGroupSummary.isEmpty()) {
+                    throw new CloudConnectorException(String.format("Could not create load balancer listeners: target group %s not found.",
+                        listener.getTargetGroup().getName()));
+                }
+                if (StringUtils.isEmpty(targetGroupSummary.get().getPhysicalResourceId())) {
+                    throw new CloudConnectorException(String.format("Could not create load balancer listeners: target group %s arn not found.",
+                        listener.getTargetGroup().getName()));
+                }
+                listener.getTargetGroup().setArn(targetGroupSummary.get().getPhysicalResourceId());
+                LOGGER.debug("Found arn {} for target group {}", listener.getTargetGroup().getArn(), listener.getTargetGroup().getName());
+            }
+            Optional<StackResourceSummary> loadBalancerSummary = result.getStackResourceSummaries().stream()
+                .filter(stackResourceSummary -> loadBalancer.getName().equals(stackResourceSummary.getLogicalResourceId()))
+                .findFirst();
+            if (loadBalancerSummary.isEmpty()) {
+                throw new CloudConnectorException(String.format("Could not create load balancer listeners: load balancer %s not found.",
+                    loadBalancer.getName()));
+            }
+            if (StringUtils.isEmpty(loadBalancerSummary.get().getPhysicalResourceId())) {
+                throw new CloudConnectorException(String.format("Could not create load balancer listeners: load balancer %s arn not found.",
+                    loadBalancer.getName()));
+            }
+            loadBalancer.setArn(loadBalancerSummary.get().getPhysicalResourceId());
+            loadBalancer.validateListenerConfigIsSet();
+            LOGGER.debug("Found arn {} for load balancer {}", loadBalancer.getArn(), loadBalancer.getName());
+        }
+    }
+
+    @VisibleForTesting
+    AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
+            AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client, List<AwsLoadBalancer> awsLoadBalancers) {
+        // Check and see if we already have a load balancer whose scheme matches this one.
+        AwsLoadBalancer currentLoadBalancer = null;
+        LoadBalancerType cloudLbType = cloudLoadBalancer.getType();
+        Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLbType, awsNetworkView);
+        AwsLoadBalancerScheme scheme = determinePublicVsPrivateSchema(subnetIds, awsNetworkView.getExistingVpc(), amazonEC2Client);
+
+        if ((AwsLoadBalancerScheme.INTERNAL.equals(scheme) && LoadBalancerType.PUBLIC.equals(cloudLbType)) ||
+                (AwsLoadBalancerScheme.INTERNET_FACING.equals(scheme) && LoadBalancerType.PRIVATE.equals(cloudLbType))) {
+            LOGGER.debug("Discovered mismatch between load balancer type and subnet type. Load balancer type is {}, " +
+                "and subnet type is {}. Load balancer will not be created.", cloudLbType,
+                AwsLoadBalancerScheme.INTERNAL.equals(scheme) ? "PRIVATE" : "PUBLIC");
+        } else {
+            Optional<AwsLoadBalancer> existingLoadBalancer = awsLoadBalancers.stream()
+                .filter(lb -> lb.getScheme() == scheme)
+                .findFirst();
+
+            if (existingLoadBalancer.isPresent()) {
+                currentLoadBalancer = existingLoadBalancer.get();
+            } else {
+                currentLoadBalancer = new AwsLoadBalancer(scheme);
+            }
+
+            currentLoadBalancer.addSubnets(subnetIds);
+            setupLoadBalancer(cloudLoadBalancer, instances, currentLoadBalancer);
+        }
         return currentLoadBalancer;
     }
 
-    private Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView) {
+    @VisibleForTesting
+    Set<String> selectLoadBalancerSubnetIds(LoadBalancerType type, AwsNetworkView awsNetworkView) {
         List<String> subnetIds;
         if (type == LoadBalancerType.PRIVATE) {
+            LOGGER.debug("Private load balancer detected. Using instance subnet for load balancer creation.");
             subnetIds = awsNetworkView.getSubnetList();
         } else {
             subnetIds = awsNetworkView.getEndpointGatewaySubnetList();
+            LOGGER.debug("Public load balancer detected. Using endpoint gateway subnet for load balancer creation.");
+            if (subnetIds.isEmpty()) {
+                LOGGER.debug("Endpoint gateway subnet is not set. Falling back to instance subnet for load balancer creation.");
+                subnetIds = awsNetworkView.getSubnetList();
+            }
         }
         if (subnetIds.isEmpty()) {
             throw new CloudConnectorException("Unable to configure load balancer: Could not identify subnets.");
