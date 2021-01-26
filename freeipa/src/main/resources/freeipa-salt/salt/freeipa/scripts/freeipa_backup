@@ -222,7 +222,13 @@ elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     host "${backup_host}" > /dev/null || error_exit "Unable to resolve host for backup location ${BACKUP_LOCATION}"
     /bin/keyctl new_session 2>&1 | tee -a "${LOGFILE}"
     if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
-        error_exit "Unable to setup keyring session"
+        SESSION_PERMS=$(/bin/keyctl rdescribe @s)
+        SESSION_OWNER=$(echo "${SESSION_PERMS}" | cut -f2 -d";")
+        if [[ "${SESSION_OWNER}" != "${UID}" ]]; then
+            error_exit "Unable to setup keyring session. The keyring session permissions are ${SESSION_PERMS} but the UID is ${UID}. Was this command run with \"sudo\" or \"sudo su\"? If so, then try \"sudo su -\"."
+        else
+            error_exit "Unable to setup keyring session"
+        fi
     fi
     /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" 2>&1 | tee -a "${LOGFILE}"
     if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
