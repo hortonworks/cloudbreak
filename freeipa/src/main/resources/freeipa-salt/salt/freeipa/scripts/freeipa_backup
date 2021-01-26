@@ -130,17 +130,25 @@ doStatus(){
     if [[ -n "$BACKUP_SCHEDULE" ]]
     then
         type_of_msg=$(echo "$*"|cut -d" " -f1)
+        orig_type_of_msg=${type_of_msg}
         msg=$(echo "$*"|cut -d" " -f2-)
-        [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
+        if [[ $type_of_msg == INFO ]]; then
+            type_of_msg="INFO " # one space for aligning
+            backup_dst_json="\"backup_path\":\"${BACKUP_LOCATION}/${BACKUPDIR}\","
+            status="success"
+        else
+            status="failure"
+        fi
 
         echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg" > "${STATUSFILEPREFIX}${BACKUP_SCHEDULE}".log
+        echo "{\"time\":\"$(date "+%Y-%m-%dT%H:%M:%SZ")\",\"level\":\"${orig_type_of_msg}\",\"status\":\"${status}\",${backup_dst_json}\"message\":\"${msg}\"}" > "${STATUSFILEPREFIX}${BACKUP_SCHEDULE}".json
     fi
 }
 
 error_exit()
 {
     doLog "ERROR $1"
-    if [[ -n "$PERMISSIONS_CHECK" ]]; then
+    if [[ -z "$PERMISSIONS_CHECK" ]]; then
         doStatus "ERROR $1"
     fi
     exit 1
@@ -260,6 +268,6 @@ elif [[ "${config[backup_platform]}" = "GCP" ]]; then
 fi
 
 doLog "INFO Backup ${PERMISSIONS_CHECK}completed."
-if [[ -n "$PERMISSIONS_CHECK" ]]; then
+if [[ -z "$PERMISSIONS_CHECK" ]]; then
     doStatus "INFO Backup succeeded."
 fi
