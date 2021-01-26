@@ -5,6 +5,7 @@ import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
@@ -45,6 +46,19 @@ public class CertificateTrustManager {
         }
     }
 
+    public static SSLContext sslSavingTrustStoreContext() {
+        TrustManager[] trustManagers = {new CertificateTrustManager.SavingX509TrustManager()};
+        SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
+        try {
+            sslContext.init(null, trustManagers, new SecureRandom());
+        } catch (KeyManagementException e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new RuntimeException("FF", e);
+        }
+        return sslContext;
+    }
+
     private static X509TrustManager trustEverythingTrustManager() {
         return new X509TrustManager() {
             @Override
@@ -68,6 +82,7 @@ public class CertificateTrustManager {
     }
 
     public static class SavingX509TrustManager implements X509TrustManager {
+
         private X509Certificate[] chain;
 
         @Override
