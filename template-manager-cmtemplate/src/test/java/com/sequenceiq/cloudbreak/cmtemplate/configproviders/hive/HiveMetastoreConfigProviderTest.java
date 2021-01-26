@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMeta
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_SERVICE_CONFIG_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.JDBC_URL_OVERRIDE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.METASTORE_CANARY_HEALTH_ENABLED;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_COMPACTOR_INITIATOR_ON;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -280,6 +281,38 @@ class HiveMetastoreConfigProviderTest {
                 entry(HIVE_METASTORE_LDAP_URI, "ldap://localhost:389"),
                 entry(HIVE_METASTORE_LDAP_BASEDN, "cn=users,dc=example,dc=org")
         );
+        Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
+        assertThat(configNameToVariableNameMap).isEmpty();
+    }
+
+    @Test void getServiceConfigsTestDatahubCm710() {
+        TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0), null)
+                .withStackType(StackType.WORKLOAD).build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
+
+        verifyDbOnlyMinimalResult(result);
+    }
+
+    @Test void getServiceConfigsTestDatahubCm711() {
+        TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
+                .withRdsConfigs(Set.of(createRdsConfig(null)))
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_1), null)
+                .withStackType(StackType.WORKLOAD).build();
+
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(templateProcessor, tpo);
+
+        Map<String, String> configNameToValueMap = getConfigNameToValueMap(result);
+        assertThat(configNameToValueMap)
+            .containsOnly(entry(HIVE_METASTORE_DATABASE_HOST, "10.1.1.1"),
+                entry(HIVE_METASTORE_DATABASE_NAME, "hive"),
+                entry(HIVE_METASTORE_DATABASE_PASSWORD, "iamsoosecure"),
+                entry(HIVE_METASTORE_DATABASE_PORT, "5432"),
+                entry(HIVE_METASTORE_DATABASE_TYPE, "postgresql"),
+                entry(HIVE_METASTORE_DATABASE_USER, "heyitsme"),
+                entry(HIVE_COMPACTOR_INITIATOR_ON, "false"));
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);
         assertThat(configNameToVariableNameMap).isEmpty();
     }

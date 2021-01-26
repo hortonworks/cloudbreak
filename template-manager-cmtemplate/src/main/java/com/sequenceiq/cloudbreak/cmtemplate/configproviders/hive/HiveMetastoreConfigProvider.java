@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
@@ -50,6 +51,9 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
     static final String HIVE_METASTORE_DATABASE_USER = "hive_metastore_database_user";
 
     @VisibleForTesting
+    static final String HIVE_COMPACTOR_INITIATOR_ON = "hive_compactor_initiator_on";
+
+    @VisibleForTesting
     static final String HIVE_SERVICE_CONFIG_SAFETY_VALVE = "hive_service_config_safety_valve";
 
     @VisibleForTesting
@@ -85,7 +89,15 @@ public class HiveMetastoreConfigProvider extends AbstractRdsRoleConfigProvider {
                 config(HIVE_METASTORE_DATABASE_TYPE, hiveRdsView.getSubprotocol()),
                 config(HIVE_METASTORE_DATABASE_USER, hiveRdsView.getConnectionUserName())
         );
-        addDbSslConfigsIfNeeded(templateProcessor, hiveRdsView, configs, getCmVersion(source));
+        String cmVersion = getCmVersion(source);
+        addDbSslConfigsIfNeeded(templateProcessor, hiveRdsView, configs, cmVersion);
+
+        // For DataHub, don't start the compactor.Initiator thread which automatically queues ACID compaction.
+        // The Initiator thread in the DataLake's HMS will take care of this.
+        if (source.getStackType() == StackType.WORKLOAD && isVersionNewerOrEqualThanLimited(cmVersion,
+            CLOUDERAMANAGER_VERSION_7_1_1)) {
+            configs.add(config(HIVE_COMPACTOR_INITIATOR_ON, Boolean.FALSE.toString()));
+        }
 
         Optional<KerberosConfig> kerberosConfigOpt = source.getKerberosConfig();
         if (kerberosConfigOpt.isPresent()) {
