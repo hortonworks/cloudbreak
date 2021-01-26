@@ -175,9 +175,9 @@ upload_aws_backup() {
 
 if [[ -n "$PERMISSIONS_CHECK" ]]; then
     doLog "INFO Running backup upload permissions check."
-    BACKUPDIR="ipa-backup-test-$(date "+%Y-%m-%dT%H-%M-%S")"
-    mkdir -p "${config[backup_path]}/${BACKUPDIR}"
-    echo "Backup upload test" > "${config[backup_path]}/${BACKUPDIR}/upload-test.txt"
+    BACKUP_TEST_DIR="ipa-backup-test-$(date "+%Y-%m-%dT%H-%M-%S")"
+    mkdir -p "${config[backup_path]}/${BACKUP_TEST_DIR}"
+    echo "Backup upload test" > "${config[backup_path]}/${BACKUP_TEST_DIR}/upload-test.txt"
     BACKUP_LOCATION="${config[backup_location]}/$(hostname -f)/.upload-test"
 else
     # ON START
@@ -199,11 +199,12 @@ else
     # shellcheck disable=SC2086
     /sbin/ipa-backup ${BACKUP_OPTIONS} >> "${LOGFILE}" 2>&1 || error_exit "ipa-backup failed! Aborting!"
 
-    # shellcheck disable=SC2012
-    BACKUPDIR=$(basename "$(ls -td "${config[backup_path]}/ipa-*" | head -1)")
-
     BACKUP_LOCATION="${config[backup_location]}/${BACKUP_PATH_POSTFIX}"
 fi
+
+# shellcheck disable=SC2012
+BACKUPDIR=$(basename "$(ls -td "${config[backup_path]}"/ipa-* | head -1)")
+
 doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]}"
 
 if [[ "${config[backup_platform]}" = "AWS" ]]; then
