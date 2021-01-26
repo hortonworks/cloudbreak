@@ -61,7 +61,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         if (!targets.isEmpty()) {
             LOGGER.debug("Missing targets for SaltBootstrap: {}", targets);
 
-            SaltAction saltAction = createBootstrap(params.isRestartNeeded());
+            SaltAction saltAction = createBootstrap(params.isRestartNeededFlagSupported(), params.isRestartNeeded());
             GenericResponses responses = sc.action(saltAction);
 
             Set<Node> failedTargets = new HashSet<>();
@@ -113,7 +113,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 : new MinionAcceptor(sc, saltAction.getMinions(), new AcceptAllFpMatcher(), new DummyFingerprintCollector());
     }
 
-    private SaltAction createBootstrap(boolean restartNeeded) {
+    private SaltAction createBootstrap(boolean restartNeededFlagSupported, boolean restartNeeded) {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
         if (params.getCloud() != null) {
             saltAction.setCloud(new Cloud(params.getCloud()));
@@ -136,27 +136,59 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 // set due to compatibility reasons
                 saltAction.setServer(gatewayAddress);
                 saltAction.setMaster(master);
-                saltAction.addMinion(createMinion(saltMaster, restartNeeded));
+                saltAction.addMinion(createMinion(saltMaster, restartNeededFlagSupported, restartNeeded));
                 saltAction.addMaster(master);
             }
         }
         for (Node minion : targets.stream().filter(node -> !getGatewayPrivateIps().contains(node.getPrivateIp())).collect(Collectors.toList())) {
-            saltAction.addMinion(createMinion(minion, restartNeeded));
+            saltAction.addMinion(createMinion(minion, restartNeededFlagSupported, restartNeeded));
         }
         return saltAction;
     }
 
-    private Minion createMinion(Node node, boolean restartNeeded) {
+    private Minion createMinion(Node node, boolean restartNeededFlagSupported, boolean restartNeeded) {
         Minion minion = new Minion();
         minion.setAddress(node.getPrivateIp());
         minion.setHostGroup(node.getHostGroup());
         minion.setHostName(node.getHostname());
         minion.setDomain(node.getDomain());
-        minion.setServers(getGatewayPrivateIps());
+        minion.setServers(calculateServerIps(restartNeededFlagSupported, restartNeeded));
         minion.setRestartNeeded(restartNeeded);
         // set due to compatibility reasons
         minion.setServer(getGatewayPrivateIps().get(0));
         return minion;
+    }
+
+    /***
+     *  Restart needed flag was introduced for the following use case:
+     *
+     *     In a repair scenario where salt master has the same IP address as before, the minions on other instances are not restarted by salt-bootstrap.
+     *     Salt minion does not try to communicate with master by itself for a long time (30mins or sthg like this).
+     *     So when we are waiting for the minions' keys on salt-master then timeout can happen if all the minions haven't tried to communicate with
+     *     master during this time frame.
+     *
+     *     Timeout error message in this scenario: There are missing nodes from salt network response.
+     *     Solution was to introduce a restartNeeded flag in salt-bootstrap and we restart salt minions every time we do a salt-master replacement.
+     *     (it used to be restarted only in case when salt-master IP address changed)
+     *
+     *  In case of older salt-bootsrap ( pre 0.13.4 ) the restartNeeded flag is not interpreted. So in an upgrade scenario (it has a repair flow in
+     *  itself) where the upgrade starts from a 7.1.0 image, the minions are not restarted so the above mentioned timeout could happen.
+     *
+     *  It is a dirty fix but if the restartNeeded flag is set but salt-bootstrap does not support this flag, then we change the
+     *  salt master ip address to loopback address (127.0.0.1), so salt-minion will be restarted by older salt-bootstrap also.
+     *
+     *  The original IP will be set in the next iteration because restartNeeded flag will be false.
+     *
+     * @param restartNeededFlagSupported is restartNeeded flag supported by salt-bootstrap
+     * @param restartNeeded restart minions
+     * @return salt master(s) ip adress(es)
+     */
+    private List<String> calculateServerIps(boolean restartNeededFlagSupported, boolean restartNeeded) {
+        if (!restartNeededFlagSupported && restartNeeded) {
+            return Collections.singletonList("127.0.0.1");
+        } else {
+            return getGatewayPrivateIps();
+        }
     }
 
     private List<String> getGatewayPrivateIps() {
