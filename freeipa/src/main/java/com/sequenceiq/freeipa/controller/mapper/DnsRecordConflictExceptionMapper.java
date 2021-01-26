@@ -16,7 +16,7 @@ public class DnsRecordConflictExceptionMapper extends BaseExceptionMapper<DnsRec
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(DnsRecordConflictException exception) {
         return Status.CONFLICT;
     }
 

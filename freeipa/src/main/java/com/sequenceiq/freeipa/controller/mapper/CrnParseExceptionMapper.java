@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseException> {
 
     @Override
-    Status getResponseStatus() {
-        return Status.UNAUTHORIZED;
+    Status getResponseStatus(CrnParseException exception) {
+        return Status.BAD_REQUEST;
     }
 
     @Override
@@ -21,6 +21,6 @@ public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseExcepti
 
     @Override
     protected String getErrorMessage(CrnParseException exception) {
-        return getResponseStatus().getReasonPhrase() + ": " + exception.getMessage();
+        return getResponseStatus(exception).getReasonPhrase() + ": " + exception.getMessage();
     }
 }

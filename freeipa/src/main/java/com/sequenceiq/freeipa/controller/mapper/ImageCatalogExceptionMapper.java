@@ -10,7 +10,7 @@ import com.sequenceiq.freeipa.service.image.ImageCatalogException;
 public class ImageCatalogExceptionMapper extends BaseExceptionMapper<ImageCatalogException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ImageCatalogException exception) {
         return Status.NOT_FOUND;
     }
 

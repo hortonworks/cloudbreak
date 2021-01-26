@@ -18,7 +18,7 @@ public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundEx
     private UriInfo uriInfo;
 
     @Override
-    Response.Status getResponseStatus() {
+    Response.Status getResponseStatus(NotFoundException exception) {
         return Response.Status.NOT_FOUND;
     }
 
@@ -31,6 +31,6 @@ public class JaxRsNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundEx
     public Response toResponse(NotFoundException exception) {
         String absolutePath = uriInfo.getRequestUri().getPath();
         LOGGER.info("Couldn't find the specified resource on path '{}', error message: {}", absolutePath, getErrorMessage(exception));
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+        return Response.status(getResponseStatus(exception)).entity(getEntity(exception)).build();
     }
 }

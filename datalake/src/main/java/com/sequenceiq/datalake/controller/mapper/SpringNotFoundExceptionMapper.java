@@ -17,7 +17,7 @@ public class SpringNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundE
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringNotFoundExceptionMapper.class);
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(NotFoundException exception) {
         return Status.NOT_FOUND;
     }
 
@@ -29,7 +29,7 @@ public class SpringNotFoundExceptionMapper extends BaseExceptionMapper<NotFoundE
     @Override
     public Response toResponse(NotFoundException exception) {
         LOGGER.info("Resource not found: {}", getErrorMessage(exception));
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+        return Response.status(getResponseStatus(exception)).entity(getEntity(exception)).build();
     }
 
 }

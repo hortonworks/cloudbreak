@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class JaxRsBadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
 
     @Override
-    Response.Status getResponseStatus() {
+    Response.Status getResponseStatus(BadRequestException exception) {
         return Response.Status.BAD_REQUEST;
     }
 

@@ -1,15 +1,16 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
-import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
+import javax.ws.rs.core.Response.Status;
+
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.core.Response.Status;
+import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 
 @Component
 public class UnsupportedExceptionMapper extends BaseExceptionMapper<UnsupportedException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(UnsupportedException exception) {
         return Status.FORBIDDEN;
     }
 

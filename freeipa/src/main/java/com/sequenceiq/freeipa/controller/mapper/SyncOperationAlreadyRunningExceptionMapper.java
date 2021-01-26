@@ -10,7 +10,7 @@ import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningEx
 public class SyncOperationAlreadyRunningExceptionMapper extends BaseExceptionMapper<SyncOperationAlreadyRunningException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(SyncOperationAlreadyRunningException exception) {
         return Status.CONFLICT;
     }
 

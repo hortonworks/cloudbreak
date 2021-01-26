@@ -16,7 +16,7 @@ public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(Exception exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 
