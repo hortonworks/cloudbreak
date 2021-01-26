@@ -14,7 +14,7 @@ public class BadRequestExceptionMapper extends BaseExceptionMapper<BadRequestExc
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(BadRequestException exception) {
         return Status.BAD_REQUEST;
     }
 

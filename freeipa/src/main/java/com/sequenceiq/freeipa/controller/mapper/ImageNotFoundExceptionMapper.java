@@ -10,7 +10,7 @@ import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 public class ImageNotFoundExceptionMapper extends BaseExceptionMapper<ImageNotFoundException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ImageNotFoundException exception) {
         return Status.NOT_FOUND;
     }
 

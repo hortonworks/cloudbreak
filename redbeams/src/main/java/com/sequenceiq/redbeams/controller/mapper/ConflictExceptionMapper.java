@@ -11,7 +11,7 @@ import com.sequenceiq.redbeams.exception.ConflictException;
 public class ConflictExceptionMapper extends BaseExceptionMapper<ConflictException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ConflictException exception) {
         return Status.CONFLICT;
     }
 
@@ -22,6 +22,6 @@ public class ConflictExceptionMapper extends BaseExceptionMapper<ConflictExcepti
 
     @Override
     public Response toResponse(ConflictException exception) {
-        return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
+        return Response.status(getResponseStatus(exception)).entity(getEntity(exception)).build();
     }
 }

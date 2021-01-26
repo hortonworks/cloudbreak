@@ -1,16 +1,16 @@
 package com.sequenceiq.redbeams.controller.mapper;
 
-import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
-
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 
 @Component
 public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseException> {
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(CrnParseException exception) {
         return Status.BAD_REQUEST;
     }
 
@@ -21,6 +21,6 @@ public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseExcepti
 
     @Override
     protected String getErrorMessage(CrnParseException exception) {
-        return getResponseStatus().getReasonPhrase() + ": " + exception.getMessage();
+        return getResponseStatus(exception).getReasonPhrase() + ": " + exception.getMessage();
     }
 }

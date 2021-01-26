@@ -16,7 +16,7 @@ public class InvalidFreeIpaStateExceptionMapper extends BaseExceptionMapper<Inva
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(InvalidFreeIpaStateException exception) {
         return Status.BAD_GATEWAY;
     }
 

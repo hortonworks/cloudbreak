@@ -16,7 +16,7 @@ public class FreeipaClientExceptionWrapperMapper extends BaseExceptionMapper<Fre
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(FreeIpaClientExceptionWrapper exception) {
         return Status.INTERNAL_SERVER_ERROR;
     }
 

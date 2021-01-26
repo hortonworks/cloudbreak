@@ -35,7 +35,7 @@ public class ConstraintViolationExceptionMapper extends BaseExceptionMapper<Cons
     }
 
     @Override
-    Status getResponseStatus() {
+    Status getResponseStatus(ConstraintViolationException exception) {
         return Status.BAD_REQUEST;
     }
 
