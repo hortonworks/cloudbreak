@@ -18,11 +18,18 @@ public class ConfigKey {
 
     private final Optional<Integer> timeout;
 
+    private ConfigKey(ConfigKey.Builder builder) {
+        this.secure = builder.secure;
+        this.debug = builder.debug;
+        this.ignorePreValidation = builder.ignorePreValidation;
+        this.timeout = builder.timeout;
+    }
+
     public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation) {
         this.secure = secure;
         this.debug = debug;
         this.ignorePreValidation = ignorePreValidation;
-        timeout = Optional.empty();
+        this.timeout = Optional.empty();
     }
 
     public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation, int timeout) {
@@ -84,5 +91,45 @@ public class ConfigKey {
                 .append("ignorePreValidation", ignorePreValidation)
                 .append("timeout", timeout)
                 .build();
+    }
+
+    public static ConfigKey.Builder builder() {
+        return new Builder();
+    }
+
+    public static final class Builder {
+
+        private boolean secure;
+
+        private boolean debug;
+
+        private boolean ignorePreValidation;
+
+        private Optional<Integer> timeout = Optional.empty();
+
+        public ConfigKey build() {
+
+            return new ConfigKey(this);
+        }
+
+        public Builder withSecure(boolean secure) {
+            this.secure = secure;
+            return this;
+        }
+
+        public Builder withDebug(boolean debug) {
+            this.debug = debug;
+            return this;
+        }
+
+        public Builder withIgnorePreValidation(boolean ignorePreValidation) {
+            this.ignorePreValidation = ignorePreValidation;
+            return this;
+        }
+
+        public Builder withTimeOut(Integer timeout) {
+            this.timeout = Optional.of(timeout);
+            return this;
+        }
     }
 }

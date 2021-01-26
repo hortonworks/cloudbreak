@@ -81,7 +81,6 @@ public class ApiKeyRequestFilter implements ClientRequestFilter {
             Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
             sgr.initSign(privateKey);
             String messageToSign = method + "\n" + contentType + "\n" + date + "\n" + path + "\n" + AUTH_METHOD;
-            LOGGER.info("Message to sign: \n'{}'", messageToSign);
             sgr.update(messageToSign.getBytes(StandardCharsets.UTF_8));
             return new String(Base64.getUrlEncoder().encode(sgr.sign()), StandardCharsets.UTF_8);
         } catch (NoSuchAlgorithmException e) {
