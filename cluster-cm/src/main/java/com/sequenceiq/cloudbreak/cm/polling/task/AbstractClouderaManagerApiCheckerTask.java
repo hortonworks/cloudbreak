@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.io.IOException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -96,6 +97,7 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         return e.getCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()
                 || e.getCode() == HttpStatus.BAD_REQUEST.value()
                 || e.getCause() instanceof SocketException
+                || e.getCause() instanceof IOException
                 || e.getCause() instanceof SocketTimeoutException;
     }
 
