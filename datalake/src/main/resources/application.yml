@@ -135,6 +135,8 @@ cb:
       connect.timeout.seconds: 245
       read.timeout.seconds: 245
       write.timeout.seconds: 245
+      commands:
+        deployClientConfig.timeout.interrupt.seconds: 120
 
 notification:
   urls: http://localhost:3000/notifications
