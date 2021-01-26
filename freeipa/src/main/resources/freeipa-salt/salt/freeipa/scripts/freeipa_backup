@@ -15,9 +15,6 @@ _lock()             { flock -"$1" ${LOCKFD}; }
 _no_more_locking()  { _lock u; _lock xn && rm -f "${LOCKFILE}"; }
 _prepare_locking()  { eval "exec ${LOCKFD}>\"${LOCKFILE}\""; trap _no_more_locking EXIT; }
 
-# ON START
-_prepare_locking
-
 # PUBLIC
 exlock_now()        { _lock xn; }  # obtain an exclusive lock immediately or fail
 exlock()            { _lock x; }   # obtain an exclusive lock
@@ -71,8 +68,14 @@ if [[ -f $CONFIG_FILE ]]; then
 fi
 set -x
 
-while getopts "t:f:" OPTION; do
+while getopts "t:f:pl" OPTION; do
     case $OPTION in
+    p  )
+        PERMISSIONS_CHECK="permissions check "
+        ;;
+    l  )
+        FORCE_LOG="true"
+        ;;
     t  )
         TYPE=$OPTARG
         [[ ! $TYPE =~ FULL|DATA ]] && {
@@ -94,7 +97,7 @@ then
     exit 1
 fi
 
-if [[ -z "$TYPE" ]] || [[ -z "$FOLDER" ]];
+if [[ -z "$PERMISSIONS_CHECK" && ( -z "$TYPE" || -z "$FOLDER" ) ]];
 then
     echo "A type (-t) and a folder (-f) must be defined" >&2
     exit 1
@@ -119,7 +122,7 @@ doLog(){
     [[ $type_of_msg == WARN ]] && type_of_msg="WARN " # as well
 
     # print to the terminal if we have one
-    test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg"
+    test -t 1 -o -n "$FORCE_LOG" && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg"
     echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg $msg" >> "${LOGFILE}"
 }
 
@@ -137,7 +140,9 @@ doStatus(){
 error_exit()
 {
     doLog "ERROR $1"
-    doStatus "ERROR $1"
+    if [[ -n "$PERMISSIONS_CHECK" ]]; then
+        doStatus "ERROR $1"
+    fi
     exit 1
 }
 
@@ -168,27 +173,37 @@ upload_aws_backup() {
     fi
 }
 
-doLog "INFO Running ${TYPE} IPA backup."
+if [[ -n "$PERMISSIONS_CHECK" ]]; then
+    doLog "INFO Running backup upload permissions check."
+    BACKUPDIR="ipa-backup-test-$(date "+%Y-%m-%dT%H-%M-%S")"
+    mkdir -p "${config[backup_path]}/${BACKUPDIR}"
+    echo "Backup upload test" > "${config[backup_path]}/${BACKUPDIR}/upload-test.txt"
+    BACKUP_LOCATION="${config[backup_location]}/$(hostname -f)/.upload-test"
+else
+    # ON START
+    _prepare_locking
 
-exlock_now || error_exit "A backup seems to be currently running. Lock file is at ${LOCKFILE}"
+    doLog "INFO Running ${TYPE} IPA backup."
+    exlock_now || error_exit "A backup seems to be currently running. Lock file is at ${LOCKFILE}"
 
-# This settings is not needed because cloud service endpoints are used but http_proxy parameter has been taken for later usage
-#set +x
-#if [[ -n "${config[http_proxy]}" ]]; then
-#    doLog "INFO Configure HTTP proxy"
-#    export HTTPS_PROXY="${config[http_proxy]}"
-#fi
-#set -x
+    # This settings is not needed because cloud service endpoints are used but http_proxy parameter has been taken for later usage
+    #set +x
+    #if [[ -n "${config[http_proxy]}" ]]; then
+    #    doLog "INFO Configure HTTP proxy"
+    #    export HTTPS_PROXY="${config[http_proxy]}"
+    #fi
+    #set -x
 
-# Perform a backup
+    # Perform a backup
 
-# shellcheck disable=SC2086
-/sbin/ipa-backup ${BACKUP_OPTIONS} >> "${LOGFILE}" 2>&1 || error_exit "ipa-backup failed! Aborting!"
+    # shellcheck disable=SC2086
+    /sbin/ipa-backup ${BACKUP_OPTIONS} >> "${LOGFILE}" 2>&1 || error_exit "ipa-backup failed! Aborting!"
 
-# shellcheck disable=SC2012
-BACKUPDIR=$(basename "$(ls -td "${config[backup_path]}/ipa-*" | head -1)")
+    # shellcheck disable=SC2012
+    BACKUPDIR=$(basename "$(ls -td "${config[backup_path]}/ipa-*" | head -1)")
 
-BACKUP_LOCATION="${config[backup_location]}/${BACKUP_PATH_POSTFIX}"
+    BACKUP_LOCATION="${config[backup_location]}/${BACKUP_PATH_POSTFIX}"
+fi
 doLog "DEBUG Uploading backup to ${BACKUP_LOCATION} on ${config[backup_platform]}"
 
 if [[ "${config[backup_platform]}" = "AWS" ]]; then
@@ -205,9 +220,18 @@ elif [[ "${config[backup_platform]}" = "AZURE" ]]; then
     doLog "INFO Checking for valid backup location"
     backup_host=$(get_hostname_from_url "${BACKUP_LOCATION}")
     host "${backup_host}" > /dev/null || error_exit "Unable to resolve host for backup location ${BACKUP_LOCATION}"
-    /bin/keyctl new_session >> "${LOGFILE}" 2>&1 || error_exit "Unable to setup keyring session"
-    /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" >> "${LOGFILE}" 2>&1 || error_exit "Unable to login to Azure!"
-    /usr/local/bin/azcopy copy "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}" --recursive=true --check-length=false >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    /bin/keyctl new_session 2>&1 | tee -a "${LOGFILE}"
+    if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
+        error_exit "Unable to setup keyring session"
+    fi
+    /usr/local/bin/azcopy login --identity --identity-resource-id "${config[azure_instance_msi]}" 2>&1 | tee -a "${LOGFILE}"
+    if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
+        error_exit "Unable to login to Azure!"
+    fi
+    /usr/local/bin/azcopy copy "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}" --recursive=true --check-length=false 2>&1 | tee -a "${LOGFILE}"
+    if [[ "${PIPESTATUS[0]}" -ne "0" ]]; then
+        error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+    fi
     remove_local_backups
 elif [[ "${config[backup_platform]}" = "GCP" ]]; then
     # To avoid storage.objects.list permission for logger we must sync backups to the bucket instead of the object
@@ -229,5 +253,7 @@ elif [[ "${config[backup_platform]}" = "GCP" ]]; then
     remove_local_backups
 fi
 
-doLog "INFO Backup completed."
-doStatus "INFO Backup succeeded."
+doLog "INFO Backup ${PERMISSIONS_CHECK}completed."
+if [[ -n "$PERMISSIONS_CHECK" ]]; then
+    doStatus "INFO Backup succeeded."
+fi
