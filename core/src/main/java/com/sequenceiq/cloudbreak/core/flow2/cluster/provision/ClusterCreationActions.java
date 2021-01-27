@@ -48,6 +48,8 @@ import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobService;
+import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobAdapter;
 
 @Configuration
 public class ClusterCreationActions {
@@ -56,6 +58,9 @@ public class ClusterCreationActions {
 
     @Inject
     private StatusCheckerJobService jobService;
+
+    @Inject
+    private StructuredSynchronizerJobService syncJobService;
 
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;
@@ -270,6 +275,7 @@ public class ClusterCreationActions {
             protected void doExecute(ClusterViewContext context, ClusterProxyGatewayRegistrationSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.clusterInstallationFinished(context.getStack());
                 jobService.schedule(context.getStackId(), StackJobAdapter.class);
+                syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
+import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobService;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
@@ -35,6 +36,9 @@ public class ClusterTerminationActions {
 
     @Inject
     private StatusCheckerJobService jobService;
+
+    @Inject
+    private StructuredSynchronizerJobService syncJobService;
 
     @Bean(name = "PREPARE_CLUSTER_STATE")
     public Action<?, ?> prepareCluster() {
@@ -110,6 +114,7 @@ public class ClusterTerminationActions {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterTerminationResult payload, Map<Object, Object> variables) {
                 clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
+                syncJobService.unschedule(String.valueOf(context.getStackId()));
                 sendEvent(context);
             }
 
