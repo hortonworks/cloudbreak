@@ -8,4 +8,10 @@ public class RoleTarget extends GrainTarget {
         super(ROLE_PREFIX + target);
     }
 
+    @Override
+    public String toString() {
+        return "RoleTarget{" +
+                "targets=" + getTarget() +
+                '}';
+    }
 }

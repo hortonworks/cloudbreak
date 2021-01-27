@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -72,19 +73,23 @@ public class SaltStates {
     }
 
     public static ApplyResponse addGrain(SaltConnector sc, Target<String> target, String key, String value) {
-        return sc.run(target, "grains.append", LOCAL, ApplyResponse.class, key, value);
+        return measure(() -> sc.run(target, "grains.append", LOCAL, ApplyResponse.class, key, value), LOGGER,
+                "Grains append took {}ms for key [{}] value [{}] to targets: {}", key, value, target);
     }
 
     public static ApplyResponse removeGrain(SaltConnector sc, Target<String> target, String key, String value) {
-        return sc.run(target, "grains.remove", LOCAL, ApplyResponse.class, key, value);
+        return measure(() -> sc.run(target, "grains.remove", LOCAL, ApplyResponse.class, key, value), LOGGER,
+                "Grains remove took {}ms for key [{}] value [{}] to targets: {}", key, value, target);
     }
 
     public static ApplyResponse syncAll(SaltConnector sc) {
-        return sc.run(Glob.ALL, "saltutil.sync_all", LOCAL, ApplyResponse.class);
+        return measure(() -> sc.run(Glob.ALL, "saltutil.sync_all", LOCAL_ASYNC, ApplyResponse.class), LOGGER,
+                "SyncAll call took {}ms");
     }
 
     public static ApplyResponse updateMine(SaltConnector sc) {
-        return sc.run(Glob.ALL, "mine.update", LOCAL, ApplyResponse.class);
+        return measure(() -> sc.run(Glob.ALL, "mine.update", LOCAL, ApplyResponse.class), LOGGER,
+                "Mine update took {}msd");
     }
 
     public static String highstate(SaltConnector sc) {
@@ -92,7 +97,8 @@ public class SaltStates {
     }
 
     public static String highstate(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid();
+        return measure(() -> sc.run(target, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid(), LOGGER,
+                "HisghState call took {}ms for targets: {}", target);
     }
 
     public static ApplyFullResponse showState(SaltConnector sc, String state) {
@@ -183,19 +189,21 @@ public class SaltStates {
     }
 
     public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
-        MinionIpAddressesResponse minionIpAddressesResponse = sc.run(Glob.ALL, "network.ipaddrs", LOCAL, MinionIpAddressesResponse.class);
+        MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(Glob.ALL, "network.ipaddrs", LOCAL, MinionIpAddressesResponse.class),
+                LOGGER, "Network IP address call took {}ms");
         LOGGER.debug("Minion ip response: {}", minionIpAddressesResponse);
         return minionIpAddressesResponse;
     }
 
     public static MinionStatusSaltResponse collectNodeStatus(SaltConnector sc) {
-        MinionStatusSaltResponse minionStatus = sc.run("manage.status", RUNNER, MinionStatusSaltResponse.class);
+        MinionStatusSaltResponse minionStatus = measure(() -> sc.run("manage.status", RUNNER, MinionStatusSaltResponse.class), LOGGER,
+                "Manage status call took {}ms");
         LOGGER.debug("Minion status: {}", minionStatus);
         return minionStatus;
     }
 
     public static PingResponse ping(SaltConnector sc, Target<String> target) {
-        return sc.run(target, "test.ping", LOCAL, PingResponse.class);
+        return measure(() -> sc.run(target, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
 
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
@@ -231,7 +239,8 @@ public class SaltStates {
     }
 
     private static Map<String, Map<String, String>> getSinglePackageVersion(SaltConnector sc, String singlePackage, Optional<String> versionPattern) {
-        PackageVersionResponse packageVersionResponse = sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, singlePackage);
+        PackageVersionResponse packageVersionResponse = measure(() -> sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, singlePackage),
+                LOGGER, "Get package version took {}ms for package [{}] with pattern [{}]", singlePackage, versionPattern);
         Map<String, String> packageVersionsMap =
                 CollectionUtils.isEmpty(packageVersionResponse.getResult()) ? new HashMap<>() : packageVersionResponse.getResult().get(0);
         Map<String, Map<String, String>> result = new HashMap<>();
@@ -246,7 +255,8 @@ public class SaltStates {
     public static Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
-                CommandExecutionResponse resp = sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
+                CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
+                        "Command run took {}ms for command [{}]", command);
                 List<Map<String, String>> result = resp.getResult();
                 return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
             } catch (RuntimeException e) {
@@ -259,7 +269,8 @@ public class SaltStates {
     public static Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
-                CommandExecutionResponse resp = sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command);
+                CommandExecutionResponse resp = measure(() -> sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
+                        "Command run took {}ms for command: [{}]", command);
                 List<Map<String, String>> result = resp.getResult();
                 return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
             } catch (RuntimeException e) {
@@ -274,25 +285,29 @@ public class SaltStates {
     }
 
     public static Map<String, JsonNode> getGrains(SaltConnector sc, Target<String> target, String grain) {
-        ApplyResponse resp = sc.run(target, "grains.get", LOCAL, ApplyResponse.class, grain);
+        ApplyResponse resp = measure(() -> sc.run(target, "grains.get", LOCAL, ApplyResponse.class, grain), LOGGER,
+                "GrainsGet took {}ms for grain [{}]", grain);
         Iterable<Map<String, JsonNode>> result = resp.getResult();
         return result.iterator().hasNext() ? result.iterator().next() : new HashMap<>();
     }
 
     public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
-        return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service);
+        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service), LOGGER,
+                "ApplyState async took {}ms for service [{}]", service);
     }
 
     public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
-        return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr));
+        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr)), LOGGER,
+                "ApplyState with pillars took {}ms for service [{}]", service);
     }
 
     public static ApplyResponse applyConcurrentState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
-        return sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class,  service, String.format("pillar=%s", inlinePillarsStr), "concurrent=True");
+        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class,  service, String.format("pillar=%s", inlinePillarsStr),
+                "concurrent=True"), LOGGER, "ApplyConcurrentState took {}ms for service [{}]", service);
     }
 
     public static ApplyResponse applyStateAll(SaltConnector sc, String service) {
@@ -300,7 +315,8 @@ public class SaltStates {
     }
 
     private static ApplyResponse applyStateAllSync(SaltConnector sc, String service) {
-        return sc.run(Glob.ALL, "state.apply", LOCAL, ApplyResponse.class, service);
+        return measure(() -> sc.run(Glob.ALL, "state.apply", LOCAL, ApplyResponse.class, service), LOGGER,
+                "ApplyState in sync for ALL took {}ms for service [{}]", service);
     }
 
     private static String parseVersion(String versionCommandOutput, Optional<String> pattern) {

@@ -92,7 +92,7 @@ public class SaltStatesTest {
     @Test
     public void syncAllTest() {
         SaltStates.syncAll(saltConnector);
-        verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_all"), eq(LOCAL), eq(ApplyResponse.class));
+        verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("saltutil.sync_all"), eq(LOCAL_ASYNC), eq(ApplyResponse.class));
     }
 
     @Test

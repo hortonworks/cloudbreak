@@ -217,7 +217,7 @@ public class SaltOrchestratorTest {
         verifyNew(HighStateAllRunner.class, atLeastOnce()).withArguments(eq(allNodes),
                 eq(targets));
         verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateAllRunner), eq(true));
-        verify(saltCommandRunner, times(2)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
+        verify(saltCommandRunner, times(1)).runSaltCommand(any(SaltConnector.class), any(BaseSaltJobRunner.class),
                 any(ExitCriteriaModel.class), any(ExitCriteria.class));
         verify(saltCommandRunner, times(2)).runModifyGrainCommand(any(SaltConnector.class), any(ModifyGrainBase.class),
                 any(ExitCriteriaModel.class), any(ExitCriteria.class));
