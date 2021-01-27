@@ -118,6 +118,12 @@ public class BlueprintV4RequestToBlueprintConverter
         if (volumeMatch.find()) {
             throw new BadRequestException("Volume configuration should not be part of your Cloudera Manager template.");
         }
+        if (!cmTemplateProcessor.everyHostTemplateHasRoleConfigGroupsRefNames()) {
+            throw new BadRequestException("RoleConfigGroupsRefNames is probably missing or misspelled in your Cloudera Manager template.");
+        }
+        if (!cmTemplateProcessor.everyServiceHasRoleConfigGroups()) {
+            throw new BadRequestException("RoleConfigGroups is probably missing or misspelled in your Cloudera Manager template.");
+        }
     }
 
     private String getNameByItsAvailability(@Nullable String name) {
