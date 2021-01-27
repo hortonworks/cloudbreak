@@ -67503,6 +67503,10 @@ public final class UsageProto {
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder();
   }
   /**
+   * <pre>
+   * Generated when Environment creation has been requested or finished
+   * </pre>
+   *
    * Protobuf type {@code usage.CDPEnvironmentRequested}
    */
   public  static final class CDPEnvironmentRequested extends
@@ -67967,6 +67971,10 @@ public final class UsageProto {
       return builder;
     }
     /**
+     * <pre>
+     * Generated when Environment creation has been requested or finished
+     * </pre>
+     *
      * Protobuf type {@code usage.CDPEnvironmentRequested}
      */
     public static final class Builder extends
@@ -69965,6 +69973,10 @@ public final class UsageProto {
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPOperationDetailsOrBuilder getOperationDetailsOrBuilder();
   }
   /**
+   * <pre>
+   * Generated when Datalake creation has been requested or finished
+   * </pre>
+   *
    * Protobuf type {@code usage.CDPDatalakeRequested}
    */
   public  static final class CDPDatalakeRequested extends
@@ -70243,6 +70255,10 @@ public final class UsageProto {
       return builder;
     }
     /**
+     * <pre>
+     * Generated when Datalake creation has been requested or finished
+     * </pre>
+     *
      * Protobuf type {@code usage.CDPDatalakeRequested}
      */
     public static final class Builder extends
@@ -70633,7 +70649,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * The environment's status before the change.
+     * The datalake's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -70641,7 +70657,7 @@ public final class UsageProto {
     int getOldStatusValue();
     /**
      * <pre>
-     * The environment's status before the change.
+     * The datalake's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -70650,7 +70666,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * The environment's status after the change.
+     * The datalake's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -70658,7 +70674,7 @@ public final class UsageProto {
     int getNewStatusValue();
     /**
      * <pre>
-     * The environment's status after the change.
+     * The datalake's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -70685,7 +70701,7 @@ public final class UsageProto {
   }
   /**
    * <pre>
-   * Generated when Environment status has changed
+   * Generated when Datalake status has changed
    * </pre>
    *
    * Protobuf type {@code usage.CDPDatalakeStatusChanged}
@@ -70829,7 +70845,7 @@ public final class UsageProto {
     private int oldStatus_;
     /**
      * <pre>
-     * The environment's status before the change.
+     * The datalake's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -70839,7 +70855,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The environment's status before the change.
+     * The datalake's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -70854,7 +70870,7 @@ public final class UsageProto {
     private int newStatus_;
     /**
      * <pre>
-     * The environment's status after the change.
+     * The datalake's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -70864,7 +70880,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The environment's status after the change.
+     * The datalake's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -71110,7 +71126,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Generated when Environment status has changed
+     * Generated when Datalake status has changed
      * </pre>
      *
      * Protobuf type {@code usage.CDPDatalakeStatusChanged}
@@ -71442,7 +71458,7 @@ public final class UsageProto {
       private int oldStatus_ = 0;
       /**
        * <pre>
-       * The environment's status before the change.
+       * The datalake's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -71452,7 +71468,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status before the change.
+       * The datalake's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -71464,7 +71480,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status before the change.
+       * The datalake's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -71476,7 +71492,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status before the change.
+       * The datalake's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -71492,7 +71508,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status before the change.
+       * The datalake's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -71507,7 +71523,7 @@ public final class UsageProto {
       private int newStatus_ = 0;
       /**
        * <pre>
-       * The environment's status after the change.
+       * The datalake's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -71517,7 +71533,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status after the change.
+       * The datalake's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -71529,7 +71545,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status after the change.
+       * The datalake's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -71541,7 +71557,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status after the change.
+       * The datalake's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -71557,7 +71573,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The environment's status after the change.
+       * The datalake's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>

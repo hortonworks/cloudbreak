@@ -374,6 +374,28 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 .collect(Collectors.toList());
     }
 
+    public List<ApiClusterTemplateHostTemplate> getHostTemplates() {
+        return cmTemplate.getHostTemplates();
+    }
+
+    public boolean everyHostTemplateHasRoleConfigGroupsRefNames() {
+        for (ApiClusterTemplateHostTemplate hostTemplate : getHostTemplates()) {
+            if (hostTemplate.getRoleConfigGroupsRefNames() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean everyServiceHasRoleConfigGroups() {
+        for (ApiClusterTemplateService service : cmTemplate.getServices()) {
+            if (service.getRoleConfigGroups() == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public Set<ServiceComponent> getAllComponents() {
         return getServiceComponentsByHostGroup().entrySet().stream()
                 .flatMap(entry -> entry.getValue().stream())
