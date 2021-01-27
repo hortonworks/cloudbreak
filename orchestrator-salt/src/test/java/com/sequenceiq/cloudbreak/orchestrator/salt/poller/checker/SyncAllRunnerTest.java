@@ -48,6 +48,7 @@ public class SyncAllRunnerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         nodes.put("10-0-0-1.example.com", objectMapper.valueToTree("something"));
         nodes.put("10-0-0-2.example.com", objectMapper.valueToTree("something"));
+        nodes.put("jid", objectMapper.valueToTree("1234"));
         result.add(nodes);
         applyResponse.setResult(result);
         PowerMockito.when(SaltStates.syncAll(any())).thenReturn(applyResponse);
@@ -55,8 +56,8 @@ public class SyncAllRunnerTest {
         SyncAllRunner syncAllRunner = new SyncAllRunner(targets, allNode);
 
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
-        String missingIps = syncAllRunner.submit(saltConnector);
+        String jid = syncAllRunner.submit(saltConnector);
         assertThat(syncAllRunner.getTargetHostnames(), hasItems("10-0-0-3.example.com"));
-        assertEquals("[10-0-0-3.example.com]", missingIps);
+        assertEquals("1234", jid);
     }
 }
