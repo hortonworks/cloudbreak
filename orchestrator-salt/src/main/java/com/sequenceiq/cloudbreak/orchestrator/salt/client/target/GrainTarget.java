@@ -17,4 +17,11 @@ public class GrainTarget implements Target<String> {
     public String getType() {
         return "grain";
     }
+
+    @Override
+    public String toString() {
+        return "GrainTarget{" +
+                "target='" + target + '\'' +
+                '}';
+    }
 }

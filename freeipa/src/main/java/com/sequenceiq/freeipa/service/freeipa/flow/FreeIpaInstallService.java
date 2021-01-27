@@ -121,15 +121,14 @@ public class FreeIpaInstallService {
         FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(stack, allNodes, proxyConfig);
         servicePillarConfig.put("freeipa", new SaltPillarProperties("/freeipa/init.sls", Collections.singletonMap("freeipa", freeIpaConfigView.toMap())));
         servicePillarConfig.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
-        decoratePillarsWithTelemetryConfigs(stack, servicePillarConfig);
-        decoratePillarsWithProxyConfig(proxyConfig, servicePillarConfig);
-        decoratePillarWithTags(stack, servicePillarConfig);
+        servicePillarConfig.putAll(createTelemetryPillarConfig(stack));
+        servicePillarConfig.putAll(createProxyPillarConfig(proxyConfig));
+        servicePillarConfig.putAll(createTagsPillarConfig(stack));
         hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
         hostOrchestrator.installFreeIpa(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
     }
 
-    private void decoratePillarsWithProxyConfig(ProxyConfig proxyConfig,
-            Map<String, SaltPillarProperties> servicePillarConfig) {
+    private Map<String, SaltPillarProperties> createProxyPillarConfig(ProxyConfig proxyConfig) {
         if (proxyConfig != null) {
             Map<String, Object> proxy = new HashMap<>();
             proxy.put("host", proxyConfig.getServerHost());
@@ -139,12 +138,14 @@ public class FreeIpaInstallService {
                 proxy.put("user", auth.getUserName());
                 proxy.put("password", auth.getPassword());
             });
-            servicePillarConfig.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
+            return Map.of(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
+        } else {
+            return Map.of();
         }
     }
 
-    private void decoratePillarsWithTelemetryConfigs(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig)
-            throws CloudbreakOrchestratorFailedException {
+    private Map<String, SaltPillarProperties> createTelemetryPillarConfig(Stack stack) throws CloudbreakOrchestratorFailedException {
+        Map<String, SaltPillarProperties> servicePillarConfig = new HashMap<>();
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
@@ -184,20 +185,24 @@ public class FreeIpaInstallService {
                 }
             }
         }
+        return servicePillarConfig;
     }
 
-    private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
+    private Map<String, SaltPillarProperties> createTagsPillarConfig(Stack stack) {
         if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
                 Map<String, Object> tags = new HashMap<>(stackTags.getDefaultTags());
                 Map<String, Object> applicationTags = new HashMap<>(stackTags.getApplicationTags());
                 tags.putAll(applicationTags);
-                servicePillarConfig.put("tags", new SaltPillarProperties("/tags/init.sls",
+                return Map.of("tags", new SaltPillarProperties("/tags/init.sls",
                         Collections.singletonMap("tags", tags)));
             } catch (Exception e) {
                 LOGGER.debug("Exception during reading default tags.", e);
+                return Map.of();
             }
+        } else {
+            return Map.of();
         }
     }
 }

@@ -19,4 +19,11 @@ public class HostList implements Target<String> {
     public String getType() {
         return "list";
     }
+
+    @Override
+    public String toString() {
+        return "HostList{" +
+                "targets=" + targets == null ? "null" : String.join(", ", targets) +
+                '}';
+    }
 }
