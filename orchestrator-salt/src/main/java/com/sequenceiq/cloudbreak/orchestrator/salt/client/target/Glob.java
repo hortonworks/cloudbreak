@@ -19,4 +19,11 @@ public class Glob implements Target<String> {
     public String getType() {
         return "glob";
     }
+
+    @Override
+    public String toString() {
+        return "Glob{" +
+                "glob='" + glob + '\'' +
+                '}';
+    }
 }
