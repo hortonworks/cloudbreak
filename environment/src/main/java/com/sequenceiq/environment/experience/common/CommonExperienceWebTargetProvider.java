@@ -32,7 +32,7 @@ class CommonExperienceWebTargetProvider {
 
     WebTarget createWebTargetBasedOnInputs(String experienceBasePath, String environmentCrn) {
         LOGGER.debug("Creating WebTarget to connect experience");
-        return client.target(createPathToExperience(experienceBasePath, "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:e4f4da84-4091-4023-b70b-2e18ce056db6"));
+        return client.target(createPathToExperience(experienceBasePath, environmentCrn));
     }
 
     private String createPathToExperience(String experienceBasePath, String environmentCrn) {
