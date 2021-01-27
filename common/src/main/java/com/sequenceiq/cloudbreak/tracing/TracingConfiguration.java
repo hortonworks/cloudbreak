@@ -31,7 +31,8 @@ import io.opentracing.util.GlobalTracer;
 @Configuration
 public class TracingConfiguration {
 
-    private static final Set<String> ALLOWED_TRACING_HEADERS = Set.of("uber-trace-id", "cdp-destination-api", "cdp-caller-id");
+    private static final Set<String> ALLOWED_TRACING_HEADERS = Set.of("uber-trace-id", "cdp-destination-api", "cdp-caller-id",
+            "x-b3-parentspanid", "x-b3-traceid", "x-b3-spanid", "x-b3-sampled", "user-agent");
 
     private final Tracer tracer;
 
