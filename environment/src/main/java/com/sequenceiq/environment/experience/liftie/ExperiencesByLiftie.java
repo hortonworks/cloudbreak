@@ -23,14 +23,18 @@ public class ExperiencesByLiftie implements Experience {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperiencesByLiftie.class);
 
+    private final ListClustersResponseValidator listClustersResponseValidator;
+
     private final LiftieApi liftieApi;
 
-    public ExperiencesByLiftie(LiftieApi liftieApi) {
+    public ExperiencesByLiftie(LiftieApi liftieApi, ListClustersResponseValidator listClustersResponseValidator) {
+        this.listClustersResponseValidator = listClustersResponseValidator;
         this.liftieApi = liftieApi;
     }
 
     @Override
     public int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment) {
+        throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
         List<ClusterView> clusterViews = getClusterViews(environment.getName(), environment.getAccountId());
         return countNotDeletedClusters(clusterViews);
     }
@@ -55,12 +59,18 @@ public class ExperiencesByLiftie implements Experience {
     private List<ClusterView> getClusterViews(String environmentName, String tenant) {
         List<ClusterView> clusterViews = new LinkedList<>();
         List<ListClustersResponse> clustersResponses = new LinkedList<>();
-        ListClustersResponse first = liftieApi.listClusters("gmeszaros-aws-1611222116", tenant, null);
+        ListClustersResponse first = liftieApi.listClusters(environmentName, tenant, null);
+        if (listClustersResponseValidator.isListClustersResponseEmpty(first)) {
+            return clusterViews;
+        }
         clustersResponses.add(first);
         if (first.getPage().getTotalPages() > 1) {
             int currentPage = first.getPage().getNumber() + 1;
-            while (currentPage < first.getPage().getTotalPages()) {
-                clustersResponses.add(liftieApi.listClusters("gmeszaros-aws-1611222116", tenant, currentPage));
+            while (currentPage <= first.getPage().getTotalPages()) {
+                ListClustersResponse response = liftieApi.listClusters(environmentName, tenant, currentPage);
+                if (!listClustersResponseValidator.isListClustersResponseEmpty(response)) {
+                    clustersResponses.add(response);
+                }
                 currentPage++;
             }
         }

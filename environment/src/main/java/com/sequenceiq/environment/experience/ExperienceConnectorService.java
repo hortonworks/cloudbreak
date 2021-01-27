@@ -21,8 +21,8 @@ public class ExperienceConnectorService {
     private final List<Experience> experiences;
 
     public ExperienceConnectorService(List<Experience> experiences, EntitlementService entitlementService) {
-        this.experiences = experiences;
         this.entitlementService = entitlementService;
+        this.experiences = experiences;
     }
 
     public int getConnectedExperienceCount(EnvironmentExperienceDto dto) {
