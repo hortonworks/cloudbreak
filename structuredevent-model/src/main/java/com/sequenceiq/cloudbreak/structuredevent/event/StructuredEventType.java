@@ -12,7 +12,8 @@ public enum StructuredEventType {
 
     REST(StructuredRestCallEvent.class, CDPStructuredRestCallEvent.class),
     FLOW(StructuredFlowEvent.class, CDPStructuredFlowEvent.class),
-    NOTIFICATION(StructuredNotificationEvent.class, CDPStructuredNotificationEvent.class);
+    NOTIFICATION(StructuredNotificationEvent.class, CDPStructuredNotificationEvent.class),
+    SYNC(StructuredSyncEvent.class);
 
     private static final Map<Class<? extends StructuredEvent>, StructuredEventType> STRUCTURED_EVENT_TYPE_MAP = new HashMap<>();
 
@@ -31,6 +32,11 @@ public enum StructuredEventType {
     StructuredEventType(Class<? extends StructuredEvent> clazz, Class<? extends CDPStructuredEvent> cdpClazz) {
         this.clazz = clazz;
         this.cdpClazz = cdpClazz;
+    }
+
+    StructuredEventType(Class<? extends StructuredEvent> clazz) {
+        this.clazz = clazz;
+        this.cdpClazz = null;
     }
 
     public static StructuredEventType getByClass(Class<? extends StructuredEvent> clazz) {
