@@ -40,6 +40,8 @@ public class FreeIpaConfigView {
 
     private final boolean dnssecValidationEnabled;
 
+    private final boolean ccmv2Enabled;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -52,6 +54,7 @@ public class FreeIpaConfigView {
         this.freeipaToReplicateIp = builder.freeipaToReplicateIp;
         this.hosts = builder.hosts;
         this.backup = builder.backup;
+        this.ccmv2Enabled = builder.ccmv2Enabled;
     }
 
     public String getRealm() {
@@ -105,6 +108,7 @@ public class FreeIpaConfigView {
         map.put("admin_user", ObjectUtils.defaultIfNull(this.adminUser, EMPTY_CONFIG_DEFAULT));
         map.put("freeipa_to_replicate", ObjectUtils.defaultIfNull(this.freeipaToReplicate, EMPTY_CONFIG_DEFAULT));
         map.put("freeipa_to_replicate_ip", ObjectUtils.defaultIfNull(this.freeipaToReplicateIp, EMPTY_CONFIG_DEFAULT));
+        map.put("enable_ccmv2", this.ccmv2Enabled);
         if (MapUtils.isNotEmpty(backup.toMap())) {
             map.put("backup", this.backup.toMap());
         }
@@ -135,6 +139,8 @@ public class FreeIpaConfigView {
         private boolean dnssecValidationEnabled;
 
         private FreeIpaBackupConfigView backup;
+
+        private boolean ccmv2Enabled;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -187,6 +193,11 @@ public class FreeIpaConfigView {
 
         public Builder withBackupConfig(FreeIpaBackupConfigView backupConfig) {
             this.backup = backupConfig;
+            return this;
+        }
+
+        public Builder withCcmv2Enabled(boolean ccmv2Enabled) {
+            this.ccmv2Enabled = ccmv2Enabled;
             return this;
         }
     }
