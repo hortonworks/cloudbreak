@@ -66,6 +66,7 @@ public class FreeIpaConfigService {
                 .withFreeIpaToReplicate(gatewayConfigService.getPrimaryGatewayConfig(stack))
                 .withHosts(hosts)
                 .withBackupConfig(determineAndSetBackup(stack, proxyConfig))
+                .withCcmv2Enabled(stack.getTunnel().useCcmV2())
                 .build();
     }
 
