@@ -111,7 +111,7 @@ public class ClusterBootstrapper {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private SaltBootstrapFingerprintVersionChecker fingerprintVersionChecker;
+    private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -222,15 +222,23 @@ public class ClusterBootstrapper {
             LOGGER.warn("Image not found for stack {}", stack.getName(), e);
         }
         boolean saltBootstrapFpSupported = isSaltBootstrapFpSupported(stack);
+        boolean saltBootstrapRestartNeededSupported = isSaltBootstrapRestartNeededSupported(stack);
         params.setSaltBootstrapFpSupported(saltBootstrapFpSupported);
+        params.setRestartNeededFlagSupported(saltBootstrapRestartNeededSupported);
         LOGGER.debug("Created bootstrap params: {}", params);
         return params;
+    }
+
+    private boolean isSaltBootstrapRestartNeededSupported(Stack stack) {
+        return stack.getNotDeletedInstanceMetaDataSet().stream()
+                .map(InstanceMetaData::getImage)
+                .allMatch(i -> saltBootstrapVersionChecker.isRestartNeededFlagSupported(i));
     }
 
     private boolean isSaltBootstrapFpSupported(Stack stack) {
         return stack.getNotDeletedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getImage)
-                .allMatch(i -> fingerprintVersionChecker.isFingerprintingSupported(i));
+                .allMatch(i -> saltBootstrapVersionChecker.isFingerprintingSupported(i));
     }
 
     private List<GatewayConfig> collectAndCheckGateways(Stack stack) {

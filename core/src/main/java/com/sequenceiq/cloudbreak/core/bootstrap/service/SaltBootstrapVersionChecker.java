@@ -15,13 +15,23 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.PackageVersionChecker;
 
 @Component
-public class SaltBootstrapFingerprintVersionChecker {
+public class SaltBootstrapVersionChecker {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltBootstrapFingerprintVersionChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltBootstrapVersionChecker.class);
 
-    private static final Versioned MIN_VERSION = () -> "0.13.2";
+    private static final Versioned FINGERPRINT_SUPPORT_MIN_VERSION = () -> "0.13.2";
+
+    private static final Versioned RESTART_NEEDED_FLAG_SUPPORT_MIN_VERSION = () -> "0.13.4";
 
     public boolean isFingerprintingSupported(Json image) {
+        return isSupported(FINGERPRINT_SUPPORT_MIN_VERSION, image);
+    }
+
+    public boolean isRestartNeededFlagSupported(Json image) {
+        return isSupported(RESTART_NEEDED_FLAG_SUPPORT_MIN_VERSION, image);
+    }
+
+    private boolean isSupported(Versioned version, Json image) {
         if (image == null) {
             LOGGER.info("Image is null, couldn't verify salt-bootstrap version");
             return false;
@@ -33,7 +43,7 @@ public class SaltBootstrapFingerprintVersionChecker {
                     String saltBootstrapVersion = packageVersions.getOrDefault(PackageVersionChecker.SALT_BOOTSTRAP, "0.0.0");
                     Versioned currentVersion = () -> StringUtils.substringBefore(saltBootstrapVersion, "-");
                     LOGGER.debug("Saltboot version in image: {}", currentVersion.getVersion());
-                    return -1 < new VersionComparator().compare(currentVersion, MIN_VERSION);
+                    return -1 < new VersionComparator().compare(currentVersion, version);
                 } else {
                     LOGGER.info("PackageVersions is null in image {} {}", instanceImage.getImageId(), instanceImage.getImageName());
                     return false;
