@@ -7,6 +7,8 @@ public class BootstrapParams {
 
     private boolean saltBootstrapFpSupported;
 
+    private boolean restartNeededFlagSupported;
+
     private boolean restartNeeded;
 
     public String getCloud() {
@@ -31,6 +33,14 @@ public class BootstrapParams {
 
     public void setSaltBootstrapFpSupported(boolean saltBootstrapFpSupported) {
         this.saltBootstrapFpSupported = saltBootstrapFpSupported;
+    }
+
+    public boolean isRestartNeededFlagSupported() {
+        return restartNeededFlagSupported;
+    }
+
+    public void setRestartNeededFlagSupported(boolean restartNeededFlagSupported) {
+        this.restartNeededFlagSupported = restartNeededFlagSupported;
     }
 
     public boolean isRestartNeeded() {
