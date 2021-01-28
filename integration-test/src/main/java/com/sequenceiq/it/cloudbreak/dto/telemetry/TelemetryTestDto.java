@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
+import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
@@ -15,6 +16,7 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 
@@ -30,6 +32,9 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
 
     @Inject
     private AzureCloudProvider azureCloudProvider;
+
+    @Inject
+    private GcpCloudProvider gcpCloudProvider;
 
     public TelemetryTestDto(TestContext testContext) {
         super(new TelemetryRequest(), testContext);
@@ -70,6 +75,13 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
                 break;
             case YARN:
                 getRequest().setLogging(null);
+                break;
+            case GCP:
+                GcsCloudStorageV1Parameters gcsCloudStorageV1Parameters = new GcsCloudStorageV1Parameters();
+                gcsCloudStorageV1Parameters.setServiceAccountEmail(gcpCloudProvider.getServiceAccountEmail());
+                loggingRequest.setGcs(gcsCloudStorageV1Parameters);
+                loggingRequest.setStorageLocation(gcpCloudProvider.getBaseLocation());
+                getRequest().setLogging(loggingRequest);
                 break;
             default:
                 break;
