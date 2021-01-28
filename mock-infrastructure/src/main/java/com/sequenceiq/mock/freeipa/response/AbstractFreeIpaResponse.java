@@ -3,8 +3,8 @@ package com.sequenceiq.mock.freeipa.response;
 import java.util.List;
 import java.util.Map;
 
-import com.sequenceiq.freeipa.client.model.RPCMessage;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 public abstract class AbstractFreeIpaResponse<T> {
 

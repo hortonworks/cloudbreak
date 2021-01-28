@@ -31,7 +31,6 @@
   file.managed:
     - makedirs: True
     - source: salt://nginx/conf/ssl-locations.d/nodestatus.conf
-    - template: jinja
 
 restart_nginx_after_ssl_reconfig:
   service.running:

@@ -30,13 +30,14 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.model.RPCMessage;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -66,6 +67,9 @@ class StackStatusTest {
 
     @MockBean
     private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
+
+    @MockBean
+    private FreeIpaNodeStatusService freeIpaNodeStatusService;
 
     @MockBean
     private StackInstanceProviderChecker stackInstanceProviderChecker;

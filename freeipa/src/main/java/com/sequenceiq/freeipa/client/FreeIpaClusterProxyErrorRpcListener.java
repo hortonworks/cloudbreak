@@ -4,10 +4,11 @@ import java.util.Optional;
 
 import javax.ws.rs.core.Response;
 
+import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
-public class FreeIpaHealthCheckClusterProxyErrorRpcListener implements FreeIpaHealthCheckRpcListener {
+public class FreeIpaClusterProxyErrorRpcListener implements RpcListener {
 
     private Optional<ClusterProxyError> deserializeAsClusterProxyError(Response response) {
         try {

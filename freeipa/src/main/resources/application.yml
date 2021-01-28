@@ -109,6 +109,9 @@ freeipa:
   healthcheck:
     connectionTimeoutMs: 5000
     readTimeoutMs: 5000
+  nodestatus:
+    connectionTimeoutMs: 5000
+    readTimeoutMs: 5000
   batch:
     partitionsize:
       defaultSize: 100

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
 public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
 
-    private final FreeIpaHealthCheckClusterProxyErrorRpcListener clusterProxyErrorRpcListener = new FreeIpaHealthCheckClusterProxyErrorRpcListener();
+    private final FreeIpaClusterProxyErrorRpcListener clusterProxyErrorRpcListener = new FreeIpaClusterProxyErrorRpcListener();
 
     @Test
     public void testClusterProxyError() throws IOException {

@@ -7,22 +7,28 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
+import com.sequenceiq.node.health.client.model.HealthReport;
 
 @Component
 public class FreeipaChecker {
@@ -31,6 +37,9 @@ public class FreeipaChecker {
 
     @Inject
     private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
+
+    @Inject
+    private FreeIpaNodeStatusService freeIpaNodeStatusService;
 
     private Pair<Map<InstanceMetaData, DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
@@ -66,6 +75,7 @@ public class FreeipaChecker {
             Set<InstanceMetaData> notTermiatedStackInstances = stack.getAllInstanceMetaDataList().stream()
                     .filter(Predicate.not(InstanceMetaData::isTerminated))
                     .collect(Collectors.toSet());
+            checkNodeHealthReports(stack, checkableInstances);
             Pair<Map<InstanceMetaData, DetailedStackStatus>, String> statusCheckPair = checkStatus(stack, checkableInstances);
             List<DetailedStackStatus> responses = new ArrayList<>(statusCheckPair.getFirst().values());
             DetailedStackStatus status;
@@ -80,6 +90,43 @@ public class FreeipaChecker {
             LOGGER.info("Error occurred during status fetch: " + e.getMessage(), e);
             return new SyncResult("FreeIpa is unreachable, because error occurred: " + e.getMessage(), DetailedStackStatus.UNREACHABLE, null);
         }
+    }
+
+    private void checkNodeHealthReports(Stack stack, Set<InstanceMetaData> checkableInstances) {
+        for (InstanceMetaData instanceMetaData : checkableInstances) {
+            try {
+                LOGGER.debug("Fetching node health reports for instance: {}", instanceMetaData.getInstanceId());
+                RPCResponse<HealthReport> networkReportRPCResponse = checkedMeasure(() -> freeIpaNodeStatusService.nodeNetworkReport(stack, instanceMetaData),
+                        LOGGER, ":::Auto sync::: FreeIPA network report ran in {}ms");
+                logReportResult(instanceMetaData, networkReportRPCResponse, "network");
+                RPCResponse<HealthReport> servicesReportRPCResponse = checkedMeasure(() -> freeIpaNodeStatusService.nodeServicesReport(stack, instanceMetaData),
+                        LOGGER, ":::Auto sync::: FreeIPA services report ran in {}ms");
+                logReportResult(instanceMetaData, servicesReportRPCResponse, "services");
+            } catch (Exception e) {
+                LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    private void logReportResult(InstanceMetaData instanceMetaData, RPCResponse<HealthReport> meteringReportRPCResponse, String reportType) {
+        if (isSuccessfulRequest(meteringReportRPCResponse)) {
+            LOGGER.info("FreeIPA " + reportType + " reports for instance: [{}], report: [{}]", instanceMetaData.getInstanceId(),
+                    meteringReportRPCResponse.getResult());
+        } else {
+            LOGGER.info("Failed to get " + reportType + " reports for instance: [{}], reason: [{}]", instanceMetaData.getInstanceId(),
+                    meteringReportRPCResponse.getSummary());
+        }
+    }
+
+    @NotNull
+    private Boolean isSuccessfulRequest(RPCResponse<HealthReport> response) {
+        return response.getMessages().stream()
+                .map(RPCMessage::getCode)
+                .filter(Objects::nonNull)
+                .map(Response.Status.Family::familyOf)
+                .map(f -> f.equals(Response.Status.Family.SUCCESSFUL))
+                .reduce(Boolean::logicalAnd)
+                .orElse(Boolean.FALSE);
     }
 
     private boolean areAllStatusTheSame(List<DetailedStackStatus> response) {
