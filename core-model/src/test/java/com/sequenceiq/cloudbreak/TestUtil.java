@@ -94,7 +94,7 @@ public class TestUtil {
 
     private static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
 
-    private static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
+    private static final String N2_HIGHCPU_16_INSTANCE = "n2-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
 
@@ -362,7 +362,7 @@ public class TestUtil {
 
     public static Template gcpTemplate(Long id) {
         Template gcpTemplate = new Template();
-        gcpTemplate.setInstanceType(N1_HIGHCPU_16_INSTANCE);
+        gcpTemplate.setInstanceType(N2_HIGHCPU_16_INSTANCE);
         gcpTemplate.setId(id);
         gcpTemplate.setCloudPlatform(GCP);
         gcpTemplate.setDescription(DUMMY_DESCRIPTION);

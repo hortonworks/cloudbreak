@@ -92,7 +92,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     private static final int TEN = 10;
 
-    @Value("${cb.gcp.default.vmtype:n1-highcpu-8}")
+    @Value("${cb.gcp.default.vmtype:n2-highcpu-8}")
     private String gcpVmDefault;
 
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")

@@ -1,7 +1,7 @@
 {
   "master": {
     "type": "master",
-    "flavor": "n1-standard-8",
+    "flavor": "n2-standard-8",
     "cardinality": 1,
     "volumeType": "SSD",
     "volumeCount": 1,
@@ -9,7 +9,7 @@
   },
   "worker": {
     "type": "worker",
-    "flavor": "n1-standard-4",
+    "flavor": "n2-standard-4",
     "cardinality": 3,
     "volumeType": "SSD",
     "volumeCount": 1,
@@ -17,7 +17,7 @@
   },
   "broker": {
     "type": "broker",
-    "flavor": "n1-standard-8",
+    "flavor": "n2-standard-8",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,
@@ -25,7 +25,7 @@
   },
   "quorum": {
     "type": "quorum",
-    "flavor": "n1-standard-4",
+    "flavor": "n2-standard-4",
     "cardinality": 3,
     "volumeType": "MAGNETIC",
     "volumeCount": 1,
