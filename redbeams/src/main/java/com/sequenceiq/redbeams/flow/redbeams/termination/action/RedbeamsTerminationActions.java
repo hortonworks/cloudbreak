@@ -67,8 +67,7 @@ public class RedbeamsTerminationActions {
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
                 dbStackJobService.unschedule(context.getDBStack());
-                return new DeregisterDatabaseServerRequest(context.getCloudContext(), context.getDatabaseStack(),
-                        context.getDBStack());
+                return new DeregisterDatabaseServerRequest(context.getCloudContext(), context.getDatabaseStack(), context.getDBStack());
             }
 
             @Override
@@ -105,7 +104,7 @@ public class RedbeamsTerminationActions {
 
     @Bean(name = "REDBEAMS_TERMINATION_FINISHED_STATE")
     public Action<?, ?> terminationFinished() {
-        return new AbstractRedbeamsTerminationAction<>(DeregisterDatabaseServerSuccess.class) {
+        return new AbstractRedbeamsTerminationAction<>(DeregisterDatabaseServerSuccess.class, false) {
 
             @Override
             protected void prepareExecution(DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) {
@@ -113,25 +112,26 @@ public class RedbeamsTerminationActions {
             }
 
             @Override
-            protected Selectable createRequest(RedbeamsContext context) {
+            protected void doExecute(RedbeamsContext context, DeregisterDatabaseServerSuccess payload, Map<Object, Object> variables) throws Exception {
                 // Delete the DB stack here instead of deregistration so that we can keep track of its status
                 // through the termination
-                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, Optional.of(context.getDBStack()));
-                dbStackService.delete(context.getDBStack().getId());
-
-                return new RedbeamsEvent(REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
+                Optional<DBStack> dbstack = Optional.ofNullable(context.getDBStack());
+                metricService.incrementMetricCounter(MetricType.DB_TERMINATION_FINISHED, dbstack);
+                dbstack.ifPresentOrElse(db -> dbStackService.delete(db.getId()),
+                        () -> LOGGER.debug("DBStack for {} id is not found, so deletion will be skipped!", payload.getResourceId()));
+                sendEvent(context);
             }
 
             @Override
-            protected Object getFailurePayload(DeregisterDatabaseServerSuccess payload, Optional<RedbeamsContext> flowContext, Exception ex) {
-                return null;
+            protected Selectable createRequest(RedbeamsContext context) {
+                return new RedbeamsEvent(REDBEAMS_TERMINATION_FINISHED_EVENT.name(), 0L);
             }
         };
     }
 
     @Bean(name = "REDBEAMS_TERMINATION_FAILED_STATE")
     public Action<?, ?> failedAction() {
-        return new AbstractRedbeamsTerminationAction<>(RedbeamsFailureEvent.class) {
+        return new AbstractRedbeamsTerminationAction<>(RedbeamsFailureEvent.class, false) {
 
             // A lot here - some of this could go into some sort of failure handler class
             // compare to core StackCreationService::handleStackCreationFailure
