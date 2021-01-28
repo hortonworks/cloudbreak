@@ -140,10 +140,10 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
                 freeipaJobService.schedule(context.getStack());
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 sendEvent(context);
             }
 
