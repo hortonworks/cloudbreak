@@ -260,6 +260,41 @@ public class HueConfigProviderTest {
         assertThat(result).isFalse();
     }
 
+    @Test
+    public void getProxyHostsWhenLoadBalancerConfigured() {
+        BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
+
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setType(HUE);
+        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        rdsConfig.setConnectionUserName(USER_NAME);
+        rdsConfig.setConnectionPassword(PASSWORD);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedInternalFQDN = "private-gateway.cloudera.site";
+        String expectedLBFQDN = "loadbalancer-gateway.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+            .withGeneralClusterConfigs(generalClusterConfigs)
+            .withGateway(new Gateway(), "", new HashSet<>())
+            .withBlueprintView(blueprintView)
+            .withRdsConfigs(Set.of(rdsConfig))
+            .build();
+
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+            result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN, expectedLBFQDN);
+        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
+        assertThat(paramToVariable).contains(
+            new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue));
+    }
+
     private BlueprintView getMockBlueprintView(String bpVersion, String tmplVersion) {
         BlueprintView blueprintView = mock(BlueprintView.class);
         when(blueprintView.getVersion()).thenReturn(bpVersion);
