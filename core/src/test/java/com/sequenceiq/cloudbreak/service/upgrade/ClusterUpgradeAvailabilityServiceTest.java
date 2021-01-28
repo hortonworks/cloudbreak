@@ -135,7 +135,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         Image otherImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of(properImage, otherImage, currentImageFromCatalog));
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType());
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null);
         UpgradeV4Response response = new UpgradeV4Response();
 
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack)).thenReturn(imageFilterParams);
@@ -170,7 +170,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         Image otherImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of(properImage, otherImage, currentImageFromCatalog));
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType());
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null);
         UpgradeV4Response response = new UpgradeV4Response();
 
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack)).thenReturn(imageFilterParams);
@@ -211,7 +211,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType());
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null);
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack)).thenReturn(imageFilterParams);
         when(clusterUpgradeImageFilter.filter(imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
@@ -260,7 +260,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType());
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null);
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack)).thenReturn(imageFilterParams);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(clusterUpgradeImageFilter.filter(imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
@@ -302,7 +302,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogService.get(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType());
+        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack)).thenReturn(imageFilterParams);
         when(clusterUpgradeImageFilter.filter(imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);

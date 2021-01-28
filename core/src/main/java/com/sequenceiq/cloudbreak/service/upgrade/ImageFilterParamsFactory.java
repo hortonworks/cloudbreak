@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
@@ -31,7 +32,7 @@ class ImageFilterParamsFactory {
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     ImageFilterParams create(Image image, boolean lockComponents, Stack stack) {
-        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType());
+        return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(), getBlueprint(stack));
     }
 
     private Map<String, String> getStackRelatedParcels(Stack stack) {
@@ -50,5 +51,9 @@ class ImageFilterParamsFactory {
     private ClouderaManagerProduct getCdhProduct(Set<ClusterComponent> componentsByBlueprint) {
         return clouderaManagerProductsProvider.findCdhProduct(componentsByBlueprint)
                 .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
+    }
+
+    private Blueprint getBlueprint(Stack stack) {
+        return stack.getCluster().getBlueprint();
     }
 }

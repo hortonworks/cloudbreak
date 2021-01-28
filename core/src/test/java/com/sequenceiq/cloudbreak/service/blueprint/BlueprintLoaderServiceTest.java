@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
@@ -78,7 +79,7 @@ public class BlueprintLoaderServiceTest {
     @Mock
     private Workspace workspace;
 
-    public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
+    public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index, BlueprintUpgradeOption upgradeOption) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId((long) index);
         blueprint.setStackName("test-validation" + index);
@@ -87,6 +88,7 @@ public class BlueprintLoaderServiceTest {
         blueprint.setStatus(resourceStatus);
         blueprint.setDescription("test validation" + index);
         blueprint.setName("multi-node-hdfs-yarn" + index);
+        blueprint.setBlueprintUpgradeOption(upgradeOption);
         return blueprint;
     }
 
@@ -96,8 +98,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testWhenUserHaveAllTheDefaultBlueprintThenReturnFalse() {
-        Set<Blueprint> blueprints = generateBlueprintData(3);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -107,8 +109,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testWhenTheUserIsANewOneInTheNewWorkspaceThenReturnTrue() {
-        Set<Blueprint> blueprints = generateBlueprintData(0);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
+        Set<Blueprint> blueprints = generateBlueprintData(0, BlueprintUpgradeOption.ENABLED);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(2, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -118,9 +120,9 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testWhenUserDeletedDefaultAndPresentedInCacheShouldReturnTrue() {
-        Set<Blueprint> blueprints = generateBlueprintData(0);
-        blueprints.add(createBlueprint(DEFAULT_DELETED, 0));
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
+        Set<Blueprint> blueprints = generateBlueprintData(0, BlueprintUpgradeOption.ENABLED);
+        blueprints.add(createBlueprint(DEFAULT_DELETED, 0, BlueprintUpgradeOption.ENABLED));
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(1, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -130,8 +132,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testWhenUserDeletedDefaultAndNOTPresentedInCacheShouldReturnFalse() {
-        Set<Blueprint> blueprints = generateBlueprintData(0);
-        blueprints.add(createBlueprint(DEFAULT_DELETED, 0));
+        Set<Blueprint> blueprints = generateBlueprintData(0, BlueprintUpgradeOption.ENABLED);
+        blueprints.add(createBlueprint(DEFAULT_DELETED, 0, BlueprintUpgradeOption.ENABLED));
         Map<String, Blueprint> defaultBlueprints = new HashMap<>();
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
@@ -142,8 +144,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testWhenTheUserIsANewOneInTheExistingWorkspaceThenReturnTrue() {
-        Set<Blueprint> blueprints = generateBlueprintData(1);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(2);
+        Set<Blueprint> blueprints = generateBlueprintData(1, BlueprintUpgradeOption.ENABLED);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(2, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -153,8 +155,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testWhenTheUserHasAllDefaultBlueprintsButOneWasChangedThenReturnTrue() {
-        Set<Blueprint> blueprints = generateBlueprintData(3);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1);
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 1, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -165,8 +167,8 @@ public class BlueprintLoaderServiceTest {
     @Test
     public void testWhenTheUserHasUserManagedBlueprintsButOneDefaultBlueprintHasSameNameThenReturnFalse() {
         Set<Blueprint> blueprints = new HashSet<>();
-        blueprints.add(createBlueprint(USER_MANAGED, 0));
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
+        blueprints.add(createBlueprint(USER_MANAGED, 0, BlueprintUpgradeOption.ENABLED));
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(1, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.isAddingDefaultBlueprintsNecessaryForTheUser(blueprints);
@@ -179,9 +181,9 @@ public class BlueprintLoaderServiceTest {
     public void testForTheSpecifiedUserWhenNewDefaultsExistAndNeedsToRetireOldBlueprintsThenRepositoryShouldAddTwoNewBlueprintAndRetireTwoOld() {
         Set<ClusterTemplate> emptyClusterTemplateList = Sets.newHashSet();
         // We have a0, a1, a2 in the DB
-        Set<Blueprint> blueprints = generateBlueprintData(3);
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
         // We have a2, a3, a4 as defaults
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
         when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class))).thenReturn(emptyClusterTemplateList);
 
@@ -208,9 +210,9 @@ public class BlueprintLoaderServiceTest {
     public void testForTheSpecifiedUserWhenNewDefaultsExistAndNONeedsToRetireOldBlueprintsThenRepositoryShouldUpdateAddTwoNewAndReturnWithFive() {
         Set<ClusterTemplate> notEmptyClusterTemplateList = Sets.newHashSet(new ClusterTemplate());
         // We have a0, a1, a2 in the DB
-        Set<Blueprint> blueprints = generateBlueprintData(3);
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
         // We have a2, a3, a4 as defaults
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, 2, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
         when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class))).thenReturn(notEmptyClusterTemplateList);
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
@@ -238,8 +240,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testLoadBlueprintsWhenUserIsANewOneInTheExistingWorkspaceThenAllDefaultShouldBeAdd() {
-        Set<Blueprint> blueprints = generateBlueprintData(0);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
+        Set<Blueprint> blueprints = generateBlueprintData(0, BlueprintUpgradeOption.ENABLED);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
@@ -249,8 +251,8 @@ public class BlueprintLoaderServiceTest {
 
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenEveryDefaultExistThenRepositoryShouldNotUpdateAnything() {
-        Set<Blueprint> blueprints = generateBlueprintData(3);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(3);
+        Set<Blueprint> blueprints = generateBlueprintData(3, BlueprintUpgradeOption.ENABLED);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(3, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
@@ -260,9 +262,9 @@ public class BlueprintLoaderServiceTest {
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenDefaultBlueprintExistsInDBAsUserManagedThenUpdateToDefault() {
         Set<Blueprint> blueprints = new HashSet<>();
-        Blueprint blueprint = createBlueprint(USER_MANAGED, 0);
+        Blueprint blueprint = createBlueprint(USER_MANAGED, 0, BlueprintUpgradeOption.ENABLED);
         blueprints.add(blueprint);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(1, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave);
@@ -275,9 +277,9 @@ public class BlueprintLoaderServiceTest {
     @Test
     public void testLoadBlueprintsForTheSpecifiedUserWhenHasUserManagedBlueprintButNoDefultWithThisNameThenShouldNotUpdate() {
         Set<Blueprint> blueprints = new HashSet<>();
-        Blueprint blueprint = createBlueprint(USER_MANAGED, 1);
+        Blueprint blueprint = createBlueprint(USER_MANAGED, 1, BlueprintUpgradeOption.ENABLED);
         blueprints.add(blueprint);
-        Map<String, Blueprint> defaultBlueprints = generateCacheData(1);
+        Map<String, Blueprint> defaultBlueprints = generateCacheData(1, BlueprintUpgradeOption.ENABLED);
         when(defaultBlueprintCache.defaultBlueprints()).thenReturn(defaultBlueprints);
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
@@ -291,23 +293,23 @@ public class BlueprintLoaderServiceTest {
         return blueprints;
     }
 
-    private Map<String, Blueprint> generateCacheData(int cacheSize) {
-        return generateCacheData(cacheSize, 0);
+    private Map<String, Blueprint> generateCacheData(int cacheSize, BlueprintUpgradeOption upgradeOption) {
+        return generateCacheData(cacheSize, 0, upgradeOption);
     }
 
-    private Map<String, Blueprint> generateCacheData(int cacheSize, int startIndex) {
+    private Map<String, Blueprint> generateCacheData(int cacheSize, int startIndex, BlueprintUpgradeOption upgradeOption) {
         Map<String, Blueprint> cacheData = new HashMap<>();
         for (int i = startIndex; i < cacheSize + startIndex; i++) {
-            Blueprint blueprint = createBlueprint(DEFAULT, i);
+            Blueprint blueprint = createBlueprint(DEFAULT, i, upgradeOption);
             cacheData.put(blueprint.getName(), blueprint);
         }
         return cacheData;
     }
 
-    private Set<Blueprint> generateBlueprintData(int blueprintSize) {
+    private Set<Blueprint> generateBlueprintData(int blueprintSize, BlueprintUpgradeOption upgradeOption) {
         Set<Blueprint> blueprintData = new HashSet<>();
         for (int i = 0; i < blueprintSize; i++) {
-            Blueprint blueprint = createBlueprint(DEFAULT, i);
+            Blueprint blueprint = createBlueprint(DEFAULT, i, upgradeOption);
             blueprintData.add(blueprint);
         }
         return blueprintData;

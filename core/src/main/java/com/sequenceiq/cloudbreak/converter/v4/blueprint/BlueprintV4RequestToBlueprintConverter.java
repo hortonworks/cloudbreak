@@ -66,8 +66,7 @@ public class BlueprintV4RequestToBlueprintConverter
                 throw new BadRequestException(String.format("Cannot download cluster template from: %s", sourceUrl), e);
             }
         } else if (!CollectionUtils.isEmpty(json.getServices()) && !Strings.isNullOrEmpty(json.getPlatform())) {
-            GeneratedCmTemplate generatedCmTemplate =
-                    clusterTemplateGeneratorService.generateTemplateByServices(json.getServices(), json.getPlatform());
+            GeneratedCmTemplate generatedCmTemplate = clusterTemplateGeneratorService.generateTemplateByServices(json.getServices(), json.getPlatform());
             blueprint.setBlueprintText(generatedCmTemplate.getTemplate());
         } else {
             blueprint.setBlueprintText(json.getBlueprint());

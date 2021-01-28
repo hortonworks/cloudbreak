@@ -3,14 +3,13 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
-import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.mutable.Mutable;
 import org.apache.commons.lang3.mutable.MutableObject;
@@ -18,9 +17,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 
 @Component
 public class ClusterUpgradeImageFilter {
@@ -41,7 +43,15 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
+    @Inject
+    private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
+
     public ImageFilterResult filter(CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform, ImageFilterParams imageFilterParams) {
+        return isValidBlueprint(imageFilterParams) ? getImageFilterResult(imageCatalogV3, cloudPlatform, imageFilterParams)
+                : createEmptyResult();
+    }
+
+    private ImageFilterResult getImageFilterResult(CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform, ImageFilterParams imageFilterParams) {
         ImageFilterResult imagesForCbVersion = imageCatalogServiceProxy.getImageFilterResult(imageCatalogV3);
         List<Image> imageList = imagesForCbVersion.getAvailableImages().getCdhImages();
         if (CollectionUtils.isEmpty(imageList)) {
@@ -112,7 +122,16 @@ public class ClusterUpgradeImageFilter {
         return packageLocationFilter.filterImage(currentImage, imageFilterParams);
     }
 
+    private boolean isValidBlueprint(ImageFilterParams imageFilterParams) {
+        return imageFilterParams.getStackType().equals(StackType.DATALAKE)
+                || blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());
+    }
+
     private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
         return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
+    }
+
+    private ImageFilterResult createEmptyResult() {
+        return new ImageFilterResult(new Images(null, Collections.emptyList(), null), "The upgrade is not allowed for this blueprint.");
     }
 }
