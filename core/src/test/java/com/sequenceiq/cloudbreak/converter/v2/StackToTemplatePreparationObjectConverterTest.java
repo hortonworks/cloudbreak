@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -66,6 +67,7 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -244,6 +246,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
+    @Mock
+    private LoadBalancerConfigService loadBalancerConfigService;
+
     @BeforeEach
     public void setUp() throws IOException {
         MockitoAnnotations.initMocks(this);
@@ -274,6 +279,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getResourceCrn()).thenReturn("crn");
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
+        when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(null);
         Credential credential = Credential.builder()
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
@@ -298,6 +304,8 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
         when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString(), anyString(), any(Optional.class))).thenReturn(Collections.EMPTY_LIST);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
+        when(stackMock.getId()).thenReturn(1L);
+        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class), any(Cluster.class))).thenReturn(new GeneralClusterConfigs());
     }
 
     @Test
@@ -541,6 +549,16 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         assertThat(result).isNotNull();
         assertThat(result.getRdsSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
+    }
+
+    @Test
+    public void testConvertWhenLoadBalanceExistsFqdnIsSet() {
+        String lbUrl = "loadbalancer.domain";
+        when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(lbUrl);
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertEquals(lbUrl, result.getGeneralClusterConfigs().getLoadBalancerGatewayFqdn().get());
     }
 
 }

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -172,6 +173,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
+
+    @Inject
+    private LoadBalancerConfigService loadBalancerConfigService;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -371,6 +375,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                 generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(source.getPrimaryGatewayInstance().getDiscoveryFQDN()));
             }
         }
+        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(source.getId())));
         return generalClusterConfigs;
     }
 
