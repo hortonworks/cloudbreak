@@ -106,6 +106,9 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
             String proxyHosts = String.join(",", generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get(),
                     generalClusterConfigs.getExternalFQDN());
+            if (generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent()) {
+                proxyHosts = String.join(",", proxyHosts, generalClusterConfigs.getLoadBalancerGatewayFqdn().get());
+            }
             if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
                 result.add(new ApiClusterTemplateVariable().name(KNOX_PROXYHOSTS).value(proxyHosts));
             } else {

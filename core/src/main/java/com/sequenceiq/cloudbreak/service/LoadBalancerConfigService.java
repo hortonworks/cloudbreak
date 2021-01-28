@@ -113,23 +113,15 @@ public class LoadBalancerConfigService {
     }
 
     public String getLoadBalancerUserFacingFQDN(Long stackId) {
-        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
-        if (!loadBalancers.isEmpty()) {
-            LoadBalancer preferredLB = loadBalancers.stream()
-                .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
-                .findAny()
-                .orElse(loadBalancers.iterator().next());
-            if (StringUtils.isNotEmpty(preferredLB.getFqdn())) {
-                return preferredLB.getFqdn();
-            } else {
-                return loadBalancers.stream()
-                    .map(LoadBalancer::getFqdn)
-                    .filter(StringUtils::isNotEmpty)
-                    .findFirst().orElse(null);
-            }
-        }
+        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId).stream()
+            .filter(lb -> StringUtils.isNotEmpty(lb.getFqdn()))
+            .collect(Collectors.toSet());
+        LoadBalancer loadBalancer = loadBalancers.stream()
+            .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
+            .findAny()
+            .orElseGet(() -> loadBalancers.stream().findAny().orElse(null));
 
-        return null;
+        return loadBalancer == null ? null : loadBalancer.getFqdn();
     }
 
     public Optional<LoadBalancer> selectLoadBalancer(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
