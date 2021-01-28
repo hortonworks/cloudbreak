@@ -168,7 +168,7 @@ integrationtest:
         serviceAccountPrivateKey:
         projectId:
     instance:
-      type: n2-standard-8
+      type: n1-standard-8
       volumeSize: 100
       volumeCount: 1
       volumeType: pd-standard
