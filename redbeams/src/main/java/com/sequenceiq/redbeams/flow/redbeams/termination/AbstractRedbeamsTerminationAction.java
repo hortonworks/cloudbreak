@@ -25,6 +25,7 @@ import com.sequenceiq.redbeams.converter.cloud.CredentialToCloudCredentialConver
 import com.sequenceiq.redbeams.converter.spi.DBStackToDatabaseStackConverter;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.dto.Credential;
+import com.sequenceiq.redbeams.exception.RedbeamsException;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate.TerminateDatabaseServerFailed;
@@ -48,8 +49,15 @@ public abstract class AbstractRedbeamsTerminationAction<P extends RedbeamsEvent>
     @Inject
     private DBStackToDatabaseStackConverter databaseStackConverter;
 
+    private boolean failOnMissingDBStack;
+
     protected AbstractRedbeamsTerminationAction(Class<P> payloadClass) {
+        this(payloadClass, true);
+    }
+
+    protected AbstractRedbeamsTerminationAction(Class<P> payloadClass, boolean failOnMissingDBStack) {
         super(payloadClass);
+        this.failOnMissingDBStack = failOnMissingDBStack;
     }
 
     @PostConstruct
@@ -59,27 +67,28 @@ public abstract class AbstractRedbeamsTerminationAction<P extends RedbeamsEvent>
 
     @Override
     protected void doExecute(RedbeamsContext context, P payload, Map<Object, Object> variables) throws Exception {
+        if (failOnMissingDBStack && !context.doesDBStackExist()) {
+            throw new RedbeamsException(String.format("The dbstack for %s id does not exist!", payload.getResourceId()));
+        }
         sendEvent(context);
     }
 
     @Override
     protected RedbeamsContext createFlowContext(FlowParameters flowParameters,
-        StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext, P payload) {
+            StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext, P payload) {
         Optional<DBStack> optionalDBStack = dbStackService.findById(payload.getResourceId());
-
         CloudContext cloudContext = null;
         CloudCredential cloudCredential = null;
         DatabaseStack databaseStack = null;
         DBStack dbStack = null;
-        dbStack = optionalDBStack.get();
-        MDCBuilder.buildMdcContext(dbStack);
-        Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
-        String userName = dbStack.getOwnerCrn().getUserId();
-        String accountId = dbStack.getOwnerCrn().getAccountId();
-        cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),
-                dbStack.getPlatformVariant(), location, userName, accountId);
-
         if (optionalDBStack.isPresent()) {
+            dbStack = optionalDBStack.get();
+            MDCBuilder.buildMdcContext(dbStack);
+            Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
+            String userName = dbStack.getOwnerCrn().getUserId();
+            String accountId = dbStack.getOwnerCrn().getAccountId();
+            cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),
+                    dbStack.getPlatformVariant(), location, userName, accountId);
             try {
                 Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
                 cloudCredential = credentialConverter.convert(credential);
@@ -87,6 +96,9 @@ public abstract class AbstractRedbeamsTerminationAction<P extends RedbeamsEvent>
                 LOGGER.warn("Could not detect credential for environment: {}", dbStack.getEnvironmentId());
             }
             databaseStack = databaseStackConverter.convert(dbStack);
+        } else {
+            LOGGER.warn("DBStack for {} id is not found in the database, it seems to be only possible if the redbeams process was killed during the execution" +
+                    " of the termination finished action", payload.getResourceId());
         }
         return new RedbeamsContext(flowParameters, cloudContext, cloudCredential, databaseStack, dbStack);
     }
