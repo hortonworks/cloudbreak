@@ -62,7 +62,7 @@ freeipa:
   platform.default.instanceType:
     AWS: m5.large
     AZURE: Standard_D3_v2
-    GCP: n1-standard-2
+    GCP: n2-standard-2
   platform.dnssec.validation:
     AWS: true
     AZURE: false
