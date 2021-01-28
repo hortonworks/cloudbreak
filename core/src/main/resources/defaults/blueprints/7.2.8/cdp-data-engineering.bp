@@ -511,7 +511,8 @@
           "tez-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "livy-GATEWAY-BASE",
-          "yarn-GATEWAY-BASE"
+          "yarn-GATEWAY-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
         ]
       }
     ]
