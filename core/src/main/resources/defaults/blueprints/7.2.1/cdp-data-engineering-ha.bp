@@ -466,7 +466,8 @@
           "livy-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "tez-GATEWAY-BASE",
-          "yarn-GATEWAY-BASE"
+          "yarn-GATEWAY-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
         ]
       },
       {
@@ -490,7 +491,8 @@
           "yarn-RESOURCEMANAGER-BASE",
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
-          "yarn-GATEWAY-BASE"
+          "yarn-GATEWAY-BASE",
+          "sqoop-SQOOP_CLIENT-GATEWAY-BASE"
         ]
       },
       {
