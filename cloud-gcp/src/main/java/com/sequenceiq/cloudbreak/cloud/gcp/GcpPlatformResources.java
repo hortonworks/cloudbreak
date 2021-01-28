@@ -371,6 +371,13 @@ public class GcpPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters);
+        return new CloudVmTypes(cloudVmTypes.getCloudVmResponses(), cloudVmTypes.getDefaultCloudVmResponses());
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
+    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
         Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
         if (restrictInstanceTypes) {
