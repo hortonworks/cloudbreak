@@ -3,8 +3,9 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 import java.util.Map;
 import java.util.Objects;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 public class ImageFilterParams {
 
@@ -16,11 +17,14 @@ public class ImageFilterParams {
 
     private final StackType stackType;
 
-    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType) {
+    private final Blueprint blueprint;
+
+    public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
         this.stackType = stackType;
+        this.blueprint = blueprint;
     }
 
     public Image getCurrentImage() {
@@ -39,6 +43,10 @@ public class ImageFilterParams {
         return stackType;
     }
 
+    public Blueprint getBlueprint() {
+        return blueprint;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -50,12 +58,13 @@ public class ImageFilterParams {
         ImageFilterParams that = (ImageFilterParams) o;
         return lockComponents == that.lockComponents &&
                 Objects.equals(currentImage, that.currentImage) &&
+                Objects.equals(stackRelatedParcels, that.stackRelatedParcels) &&
                 Objects.equals(stackType, that.stackType) &&
-                Objects.equals(stackRelatedParcels, that.stackRelatedParcels);
+                Objects.equals(blueprint, that.blueprint);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType);
+        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint);
     }
 }

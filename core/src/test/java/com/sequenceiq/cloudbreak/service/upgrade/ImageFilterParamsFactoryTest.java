@@ -21,7 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -37,6 +39,9 @@ public class ImageFilterParamsFactoryTest {
 
     @Mock
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Mock
+    private Blueprint blueprint;
 
     @Test
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataLake() {
@@ -55,6 +60,7 @@ public class ImageFilterParamsFactoryTest {
         assertTrue(actual.isLockComponents());
         assertEquals(cdhVersion, actual.getStackRelatedParcels().get(cdhName));
         assertEquals(StackType.DATALAKE, actual.getStackType());
+        assertEquals(blueprint, actual.getBlueprint());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).findCdhProduct(clusterComponents);
     }
@@ -81,6 +87,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(sparkVersion, actual.getStackRelatedParcels().get(sparkName));
         assertEquals(nifiVersion, actual.getStackRelatedParcels().get(nifiName));
         assertEquals(StackType.WORKLOAD, actual.getStackType());
+        assertEquals(blueprint, actual.getBlueprint());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
     }
@@ -106,7 +113,14 @@ public class ImageFilterParamsFactoryTest {
     private Stack createStack(StackType stackType) {
         Stack stack = new Stack();
         stack.setType(stackType);
+        stack.setCluster(createCluster());
         return stack;
+    }
+
+    private Cluster createCluster() {
+        Cluster cluster = new Cluster();
+        cluster.setBlueprint(blueprint);
+        return cluster;
     }
 
     private ClouderaManagerProduct createCMProduct(String name, String version) {

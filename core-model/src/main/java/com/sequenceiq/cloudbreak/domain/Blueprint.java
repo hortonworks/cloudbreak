@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
+import com.sequenceiq.cloudbreak.domain.converter.BlueprintUpgradeOptionConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -65,6 +66,9 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     private String stackVersion;
 
     private Long created = System.currentTimeMillis();
+
+    @Convert(converter = BlueprintUpgradeOptionConverter.class)
+    private BlueprintUpgradeOption blueprintUpgradeOption;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -176,5 +180,13 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public BlueprintUpgradeOption getBlueprintUpgradeOption() {
+        return blueprintUpgradeOption;
+    }
+
+    public void setBlueprintUpgradeOption(BlueprintUpgradeOption blueprintUpgradeOption) {
+        this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
 }
