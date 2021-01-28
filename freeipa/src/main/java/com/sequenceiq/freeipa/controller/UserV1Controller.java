@@ -115,7 +115,6 @@ public class UserV1Controller implements UserV1Endpoint {
 
     @Override
     @CustomPermissionCheck
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.ENVIRONMENT_READ)
     public SyncOperationStatus setPassword(SetPasswordRequest request) {
         String userCrn = checkActorCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
