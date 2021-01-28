@@ -100,15 +100,22 @@ public class AzureUpscaleService {
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
         } catch (Exception e) {
-            List<CloudInstance> newCloudInstances = newInstances.stream()
-                    .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null))
-                    .collect(Collectors.toList());
+            LOGGER.warn("Trying to remove resources due to exception", e);
+            List<CloudInstance> newCloudInstances = getNewInstances(newInstances);
             List<CloudResource> allRemovableResource = new ArrayList<>();
             allRemovableResource.addAll(templateResources);
             allRemovableResource.addAll(osDiskResources);
             azureTerminationHelperService.downscale(ac, stack, newCloudInstances, resources, allRemovableResource);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure: %s, %s", stackName, e.getMessage()), e);
         }
+    }
+
+    private List<CloudInstance> getNewInstances(List<CloudResource> newInstances) {
+        List<CloudInstance> newCloudInstances = newInstances.stream()
+                .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null, cloudResource.getParameters()))
+                .collect(Collectors.toList());
+        LOGGER.debug("Created instances to be removed {}", newCloudInstances.toString());
+        return newCloudInstances;
     }
 
     private void purgeExistingInstances(AzureStackView azureStackView) {

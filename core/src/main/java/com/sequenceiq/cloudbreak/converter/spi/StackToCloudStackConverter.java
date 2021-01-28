@@ -261,7 +261,7 @@ public class StackToCloudStackConverter {
                                         instanceGroup.getInstanceGroupType(),
                                         buildCloudInstances(stackAuthentication, deleteRequests, instanceGroup),
                                         buildSecurity(instanceGroup),
-                                        buildCloudInstanceSkeleton(stackAuthentication, instanceGroup, stack),
+                                        buildCloudInstanceSkeleton(stackAuthentication, instanceGroup),
                                         getFields(instanceGroup),
                                         instanceAuthentication,
                                         instanceAuthentication.getLoginUserName(),
@@ -341,7 +341,7 @@ public class StackToCloudStackConverter {
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
-    private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup, Stack stack) {
+    private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup) {
         CloudInstance skeleton = null;
         if (instanceGroup.getNodeCount() == 0) {
             skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,

@@ -58,13 +58,13 @@ public class CloudFailureHandler {
         AuthenticatedContext auth = cloudFailureContext.getAuth();
         ResourceBuilderContext ctx = cloudFailureContext.getCtx();
         if (stx.getAdjustmentType() == null && !failures.isEmpty()) {
-            LOGGER.info("Failure policy is null so error will throw");
+            LOGGER.info("Failure policy is null so error will be thrown");
             throwError(failuresList);
         }
         switch (stx.getAdjustmentType()) {
             case EXACT:
                 if (stx.getThreshold() > fullNodeCount - failures.size()) {
-                    LOGGER.info("Number of failures is more than the threshold so error will throw");
+                    LOGGER.info("Number of failures is more than the threshold ({}) so error will be thrown", stx.getThreshold());
                     failures = resourceStatuses.stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
                     doRollbackAndDecreaseNodeCount(auth, resourceStatuses, failures, group, ctx, resourceBuilders, stx.getUpscale());
                     throwError(failuresList);
@@ -128,7 +128,7 @@ public class CloudFailureHandler {
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         LOGGER.info("InstanceGroup {} node count decreased with one so the new node size is: {}", group.getName(), group.getInstancesSize());
         if (getRemovableInstanceTemplates(group, ids).size() <= 0 && !upscale) {
-            LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
+            LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will be thrown");
             throwError(statuses);
         } else {
             for (int i = compute.size() - 1; i >= 0; i--) {

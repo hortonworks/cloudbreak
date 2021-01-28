@@ -15,6 +15,7 @@ import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -162,7 +163,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                                     volume.getId(), volume.getSize(), AzureDiskType.getByValue(
                                             volume.getType()), region, resourceGroupName, cloudStack.getTags());
                         } else {
-                            LOGGER.debug("Managed disk for resourcegroup: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
+                            LOGGER.debug("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
                         String volumeId = result.id();
                         volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType(),
@@ -203,14 +204,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(resource);
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AZURE_VOLUMESET, context, auth, List.of(resource));
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(ResourceStatus.DELETED::equals);
-        if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
-            LOGGER.debug("Resource {} will be preserved for later reattachment.", resource.getName());
-            resource.setStatus(CommonStatus.DETACHED);
-            volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
-            resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
-            resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
-            throw new InterruptedException("Resource will be preserved for later reattachment.");
-        }
+        preserveVolumeIfDoNotDeleteOnTermination(auth, resource, volumeSetAttributes, anyDeleted);
 
         LOGGER.debug("Resource {} will be deleted.", resource.getName());
         AzureClient client = getAzureClient(auth);
@@ -220,24 +214,52 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                         (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()) && volumeSetAttributes.getDeleteOnTermination()))
                 .collect(Collectors.toList());
 
+        deleteVolumes(context, client, removableDisks);
+        return null;
+    }
+
+    private void deleteVolumes(AzureContext context, AzureClient client, List<CloudResourceStatus> removableDisks) {
         for (CloudResourceStatus cloudResourceStatus : removableDisks) {
             CloudResource cloudResource = cloudResourceStatus.getCloudResource();
-            String instanceName = cloudResource.getInstanceId();
-            List<String> volumeIds = getVolumeSetAttributes(cloudResource).getVolumes().stream()
-                    .map(VolumeSetAttributes.Volume::getId)
-                    .collect(Collectors.toList());
+            List<String> volumeIds = getVolumeIds(cloudResource);
             for (String volumeId : volumeIds) {
-                if (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus())) {
-                    CloudResource resourceGroup = context.getNetworkResources().stream()
-                            .filter(r -> r.getType().equals(ResourceType.AZURE_RESOURCE_GROUP))
-                            .findFirst()
-                            .orElseThrow(() -> new AzureResourceException("Resource group resource not found"));
-                    client.detachDiskFromVm(volumeId, client.getVirtualMachine(resourceGroup.getName(), instanceName));
-                }
+                detachVolume(context, client, cloudResourceStatus, cloudResource, volumeId);
             }
             azureUtils.deleteManagedDisks(client, volumeIds);
         }
-        return null;
+    }
+
+    private List<String> getVolumeIds(CloudResource cloudResource) {
+        return getVolumeSetAttributes(cloudResource).getVolumes().stream()
+                .map(VolumeSetAttributes.Volume::getId)
+                .collect(Collectors.toList());
+    }
+
+    private void detachVolume(AzureContext context, AzureClient client, CloudResourceStatus cloudResourceStatus, CloudResource cloudResource, String volumeId) {
+        if (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus())) {
+            String instanceName = cloudResource.getInstanceId();
+            if (StringUtils.isEmpty(instanceName)) {
+                LOGGER.warn("Volume {} does not have instance name set, we assume it is not attached", volumeId);
+                return;
+            }
+            CloudResource resourceGroup = context.getNetworkResources().stream()
+                    .filter(r -> r.getType().equals(ResourceType.AZURE_RESOURCE_GROUP))
+                    .findFirst()
+                    .orElseThrow(() -> new AzureResourceException("Resource group resource not found"));
+            client.detachDiskFromVm(volumeId, client.getVirtualMachineByResourceGroup(resourceGroup.getName(), instanceName));
+        }
+    }
+
+    private void preserveVolumeIfDoNotDeleteOnTermination(AuthenticatedContext auth, CloudResource resource, VolumeSetAttributes volumeSetAttributes,
+            boolean anyDeleted) throws InterruptedException {
+        if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
+            LOGGER.debug("Resource {} will be preserved for later reattachment.", resource.getName());
+            resource.setStatus(CommonStatus.DETACHED);
+            volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
+            resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
+            resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
+            throw new InterruptedException("Resource will be preserved for later reattachment.");
+        }
     }
 
     @Override
@@ -276,14 +298,17 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .map(Disk::id)
                 .collect(Collectors.toList());
         if (!actualIdList.containsAll(expectedIdList)) {
+            LOGGER.debug("Resource status is DELETED, as actual id list {} does not contain all the expected ids {}", actualIdList, expectedIdList);
             return ResourceStatus.DELETED;
         }
         List<String> actualAttachedIdList = existingDisks.stream().
                 filter(Disk::isAttachedToVirtualMachine).map(Disk::id)
                 .collect(Collectors.toList());
         if (actualAttachedIdList.containsAll(expectedIdList)) {
+            LOGGER.debug("Resource status is ATTACHED, as attached id list {} contains all the expected ids {}", actualAttachedIdList, expectedIdList);
             return ResourceStatus.ATTACHED;
         }
+        LOGGER.debug("Resource status is CREATED, as attached id list {} does not contain all the expected ids {}", actualAttachedIdList, expectedIdList);
         return ResourceStatus.CREATED;
     }
 
