@@ -349,7 +349,7 @@ SaltOrchestrator implements HostOrchestrator {
             }
             grainUploader.uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc, exitCriteria);
 
-            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allNodeHostname, allNodes), exitModel, exitCriteria);
+            runSyncAll(sc, allNodeHostname, allNodes, exitModel);
             saltCommandRunner.runSaltCommand(sc, new MineUpdateRunner(gatewayTargetHostnames, allNodes), exitModel, exitCriteria);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
@@ -612,7 +612,7 @@ SaltOrchestrator implements HostOrchestrator {
                     exitCriteriaModel, exitCriteria);
 
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, exitCriteria);
+            runSyncAll(sc, allHostnames, allNodes, exitCriteriaModel);
             runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, true);
 
             // remove 'manager_upgrade' role from all nodes
@@ -841,7 +841,7 @@ SaltOrchestrator implements HostOrchestrator {
                 }
 
                 Set<String> allHostnames = responsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, responsiveNodes), exitCriteriaModel, exitCriteria);
+                runSyncAll(sc, allHostnames, responsiveNodes, exitCriteriaModel);
                 runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodes), exitCriteriaModel, maxRetry, true);
 
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"),
@@ -856,6 +856,11 @@ SaltOrchestrator implements HostOrchestrator {
             LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
             throwExceptionIfNotForced(forced, e);
         }
+    }
+
+    private void runSyncAll(SaltConnector sc, Set<String> targetHostnames, Set<Node> allNode, ExitCriteriaModel exitCriteriaModel) throws Exception {
+        SaltJobIdTracker syncAllTracker = new SaltJobIdTracker(sc, new SyncAllRunner(targetHostnames, allNode));
+        saltRunner.runner(syncAllTracker, exitCriteria, exitCriteriaModel, maxRetry, true).call();
     }
 
     @Override
@@ -890,7 +895,8 @@ SaltOrchestrator implements HostOrchestrator {
                 saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(targetHostnames, allNodes, "roles", roleToRemove),
                         exitCriteriaModel, maxRetryLeave, exitCriteria);
                 Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, exitCriteria);
+                SaltJobIdTracker syncAllTracker = new SaltJobIdTracker(sc, new SyncAllRunner(allHostnames, allNodes));
+                saltRunner.runner(syncAllTracker, exitCriteria, exitCriteriaModel, maxRetryLeave, false).call();
                 runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryLeave, true);
             }
         } catch (Exception e) {
@@ -1035,7 +1041,7 @@ SaltOrchestrator implements HostOrchestrator {
             saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(targetHostnames, allNodes, "recipes", phase.value()), exitCriteriaModel, maxRetry,
                     exitCriteria);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new SyncAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetry, exitCriteria);
+            runSyncAll(sc, allHostnames, allNodes, exitCriteriaModel);
             if (phase == PRE_CLOUDERA_MANAGER_START) {
                 // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.
                 runNewService(sc, new HighStateAllRunner(allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
