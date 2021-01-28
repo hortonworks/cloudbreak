@@ -124,6 +124,9 @@ public class AzureIDBrokerObjectStorageValidator {
             Set<String> mappedIdentityIds = new HashSet<>();
             mappedIdentityIds.addAll(accountMappings.getUserMappings().values());
             mappedIdentityIds.addAll(accountMappings.getGroupMappings().values());
+            mappedIdentityIds = mappedIdentityIds.stream()
+                    .map(id -> id.replaceFirst("(?i)/resourceGroups/", "/resourcegroups/"))
+                    .collect(Collectors.toSet());
             PagedList<Identity> existingIdentities = client.listIdentities();
 
             Set<String> existingIdentityIds = existingIdentities.stream().map(Identity::id).collect(Collectors.toSet());

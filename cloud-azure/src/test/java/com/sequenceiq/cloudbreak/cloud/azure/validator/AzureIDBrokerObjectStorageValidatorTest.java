@@ -84,6 +84,9 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     private static final String USER_IDENTITY_1 =
             "/subscriptions/a9d4456e-349f-44f6-bc73-aaaaaaaaaaaa/resourcegroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/user";
 
+    private static final String USER_IDENTITY_1_CASE =
+            "/subscriptions/a9d4456e-349f-44f6-bc73-aaaaaaaaaaaa/resourceGroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/user";
+
     private static final String GROUP_IDENTITY_1 =
             "/subscriptions/a9d4456e-349f-44f6-bc73-aaaaaaaaaaaa/resourcegroups/msi/providers/Microsoft.ManagedIdentity/userAssignedIdentities/group";
 
@@ -235,6 +238,25 @@ public class AzureIDBrokerObjectStorageValidatorTest {
     }
 
     @Test
+    public void testValidateObjectStorageMappingCaseSensitivityCB6600() {
+        SpiFileSystem fileSystem = setupSpiFileSystem(true);
+        PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
+        when(assumer.id()).thenReturn(USER_IDENTITY_1);
+        when(logger.id()).thenReturn(GROUP_IDENTITY_1);
+        identityPagedList.add(assumer);
+        identityPagedList.add(logger);
+        when(client.listIdentities()).thenReturn(identityPagedList);
+        new RoleASsignmentBuilder(client)
+                .withAssignment(ASSUMER_IDENTITY_PRINCIPAL_ID, SUBSCRIPTION_FULL_ID)
+                .withAssignment(LOG_IDENTITY_PRINCIPAL_ID, STORAGE_RESOURCE_GROUP_NAME);
+
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        underTest.validateObjectStorage(client, fileSystem, resultBuilder);
+        ValidationResult validationResult = resultBuilder.build();
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
     public void testValidateObjectStorageNoMappedRoles() {
         SpiFileSystem fileSystem = setupSpiFileSystem(true);
         PagedList<Identity> identityPagedList = Mockito.spy(PagedList.class);
@@ -339,7 +361,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         if (addMapping) {
             AccountMappingBase accountMapping = new AccountMappingBase();
             accountMapping.setGroupMappings(Map.ofEntries(Map.entry(GROUP_1, GROUP_IDENTITY_1)));
-            accountMapping.setUserMappings(Map.ofEntries(Map.entry(USER_1, USER_IDENTITY_1)));
+            accountMapping.setUserMappings(Map.ofEntries(Map.entry(USER_1, USER_IDENTITY_1_CASE)));
             idBrokerCloudFileSystem.setAccountMapping(accountMapping);
         }
         CloudAdlsGen2View loggerCloudFileSystem = new CloudAdlsGen2View(CloudIdentityType.LOG);
