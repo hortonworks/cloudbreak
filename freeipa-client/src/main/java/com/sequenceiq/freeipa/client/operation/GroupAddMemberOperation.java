@@ -13,7 +13,7 @@ import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Group;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 public class GroupAddMemberOperation extends AbstractFreeipaOperation<Group> {
 

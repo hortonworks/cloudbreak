@@ -18,7 +18,7 @@ import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.client.model.RPCMessage;
+import com.sequenceiq.cloudbreak.client.RPCMessage;
 
 @Component
 public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<Boolean> {

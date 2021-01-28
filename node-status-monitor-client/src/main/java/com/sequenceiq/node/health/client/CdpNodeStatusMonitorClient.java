@@ -1,8 +1,9 @@
-package com.sequenceiq.freeipa.client;
+package com.sequenceiq.node.health.client;
 
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -11,18 +12,18 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.client.RpcListener;
-import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
-import com.sequenceiq.freeipa.client.healthcheckmodel.ClusterCheckResult;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RpcListener;
+import com.sequenceiq.node.health.client.model.HealthReport;
 
-public class FreeIpaHealthCheckClient implements AutoCloseable {
+public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaHealthCheckClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CdpNodeStatusMonitorClient.class);
 
     private final Client restClient;
 
@@ -32,10 +33,17 @@ public class FreeIpaHealthCheckClient implements AutoCloseable {
 
     private final RpcListener listener;
 
-    public FreeIpaHealthCheckClient(Client restClient, URL url, Map<String, String> headers, RpcListener listener) {
+    private final Optional<String> username;
+
+    private final Optional<String> password;
+
+    public CdpNodeStatusMonitorClient(Client restClient, URL url, Map<String, String> headers, RpcListener listener, Optional<String> username,
+            Optional<String> password) {
         this.restClient = restClient;
         this.headers = new MultivaluedHashMap<>(headers);
         this.listener = listener;
+        this.username = username;
+        this.password = password;
 
         rpcTarget = restClient.target(url.toString());
     }
@@ -45,35 +53,43 @@ public class FreeIpaHealthCheckClient implements AutoCloseable {
         restClient.close();
     }
 
-    public RPCResponse<CheckResult> nodeHealth() throws FreeIpaClientException {
-        return invoke("node health check", "", CheckResult.class);
+    public RPCResponse<HealthReport> nodeMeteringReport() throws CdpNodeStatusMonitorClientException {
+        return invoke("node metering check", "/metering_report.json", HealthReport.class);
     }
 
-    public RPCResponse<ClusterCheckResult> clusterHealth() throws FreeIpaClientException {
-        return invoke("cluster health from node", "/cluster", ClusterCheckResult.class);
+    public RPCResponse<HealthReport> nodeNetworkReport() throws CdpNodeStatusMonitorClientException {
+        return invoke("node network check", "/network_report.json", HealthReport.class);
     }
 
-    private <T> RPCResponse<T> invoke(String name, String path, Class<T> resultType) throws FreeIpaClientException {
+    public RPCResponse<HealthReport> nodeServicesReport() throws CdpNodeStatusMonitorClientException {
+        return invoke("node services check", "/services_report.json", HealthReport.class);
+    }
+
+    private <T> RPCResponse<T> invoke(String name, String path, Class<T> resultType) throws CdpNodeStatusMonitorClientException {
         Invocation.Builder builder = rpcTarget.path(path)
                 .request()
                 .headers(headers);
+        if (username.isPresent() && password.isPresent()) {
+            builder.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, username.get());
+            builder.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, password.get());
+        }
         try (Response response = builder.get()) {
             bufferResponseEntity(response);
             processRpcListener(response);
             checkResponseStatus(response);
             return toRpcResponse(name, response, resultType);
-        } catch (FreeIpaClientException e) {
+        } catch (CdpNodeStatusMonitorClientException e) {
             throw e;
         } catch (Throwable throwable) {
             String message = String.format("Invoke FreeIPA health check failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
-            throw new FreeIpaClientException(message, throwable);
+            throw new CdpNodeStatusMonitorClientException(message, throwable);
         }
     }
 
-    private void bufferResponseEntity(Response response) throws FreeIpaClientException {
+    private void bufferResponseEntity(Response response) throws CdpNodeStatusMonitorClientException {
         if (!response.bufferEntity()) {
-            throw new FreeIpaClientException("Unable to buffer the response from FreeIPA");
+            throw new CdpNodeStatusMonitorClientException("Unable to buffer the response from FreeIPA");
         }
     }
 
@@ -83,12 +99,12 @@ public class FreeIpaHealthCheckClient implements AutoCloseable {
         }
     }
 
-    private void checkResponseStatus(Response response) throws FreeIpaClientException {
+    private void checkResponseStatus(Response response) throws CdpNodeStatusMonitorClientException {
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL &&
                 response.getStatus() != Response.Status.SERVICE_UNAVAILABLE.getStatusCode()) {
             String message = String.format("Invoke FreeIPA health check failed: %d", response.getStatus());
             LOGGER.warn("{}, reason: {}", message, response.readEntity(String.class));
-            throw new FreeIpaClientException(message, response.getStatus());
+            throw new CdpNodeStatusMonitorClientException(message, response.getStatus());
         }
     }
 

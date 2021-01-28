@@ -25,7 +25,7 @@ import com.google.common.collect.Multimap;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;

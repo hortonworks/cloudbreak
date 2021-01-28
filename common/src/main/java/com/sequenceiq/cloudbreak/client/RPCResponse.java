@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.client.model;
+package com.sequenceiq.cloudbreak.client;
 
 import java.util.List;
 

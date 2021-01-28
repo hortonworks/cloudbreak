@@ -1,7 +1,7 @@
-package com.sequenceiq.freeipa.client;
+package com.sequenceiq.cloudbreak.client;
 
 import javax.ws.rs.core.Response;
 
-public interface FreeIpaHealthCheckRpcListener {
+public interface RpcListener {
     void onBeforeResponseProcessed(Response response) throws Exception;
 }

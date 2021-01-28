@@ -21,7 +21,7 @@ import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Group;
-import com.sequenceiq.freeipa.client.model.RPCResponse;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupAddOperationTest {
