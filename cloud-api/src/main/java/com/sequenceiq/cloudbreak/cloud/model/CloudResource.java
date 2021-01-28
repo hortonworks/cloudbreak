@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
@@ -75,19 +76,6 @@ public class CloudResource extends DynamicModel {
         return stackAware;
     }
 
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder("CloudResource{");
-        sb.append("type=").append(type);
-        sb.append(", status=").append(status);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", reference='").append(reference).append('\'');
-        sb.append(", group='").append(group).append('\'');
-        sb.append(", persistent='").append(persistent).append('\'');
-        sb.append('}');
-        return sb.toString();
-    }
-
     public static Builder builder() {
         return new Builder();
     }
@@ -102,6 +90,20 @@ public class CloudResource extends DynamicModel {
 
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CloudResource.class.getSimpleName() + "[", "]")
+                .add("type=" + type)
+                .add("status=" + status)
+                .add("name='" + name + "'")
+                .add("reference='" + reference + "'")
+                .add("group='" + group + "'")
+                .add("persistent=" + persistent)
+                .add("stackAware=" + stackAware)
+                .add("instanceId='" + instanceId + "'")
+                .toString();
     }
 
     public static class Builder {

@@ -217,7 +217,7 @@ public class AzureVolumeResourceBuilderTest {
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
         underTest.delete(context, auth, volumeSetResource);
         verify(azureUtils, times(1)).deleteManagedDisks(any(), captor.capture());
-        verify(azureClient, times(0)).getVirtualMachine(any(), any());
+        verify(azureClient, times(0)).getVirtualMachineByResourceGroup(any(), any());
         verify(azureClient, times(0)).detachDiskFromVm(any(), any());
         Collection<String> deletedAzureManagedDisks = captor.getValue();
         assertThat(deletedAzureManagedDisks, containsInAnyOrder("vol1"));
@@ -252,12 +252,12 @@ public class AzureVolumeResourceBuilderTest {
         when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
         when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
-        when(azureClient.getVirtualMachine(any(), eq("instance1"))).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachineByResourceGroup(any(), eq("instance1"))).thenReturn(virtualMachine);
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
         underTest.delete(context, auth, volumeSetResource);
 
         verify(azureUtils, times(1)).deleteManagedDisks(any(), captor.capture());
-        verify(azureClient, times(1)).getVirtualMachine(eq("resource-group"), eq("instance1"));
+        verify(azureClient, times(1)).getVirtualMachineByResourceGroup(eq("resource-group"), eq("instance1"));
         verify(azureClient, times(1)).detachDiskFromVm(eq("vol1"), eq(virtualMachine));
         Collection<String> deletedAzureManagedDisks = captor.getValue();
         assertThat(deletedAzureManagedDisks, containsInAnyOrder("vol1"));

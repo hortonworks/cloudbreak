@@ -43,17 +43,18 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
     @Override
     public List<CloudResource> build(AzureContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) {
-        LOGGER.info("Attach disk to instance");
 
         CloudResource instance = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AZURE_INSTANCE))
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Instance resource not found"));
 
+        LOGGER.info("Attach disk to the instance {}", instance.toString());
+
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         AzureClient client = getAzureClient(auth);
-        VirtualMachine vm = client.getVirtualMachine(resourceGroupName, instance.getName());
+        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, instance.getName());
         Set<String> diskIds = vm.dataDisks().values().stream().map(VirtualMachineDataDisk::id).collect(Collectors.toSet());
 
         CloudResource volumeSet = buildableResource.stream()
@@ -61,7 +62,6 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 .filter(cloudResource -> !instance.getInstanceId().equals(cloudResource.getInstanceId()))
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Volume set resource not found"));
-
 
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(volumeSet);
         volumeSetAttributes.getVolumes()
@@ -78,6 +78,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 });
         volumeSet.setInstanceId(instance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
+        LOGGER.debug("Volume set {} attached successfully", volumeSet.toString());
         return List.of(volumeSet);
     }
 
