@@ -15,7 +15,6 @@ auth:
       expiration-minutes: 10
     freeipa:
       ha:
-        enable: true
         repair.enable: true
     cloudstoragevalidation.enable: true
     runtime.upgrade.enable: true

@@ -208,6 +208,10 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private static final String SSH_PUBLIC_KEY_PATTERN = "^ssh-(rsa|ed25519)\\s+AAAA(B|C)3NzaC1.*(|\\n)";
 
+    // See com.cloudera.thunderhead.service.common.entitlements.CdpEntitlements.CDP_CP_CUSTOM_DL_TEMPLATE
+    // not used in CB, but used in CDP CLI, so we need this in mock for local development
+    private static final String CDP_CP_CUSTOM_DL_TEMPLATE = "CDP_CM_ADMIN_CREDENTIALS";
+
     @Inject
     private JsonUtil jsonUtil;
 
@@ -240,9 +244,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.baseimage.enable}")
     private boolean enableBaseImages;
-
-    @Value("${auth.mock.freeipa.ha.enable}")
-    private boolean enableFreeIpaHa;
 
     @Value("${auth.mock.freeipa.ha.repair.enable}")
     private boolean enableFreeIpaHaRepair;
@@ -560,9 +561,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
         }
-        if (enableFreeIpaHa) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
-        }
         if (enableFreeIpaHaRepair) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
         }
@@ -638,6 +636,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_FLOW_SCALING))
                                 .addEntitlements(createEntitlement(CDP_SHOW_CLI))
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
+                                .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL))
                                 .setPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(request.getAccountId())
@@ -647,10 +646,14 @@ public class MockUserManagementService extends UserManagementImplBase {
         responseObserver.onCompleted();
     }
 
-    private Entitlement createEntitlement(com.sequenceiq.cloudbreak.auth.altus.model.Entitlement entitlement) {
+    private Entitlement createEntitlement(String entitlement) {
         return Entitlement.newBuilder()
-                .setEntitlementName(entitlement.name())
+                .setEntitlementName(entitlement)
                 .build();
+    }
+
+    private Entitlement createEntitlement(com.sequenceiq.cloudbreak.auth.altus.model.Entitlement entitlement) {
+        return createEntitlement(entitlement.name());
     }
 
     @Override
