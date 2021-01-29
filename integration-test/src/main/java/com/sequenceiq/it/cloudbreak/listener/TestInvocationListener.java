@@ -45,11 +45,13 @@ public class TestInvocationListener implements IInvokedMethodListener {
         JSONObject jsonObject = new JSONObject();
         Object[] parameters = testResult.getParameters();
         if (parameters == null || parameters.length == 0) {
+            LOGGER.warn("Test context could not be found because parameters array is empty in test result.");
             return;
         }
         try {
             testContext = (TestContext) parameters[0];
         } catch (ClassCastException e) {
+            LOGGER.warn("Test context could not be casted from test result parameters.");
             return;
         }
 
@@ -94,6 +96,8 @@ public class TestInvocationListener implements IInvokedMethodListener {
             } catch (Exception e) {
                 LOGGER.info("Creating/Appending resource file is failing, because of: {}", e.getMessage(), e);
             }
+        } else {
+            LOGGER.info("No resources found, no output file needs to be created.");
         }
     }
 
