@@ -14,7 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
-import com.sequenceiq.freeipa.service.TelemetryAgentService;
+import com.sequenceiq.freeipa.service.telemetry.TelemetryAgentService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

@@ -2,10 +2,12 @@ package com.sequenceiq.freeipa.service.freeipa.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +25,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -76,6 +79,9 @@ public class FreeIpaConfigServiceTest {
     @Mock
     private Environment environment;
 
+    @Mock
+    private ProxyConfigDtoService proxyConfigDtoService;
+
     @InjectMocks
     private FreeIpaConfigService freeIpaConfigService;
 
@@ -97,6 +103,7 @@ public class FreeIpaConfigServiceTest {
         Stack stack = new Stack();
         stack.setCloudPlatform(CloudPlatform.AWS.name());
         stack.setBackup(backup);
+        stack.setEnvironmentCrn("envcrn");
 
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
@@ -106,13 +113,14 @@ public class FreeIpaConfigServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
         Set<Object> expectedHosts = ImmutableSet.of(expectedHost);
 
         FreeIpaConfigView freeIpaConfigView = freeIpaConfigService.createFreeIpaConfigs(
-                stack, ImmutableSet.of(node), null);
+                stack, ImmutableSet.of(node));
 
         assertEquals(DOMAIN.toUpperCase(), freeIpaConfigView.getRealm());
         assertEquals(DOMAIN, freeIpaConfigView.getDomain());
