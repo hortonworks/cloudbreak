@@ -13,7 +13,6 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
@@ -24,25 +23,22 @@ import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 @Service
 public class CommonExperienceService implements Experience {
 
-    private static final String DEFAULT_EXPERIENCE_PROTOCOL = "https";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceService.class);
 
     private final CommonExperienceConnectorService experienceConnectorService;
+
+    private final CommonExperiencePathCreator commonExperiencePathCreator;
 
     private final CommonExperienceValidator experienceValidator;
 
     private final Set<CommonExperience> configuredExperiences;
 
-    private final String experienceProtocol;
-
-    public CommonExperienceService(@Value("${experience.scan.protocol}") String experienceProtocol, CommonExperienceConnectorService experienceConnectorService,
-            ExperienceServicesConfig config, CommonExperienceValidator experienceValidator) {
+    public CommonExperienceService(CommonExperienceConnectorService experienceConnectorService, ExperienceServicesConfig config,
+            CommonExperienceValidator experienceValidator, CommonExperiencePathCreator commonExperiencePathCreator) {
+        this.commonExperiencePathCreator = commonExperiencePathCreator;
+        this.experienceConnectorService = experienceConnectorService;
         this.experienceValidator = experienceValidator;
         this.configuredExperiences = identifyConfiguredExperiences(config);
-        this.experienceConnectorService = experienceConnectorService;
-        this.experienceProtocol = StringUtils.isEmpty(experienceProtocol) ? DEFAULT_EXPERIENCE_PROTOCOL : experienceProtocol;
-        LOGGER.debug("Experience connection protocol set to: {}", this.experienceProtocol);
     }
 
     @Override
@@ -70,7 +66,7 @@ public class CommonExperienceService implements Experience {
                 .stream()
                 .filter(commonExperience -> activeExperiences.contains(commonExperience.getName()))
                 .forEach(commonExperience -> experienceConnectorService
-                        .deleteWorkspaceForEnvironment(createPathToExperience(commonExperience), environment.getCrn()));
+                        .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
     }
 
     /**
@@ -105,11 +101,7 @@ public class CommonExperienceService implements Experience {
     }
 
     private Set<String> collectExperienceEntryNamesWhenItHasActiveWorkspaceForEnv(CommonExperience xp, String envCrn) {
-        return experienceConnectorService.getWorkspaceNamesConnectedToEnv(createPathToExperience(xp), envCrn);
-    }
-
-    private String createPathToExperience(CommonExperience xp) {
-        return experienceProtocol + "://" + xp.getHostAddress() + ":" + xp.getPort() + xp.getInternalEnvEndpoint();
+        return experienceConnectorService.getWorkspaceNamesConnectedToEnv(commonExperiencePathCreator.createPathToExperience(xp), envCrn);
     }
 
     private Set<CommonExperience> identifyConfiguredExperiences(ExperienceServicesConfig config) {

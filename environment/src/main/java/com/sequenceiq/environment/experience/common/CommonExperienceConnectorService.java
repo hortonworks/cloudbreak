@@ -46,31 +46,31 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         this.retryableWebTarget = retryableWebTarget;
     }
 
-    @Override
     @NotNull
+    @Override
     public Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> result = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
             Optional<CpInternalEnvironmentResponse> response = responseReader
-                    .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
+                        .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
             return response.map(CommonExperienceConnectorService::getExperienceNamesFromListResponse).orElseGet(Set::of);
         }
         return Collections.emptySet();
     }
 
-    @Override
     @NotNull
-    public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
+    @Override
+        public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> response = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.delete(call));
-        return responseReader.read(
-                webTarget.getUri().toString(),
-                response.orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG)),
-                DeleteCommonExperienceWorkspaceResponse.class)
-                .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+        if (response.isPresent()) {
+            return responseReader.read(webTarget.getUri().toString(), response.get(), DeleteCommonExperienceWorkspaceResponse.class)
+                    .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+        }
+        throw new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
 
     private Optional<Response> executeCall(String path, Callable<Response> toCall) {
