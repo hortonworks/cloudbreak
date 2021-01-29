@@ -47,6 +47,7 @@ import com.sequenceiq.it.cloudbreak.listener.ThreadLocalTestListener;
 import com.sequenceiq.it.cloudbreak.search.CustomHTMLReporter;
 import com.sequenceiq.it.cloudbreak.search.CustomJUnitXMLReporter;
 import com.sequenceiq.it.config.ITProps;
+import com.sequenceiq.it.cloudbreak.listener.TestCaseTimeoutListener;
 import com.sequenceiq.it.util.cleanup.CleanupUtil;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
@@ -126,6 +127,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         testng.addListener(new TestInvocationListener());
         testng.addListener(new CustomHTMLReporter());
         testng.addListener(new CustomJUnitXMLReporter());
+        testng.addListener(new TestCaseTimeoutListener());
         setupSuites(testng);
         if (!CLEANUP_COMMAND.equals(itCommand)) {
             testng.run();
