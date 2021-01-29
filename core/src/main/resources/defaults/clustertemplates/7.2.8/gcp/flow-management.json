@@ -14,7 +14,7 @@
     "instanceGroups": [
       {
         "nodeCount": 1,
-        "name": "gateway",
+        "name": "management",
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {

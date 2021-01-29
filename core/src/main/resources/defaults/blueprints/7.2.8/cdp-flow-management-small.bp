@@ -290,7 +290,7 @@
         ]
       },
       {
-        "refName": "gateway",
+        "refName": "management",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
