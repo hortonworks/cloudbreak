@@ -52,7 +52,7 @@ import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.AccountTagService;
+import com.sequenceiq.freeipa.service.tag.AccountTagService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Component

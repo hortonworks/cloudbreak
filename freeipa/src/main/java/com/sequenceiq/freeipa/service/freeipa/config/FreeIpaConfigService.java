@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -47,7 +49,10 @@ public class FreeIpaConfigService {
     @Inject
     private Environment environment;
 
-    public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts, ProxyConfig proxyConfig) {
+    @Inject
+    private ProxyConfigDtoService proxyConfigDtoService;
+
+    public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
@@ -65,7 +70,7 @@ public class FreeIpaConfigService {
                 .withAdminUser(freeIpaClientFactory.getAdminUser())
                 .withFreeIpaToReplicate(gatewayConfigService.getPrimaryGatewayConfig(stack))
                 .withHosts(hosts)
-                .withBackupConfig(determineAndSetBackup(stack, proxyConfig))
+                .withBackupConfig(determineAndSetBackup(stack))
                 .withCcmv2Enabled(stack.getTunnel().useCcmV2())
                 .build();
     }
@@ -82,7 +87,7 @@ public class FreeIpaConfigService {
         return dnsSecValidationEnabled;
     }
 
-    private FreeIpaBackupConfigView determineAndSetBackup(Stack stack, ProxyConfig proxyConfig) {
+    private FreeIpaBackupConfigView determineAndSetBackup(Stack stack) {
         Backup backup = stack.getBackup();
         final FreeIpaBackupConfigView.Builder builder = new FreeIpaBackupConfigView.Builder();
         if (backup != null) {
@@ -104,10 +109,11 @@ public class FreeIpaConfigService {
                         .withGcpServiceAccount(backup.getGcs().getServiceAccountEmail());
                 LOGGER.debug("Backups will be configured to use GCP storage");
             }
-            if (proxyConfig != null) {
-                LOGGER.debug("Proxy will be configured for backup: {}", proxyConfig.getName());
-                builder.withProxyUrl(proxyConfig.getFullProxyUrl());
-            }
+            Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+            proxyConfig.ifPresent(config -> {
+                LOGGER.debug("Proxy will be configured for backup: {}", config.getName());
+                builder.withProxyUrl(config.getFullProxyUrl());
+            });
         } else {
             builder.withEnabled(false);
             LOGGER.debug("Backups will not be configured.");
