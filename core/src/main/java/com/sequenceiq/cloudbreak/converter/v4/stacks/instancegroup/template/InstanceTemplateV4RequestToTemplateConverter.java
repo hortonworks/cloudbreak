@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -17,13 +16,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -45,9 +40,6 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
     @Inject
     private DefaultRootVolumeSizeProvider defaultRootVolumeSizeProvider;
 
-    @Inject
-    private EntitlementService entitlementService;
-
     @Override
     public Template convert(InstanceTemplateV4Request source) {
         Template template = new Template();
@@ -58,12 +50,7 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
         setVolumesProperty(source.getAttachedVolumes(), Optional.ofNullable(source.getRootVolume()), template);
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
-        Optional<Map<String, Object>> optionalParameters = Optional.ofNullable(parameters).map(HashMap::new);
-        if (source.getCloudPlatform() == CloudPlatform.AWS) {
-            optionalParameters.ifPresent(p -> p.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED,
-                    entitlementService.fastEbsEncryptionEnabled(ThreadBasedUserCrnProvider.getAccountId())));
-        }
-        optionalParameters.map(toJson()).ifPresent(template::setAttributes);
+        Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
         Map<String, Object> secretParameters = providerParameterCalculator.get(source).asSecretMap();
         Optional.ofNullable(secretParameters).map(toJson()).map(Json::getValue).ifPresent(template::setSecretAttributes);
         return template;

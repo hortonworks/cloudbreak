@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelCo
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
@@ -91,9 +90,6 @@ public class AwsLaunchService {
 
     @Inject
     private AwsNetworkService awsNetworkService;
-
-    @Inject
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Inject
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
@@ -208,8 +204,7 @@ public class AwsLaunchService {
             .withDefaultSubnet(subnet)
             .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
             .withVpcCidrs(network.getNetworkCidrs())
-            .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
-            .withEncryptedAMIByGroupName(encryptedImageCopyService.createEncryptedImages(ac, stack, resourceNotifier));
+            .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()));
 
         AwsEfsFileSystem efsFileSystem = getAwsEfsFileSystem(stack);
 

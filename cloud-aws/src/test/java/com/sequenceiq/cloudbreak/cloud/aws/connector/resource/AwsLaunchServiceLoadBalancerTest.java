@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
@@ -99,9 +98,6 @@ public class AwsLaunchServiceLoadBalancerTest {
 
     @Mock
     private AwsNetworkService awsNetworkService;
-
-    @Mock
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Mock
     private CloudFormationStackUtil cfStackUtil;
@@ -558,7 +554,6 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         when(awsNetworkService.getExistingSubnetCidr(any(), any())).thenReturn(List.of(CIDR));
         when(awsNetworkService.getVpcCidrs(any(), any())).thenReturn(List.of(CIDR));
-        when(encryptedImageCopyService.createEncryptedImages(any(), any(), any())).thenReturn(Map.of());
         when(cfStackUtil.getCfStackName(any())).thenReturn(STACK_NAME);
         when(awsClient.createCloudFormationRetryClient(any(), anyString())).thenReturn(cfRetryClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(cfClient);

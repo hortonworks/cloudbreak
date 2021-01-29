@@ -10,7 +10,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FAST_EBS_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -270,9 +269,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
     private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
-
-    @Value("${auth.mock.fastebsencryption.enable}")
-    private boolean enableFastEbsEncryption;
 
     @Value("${auth.mock.cloudidentitymappinng.enable}")
     private boolean enableCloudIdentityMappinng;
@@ -589,9 +585,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));
-        }
-        if (enableFastEbsEncryption) {
-            builder.addEntitlements(createEntitlement(CDP_CB_FAST_EBS_ENCRYPTION));
         }
         if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
