@@ -264,11 +264,11 @@ public class AwsSubnetIgwExplorerTest {
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, SUBNET_ID, VPC_ID);
 
-        assertTrue(hasInternetGateway);
+        assertFalse(hasInternetGateway);
     }
 
     @Test
-    public void testWithMainAndCustomRouteTablesWithAssociationsAndIgwAttachedToACustomRouteTable() {
+    public void testWithMainAndCustomRouteTableWithAssociationsAndIgwAttachedToACustomRouteTable() {
         DescribeRouteTablesResult describeRouteTablesResult = new DescribeRouteTablesResult();
         Set<RouteTable> routeTables = new HashSet<>();
         RouteTable mainRouteTable = new RouteTable().withVpcId(VPC_ID);
@@ -281,23 +281,14 @@ public class AwsSubnetIgwExplorerTest {
         routeTables.add(mainRouteTable);
 
         RouteTable customRouteTable = new RouteTable().withVpcId(VPC_ID);
-        Route customRoute = new Route()
-                .withDestinationCidrBlock(INTERNAL_DESTINATION_CIDR_BLOCK);
-        customRouteTable.setRoutes(List.of(customRoute));
-        RouteTableAssociation customRouteTableAssociation = new RouteTableAssociation()
-                .withSubnetId(SUBNET_ID);
-        customRouteTable.setAssociations(List.of(customRouteTableAssociation));
-        routeTables.add(customRouteTable);
-
-        RouteTable custom2RouteTable = new RouteTable().withVpcId(VPC_ID);
         Route custom2Route = new Route()
                 .withGatewayId(GATEWAY_ID)
                 .withDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        custom2RouteTable.setRoutes(List.of(custom2Route));
+        customRouteTable.setRoutes(List.of(custom2Route));
         RouteTableAssociation custom2RouteTableAssociation = new RouteTableAssociation()
                 .withSubnetId(SUBNET_ID);
-        custom2RouteTable.setAssociations(List.of(custom2RouteTableAssociation));
-        routeTables.add(custom2RouteTable);
+        customRouteTable.setAssociations(List.of(custom2RouteTableAssociation));
+        routeTables.add(customRouteTable);
         describeRouteTablesResult.setRouteTables(routeTables);
 
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, SUBNET_ID, VPC_ID);
