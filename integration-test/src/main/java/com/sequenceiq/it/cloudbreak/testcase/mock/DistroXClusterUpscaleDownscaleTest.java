@@ -72,6 +72,8 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .withName(stack)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
+                .mockCm().cmActiveCommands().delete().thenReturn("[]")
+                .mockCm().cmRecentCommands().delete().thenReturn("[]")
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack));
 

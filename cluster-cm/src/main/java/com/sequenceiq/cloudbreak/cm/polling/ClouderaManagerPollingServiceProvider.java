@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.commands.DeployClientConfigCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandCheckerTask;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerApplyHostTemplat
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerBatchCommandsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerCollectDiagnosticsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionHostListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigIdCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDeployClientConfigListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerGenerateCredentialsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
@@ -56,6 +58,8 @@ public class ClouderaManagerPollingServiceProvider {
     private static final int POLL_INTERVAL = 5000;
 
     private static final int INFINITE_ATTEMPT = -1;
+
+    private static final long POLL_FOR_15_MINUTES = TimeUnit.MINUTES.toSeconds(15);
 
     private static final long POLL_FOR_ONE_HOUR = TimeUnit.HOURS.toSeconds(1);
 
@@ -224,6 +228,18 @@ public class ClouderaManagerPollingServiceProvider {
         LOGGER.debug("Waiting for Cloudera Manager to finish the following commands: {}. [Server address: {}]", commandIds, stack.getClusterManagerIp());
         return pollCommandListWithTimeListener(stack, apiClient, commandIds, POLL_FOR_ONE_HOUR,
                 new ClouderaManagerBatchCommandsListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService, commandName));
+    }
+
+    public PollingResult checkNewDeployClusterClientConfigCommand(Stack stack, ApiClient apiClient, BigDecimal recentCommandId,
+            DeployClientConfigCommandRetriever deployClientConfigCommandRetriever) {
+        LOGGER.debug("Waiting for Cloudera Manager until it will have a new deploy cluster client config command id. [Server address: {}]",
+                stack.getClusterManagerIp());
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, recentCommandId);
+        return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeoutSingleFailure(
+                new ClouderaManagerDeployClientConfigIdCheckerTask(clouderaManagerApiPojoFactory, deployClientConfigCommandRetriever),
+                pollerObject,
+                POLL_INTERVAL,
+                POLL_FOR_15_MINUTES);
     }
 
     private PollingResult pollCommandListWithTimeListener(Stack stack, ApiClient apiClient, List<BigDecimal> commandIds, long maximumWaitTimeInSeconds,

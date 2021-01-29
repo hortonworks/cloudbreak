@@ -78,6 +78,8 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractMockTest {
                 .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4(), key(clusterName))
                 .await(STACK_AVAILABLE, key(clusterName))
+                .mockCm().cmActiveCommands().get().thenReturn("[]")
+                .mockCm().cmRecentCommands().get().thenReturn("[]")
                 .when(StackScalePostAction.valid().withDesiredCount(15), key(clusterName))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(clusterName), POLLING_INTERVAL)
                 .when(StackScalePostAction.valid().withDesiredCount(6), key(clusterName))

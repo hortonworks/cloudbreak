@@ -10,6 +10,10 @@ import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
     public static final String API_ROOT = "/api/v31";
 
+    public static final String ACTIVE_COMMANDS = "/cmf/commands/activeCommandTable";
+
+    public static final String RECENT_COMMANDS = "/cmf/commands/commandTable";
+
     private T testDto;
 
     private ExecuteQueryToMockInfrastructure executeQueryToMockInfrastructure;
@@ -46,6 +50,26 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
 
     public ClouderaManagerHosts<T> clouderaManagerHosts() {
         return (ClouderaManagerHosts<T>) EndpointProxyFactory.create(ClouderaManagerHosts.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public ActiveCommandTable<T> cmActiveCommands() {
+        return (ActiveCommandTable<T>) EndpointProxyFactory.create(
+                ActiveCommandTable.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    public RecentCommandTable<T> cmRecentCommands() {
+        return (RecentCommandTable<T>) EndpointProxyFactory.create(
+                RecentCommandTable.class, testDto, executeQueryToMockInfrastructure);
+    }
+
+    @SparkUri(url = ACTIVE_COMMANDS)
+    public interface ActiveCommandTable<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
+    }
+
+    @SparkUri(url = RECENT_COMMANDS)
+    public interface RecentCommandTable<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+        DefaultResponseConfigure<T> get();
     }
 
     @SparkUri(url = API_ROOT + "/cm/importClusterTemplate", requestType = ApiClusterTemplate.class)

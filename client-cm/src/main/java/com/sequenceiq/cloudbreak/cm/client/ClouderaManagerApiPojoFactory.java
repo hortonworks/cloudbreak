@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm.client;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
@@ -38,6 +39,10 @@ public class ClouderaManagerApiPojoFactory {
 
     public ToolsResourceApi getToolsResourceApi(ApiClient apiClient) {
         return new ToolsResourceApi(apiClient);
+    }
+
+    public ClustersResourceApi getClustersResourceApi(ApiClient apiClient) {
+        return new ClustersResourceApi(apiClient);
     }
     // CHECKSTYLE:ON
 }

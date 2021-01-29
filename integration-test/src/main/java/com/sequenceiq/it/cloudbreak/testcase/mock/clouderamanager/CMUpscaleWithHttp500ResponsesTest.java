@@ -84,6 +84,8 @@ CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
                 .withName(clusterName)
                 .when(stackTestClient.createV4(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
+                .mockCm().cmActiveCommands().get().thenReturn("[]")
+                .mockCm().cmRecentCommands().get().thenReturn("[]")
                 .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE), key(stack))
                 .await(StackTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL)
                 .mockSpi().cloudInstanceStatuses().post().atLeast(1).verify()

@@ -17,6 +17,9 @@ public class CommandResource {
     @JsonProperty("start")
     private Long start;
 
+    @JsonProperty("success")
+    private Boolean success;
+
     public Long getId() {
         return id;
     }
@@ -39,5 +42,13 @@ public class CommandResource {
 
     public void setStart(Long start) {
         this.start = start;
+    }
+
+    public Boolean getSuccess() {
+        return success;
+    }
+
+    public void setSuccess(Boolean success) {
+        this.success = success;
     }
 }
