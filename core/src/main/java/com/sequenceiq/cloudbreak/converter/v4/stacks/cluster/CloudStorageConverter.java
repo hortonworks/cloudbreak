@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -54,6 +56,8 @@ import com.sequenceiq.common.model.FileSystemType;
 
 @Component
 public class CloudStorageConverter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudStorageConverter.class);
 
     @Inject
     private MissingResourceNameGenerator nameGenerator;
@@ -139,6 +143,7 @@ public class CloudStorageConverter {
         configurations.put(CloudEfsConfiguration.KEY_PERFORMANCE_MODE, efsParameters.getPerformanceMode());
         configurations.put(CloudEfsConfiguration.KEY_PROVISIONED_THROUGHPUT_INMIBPS, efsParameters.getProvisionedThroughputInMibps());
         configurations.put(CloudEfsConfiguration.KEY_THROUGHPUT_MODE, efsParameters.getThroughputMode());
+        configurations.put(CloudEfsConfiguration.KEY_ASSOCIATED_INSTANCE_GROUP_NAMES, efsParameters.getAssociatedInstanceGroupNames());
 
         String configString;
         try {
@@ -158,7 +163,7 @@ public class CloudStorageConverter {
                     .filter(currCloudIdentity -> currCloudIdentity.getEfsIdentity() != null)
                     .findFirst();
 
-            if (cloudIdentity != null && cloudIdentity.get() != null) {
+            if (cloudIdentity.isPresent()) {
                 cloudStorage.setCloudIdentities(List.of(cloudIdentity.get()));
             }
         }
@@ -175,26 +180,24 @@ public class CloudStorageConverter {
         }
 
         AwsEfsParameters efsParameters = new AwsEfsParameters();
-
         efsParameters.setName(fileSystem.getName());
 
-        Map<String, String> configurations = null;
+        Map<String, Object> configurations = null;
         try {
             configurations = JsonUtil.readValue(fileSystem.getConfigurations().getValue(), Map.class);
         } catch (IOException ex) {
-            // TODO: log the error
+            LOGGER.error("Cannot read EFS configuration. Do not create the EFS instance.", ex);
             return null;
         }
 
-        efsParameters.setName(fileSystem.getName());
-        efsParameters.setEncrypted(Boolean.valueOf(configurations.get(CloudEfsConfiguration.KEY_ENCRYPTED)));
+        efsParameters.setEncrypted((Boolean) configurations.getOrDefault(CloudEfsConfiguration.KEY_ENCRYPTED, true));
 
         if (configurations.containsKey(CloudEfsConfiguration.KEY_FILESYSTEM_ID)) {
-            efsParameters.setFilesystemId(configurations.get(CloudEfsConfiguration.KEY_FILESYSTEM_ID));
+            efsParameters.setFilesystemId((String) configurations.get(CloudEfsConfiguration.KEY_FILESYSTEM_ID));
         }
 
         if (configurations.containsKey(CloudEfsConfiguration.KEY_LIFECYCLE_STATE)) {
-            efsParameters.setLifeCycleState(configurations.get(CloudEfsConfiguration.KEY_LIFECYCLE_STATE));
+            efsParameters.setLifeCycleState((String) configurations.get(CloudEfsConfiguration.KEY_LIFECYCLE_STATE));
         }
 
         return efsParameters;
@@ -433,7 +436,7 @@ public class CloudStorageConverter {
 
     private EfsIdentity identityRequestToEfs(StorageIdentityBase storageIdentityRequest) {
         EfsIdentity efsIdentity = new EfsIdentity();
-        efsIdentity.setInstanceProfile(storageIdentityRequest.getS3().getInstanceProfile());
+        efsIdentity.setInstanceProfile(storageIdentityRequest.getEfs().getInstanceProfile());
         return efsIdentity;
     }
 

@@ -151,6 +151,11 @@ public class ClusterOperationService {
                 cluster.setFileSystem(fileSystemConfigService.createWithMdcContextRestore(cluster.getFileSystem(), cluster.getWorkspace(), user));
             }
 
+            if (cluster.getAdditionalFileSystem() != null) {
+                cluster.setAdditionalFileSystem(
+                        fileSystemConfigService.createWithMdcContextRestore(cluster.getAdditionalFileSystem(), cluster.getWorkspace(), user));
+            }
+
             removeGatewayIfNotSupported(cluster, components);
 
             cluster.setStack(stack);

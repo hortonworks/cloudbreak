@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageBase;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
+import com.sequenceiq.common.model.FileSystemType;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -124,9 +125,6 @@ public class ClusterV4RequestToClusterConverterTest {
     public void testConvertWhenCloudStorageConfiguredAndRdsAndLdapAndProxyExistsAnd() {
         CloudStorageRequest cloudStorageRequest = mock(CloudStorageRequest.class);
 
-
-
-
         when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
 
         String rdsConfigName = "rds-name";
@@ -152,6 +150,49 @@ public class ClusterV4RequestToClusterConverterTest {
         Cluster actual = ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> underTest.convert(source));
 
         assertThat(actual.getFileSystem(), is(fileSystem));
+        assertThat(actual.getName(), is(source.getName()));
+        assertThat(actual.getRdsConfigs().size(), is(1));
+        assertThat(actual.getRdsConfigs().stream().findFirst().get().getName(), is(rdsConfigName));
+        assertThat(actual.getProxyConfigCrn(), is(proxyConfigCrn));
+
+        verify(cloudStorageValidationUtil, times(1)).isCloudStorageConfigured(cloudStorageRequest);
+        verify(cloudStorageConverter, times(1)).requestToFileSystem(cloudStorageRequest);
+        verify(rdsConfigService, times(1)).findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId());
+    }
+
+    @Test
+    public void testConvertWhenCloudStorageConfigured4Efs() {
+        CloudStorageRequest cloudStorageRequest = mock(CloudStorageRequest.class);
+
+        when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
+
+        String rdsConfigName = "rds-name";
+        String proxyConfigCrn = "proxy-config-resource-crn";
+        String ldapName = "ldap-name";
+
+        FileSystem fileSystem = new FileSystem();
+        FileSystem efsFileSystem = new FileSystem();
+        efsFileSystem.setType(FileSystemType.EFS);
+
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setName(rdsConfigName);
+
+        ClusterV4Request source = new ClusterV4Request();
+        source.setCloudStorage(cloudStorageRequest);
+        source.setDatabases(singleton(rdsConfigName));
+        source.setProxyConfigCrn(proxyConfigCrn);
+        source.setBlueprintName(BLUEPRINT);
+        when(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq(BLUEPRINT), any())).thenReturn(blueprint);
+
+        when(cloudStorageValidationUtil.isCloudStorageConfigured(cloudStorageRequest)).thenReturn(true);
+        when(cloudStorageConverter.requestToFileSystem(cloudStorageRequest)).thenReturn(fileSystem);
+        when(cloudStorageConverter.requestToAdditionalFileSystem(cloudStorageRequest)).thenReturn(efsFileSystem);
+        when(rdsConfigService.findByNamesInWorkspace(singleton(rdsConfigName), workspace.getId())).thenReturn(singleton(rdsConfig));
+
+        Cluster actual = ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> underTest.convert(source));
+
+        assertThat(actual.getFileSystem(), is(fileSystem));
+        assertThat(actual.getAdditionalFileSystem(), is(efsFileSystem));
         assertThat(actual.getName(), is(source.getName()));
         assertThat(actual.getRdsConfigs().size(), is(1));
         assertThat(actual.getRdsConfigs().stream().findFirst().get().getName(), is(rdsConfigName));

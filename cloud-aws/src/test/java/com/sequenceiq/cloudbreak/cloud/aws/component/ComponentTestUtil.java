@@ -153,6 +153,7 @@ public class ComponentTestUtil {
         newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS, tags);
         newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_PERFORMANCE_MODE, "generalPurpose");
         newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_THROUGHPUT_MODE, "provisioned");
+        newEfsFileSystem.putParameter(CloudEfsConfiguration.KEY_ASSOCIATED_INSTANCE_GROUP_NAMES, List.of("core", "master"));
 
         return newEfsFileSystem;
     }

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.converter.stack.cluster;
+package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,27 +13,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
-import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.PerformanceMode;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.ThroughputMode;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptor;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -43,13 +50,19 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.cloudstorage.AwsEfsParameters;
+import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
+import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.model.FileSystemType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
     @InjectMocks
     private ClusterToClusterV4ResponseConverter underTest;
+
+    @Mock
+    private CloudStorageConverter cloudStorageConverter;
 
     @Mock
     private ConversionService conversionService;
@@ -69,10 +82,12 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Mock
     private ProxyConfigDtoService proxyConfigDtoService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        given(conversionService.convert(any(Workspace.class), eq(WorkspaceResourceV4Response.class)))
+        given(conversionService.convert(any(Object.class), eq(WorkspaceResourceV4Response.class)))
                 .willReturn(new WorkspaceResourceV4Response());
+        given(conversionService.convert(any(Object.class), eq(GatewayV4Response.class)))
+                .willReturn(new GatewayV4Response());
     }
 
     @Test
@@ -102,6 +117,39 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
 
         List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway");
+        assertAllFieldsNotNull(result, skippedFields);
+    }
+
+    @Test
+    public void testConvertAdditionalFileSystem() {
+        // GIVEN
+        getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
+        getSource().setBlueprint(new Blueprint());
+        getSource().setExtendedBlueprintText("asdf");
+        getSource().setFqdn("some.fqdn");
+        getSource().setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
+        getSource().setAdditionalFileSystem(getEfsFileSystem());
+        given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
+        given(stackUtil.extractClusterManagerAddress(any(Stack.class))).willReturn("some.fqdn");
+        Cluster source = getSource();
+        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
+        TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
+        when(conversionService.convert("secret/path", SecretResponse.class)).thenReturn(new SecretResponse("kv", "pass"));
+        when(conversionService.convert(getSource().getBlueprint(), BlueprintV4Response.class)).thenReturn(new BlueprintV4Response());
+        when(serviceEndpointCollector.getManagerServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
+        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        when(cloudStorageConverter.fileSystemToResponse(any(FileSystem.class))).thenReturn(new CloudStorageResponse());
+        when(cloudStorageConverter.fileSystemToEfsParameters(any(FileSystem.class))).thenReturn(getEfsParameters());
+        // WHEN
+        ClusterV4Response result = underTest.convert(source);
+        // THEN
+        assertEquals(1L, (long) result.getId());
+        assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
+        assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
+
+        List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "gateway");
         assertAllFieldsNotNull(result, skippedFields);
     }
 
@@ -175,5 +223,56 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
 
     private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {
         return new StackServiceComponentDescriptor("ELASTIC_SEARCH", "MASTER", 1, 1);
+    }
+
+    private FileSystem getEfsFileSystem() {
+        FileSystem fileSystem = new FileSystem();
+        AwsEfsParameters efsParameters = getEfsParameters();
+
+        fileSystem.setName(efsParameters.getName());
+        FileSystemType fileSystemType = FileSystemType.EFS;
+        fileSystem.setType(fileSystemType);
+
+        Map<String, Object> configurations = new HashMap<>();
+        configurations.put(CloudEfsConfiguration.KEY_BACKUP_POLICY_STATUS, efsParameters.getBackupPolicyStatus());
+        configurations.put(CloudEfsConfiguration.KEY_ENCRYPTED, efsParameters.getEncrypted());
+        configurations.put(CloudEfsConfiguration.KEY_FILESYSTEM_POLICY, efsParameters.getFileSystemPolicy());
+        configurations.put(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS, efsParameters.getFileSystemTags());
+        configurations.put(CloudEfsConfiguration.KEY_KMSKEYID, efsParameters.getKmsKeyId());
+        configurations.put(CloudEfsConfiguration.KEY_LIFECYCLE_POLICIES, efsParameters.getLifeCyclePolicies());
+        configurations.put(CloudEfsConfiguration.KEY_PERFORMANCE_MODE, efsParameters.getPerformanceMode());
+        configurations.put(CloudEfsConfiguration.KEY_PROVISIONED_THROUGHPUT_INMIBPS, efsParameters.getProvisionedThroughputInMibps());
+        configurations.put(CloudEfsConfiguration.KEY_THROUGHPUT_MODE, efsParameters.getThroughputMode());
+        configurations.put(CloudEfsConfiguration.KEY_ASSOCIATED_INSTANCE_GROUP_NAMES, efsParameters.getAssociatedInstanceGroupNames());
+
+        String configString;
+        try {
+            configString = JsonUtil.writeValueAsString(configurations);
+        } catch (JsonProcessingException ignored) {
+            configString = configurations.toString();
+        }
+
+        fileSystem.setConfigurations(new Json(configString));
+
+        CloudStorage cloudStorage = new CloudStorage();
+        fileSystem.setCloudStorage(cloudStorage);
+
+        return fileSystem;
+    }
+
+    AwsEfsParameters getEfsParameters() {
+        String fileSystemName = "lina-efs-0127-1";
+        Map<String, String> tags = new HashMap<>();
+        tags.put(CloudEfsConfiguration.KEY_FILESYSTEM_TAGS_NAME, fileSystemName);
+
+        AwsEfsParameters efsParameters = new AwsEfsParameters();
+        efsParameters.setName(fileSystemName);
+        efsParameters.setEncrypted(true);
+        efsParameters.setFileSystemTags(tags);
+        efsParameters.setPerformanceMode(PerformanceMode.GENERALPURPOSE.toString());
+        efsParameters.setThroughputMode(ThroughputMode.BURSTING.toString());
+        efsParameters.setAssociatedInstanceGroupNames(List.of("core", "master"));
+
+        return efsParameters;
     }
 }

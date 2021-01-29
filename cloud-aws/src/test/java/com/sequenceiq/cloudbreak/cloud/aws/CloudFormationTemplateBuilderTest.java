@@ -1473,7 +1473,10 @@ public class CloudFormationTemplateBuilderTest {
             .contains("AWS::EFS::FileSystem")
             .contains("\"Encrypted\" : \"true\"")
             .contains("\"PerformanceMode\": \"generalPurpose\"")
-            .contains("\"ThroughputMode\": \"bursting\"");
+            .contains("\"ThroughputMode\": \"bursting\"")
+            .contains("MountTarget")
+            .contains("[{ \"Ref\" : \"ClusterNodeSecurityGroupmaster\" }]")
+            .doesNotContain("[{ \"Ref\" : \"ClusterNodeSecurityGroupgateway\" }]");
     }
 
     @Test
@@ -1505,12 +1508,64 @@ public class CloudFormationTemplateBuilderTest {
             .contains("AWS::EFS::FileSystem")
             .contains("\"Encrypted\" : \"false\"")
             .contains("\"PerformanceMode\": \"maxIO\"")
-            .contains("\"ThroughputMode\": \"provisioned\"");
+            .contains("\"ThroughputMode\": \"provisioned\"")
+            .contains("MountTarget")
+            .contains("[{ \"Ref\" : \"ClusterNodeSecurityGroupmaster\" }]")
+            .doesNotContain("[{ \"Ref\" : \"ClusterNodeSecurityGroupgateway\" }]");
+    }
+
+    @Test
+    public void buildTestEfsSetFieldsWithExistingSecurityGroups() {
+        //GIVEN
+        CloudStack cloudStack = initCloudStackWithInstanceProfileAndSecurityGroups(
+                List.of("sg-02fe9cf52ed86b28b", "sg-03610a4f8454e526f", "sg-03617a9585e72f75a", "sg-04ad3ca3786d34436", "sg-071f64ce36f37f14d"),
+                true);
+        AwsEfsFileSystem awsEfsFileSystem = setupEfsFileSystemValidSet();
+
+        //WHEN
+        modelContext = new ModelContext()
+                .withAuthenticatedContext(authenticatedContext)
+                .withStack(cloudStack)
+                .withExistingVpc(true)
+                .withExistingIGW(true)
+                .withExistingSubnetCidr(singletonList(existingSubnetCidr))
+                .withExistinVpcCidr(List.of(existingSubnetCidr))
+                .mapPublicIpOnLaunch(true)
+                .withEnableInstanceProfile(true)
+                .withInstanceProfileAvailable(true)
+                .withOutboundInternetTraffic(OutboundInternetTraffic.ENABLED)
+                .withTemplate(awsCloudFormationTemplate)
+                .withEnableEfs(true)
+                .withEfsFileSystem(awsEfsFileSystem);
+
+        String templateString = cloudFormationTemplateBuilder.build(modelContext);
+
+        //THEN
+        Assertions.assertThat(templateString)
+                .matches(JsonUtil::isValid, "Invalid JSON: " + templateString)
+                .contains("AWS::EFS::FileSystem")
+                .contains("\"Encrypted\" : \"false\"")
+                .contains("\"PerformanceMode\": \"maxIO\"")
+                .contains("\"ThroughputMode\": \"provisioned\"")
+                .contains("MountTarget")
+                .contains("sg-02fe9cf52ed86b28b");
     }
 
     private AwsEfsFileSystem setupEfsFileSystemNullFields() {
-        return new AwsEfsFileSystem(null, true, null, null, null, null,
-            null, null, null);
+        AwsEfsFileSystem newEfs = AwsEfsFileSystem.Builder.builder()
+                .withBackupPolicyStatus(null)
+                .withEncrypted(true)
+                .withFileSystemPolicy(null)
+                .withFileSystemTags(null)
+                .withKmsKeyId(null)
+                .withLifeCyclePolicies(null)
+                .withPerformanceMode(null)
+                .withProvisionedThroughputInMibps(null)
+                .withThroughputMode(null)
+                .withAssociatedInstanceGroupNames(List.of("core", "master"))
+                .build();
+
+        return newEfs;
     }
 
     private AwsEfsFileSystem setupEfsFileSystemValidSet() {
@@ -1529,9 +1584,21 @@ public class CloudFormationTemplateBuilderTest {
         List<String> lifeCyclePolicies = new ArrayList<>();
         lifeCyclePolicies.add("{\"TransitionToIA\" : \"AFTER_30_DAYS\"}");
         lifeCyclePolicies.add("{\"TransitionToIA\" : \"AFTER_7_DAYS\"}");
-
-        return new AwsEfsFileSystem("DISABLED", false, fileSystemPolicy != null ? fileSystemPolicy.toString() : null, fileSystemTags,
-            "sdx-key", lifeCyclePolicies, "maxIO", 1.0, "provisioned");
+        List<String> associatedIGs = new ArrayList<>();
+        associatedIGs.add("core");
+        associatedIGs.add("master");
+        return AwsEfsFileSystem.Builder.builder()
+                .withBackupPolicyStatus("DISABLED")
+                .withEncrypted(false)
+                .withFileSystemPolicy(fileSystemPolicy != null ? fileSystemPolicy.toString() : null)
+                .withFileSystemTags(fileSystemTags)
+                .withKmsKeyId("sdx-key")
+                .withLifeCyclePolicies(lifeCyclePolicies)
+                .withPerformanceMode("maxIO")
+                .withProvisionedThroughputInMibps(1.0)
+                .withThroughputMode("provisioned")
+                .withAssociatedInstanceGroupNames(associatedIGs)
+                .build();
     }
 
     private AwsLoadBalancer setupLoadBalancer(AwsLoadBalancerScheme scheme, int port, boolean setArn) {
@@ -1553,6 +1620,21 @@ public class CloudFormationTemplateBuilderTest {
         logView.setInstanceProfile(INSTANCE_PROFILE);
         List<Group> groups = List.of(createDefaultGroupGatewayGroup(Optional.of(logView)),
                 createDefaultGroupMasterGroup(Optional.of(logView)));
+        return createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
+    }
+
+    private CloudStack initCloudStackWithInstanceProfileAndSecurityGroups(List<String> existingSecurityGroups, boolean includeCoreGroup) {
+        CloudS3View logView = new CloudS3View(CloudIdentityType.LOG);
+        logView.setInstanceProfile(INSTANCE_PROFILE);
+        List<Group> groups;
+        if (includeCoreGroup) {
+            groups = List.of(createDefaultGroupGatewayGroup(Optional.of(logView)),
+                    createDefaultGroupMasterGroupWithExistingSGs(Optional.of(logView), existingSecurityGroups),
+                    createDefaultGroupWithExistingSGs("core", Optional.of(logView), existingSecurityGroups));
+        } else {
+            groups = List.of(createDefaultGroupGatewayGroup(Optional.of(logView)),
+                    createDefaultGroupMasterGroupWithExistingSGs(Optional.of(logView), existingSecurityGroups));
+        }
         return createDefaultCloudStack(groups, getDefaultCloudStackParameters(), getDefaultCloudStackTags());
     }
 
@@ -1582,8 +1664,17 @@ public class CloudFormationTemplateBuilderTest {
         return createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE, getDefaultCloudStackSecurity(), cloudFileSystemView);
     }
 
+    private Group createDefaultGroupMasterGroupWithExistingSGs(Optional<CloudFileSystemView> cloudFileSystemView, List<String> existingSecurityGroups) {
+        return createDefaultGroup("master", InstanceGroupType.CORE, ROOT_VOLUME_SIZE,
+                getDefaultCloudStackSecurityWithExistingSGs(existingSecurityGroups), cloudFileSystemView);
+    }
+
     private Group createDefaultGroupGatewayGroup(Optional<CloudFileSystemView> cloudFileSystemView) {
         return createDefaultGroup("gateway", InstanceGroupType.GATEWAY, ROOT_VOLUME_SIZE, getDefaultCloudStackSecurity(), cloudFileSystemView);
+    }
+
+    private Group createDefaultGroupWithExistingSGs(String groupName, Optional<CloudFileSystemView> cloudFileSystemView, List<String> existingSecurityGroups) {
+        return createDefaultGroup(groupName, InstanceGroupType.CORE, ROOT_VOLUME_SIZE, getDefaultCloudStackSecurity(), cloudFileSystemView);
     }
 
     private Group createDefaultGroupWithInstanceTemplate(String name, InstanceTemplate instanceTemplate, InstanceGroupType instanceGroupType) {
@@ -1618,6 +1709,10 @@ public class CloudFormationTemplateBuilderTest {
 
     private Security getDefaultCloudStackSecurity() {
         return new Security(getDefaultSecurityRules(), emptyList());
+    }
+
+    private Security getDefaultCloudStackSecurityWithExistingSGs(List<String> existingSecurityGroups) {
+        return new Security(getDefaultSecurityRules(), existingSecurityGroups);
     }
 
     private List<SecurityRule> getDefaultSecurityRules() {

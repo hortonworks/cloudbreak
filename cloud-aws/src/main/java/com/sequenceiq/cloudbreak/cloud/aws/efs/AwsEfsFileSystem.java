@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.efs;
 
+import static com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration.KEY_ASSOCIATED_INSTANCE_GROUP_NAMES;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration.KEY_BACKUP_POLICY_STATUS;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration.KEY_ENCRYPTED;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration.KEY_FILESYSTEM_POLICY;
@@ -35,47 +36,56 @@ public class AwsEfsFileSystem {
     private static final Double PROVISIONED_THROUGHPUT_MIBPS_DEFAULT = 1.0;
 
     // When this value is null, do not create backup policy
-    private String backupPolicyStatus;
+    private final String backupPolicyStatus;
 
-    private Boolean encrypted;
+    private final Boolean encrypted;
 
-    private String fileSystemPolicy;
+    private final String fileSystemPolicy;
 
-    private Map<String, String> fileSystemTags;
+    private final Map<String, String> fileSystemTags;
 
-    private String kmsKeyId;
+    private final String kmsKeyId;
 
-    private List<String> lifeCyclePolicies;
+    private final List<String> lifeCyclePolicies;
 
-    private String performanceMode;
+    private final String performanceMode;
 
-    private Double provisionedThroughputInMibps;
+    private final Double provisionedThroughputInMibps;
 
-    private String throughputMode;
+    private final String throughputMode;
 
-    public AwsEfsFileSystem(String backupPolicyStatus, boolean encrypted, String fileSystemPolicy, Map<String, String> fileSystemTags, String kmsKeyId,
-            List<String> lifeCyclePolicies, String performanceMode, Double provisionedThroughputInMibps, String throughputMode) {
-        this.backupPolicyStatus = backupPolicyStatus != null ? backupPolicyStatus : BACKUP_POLICY_STATUS_DEFAULT;
+    private final List<String> associatedInstanceGroupNames;
+
+    private AwsEfsFileSystem(String backupPolicyStatus, boolean encrypted, String fileSystemPolicy, Map<String, String> fileSystemTags, String kmsKeyId,
+            List<String> lifeCyclePolicies, String performanceMode, Double provisionedThroughputInMibps, String throughputMode,
+            List<String> associatedInstanceGroupNames) {
+
+        if (associatedInstanceGroupNames == null || associatedInstanceGroupNames.size() == 0) {
+            throw new IllegalArgumentException("EFS associated instance group names are not set");
+        }
+
+        this.backupPolicyStatus = backupPolicyStatus;
         this.encrypted = encrypted;
         this.fileSystemPolicy = fileSystemPolicy;
 
         if (fileSystemTags != null) {
             this.fileSystemTags = new HashMap<>(fileSystemTags);
+        } else {
+            this.fileSystemTags = new HashMap<>();
         }
 
         this.kmsKeyId = kmsKeyId;
 
         if (lifeCyclePolicies != null) {
             this.lifeCyclePolicies = new ArrayList<>(lifeCyclePolicies);
+        } else {
+            this.lifeCyclePolicies = new ArrayList<>();
         }
 
-        this.performanceMode = performanceMode != null ? performanceMode : PERFORMANCE_MODE_DEFAULT;
+        this.performanceMode = performanceMode;
         this.provisionedThroughputInMibps = provisionedThroughputInMibps;
-        this.throughputMode = throughputMode != null ? throughputMode : THROUGHPUT_MODE_DEFAULT;
-
-        if (this.throughputMode.equalsIgnoreCase(THROUGHPUT_MODE_PROVISIONED) && this.provisionedThroughputInMibps == null) {
-            this.provisionedThroughputInMibps = PROVISIONED_THROUGHPUT_MIBPS_DEFAULT;
-        }
+        this.throughputMode = throughputMode;
+        this.associatedInstanceGroupNames = associatedInstanceGroupNames;
     }
 
     public static AwsEfsFileSystem toAwsEfsFileSystem(SpiFileSystem inFileSystem) {
@@ -96,7 +106,8 @@ public class AwsEfsFileSystem {
                 inFileSystem.getParameter(KEY_LIFECYCLE_POLICIES, List.class),
                 inFileSystem.getStringParameter(KEY_PERFORMANCE_MODE),
                 inFileSystem.getParameter(KEY_PROVISIONED_THROUGHPUT_INMIBPS, Double.class),
-                inFileSystem.getStringParameter(KEY_THROUGHPUT_MODE)
+                inFileSystem.getStringParameter(KEY_THROUGHPUT_MODE),
+                inFileSystem.getParameter(KEY_ASSOCIATED_INSTANCE_GROUP_NAMES, List.class)
         );
 
         return newEfs;
@@ -106,71 +117,149 @@ public class AwsEfsFileSystem {
         return backupPolicyStatus;
     }
 
-    public void setbackupPolicyStatus(String backupPolicyStatus) {
-        this.backupPolicyStatus = backupPolicyStatus;
-    }
-
-    public Boolean getencrypted() {
+    public Boolean getEncrypted() {
         return encrypted;
-    }
-
-    public void setEncrypted(Boolean encrypted) {
-        this.encrypted = encrypted;
     }
 
     public String getFileSystemPolicy() {
         return fileSystemPolicy;
     }
 
-    public void setFileSystemPolicy(String fileSystemPolicy) {
-        this.fileSystemPolicy = fileSystemPolicy;
-    }
-
     public Map<String, String> getFileSystemTags() {
         return fileSystemTags;
-    }
-
-    public void setFileSystemTags(Map<String, String> fileSystemTags) {
-        this.fileSystemTags = new HashMap<>(fileSystemTags);
     }
 
     public String getKmsKeyId() {
         return kmsKeyId;
     }
 
-    public void setKmsKeyId(String kmsKeyId) {
-        this.kmsKeyId = kmsKeyId;
-    }
-
     public List<String> getLifeCyclePolicies() {
         return lifeCyclePolicies;
-    }
-
-    public void setLifeCyclePolicies(List<String> lifeCyclePolicies) {
-        this.lifeCyclePolicies = new ArrayList<>(lifeCyclePolicies);
     }
 
     public String getPerformanceMode() {
         return performanceMode;
     }
 
-    public void setPerformanceMode(String performanceMode) {
-        this.performanceMode = performanceMode;
-    }
-
     public Double getProvisionedThroughputInMibps() {
         return provisionedThroughputInMibps;
-    }
-
-    public void setProvisionedThroughputInMibps(Double provisionedThroughputInMibps) {
-        this.provisionedThroughputInMibps = provisionedThroughputInMibps;
     }
 
     public String getThroughputMode() {
         return throughputMode;
     }
 
-    public void setThroughputMode(String throughputMode) {
-        this.throughputMode = throughputMode;
+    public List<String> getAssociatedInstanceGroupNames() {
+        return associatedInstanceGroupNames;
+    }
+
+    public static class Builder {
+        private String backupPolicyStatus;
+
+        private Boolean encrypted;
+
+        private String fileSystemPolicy;
+
+        private Map<String, String> fileSystemTags;
+
+        private String kmsKeyId;
+
+        private List<String> lifeCyclePolicies;
+
+        private String performanceMode;
+
+        private Double provisionedThroughputInMibps;
+
+        private String throughputMode;
+
+        private List<String> associatedInstanceGroupNames;
+
+        public Builder withBackupPolicyStatus(String backupPolicyStatus) {
+            this.backupPolicyStatus = backupPolicyStatus;
+            return this;
+        }
+
+        public Builder withEncrypted(Boolean encrypted) {
+            this.encrypted = encrypted;
+            return this;
+        }
+
+        public Builder withFileSystemPolicy(String fileSystemPolicy) {
+            this.fileSystemPolicy = fileSystemPolicy;
+            return this;
+        }
+
+        public Builder withFileSystemTags(Map<String, String> fileSystemTags) {
+            this.fileSystemTags = fileSystemTags;
+            return this;
+        }
+
+        public Builder withKmsKeyId(String kmsKeyId) {
+            this.kmsKeyId = kmsKeyId;
+            return this;
+        }
+
+        public Builder withLifeCyclePolicies(List<String> lifeCyclePolicies) {
+            this.lifeCyclePolicies = lifeCyclePolicies;
+            return this;
+        }
+
+        public Builder withPerformanceMode(String performanceMode) {
+            this.performanceMode = performanceMode;
+            return this;
+        }
+
+        public Builder withProvisionedThroughputInMibps(Double provisionedThroughputInMibps) {
+            this.provisionedThroughputInMibps = provisionedThroughputInMibps;
+            return this;
+        }
+
+        public Builder withThroughputMode(String throughputMode) {
+            this.throughputMode = throughputMode;
+            return this;
+        }
+
+        public Builder withAssociatedInstanceGroupNames(List<String> associatedInstanceGroupNames) {
+            this.associatedInstanceGroupNames = associatedInstanceGroupNames;
+            return this;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public AwsEfsFileSystem build() {
+            setDefaultIfNeeded();
+            return new AwsEfsFileSystem(
+                    backupPolicyStatus,
+                    encrypted,
+                    fileSystemPolicy,
+                    fileSystemTags,
+                    kmsKeyId,
+                    lifeCyclePolicies,
+                    performanceMode,
+                    provisionedThroughputInMibps,
+                    throughputMode,
+                    associatedInstanceGroupNames
+            );
+        }
+
+        private void setDefaultIfNeeded() {
+            if (backupPolicyStatus == null) {
+                backupPolicyStatus = BACKUP_POLICY_STATUS_DEFAULT;
+            }
+
+            if (performanceMode == null) {
+                performanceMode = PERFORMANCE_MODE_DEFAULT;
+            }
+
+            if (throughputMode == null) {
+                throughputMode = THROUGHPUT_MODE_DEFAULT;
+            }
+
+            if (throughputMode.equalsIgnoreCase(THROUGHPUT_MODE_PROVISIONED) && provisionedThroughputInMibps == null) {
+                provisionedThroughputInMibps = PROVISIONED_THROUGHPUT_MIBPS_DEFAULT;
+            }
+        }
     }
 }

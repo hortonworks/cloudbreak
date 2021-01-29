@@ -128,7 +128,7 @@ public class StackRequestManifester {
             setupClusterRequest(stackRequest);
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
-            cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
+            cloudStorageValidator.validate(stackRequest, environment, new ValidationResult.ValidationResultBuilder());
             setupInstanceVolumeEncryption(stackRequest, environment.getCloudPlatform(), Crn.safeFromString(environment.getCrn()).getAccountId());
             return stackRequest;
         } catch (IOException e) {

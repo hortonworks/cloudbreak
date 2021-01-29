@@ -53,12 +53,15 @@ public class FileSystemConverter {
             Map<String, Object> efsParameters = null;
 
             try {
-                efsParameters = source.getConfigurations().get(Map.class);
-                if (efsParameters == null) {
-                    efsParameters = new HashMap<>();
+                if (source.getConfigurations() != null) {
+                    efsParameters = source.getConfigurations().get(Map.class);
                 }
             } catch (IOException ex) {
                 LOGGER.error("Cannot get EFS parameters.", ex);
+            }
+
+            if (efsParameters == null) {
+                efsParameters = new HashMap<>();
             }
 
             return new SpiFileSystem(source.getName(), source.getType(), cloudFileSystemViews, efsParameters);

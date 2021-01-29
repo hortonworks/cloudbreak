@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -10,13 +9,13 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -38,7 +37,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
 
     @InjectMocks
@@ -69,14 +68,13 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
     private IdBrokerConverterUtil idBrokerConverterUtil =  new IdBrokerConverterUtil();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
 
         if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
             ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
         }
-        when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
     }
 
     @Test

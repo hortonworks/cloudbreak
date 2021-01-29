@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,9 +40,9 @@ public class AbstractConverterTest {
             }
             remainingFields.remove(field.getName());
         }
-        assertTrue("Field(s) \"" + String.join("\", \"", remainingFields) + "\" does not exist in class anymore.", remainingFields.isEmpty());
+        assertTrue(remainingFields.isEmpty(), "Field(s) \"" + String.join("\", \"", remainingFields) + "\" does not exist in class anymore.");
         LOGGER.info("Checked fields count: {}, skipped counts: {}", count, skippedCount);
-        assertTrue("Field(s) \"" + String.join("\", \"", missing) + "\" is null.", missing.isEmpty());
+        assertTrue(missing.isEmpty(), "Field(s) \"" + String.join("\", \"", missing) + "\" is null.");
     }
 
     private boolean isFieldNull(Object obj, Field field) {
@@ -60,5 +59,4 @@ public class AbstractConverterTest {
         Field[] parentFields = obj.getClass().getSuperclass().getDeclaredFields();
         return ObjectArrays.concat(fields, parentFields, Field.class);
     }
-
 }

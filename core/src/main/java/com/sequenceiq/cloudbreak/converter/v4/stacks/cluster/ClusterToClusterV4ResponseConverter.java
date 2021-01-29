@@ -134,24 +134,28 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
     }
 
     private CloudStorageResponse getCloudStorage(Cluster source) {
+        CloudStorageResponse cloudStorageResponse = null;
+
         if (source.getFileSystem() != null) {
-            CloudStorageResponse cloudStorageResponse = cloudStorageConverter.fileSystemToResponse(source.getFileSystem());
+            cloudStorageResponse = cloudStorageConverter.fileSystemToResponse(source.getFileSystem());
+        }
 
-            if (source.getAdditionalFileSystem() != null) {
-                AwsEfsParameters efsParameters = cloudStorageConverter.fileSystemToEfsParameters(source.getAdditionalFileSystem());
-
-                if (efsParameters != null) {
-                    if (cloudStorageResponse.getAws() == null) {
-                        cloudStorageResponse.setAws(new AwsStorageParameters());
-                    }
-
-                    cloudStorageResponse.getAws().setEfsParameters(efsParameters);
-                }
+        if (source.getAdditionalFileSystem() != null) {
+            if (cloudStorageResponse == null) {
+                cloudStorageResponse = cloudStorageConverter.fileSystemToResponse(source.getAdditionalFileSystem());
             }
 
-            return cloudStorageResponse;
+            AwsEfsParameters efsParameters = cloudStorageConverter.fileSystemToEfsParameters(source.getAdditionalFileSystem());
+
+            if (efsParameters != null) {
+                if (cloudStorageResponse.getAws() == null) {
+                    cloudStorageResponse.setAws(new AwsStorageParameters());
+                }
+
+                cloudStorageResponse.getAws().setEfsParameters(efsParameters);
+            }
         }
-        return null;
+        return cloudStorageResponse;
     }
 
     private void convertNullableProperties(Cluster source, ClusterV4Response clusterResponse) {

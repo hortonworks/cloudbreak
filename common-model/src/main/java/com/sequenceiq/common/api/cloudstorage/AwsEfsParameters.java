@@ -34,6 +34,10 @@ public class AwsEfsParameters {
 
     private String throughputMode;
 
+    // EFS only accepts the security groups of the listed instance groups and
+    // only gets attached to the EC2 instances in those instance groups
+    private List<String> associatedInstanceGroupNames;
+
     // the following fields are only set at response
     private String filesystemId;
 
@@ -117,6 +121,14 @@ public class AwsEfsParameters {
 
     public void setThroughputMode(String throughputMode) {
         this.throughputMode = throughputMode;
+    }
+
+    public List<String> getAssociatedInstanceGroupNames() {
+        return associatedInstanceGroupNames;
+    }
+
+    public void setAssociatedInstanceGroupNames(List<String> associatedInstanceGroupNames) {
+        this.associatedInstanceGroupNames = associatedInstanceGroupNames;
     }
 
     public String getFilesystemId() {

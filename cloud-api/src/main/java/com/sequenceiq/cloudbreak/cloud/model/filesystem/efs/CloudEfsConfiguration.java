@@ -21,6 +21,8 @@ public final class CloudEfsConfiguration {
 
     public static final String KEY_THROUGHPUT_MODE = "throughputMode";
 
+    public static final String KEY_ASSOCIATED_INSTANCE_GROUP_NAMES = "associatedInstanceGroupNames";
+
     public static final String KEY_FILESYSTEM_ID = "filesystemId";
 
     public static final String KEY_LIFECYCLE_STATE = "lifeCycleState";
