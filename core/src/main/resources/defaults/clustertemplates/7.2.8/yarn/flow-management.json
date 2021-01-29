@@ -10,7 +10,7 @@
     "instanceGroups": [
       {
         "nodeCount": 1,
-        "name": "gateway",
+        "name": "management",
         "type": "GATEWAY",
         "template": {
           "rootVolume": {
