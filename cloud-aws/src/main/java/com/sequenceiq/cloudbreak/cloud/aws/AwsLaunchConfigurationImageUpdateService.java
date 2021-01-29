@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,25 +12,16 @@ import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
 import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 @Service
 public class AwsLaunchConfigurationImageUpdateService {
 
     @Inject
     private AwsClient awsClient;
-
-    @Inject
-    private ResourceNotifier resourceNotifier;
-
-    @Inject
-    private EncryptedImageCopyService encryptedImageCopyService;
 
     @Inject
     private LaunchConfigurationHandler launchConfigurationHandler;
@@ -45,27 +35,20 @@ public class AwsLaunchConfigurationImageUpdateService {
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
         AmazonAutoScalingClient autoScalingClient = awsClient.createAutoScalingClient(credentialView, regionName);
 
-        Map<String, String> encryptedImages = getEncryptedImagesMappedByAutoscalingGroupName(authenticatedContext, stack);
         Map<AutoScalingGroup, String> scalingGroups = autoScalingGroupHandler.getAutoScalingGroups(cloudFormationClient, autoScalingClient, cfResource);
         List<LaunchConfiguration> oldLaunchConfigurations = launchConfigurationHandler.getLaunchConfigurations(autoScalingClient, scalingGroups.keySet());
         for (LaunchConfiguration oldLaunchConfiguration : oldLaunchConfigurations) {
-            changeImageInAutoscalingGroup(authenticatedContext, stack, autoScalingClient, scalingGroups, encryptedImages, oldLaunchConfiguration);
+            changeImageInAutoscalingGroup(authenticatedContext, stack, autoScalingClient, scalingGroups, oldLaunchConfiguration);
         }
     }
 
-    private Map<String, String> getEncryptedImagesMappedByAutoscalingGroupName(AuthenticatedContext authenticatedContext, CloudStack stack) {
-        return encryptedImageCopyService.createEncryptedImages(authenticatedContext, stack, resourceNotifier).entrySet()
-                .stream().collect(Collectors.toMap(entry -> AwsGroupView.getAutoScalingGroupName(entry.getKey()), Map.Entry::getValue));
-    }
-
     private void changeImageInAutoscalingGroup(AuthenticatedContext authenticatedContext, CloudStack stack, AmazonAutoScalingClient autoScalingClient,
-            Map<AutoScalingGroup, String> scalingGroups, Map<String, String> encryptedImages, LaunchConfiguration oldLaunchConfiguration) {
+            Map<AutoScalingGroup, String> scalingGroups, LaunchConfiguration oldLaunchConfiguration) {
 
         Map.Entry<AutoScalingGroup, String> autoScalingGroup = getAutoScalingGroupForLaunchConfiguration(scalingGroups, oldLaunchConfiguration);
 
-        String encryptedImageName = encryptedImages.get(autoScalingGroup.getValue());
         String launchConfigurationName = launchConfigurationHandler.createNewLaunchConfiguration(
-                stack.getImage().getImageName(), autoScalingClient, oldLaunchConfiguration, authenticatedContext.getCloudContext(), encryptedImageName);
+                stack.getImage().getImageName(), autoScalingClient, oldLaunchConfiguration, authenticatedContext.getCloudContext());
 
         autoScalingGroupHandler.updateAutoScalingGroupWithLaunchConfiguration(autoScalingClient, autoScalingGroup.getKey().getAutoScalingGroupName(),
                 oldLaunchConfiguration, launchConfigurationName);

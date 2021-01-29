@@ -52,7 +52,6 @@ public class InstanceTemplateRequestToTemplateConverter {
         if (cloudPlatform == CloudPlatform.AWS) {
             // FIXME Enable EBS encryption with appropriate KMS key
             attributes.put(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, Boolean.TRUE);
-            attributes.put(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, entitlementService.fastEbsEncryptionEnabled(accountId));
             attributes.put(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
         }
         Optional.ofNullable(source.getAws())

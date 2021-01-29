@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedImageCopyService;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -58,12 +56,6 @@ public class AwsTerminateService {
     private CloudFormationStackUtil cfStackUtil;
 
     @Inject
-    private EncryptedSnapshotService encryptedSnapshotService;
-
-    @Inject
-    private EncryptedImageCopyService encryptedImageCopyService;
-
-    @Inject
     private AwsResourceConnector awsResourceConnector;
 
     @Inject
@@ -84,7 +76,6 @@ public class AwsTerminateService {
         awsCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView);
         waitAndDeleteCloudformationStack(ac, stack, resources, amazonCloudFormationClient);
         awsComputeResourceService.deleteComputeResources(ac, stack, resources);
-        cleanupEncryptedResources(ac, resources, regionName, amazonEC2Client);
         deleteKeyPair(ac, stack, amazonEC2Client, credentialView, regionName);
         deleteLaunchConfiguration(resources, ac);
         LOGGER.debug("Deleting stack finished");
@@ -162,11 +153,6 @@ public class AwsTerminateService {
                 LOGGER.warn(errorMessage, e);
             }
         }
-    }
-
-    private void cleanupEncryptedResources(AuthenticatedContext ac, List<CloudResource> resources, String regionName, AmazonEC2Client amazonEC2Client) {
-        encryptedSnapshotService.deleteResources(ac, amazonEC2Client, resources);
-        encryptedImageCopyService.deleteResources(regionName, amazonEC2Client, resources);
     }
 
     private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {

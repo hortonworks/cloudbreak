@@ -75,7 +75,7 @@ public class LaunchConfigurationHandlerTest {
         CloudContext cloudContext = new CloudContext(1L, "cloudContext", "crn", "AWS", USER_ID, WORKSPACE_ID);
         String imageName = "imageName";
         String launchConfigurationName = underTest.createNewLaunchConfiguration(imageName, autoScalingClient,
-                new LaunchConfiguration().withLaunchConfigurationName(lName), cloudContext, null);
+                new LaunchConfiguration().withLaunchConfigurationName(lName), cloudContext);
         ArgumentCaptor<CreateLaunchConfigurationRequest> captor = ArgumentCaptor.forClass(CreateLaunchConfigurationRequest.class);
         verify(autoScalingClient).createLaunchConfiguration(captor.capture());
         assertTrue(captor.getValue().getLaunchConfigurationName().startsWith(lName));
