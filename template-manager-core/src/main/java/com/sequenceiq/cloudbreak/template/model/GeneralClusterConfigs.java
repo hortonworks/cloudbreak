@@ -47,6 +47,8 @@ public class GeneralClusterConfigs {
 
     private boolean enableRangerRaz;
 
+    private Optional<String> loadBalancerGatewayFqdn = Optional.empty();
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -205,5 +207,13 @@ public class GeneralClusterConfigs {
 
     public void setEnableRangerRaz(boolean enableRangerRaz) {
         this.enableRangerRaz = enableRangerRaz;
+    }
+
+    public Optional<String> getLoadBalancerGatewayFqdn() {
+        return loadBalancerGatewayFqdn;
+    }
+
+    public void setLoadBalancerGatewayFqdn(Optional<String> loadBalancerGatewayFqdn) {
+        this.loadBalancerGatewayFqdn = loadBalancerGatewayFqdn;
     }
 }
