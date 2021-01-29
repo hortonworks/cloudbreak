@@ -18,13 +18,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.util.StringUtils;
 import org.testng.ITestResult;
 import org.testng.Reporter;
 
@@ -186,6 +186,46 @@ public abstract class TestContext implements ApplicationContextAware {
         return instanceAwait;
     }
 
+    public <E extends Exception, T extends CloudbreakTestDto, U extends MicroserviceClient> T whenException(Class<T> entityClass,
+            Class<? extends MicroserviceClient> clientClass, Action<T, U> action, Class<E> expectedException) {
+        return whenException(entityClass, clientClass, action, expectedException, emptyRunningParameter());
+    }
+
+    public <E extends Exception, T extends CloudbreakTestDto, U extends MicroserviceClient> T whenException(Class<T> entityClass,
+            Class<? extends MicroserviceClient> clientClass, Action<T, U> action, Class<E> expectedException, RunningParameter runningParameter) {
+        return whenException(getEntityFromEntityClass(entityClass, runningParameter), clientClass, action, expectedException, runningParameter);
+    }
+
+    public <E extends Exception, T extends CloudbreakTestDto, U extends MicroserviceClient> T whenException(T entity,
+            Class<? extends MicroserviceClient> clientClass, Action<T, U> action, Class<E> expectedException) {
+        return whenException(entity, clientClass, action, expectedException, emptyRunningParameter());
+    }
+
+    public <E extends Exception, T extends CloudbreakTestDto, U extends MicroserviceClient> T whenException(T entity,
+            Class<? extends MicroserviceClient> clientClass, Action<T, U> action, Class<E> expectedException, RunningParameter runningParameter) {
+        checkShutdown();
+        String key = runningParameter.getKey();
+        if (StringUtils.isBlank(key)) {
+            key = action.getClass().getSimpleName();
+        }
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            LOGGER.info("Should be skipped because of previous error. when [{}]", key);
+            return entity;
+        }
+
+        CloudbreakUser who = getWho(runningParameter);
+
+        LOGGER.info("when exception {} action on {} by {}, name: {}", key, entity, who, entity.getName());
+        Log.whenException(LOGGER, action.getClass().getSimpleName() + " action on " + entity + " by " + who);
+
+        try {
+            return doAction(entity, clientClass, action, who.getAccessKey());
+        } catch (Exception e) {
+            exceptionValidation(expectedException, e, key, runningParameter, "whenException");
+        }
+        return entity;
+    }
+
     public <T extends CloudbreakTestDto, U extends MicroserviceClient> T when(Class<T> entityClass, Class<? extends MicroserviceClient> clientClass,
             Action<T, U> action) {
         return when(entityClass, clientClass, action, emptyRunningParameter());
@@ -204,10 +244,9 @@ public abstract class TestContext implements ApplicationContextAware {
             RunningParameter runningParameter) {
         checkShutdown();
         String key = runningParameter.getKey();
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             key = action.getClass().getSimpleName();
         }
-
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             LOGGER.info("Should be skipped because of previous error. when [{}]", key);
             return entity;
@@ -406,7 +445,7 @@ public abstract class TestContext implements ApplicationContextAware {
      * integrationtest.user.crn
      */
     private Optional<Crn> getUserParameterCrn() {
-        if (!testParameter.get(CloudbreakTest.USER_CRN).isEmpty() || testParameter.get(CloudbreakTest.USER_CRN) != null) {
+        if (StringUtils.isNotBlank(testParameter.get(CloudbreakTest.USER_CRN))) {
             return Optional.ofNullable(Crn.fromString(testParameter.get(CloudbreakTest.USER_CRN)));
         }
         return Optional.empty();
@@ -448,7 +487,7 @@ public abstract class TestContext implements ApplicationContextAware {
      * integrationtest.user.name
      */
     private Optional<String> getUserParameterName() {
-        if (!testParameter.get(CloudbreakTest.USER_NAME).isEmpty() || testParameter.get(CloudbreakTest.USER_NAME) != null) {
+        if (StringUtils.isNotBlank(testParameter.get(CloudbreakTest.USER_NAME))) {
             return Optional.of(testParameter.get(CloudbreakTest.USER_NAME));
         }
         return Optional.empty();
@@ -550,7 +589,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public <O, T extends CloudbreakTestDto> T select(T entity, Attribute<T, O> attribute, Finder<O> finder, RunningParameter runningParameter) {
         checkShutdown();
         String key = runningParameter.getKey();
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             key = attribute.getClass().getSimpleName();
         }
 
@@ -581,7 +620,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public <O, T extends CloudbreakTestDto> T capture(T entity, Attribute<T, O> attribute, RunningParameter runningParameter) {
         checkShutdown();
         String key = runningParameter.getKey();
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             key = entity.getClass().getSimpleName();
         }
 
@@ -593,7 +632,7 @@ public abstract class TestContext implements ApplicationContextAware {
         try {
             O attr = attribute.get(entity);
             String captureKey = key;
-            if (StringUtils.isEmpty(key)) {
+            if (StringUtils.isBlank(key)) {
                 captureKey = entity.getClass().getSimpleName();
             }
             captures.put(captureKey, new Capture(attr));
@@ -609,7 +648,7 @@ public abstract class TestContext implements ApplicationContextAware {
     public <O, T extends CloudbreakTestDto> T verify(T entity, Attribute<T, O> attribute, RunningParameter runningParameter) {
         checkShutdown();
         String key = runningParameter.getKey();
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             key = attribute.getClass().getSimpleName();
         }
 
@@ -621,7 +660,7 @@ public abstract class TestContext implements ApplicationContextAware {
         try {
             O attr = attribute.get(entity);
             String captureKey = key;
-            if (StringUtils.isEmpty(key)) {
+            if (StringUtils.isBlank(key)) {
                 captureKey = entity.getClass().getSimpleName();
             }
             Capture capture = captures.get(captureKey);
@@ -801,27 +840,44 @@ public abstract class TestContext implements ApplicationContextAware {
             getExceptionMap().put("expect", new RuntimeException(message));
             Log.expect(LOGGER, message);
         } else {
-            if (!exception.getClass().equals(expectedException)) {
-                String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
-                        expectedException, exception.getClass());
-                getExceptionMap().put("expect", new RuntimeException(message));
-                Log.expect(LOGGER, message);
-            } else if (!isMessageEquals(exception, runningParameter)) {
-                String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
-                        runningParameter.getExpectedMessage(), ResponseUtil.getErrorMessage(exception));
-                getExceptionMap().put("expect", new RuntimeException(message));
-                Log.expect(LOGGER, message);
-            } else {
-                getExceptionMap().remove(key);
-                Log.expect(LOGGER, "Expected exception conditions have met, exception: " + expectedException
-                        + ", message: " + runningParameter.getExpectedMessage());
-            }
+            exceptionValidation(expectedException, exception, key, runningParameter, "expect");
         }
         return entity;
     }
 
+    private <E extends Exception> void exceptionValidation(Class<E> expectedException, Exception actualException, String entityKey,
+            RunningParameter runningParameter, String stepKey) {
+        if (!actualException.getClass().equals(expectedException)) {
+            String message = String.format("Expected exception (%s) does not match with the actual exception (%s).",
+                    expectedException, actualException.getClass());
+            getExceptionMap().put(stepKey, new TestFailException(message));
+            LOGGER.error(message);
+            htmlLoggerForExceptionValidation(message, stepKey);
+        } else if (!isMessageEquals(actualException, runningParameter)) {
+            String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
+                    runningParameter.getExpectedMessage(), ResponseUtil.getErrorMessage(actualException));
+            getExceptionMap().put(stepKey, new TestFailException(message));
+            LOGGER.error(message);
+            htmlLoggerForExceptionValidation(message, stepKey);
+        } else {
+            String message = String.format("Expected exception conditions have met, exception: %s, message: %s",
+                    expectedException, runningParameter.getExpectedMessage());
+            getExceptionMap().remove(entityKey);
+            LOGGER.info(message);
+            htmlLoggerForExceptionValidation(message, stepKey);
+        }
+    }
+
+    private void htmlLoggerForExceptionValidation(String message, String stepKey) {
+        if ("expect".equalsIgnoreCase(stepKey)) {
+            Log.expect(LOGGER, message);
+        } else {
+            Log.whenException(LOGGER, message);
+        }
+    }
+
     private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
-        return StringUtils.isEmpty(runningParameter.getExpectedMessage())
+        return StringUtils.isBlank(runningParameter.getExpectedMessage())
                 || Pattern.compile(runningParameter.getExpectedMessage()).matcher(ResponseUtil.getErrorMessage(exception)).find();
     }
 
@@ -906,7 +962,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private <T> String getKey(Class<T> entityClass, RunningParameter runningParameter) {
         String key = runningParameter.getKey();
-        if (StringUtils.isEmpty(key)) {
+        if (StringUtils.isBlank(key)) {
             key = entityClass.getSimpleName();
         }
         return key;

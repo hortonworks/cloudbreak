@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import java.util.List;
 import java.util.Map;
 
@@ -68,19 +70,15 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-
                 // testing unauthorized calls for environment
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentPattern(testContext))
-                                .withKey("EnvironmentGetAction"))
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentPattern(testContext))
-                                .withKey("EnvironmentGetAction"));
+                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
+                        " right on 'environment' " + environmentPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
+                        " right on 'environment' " + environmentPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .validate();
+
         testFreeipaCreation(testContext);
+
         testContext
                 //after assignment describe should work for the environment
                 .given(UmsTestDto.class)
@@ -92,7 +90,9 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
+
         testCheckRightUtil(testContext, testContext.given(EnvironmentTestDto.class).getCrn());
+
         testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.delete())
@@ -136,23 +136,14 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
-
                 //testing unathorized freeipa calls for the environment
-                .when(freeIpaTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentFreeIpaPattern(testContext))
-                                .withKey("FreeIpaDescribeAction"))
-                .when(freeIpaTestClient.stop(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/stopEnvironment' right on 'environment' " +
-                                environmentFreeIpaPattern(testContext))
-                                .withKey("FreeIpaStopAction"))
-                .when(freeIpaTestClient.start(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/startEnvironment' right on 'environment' " +
-                                environmentFreeIpaPattern(testContext))
-                                .withKey("FreeIpaStartAction"));
+                .whenException(freeIpaTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
+                        " right on 'environment' " + environmentFreeIpaPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(freeIpaTestClient.stop(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/stopEnvironment' right on" +
+                        " 'environment' " + environmentFreeIpaPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(freeIpaTestClient.start(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/startEnvironment' right on" +
+                        " 'environment' " + environmentFreeIpaPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .validate();
     }
 
     private String environmentPattern(TestContext testContext) {

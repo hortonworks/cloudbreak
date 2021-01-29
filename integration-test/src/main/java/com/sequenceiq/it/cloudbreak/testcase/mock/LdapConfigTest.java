@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
@@ -91,15 +92,12 @@ public class LdapConfigTest extends AbstractMockTest {
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid name")
     public void testCreateLdapWithMissingName(MockedTestContext testContext) {
-        String key = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .valid()
                 .withName("")
-                .when(ldapTestClient.createV1(), RunningParameter.key(key))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
-                                .withKey(key))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class,
+                        expectedMessage("The length of the ldap config's name has to be in range of 1 to 100"))
                 .validate();
     }
 
@@ -109,15 +107,11 @@ public class LdapConfigTest extends AbstractMockTest {
             when = "calling create ldap",
             then = "getting BadRequestException because ldap needs a valid environmentCrn")
     public void testCreateLdapWithMissingEnvironmentCrn(MockedTestContext testContext) {
-        String key = resourcePropertyProvider().getName();
         testContext
                 .given(LdapTestDto.class)
                 .valid()
                 .withEnvironmentCrn("")
-                .when(ldapTestClient.createV1(), RunningParameter.key(key))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage(".*environmentCrn.*must not be empty.*")
-                                .withKey(key))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class, expectedMessage(".*environmentCrn.*must not be empty.*"))
                 .validate();
     }
 
@@ -131,10 +125,9 @@ public class LdapConfigTest extends AbstractMockTest {
                 .given(LdapTestDto.class)
                 .valid()
                 .withName(INVALID_LDAP_NAME)
-                .when(ldapTestClient.createV1(), RunningParameter.key(INVALID_LDAP_NAME))
-                .expect(BadRequestException.class, RunningParameter.expectedMessage(
-                        "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-                                .withKey(INVALID_LDAP_NAME))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class,
+                        expectedMessage("The name can only contain lowercase alphanumeric characters" +
+                                " and hyphens and has start with an alphanumeric character"))
                 .validate();
     }
 
@@ -149,10 +142,8 @@ public class LdapConfigTest extends AbstractMockTest {
                 .given(LdapTestDto.class)
                 .valid()
                 .withName(longName)
-                .when(ldapTestClient.createV1(), RunningParameter.key(longName))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage("The length of the ldap config's name has to be in range of 1 to 100")
-                                .withKey(longName))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class,
+                        expectedMessage("The length of the ldap config's name has to be in range of 1 to 100"))
                 .validate();
     }
 
@@ -169,10 +160,8 @@ public class LdapConfigTest extends AbstractMockTest {
                 .valid()
                 .withName(name)
                 .withDescription(longDesc)
-                .when(ldapTestClient.createV1(), RunningParameter.key(longDesc))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage("The length of the ldap config's description has to be in range of 0 to 1000")
-                                .withKey(longDesc))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class,
+                        expectedMessage("The length of the ldap config's description has to be in range of 0 to 1000"))
                 .validate();
     }
 
@@ -220,10 +209,7 @@ public class LdapConfigTest extends AbstractMockTest {
                 .given(name, LdapTestDto.class)
                 .valid()
                 .withEnvironmentCrn(envCrn)
-                .when(ldapTestClient.createV1(), RunningParameter.key(name))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage("environment is already exists")
-                                .withKey(name))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class, expectedMessage("environment is already exists"))
                 .validate();
     }
 }

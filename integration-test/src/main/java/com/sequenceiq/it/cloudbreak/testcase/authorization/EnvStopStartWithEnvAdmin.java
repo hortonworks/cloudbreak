@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
 public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -52,7 +55,6 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
         //hacky way to let access to image catalog
@@ -77,20 +79,17 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-
                 // testing unauthorized calls for environment
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentPattern(testContext))
-                                .withKey("EnvironmentGetAction"))
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentPattern(testContext))
-                                .withKey("EnvironmentGetAction"))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " + environmentPattern(testContext))
+                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " + environmentPattern(testContext))
+                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
+
         createDatalake(testContext);
+
         testContext
                 .given(EnvironmentTestDto.class)
                 .given(UmsTestDto.class)

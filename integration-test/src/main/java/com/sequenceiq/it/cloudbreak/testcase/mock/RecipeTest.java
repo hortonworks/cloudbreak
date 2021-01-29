@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
@@ -18,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.assertion.audit.RecipeAuditGrpcServiceAssert
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 
@@ -70,14 +70,11 @@ public class RecipeTest extends AbstractMockTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateSpecialNameRecipe(MockedTestContext testContext) {
-        String spacialName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(resourcePropertyProvider().getInvalidName())
-                .when(recipeTestClient.createV4(), RunningParameter.key(spacialName))
-                .expect(BadRequestException.class, RunningParameter.key(spacialName)
-                        .withExpectedMessage("The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start "
-                                + "with an alphanumeric character"))
+                .whenException(recipeTestClient.createV4(), BadRequestException.class, expectedMessage("The recipe's name can only contain lowercase" +
+                        " alphanumeric characters and hyphens and has start with an alphanumeric character"))
                 .validate();
     }
 
@@ -87,12 +84,9 @@ public class RecipeTest extends AbstractMockTest {
             when = "create recipe twice",
             then = "getting a BadRequestException")
     public void testCreateAgainRecipe(MockedTestContext testContext) {
-        String againName = resourcePropertyProvider().getName();
         testContext.given(RecipeTestDto.class)
                 .when(recipeTestClient.createV4())
-                .when(recipeTestClient.createV4(), RunningParameter.key(againName))
-                .expect(BadRequestException.class, RunningParameter.key(againName)
-                        .withExpectedMessage("recipe already exists with name '"))
+                .whenException(recipeTestClient.createV4(), BadRequestException.class, expectedMessage("recipe already exists with name '"))
                 .validate();
     }
 
@@ -102,13 +96,11 @@ public class RecipeTest extends AbstractMockTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeShortName(MockedTestContext testContext) {
-        String shortName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(getLongNameGenerator().stringGenerator(3))
-                .when(recipeTestClient.createV4(), RunningParameter.key(shortName))
-                .expect(BadRequestException.class, RunningParameter.key(shortName)
-                        .withExpectedMessage("The length of the recipe's name has to be in range of 5 to 100"))
+                .whenException(recipeTestClient.createV4(), BadRequestException.class, expectedMessage("The length of the recipe's name has to be in range" +
+                        " of 5 to 100"))
                 .validate();
     }
 
@@ -118,13 +110,11 @@ public class RecipeTest extends AbstractMockTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongName(MockedTestContext testContext) {
-        String longName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withName(getLongNameGenerator().stringGenerator(101))
-                .when(recipeTestClient.createV4(), RunningParameter.key(longName))
-                .expect(BadRequestException.class, RunningParameter.key(longName)
-                        .withExpectedMessage("The length of the recipe's name has to be in range of 5 to 100"))
+                .whenException(recipeTestClient.createV4(), BadRequestException.class, expectedMessage("The length of the recipe's name has to be in range" +
+                        " of 5 to 100"))
                 .validate();
     }
 
@@ -134,13 +124,10 @@ public class RecipeTest extends AbstractMockTest {
             when = "create recipe",
             then = "getting a BadRequestException")
     public void testCreateInvalidRecipeLongDescription(MockedTestContext testContext) {
-        String longDesc = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
                 .withDescription(getLongNameGenerator().stringGenerator(1001))
-                .when(recipeTestClient.createV4(), RunningParameter.key(longDesc))
-                .expect(BadRequestException.class, RunningParameter.key(longDesc)
-                        .withExpectedMessage("size must be between 0 and 1000"))
+                .whenException(recipeTestClient.createV4(), BadRequestException.class, expectedMessage("size must be between 0 and 1000"))
                 .validate();
     }
 

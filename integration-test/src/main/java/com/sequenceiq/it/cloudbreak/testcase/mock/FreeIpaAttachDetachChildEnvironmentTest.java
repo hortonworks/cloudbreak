@@ -12,7 +12,6 @@ import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
@@ -62,7 +61,6 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
             when = "calling a freeipa delete on parent environment",
             then = "it should fail")
     public void testParentFreeIpaDeleteFailure(MockedTestContext testContext) {
-        String key = resourcePropertyProvider().getName();
         testContext
                 .given(FreeIpaTestDto.class)
                     .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
@@ -76,8 +74,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
                 .given(FreeIpaChildEnvironmentTestDto.class)
                 .when(freeIpaTestClient.attachChildEnvironment())
                 .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.delete(), RunningParameter.key(key))
-                .expect(BadRequestException.class, RunningParameter.key(key))
+                .whenException(freeIpaTestClient.delete(), BadRequestException.class)
                 .validate();
     }
 

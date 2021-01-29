@@ -81,6 +81,10 @@ public class Log<T extends CloudbreakTestDto> {
         log(logger, "When", message);
     }
 
+    public static void whenException(Logger logger, String message) {
+        log(logger, "WhenException", message);
+    }
+
     public static void then(Logger logger, String message) {
         log(logger, "Then", message);
     }

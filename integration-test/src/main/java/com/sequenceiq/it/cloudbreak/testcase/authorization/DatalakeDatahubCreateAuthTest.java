@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
@@ -81,23 +82,15 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'datalake/describeDetailedDatalake' right on any of the " +
-                                "'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]" +
-                                " or on " +
-                                datalakePattern(testContext.get(sdxInternal).getName()))
-                                .withKey("SdxDetailedDescribeInternalAction"))
+                .whenException(sdxTestClient.detailedDescribeInternal(), ForbiddenException.class, expectedMessage("Doesn't have " +
+                        "'datalake/describeDetailedDatalake' right on any of the 'environment'[(]-s[)] " +
+                        "[\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " + datalakePattern(testContext.get(sdxInternal).getName()))
+                        .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .given(RenewDatalakeCertificateTestDto.class)
                 .withStackCrn(testContext.get(sdxInternal).getCrn())
-                .when(sdxTestClient.renewDatalakeCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'datalake/repairDatalake' right on any of the " +
-                                "'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]" +
-                                " or on " +
-                                datalakePattern(testContext.get(sdxInternal).getName()))
-                                .withKey("RenewDatalakeCertificateAction"))
-
+                .whenException(sdxTestClient.renewDatalakeCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datalake/repairDatalake'" +
+                        " right on any of the 'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
+                        datalakePattern(testContext.get(sdxInternal).getName())).withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
     }
 

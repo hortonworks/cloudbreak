@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -125,10 +126,8 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .withRecipes(recipeName)
                 .given(stackName, StackTestDto.class)
                 .replaceInstanceGroups(instanceGroupName)
-                .when(stackTestClient.createV4(), RunningParameter.key(stackName))
-                .expect(BadRequestException.class, RunningParameter.key(stackName)
-                        .withExpectedMessage(String.format("The given recipe does not exist for the instance group \"%s\": %s",
-                                hostGroupTypeForRecipe.getName(), recipeName)))
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(String.format("The given recipe does not exist" +
+                        " for the instance group \"%s\": %s", hostGroupTypeForRecipe.getName(), recipeName)))
                 .validate();
     }
 
@@ -248,7 +247,6 @@ public class RecipeClusterTest extends AbstractMockTest {
             then = "getting BadRequestException")
     public void testTryToDeleteAttachedRecipe(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
-        String key = resourcePropertyProvider().getName();
 
         testContext
                 .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_CLOUDERA_MANAGER_START)
@@ -258,10 +256,8 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .given(RecipeTestDto.class)
-                .when(recipeTestClient.deleteV4(), RunningParameter.key(key))
-                .expect(BadRequestException.class, RunningParameter.key(key)
-                        .withExpectedMessage("There is a cluster \\['.*'\\] which uses recipe '.*'. "
-                                + "Please remove this cluster before deleting the recipe"))
+                .whenException(recipeTestClient.deleteV4(), BadRequestException.class, expectedMessage("There is a cluster \\['.*'\\] which uses recipe" +
+                        " '.*'. Please remove this cluster before deleting the recipe"))
                 .validate();
     }
 

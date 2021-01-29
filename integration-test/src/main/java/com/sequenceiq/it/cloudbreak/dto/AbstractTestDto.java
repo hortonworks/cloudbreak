@@ -285,6 +285,26 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         throw new NotImplementedException(String.format("The entity(%s) must be implement the valid() method.", getClass()));
     }
 
+    public <E extends Exception> T whenException(Class<T> entityClass, Action<T, U> action, Class<E> expectedException) {
+        throw new NotImplementedException(String.format("The entity(%s) must be implement the whenException(Class<T>, Action<T, U>, Class<E>) method.",
+                getClass()));
+    }
+
+    public <E extends Exception> T whenException(Action<T, U> action, Class<E> expectedException) {
+        throw new NotImplementedException(String.format("The entity(%s) must be implement the when(Action<T, U>, Class<E>) method.", getClass()));
+    }
+
+    public <E extends Exception> T whenException(Class<T> entityClass, Action<T, U> action, Class<E> expectedException,
+            RunningParameter runningParameter) {
+        throw new NotImplementedException(
+                String.format("The entity(%s) must be implement the when(Class<T>, Action<T, U>, Class<E>, RunningParameter) method.", getClass()));
+    }
+
+    public <E extends Exception> T whenException(Action<T, U> action, Class<E> expectedException, RunningParameter runningParameter) {
+        throw new NotImplementedException(String.format("The entity(%s) must be implement the when(Action<T, U>, Class<E>, RunningParameter) method.",
+                getClass()));
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "[name: " + getName() + ']';
