@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import javax.ws.rs.BadRequestException;
 
@@ -29,9 +29,7 @@ public class ClusterCreationTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .withEmptyNetwork()
                 .withEmptyPlacement()
-                .when(StackTestAction::create, key("error"))
-                .expect(BadRequestException.class, key("error")
-                        .withExpectedMessage("Network must be specified!"))
+                .whenException(StackTestAction::create, BadRequestException.class, expectedMessage("Network must be specified!"))
                 .validate();
     }
 }

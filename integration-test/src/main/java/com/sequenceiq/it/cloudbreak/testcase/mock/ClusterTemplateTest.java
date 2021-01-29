@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -142,15 +143,11 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the cluster template is cannot be created"
     )
     public void testCreateClusterTemplateWithoutEnvironmentName(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext.given(DistroXTemplateTestDto.class)
                 .withEnvironmentName(null)
                 .given(ClusterTemplateTestDto.class)
                 .withDistroXTemplate()
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("The environmentName cannot be null."))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("The environmentName cannot be null."))
                 .validate();
     }
 
@@ -176,52 +173,6 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .validate();
     }
 
-    /*@Test(dataProvider = TEST_CONTEXT_WITH_MOCK, enabled = false)
-    @Description(
-            given = "a prepared cluster template with many properties",
-            when = "a stack is created from the prepared cluster template",
-            then = "the stack starts properly and can be deleted"
-    )
-    public void testLaunchClusterFromTemplateWithProperties(MockedTestContext testContext) {
-        testContext
-                .given(LdapTestDto.class)
-                .withName("mock-test-ldap")
-                .when(ldapTestClient.createV1())
-
-                .given(RecipeTestDto.class)
-                .withName("mock-test-recipe")
-                .when(recipeTestClient.createV4())
-
-                .given(DatabaseTestDto.class)
-                .withName("mock-test-rds")
-                .when(new DatabaseCreateIfNotExistsAction())
-
-                .given("mpack", MPackTestDto.class)
-                .withName("mock-test-mpack")
-                .when(mpackTestClient.createV4())
-
-                .given(StackTemplateTestDto.class)
-                .withEnvironment(EnvironmentTestDto.class)
-                .withEveryProperties()
-
-                .given(ClusterTemplateTestDto.class)
-                .withName(resourcePropertyProvider().getName())
-                .when(clusterTemplateTestClient.createV4())
-                .when(clusterTemplateTestClient.getV4())
-                .then(ClusterTemplateTestAssertion.checkStackTemplateAfterClusterTemplateCreationWithProperties())
-
-                .when(clusterTemplateTestClient.launchCluster(StackTemplateTestDto.class))
-                .given(StackTemplateTestDto.class)
-                .await(STACK_AVAILABLE)
-
-                .given(ClusterTemplateTestDto.class)
-                .withName(resourcePropertyProvider().getName())
-                .when(clusterTemplateTestClient.deleteCluster(StackTemplateTestDto.class), RunningParameter.force())
-                .given(StackTemplateTestDto.class)
-                .await(STACK_DELETED, RunningParameter.force())
-                .validate();
-    }*/
-
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "a cluster template list request",
@@ -244,14 +195,11 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the cluster template cannot be created"
     )
     public void testCreateInvalidNameClusterTemplate(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext
                 .given(ClusterTemplateTestDto.class)
                 .withName(ILLEGAL_CT_NAME)
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("Name should not contain semicolon, forward slash or percentage characters"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("Name should not contain semicolon," +
+                        " forward slash or percentage characters"))
                 .validate();
     }
 
@@ -284,15 +232,11 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the cluster template cannot be created"
     )
     public void testCreateInvalidShortNameClusterTemplate(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext
                 .given(ClusterTemplateTestDto.class)
                 .withName(getLongNameGenerator().stringGenerator(2))
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("The length of name has to be in range of 5 to 40")
-                )
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("The length of name has to be in range" +
+                        " of 5 to 40"))
                 .validate();
     }
 
@@ -303,15 +247,12 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the cluster definition cannot be created"
     )
     public void testCreateWithoutBlueprintInCluster(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext
                 .given("dixTemplate", DistroXTemplateTestDto.class)
                 .withBlueprintName(null)
                 .given(ClusterTemplateTestDto.class)
                 .withDistroXTemplateKey("dixTemplate")
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class)
                 .validate();
     }
 
@@ -322,15 +263,12 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the cluster definition cannot be created"
     )
     public void testCreateWithEmptyBlueprintInCluster(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext
                 .given("dixTemplate", DistroXTemplateTestDto.class)
                 .withBlueprintName("")
                 .given(ClusterTemplateTestDto.class)
                 .withDistroXTemplateKey("dixTemplate")
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class)
                 .validate();
     }
 
@@ -341,15 +279,12 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the cluster definition cannot be created"
     )
     public void testCreateWithNotExistingBlueprintInCluster(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext
                 .given("dixTemplate", DistroXTemplateTestDto.class)
                 .withBlueprintName("thisBlueprintDoesNotExistsForSure")
                 .given(ClusterTemplateTestDto.class)
                 .withDistroXTemplateKey("dixTemplate")
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class)
                 .validate();
     }
 
@@ -371,9 +306,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("^clustertemplate already exists with name.*"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("^clustertemplate already exists with name.*"))
                 .validate();
     }
 
@@ -384,15 +317,12 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the a cluster template should not be created"
     )
     public void testCreateLongDescriptionClusterTemplate(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
         String invalidLongDescripton = getLongNameGenerator().stringGenerator(1001);
         testContext
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .withDescription(invalidLongDescripton)
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("size must be between 0 and 1000"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("size must be between 0 and 1000"))
                 .validate();
     }
 
@@ -403,13 +333,9 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the a cluster template should not be created"
     )
     public void testCreateEmptyStackTemplateClusterTemplateException(MockedTestContext testContext) {
-        String generatedKey = resourcePropertyProvider().getName();
-
         testContext.given(ClusterTemplateTestDto.class)
                 .withDistroXTemplate(null)
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey)
-                        .withExpectedMessage("must not be null"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("must not be null"))
                 .validate();
     }
 
@@ -420,20 +346,14 @@ public class ClusterTemplateTest extends AbstractMockTest {
             then = "the a cluster template should not be created"
     )
     public void testCreateEmptyClusterTemplateNameException(MockedTestContext testContext) {
-        String generatedKey1 = resourcePropertyProvider().getName();
-        String generatedKey2 = resourcePropertyProvider().getName();
-
         testContext
                 .given(ClusterTemplateTestDto.class)
                 .withName(null)
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey1))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("must not be null").withSkipOnFail(false))
                 .given(ClusterTemplateTestDto.class)
                 .withName("")
-                .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey2)
-                        .withSkipOnFail(false))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey1).withExpectedMessage("must not be null"))
-                .expect(BadRequestException.class, RunningParameter.key(generatedKey2)
-                        .withExpectedMessage("The length of name has to be in range of 5 to 40"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("The length of name has to be in range" +
+                        " of 5 to 40"))
                 .validate();
     }
 

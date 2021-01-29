@@ -83,61 +83,9 @@ public class DatabaseTest extends AbstractMockTest {
                 .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
                 .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
                 .then(RedbeamsDatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
-                .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
-                .expect(BadRequestException.class, RunningParameter.key(databaseName))
+                .whenException(databaseTestClient.createV4(), BadRequestException.class)
                 .validate();
     }
-
-    /*
-    @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
-    public void testCreateDatabaseWithInvalidAttribute(
-            TestContext testContext,
-            String databaseName,
-            String username,
-            String password,
-            String connectionUrl,
-            String expectedErrorMessage,
-            @Description TestCaseDescription testCaseDescription) {
-        String generatedKey = resourcePropertyProvider().getName();
-        testContext
-                .given(DatabaseTestDto.class)
-                .withName(databaseName)
-                .withConnectionUserName(username)
-                .withConnectionPassword(password)
-                .withConnectionURL(connectionUrl)
-                .when(databaseTestClient.createV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage(expectedErrorMessage)
-                                .withKey(generatedKey))
-                .validate();
-    }
-
-    @Test(dataProvider = INVALID_ATTRIBUTE_PROVIDER)
-    public void testDatabaseTestConnectionWithInvalidAttribute(
-            TestContext testContext,
-            String databaseName,
-            String username,
-            String password,
-            String connectionUrl,
-            String expectedErrorMessage,
-            @Description TestCaseDescription testCaseDescription) {
-        String generatedKey = resourcePropertyProvider().getName();
-
-        testContext
-                .given(DatabaseTestTestDto.class)
-                .withRequest(new DatabaseV4Request())
-                .withName(databaseName)
-                .withConnectionUserName(username)
-                .withConnectionPassword(password)
-                .withConnectionURL(connectionUrl)
-                .withType("HIVE")
-                .when(databaseTestClient.testV4(), RunningParameter.key(generatedKey))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage(expectedErrorMessage)
-                                .withKey(generatedKey))
-                .validate();
-    }
-    */
 
     @DataProvider(name = DB_TYPE_PROVIDER)
     public Object[][] provideTypes() {

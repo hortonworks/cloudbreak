@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
@@ -9,7 +11,6 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerProductTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -75,28 +76,19 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(clouderaManager)
                 .given(StackTestDto.class).withCluster(cluster)
-                .when(stackTestClient.createV4(), RunningParameter.key(versionKey))
-                .expect(BadRequestException.class, RunningParameter.expectedMessage(versionValidation)
-                        .withKey(versionKey))
-
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(versionValidation))
                 .given(partialProduct, ClouderaManagerProductTestDto.class)
                 .withName("CDH")
                 .withVersion("7.0.0.0")
                 .withParcel("")
                 .given(StackTestDto.class)
-                .when(stackTestClient.createV4(), RunningParameter.key(parcelKey))
-                .expect(BadRequestException.class, RunningParameter.expectedMessage(parcelValidation)
-                        .withKey(parcelKey))
-
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(parcelValidation))
                 .given(partialProduct, ClouderaManagerProductTestDto.class)
                 .withName("")
                 .withVersion("7.0.0.0")
                 .withParcel("http://cdh/parcel")
                 .given(StackTestDto.class)
-                .when(stackTestClient.createV4(), RunningParameter.key(nameKey))
-                .expect(BadRequestException.class, RunningParameter.expectedMessage(nameValidation)
-                        .withKey(nameKey))
-
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(nameValidation))
                 .validate();
     }
 

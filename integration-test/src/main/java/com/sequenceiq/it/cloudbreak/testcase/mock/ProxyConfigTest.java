@@ -104,10 +104,7 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(name))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the name has to be in range of 4 to 100")
-                                .withKey(name))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("The length of the name has to be in range of 4 to 100"))
                 .validate();
     }
 
@@ -117,7 +114,6 @@ public class ProxyConfigTest extends AbstractMockTest {
             when = "calling create proxy",
             then = "getting back a BadRequestException")
     public void testCreateProxyWithShortName(MockedTestContext testContext) {
-        String name = resourcePropertyProvider().getName();
         testContext
                 .given(ProxyTestDto.class)
                 .withName(SHORT_PROXY_NAME)
@@ -127,9 +123,7 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(name))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the name has to be in range of 4 to 100").withKey(name))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("The length of the name has to be in range of 4 to 100"))
                 .validate();
     }
 
@@ -148,10 +142,8 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(INVALID_PROXY_NAME))
-                .expect(BadRequestException.class,
-                        expectedMessage("The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-                                .withKey(INVALID_PROXY_NAME))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("The name can only contain lowercase alphanumeric" +
+                        " characters and hyphens and has start with an alphanumeric character"))
                 .validate();
     }
 
@@ -171,10 +163,7 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the name has to be in range of 4 to 100")
-                                .withKey(key))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("The length of the name has to be in range of 4 to 100"))
                 .validate();
     }
 
@@ -195,10 +184,8 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTPS)
-                .when(proxyTestClient.create(), key(name))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the description cannot be longer than 1000 character")
-                                .withKey(name))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("The length of the description cannot" +
+                        " be longer than 1000 character"))
                 .validate();
     }
 
@@ -219,10 +206,8 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("The length of the server host has to be in range of 1 to 255")
-                                .withKey(key))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("The length of the server host" +
+                        " has to be in range of 1 to 255"))
                 .validate();
     }
 
@@ -243,10 +228,7 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(), key(key))
-                .expect(BadRequestException.class,
-                        expectedMessage("Server port is required")
-                                .withKey(key))
+                .whenException(proxyTestClient.create(), BadRequestException.class, expectedMessage("Server port is required"))
                 .validate();
     }
 
@@ -309,9 +291,7 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .when(proxyTestClient.create(),
-                        key(name))
-                .expect(ForbiddenException.class, key(name))
+                .whenException(proxyTestClient.create(), ForbiddenException.class)
                 .validate();
     }
 }

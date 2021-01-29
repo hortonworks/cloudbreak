@@ -62,6 +62,27 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
     }
 
     @Override
+    public <E extends Exception> T whenException(Class<T> entityClass, Action<T, SdxClient> action, Class<E> expectedException) {
+        return getTestContext().whenException(entityClass, SdxClient.class, action, expectedException, emptyRunningParameter());
+    }
+
+    @Override
+    public <E extends Exception> T whenException(Action<T, SdxClient> action, Class<E> expectedException) {
+        return getTestContext().whenException((T) this, SdxClient.class, action, expectedException, emptyRunningParameter());
+    }
+
+    @Override
+    public <E extends Exception> T whenException(Class<T> entityClass, Action<T, SdxClient> action, Class<E> expectedException,
+            RunningParameter runningParameter) {
+        return getTestContext().whenException(entityClass, SdxClient.class, action, expectedException, runningParameter);
+    }
+
+    @Override
+    public <E extends Exception> T whenException(Action<T, SdxClient> action, Class<E> expectedException, RunningParameter runningParameter) {
+        return getTestContext().whenException((T) this, SdxClient.class, action, expectedException, runningParameter);
+    }
+
+    @Override
     public T then(Assertion<T, SdxClient> assertion) {
         return then(assertion, emptyRunningParameter());
     }

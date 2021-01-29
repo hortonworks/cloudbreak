@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
 
@@ -9,7 +11,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -47,34 +48,28 @@ public class RecipeTest extends AbstractIntegrationTest {
                     Assertions.assertThat(dto.getSimpleResponses().getResponses()).isNotEmpty();
                     return dto;
                 })
-                .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withKey("RecipeGetAction"))
-                .when(recipeTestClient.getV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withKey("RecipeGetAction"))
-                .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withKey("RecipeDeleteAction"))
-                .when(recipeTestClient.deleteV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
-                                .withKey("RecipeDeleteAction"))
+                .whenException(recipeTestClient.getV4(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
+                                patternWithName(testContext.get(RecipeTestDto.class).getName())).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(recipeTestClient.getV4(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
+                                        patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
+                                        patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
+                                        patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .when(recipeTestClient.deleteV4())
                 .when(recipeTestClient.listV4())
                 .then((context, dto, client) -> {
                     Assertions.assertThat(
                             dto.getSimpleResponses().getResponses()
                                     .stream()
-                                    .filter(response -> response.getName()
-                                            .equals(dto.getName())).findFirst().isPresent()).isFalse();
+                                    .anyMatch(response -> response.getName().equals(dto.getName()))).isFalse();
                     return dto;
                 })
                 .validate();

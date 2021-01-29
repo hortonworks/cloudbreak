@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -14,7 +16,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -84,12 +85,9 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
                 .withClusterCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT).setAccountId("acc").setResource("res").build().toString())
-                .when(redbeamsDatabaseServerTest.createV4())
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage(".*Crn provided: " +
-                                "crn:cdp:environments:us-west-1:acc:environment:res has invalid resource type or service type. " +
-                                "Accepted service type / resource type pairs: [(]datalake,datalake[)],[(]datahub,cluster[)].*")
-                                .withKey("RedbeamsDatabaseServerCreateAction"))
+                .whenException(redbeamsDatabaseServerTest.createV4(), BadRequestException.class,
+                        expectedMessage(".*Crn provided: crn:cdp:environments:us-west-1:acc:environment:res has invalid resource type or" +
+                                " service type. Accepted service type / resource type pairs: [(]datalake,datalake[)],[(]datahub,cluster[)].*"))
                 .validate();
     }
 }

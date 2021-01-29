@@ -70,7 +70,6 @@ public class EnvironmentChildTest extends AbstractMockTest {
             when = "child create request is sent but parent environment is a child environment",
             then = "a BadRequestException should be returned")
     public void testCreateChildEnvironmentWhereParentIsAChild(MockedTestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                 .withParentEnvironment()
@@ -78,8 +77,7 @@ public class EnvironmentChildTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(EnvironmentTestDto.class)
                 .withParentEnvironment()
-                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
+                .whenException(environmentTestClient.create(), BadRequestException.class)
                 .validate();
     }
 
@@ -89,13 +87,11 @@ public class EnvironmentChildTest extends AbstractMockTest {
             when = "child create request is sent but parent is not created yet",
             then = "a BadRequestException should be returned")
     public void testCreateChildWithoutParentEnvironment(MockedTestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(PARENT_ENVIRONMENT, EnvironmentTestDto.class)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                 .withParentEnvironment(RunningParameter.key(PARENT_ENVIRONMENT))
-                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
+                .whenException(environmentTestClient.create(), BadRequestException.class)
                 .validate();
     }
 
@@ -105,15 +101,13 @@ public class EnvironmentChildTest extends AbstractMockTest {
             when = "a delete request is sent for the parent environment without cascading",
             then = "a BadRequestException should be returned")
     public void testDeleteParentEnvironmentWithExistingChild(MockedTestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                 .withParentEnvironment()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.deleteByName(false), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
+                .whenException(environmentTestClient.deleteByName(false), BadRequestException.class)
                 .validate();
     }
 
