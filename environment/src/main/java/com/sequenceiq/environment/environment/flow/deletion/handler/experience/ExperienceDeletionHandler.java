@@ -44,7 +44,7 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
         EnvironmentDto envDto = environmentDeletionDtoEvent.getData().getEnvironmentDto();
 
         try {
-            if (entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())) {
+            if (true /*entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())*/) {
                 environmentService.findEnvironmentById(envDto.getId())
                         .ifPresent(environmentExperienceDeletionAction::execute);
             }

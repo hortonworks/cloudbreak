@@ -5,6 +5,9 @@ server:
 
 server.port: 8088
 
+cert:
+  validation: false
+
 opentracing:
   jaeger:
     log-spans: false
@@ -212,13 +215,13 @@ experience:
     protocol: https
     liftie:
       api:
-        port: 9999
+        port: 10090
         address: localhost
     path:
       componentToReplace: "{crn}"
     config:
       experiences:
         - name: DWX
-          hostAddress: ${DWX_HOST_ADDRESS}
-          internalEnvEndpoint: ${DWX_INTERNAL_ENV_ENDPOINT}
-          port: ${DWX_PORT}
+          hostAddress: localhost
+          internalEnvEndpoint: /dwx/{crn}
+          port: 10090

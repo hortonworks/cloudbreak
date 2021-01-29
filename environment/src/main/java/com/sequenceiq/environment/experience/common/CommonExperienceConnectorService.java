@@ -54,7 +54,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         Optional<Response> result = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
             Optional<CpInternalEnvironmentResponse> response = responseReader
-                        .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
+                    .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
             return response.map(CommonExperienceConnectorService::getExperienceNamesFromListResponse).orElseGet(Set::of);
         }
         return Collections.emptySet();
@@ -62,7 +62,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     @NotNull
     @Override
-        public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
+    public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> response = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.delete(call));
