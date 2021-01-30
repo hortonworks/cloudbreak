@@ -83,9 +83,6 @@ class EntitlementServiceTest {
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, false},
                 {"CDP_AZURE_SINGLE_RESOURCE_GROUP", (EntitlementCheckFunction) EntitlementService::azureSingleResourceGroupDeploymentEnabled, true},
 
-                {"CDP_CB_FAST_EBS_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::fastEbsEncryptionEnabled, false},
-                {"CDP_CB_FAST_EBS_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::fastEbsEncryptionEnabled, true},
-
                 {"CDP_CLOUD_IDENTITY_MAPPING", (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, false},
                 {"CDP_CLOUD_IDENTITY_MAPPING", (EntitlementCheckFunction) EntitlementService::cloudIdentityMappingEnabled, true},
 

@@ -41,13 +41,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2RetryClient;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
-import com.sequenceiq.cloudbreak.cloud.aws.encryption.EncryptedSnapshotService;
 import com.sequenceiq.cloudbreak.cloud.aws.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -80,9 +78,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private AwsTaggingService awsTaggingService;
-
-    @Inject
-    private EncryptedSnapshotService encryptedSnapshotService;
 
     @Inject
     private AwsClient awsClient;
@@ -169,9 +164,8 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
-        String snapshotId = getEbsSnapshotIdIfNeeded(auth, cloudStack, group);
-        boolean encryptedVolumeUsingFastApproach = isEncryptedVolumeUsingFastApproachRequested(group);
-        String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolumeUsingFastApproach);
+        boolean encryptedVolume = isEncryptedVolumeRequested(group);
+        String volumeEncryptionKey = getVolumeEncryptionKey(group, encryptedVolume);
         TagSpecification tagSpecification = new TagSpecification()
                 .withResourceType(com.amazonaws.services.ec2.model.ResourceType.Volume)
                 .withTags(awsTaggingService.prepareEc2Tags(cloudStack.getTags()));
@@ -190,7 +184,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             VolumeSetAttributes volumeSet = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, ephemeralCount.intValue());
             futures.addAll(volumeSet.getVolumes().stream()
-                    .map(createVolumeRequest(snapshotId, encryptedVolumeUsingFastApproach, volumeEncryptionKey, tagSpecification, volumeSet))
+                    .map(createVolumeRequest(encryptedVolume, volumeEncryptionKey, tagSpecification, volumeSet))
                     .map(request -> intermediateBuilderExecutor.submit(() -> {
                         CreateVolumeResult result = client.createVolume(request);
                         String volumeId = result.getVolume().getVolumeId();
@@ -227,47 +221,27 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .build();
     }
 
-    private boolean isFastEbsEncryptionEnabled(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isFastEbsEncryptionEnabled();
+    private boolean isEncryptedVolumeRequested(Group group) {
+        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes();
     }
 
-    private boolean isEncryptedVolumeUsingFastApproachRequested(Group group) {
-        return new AwsInstanceView(group.getReferenceInstanceTemplate()).isEncryptedVolumes() && isFastEbsEncryptionEnabled(group);
-    }
-
-    private String getVolumeEncryptionKey(Group group, boolean encryptedVolumeUsingFastApproach) {
+    private String getVolumeEncryptionKey(Group group, boolean encryptedVolume) {
         AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
-        return encryptedVolumeUsingFastApproach && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
+        return encryptedVolume && awsInstanceView.isKmsCustom() ? awsInstanceView.getKmsKey() : null;
     }
 
-    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(String snapshotId, boolean encryptedVolumeUsingFastApproach,
+    private Function<VolumeSetAttributes.Volume, CreateVolumeRequest> createVolumeRequest(boolean encryptedVolume,
             String volumeEncryptionKey, TagSpecification tagSpecification, VolumeSetAttributes volumeSet) {
         return volume -> {
-            CreateVolumeRequest createVolumeRequest = new CreateVolumeRequest()
+            return new CreateVolumeRequest()
                     .withAvailabilityZone(volumeSet.getAvailabilityZone())
                     .withSize(volume.getSize())
-                    .withSnapshotId(snapshotId)
+                    .withSnapshotId(null)
                     .withTagSpecifications(tagSpecification)
-                    .withVolumeType(volume.getType());
-            if (snapshotId == null) {
-                createVolumeRequest
-                        .withEncrypted(encryptedVolumeUsingFastApproach)
-                        .withKmsKeyId(volumeEncryptionKey);
-            }
-            return createVolumeRequest;
+                    .withVolumeType(volume.getType())
+                    .withEncrypted(encryptedVolume)
+                    .withKmsKeyId(volumeEncryptionKey);
         };
-    }
-
-    private String getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack, Group group) {
-        if (!encryptedSnapshotService.isEncryptedVolumeRequested(group) || isFastEbsEncryptionEnabled(group)) {
-            return null;
-        }
-
-        return encryptedSnapshotService.createSnapshotIfNeeded(ac, cloudStack, group, resourceNotifier)
-                .orElseThrow(() -> {
-                    String message = String.format("Failed to create EBS encrypted volume on stack: %s", ac.getCloudContext().getId());
-                    return new CloudConnectorException(message);
-                });
     }
 
     @Override

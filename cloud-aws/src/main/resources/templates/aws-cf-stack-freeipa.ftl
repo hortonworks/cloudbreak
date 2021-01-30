@@ -155,7 +155,7 @@
             {
               "DeviceName" : { "Ref" : "RootDeviceName" },
               "Ebs" : {
-                <#if group.ebsEncrypted && group.fastEbsEncryptionEnabled>
+                <#if group.ebsEncrypted>
                 "Encrypted" : "true",
                   <#if group.kmsKeyDefined>
                   "KmsKeyId" : "${group.kmsKey}",
@@ -166,11 +166,7 @@
               }
             }
           ],
-          <#if group.ebsEncrypted && !group.fastEbsEncryptionEnabled>
-          "ImageId"        : "${group.encryptedAMI}",
-          <#else>
           "ImageId"        : { "Ref" : "AMI" },
-          </#if>
           <#if group.cloudSecurityIds?size != 0>
           "SecurityGroupIds" : [ <#list group.cloudSecurityIds as cloudSecurityId>
                                  "${cloudSecurityId}"<#if cloudSecurityId_has_next>,</#if>

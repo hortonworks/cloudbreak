@@ -174,7 +174,7 @@ public class MockUserManagementServiceTest {
         Account account = res.getAccount();
         List<String> entitlements = account.getEntitlementsList().stream().map(Entitlement::getEntitlementName).collect(Collectors.toList());
         assertThat(entitlements).contains("CDP_AZURE", "CDP_GCP", "CDP_AUTOMATIC_USERSYNC_POLLER", "CLOUDERA_INTERNAL_ACCOUNT", "DATAHUB_AZURE_AUTOSCALING",
-                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV", "DATAHUB_FLOW_SCALING", "DATAHUB_STREAMING_SCALING");
+                "DATAHUB_AWS_AUTOSCALING", "LOCAL_DEV", "DATAHUB_FLOW_SCALING", "DATAHUB_STREAMING_SCALING", "CDP_CM_ADMIN_CREDENTIALS");
     }
 
     static Object[][] conditionalEntitlementDataProvider() {
@@ -211,9 +211,6 @@ public class MockUserManagementServiceTest {
                         "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", false},
                 {"enableAzureSingleResourceGroupDedicatedStorageAccount true", "enableAzureSingleResourceGroupDedicatedStorageAccount", true,
                         "CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT", true},
-
-                {"enableFastEbsEncryption false", "enableFastEbsEncryption", false, "CDP_CB_FAST_EBS_ENCRYPTION", false},
-                {"enableFastEbsEncryption true", "enableFastEbsEncryption", true, "CDP_CB_FAST_EBS_ENCRYPTION", true},
 
                 {"enableCloudIdentityMappinng false", "enableCloudIdentityMappinng", false, "CDP_CLOUD_IDENTITY_MAPPING", false},
                 {"enableCloudIdentityMappinng true", "enableCloudIdentityMappinng", true, "CDP_CLOUD_IDENTITY_MAPPING", true},

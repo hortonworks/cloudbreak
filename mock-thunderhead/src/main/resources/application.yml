@@ -15,7 +15,6 @@ auth:
       expiration-minutes: 10
     freeipa:
       ha:
-        enable: true
         repair.enable: true
     cloudstoragevalidation.enable: true
     runtime.upgrade.enable: true
@@ -23,7 +22,6 @@ auth:
     raz.enable: true
     azure.single.resourcegroup.enable: true
     azure.single.resourcegroup.dedicated.storage.account.enable: true
-    fastebsencryption.enable: true
     cloudidentitymappinng.enable: true
     mediumdutysdx.enable: true
     upgrade.internalrepo.enable: true

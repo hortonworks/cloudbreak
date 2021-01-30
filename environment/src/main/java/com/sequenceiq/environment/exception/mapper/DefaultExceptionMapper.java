@@ -5,7 +5,7 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
+public class DefaultExceptionMapper extends SearchCauseExceptionMapper<Exception> {
 
     @Override
     Status getResponseStatus(Exception exception) {

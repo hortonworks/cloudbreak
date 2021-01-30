@@ -98,14 +98,4 @@ public class AwsInstanceView {
         return HUNDRED_PERCENT - Objects.requireNonNullElse(getSpotPercentage(), 0);
     }
 
-    public boolean isFastEbsEncryptionEnabled() {
-        Object fastEbsEncryption = instanceTemplate.getParameter(AwsInstanceTemplate.FAST_EBS_ENCRYPTION_ENABLED, Object.class);
-        if (fastEbsEncryption instanceof Boolean) {
-            return (Boolean) fastEbsEncryption;
-        } else if (fastEbsEncryption instanceof String) {
-            return Boolean.parseBoolean((String) fastEbsEncryption);
-        }
-        return false;
-    }
-
 }
