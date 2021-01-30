@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.repository.StackRepository;
+import com.sequenceiq.freeipa.service.telemetry.TelemetryAgentService;
 
 @ExtendWith(MockitoExtension.class)
 public class TelemetryAgentServiceTest {

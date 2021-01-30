@@ -10,7 +10,7 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryResponse;
-import com.sequenceiq.freeipa.service.TelemetryAgentService;
+import com.sequenceiq.freeipa.service.telemetry.TelemetryAgentService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

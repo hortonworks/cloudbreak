@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service;
+package com.sequenceiq.freeipa.service.tag;
 
 import java.util.Map;
 import java.util.stream.Collectors;

@@ -41,4 +41,8 @@ public class RedbeamsContext extends CommonContext {
     public DBStack getDBStack() {
         return dbStack;
     }
+
+    public boolean doesDBStackExist() {
+        return dbStack != null;
+    }
 }
