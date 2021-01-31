@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
@@ -151,8 +152,8 @@ public class ComponentTestUtil {
     private CloudInstance getCloudInstance(InstanceAuthentication instanceAuthentication,
             String groupName, InstanceStatus instanceStatus, long privateId, String instanceId) {
         List<Volume> volumes = Arrays.asList(
-                new Volume("/hadoop/fs1", "HDD", SIZE_DISK_1),
-                new Volume("/hadoop/fs2", "HDD", SIZE_DISK_2)
+                new Volume("/hadoop/fs1", "HDD", SIZE_DISK_1, CloudVolumeUsageType.GENERAL),
+                new Volume("/hadoop/fs2", "HDD", SIZE_DISK_2, CloudVolumeUsageType.GENERAL)
         );
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", groupName, privateId, volumes, instanceStatus,
                 new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");

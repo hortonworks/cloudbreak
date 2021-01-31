@@ -62,6 +62,8 @@ public class ModelDescriptions {
         public static final String VOLUME_SIZE = "size of volume";
         public static final String ROOT_VOLUME_SIZE = "size of the root volume";
         public static final String VOLUME_TYPE = "type of the volumes";
+        public static final String DATABASE_VOLUME_SIZE = "size of the database volume";
+        public static final String DATABASE_VOLUME_TYPE = "type of the database volume";
         public static final String INSTANCE_TYPE = "type of the instance";
         public static final String CUSTOM_INSTANCE_TYPE = "custom instancetype definition";
         public static final String PARAMETERS = "cloud specific parameters for template";

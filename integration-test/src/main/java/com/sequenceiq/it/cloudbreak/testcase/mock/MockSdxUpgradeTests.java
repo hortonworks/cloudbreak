@@ -55,10 +55,10 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
-            when = "start an sdx cluster with embedded database on root disk",
-            then = "Upgrade criteria is not met"
+            when = "start an sdx cluster without attached disk on gateway, but disk attachment is supported on cloud provider side",
+            then = "Upgrade option should be presented"
     )
-    public void testSdxUpgradeCriteriaNotMetTestWhenEmbeddedDatabaseIsOnRootDisk(MockedTestContext testContext) {
+    public void testSdxUpgradeWhenNoAttachedDisksButEmbeddedDBShouldHaveBeenOnSelfConfiguredAttachedDisk(MockedTestContext testContext) {
         String upgradeImageCatalogName = resourcePropertyProvider().getName();
         createImageCatalogForOsUpgrade(testContext, upgradeImageCatalogName);
         String sdxInternal = resourcePropertyProvider().getName();
@@ -92,8 +92,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then(SdxUpgradeTestAssertion.validateUnsuccessfulUpgrade(
-                        "Action is only supported if Cloudera Manager state is stored in external Database or in embedded database on attached disk."))
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
                 .validate();
     }
 

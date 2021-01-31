@@ -93,7 +93,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         for (int i = 0; i < template.getVolumes().size(); i++) {
             String volumeName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             Volume volume = template.getVolumes().get(i);
-            volumes.add(new VolumeSetAttributes.Volume(volumeName, generator.next(), volume.getSize(), volume.getType()));
+            volumes.add(new VolumeSetAttributes.Volume(volumeName, generator.next(), volume.getSize(), volume.getType(), volume.getVolumeUsageType()));
         }
         String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, 0);
         Map<String, Object> attributes = new HashMap<>(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()

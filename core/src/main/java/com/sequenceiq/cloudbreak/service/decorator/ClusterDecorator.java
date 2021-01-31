@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -22,10 +20,10 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintValidatorFactory;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
@@ -113,7 +111,7 @@ public class ClusterDecorator {
     }
 
     private void setupEmbeddedDatabase(Cluster cluster, Stack stack) {
-        cluster.setEmbeddedDatabaseOnAttachedDisk(embeddedDatabaseService.getEmbeddedDatabaseInfo(
-                INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getAccountId(), stack, cluster).isEmbeddedDatabaseOnAttachedDiskEnabled());
+        cluster.setEmbeddedDatabaseOnAttachedDisk(embeddedDatabaseService
+                .isEmbeddedDatabaseOnAttachedDiskEnabled(ThreadBasedUserCrnProvider.getAccountId(), stack, cluster));
     }
 }

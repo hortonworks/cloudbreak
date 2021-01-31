@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['database_volume_index'] }}"
 ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
 ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
 CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
@@ -72,13 +73,17 @@ mount_all_from_fstab() {
 
 mount_all_sequential() {
       local return_value=0
-      log $LOG_FILE mounting for first time, no previous fstab information present
+      log $LOG_FILE mounting for first time, no previous fstab information present $DATABASE_VOLUME_UUID
       local hadoop_fs_dir_counter=1
       for uuid in $ATTACHED_VOLUME_UUID_LIST; do
-          mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+          if [[ $uuid == $DATABASE_VOLUME_UUID ]]; then
+              mount_one "UUID=$uuid /dbfs $FS_TYPE defaults,noatime,nofail 0 2"
+          else
+              mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+              ((hadoop_fs_dir_counter++))
+          fi
           return_value=$(($? || return_value ))
           log $LOG_FILE result of all mounting: $return_value
-          ((hadoop_fs_dir_counter++))
       done
 
       mount_remaining $hadoop_fs_dir_counter
@@ -110,6 +115,9 @@ mount_one() {
 mount_common() {
     local return_value
     mkdir /hadoopfs
+    if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
+      mkdir /dbfs
+    fi
     if [[ -z $PREVIOUS_FSTAB  ]]; then
         mount_all_sequential
         return_value=$?
@@ -155,6 +163,7 @@ grow_mount_partition() {
 save_env_vars_to_log_file() {
     log $LOG_FILE environment variables:
     log $LOG_FILE ATTACHED_VOLUME_UUID_LIST=$ATTACHED_VOLUME_UUID_LIST
+    log $LOG_FILE DATABASE_VOLUME_UUID=$DATABASE_VOLUME_UUID
     log $LOG_FILE CLOUD_PLATFORM=$CLOUD_PLATFORM
     log $LOG_FILE PREVIOUS_FSTAB=$PREVIOUS_FSTAB
 }
@@ -163,7 +172,14 @@ main() {
     log $LOG_FILE "started, version: $VERSION"
     device_name_list=$(get_device_names $LOG_FILE)
     export ATTACHED_VOLUME_UUID_LIST=$(get_uuid_list $LOG_FILE "$device_name_list") # ephemeral devices' uuid should not be returned
-
+    local attached_volume_uuid_array=($ATTACHED_VOLUME_UUID_LIST)
+    if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
+        export DATABASE_VOLUME_UUID=${attached_volume_uuid_array[DATABASE_VOLUME_INDEX]}
+        log $LOG_FILE "database volume index is: $DATABASE_VOLUME_INDEX"
+        log $LOG_FILE "database volume uuid based on its index: $DATABASE_VOLUME_UUID"
+    else
+        log $LOG_FILE "database volume uuid is not set as its index is -1."
+    fi
     save_env_vars_to_log_file
     local script_name="mount-disk"
     can_start $script_name $LOG_FILE

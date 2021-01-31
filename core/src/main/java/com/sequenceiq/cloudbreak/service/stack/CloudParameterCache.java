@@ -55,6 +55,10 @@ public class CloudParameterCache {
         return getSpecialParameters(Platform.platform(platform)).get(PlatformParametersConsts.REGIONS_SUPPORTED);
     }
 
+    public boolean isVolumeAttachmentSupported(String platform) {
+        return getSpecialParameters(Platform.platform(platform)).get(PlatformParametersConsts.VOLUME_ATTACHMENT_SUPPORTED);
+    }
+
     private Map<String, Boolean> getSpecialParameters(Platform platform) {
         PlatformParameters platformParameters = getPlatformParameters().get(platform);
         if (platformParameters == null) {
