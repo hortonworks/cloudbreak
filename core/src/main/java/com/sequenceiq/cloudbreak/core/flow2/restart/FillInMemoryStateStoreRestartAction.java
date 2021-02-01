@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
@@ -33,6 +34,7 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
         if (stack.getCluster() != null) {
             InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
         }
+        MDCBuilder.buildMdcContext(stack);
         super.restart(flowParameters, flowChainId, event, payload);
     }
 }
