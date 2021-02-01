@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatalakeRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.LegacyTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseMapper;
@@ -34,7 +35,10 @@ public class ClusterRequestedLogger implements LegacyTelemetryEventLogger {
     private ClusterUseCaseMapper clusterUseCaseMapper;
 
     @Inject
-    private StructuredFlowEventToCDPDatalakeRequestedConverter converter;
+    private StructuredFlowEventToCDPDatalakeRequestedConverter datalakeConverter;
+
+    @Inject
+    private StructuredFlowEventToCDPDatahubRequestedConverter datahubConverter;
 
     @Override
     public void log(StructuredFlowEvent structuredFlowEvent) {
@@ -44,7 +48,19 @@ public class ClusterRequestedLogger implements LegacyTelemetryEventLogger {
         LOGGER.debug("Telemetry use case: {}", useCase);
 
         if (TRIGGER_CASES.contains(useCase)) {
-            usageReporter.cdpDatalakeRequested(converter.convert(structuredFlowEvent));
+            String resourceType = structuredFlowEvent.getOperation().getResourceType();
+            if (resourceType != null) {
+                switch (resourceType) {
+                    case "datalake":
+                        usageReporter.cdpDatalakeRequested(datalakeConverter.convert(structuredFlowEvent));
+                        break;
+                    case "datahub":
+                        usageReporter.cdpDatahubRequested(datahubConverter.convert(structuredFlowEvent));
+                        break;
+                    default:
+                        LOGGER.debug("We are not sending usage report for {}", resourceType);
+                }
+            }
         }
     }
 }

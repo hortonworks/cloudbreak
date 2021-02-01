@@ -12,9 +12,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.model.CombinedStatus;
 
 @Component
-public class StructuredFlowEventToCDPDatalakeStatusChangedConverter {
+public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventToCDPDatalakeStatusChangedConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventToCDPDatahubStatusChangedConverter.class);
 
     @Inject
     private StructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
@@ -22,20 +22,20 @@ public class StructuredFlowEventToCDPDatalakeStatusChangedConverter {
     @Inject
     private StructuredFlowEventToCombinedStatusConverter combinedStatusConverter;
 
-    public UsageProto.CDPDatalakeStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
+    public UsageProto.CDPDatahubStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
         if (structuredFlowEvent == null) {
             return null;
         }
-        UsageProto.CDPDatalakeStatusChanged.Builder cdpDatalakeStatusChanged = UsageProto.CDPDatalakeStatusChanged.newBuilder();
-        cdpDatalakeStatusChanged.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
+        UsageProto.CDPDatahubStatusChanged.Builder cdpDatahubStatusChanged = UsageProto.CDPDatahubStatusChanged.newBuilder();
+        cdpDatahubStatusChanged.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
 
-        cdpDatalakeStatusChanged.setNewStatus(status);
+        cdpDatahubStatusChanged.setNewStatus(status);
 
         CombinedStatus combinedStatus = combinedStatusConverter.convert(structuredFlowEvent);
-        cdpDatalakeStatusChanged.setFailureReason(JsonUtil.writeValueAsStringSilentSafe(combinedStatus));
+        cdpDatahubStatusChanged.setFailureReason(JsonUtil.writeValueAsStringSilentSafe(combinedStatus));
 
-        UsageProto.CDPDatalakeStatusChanged ret = cdpDatalakeStatusChanged.build();
-        LOGGER.debug("Converted CDPDatalakeStatusChanged telemetry event: {}", ret);
+        UsageProto.CDPDatahubStatusChanged ret = cdpDatahubStatusChanged.build();
+        LOGGER.debug("Converted CDPDatahubStatusChanged telemetry event: {}", ret);
         return ret;
     }
 }

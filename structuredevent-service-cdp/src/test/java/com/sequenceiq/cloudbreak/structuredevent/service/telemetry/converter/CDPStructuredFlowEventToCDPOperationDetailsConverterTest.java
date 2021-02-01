@@ -8,7 +8,7 @@ import org.powermock.reflect.Whitebox;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 
 class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
@@ -18,7 +18,7 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     public void setUp() {
         underTest = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(underTest, "appVersion", "version-1234");
-        Whitebox.setInternalState(underTest, "requestProcessingStepMapper", new RequestProcessingStepMapper());
+        Whitebox.setInternalState(underTest, "environmentRequestProcessingStepMapper", new EnvironmentRequestProcessingStepMapper());
     }
 
     @Test
@@ -44,7 +44,7 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     public void testInitProcessingType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
-        flowDetails.setFlowState("INIT_STATE");
+        flowDetails.setNextFlowState("INIT_STATE");
         cdpStructuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
@@ -68,7 +68,7 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     public void testSomethingElseProcessingType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
-        flowDetails.setFlowState("SOMETHING_ELSE");
+        flowDetails.setNextFlowState("SOMETHING_ELSE");
         cdpStructuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);

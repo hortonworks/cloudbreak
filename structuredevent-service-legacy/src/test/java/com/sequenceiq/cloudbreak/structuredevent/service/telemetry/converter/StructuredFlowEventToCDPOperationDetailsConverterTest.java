@@ -8,17 +8,17 @@ import org.powermock.reflect.Whitebox;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
 
 public class StructuredFlowEventToCDPOperationDetailsConverterTest {
 
     private StructuredFlowEventToCDPOperationDetailsConverter underTest;
 
-    @BeforeEach()
+    @BeforeEach
     public void setUp() {
         underTest = new StructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(underTest, "appVersion", "version-1234");
-        Whitebox.setInternalState(underTest, "requestProcessingStepMapper", new RequestProcessingStepMapper());
+        Whitebox.setInternalState(underTest, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
     }
 
     @Test
@@ -44,7 +44,7 @@ public class StructuredFlowEventToCDPOperationDetailsConverterTest {
     public void testInitProcessingType() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
-        flowDetails.setFlowState("INIT_STATE");
+        flowDetails.setNextFlowState("INIT_STATE");
         structuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
@@ -68,7 +68,7 @@ public class StructuredFlowEventToCDPOperationDetailsConverterTest {
     public void testSomethingElseProcessingType() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
-        flowDetails.setFlowState("SOMETHING_ELSE");
+        flowDetails.setNextFlowState("SOMETHING_ELSE");
         structuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);

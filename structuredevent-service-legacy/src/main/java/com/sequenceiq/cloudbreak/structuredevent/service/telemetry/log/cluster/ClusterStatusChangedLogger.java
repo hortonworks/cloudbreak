@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatalakeStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.LegacyTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseMapper;
@@ -26,7 +27,10 @@ public class ClusterStatusChangedLogger implements LegacyTelemetryEventLogger {
     private ClusterUseCaseMapper clusterUseCaseMapper;
 
     @Inject
-    private StructuredFlowEventToCDPDatalakeStatusChangedConverter converter;
+    private StructuredFlowEventToCDPDatalakeStatusChangedConverter datalakeConverter;
+
+    @Inject
+    private StructuredFlowEventToCDPDatahubStatusChangedConverter datahubConverter;
 
     @Override
     public void log(StructuredFlowEvent structuredFlowEvent) {
@@ -36,7 +40,19 @@ public class ClusterStatusChangedLogger implements LegacyTelemetryEventLogger {
         LOGGER.debug("Telemetry use case: {}", useCase);
 
         if (useCase != UsageProto.CDPClusterStatus.Value.UNSET) {
-            usageReporter.cdpDatalakeStatusChanged(converter.convert(structuredFlowEvent));
+            String resourceType = structuredFlowEvent.getOperation().getResourceType();
+            if (resourceType != null) {
+                switch (resourceType) {
+                    case "datalake":
+                        usageReporter.cdpDatalakeStatusChanged(datalakeConverter.convert(structuredFlowEvent, useCase));
+                        break;
+                    case "datahub":
+                        usageReporter.cdpDatahubStatusChanged(datahubConverter.convert(structuredFlowEvent, useCase));
+                        break;
+                    default:
+                        LOGGER.debug("We are not sending usage report for {}", resourceType);
+                }
+            }
         }
     }
 }

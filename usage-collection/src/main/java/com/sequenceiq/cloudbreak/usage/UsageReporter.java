@@ -80,4 +80,18 @@ public interface UsageReporter {
     void cdpDatalakeStatusChanged(
             UsageProto.CDPDatalakeStatusChanged details);
 
+    /**
+     * Reports that an CDP Datahub has been requested.
+     * @param details the event details
+     */
+    void cdpDatahubRequested(
+            UsageProto.CDPDatahubRequested details);
+
+    /**
+     * Reports that an CDP Datahub status has been changed.
+     * @param details the event status details
+     */
+    void cdpDatahubStatusChanged(
+            UsageProto.CDPDatahubStatusChanged details);
+
 }

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -46,7 +46,7 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         underTest = new CDPStructuredFlowEventToCDPEnvironmentRequestedConverter();
         CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
-        Whitebox.setInternalState(operationDetailsConverter, "requestProcessingStepMapper", new RequestProcessingStepMapper());
+        Whitebox.setInternalState(operationDetailsConverter, "environmentRequestProcessingStepMapper", new EnvironmentRequestProcessingStepMapper());
         Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
     }
 
