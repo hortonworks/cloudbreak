@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 import rx.Completable;
@@ -745,7 +746,7 @@ public class AzureClient {
 
     public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services,
             String resourceGroupName) {
-        ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZoneList();
         for (AzurePrivateDnsZoneServiceEnum service : services) {
             String dnsZoneName = service.getDnsZoneName();
@@ -775,9 +776,9 @@ public class AzureClient {
         return privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
     }
 
-    public VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName,
-            String virtualNetworkLinkName) {
-        return privatednsManager.virtualNetworkLinks().inner().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
+    private VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
+        return virtualNetworkLinkName == null ? null
+                : privatednsManager.virtualNetworkLinks().inner().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
     }
 
     public boolean checkIfDnsZonesDeployed(String resourceGroupName, List<AzurePrivateDnsZoneServiceEnum> services) {
