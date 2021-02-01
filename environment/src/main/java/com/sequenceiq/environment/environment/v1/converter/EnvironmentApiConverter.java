@@ -28,6 +28,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeI
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
@@ -47,6 +48,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto.Builder;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
@@ -325,5 +327,12 @@ public class EnvironmentApiConverter {
         features.setWorkloadAnalytics(featuresRequest.getWorkloadAnalytics());
         features.setClusterLogsCollection(featuresRequest.getClusterLogsCollection());
         return features;
+    }
+
+    public EnvironmentLoadBalancerDto initLoadBalancerDto(EnvironmentLoadBalancerUpdateRequest request) {
+        EnvironmentLoadBalancerDto.Builder builder = EnvironmentLoadBalancerDto.builder()
+            .withEndpointAccessGateway(request.getPublicEndpointAccessGateway())
+            .withEndpointGatewaySubnetIds(request.getSubnetIds());
+        return builder.build();
     }
 }

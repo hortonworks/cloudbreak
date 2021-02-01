@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.SET_MAINTENANCE_MODE_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_PILLAR_CONFIG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescription.UPDATE_SALT;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE_INTERNAL;
@@ -429,5 +430,12 @@ public interface StackV4Endpoint {
     @ApiOperation(value = OperationDescriptions.StackOpDescription.RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON,
             notes = Notes.RENEW_CERTIFICATE_NOTES, nickname = "renewStackCertificate")
     FlowIdentifier renewCertificate(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{name}/update_load_balancers")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UPDATE_LOAD_BALANCERS, nickname = "updateLoadBalancersInternal")
+    FlowIdentifier updateLoadBalancersInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }
