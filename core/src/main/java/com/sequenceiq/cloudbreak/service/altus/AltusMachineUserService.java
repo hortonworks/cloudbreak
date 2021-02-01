@@ -53,8 +53,8 @@ public class AltusMachineUserService {
     /**
      * Generate machine user for fluentd - databus communication
      */
-    public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry)) {
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry, boolean forced) {
+        if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry) || forced) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(() -> altusIAMService.generateMachineUserWithAccessKey(
                     getFluentDatabusMachineUserName(stack),
                     ThreadBasedUserCrnProvider.getUserCrn(),
@@ -62,6 +62,10 @@ public class AltusMachineUserService {
                     telemetry.isUseSharedAltusCredentialEnabled()));
         }
         return Optional.empty();
+    }
+
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
+        return generateDatabusMachineUserForFluent(stack, telemetry, false);
     }
 
     /**
@@ -115,7 +119,7 @@ public class AltusMachineUserService {
         } else {
             LOGGER.debug("Databus credential does not exist for the stack, it will be created ...");
         }
-        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry);
+        Optional<AltusCredential> altusCredential = generateDatabusMachineUserForFluent(stack, telemetry, true);
         return storeDataBusCredential(altusCredential, stack);
     }
 

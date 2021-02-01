@@ -11,13 +11,34 @@ collector:
       label: "{{ logfile["label"] }}"{% endif %}{% endfor %}
     - path: /var/log/cdp-logging-agent/cdp-logging-agent.log
       label: fluentd
-      folderPrefix: logs
+      folderPrefix: logs{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+      compress: true{% endif %}
     - path: /var/log/td-agent/td-agent.log
       label: td-agent
       folderPrefix: logs{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
       compress: true{% endif %}
       useFullPath: false
       {% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}{% endif %}
+    - path: /etc/unbound/conf.d/*
+      label: unbound
+      compress: true
+      skipAnonymization: true
+      folderPrefix: conf
+    - path: /etc/resolv.conf
+      label: resolv
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: conf
+    - path: /etc/nginx/sites-enabled/**/**.conf
+      label: nginx_sites_enabled
+      skipAnonymization: true
+      folderPrefix: conf{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+      compress: true{% endif %}
+    - path: /etc/nginx/nginx.conf
+      label: nginx_conf
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: conf
     - path: /opt/cdp-telemetry/conf/diagnostics_request.json
       label: diagnostics_request
       mandatory: true

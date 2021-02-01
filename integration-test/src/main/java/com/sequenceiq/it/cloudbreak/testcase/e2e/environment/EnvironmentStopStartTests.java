@@ -4,6 +4,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -24,6 +26,7 @@ import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class EnvironmentStopStartTests extends AbstractE2ETest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentStopStartTests.class);
 
     private static final Map<String, String> ENV_TAGS = Map.of("envTagKey", "envTagValue");
 
@@ -52,12 +55,13 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, timeOut =  7200000)
     @Description(
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
             then = "should be stopped first and started after it")
     public void testCreateStopStartEnvironment(TestContext testContext) {
+        LOGGER.info("Environment stop-start test execution has been started....");
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -95,5 +99,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)
                 .validate();
+
+        LOGGER.info("Environment stop-start test execution has been finished....");
     }
 }
