@@ -1,19 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.util.Date;
-
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.stereotype.Component;
-
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
@@ -22,6 +10,15 @@ import com.amazonaws.services.securitytoken.model.Credentials;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCachingConfig;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.stereotype.Component;
+
+import javax.inject.Inject;
+import java.util.Date;
 
 @Component
 public class AwsSessionCredentialClient {
@@ -95,17 +92,13 @@ public class AwsSessionCredentialClient {
         if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
                 || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential)) {
             LOGGER.debug("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
-            return AWSSecurityTokenServiceClientBuilder.standard()
-                    .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
-                    .withCredentials(new InstanceProfileCredentialsProvider())
-                    .build();
         } else {
             LOGGER.debug("AWSSecurityTokenServiceClient will use environment variables");
-            return AWSSecurityTokenServiceClientBuilder.standard()
-                    .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
-                    .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                    .build();
         }
+        return AWSSecurityTokenServiceClientBuilder.standard()
+                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                .build();
     }
 
 }
