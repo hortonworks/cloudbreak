@@ -27,6 +27,10 @@
     "label": "cloud_init"
   },
   {
+    "path": "/var/log/dhcp-hook.log",
+    "label": "dhcp_hook"
+  },
+  {
     "path": "/var/log/find_device_and_format.log",
     "label": "find_device_and_format"
   },
