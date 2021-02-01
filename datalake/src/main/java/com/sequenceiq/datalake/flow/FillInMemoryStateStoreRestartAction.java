@@ -5,6 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -25,6 +26,7 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
         Payload datalakePayload = (Payload) payload;
         SdxCluster sdxCluster = sdxService.getById(datalakePayload.getResourceId());
         sdxStatusService.updateInMemoryStateStore(sdxCluster);
+        MDCBuilder.buildMdcContext(sdxCluster);
         super.restart(flowParameters, flowChainId, event, payload);
     }
 }
