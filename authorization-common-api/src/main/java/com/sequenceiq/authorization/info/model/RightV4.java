@@ -12,6 +12,12 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 public enum RightV4 {
     // account level
     ENV_CREATE(AuthorizationResourceAction.CREATE_ENVIRONMENT),
+    LIST_ASSIGNED_ROLES(AuthorizationResourceAction.LIST_ASSIGNED_ROLES),
+    CREATE_CLUSTER_TEMPLATE(AuthorizationResourceAction.CREATE_CLUSTER_TEMPLATE),
+    CREATE_CLUSTER_DEFINITION(AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION),
+    CREATE_CREDENTIAL(AuthorizationResourceAction.CREATE_CREDENTIAL),
+    CREATE_RECIPE(AuthorizationResourceAction.CREATE_RECIPE),
+    CREATE_IMAGE_CATALOG(AuthorizationResourceAction.CREATE_IMAGE_CATALOG),
     // env level
     ENV_START(AuthorizationResourceAction.START_ENVIRONMENT),
     ENV_STOP(AuthorizationResourceAction.STOP_ENVIRONMENT),
@@ -30,8 +36,6 @@ public enum RightV4 {
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
     SDX_REPAIR(AuthorizationResourceAction.REPAIR_DATALAKE),
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
-    // resource level
-    LIST_ASSIGNED_ROLES(AuthorizationResourceAction.LIST_ASSIGNED_ROLES),
     // legacy
     DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ),
     DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE),
