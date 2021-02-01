@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static java.util.stream.Collectors.joining;
+
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -66,12 +68,18 @@ public class AwsCredentialVerifier {
                 LOGGER.debug("Simulate policy result: {}", simulatePrincipalPolicyResult);
                 simulatePrincipalPolicyResult.getEvaluationResults().stream()
                         .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
-                        .map(evaluationResult -> evaluationResult.getEvalActionName() + ":" + evaluationResult.getEvalResourceName())
+                        .map(evaluationResult -> {
+                            if (evaluationResult.getOrganizationsDecisionDetail().getAllowedByOrganizations()) {
+                                return evaluationResult.getEvalActionName() + " : " + evaluationResult.getEvalResourceName();
+                            } else {
+                                return evaluationResult.getEvalActionName() + " : " + evaluationResult.getEvalResourceName() + " -> Denied by Organization Rule";
+                            }
+                        })
                         .forEach(failedActionList::add);
             }
             if (!failedActionList.isEmpty()) {
                 throw new AwsPermissionMissingException(String.format("CDP Credential '%s' doesn't have permission for these actions which are required: %s",
-                        awsCredential.getName(), failedActionList));
+                        awsCredential.getName(), failedActionList.stream().collect(joining(", ", "[ ", " ]"))));
             }
         } catch (IOException e) {
             throw new IllegalStateException("Can not parse aws policy json", e);
