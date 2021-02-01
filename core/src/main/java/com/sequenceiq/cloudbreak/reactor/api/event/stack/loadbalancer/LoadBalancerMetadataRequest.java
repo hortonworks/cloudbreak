@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import java.util.List;
 
 public class LoadBalancerMetadataRequest extends StackEvent {
 
@@ -20,14 +22,17 @@ public class LoadBalancerMetadataRequest extends StackEvent {
 
     private final Stack stack;
 
+    private final List<CloudResource> cloudResources;
+
     public LoadBalancerMetadataRequest(Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            List<LoadBalancerType> typesPresentInStack) {
+            List<LoadBalancerType> typesPresentInStack, List<CloudResource> cloudResources) {
         super(stack.getId());
         this.stack = stack;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.cloudStack = cloudStack;
         this.typesPresentInStack = typesPresentInStack;
+        this.cloudResources = cloudResources;
     }
 
     public CloudContext getCloudContext() {
@@ -48,5 +53,9 @@ public class LoadBalancerMetadataRequest extends StackEvent {
 
     public Stack getStack() {
         return stack;
+    }
+
+    public List<CloudResource> getCloudResources() {
+        return cloudResources;
     }
 }

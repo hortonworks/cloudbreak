@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -16,12 +17,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -61,6 +65,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -68,9 +73,36 @@ import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 import freemarker.template.Configuration;
 
+/**
+ * Validates that ARM template can be created from Free Marker Template {@code .ftl} files.
+ *
+ * This checks that:
+ * <ul>
+ *     <li>{@code .ftl} files are properly formatted</li>
+ *     <li>Valid Json is produced</li>
+ *     <li>Certain values are contained in the Json</li>
+ * </ul>
+ *
+ * This class is parameterized, so a single test will be used to run against multiple template files.
+ * The template files are in {@code main/resources} and {@code test/resources}.
+ *
+ * To opt out of running a test for <em>older</em> versions of the template, place the {@code assumeTrue()} method at
+ * the beginning of your test.
+ * <pre>{@code
+ *     assumeTrue(isTemplateVersionGreaterOrEqualThan("2.7.3.0"));
+ * }</pre>
+ *
+ * It's useful to capture the JSON strings printed to the console, then provide them to the Azure CLI's template deployment
+ * validation commands.
+ * Example:
+ * <pre>{@code
+ * az deployment group validate --resource-group bderriso-rg --template-file arm-template-from-test
+ * }</pre>
+ */
 @ExtendWith(MockitoExtension.class)
 public class AzureTemplateBuilderTest {
 
@@ -89,6 +121,8 @@ public class AzureTemplateBuilderTest {
     private static final int ROOT_VOLUME_SIZE = 50;
 
     private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
+
+    private static final String SUBNET_CIDR = "10.0.0.0/24";
 
     private static final String FIELD_ARM_TEMPLATE_PATH = "armTemplatePath";
 
@@ -185,7 +219,7 @@ public class AzureTemplateBuilderTest {
                 .withName("thisisaverylongazureresourcenamewhichneedstobeshortened")
                 .withCrn("crn")
                 .withPlatform("dummy1")
-                .withLocation(Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")))
+                .withLocation(Location.location(Region.region("westus2"), new AvailabilityZone("availabilityZone")))
                 .withUserId(USER_ID)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
@@ -203,7 +237,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         Map<String, String> parameters = new HashMap<>();
@@ -245,7 +279,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.getCustomSubnetIds(any())).thenReturn(Collections.singletonList("existingSubnet"));
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -275,7 +309,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
@@ -308,7 +342,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         when(azureUtils.isPrivateIp(any())).then(invocation -> false);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
@@ -345,7 +379,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -376,7 +410,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -407,7 +441,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -434,11 +468,109 @@ public class AzureTemplateBuilderTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
+    public void buildWithGatewayInstanceGroupTypeAndLoadBalancer(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
+        loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(loadBalancer);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertTrue(templateString.contains("\"frontendPort\": 443,"));
+        assertTrue(templateString.contains("\"backendPort\": 443,"));
+        assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
+        assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers(String templatePath) {
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+            instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
+        publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(publicLb);
+        CloudLoadBalancer privateLb = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
+        privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(privateLb);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+            instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+
+        String templateString =
+            azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                AzureInstanceTemplateOperation.PROVISION);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertTrue(templateString.contains("\"frontendPort\": 443,"));
+        assertTrue(templateString.contains("\"backendPort\": 443,"));
+        assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
+        assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
+        assertEquals(2, StringUtils.countMatches(templateString,
+            ",\"[resourceId('Microsoft.Network/loadBalancers'"));
+        assertEquals(2, StringUtils.countMatches(templateString,
+            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPUBLIC', 'address-pool')]"));
+        assertEquals(2, StringUtils.countMatches(templateString,
+            "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPRIVATE', 'address-pool')]"));
+        assertEquals(2, StringUtils.countMatches(templateString,
+            "\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertEquals(1, StringUtils.countMatches(templateString,
+            "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
     public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData(String templatePath) {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -469,7 +601,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -503,7 +635,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -540,7 +672,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
         when(azureUtils.getCustomSubnetIds(any())).thenReturn(Collections.singletonList("existingSubnet"));
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -575,7 +707,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -608,7 +740,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -641,7 +773,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -676,7 +808,7 @@ public class AzureTemplateBuilderTest {
 
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -710,7 +842,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -745,7 +877,7 @@ public class AzureTemplateBuilderTest {
 
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -779,7 +911,7 @@ public class AzureTemplateBuilderTest {
         //GIVEN
         ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
 
-        Network network = new Network(new Subnet("testSubnet"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
@@ -1027,5 +1159,4 @@ public class AzureTemplateBuilderTest {
         String templateVersion = splitName[splitName.length - 1].replaceAll("\\.ftl", "");
         return Version.versionCompare(templateVersion, version) > -1;
     }
-
 }

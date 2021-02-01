@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -21,6 +21,7 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -73,7 +74,7 @@ public class AzureMetadataCollector implements MetadataCollector {
 
                     Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceGroup, vm.name());
 
-                    String publicIp = azureVmPublicIpProvider.getPublicIp(azureClient, azureUtils, networkInterface, resourceGroup);
+                    String publicIp = azureVmPublicIpProvider.getPublicIp(networkInterface);
 
                     String instanceId = instance.getKey();
                     String localityIndicator = Optional.ofNullable(faultDomainCount)
@@ -129,9 +130,76 @@ public class AzureMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
-        // no-op
-        return Collections.emptyList();
+    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes,
+            List<CloudResource> resources) {
+        LOGGER.debug("Collecting Azure load balancer metadata, for cluster {}", ac.getCloudContext().getName());
+
+        List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();
+        String resourceGroup = azureUtils.getTemplateResource(resources).getName();
+        final String stackName = azureUtils.getStackName(ac.getCloudContext());
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+
+        for (LoadBalancerType type : loadBalancerTypes) {
+            String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(type, stackName);
+            LOGGER.debug("Attempting to collect metadata for load balancer {}, type {}", loadBalancerName, type);
+            try {
+                String ip = null;
+                if (LoadBalancerType.PUBLIC.equals(type)) {
+                    ip = lookupPublicIp(resourceGroup, azureClient, loadBalancerName);
+                } else if (LoadBalancerType.PRIVATE.equals(type)) {
+                    ip = lookupPrivateIp(resourceGroup, azureClient, loadBalancerName);
+                }
+
+                if (StringUtils.isNotEmpty(ip)) {
+                    CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                        .withType(type)
+                        .withIp(ip)
+                        .withName(loadBalancerName)
+                        .build();
+                    cloudLoadBalancerMetadata.add(loadBalancerMetadata);
+                    LOGGER.debug("Saved metadata for load balancer: {}", loadBalancerMetadata);
+                } else {
+                    LOGGER.warn("Unable to find metadata for load balancer {}.", loadBalancerName);
+                }
+            } catch (RuntimeException e) {
+                LOGGER.warn("Unable to find metadata for load balancer " + loadBalancerName, e);
+            }
+        }
+
+        return cloudLoadBalancerMetadata;
     }
 
+    private String lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
+        String ip = null;
+        List<String> privateIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, LoadBalancerType.PRIVATE);
+        if (privateIps.isEmpty()) {
+            LOGGER.warn("Unable to find private ip address for load balancer {}", loadBalancerName);
+        } else {
+            ip = privateIps.get(0);
+            if (privateIps.size() > 1) {
+                LOGGER.warn("Found multiple private IPs ({}) for load balancer {}. Only one, {}, will be used.",
+                        String.join(", ", privateIps),
+                        loadBalancerName,
+                        ip);
+            }
+        }
+        return ip;
+    }
+
+    private String lookupPublicIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
+        String ip = null;
+        List<String> publicIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, LoadBalancerType.PUBLIC);
+        if (publicIps.isEmpty()) {
+            LOGGER.warn("Unable to find public ip address for load balancer {}", loadBalancerName);
+        } else {
+            ip = publicIps.get(0);
+            if (publicIps.size() > 1) {
+                LOGGER.warn("Found multiple public IPs ({}) for load balancer {}. Only one, {}, will be used.",
+                        String.join(", ", publicIps),
+                        loadBalancerName,
+                        ip);
+            }
+        }
+        return ip;
+    }
 }

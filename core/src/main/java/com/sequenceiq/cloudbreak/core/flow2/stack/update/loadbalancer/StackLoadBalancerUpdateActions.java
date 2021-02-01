@@ -21,10 +21,12 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -66,6 +68,9 @@ public class StackLoadBalancerUpdateActions {
 
     @Inject
     private StackLoadBalancerUpdateService stackLoadBalancerUpdateService;
+
+    @Inject
+    private ResourceToCloudResourceConverter cloudResourceConverter;
 
     @Bean(name = "CREATING_LOAD_BALANCER_ENTITY_STATE")
     public Action<?, ?> createLoadBalancerEntityAction() {
@@ -116,8 +121,9 @@ public class StackLoadBalancerUpdateActions {
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(context.getStack().getId()).stream()
                     .map(LoadBalancer::getType)
                     .collect(Collectors.toList());
+                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
                 return new LoadBalancerMetadataRequest(context.getStack(), context.getCloudContext(), context.getCloudCredential(),
-                    context.getCloudStack(), loadBalancerTypes);
+                    context.getCloudStack(), loadBalancerTypes, cloudResources);
             }
         };
     }

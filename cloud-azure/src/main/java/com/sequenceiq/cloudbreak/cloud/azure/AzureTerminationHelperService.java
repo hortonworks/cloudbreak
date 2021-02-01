@@ -98,6 +98,9 @@ public class AzureTerminationHelperService {
         azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
 
+        // load balancers must be deleted before public IP addresses
+        deleteLoadBalancersIfNecessary(ac, resourcesToRemove, deleteWholeDeployment, client, resourceGroupName);
+
         List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
         azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
@@ -128,6 +131,18 @@ public class AzureTerminationHelperService {
 
         LOGGER.debug("All the necessary resources have been deleted successfully");
         return azureResourceConnector.check(ac, resourcesToRemove);
+    }
+
+    private void deleteLoadBalancersIfNecessary(AuthenticatedContext ac,
+                                                List<CloudResource> resourcesToRemove,
+                                                boolean deleteWholeDeployment,
+                                                AzureClient client,
+                                                String resourceGroupName) {
+        if (deleteWholeDeployment) {
+            List<String> loadBalancerNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_LOAD_BALANCER);
+            azureUtils.deleteLoadBalancers(client, resourceGroupName, loadBalancerNames);
+            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_LOAD_BALANCER);
+        }
     }
 
     private void deleteInstancesInProgress(AuthenticatedContext ac, List<CloudInstance> vms, List<CloudResource> resourcesToRemove, String resourceGroupName) {

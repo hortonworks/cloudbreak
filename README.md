@@ -211,6 +211,15 @@ idea.max.intellisense.filesize=15000
 ```
 Restart IDEA, and Rebuild.
 
+#### Activating CloudBreak Code Styles
+After importing, be sure to navigate to:
+```text
+IntelliJ IDEA -> Preferences -> Editor -> Code Style -> Java -> Scheme
+```
+And, select the new scheme `Default (1)`.
+
+Otherwise, IntelliJ will constantly reorder your imports differently from CB conventions.
+
 ### Running Cloudbreak in IDEA
 
 To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class (set `Use classpath of module` to `cloudbreak.core.main`) with the following JVM options:

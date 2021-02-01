@@ -358,6 +358,30 @@ public class AzureUtilsTest {
     }
 
     @Test
+    public void deleteLoadBalancersShouldSucceed() {
+        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        when(azureClient.deleteLoadBalancerAsync(anyString(), anyString())).thenReturn(Completable.complete());
+
+        underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2"));
+
+        verify(azureClient, times(2)).deleteLoadBalancerAsync(anyString(), anyString());
+    }
+
+    @Test
+    public void deleteLoadBalancersShouldHandleAzureErrorsAndThrowCloudbreakServiceExceptionAfterAllRequestsFinish() {
+        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer1"))).thenReturn(Completable.complete());
+        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer2"))).thenReturn(Completable.error(new RuntimeException("failure message 1")));
+        when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer3"))).thenReturn(Completable.error(new RuntimeException("failure message 2")));
+
+        assertThrows(CloudbreakServiceException.class, () -> {
+            underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2", "loadbalancer3"));
+        });
+
+        verify(azureClient, times(3)).deleteLoadBalancerAsync(anyString(), anyString());
+    }
+
+    @Test
     public void deleteAvailabilitySetsShouldSucceed() {
         AzureClient azureClient = Mockito.mock(AzureClient.class);
         when(azureClient.deleteAvailabilitySetAsync(anyString(), anyString())).thenReturn(Completable.complete());

@@ -143,6 +143,9 @@ public class AzureCloudResourceService {
             case "Microsoft.Network/privateDnsZones/virtualNetworkLinks":
                 cloudResourceBuilder.type(ResourceType.AZURE_VIRTUAL_NETWORK_LINK);
                 break;
+            case "Microsoft.Network/loadBalancers":
+                cloudResourceBuilder.type(ResourceType.AZURE_LOAD_BALANCER);
+                break;
             default:
                 LOGGER.info("Unknown resource type {}", targetResource.resourceType());
                 return null;

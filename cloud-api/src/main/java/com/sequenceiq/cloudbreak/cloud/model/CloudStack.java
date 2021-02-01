@@ -63,7 +63,7 @@ public class CloudStack {
         this.loginUserName = loginUserName;
         this.publicKey = publicKey;
         this.fileSystem = Optional.ofNullable(fileSystem);
-        this.loadBalancers = loadBalancers;
+        this.loadBalancers = loadBalancers != null ? loadBalancers : Collections.emptyList();
         this.additionalFileSystem = Optional.ofNullable(additionalFileSystem);
     }
 

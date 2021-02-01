@@ -1,16 +1,18 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
-import com.sequenceiq.common.model.JsonEntity;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
+import java.util.Optional;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
+import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -56,6 +58,16 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
 
     public void setSubnetCIDR(String subnetCIDR) {
         this.subnetCIDR = subnetCIDR;
+    }
+
+    public Optional<Boolean> isNoPublicIp() {
+        if (azure != null) {
+            return Optional.ofNullable(azure.getNoPublicIp());
+        } else if (gcp != null) {
+            return Optional.ofNullable(gcp.getNoPublicIp());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public AwsNetworkV4Parameters createAws() {
