@@ -53,19 +53,22 @@ public class EnvironmentResponseConverter {
 
     private final TelemetryApiConverter telemetryApiConverter;
 
+    private final BackupConverter backupConverter;
+
     private final NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
     public EnvironmentResponseConverter(CredentialToCredentialV1ResponseConverter credentialConverter,
             RegionConverter regionConverter, CredentialViewConverter credentialViewConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             FreeIpaConverter freeIpaConverter, TelemetryApiConverter telemetryApiConverter,
-            NetworkDtoToResponseConverter networkDtoToResponseConverter) {
+            BackupConverter backupConverter, NetworkDtoToResponseConverter networkDtoToResponseConverter) {
         this.credentialConverter = credentialConverter;
         this.regionConverter = regionConverter;
         this.credentialViewConverter = credentialViewConverter;
         this.proxyConfigToProxyResponseConverter = proxyConfigToProxyResponseConverter;
         this.freeIpaConverter = freeIpaConverter;
         this.telemetryApiConverter = telemetryApiConverter;
+        this.backupConverter = backupConverter;
         this.networkDtoToResponseConverter = networkDtoToResponseConverter;
     }
 
@@ -87,6 +90,7 @@ public class EnvironmentResponseConverter {
                 .withCreated(environmentDto.getCreated())
                 .withTag(getIfNotNull(environmentDto.getTags(), this::environmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
+                .withBackup(backupConverter.convert(environmentDto.getBackup()))
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withCloudStorageValidation(environmentDto.getExperimentalFeatures().getCloudStorageValidation())
@@ -130,6 +134,7 @@ public class EnvironmentResponseConverter {
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withTag(getIfNotNull(environmentDto.getTags(), this::environmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
+                .withBackup(backupConverter.convert(environmentDto.getBackup()))
                 .withRegions(regionConverter.convertRegions(environmentDto.getRegions()))
                 .withAws(getIfNotNull(environmentDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
                 .withAzure(getIfNotNull(environmentDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))

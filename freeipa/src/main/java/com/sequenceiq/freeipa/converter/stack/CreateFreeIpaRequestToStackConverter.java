@@ -120,7 +120,11 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
-        stack.setBackup(backupConverter.convert(source.getTelemetry()));
+        if (source.getBackup() != null && isNotEmpty(source.getBackup().getStorageLocation())) {
+            stack.setBackup(backupConverter.convert(source.getBackup()));
+        } else {
+            stack.setBackup(backupConverter.convert(source.getTelemetry()));
+        }
         decorateStackWithTunnelAndCcm(stack, source);
         updateOwnerRelatedFields(source, accountId, ownerFuture, userCrn, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);
