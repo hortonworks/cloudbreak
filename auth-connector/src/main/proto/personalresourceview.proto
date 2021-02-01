@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package authorization;
+
+option java_package = "com.cloudera.thunderhead.service.personalresourceview";
+option java_outer_classname = "PersonalResourceViewProto";
+
+import "version.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service PersonalResourceView {
+
+    // Get the service version.
+    rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+    // Checks whether or not the requested resources are part of the the
+    // personal view requested.
+    rpc hasResourcesByRight(HasResourcesByRightRequest)
+    returns (HasResourcesByRightResponse) {}
+
+}
+
+message HasResourcesByRightRequest {
+    // The CRN of the user who has the view.
+    string userCrn = 1;
+    // The view right to check. Views are keyed by right name.
+    string right = 2;
+    // The resources to check. Resources may be CRNs or '*' which resolves
+    // to the account CRN of the user.
+    repeated string resource = 3;
+}
+
+message HasResourcesByRightResponse {
+    // The results of the checks.
+    repeated bool result = 1;
+}

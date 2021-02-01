@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.service.ResourceNameProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -544,10 +545,10 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
                 LOGGER, "Instance metadatas saved in {} ms for stack {}", stackName);
 
         measure(() -> loadBalancerPersistenceService.saveAll(savedStack.getLoadBalancers()),
-            LOGGER, "Load balancers saved in {} ms for stack {}", stackName);
+                LOGGER, "Load balancers saved in {} ms for stack {}", stackName);
 
         measure(() -> targetGroupPersistenceService.saveAll(savedStack.getTargetGroupAsList()),
-            LOGGER, "Target groups saved in {} ms for stack {}", stackName);
+                LOGGER, "Target groups saved in {} ms for stack {}", stackName);
 
         try {
             Set<Component> components = imageService.create(stack, platformString, imgFromCatalog);
@@ -860,6 +861,18 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
 
     public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
         return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackTypes);
+    }
+
+    public Set<StackListItem> getByWorkspaceIdAndStackIds(Long workspaceId, List<Long> stackIds, List<StackType> stackTypes) {
+        return stackRepository.findByWorkspaceIdAnStackIds(workspaceId, stackIds, stackTypes);
+    }
+
+    public List<AuthorizationResource> getAsAuthorizationResourcesByEnvCrn(Long workspaceId, String environmentCrn, StackType stackType) {
+        return stackRepository.getAsAuthorizationResourcesByEnvCrn(workspaceId, environmentCrn, stackType);
+    }
+
+    public List<AuthorizationResource> getAsAuthorizationResources(Long workspaceId, StackType stackType) {
+        return stackRepository.getAsAuthorizationResources(workspaceId, stackType);
     }
 
     public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {

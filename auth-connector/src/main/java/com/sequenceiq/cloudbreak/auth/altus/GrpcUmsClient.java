@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -489,10 +490,24 @@ public class GrpcUmsClient {
                         .setRight(right)
                         .build())
                 .collect(Collectors.toList());
-        LOGGER.debug("Check if {} has rights to resources {}:", actorCrn, rightChecks);
+        LOGGER.debug("Check if {} has rights to resources {}", actorCrn, rightChecks);
         List<Boolean> result = hasRights(actorCrn, memberCrn, rightChecks, requestId);
         return resources.stream().collect(
                 Collectors.toMap(resource -> resource, resource -> result.get(resources.indexOf(resource))));
+    }
+
+    public List<Boolean> hasRightsOnResources(String actorCrn, String memberCrn, List<String> resourceCrns, String right, Optional<String> requestId) {
+        if (CollectionUtils.isEmpty(resourceCrns)) {
+            return List.of();
+        }
+        if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
+            return resourceCrns.stream().map(r -> true).collect(Collectors.toList());
+        }
+        LOGGER.debug("Check if {} has rights on resources {}", actorCrn, resourceCrns);
+        PersonalResourceViewClient client = new PersonalResourceViewClient(channelWrapper.getChannel(), actorCrn, tracer);
+        List<Boolean> retVal = client.hasRightOnResources(RequestIdUtil.getOrGenerate(requestId), memberCrn, right, resourceCrns);
+        LOGGER.info("member {} has rights {}", memberCrn, retVal);
+        return retVal;
     }
 
     @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")

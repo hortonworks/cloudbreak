@@ -375,6 +375,8 @@ public abstract class TestContext implements ApplicationContextAware {
                 Log.then(null, assertion.getClass().getSimpleName() + " assertion is failed: " + ResponseUtil.getErrorMessage(e));
             }
             getExceptionMap().put(key, e);
+        } catch (Error e) {
+            getExceptionMap().put(key, new TestFailException(e.getMessage(), e));
         }
         return entity;
     }

@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
@@ -148,6 +149,18 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
+    public List<AuthorizationResource> findAsAuthorizationResorces(String accountId) {
+        return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
+    }
+
+    public List<AuthorizationResource> findAsAuthorizationResorcesByEnvName(String accountId, String envName) {
+        return sdxClusterRepository.findAuthorizationResourcesByAccountIdAndEnvName(accountId, envName);
+    }
+
+    public List<AuthorizationResource> findAsAuthorizationResorcesByEnvCrn(String accountId, String envCrn) {
+        return sdxClusterRepository.findAuthorizationResourcesByAccountIdAndEnvCrn(accountId, envCrn);
+    }
+
     public String getStackCrnByClusterCrn(String crn) {
         return sdxClusterRepository.findStackCrnByClusterCrn(crn)
                 .orElseThrow(notFound("SdxCluster", crn));
@@ -167,6 +180,10 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         } else {
             throw notFound("SDX cluster", id).get();
         }
+    }
+
+    public Iterable<SdxCluster> findAllById(List<Long> ids) {
+        return sdxClusterRepository.findAllById(ids);
     }
 
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
@@ -745,11 +762,6 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         return resourceNames.stream()
                 .map(resourceName -> getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn())
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        return sdxClusterRepository.findAllCrnInAccount(ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

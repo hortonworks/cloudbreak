@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -267,6 +268,60 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "AND (:environmentCrn IS null OR s.environmentCrn = :environmentCrn) "
             + "AND (s.type IS null OR s.type in :stackTypes)")
     Set<StackListItem> findByWorkspaceId(@Param("id") Long id, @Param("environmentCrn") String environmentCrn, @Param("stackTypes") List<StackType> stackTypes);
+
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as resourceCrn, "
+            + "s.name as name, "
+            + "s.tunnel as tunnel, "
+            + "s.environmentCrn as environmentCrn, "
+            + "s.type as type, "
+            + "b.resourceCrn as blueprintCrn, "
+            + "b.name as blueprintName, "
+            + "b.created as blueprintCreated, "
+            + "b.stackType as stackType, "
+            + "CASE WHEN (s.stackVersion is not null) THEN s.stackVersion ELSE b.stackVersion END as stackVersion,"
+            + "ss.status as stackStatus, "
+            + "s.cloudPlatform as cloudPlatform, "
+            + "c.status as clusterStatus, "
+            + "s.created as created, "
+            + "s.datalakeResourceId as sharedClusterId, "
+            + "b.tags as blueprintTags,"
+            + "c.id as clusterId, "
+            + "s.platformVariant as platformVariant, "
+            + "c.clusterManagerIp as clusterManagerIp, "
+            + "b.id as blueprintId, "
+            + "b.hostGroupCount as hostGroupCount, "
+            + "b.status as blueprintStatus, "
+            + "s.terminated as terminated, "
+            + "u.id as userDOId, "
+            + "u.userId as userId, "
+            + "u.userName as username, "
+            + "u.userCrn as usercrn, "
+            + "c.certExpirationState as certExpirationState "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN c.blueprint b "
+            + "LEFT JOIN s.stackStatus ss "
+            + "LEFT JOIN s.creator u "
+            + "WHERE s.id in :stackIds "
+            + "AND s.workspace.id= :workspaceId AND s.terminated = null "
+            + "AND (s.type IS null OR s.type in :stackTypes)")
+    Set<StackListItem> findByWorkspaceIdAnStackIds(@Param("workspaceId") Long workspaceId, @Param("stackIds") List<Long> stackIds,
+            @Param("stackTypes") List<StackType> stackTypes);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.resourceCrn, s.environmentCrn) "
+            + "FROM Stack s "
+            + "WHERE s.workspace.id = :id AND s.terminated = null "
+            + "AND s.environmentCrn = :environmentCrn "
+            + "AND (s.type IS null OR s.type = :stackType)")
+    List<AuthorizationResource> getAsAuthorizationResourcesByEnvCrn(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
+            @Param("stackType") StackType stackType);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.resourceCrn, s.environmentCrn) "
+            + "FROM Stack s "
+            + "WHERE s.workspace.id = :id AND s.terminated = null "
+            + "AND (s.type IS null OR s.type = :stackType)")
+    List<AuthorizationResource> getAsAuthorizationResources(@Param("id") Long id, @Param("stackType") StackType stackType);
 
     @Modifying
     @Query("UPDATE Stack s SET s.minaSshdServiceId = :minaSshdServiceId WHERE s.id = :id")

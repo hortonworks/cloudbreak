@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.thunderhead.grpc.GrpcServer;
 import com.sequenceiq.thunderhead.grpc.service.audit.MockAuditLogService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockAuthorizationService;
+import com.sequenceiq.thunderhead.grpc.service.auth.MockPersonalResourceViewService;
 import com.sequenceiq.thunderhead.grpc.service.auth.MockUserManagementService;
 
 @Configuration
@@ -19,6 +20,9 @@ public class GrpcServerConfig {
 
     @Inject
     private MockAuthorizationService mockAuthorizationService;
+
+    @Inject
+    private MockPersonalResourceViewService mockPersonalResourceViewService;
 
     @Inject
     private MockAuditLogService mockAuditLogService;
@@ -32,6 +36,7 @@ public class GrpcServerConfig {
                 grpcServerPort,
                 mockUserManagementService.bindService(),
                 mockAuthorizationService.bindService(),
+                mockPersonalResourceViewService.bindService(),
                 mockAuditLogService.bindService());
     }
 }

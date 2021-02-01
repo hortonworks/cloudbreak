@@ -23,6 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
@@ -204,6 +206,17 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return environmentRepository.findById(id).map(environmentDtoConverter::environmentToDto);
     }
 
+    public List<EnvironmentDto> findAllByIds(List<Long> ids) {
+        return Lists.newArrayList(environmentRepository.findAllById(ids))
+                .stream()
+                .map(environmentDtoConverter::environmentToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<AuthorizationResource> findAsAuthorizationResourcesInAccount(String accountId) {
+        return environmentRepository.findAsAuthorizationResourcesInAccount(accountId);
+    }
+
     public void setLocation(Environment environment, RegionWrapper regionWrapper, CloudRegions cloudRegions) {
         if (regionWrapper != null) {
             LOGGER.debug("Setting location for environment. Location: '{}'.", regionWrapper);
@@ -343,12 +356,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         return resourceNames.stream()
                 .map(resourceName -> getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn())
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        return environmentRepository.findByAccountId(ThreadBasedUserCrnProvider.getAccountId()).stream()
-                .map(env -> env.getResourceCrn()).collect(Collectors.toList());
     }
 
     @Override

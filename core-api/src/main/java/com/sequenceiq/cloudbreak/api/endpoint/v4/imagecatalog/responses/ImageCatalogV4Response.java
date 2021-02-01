@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses;
 
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.base.ImageCatalogV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -17,7 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonInclude(Include.NON_NULL)
 @NotNull
-public class ImageCatalogV4Response extends ImageCatalogV4Base implements ResourceCrnAwareApiModel {
+public class ImageCatalogV4Response extends ImageCatalogV4Base {
 
     @ApiModelProperty(value = ImageCatalogDescription.DEFAULT, required = true)
     private boolean usedAsDefault;
@@ -72,11 +70,5 @@ public class ImageCatalogV4Response extends ImageCatalogV4Base implements Resour
 
     public void setWorkspace(WorkspaceResourceV4Response workspace) {
         this.workspace = workspace;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getResourceCrn() {
-        return crn;
     }
 }

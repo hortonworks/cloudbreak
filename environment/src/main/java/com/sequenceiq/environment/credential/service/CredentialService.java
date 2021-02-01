@@ -32,6 +32,8 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.google.common.base.Strings;
+import com.google.common.collect.Sets;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
@@ -98,6 +100,14 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     public Set<Credential> listAvailablesByAccountId(String accountId, CredentialType type) {
         return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId), type);
+    }
+
+    public List<AuthorizationResource> findAsAuthorizationResourcesInAccountByType(String accountId, CredentialType type) {
+        return repository.findAsAuthorizationResourcesInAccountByType(accountId, getValidPlatformsForAccountId(accountId), type);
+    }
+
+    public Set<Credential> findAllById(Iterable<Long> ids) {
+        return Sets.newLinkedHashSet(repository.findAllById(ids));
     }
 
     @Cacheable(cacheNames = "credentialCloudPlatformCache")
@@ -365,12 +375,6 @@ public class CredentialService extends AbstractCredentialService implements Reso
                 .map(resourceName -> getByNameForAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId(),
                         ENVIRONMENT).getResourceCrn())
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return repository.findAllResourceCrnsByAccountId(accountId, ENVIRONMENT);
     }
 
     @Override

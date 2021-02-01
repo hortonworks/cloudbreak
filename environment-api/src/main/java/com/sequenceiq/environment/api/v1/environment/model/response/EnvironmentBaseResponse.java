@@ -4,9 +4,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
@@ -25,7 +23,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
-public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiModel, TaggedResponse {
+public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @ApiModelProperty(ModelDescriptions.ID)
     private String crn;
 
@@ -120,12 +118,6 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setCrn(String crn) {
         this.crn = crn;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getResourceCrn() {
-        return crn;
     }
 
     public String getName() {

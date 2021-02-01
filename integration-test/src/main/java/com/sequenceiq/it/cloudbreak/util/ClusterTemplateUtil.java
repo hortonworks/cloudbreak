@@ -19,7 +19,7 @@ public class ClusterTemplateUtil {
                     ClusterTemplateV4Response response = new ClusterTemplateV4Response();
                     response.setStatus(view.getStatus());
                     response.setDatalakeRequired(view.getDatalakeRequired());
-                    response.setCrn(view.getResourceCrn());
+                    response.setCrn(view.getCrn());
                     response.setId(view.getId());
                     response.setCloudPlatform(view.getCloudPlatform());
                     response.setDescription(view.getDescription());

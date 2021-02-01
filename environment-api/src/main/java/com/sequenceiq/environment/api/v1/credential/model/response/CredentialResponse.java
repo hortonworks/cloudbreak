@@ -2,10 +2,8 @@ package com.sequenceiq.environment.api.v1.credential.model.response;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CRN;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -19,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = CredentialDescriptor.CREDENTIAL, parent = CredentialBase.class, value = "CredentialV1Response")
 @JsonInclude(Include.NON_NULL)
-public class CredentialResponse extends CredentialBase implements ResourceCrnAwareApiModel {
+public class CredentialResponse extends CredentialBase {
 
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
     private String name;
@@ -107,11 +105,5 @@ public class CredentialResponse extends CredentialBase implements ResourceCrnAwa
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getResourceCrn() {
-        return crn;
     }
 }

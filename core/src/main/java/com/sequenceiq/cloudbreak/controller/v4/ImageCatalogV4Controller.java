@@ -13,15 +13,16 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -49,10 +51,13 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private ImageCatalogFiltering imageCatalogFiltering;
+
     @Override
-    @DisableCheckPermissions
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
     public ImageCatalogV4Responses list(Long workspaceId) {
-        Set<ImageCatalog> allByWorkspaceId = imageCatalogService.findAllByWorkspaceId(workspaceId);
+        Set<ImageCatalog> allByWorkspaceId = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(allByWorkspaceId, ImageCatalogV4Response.class));
     }
 
