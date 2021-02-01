@@ -25,6 +25,10 @@ public class EnvironmentOpDescription {
     public static final String GET_CRN_BY_NAME = "Get the crn of an environment by name.";
     public static final String GET_NAME_BY_CRN = "Get the name of an environment by crn.";
     public static final String UPDATE_CONFIG_BY_CRN = "Update the configuration for all stacks in the Environment by the Environment CRN";
+    public static final String UPDATE_LOAD_BALANCERS_BY_ENV_NAME = "Updates all cluster in an environment with load balancers, including adding the " +
+        "Endpoint Access Gateway if it's enabled. Environment is specified by name.";
+    public static final String UPDATE_LOAD_BALANCERS_BY_ENV_CRN = "Updates all cluster in an environment with load balancers, including adding the " +
+        "Endpoint Access Gateway if it's enabled. Environment is specified by CRN.";
 
     private EnvironmentOpDescription() {
     }

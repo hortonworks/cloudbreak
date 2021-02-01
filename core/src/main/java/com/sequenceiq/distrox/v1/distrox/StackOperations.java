@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
+import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
@@ -113,6 +114,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     @Inject
     private ClusterDBValidationService clusterDBValidationService;
+
+    @Inject
+    private LoadBalancerUpdateService loadBalancerUpdateService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -391,5 +395,10 @@ public class StackOperations implements ResourceBasedCrnProvider {
             CertificatesRotationV4Request certificatesRotationV4Request) {
         LOGGER.debug("Starting cluster autotls certificates rotation: " + nameOrCrn);
         return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, workspaceId, certificatesRotationV4Request);
+    }
+
+    public FlowIdentifier updateLoadBalancers(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        LOGGER.debug("Creating load balancers for stack: " + nameOrCrn);
+        return loadBalancerUpdateService.updateLoadBalancers(nameOrCrn, workspaceId);
     }
 }
