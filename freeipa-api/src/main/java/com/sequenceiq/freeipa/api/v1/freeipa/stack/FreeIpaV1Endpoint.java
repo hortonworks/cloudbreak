@@ -34,7 +34,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 
 @RetryAndMetrics
-@Path("/v1/freeipa")
+@Path("/" +
+        "v1/freeipa")
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/freeipa", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface FreeIpaV1Endpoint {

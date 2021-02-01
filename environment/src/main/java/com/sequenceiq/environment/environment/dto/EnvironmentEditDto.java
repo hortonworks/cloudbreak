@@ -15,6 +15,8 @@ public class EnvironmentEditDto {
 
     private final EnvironmentTelemetry telemetry;
 
+    private final EnvironmentBackup backup;
+
     private final NetworkDto network;
 
     private final AuthenticationDto authentication;
@@ -37,6 +39,7 @@ public class EnvironmentEditDto {
             NetworkDto network,
             AuthenticationDto authentication,
             EnvironmentTelemetry telemetry,
+            EnvironmentBackup backup,
             SecurityAccessDto securityAccess,
             Tunnel tunnel,
             IdBrokerMappingSource idBrokerMappingSource,
@@ -48,6 +51,7 @@ public class EnvironmentEditDto {
         this.network = network;
         this.authentication = authentication;
         this.telemetry = telemetry;
+        this.backup = backup;
         this.securityAccess = securityAccess;
         this.tunnel = tunnel;
         this.idBrokerMappingSource = idBrokerMappingSource;
@@ -74,6 +78,10 @@ public class EnvironmentEditDto {
 
     public EnvironmentTelemetry getTelemetry() {
         return telemetry;
+    }
+
+    public EnvironmentBackup getBackup() {
+        return backup;
     }
 
     public SecurityAccessDto getSecurityAccess() {
@@ -115,6 +123,8 @@ public class EnvironmentEditDto {
 
         private EnvironmentTelemetry telemetry;
 
+        private EnvironmentBackup backup;
+
         private SecurityAccessDto securityAccess;
 
         private Tunnel tunnel;
@@ -155,6 +165,11 @@ public class EnvironmentEditDto {
             return this;
         }
 
+        public EnvironmentEditDtoBuilder withBackup(EnvironmentBackup backup) {
+            this.backup = backup;
+            return this;
+        }
+
         public EnvironmentEditDtoBuilder withSecurityAccess(SecurityAccessDto securityAccess) {
             this.securityAccess = securityAccess;
             return this;
@@ -186,7 +201,7 @@ public class EnvironmentEditDto {
         }
 
         public EnvironmentEditDto build() {
-            return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, securityAccess, tunnel, idBrokerMappingSource,
+            return new EnvironmentEditDto(description, accountId, network, authentication, telemetry, backup, securityAccess, tunnel, idBrokerMappingSource,
                     cloudStorageValidation, adminGroupName, parameters);
         }
     }

@@ -2,9 +2,12 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.util.Optional;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -52,6 +55,9 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryResponse telemetry;
+
+    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    private @Valid BackupResponse backup;
 
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkResponse network;
@@ -168,6 +174,14 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
 
     public void setTelemetry(TelemetryResponse telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BackupResponse getBackup() {
+        return backup;
+    }
+
+    public void setBackup(BackupResponse backup) {
+        this.backup = backup;
     }
 
     public EnvironmentNetworkResponse getNetwork() {

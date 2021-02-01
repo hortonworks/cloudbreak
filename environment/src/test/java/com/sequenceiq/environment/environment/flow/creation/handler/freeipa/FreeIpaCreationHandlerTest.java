@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -106,6 +107,9 @@ public class FreeIpaCreationHandlerTest {
     private TelemetryApiConverter telemetryApiConverter;
 
     @Mock
+    private BackupConverter backupConverter;
+
+    @Mock
     private CloudPlatformConnectors connectors;
 
     @Mock
@@ -125,6 +129,7 @@ public class FreeIpaCreationHandlerTest {
                 freeIpaPollingService,
                 freeIpaServerRequestProvider,
                 telemetryApiConverter,
+                backupConverter,
                 connectors,
                 eventBus, Collections.singleton(CloudPlatform.YARN.name()));
     }

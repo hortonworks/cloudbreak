@@ -1,4 +1,4 @@
-package com.sequenceiq.common.api.telemetry.model;
+package com.sequenceiq.common.api.backup.model;
 
 import java.io.Serializable;
 
@@ -7,22 +7,23 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.common.api.telemetry.doc.TelemetryModelDescription;
+import com.sequenceiq.common.api.backup.doc.BackupModelDescription;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CloudwatchParams implements Serializable {
+public class BackupCloudwatchParams implements Serializable {
 
     @ApiModelProperty
     @NotNull
     private String instanceProfile;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLOUDWATCH_PARAMS_REGION)
+    @ApiModelProperty(BackupModelDescription.CLOUDWATCH_PARAMS_REGION)
     private String region;
 
-    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_CLOUDWATCH_PARAMS)
+    @ApiModelProperty(BackupModelDescription.CLOUDWATCH_PARAMS)
     private CloudwatchStreamKey streamKey = CloudwatchStreamKey.HOSTNAME;
 
     public String getInstanceProfile() {
@@ -50,11 +51,11 @@ public class CloudwatchParams implements Serializable {
     }
 
     @JsonIgnore
-    public static CloudwatchParams copy(CloudwatchParams cloudwatchParams) {
+    public static BackupCloudwatchParams copy(BackupCloudwatchParams cloudwatchParams) {
         if (cloudwatchParams == null) {
             return null;
         }
-        CloudwatchParams newCloudwatchParams = new CloudwatchParams();
+        BackupCloudwatchParams newCloudwatchParams = new BackupCloudwatchParams();
         newCloudwatchParams.setStreamKey(cloudwatchParams.getStreamKey());
         newCloudwatchParams.setInstanceProfile(cloudwatchParams.getInstanceProfile());
         newCloudwatchParams.setRegion(cloudwatchParams.getRegion());

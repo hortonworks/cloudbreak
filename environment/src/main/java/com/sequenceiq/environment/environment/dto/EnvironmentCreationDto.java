@@ -39,6 +39,8 @@ public class EnvironmentCreationDto {
 
     private final EnvironmentTelemetry telemetry;
 
+    private final EnvironmentBackup backup;
+
     private final Long created;
 
     private final SecurityAccessDto securityAccess;
@@ -61,7 +63,7 @@ public class EnvironmentCreationDto {
     public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
             String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
             Set<String> regions, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
-            Long created, EnvironmentTelemetry telemetry, SecurityAccessDto securityAccess, String adminGroupName,
+            Long created, EnvironmentTelemetry telemetry, EnvironmentBackup backup, SecurityAccessDto securityAccess, String adminGroupName,
             ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
             String parentEnvironmentName, String proxyConfigName) {
         //CHECKSTYLE:ON
@@ -82,6 +84,7 @@ public class EnvironmentCreationDto {
         }
         this.authentication = authentication;
         this.telemetry = telemetry;
+        this.backup = backup;
         this.securityAccess = securityAccess;
         this.adminGroupName = adminGroupName;
         this.parameters = parameters;
@@ -138,6 +141,10 @@ public class EnvironmentCreationDto {
 
     public EnvironmentTelemetry getTelemetry() {
         return telemetry;
+    }
+
+    public EnvironmentBackup getBackup() {
+        return backup;
     }
 
     public FreeIpaCreationDto getFreeIpaCreation() {
@@ -215,6 +222,8 @@ public class EnvironmentCreationDto {
         private Set<String> regions;
 
         private EnvironmentTelemetry telemetry;
+
+        private EnvironmentBackup backup;
 
         private FreeIpaCreationDto freeIpaCreation = FreeIpaCreationDto.builder().build();
 
@@ -306,6 +315,11 @@ public class EnvironmentCreationDto {
             return this;
         }
 
+        public Builder withBackup(EnvironmentBackup backup) {
+            this.backup = backup;
+            return this;
+        }
+
         public Builder withSecurityAccess(SecurityAccessDto securityAccess) {
             this.securityAccess = securityAccess;
             return this;
@@ -349,7 +363,7 @@ public class EnvironmentCreationDto {
         public EnvironmentCreationDto build() {
             return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
                     location, network, credential, regions, freeIpaCreation, authentication,
-                    created, telemetry, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
+                    created, telemetry, backup, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
                     parentEnvironmentName, proxyConfigName);
         }
     }
