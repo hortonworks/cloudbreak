@@ -15,10 +15,14 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageRequest;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
@@ -76,12 +80,46 @@ public class FreeIpaProvisionActions {
         };
     }
 
-    @Bean(name = "FREEIPA_INSTALL_STATE")
-    public Action<?, ?> installFreeIpa() {
+    @Bean(name = "ORCHESTRATOR_CONFIG_STATE")
+    public Action<?, ?> orchestratorConfig() {
         return new AbstractStackProvisionAction<>(HostMetadataSetupSuccess.class) {
 
             @Override
             protected void doExecute(StackContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.CONFIGURING_ORCHESTRATOR, "Configuring the orchestrator");
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new OrchestratorConfigRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "VALIDATING_CLOUD_STORAGE_STATE")
+    public Action<?, ?> validateFreeIpaCloudStorage() {
+        return new AbstractStackProvisionAction<>(OrchestratorConfigSuccess.class) {
+
+            @Override
+            protected void doExecute(StackContext context, OrchestratorConfigSuccess payload, Map<Object, Object> variables) {
+                stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.VALIDATING_CLOUD_STORAGE, "Validating cloud storage");
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ValidateCloudStorageRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "FREEIPA_INSTALL_STATE")
+    public Action<?, ?> installFreeIpa() {
+        return new AbstractStackProvisionAction<>(ValidateCloudStorageSuccess.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ValidateCloudStorageSuccess payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STARTING_FREEIPA_SERVICES, "Starting FreeIPA services");
                 sendEvent(context);
             }
