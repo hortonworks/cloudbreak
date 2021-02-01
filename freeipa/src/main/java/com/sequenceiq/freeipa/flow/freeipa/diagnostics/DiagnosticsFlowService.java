@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.flow.freeipa.diagnostics;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -19,6 +18,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -39,11 +39,14 @@ public class DiagnosticsFlowService {
     @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
 
+    @Inject
+    private FreeIpaNodeUtilService freeIpaNodeUtilService;
+
     public void init(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet);
+        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics init. resourceCrn: '{}'", stack.getResourceCrn());
         telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
     }
@@ -52,7 +55,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet);
+        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics collection. resourceCrn: '{}'", stack.getResourceCrn());
         telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
     }
@@ -61,7 +64,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet);
+        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
         telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
     }
@@ -70,16 +73,8 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet);
+        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics cleanup. resourceCrn: '{}'", stack.getResourceCrn());
         telemetryOrchestrator.cleanupCollectedDiagnostics(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
     }
-
-    private Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet) {
-        return instanceMetaDataSet.stream()
-                .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
-                        im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
-                .collect(Collectors.toSet());
-    }
-
 }

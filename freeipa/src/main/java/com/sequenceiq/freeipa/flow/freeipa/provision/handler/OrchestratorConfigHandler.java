@@ -1,0 +1,53 @@
+package com.sequenceiq.freeipa.flow.freeipa.provision.handler;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigFailed;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaOrchestrationConfigService;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
+
+@Component
+public class OrchestratorConfigHandler extends ExceptionCatcherEventHandler<OrchestratorConfigRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrchestratorConfigHandler.class);
+
+    @Inject
+    private EventBus eventBus;
+
+    @Inject
+    private FreeIpaOrchestrationConfigService freeIpaOrchestrationConfigService;
+
+    @Override
+    public String selector() {
+        return EventSelectorUtil.selector(OrchestratorConfigRequest.class);
+    }
+
+    @Override
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<OrchestratorConfigRequest> event) {
+        return new OrchestratorConfigFailed(resourceId, e);
+    }
+
+    @Override
+    protected Selectable doAccept(HandlerEvent event) {
+        OrchestratorConfigRequest request = event.getData();
+        Selectable response;
+        try {
+            freeIpaOrchestrationConfigService.configureOrchestrator(request.getResourceId());
+            response = new OrchestratorConfigSuccess(request.getResourceId());
+        } catch (Exception e) {
+            LOGGER.error("FreeIPA orchestration configuration failed", e);
+            response = new OrchestratorConfigFailed(request.getResourceId(), e);
+        }
+        return response;
+    }
+}
