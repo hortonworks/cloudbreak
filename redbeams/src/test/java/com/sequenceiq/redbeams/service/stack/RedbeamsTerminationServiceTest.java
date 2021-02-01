@@ -141,6 +141,7 @@ class RedbeamsTerminationServiceTest {
     void testTerminateWhenTerminationIsInProgress(Status status) {
         when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
         dbStack.getDbStackStatus().setStatus(status);
+        server.setArchived(true);
         when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
 
         DatabaseServerConfig terminatingServer = underTest.terminateByCrn(SERVER_CRN_STRING, true);

@@ -82,8 +82,9 @@ public class AwsStackRequestHelper {
                 .withTemplateBody(cfTemplate);
     }
 
-    public DeleteStackRequest createDeleteStackRequest(String cFStackName) {
+    public DeleteStackRequest createDeleteStackRequest(String cFStackName, String... retainResources) {
         return new DeleteStackRequest()
+                .withRetainResources(retainResources)
                 .withStackName(cFStackName);
     }
 

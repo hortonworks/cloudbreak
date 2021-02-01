@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -146,30 +148,26 @@ public class AwsRdsStatusLookupServiceTest {
     public void isDeleteProtectionEnabledTest() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenReturn(describeDBInstancesResult);
         when(describeDBInstancesResult.getDBInstances()).thenReturn(Arrays.asList(dbInstance));
+        DescribeDBInstancesResult describeDBInstancesResult = mock(DescribeDBInstancesResult.class);
+        DBInstance dbInstance = mock(DBInstance.class);
+        when(describeDBInstancesResult.getDBInstances()).thenReturn(List.of(dbInstance));
         when(dbInstance.getDeletionProtection()).thenReturn(true);
 
-        boolean result = victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
+        boolean result = victim.isDeleteProtectionEnabled(describeDBInstancesResult);
         assertEquals(true, result);
 
-        when(dbInstance.getDeletionProtection()).thenReturn(true);
+        when(dbInstance.getDeletionProtection()).thenReturn(false);
 
-        result = victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
-        when(result).thenReturn(false);
-
+        result = victim.isDeleteProtectionEnabled(describeDBInstancesResult);
+        assertEquals(false, result);
     }
 
     public void isDeleteProtectionEnabledShouldThrowCloudConnectorExceptionInCaseOfDBInstanceNotFoundException() {
         when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(DBInstanceNotFoundException.class);
-        victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
+        DescribeDBInstancesResult describeDBInstancesResult = mock(DescribeDBInstancesResult.class);
+        victim.isDeleteProtectionEnabled(describeDBInstancesResult);
 
         //if AWS returns that DBInstance does not exist, then we shall consider this as the termination protection is not enabled
-        assertFalse(victim.isDeleteProtectionEnabled(authenticatedContext, dbStack));
-    }
-
-    @Test(expected = CloudConnectorException.class)
-    public void isDeleteProtectionEnabledShouldThrowCloudConnectorExceptionInCaseOfAnyRuntimeException() {
-        when(amazonRDS.describeDBInstances(any(DescribeDBInstancesRequest.class))).thenThrow(RuntimeException.class);
-
-        victim.isDeleteProtectionEnabled(authenticatedContext, dbStack);
+        assertFalse(victim.isDeleteProtectionEnabled(describeDBInstancesResult));
     }
 }

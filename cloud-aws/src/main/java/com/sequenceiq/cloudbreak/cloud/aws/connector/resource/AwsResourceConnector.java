@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,11 +122,13 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception {
-        if (awsRdsStatusLookupService.isDeleteProtectionEnabled(ac, stack)) {
+        DescribeDBInstancesResult describeDBInstancesResult = awsRdsStatusLookupService.getDescribeDBInstancesResult(ac, stack);
+        boolean dbStackExistOnProviderSide = awsRdsStatusLookupService.isDbStackExistOnProviderSide(describeDBInstancesResult);
+        if (awsRdsStatusLookupService.isDeleteProtectionEnabled(describeDBInstancesResult)) {
             LOGGER.debug("Delete protection is enabled for DB: {}, Disabling it", stack.getDatabaseServer().getServerId());
             awsRdsModifyService.disableDeleteProtection(ac, stack);
         }
-        return awsRdsTerminateService.terminate(ac, stack, force, persistenceNotifier, resources);
+        return awsRdsTerminateService.terminate(ac, stack, force, persistenceNotifier, resources, dbStackExistOnProviderSide);
     }
 
     @Override
