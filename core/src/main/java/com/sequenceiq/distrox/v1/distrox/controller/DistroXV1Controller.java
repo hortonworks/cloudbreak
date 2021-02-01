@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Controller;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -34,6 +33,8 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.FilterParam;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
@@ -53,11 +54,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
+import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -75,6 +76,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1R
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
+import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXMaintenanceModeV1ToMainenanceModeV4Converter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXRepairV1RequestToClusterRepairV4RequestConverter;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXScaleV1RequestToStackScaleV4RequestConverter;
@@ -136,15 +138,14 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Inject
     private DistroXService distroxService;
 
+    @Inject
+    private DataHubFiltering dataHubFiltering;
+
     @Override
-    @DisableCheckPermissions
-    public StackViewV4Responses list(String environmentName, String environmentCrn) {
-        StackViewV4Responses stackViewV4Responses;
-        List<StackType> stackTypes = List.of(StackType.WORKLOAD);
-        stackViewV4Responses = Strings.isNullOrEmpty(environmentName)
-                ? stackOperations.listByEnvironmentCrn(workspaceService.getForCurrentUser().getId(), environmentCrn, stackTypes)
-                : stackOperations.listByEnvironmentName(workspaceService.getForCurrentUser().getId(), environmentName, stackTypes);
-        return stackViewV4Responses;
+    @FilterListBasedOnPermissions(action = DESCRIBE_DATAHUB, filter = DataHubFiltering.class)
+    public StackViewV4Responses list(@FilterParam(DataHubFiltering.ENV_NAME) String environmentName,
+            @FilterParam(DataHubFiltering.ENV_CRN) String environmentCrn) {
+        return dataHubFiltering.filterDataHubs(DESCRIBE_DATAHUB, environmentName, environmentCrn);
     }
 
     @Override

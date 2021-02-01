@@ -7,8 +7,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
@@ -17,7 +15,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class BlueprintV4ViewResponse extends CompactViewV4Response implements ResourceCrnAwareApiModel {
+public class BlueprintV4ViewResponse extends CompactViewV4Response {
     @ApiModelProperty(BlueprintModelDescription.STACK_TYPE)
     private String stackType;
 
@@ -89,11 +87,5 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response implements Re
 
     public void setCreated(Long created) {
         this.created = created;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getResourceCrn() {
-        return getCrn();
     }
 }

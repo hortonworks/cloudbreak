@@ -42,6 +42,9 @@
         <Package name="~com\.cloudera\.thunderhead\.service\.authorization.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.personalresourceview.*"/>
+    </Match>
+    <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.usermanagement.*"/>
     </Match>
     <Match>

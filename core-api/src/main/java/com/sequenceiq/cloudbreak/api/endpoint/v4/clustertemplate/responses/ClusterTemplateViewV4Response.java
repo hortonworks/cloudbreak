@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
@@ -18,7 +16,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-public class ClusterTemplateViewV4Response extends CompactViewV4Response implements ResourceCrnAwareApiModel {
+public class ClusterTemplateViewV4Response extends CompactViewV4Response {
 
     private ResourceStatus status;
 
@@ -136,11 +134,5 @@ public class ClusterTemplateViewV4Response extends CompactViewV4Response impleme
 
     public void setCreated(Long created) {
         this.created = created;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getResourceCrn() {
-        return getCrn();
     }
 }

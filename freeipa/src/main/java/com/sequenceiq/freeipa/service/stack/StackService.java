@@ -132,11 +132,6 @@ public class StackService implements ResourceCrnAndNameProvider {
     }
 
     @Override
-    public List<String> getResourceCrnsInAccount() {
-        return stackRepository.findAllEnvironmentCrnsByTenantId(ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.ENVIRONMENT;
     }

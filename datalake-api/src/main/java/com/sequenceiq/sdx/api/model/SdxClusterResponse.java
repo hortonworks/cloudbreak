@@ -2,16 +2,14 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Map;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
-import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class SdxClusterResponse implements ResourceCrnAwareApiModel {
+public class SdxClusterResponse {
 
     private String crn;
 
@@ -218,12 +216,6 @@ public class SdxClusterResponse implements ResourceCrnAwareApiModel {
 
     public void setSdxClusterServiceVersion(String sdxClusterServiceVersion) {
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
-    }
-
-    @JsonIgnore
-    @Override
-    public String getResourceCrn() {
-        return crn;
     }
 
     @Override

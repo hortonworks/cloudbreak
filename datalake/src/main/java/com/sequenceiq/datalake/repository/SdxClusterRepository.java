@@ -14,6 +14,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -52,15 +53,22 @@ public interface SdxClusterRepository extends CrudRepository<SdxCluster, Long> {
 
     List<SdxCluster> findByAccountIdAndEnvNameAndDeletedIsNull(String accountId, String envName);
 
-    List<SdxCluster> findByIdIn(Set<Long> resourceIds);
-
-    @Query("SELECT s.crn FROM SdxCluster s WHERE s.accountId = :accountId")
-    List<String> findAllCrnInAccount(@Param("accountId") String accountId);
-
     @Query("SELECT s.stackCrn FROM SdxCluster s WHERE s.crn = :crn")
     Optional<String> findStackCrnByClusterCrn(@Param("crn") String crn);
 
     @Modifying
     @Query("UPDATE SdxCluster s SET s.certExpirationState = :state WHERE s.id = :id")
     void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
+            "WHERE s.accountId = :accountId AND s.deleted IS NULL")
+    List<AuthorizationResource> findAuthorizationResourcesByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
+            "WHERE s.accountId = :accountId AND s.envName = :envName AND s.deleted IS NULL")
+    List<AuthorizationResource> findAuthorizationResourcesByAccountIdAndEnvName(@Param("accountId") String accountId, @Param("envName") String envName);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
+            "WHERE s.accountId = :accountId AND s.envCrn = :envCrn AND s.deleted IS NULL")
+    List<AuthorizationResource> findAuthorizationResourcesByAccountIdAndEnvCrn(@Param("accountId") String accountId, @Param("envCrn") String envCrn);
 }

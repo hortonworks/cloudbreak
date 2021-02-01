@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 
@@ -22,4 +23,11 @@ public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long> {
 
     @Query("SELECT f FROM FreeIpa f LEFT JOIN FETCH f.stack s WHERE s.accountId = :accountId AND s.terminated = -1")
     List<FreeIpa> findByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT f FROM FreeIpa f LEFT JOIN FETCH f.stack s WHERE f.id IN :ids AND s.terminated = -1")
+    List<FreeIpa> findAllByIds(@Param("ids") List<Long> ids);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(f.id, f.stack.environmentCrn) " +
+            "FROM FreeIpa f WHERE f.stack.accountId = :accountId AND f.stack.terminated = -1")
+    List<AuthorizationResource> findAllAsAuthorizationResources(@Param("accountId") String accountId);
 }

@@ -49,6 +49,10 @@ public class InternalCrnBuilder {
         return INTERNAL_USER_CRN.equals(c.getResource());
     }
 
+    public static boolean isInternalCrn(Crn crn) {
+        return INTERNAL_USER_CRN.equals(crn.getResource());
+    }
+
     public String getInternalCrnForServiceAsString() {
         return getInternalCrnForService().toString();
     }
