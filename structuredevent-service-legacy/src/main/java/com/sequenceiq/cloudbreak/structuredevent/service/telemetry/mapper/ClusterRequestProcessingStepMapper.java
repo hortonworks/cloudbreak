@@ -6,7 +6,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 
 @Component
-public class RequestProcessingStepMapper {
+public class ClusterRequestProcessingStepMapper {
 
     public UsageProto.CDPRequestProcessingStep.Value mapIt(FlowDetails flow) {
         UsageProto.CDPRequestProcessingStep.Value requestType = UsageProto.CDPRequestProcessingStep.Value.UNSET;
@@ -21,7 +21,7 @@ public class RequestProcessingStepMapper {
     }
 
     public boolean isFirstStep(FlowDetails flow) {
-        return "INIT_STATE".equals(flow.getFlowState());
+        return "INIT_STATE".equals(flow.getNextFlowState());
     }
 
     public boolean isLastStep(FlowDetails flow) {

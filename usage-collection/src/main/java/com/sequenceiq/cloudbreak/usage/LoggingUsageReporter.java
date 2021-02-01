@@ -88,6 +88,22 @@ public class LoggingUsageReporter implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpDatahubRequested(UsageProto.CDPDatahubRequested details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpDatahubRequested(details)
+                .build());
+    }
+
+    @Override
+    public void cdpDatahubStatusChanged(UsageProto.CDPDatahubStatusChanged details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpDatahubStatusChanged(details)
+                .build());
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())
