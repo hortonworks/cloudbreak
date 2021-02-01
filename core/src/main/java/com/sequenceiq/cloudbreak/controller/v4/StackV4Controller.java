@@ -364,4 +364,10 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier renewCertificate(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.renewCertificate(name);
     }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier updateLoadBalancersInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.updateLoadBalancers(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
 }
