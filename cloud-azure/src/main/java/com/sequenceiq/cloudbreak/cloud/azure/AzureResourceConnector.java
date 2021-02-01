@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
@@ -141,7 +142,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception {
-        throw new UnsupportedOperationException("Load balancers are not supported for Azure.");
+        // todo: we're implementing this method as part of the work to add LBs to an existing environment. See CB-11647
+        return ImmutableList.of();
     }
 
     private List<CloudResource> persistCloudResources(

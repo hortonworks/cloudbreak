@@ -1,65 +1,65 @@
 # Flow
 
-Cloudbreak Flow engine is responsible for manage the different execution flows of the cloudbreak's microservices using the Spring StateMachine project and
+Cloudbreak Flow engine is responsible for manage the different execution flows of Cloudbreak's microservices using the Spring StateMachine project and
 Reactor events.
 
-* Sprint StateMachine: https://projects.spring.io/spring-statemachine/ Version: 1.0.1.RELEASE
+* Spring StateMachine: https://projects.spring.io/spring-statemachine/ Version: 1.0.1.RELEASE
 * Project Reactor: https://projectreactor.io/docs Version: 2.0.7.RELEASE
 
-If you would like to use the flow in your application, you have to implement the following interfaces:
-- ApplicationFlowInformation
-    - You have to define here the application's restartable flows, which will be restarted after your application restarted
-    - You have to define here the application's parallel flows for a resource, which can be triggered even if other flows are running on that resource.
-- The application's flow configurations
+If you would like to use the Flow engine in your application, you must implement the following interfaces:
+- [`ApplicationFlowInformation`](flow/src/main/java/com/sequenceiq/flow/core/ApplicationFlowInformation.java)
+    - You have to define here the application's _restartable_ flows, which will be restarted after your application is restarted
+    - You have to define here the application's _parallel_ flows for a resource, which can be triggered even if other flows are running on that resource.
+- The application's flow configurations.
 
 ## Flow configuration:
 You must implement the following interfaces and abstract classes per flow:
-- FlowState: define the states of the flow
-- FlowEvent: define the events between the flow states
-- AbstractFlowConfiguration: configure the statemachine with its states and its transitions
+- [`FlowState`](flow/src/main/java/com/sequenceiq/flow/core/FlowState.java): define the states of the flow
+- [`FlowEvent`](flow/src/main/java/com/sequenceiq/flow/core/FlowEvent.java): define the events between the flow states
+- [`AbstractFlowConfiguration`](flow/src/main/java/com/sequenceiq/flow/core/config/AbstractFlowConfiguration.java): configure the statemachine with its states and its transitions
   - have to define the flow transitions
     - source state
     - target state
     - event
     - failure state
     - failure event
-  - have to define the FlowEdgeConfig
+  - have to define the `FlowEdgeConfig`
     - init state
     - final state
     - defaultFailureState: all the failure events from the states will lead to this state,
-    - failHandled event)
-- AbstractAction implementations for the different flow states.
+    - `failureHandled` event
+- `AbstractAction` implementations for the different flow states.
 
 You can implement the following interfaces for the flow to be more flexible:
-- Create your own context inherit from CommonContext
-- PayloadConverter which can be used to convert different payloads to the one which is appropriate for the state's action
-- FlowTriggerCondition: you can implement your own flow trigger condition with which you can decide if a flow is triggerable for the specified resource or not
+- Create your own context, by extending `CommonContext`.
+- Implementing `PayloadConverter` which can be used to convert different payloads to the one which is appropriate for the state's action.
+- FlowTriggerCondition: you can implement your own flow trigger condition which can decide if a flow is triggerable for the specified resource or not.
 
 ## General hints:
-- The state's actions execution time recommended to be short: mainly administration purpose: database updates, notifications, etc.
-- The state's actions triggers reactor handlers which executes long term operations, tasks.
-- The reactor handlers sends back flow control events which will lead the flow to its next state
+- The state's actions execution time should be short and should mainly perform administrative actions: database updates, notifications, etc.
+- The state's actions trigger _reactor handlers_ which execute long term operations or tasks.
+- The reactor handlers send back flow control events which will transition the flow to its next state
 - Reactor handlers should send back the flow control event with the event headers copied from the handler's trigger event.
 
 ## General usage of a flow:
 - Trigger the flow with its trigger event.
-  - flow will be initialized, step into the init state and execute the action of it
-  - on all the states
-    - from the action the trigger event will be sent to its reactor handler
-    - the handler will send the next flow control event: failure or success
-    - in case of failure the general behavior is to handle the error and finish the flow
-  - from the last state the finalize event will be sent automatically and the flow will be finished
+  - The flow will be initialized, then step into the initial state, and execute its action.
+  - For every `State` in the flow:
+    - The `Action` associated with the state will send the trigger `Event` to its Reactor `Handler`.
+    - The handler will send the next flow control event: failure or success
+    - In case of failure the general behavior is to handle the error and finish the flow
+  - The last state of the flow will automatically send a finalize event and the flow will be finished.
 
-## Example "Hello world" flow:
-#### Flow states
-Lets define flow states for our flow. You have to implement *FlowState* interface and define your state enums.
+# Example "Hello world" flow:
+## Flow states
+Let's define flow states for our flow. You have to implement the *FlowState* interface and define your state enums.
 
 We will have the following states:
-* INIT_STATE
-* HELLO_WORLD_START_STATE
-* HELLO_WORLD_FINISHED_STATE
-* HELLO_WORLD_FAILED_STATE
-* FINAL_STATE
+* `INIT_STATE`
+* `HELLO_WORLD_START_STATE`
+* `HELLO_WORLD_FINISHED_STATE`
+* `HELLO_WORLD_FAILED_STATE`
+* `FINAL_STATE`
 
 In code:
 ```java
@@ -72,12 +72,14 @@ public enum HelloWorldState implements FlowState {
 }
 ```
 
-You can define restart action for your flow, it will be used when you restart a failed flow. For example in data lake service we are using 
-*FillInMemoryStateStoreRestartAction*. It will update the data lake’s status in the *DatalakeInMemoryStateStore* to *CANCELLED* or *POLLABLE* based on the status. 
-We are using this to cancel running flows. If you have a data lake install flow and it is polling cloudbreak for stack status, then if you send a terminate 
-request we shall cancel the installation flow. It happens through this in-memory store. 
+You can define restart actions for your flow, which will be used when you restart a failed flow. 
 
-You can override restartAction this way:
+For example, in the [Data Lake service](datalake/src/main/java/com/sequenceiq/datalake) we are using `FillInMemoryStateStoreRestartAction`. 
+It will update the data lake’s status in the `DatalakeInMemoryStateStore` to `CANCELLED` or `POLLABLE` based on the status. 
+We are using this to cancel running flows. If you have a data lake install flow, and it is polling Cloudbreak for stack status, then if you send a terminate 
+request we cancel the installation flow. It happens through this in-memory store. 
+
+You can override `restartAction` this way:
 ```java
    @Override
    public Class<? extends RestartAction> restartAction() {
@@ -85,8 +87,8 @@ You can override restartAction this way:
    }
 ```
 
-#### Flow events
-Events will be sent to flow engine. Flow will change it’s states on these events.
+## Flow events
+`FlowEvent`s are sent to the flow engine, which changes its state based on these events.
 ```java
 public enum HelloWorldEvent implements FlowEvent {
    HELLOWORLD_TRIGGER_EVENT,
@@ -107,19 +109,20 @@ public enum HelloWorldEvent implements FlowEvent {
    }
 }
 ```
-#### Flow config
-We have to define which state follows which state. For this reason you have to implement a Flow config. It extends from *AbstractFlowConfiguration*. 
-If you want it to be retryable, then implement *RetryableFlowConfiguration*.
 
-First define transition with *Transition.Builder* class. It is a generic class with two type. First type is the state enum, second type is the event enum. 
-Define the default failure event, in our case it is *HELLOWORLD_SOMETHING_WENT_WRONG*. Then you can define state changes in your flow. Every state changes needs 
-a from - to on which event and what event will be triggered on failure. It can be the *defaultFailureEvent* or you can define a specific failure event like 
-*HELLOWORLD_FIRST_STEP_WENT_WRONG_EVENT* in the second step.
+## Flow config
+We have to define which state follows which state. To do that, we implement a Flow config, which extends from `AbstractFlowConfiguration`. 
+If you want it to be retryable, then implement `RetryableFlowConfiguration`.
+
+First define transition with `Transition.Builder` class. It is a generic class with two type. First type is the state enum, second type is the event enum. 
+Define the default failure event, in our case it is `HELLOWORLD_SOMETHING_WENT_WRONG`. Then you can define state changes in your flow. Every state changes needs 
+a from - to on which event and what event will be triggered on failure. It can be the `defaultFailureEvent` or you can define a specific failure event like 
+`HELLOWORLD_FIRST_STEP_WENT_WRONG_EVENT` in the second step.
 
 You have to define flow edge config, it will define what is your init and final state, the default failure state and the fail handled event. 
 We need fail handled event for restart. If this event arrives it means we handled failure correctly so it can be restarted.
 
-*getEvents* method should return your events, *getInitEvents* should return your initial event(s) and *getRetryableEvent* returns the event we can recover from.
+`getEvents` method should return your events, `getInitEvents` should return your initial event(s) and `getRetryableEvent` returns the event we can recover from.
 ```java
 @Component
 public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldState, HelloWorldEvent> implements RetryableFlowConfiguration<HelloWorldEvent> {
@@ -186,15 +189,15 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
    }
 }
 ```
-#### Actions
-We will implement the actions for flow states. Let’s see first state *HELLO_WORLD_FIRST_STEP_STATE*. In flow config we have the following lines: 
+## Actions
+We will implement the actions for flow states. Let’s see first state `HELLO_WORLD_FIRST_STEP_STATE`. In flow config we have the following lines: 
 ```java
 .from(INIT_STATE)
 .to(HELLO_WORLD_FIRST_STEP_STATE)
 .event(HELLOWORLD_TRIGGER_EVENT)
 ```
-So flow will move from *INIT_STATE* to *HELLO_WORLD_FIRST_STEP_STATE* when *HELLOWORLD_TRIGGER_EVENT* arrives. This is how you can move from one state to another. 
-As you can remember in *FlowEdgeConfig* we defined the start event for our new flow:  
+So flow will move from `INIT_STATE` to `HELLO_WORLD_FIRST_STEP_STATE` when `HELLOWORLD_TRIGGER_EVENT` arrives. This is how you can move from one state to another. 
+As you can remember in `FlowEdgeConfig` we defined the start event for our new flow:  
 ```java
 @Override
 public HelloWorldEvent[] getInitEvents() {
@@ -203,9 +206,9 @@ public HelloWorldEvent[] getInitEvents() {
    };
 }
 ```
-We will implement actions in *HelloWorldActions* class. You can see below we have a Bean with name *HELLO_WORLD_FIRST_STEP_STATE*. This is the first action in 
+We will implement actions in `HelloWorldActions` class. You can see below we have a Bean with name `HELLO_WORLD_FIRST_STEP_STATE`. This is the first action in 
 our flow. In doExecute you can do the implementation for this state. This time we just print a log message and send an 
-*HelloWorldFirstStepLongLastingTaskTriggerEvent*, but why we do this? This is where handlers come into picture.
+`HelloWorldFirstStepLongLastingTaskTriggerEvent`, but why we do this? This is where handlers come into picture.
 ```java
 @Configuration
 public class HelloWorldActions {
@@ -287,17 +290,18 @@ public class HelloWorldActions {
     }
 }
 ```
-*getFailurePayload* method is called when somehow an unexpected exception happens in your action's *doExecute*. It should return with your failure payload, 
+`getFailurePayload` method is called when somehow an unexpected exception happens in your action's `doExecute`. It should return with your failure payload, 
 usually it contains an exception.
-#### Handlers
-If you have to do something that can takes long time, like a remote call or polling something, then you shouldn’t do it in an action’s *doExecute* method. 
-If you do this then it will consume one reactor thread and after a while it can happen there will be no available threads for reactor to process events for new 
-flows. For this reason you should create a Handler. Handlers should extend from *ExceptionCatcherEventHandler*. 
+
+## Handlers
+If you have to do something that can take a long time, like a remote call or polling something, then you shouldn’t do it in an action's `doExecute` method. 
+If you do this then it will consume one reactor thread and after a while it can happen there will be no available threads for Reactor to process events for new 
+flows. For this reason you should create a Handler. Handlers should extend from `ExceptionCatcherEventHandler`. 
 You have to implement selector method to define which event your handler will listen on. In our case this event is 
-*HelloWorldFirstStepLongLastingTaskTriggerEvent*. You have to define a default failure event also, it will be sent if some unexpected and unhandled exception 
-happening in your handler. In *doAccept* you can do your long lasting actions like polling or rest calls and you have to return with an event you want to send 
-back to reactor. In this scenario we send a *HelloWorldFirstStepLongLastingTaskSuccessResponse* in successful case, and a 
-*HelloWorldFirstStepLongLastingTaskFailureResponse* in failed case. It is very common to put results into these responses for next flow steps.
+`HelloWorldFirstStepLongLastingTaskTriggerEvent`. You have to define a default failure event also, it will be sent if some unexpected and unhandled exception 
+happening in your handler. In `doAccept` you can do your long lasting actions like polling or rest calls and you have to return with an event you want to send 
+back to reactor. In this scenario we send a `HelloWorldFirstStepLongLastingTaskSuccessResponse` in successful case, and a 
+`HelloWorldFirstStepLongLastingTaskFailureResponse` in failed case. It is very common to put results into these responses for next flow steps.
 ```java
 @Component
 public class HelloWorldFirstStepLongLastingTaskHandler extends ExceptionCatcherEventHandler<HelloWorldFirstStepLongLastingTaskTriggerEvent> {
@@ -328,9 +332,9 @@ public class HelloWorldFirstStepLongLastingTaskHandler extends ExceptionCatcherE
 }
 ```
 
-You can check the second step is *HELLO_WORLD_SECOND_STEP_STATE* in our flow. It is waiting for a *HelloWorldFirstStepLongLastingTaskSuccessResponse* payload, 
-we sent from handler previously. It is a very simple step also, it’s just print a log, then sends a *HELLOWORLD_SECOND_STEP_FINISHED_EVENT*, so our flow can 
-step into *HELLO_WORLD_FINISHED_STATE* where our flow ends.
+You can check the second step is `HELLO_WORLD_SECOND_STEP_STATE` in our flow. It is waiting for a `HelloWorldFirstStepLongLastingTaskSuccessResponse` payload, 
+we sent from handler previously. It is a very simple step also, it’s just print a log, then sends a `HELLOWORLD_SECOND_STEP_FINISHED_EVENT`, so our flow can 
+step into `HELLO_WORLD_FINISHED_STATE` where our flow ends.
 
 ## Restartable flows:
 

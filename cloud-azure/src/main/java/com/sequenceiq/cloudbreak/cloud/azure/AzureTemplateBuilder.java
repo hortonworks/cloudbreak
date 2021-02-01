@@ -75,7 +75,9 @@ public class AzureTemplateBuilder {
             String rootDiskStorage = azureStorage.getImageStorageName(armCredentialView, cloudContext, cloudStack);
             AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
 
-            // needed for pre 1.16.5 templates
+            AzureLoadBalancerModelBuilder loadBalancerModelBuilder = new AzureLoadBalancerModelBuilder(cloudStack, stackName);
+
+            // needed for pre 1.16.5 templates and Load balancer setup on Medium duty datalakes.
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
 
             model.put("customImageId", customImageId);
@@ -101,6 +103,7 @@ public class AzureTemplateBuilder {
             model.put("userDefinedTags", cloudStack.getTags());
             model.put("acceleratedNetworkEnabled", azureAcceleratedNetworkValidator.validate(armStack));
             model.put("isUpscale", UPSCALE.equals(azureInstanceTemplateOperation));
+            model.putAll(loadBalancerModelBuilder.buildModel());
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.info("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;

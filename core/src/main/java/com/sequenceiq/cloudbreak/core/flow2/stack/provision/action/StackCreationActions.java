@@ -246,8 +246,9 @@ public class StackCreationActions {
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(context.getStack().getId()).stream()
                     .map(LoadBalancer::getType)
                     .collect(Collectors.toList());
+                List<CloudResource> cloudResources = cloudResourceConverter.convert(context.getStack().getResources());
                 return new CollectLoadBalancerMetadataRequest(context.getCloudContext(), context.getCloudCredential(),
-                    loadBalancerTypes);
+                    loadBalancerTypes, cloudResources);
             }
         };
     }

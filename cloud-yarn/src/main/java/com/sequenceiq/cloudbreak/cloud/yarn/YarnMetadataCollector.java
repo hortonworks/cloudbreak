@@ -144,7 +144,8 @@ public class YarnMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
+    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes,
+            List<CloudResource> resources) {
         List<CloudLoadBalancerMetadata> loadBalancerMetadata = Lists.newArrayList();
 
         if (loadBalancerTypes.size() == 0) {

@@ -32,4 +32,12 @@ public class CloudLoadBalancer {
     public LoadBalancerType getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return "CloudLoadBalancer{" +
+            "type=" + type +
+            ", portToTargetGroupMapping=" + portToTargetGroupMapping +
+            '}';
+    }
 }

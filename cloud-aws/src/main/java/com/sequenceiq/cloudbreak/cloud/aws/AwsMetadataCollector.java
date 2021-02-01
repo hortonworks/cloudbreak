@@ -181,7 +181,8 @@ public class AwsMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
+    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes,
+            List<CloudResource> resources) {
         LOGGER.debug("Collect AWS load balancer metadata, for cluster {}", ac.getCloudContext().getName());
 
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = new ArrayList<>();

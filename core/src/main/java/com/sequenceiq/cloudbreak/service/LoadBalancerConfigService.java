@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static java.util.Map.entry;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,14 +23,19 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.NetworkV4Base;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -35,7 +44,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
-import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -43,18 +51,16 @@ import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
-
 @Service
 public class LoadBalancerConfigService {
+
+    public static final int DEFAULT_UPDATE_DOMAIN_COUNT = 20;
+
+    public static final int DEFAULT_FAULT_DOMAIN_COUNT = 2;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LoadBalancerConfigService.class);
 
     private static final String ENDPOINT_SUFFIX = "gateway";
-
-    private static final String SUBNET_ID = "subnetId";
-
-    private static final Set<Integer> DEFAULT_KNOX_PORTS = Set.of(443);
 
     @Value("${cb.https.port:443}")
     private String httpsPort;
@@ -73,6 +79,9 @@ public class LoadBalancerConfigService {
 
     @Inject
     private SubnetSelector subnetSelector;
+
+    @Inject
+    private ProviderParameterCalculator providerParameterCalculator;
 
     public Set<String> getKnoxGatewayGroups(Stack stack) {
         LOGGER.debug("Fetching list of instance groups with Knox gateway installed");
@@ -96,11 +105,6 @@ public class LoadBalancerConfigService {
             LOGGER.info("No Knox gateway instance groups found");
         }
         return groupNames;
-    }
-
-    private boolean isKnoxGatewayDefinedInServices(Set<ServiceComponent> serviceComponents) {
-        return serviceComponents.stream()
-            .anyMatch(serviceComponent -> KnoxRoles.KNOX_GATEWAY.equals(serviceComponent.getComponent()));
     }
 
     public String generateLoadBalancerEndpoint(Stack stack) {
@@ -159,7 +163,44 @@ public class LoadBalancerConfigService {
     }
 
     public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean loadBalancerFlagEnabled) {
-        return setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
+        Set<LoadBalancer> loadBalancers = setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
+
+        if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.toString())) {
+            configureLoadBalancerAvailabilitySets(stack.getName(), loadBalancers);
+        }
+        return loadBalancers;
+    }
+
+    /**
+     * Adds availability sets to instance groups associated with Knox target groups.
+     * This method updates the JSON parameters associated with certain instance groups.
+     *
+     * It's only necessary to add availability sets to the Azure deployment while we
+     * use the {@code basic} Azure Load Balancer SKU.
+     *
+     * @param availabilitySetPrefix A string prefix. Should be a stack name normally.
+     * @param loadBalancers the list of load balancers to look up target groups from.
+     */
+    public void configureLoadBalancerAvailabilitySets(String availabilitySetPrefix, Set<LoadBalancer> loadBalancers) {
+        getKnoxInstanceGroups(loadBalancers)
+                .forEach(instanceGroup -> attachAvailabilitySetParameters(availabilitySetPrefix, instanceGroup));
+    }
+
+    private void attachAvailabilitySetParameters(String availabilitySetPrefix, InstanceGroup ig) {
+        Map<String, Object> parameters = ig.getAttributes().getMap();
+        parameters.put("availabilitySet", Map.ofEntries(
+                entry(AzureInstanceGroupParameters.NAME, String.format("%s-%s-as", availabilitySetPrefix, ig.getGroupName())),
+                entry(AzureInstanceGroupParameters.FAULT_DOMAIN_COUNT, DEFAULT_FAULT_DOMAIN_COUNT),
+                entry(AzureInstanceGroupParameters.UPDATE_DOMAIN_COUNT, DEFAULT_UPDATE_DOMAIN_COUNT)));
+        ig.setAttributes(new Json(parameters));
+    }
+
+    private Set<InstanceGroup> getKnoxInstanceGroups(Set<LoadBalancer> loadBalancers) {
+        return loadBalancers.stream()
+                .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
+                .filter(targetGroup -> TargetGroupType.KNOX.equals(targetGroup.getType()))
+                .flatMap(targetGroup -> targetGroup.getInstanceGroups().stream())
+                .collect(Collectors.toSet());
     }
 
     public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
@@ -224,13 +265,21 @@ public class LoadBalancerConfigService {
 
     private boolean isSelectedSubnetAvailableAndRequestedType(Network network, EnvironmentNetworkResponse envNetwork, boolean privateType) {
         if (network != null) {
-            Json attributes = network.getAttributes();
-            Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
-            String subnetId = params.get(SUBNET_ID) != null ? String.valueOf(params.get(SUBNET_ID)) : null;
+            String subnetId = getSubnetId(network);
             if (StringUtils.isNotEmpty(subnetId)) {
                 LOGGER.debug("Found selected stack subnet {}", subnetId);
                 Optional<CloudSubnet> selectedSubnet = subnetSelector.findSubnetById(envNetwork.getSubnetMetas(), subnetId);
-                if (selectedSubnet.isPresent()) {
+
+                // "noPublicIp" is an option for Azure and GCP that is used to set the network to private or public, it is not
+                // set on AWS networks. So, we check for it first, then fall back to AWS.
+                NetworkV4Base networkV4Base = getNetworkV4Base(network);
+                if (networkV4Base.isNoPublicIp().isPresent()) {
+                    // azure and gcp specific
+                    Boolean noPublicIp = networkV4Base.isNoPublicIp().get();
+                    LOGGER.debug("Subnet {} type {}", subnetId, noPublicIp ? "private" : "public");
+                    return privateType == noPublicIp;
+                } else if (selectedSubnet.isPresent()) {
+                    // aws specific
                     LOGGER.debug("Subnet {} type {}", subnetId, selectedSubnet.get().isPrivateSubnet() ? "private" : "public");
                     return privateType == selectedSubnet.get().isPrivateSubnet();
                 }
@@ -238,6 +287,23 @@ public class LoadBalancerConfigService {
         }
         LOGGER.debug("Subnet for load balancer creation was not found.");
         return false;
+    }
+
+    private String getSubnetId(Network network) {
+        Json attributes = network.getAttributes();
+        Map<String, Object> params = attributes == null ?
+                Collections.emptyMap() : attributes.getMap();
+
+        return params.get(NetworkConstants.SUBNET_ID) != null ? String.valueOf(params.get(NetworkConstants.SUBNET_ID)) : null;
+    }
+
+    private NetworkV4Base getNetworkV4Base(Network network) {
+        Json attributes = network.getAttributes();
+        Map<String, Object> params = attributes == null ?
+                Collections.emptyMap() : attributes.getMap();
+        NetworkV4Base networkV4Base = new NetworkV4Base();
+        providerParameterCalculator.parse(params, networkV4Base);
+        return networkV4Base;
     }
 
     private boolean isLoadBalancerEnabled(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment, boolean flagEnabled) {
@@ -283,7 +349,10 @@ public class LoadBalancerConfigService {
         Set<InstanceGroup> knoxGatewayInstanceGroups = stack.getInstanceGroups().stream()
             .filter(ig -> knoxGatewayGroupNames.contains(ig.getGroupName()))
             .collect(Collectors.toSet());
-        if (!knoxGatewayInstanceGroups.isEmpty()) {
+
+        if (AZURE.equalsIgnoreCase(stack.getCloudPlatform()) && knoxGatewayInstanceGroups.size() > 1) {
+            throw new CloudbreakServiceException("For Azure load balancers, Knox must be defined in a single instance group.");
+        } else if (!knoxGatewayInstanceGroups.isEmpty()) {
             LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
             knoxTargetGroup = new TargetGroup();
             knoxTargetGroup.setType(TargetGroupType.KNOX);

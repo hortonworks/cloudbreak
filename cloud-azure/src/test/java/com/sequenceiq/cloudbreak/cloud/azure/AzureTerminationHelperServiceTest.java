@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -135,6 +137,15 @@ class AzureTerminationHelperServiceTest {
         verify(azureComputeResourceService).deleteComputeResources(any(), any(), eq(volumeSets), any());
         verify(azureUtils).deleteSecurityGroups(any(), eq(NSG_ID_LIST));
         verify(azureUtils).deleteNetworks(any(), eq(NETWORK_ID_LIST));
+    }
+
+    @Test
+    void testWhenDeleteWholeDeploymentThenLoadBalancersAreRemovedBeforePublicIps() {
+        underTest.terminate(ac, cloudStack, resourcesToRemoveList);
+
+        InOrder inOrder = inOrder(azureUtils);
+        inOrder.verify(azureUtils).deleteLoadBalancers(any(), any(), any());
+        inOrder.verify(azureUtils).deletePublicIps(any(), any(), any());
     }
 
     private List<CloudResource> setupCloudResources() {

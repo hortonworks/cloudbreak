@@ -124,10 +124,6 @@ public class AzureUtils {
         sb.delete(j, sb.length());
     }
 
-    public String getLoadBalancerId(String stackName) {
-        return String.format("%s%s", stackName, "lb");
-    }
-
     public String getPrivateInstanceId(String stackName, String groupName, String privateId) {
         return String.format("%s%s%s", stackName, getGroupName(groupName), privateId);
     }
@@ -381,12 +377,11 @@ public class AzureUtils {
             }
             Completable.mergeDelayError(deleteCompletables).await();
         } catch (CompositeException e) {
-            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
-            LOGGER.error("Error(s) occured while waiting for vm deletion: {}", errorMessages);
-            throw new CloudbreakServiceException("Error(s) occured while waiting for vm deletion: " + errorMessages, e);
+            logAndWrapCompositeException(e, "Error(s) occured while waiting for vm deletion: {}",
+                    "Error(s) occured while waiting for vm deletion: ");
         } catch (RuntimeException e) {
-            LOGGER.error("Error occured while waiting for vm deletion: {}", e.getMessage(), e);
-            throw new CloudbreakServiceException("Error occured while waiting for vm deletion: " + e.getMessage(), e);
+            wrapAndLog(e, "Error occured while waiting for vm deletion: {}",
+                    "Error occured while waiting for vm deletion: ");
         }
     }
 
@@ -419,12 +414,11 @@ public class AzureUtils {
             }
             Completable.mergeDelayError(deleteCompletables).await();
         } catch (CompositeException e) {
-            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
-            LOGGER.error("Error(s) occured while waiting for network interface deletion: {}", errorMessages);
-            throw new CloudbreakServiceException("Error(s) occured while waiting for network interface deletion: " + errorMessages, e);
+            logAndWrapCompositeException(e, "Error(s) occured while waiting for network interface deletion: {}",
+                    "Error(s) occured while waiting for network interface deletion: ");
         } catch (RuntimeException e) {
-            LOGGER.error("Error occured while waiting for network interface deletion: {}", e.getMessage(), e);
-            throw new CloudbreakServiceException("Error occured while waiting for network interface deletion: " + e.getMessage(), e);
+            wrapAndLog(e, "Error occured while waiting for network interface deletion: {}",
+                    "Error occured while waiting for network interface deletion: ");
         }
     }
 
@@ -444,12 +438,38 @@ public class AzureUtils {
             }
             Completable.mergeDelayError(deleteCompletables).await();
         } catch (CompositeException e) {
-            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
-            LOGGER.error("Error(s) occured while waiting for public ip deletion: {}", errorMessages);
-            throw new CloudbreakServiceException("Error(s) occured while waiting for public ip deletion: " + errorMessages, e);
+            logAndWrapCompositeException(e, "Error(s) occured while waiting for public ip deletion: {}",
+                    "Error(s) occured while waiting for public ip deletion: ");
         } catch (RuntimeException e) {
-            LOGGER.error("Error occured while waiting for public ip deletion: {}", e.getMessage(), e);
-            throw new CloudbreakServiceException("Error occured while waiting for public ip deletion: " + e.getMessage(), e);
+            wrapAndLog(e, "Error occured while waiting for public ip deletion: {}",
+                    "Error occured while waiting for public ip deletion: ");
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void deleteLoadBalancers(AzureClient azureClient, String resourceGroupName, Collection<String> loadBalancerNames) {
+        LOGGER.info("Deleting load balancers: {}", loadBalancerNames);
+        try {
+            List<Completable> deleteCompletables = new ArrayList<>();
+            for (String loadBalancerName : loadBalancerNames) {
+                deleteCompletables.add(azureClient.deleteLoadBalancerAsync(resourceGroupName, loadBalancerName)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure load balancer delete: {}", loadBalancerName, throwable);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables)
+                    .doOnCompleted(() -> {
+                        LOGGER.debug("Azure load balancers successfully deleted.");
+                    })
+                    .await();
+        } catch (CompositeException e) {
+            logAndWrapCompositeException(e, "Error(s) occurred while waiting for load balancer deletion: {}",
+                    "Error(s) occurred while waiting for load balancer deletion: ");
+        } catch (RuntimeException e) {
+            wrapAndLog(e, "Error occurred  while waiting for load balancer deletion: {}",
+                    "Error occurred while waiting for load balancer deletion: ");
+            return;
         }
     }
 
@@ -469,12 +489,11 @@ public class AzureUtils {
             }
             Completable.mergeDelayError(deleteCompletables).await();
         } catch (CompositeException e) {
-            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
-            LOGGER.error("Error(s) occured while waiting for availability set deletion: {}", errorMessages);
-            throw new CloudbreakServiceException("Error(s) occured while waiting for availability set deletion: " + errorMessages, e);
+            logAndWrapCompositeException(e, "Error(s) occured while waiting for availability set deletion: {}",
+                    "Error(s) occured while waiting for availability set deletion: ");
         } catch (RuntimeException e) {
-            LOGGER.error("Error occured while waiting for availability set deletion: {}", e.getMessage(), e);
-            throw new CloudbreakServiceException("Error occured while waiting for availability set deletion: " + e.getMessage(), e);
+            wrapAndLog(e, "Error occured while waiting for availability set deletion: {}",
+                    "Error occured while waiting for availability set deletion: ");
         }
     }
 
@@ -562,12 +581,11 @@ public class AzureUtils {
             }
             Completable.mergeDelayError(deleteCompletables).await();
         } catch (CompositeException e) {
-            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
-            LOGGER.error("Error(s) occured while waiting for generic resource deletion: {}", errorMessages);
-            throw new CloudbreakServiceException("Error(s) occured while waiting for generic resource deletion: " + errorMessages, e);
+            logAndWrapCompositeException(e, "Error(s) occured while waiting for generic resource deletion: {}",
+                    "Error(s) occured while waiting for generic resource deletion: ");
         } catch (RuntimeException e) {
-            LOGGER.error("Error occured while waiting for generic resource deletion: {}", e.getMessage(), e);
-            throw new CloudbreakServiceException("Error occured while waiting for generic resource deletion: " + e.getMessage(), e);
+            wrapAndLog(e, "Error occured while waiting for generic resource deletion: {}",
+                    "Error occured while waiting for generic resource deletion: ");
         }
     }
 
@@ -682,5 +700,16 @@ public class AzureUtils {
         } else {
             return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
         }
+    }
+
+    private void logAndWrapCompositeException(CompositeException ce, String formatString, String exceptionString) {
+        String errorMessages = ce.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+        LOGGER.error(formatString, errorMessages);
+        throw new CloudbreakServiceException(exceptionString + errorMessages, ce);
+    }
+
+    private void wrapAndLog(RuntimeException e, String formatString, String exceptionPrefix) {
+        LOGGER.error(formatString, e.getMessage(), e);
+        throw new CloudbreakServiceException(exceptionPrefix + e.getMessage(), e);
     }
 }

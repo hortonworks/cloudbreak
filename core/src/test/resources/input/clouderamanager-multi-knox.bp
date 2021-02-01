@@ -1,0 +1,316 @@
+{
+  "cdhVersion": "6.1.0",
+  "products": [
+    {
+      "version": "6.1.0-1.cdh6.1.0.p0.770702",
+      "product": "CDH"
+    }
+  ],
+  "services": [
+    {
+      "refName": "isilon",
+      "serviceType": "ISILON",
+      "serviceConfigs": [
+        {
+          "name": "default_fs_name",
+          "value": "hdfs",
+          "ref": null,
+          "variable": null,
+          "autoConfig": null
+        }
+      ],
+      "roleConfigGroups": null,
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "hdfs",
+      "serviceType": "HDFS",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "hdfs-NAMENODE-BASE",
+          "roleType": "NAMENODE",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "hdfs-SECONDARYNAMENODE-BASE",
+          "roleType": "SECONDARYNAMENODE",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "hdfs-DATANODE-BASE",
+          "roleType": "DATANODE",
+          "base": null,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "hdfs-BALANCER-BASE",
+          "roleType": "BALANCER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "kafka",
+      "serviceType": "KAFKA",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "kafka-KAFKA_BROKER-BASE",
+          "roleType": "KAFKA_BROKER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "hbase",
+      "serviceType": "HBASE",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "hbase-REGIONSERVER-BASE",
+          "roleType": "REGIONSERVER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "hbase-MASTER-BASE",
+          "roleType": "MASTER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "yarn",
+      "serviceType": "YARN",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "yarn-RESOURCEMANAGER-BASE",
+          "roleType": "RESOURCEMANAGER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "yarn-NODEMANAGER-BASE",
+          "roleType": "NODEMANAGER",
+          "base": false,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "yarn-JOBHISTORY-BASE",
+          "roleType": "JOBHISTORY",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "spark_on_yarn",
+      "serviceType": "SPARK_ON_YARN",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "roleType": "SPARK_YARN_HISTORY_SERVER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "spark_on_yarn-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "hive",
+      "serviceType": "HIVE",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "hive-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "hive-HIVESERVER2-BASE",
+          "roleType": "HIVESERVER2",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "hive-HIVEMETASTORE-BASE",
+          "roleType": "HIVEMETASTORE",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "ranger",
+      "serviceType": "RANGER",
+      "serviceConfigs": [
+        {
+          "name": "rangeradmin_user_password",
+          "value": "{{{ general.password }}}",
+          "ref": null,
+          "variable": null,
+          "autoConfig": null
+        }
+      ],
+      "roleConfigGroups": null,
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "impala",
+      "serviceType": "IMPALA",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "impala-IMPALAD-BASE",
+          "roleType": "IMPALAD",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "impala-STATESTORE-BASE",
+          "roleType": "STATESTORE",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        },
+        {
+          "refName": "impala-CATALOGSERVER-BASE",
+          "roleType": "CATALOGSERVER",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    },
+    {
+      "refName": "knox",
+      "serviceType": "KNOX",
+      "serviceConfigs": null,
+      "roleConfigGroups": [
+        {
+          "refName": "knox-KNOX_GATEWAY-BASE",
+          "roleType": "KNOX_GATEWAY",
+          "base": true,
+          "displayName": null,
+          "configs": null
+        }
+      ],
+      "roles": null,
+      "displayName": null
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "roleConfigGroupsRefNames": [
+        "hbase-MASTER-BASE",
+        "hdfs-BALANCER-BASE",
+        "hdfs-NAMENODE-BASE",
+        "hdfs-SECONDARYNAMENODE-BASE",
+        "hive-GATEWAY-BASE",
+        "hive-HIVEMETASTORE-BASE",
+        "hive-HIVESERVER2-BASE",
+        "impala-CATALOGSERVER-BASE",
+        "impala-STATESTORE-BASE",
+        "kafka-KAFKA_BROKER-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+        "yarn-JOBHISTORY-BASE",
+        "yarn-RESOURCEMANAGER-BASE",
+        "zookeeper-SERVER-BASE",
+        "knox-KNOX_GATEWAY-BASE"
+      ],
+      "cardinality": 1
+    },
+    {
+      "refName": "worker",
+      "roleConfigGroupsRefNames": [
+        "hbase-REGIONSERVER-BASE",
+        "hdfs-DATANODE-BASE",
+        "hive-GATEWAY-BASE",
+        "impala-IMPALAD-BASE",
+        "spark_on_yarn-GATEWAY-BASE",
+        "yarn-NODEMANAGER-BASE",
+        "knox-KNOX_GATEWAY-BASE"
+      ],
+      "cardinality": 1
+    }
+  ],
+  "displayName": "simple_template",
+  "cmVersion": "6.1.0",
+  "instantiator": null,
+  "repositories": [
+    "https://archive.cloudera.com/cdh6/{latest_supported}/parcels/",
+    "https://archive.cloudera.com/cdh5/parcels/5.14/",
+    "https://archive.cloudera.com/accumulo-c5/parcels/latest/",
+    "https://archive.cloudera.com/kafka/parcels/latest/",
+    "http://archive.cloudera.com/kudu/parcels/latest/",
+    "https://archive.cloudera.com/spark/parcels/latest/",
+    "https://archive.cloudera.com/sqoop-teradata-connector1/latest/",
+    "https://archive.cloudera.com/sqoop-netezza-connector1/latest/",
+    "https://archive.cloudera.com/sqoop-connectors/parcels/latest/"
+  ],
+  "clusterSpec": null
+}

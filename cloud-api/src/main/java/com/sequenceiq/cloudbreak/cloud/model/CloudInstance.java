@@ -7,6 +7,17 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
+/**
+ * A common, abstract representation of a virtual machine in a cloud provider.
+ *
+ * For example, this class can be used to represent an AWS EC2 instance, Azure virtual machine, or GCP virtual machine instance.
+ *
+ * This is a <em>minimal</em> representation, containing the unique (cloud vendor specific) instance ID, template used to create the
+ * instance, and necessary information to authenticate and connect to the instance.
+ *
+ * @see InstanceTemplate
+ * @see InstanceAuthentication
+ */
 public class CloudInstance extends DynamicModel {
 
     public static final String INSTANCE_NAME = "InstanceName";

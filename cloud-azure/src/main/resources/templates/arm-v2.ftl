@@ -230,11 +230,11 @@
                    "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
                    "tags": {
-                 <#if userDefinedTags?? && userDefinedTags?has_content>
-                     <#list userDefinedTags?keys as key>
-                        "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
-                        </#list>
-                 </#if>
+                     <#if userDefinedTags?? && userDefinedTags?has_content>
+                         <#list userDefinedTags?keys as key>
+                            "${key}": "${userDefinedTags[key]}"<#if key_has_next>,</#if>
+                            </#list>
+                     </#if>
                     },
                    "dependsOn": [
                        <#if !noFirewallRules>
@@ -254,20 +254,28 @@
                        <#if !noFirewallRules || !noPublicIp>,</#if>
                        "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
                        </#if>
+                       <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
+                           <#list loadBalancerMapping[instance.groupName] as loadBalancer>
+                               <#--
+                                  we have to define a dependency between the NIC and the address pool it belongs to
+                                  this makes every instance in the gateway group depend on every load balancer address pool
+                                  when we add support for multiple load balancers, this will have to be updated.
+                               -->
+                               ,"[resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}')]"
+                           </#list>
+                       </#if>
                    ],
                    "properties": {
-                   <#if acceleratedNetworkEnabled[instance.flavor]>
-                       "enableAcceleratedNetworking": "true",
-                   </#if>
-                    <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
-                       "networkSecurityGroup":{
-                           "id": "${securityGroups[instance.groupName]}"
-                        },
-                    <#elseif !noFirewallRules>
-                        "networkSecurityGroup":{
-                            "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
-                       },
-                    </#if>
+                       <#if acceleratedNetworkEnabled[instance.flavor]> "enableAcceleratedNetworking": "true", </#if>
+                        <#if securityGroups[instance.groupName]?? && securityGroups[instance.groupName]?has_content>
+                           "networkSecurityGroup":{
+                               "id": "${securityGroups[instance.groupName]}"
+                            },
+                        <#elseif !noFirewallRules>
+                            "networkSecurityGroup":{
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
+                           },
+                        </#if>
                        "ipConfigurations": [
                            {
                                "name": "ipconfig1",
@@ -286,6 +294,21 @@
                                    "subnet": {
                                        "id": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]"
                                    }
+                                   </#if>
+                                   <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
+                                   ,"loadBalancerBackendAddressPools": [
+                                       {
+                                           <#--
+                                               This is adding the NIC to all load balancer backend address pools.
+                                               When we add more load balancers, we'll have to associate the NIC with
+                                               only a single LB pool
+                                           -->
+                                           <#list loadBalancerMapping[instance.groupName] as loadBalancer>
+                                           "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', 'address-pool')]"
+                                           <#if (loadBalancer_index + 1) != loadBalancerMapping[instance.groupName]?size>,</#if>
+                                           </#list>
+                                       }
+                                   ]
                                    </#if>
                                }
                            }
@@ -390,6 +413,114 @@
              </#list>
              <#if (instanceGroup_index + 1) != groups?size>,</#if>
              </#list>
-
+            <#list loadBalancers as loadBalancer>
+                ,{
+                  "apiVersion": "2020-05-01",
+                  "type": "Microsoft.Network/loadBalancers",
+                  "dependsOn": [
+                    <#if loadBalancer.type == "PUBLIC">
+                    "[resourceId('Microsoft.Network/publicIPAddresses', '${loadBalancer.name}-publicIp')]"
+                    </#if>
+                  ],
+                  "location": "[parameters('region')]",
+                  "name": "${loadBalancer.name}",
+                  "properties": {
+                    "backendAddressPools": [
+                      {
+<#--                todo: when additional lbs and pools are added we'll have to handle associating the appropriate address pool names-->
+                        "name": "address-pool",
+                        "properties": {}
+                      }
+                    ],
+                    "frontendIPConfigurations": [
+                      <#if loadBalancer.type == "PUBLIC">
+                      {
+                        "name": "${loadBalancer.name}-frontend",
+                        "properties": {
+                          "publicIPAddress": {
+                            "id": "[resourceId('Microsoft.Network/publicIPAddresses', '${loadBalancer.name}-publicIp')]"
+                          }
+                        }
+                      }
+                      <#else>
+                      {
+                        "name": "${loadBalancer.name}-frontend",
+                        "properties": {
+                          "privateIPAddressVersion": "IPv4",
+                          "privateIPAllocationMethod": "Dynamic",
+                          <#if existingVPC>
+                          "subnet": {
+                            "id": "[concat(variables('vnetID'),'/subnets/', '${existingSubnetName}')]"
+                          }
+                          <#else>
+                          "subnet": {
+                            "id": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]"
+                          }
+                          </#if>
+                        }
+                      }
+                      </#if>
+                ],
+                "inboundNatPools": [],
+                "inboundNatRules": [],
+                    "loadBalancingRules": [
+                        <#list loadBalancer.rules as rule>
+                            {
+                                "name": "${rule.name}",
+                                "properties": {
+                                    "backendAddressPool": {
+                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', 'address-pool')]"
+                                    },
+                                    "backendPort": ${rule.backendPort},
+                                    "enableFloatingIP": false,
+                                    "enableTcpReset": false,
+                                    "frontendIPConfiguration": {
+                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend')]"
+                                    },
+                                    "frontendPort": ${rule.frontendPort},
+                                    "idleTimeoutInMinutes": 4,
+                                    "loadDistribution": "Default",
+                                    "probe": {
+                                        "id": "[resourceId('Microsoft.Network/loadBalancers/probes', '${loadBalancer.name}', '${rule.probe.name}')]"
+                                    },
+                                    "protocol": "Tcp"
+                                }
+                            }<#if (rule_index + 1) != loadBalancer.rules?size>,</#if>
+                        </#list>
+                    ],
+                    "probes": [
+                      <#list loadBalancer.probes as probe>
+                      {
+                        "name": "${probe.name}",
+                        "properties": {
+                          "intervalInSeconds": 5,
+                          "numberOfProbes": 2,
+                          "port": ${probe.port},
+                          "protocol": "Tcp"
+                        }
+                      }<#if (probe_index + 1) != loadBalancer.probes?size>,</#if>
+                      </#list>
+                    ]
+                  },
+                  "sku": {
+                    "name": "Basic"
+                  }
+                }
+                <#if loadBalancer.type == "PUBLIC">
+                ,{
+                    "type": "Microsoft.Network/publicIPAddresses",
+                    "apiVersion": "2020-06-01",
+                    "name": "${loadBalancer.name}-publicIp",
+                    "location": "[parameters('region')]",
+                    "sku": {
+                        "name": "Basic"
+                    },
+                    "properties": {
+                        "publicIPAddressVersion": "IPv4",
+                        "publicIPAllocationMethod": "Static"
+                    }
+                }
+                </#if>
+            </#list>
      	]
 }

@@ -77,7 +77,7 @@ public class AzureInstanceGroupView {
     }
 
     /**
-     * needed because of Freemarker template generating (1.6 -> 1.16 compatibility)
+     * needed because of Freemarker template generating (1.6 {@literal ->} 1.16 compatibility)
      *
      * @return name of the instance group
      */

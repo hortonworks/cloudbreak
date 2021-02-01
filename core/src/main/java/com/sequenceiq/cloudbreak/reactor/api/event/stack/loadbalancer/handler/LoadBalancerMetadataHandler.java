@@ -54,7 +54,7 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
         try {
             LOGGER.info("Fetch cloud load balancer metadata");
             List<CloudLoadBalancerMetadata> loadBalancerStatuses = loadBalancerMetadataService.collectMetadata(cloudContext,
-                request.getCloudCredential(), request.getTypesPresentInStack());
+                request.getCloudCredential(), request.getTypesPresentInStack(), request.getCloudResources());
 
             Set<CloudLoadBalancerMetadata> failedStatues = loadBalancerStatuses.stream()
                 .filter(this::isMissingMetadata)

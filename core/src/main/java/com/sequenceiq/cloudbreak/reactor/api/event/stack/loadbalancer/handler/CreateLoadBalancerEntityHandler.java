@@ -95,7 +95,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             }
 
             Set<InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplates(stack.getId());
-            instanceGroups.forEach(ig -> ig.setTargetGroups(targetGroupPersistenceService.findByIntanceGroupId(ig.getId())));
+            instanceGroups.forEach(ig -> ig.setTargetGroups(targetGroupPersistenceService.findByInstanceGroupId(ig.getId())));
             Set<LoadBalancer> existingLoadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
             stack.setInstanceGroups(instanceGroups);
             Set<LoadBalancer> newLoadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, false);

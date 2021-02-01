@@ -1,20 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import java.util.List;
-
-import javax.inject.Inject;
-
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
+import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
-import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
-import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
-
 import reactor.bus.Event;
 import reactor.bus.EventBus;
+
+import javax.inject.Inject;
+import java.util.List;
 
 @Component
 public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHandler<CollectLoadBalancerMetadataRequest> {
@@ -38,7 +35,7 @@ public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHan
         CollectLoadBalancerMetadataRequest request = collectLBMetadataRequestEvent.getData();
         try {
             List<CloudLoadBalancerMetadata> loadBalancerStatuses = loadBalancerMetadataService.collectMetadata(request.getCloudContext(),
-                request.getCloudCredential(), request.getTypesPresentInStack());
+                request.getCloudCredential(), request.getTypesPresentInStack(), request.getCloudResources());
             CollectLoadBalancerMetadataResult collectLBMetadataResult =
                 new CollectLoadBalancerMetadataResult(request.getResourceId(), loadBalancerStatuses);
 

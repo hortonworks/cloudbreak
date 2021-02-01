@@ -44,7 +44,8 @@ public class MockMetadataCollector implements MetadataCollector {
     }
 
     @Override
-    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
+    public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes,
+            List<CloudResource> resources) {
         // no-op
         return Collections.emptyList();
     }

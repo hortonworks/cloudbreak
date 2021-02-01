@@ -54,6 +54,7 @@ import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInn
 import com.microsoft.azure.management.keyvault.KeyPermissions;
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.LoadBalancer;
+import com.microsoft.azure.management.network.LoadBalancerFrontend;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
@@ -61,6 +62,7 @@ import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.NetworkSecurityGroups;
 import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.network.Subnet;
+import com.microsoft.azure.management.network.implementation.FrontendIPConfigurationInner;
 import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
 import com.microsoft.azure.management.privatedns.v2018_09_01.VirtualNetworkLinkState;
 import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.VirtualNetworkLinkInner;
@@ -101,6 +103,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 import rx.Completable;
 import rx.Observable;
@@ -529,6 +532,10 @@ public class AzureClient {
         return handleAuthException(() -> azure.availabilitySets().getByResourceGroup(resourceGroup, asName));
     }
 
+    public Completable deleteLoadBalancerAsync(String resourceGroup, String loadBalancerName) {
+        return handleAuthException(() -> azure.loadBalancers().deleteByResourceGroupAsync(resourceGroup, loadBalancerName));
+    }
+
     public void deleteAvailabilitySet(String resourceGroup, String asName) {
         handleAuthException(() -> azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName));
     }
@@ -692,14 +699,54 @@ public class AzureClient {
         return handleAuthException(() -> azure.loadBalancers().getByResourceGroup(resourceGroupName, loadBalancerName));
     }
 
-    public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName) {
-        List<String> ipList = new ArrayList<>();
-        List<String> publicIpAddressIds = getLoadBalancer(resourceGroupName, loadBalancerName).publicIPAddressIds();
-        for (String publicIpAddressId : publicIpAddressIds) {
-            PublicIPAddress publicIpAddress = getPublicIpAddressById(publicIpAddressId);
-            ipList.add(publicIpAddress.ipAddress());
+    /**
+     * Returns the IP addresses associated with a particular Load Balancer in a particular Azure Resource Group.
+     *
+     * Load balancer type is used to determine whether to return private or public IP addresses, it's possible for a
+     * load balancer to have both private and public IP addresses.
+     *
+     * @param resourceGroupName the name of the resource group containing the load balancer
+     * @param loadBalancerName the name of the load balancer
+     * @param loadBalancerType corresponds to load balancer IP address types to retrieve.
+     * @return IP addresses
+     */
+    public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
+        if (loadBalancerType == LoadBalancerType.PRIVATE) {
+            return getLoadBalancerPrivateIps(resourceGroupName, loadBalancerName);
+        } else if (loadBalancerType == LoadBalancerType.PUBLIC) {
+            return getLoadBalancerIps(resourceGroupName, loadBalancerName);
+        } else {
+            return List.of();
         }
-        return ipList;
+    }
+
+    private List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName) {
+        List<String> idsAssociatedWithLoadBalancerPublicIps = getLoadBalancer(resourceGroupName, loadBalancerName).publicIPAddressIds();
+        List<PublicIPAddress> publicIpAddressesInResourceGroup = getPublicIpAddresses(resourceGroupName);
+
+        List<String> loadBalancerIps = publicIpAddressesInResourceGroup.stream()
+                .filter(ipAddress -> idsAssociatedWithLoadBalancerPublicIps.contains(ipAddress.id()))
+                .map(PublicIPAddress::ipAddress)
+                .sorted()
+                .collect(Collectors.toList());
+
+        LOGGER.info("IPs for load balancer {} retrieved: {}", loadBalancerName, loadBalancerIps);
+        return loadBalancerIps;
+    }
+
+    private List<String> getLoadBalancerPrivateIps(String resourceGroupName, String loadBalancerName) {
+        // The keys in this map are the names of the frontend load balancers. We don't use them however.
+        Map<String, LoadBalancerFrontend> frontends = getLoadBalancer(resourceGroupName, loadBalancerName).frontends();
+
+        List<String> loadbalancerPrivateIps = frontends.values().stream()
+                .map(LoadBalancerFrontend::inner)
+                .map(FrontendIPConfigurationInner::privateIPAddress)
+                .filter(Objects::nonNull)
+                .sorted()
+                .collect(Collectors.toList());
+
+        LOGGER.info("Private IPs for load balancer {} retrieved: {}", loadBalancerName, loadbalancerPrivateIps);
+        return loadbalancerPrivateIps;
     }
 
     public PagedList<Identity> listIdentities() {

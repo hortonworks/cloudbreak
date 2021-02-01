@@ -334,7 +334,7 @@ public class AwsMetaDataCollectorTest {
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
-                List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC));
+                List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
 
         Assert.assertEquals(2, metadata.size());
         Optional<CloudLoadBalancerMetadata> internalMetadata = metadata.stream()
@@ -357,7 +357,7 @@ public class AwsMetaDataCollectorTest {
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
-                List.of(LoadBalancerType.PRIVATE));
+                List.of(LoadBalancerType.PRIVATE), null);
 
         Assert.assertEquals(1, metadata.size());
         Optional<CloudLoadBalancerMetadata> internalMetadata = metadata.stream()
@@ -374,7 +374,7 @@ public class AwsMetaDataCollectorTest {
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
-                List.of(LoadBalancerType.PUBLIC));
+                List.of(LoadBalancerType.PUBLIC), null);
 
         Assert.assertEquals(1, metadata.size());
         Optional<CloudLoadBalancerMetadata> externalMetadata = metadata.stream()
@@ -391,7 +391,7 @@ public class AwsMetaDataCollectorTest {
 
         AuthenticatedContext ac = authenticatedContext();
         List<CloudLoadBalancerMetadata> metadata = awsMetadataCollector.collectLoadBalancer(ac,
-                List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC));
+                List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC), null);
 
         Assert.assertEquals(1, metadata.size());
         Optional<CloudLoadBalancerMetadata> externalMetadata = metadata.stream()

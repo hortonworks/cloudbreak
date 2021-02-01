@@ -26,6 +26,6 @@ public interface MetadataCollector {
     List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources,
             List<CloudInstance> vms, List<CloudInstance> allInstances);
 
-    List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes);
-
+    List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes,
+            List<CloudResource> resources);
 }
