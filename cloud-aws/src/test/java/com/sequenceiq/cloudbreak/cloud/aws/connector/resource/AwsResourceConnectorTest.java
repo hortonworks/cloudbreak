@@ -9,6 +9,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 
+import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -54,25 +55,31 @@ public class AwsResourceConnectorTest {
     @Test
     public void terminateDatabaseServerWithDeleteProtectionTest() throws Exception {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        when(awsRdsStatusLookupService.isDeleteProtectionEnabled(authenticatedContext, dbStack)).thenReturn(true);
+        DescribeDBInstancesResult describeDBInstancesResult = mock(DescribeDBInstancesResult.class);
+        when(awsRdsStatusLookupService.getDescribeDBInstancesResult(any(), any())).thenReturn(describeDBInstancesResult);
+        when(awsRdsStatusLookupService.isDeleteProtectionEnabled(describeDBInstancesResult)).thenReturn(true);
+        when(awsRdsStatusLookupService.isDbStackExistOnProviderSide(describeDBInstancesResult)).thenReturn(true);
 
         awsResourceConnector.terminateDatabaseServer(authenticatedContext, dbStack,
                 Collections.emptyList(), persistenceNotifier, true);
         verify(awsRdsModifyService, times(1)).disableDeleteProtection(any(), any());
         verify(awsRdsTerminateService, times(1)).terminate(authenticatedContext, dbStack,
-                true, persistenceNotifier, Collections.emptyList());
+                true, persistenceNotifier, Collections.emptyList(), true);
 
     }
 
     @Test
     public void terminateDatabaseServerWithOutDeleteProtectionTest() throws Exception {
         PersistenceNotifier persistenceNotifier = mock(PersistenceNotifier.class);
-        when(awsRdsStatusLookupService.isDeleteProtectionEnabled(authenticatedContext, dbStack)).thenReturn(false);
+        DescribeDBInstancesResult describeDBInstancesResult = mock(DescribeDBInstancesResult.class);
+        when(awsRdsStatusLookupService.getDescribeDBInstancesResult(any(), any())).thenReturn(describeDBInstancesResult);
+        when(awsRdsStatusLookupService.isDeleteProtectionEnabled(describeDBInstancesResult)).thenReturn(false);
+        when(awsRdsStatusLookupService.isDbStackExistOnProviderSide(describeDBInstancesResult)).thenReturn(true);
 
         awsResourceConnector.terminateDatabaseServer(authenticatedContext, dbStack,
                 Collections.emptyList(), persistenceNotifier, true);
         verify(awsRdsModifyService, times(0)).disableDeleteProtection(any(), any());
         verify(awsRdsTerminateService, times(1)).terminate(authenticatedContext, dbStack,
-                true, persistenceNotifier, Collections.emptyList());
+                true, persistenceNotifier, Collections.emptyList(), true);
     }
 }

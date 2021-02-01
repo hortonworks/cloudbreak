@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -50,7 +51,24 @@ public class AwsRdsStatusLookupService {
                 .get();
     }
 
-    public boolean isDeleteProtectionEnabled(AuthenticatedContext ac, DatabaseStack dbStack) {
+    public boolean isDeleteProtectionEnabled(DescribeDBInstancesResult describeDBInstancesResult) {
+        if (isDbStackExistOnProviderSide(describeDBInstancesResult)) {
+            return describeDBInstancesResult.getDBInstances()
+                    .stream()
+                    .findFirst()
+                    .get()
+                    .getDeletionProtection();
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isDbStackExistOnProviderSide(DescribeDBInstancesResult describeDBInstancesResult) {
+        return describeDBInstancesResult == null ? false : true;
+    }
+
+    @Nullable
+    public DescribeDBInstancesResult getDescribeDBInstancesResult(AuthenticatedContext ac, DatabaseStack dbStack) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);
@@ -64,15 +82,11 @@ public class AwsRdsStatusLookupService {
             describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
         } catch (DBInstanceNotFoundException ex) {
             LOGGER.debug("DB Instance does not exist! Therefore termination protection check is not relevant anymore: {}", ex.getMessage());
-            return false;
+            return null;
         } catch (RuntimeException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }
-
-        return describeDBInstancesResult.getDBInstances()
-                .stream()
-                .findFirst()
-                .get().getDeletionProtection();
+        return describeDBInstancesResult;
     }
 
     private ExternalDatabaseStatus getExternalDatabaseStatus(String dbInstanceStatus) {
