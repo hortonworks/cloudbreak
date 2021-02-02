@@ -36,7 +36,8 @@ public class EnvironmentEditRequest {
     private BackupRequest backupRequest;
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
-    private @Valid SecurityAccessRequest securityAccess;
+    @Valid
+    private SecurityAccessRequest securityAccess;
 
     @ApiModelProperty(EnvironmentModelDescription.IDBROKER_MAPPING_SOURCE)
     private IdBrokerMappingSource idBrokerMappingSource;
