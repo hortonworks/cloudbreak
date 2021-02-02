@@ -68,6 +68,8 @@ public class AzurePlatformResources implements PlatformResources {
 
     private static final float NO_MB_PER_GB = 1024.0f;
 
+    private static final int NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE = 0;
+
     @Value("${cb.azure.default.max.disk.size:32767}")
     private int maxDiskSize;
 
@@ -225,23 +227,29 @@ public class AzurePlatformResources implements PlatformResources {
 
         Set<VmType> types = new HashSet<>();
         VmType defaultVmType = null;
-
+        Set<String> vmTypesWithoutResourceDisks = new HashSet<>();
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
-            float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
-            VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
+            if (virtualMachineSize.resourceDiskSizeInMB() != NO_RESOURCE_DISK_ATTACHED_TO_INSTANCE) {
+                float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder().withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
 
-            for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
-                if (volumeParameterType.in(MAGNETIC, SSD)) {
-                    volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
+                for (VolumeParameterType volumeParameterType : VolumeParameterType.values()) {
+                    if (volumeParameterType.in(MAGNETIC, SSD)) {
+                        volumeParameterType.buildForVmTypeMetaBuilder(builder, virtualMachineSize.maxDataDiskCount(), maxDiskSize);
+                    }
                 }
-            }
 
-            VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
-            types.add(vmType);
-            if (virtualMachineSize.name().equals(armVmDefault)) {
-                defaultVmType = vmType;
+                VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
+                types.add(vmType);
+                if (virtualMachineSize.name().equals(armVmDefault)) {
+                    defaultVmType = vmType;
+                }
+            } else {
+                vmTypesWithoutResourceDisks.add(virtualMachineSize.name());
             }
         }
+        LOGGER.debug("The following Azure VM types have been filtered out, because there is no resource disk available with them: {}",
+                String.join(", ", vmTypesWithoutResourceDisks));
         cloudVmResponses.put(region.value(), types);
         defaultCloudVmResponses.put(region.value(), defaultVmType);
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
