@@ -45,7 +45,7 @@ public class AzureVirtualMachineService {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
-        LOGGER.debug("Starting to retrieve vm metadata from Azure for ids: {}", privateInstanceIds);
+        LOGGER.debug("Starting to retrieve vm metadata from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
         PagedList<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup);
         while (hasMissingVm(virtualMachines, privateInstanceIds) && virtualMachines.hasNextPage()) {
             virtualMachines.loadNextPage();
@@ -75,7 +75,7 @@ public class AzureVirtualMachineService {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void refreshInstanceViews(Map<String, VirtualMachine> virtualMachines) {
-        LOGGER.info("Parallel instanceviews refresh to download instance view fields from azure, like PowerState of the machines: {}",
+        LOGGER.info("Parallel instance views refresh to download instance view fields from azure, like PowerState of the machines: {}",
                 virtualMachines.keySet());
         List<Completable> refreshInstanceViewCompletables = new ArrayList<>();
         for (VirtualMachine virtualMachine : virtualMachines.values()) {
@@ -120,7 +120,7 @@ public class AzureVirtualMachineService {
 
         Map<String, VirtualMachine> virtualMachines = new HashMap<>();
         for (Map.Entry<String, Collection<String>> resourceGroupInstanceIdsMap : resourceGroupInstanceMultimap.asMap().entrySet()) {
-            LOGGER.info("Get vms for resource group and add to all virtualmachines: {}", resourceGroupInstanceIdsMap.getKey());
+            LOGGER.info("Get vms for resource group and add to all virtual machines: {}", resourceGroupInstanceIdsMap.getKey());
             try {
                 virtualMachines.putAll(getVirtualMachinesByName(azureClient,
                         resourceGroupInstanceIdsMap.getKey(), resourceGroupInstanceIdsMap.getValue()));

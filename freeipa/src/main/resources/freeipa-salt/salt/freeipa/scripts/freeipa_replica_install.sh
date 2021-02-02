@@ -13,7 +13,6 @@ echo "The first ipaddress of the host is $IPADDR"
 if [ ! -f /etc/resolv.conf.orig ]; then
   cp /etc/resolv.conf /etc/resolv.conf.orig
 fi
-FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}');
 
 install -m644 /etc/resolv.conf.install /etc/resolv.conf
 
@@ -32,6 +31,15 @@ ipa-client-install \
   --force-join \
   --ssh-trust-dns \
   --no-ntp
+
+FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}')
+PRIMARY_IPA=$(grep -Ev '^#|^;' /etc/resolv.conf | grep nameserver | awk '{print $2}')
+
+if [[ "${FORWARDERS}" == *" 169.254."* ]]; then
+  echo "IPA does not work with link-local IP addresses, so not using it as the forwarder"
+  FORWARDERS="--forwarder $PRIMARY_IPA --auto-forwarders "
+  cp /etc/resolv.conf.orig /etc/resolv.conf
+fi
 
 ipa-replica-install \
           --setup-ca \

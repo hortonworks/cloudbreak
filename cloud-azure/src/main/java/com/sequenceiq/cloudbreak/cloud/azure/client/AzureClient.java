@@ -33,7 +33,6 @@ import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
-import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
@@ -468,7 +467,7 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().listByResourceGroup(resourceGroup));
     }
 
-    public VirtualMachine getVirtualMachine(String resourceGroup, String vmName) {
+    public VirtualMachine getVirtualMachineByResourceGroup(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroup(resourceGroup, vmName));
     }
 
@@ -480,12 +479,8 @@ public class AzureClient {
         return handleAuthException(() -> azure.virtualMachines().getByResourceGroupAsync(resourceGroup, vmName));
     }
 
-    public PowerState getVirtualMachinePowerState(String resourceGroup, String vmName) {
-        return getVirtualMachine(resourceGroup, vmName).powerState();
-    }
-
     public VirtualMachineInstanceView getVirtualMachineInstanceView(String resourceGroup, String vmName) {
-        return getVirtualMachine(resourceGroup, vmName).instanceView();
+        return getVirtualMachineByResourceGroup(resourceGroup, vmName).instanceView();
     }
 
     public Set<AvailabilityZoneId> getAvailabilityZone(String resourceGroup, String vmName) {
@@ -517,15 +512,6 @@ public class AzureClient {
 
     public Completable deallocateVirtualMachineAsync(String resourceGroup, String vmName) {
         return handleAuthException(() -> azure.virtualMachines().deallocateAsync(resourceGroup, vmName));
-    }
-
-    public boolean isVirtualMachineExists(String resourceGroup, String vmName) {
-        return handleAuthException(() -> {
-            Optional<VirtualMachine> vm = azure.virtualMachines().listByResourceGroup(resourceGroup).stream()
-                    .filter(virtualMachine -> vmName.equals(virtualMachine.name()))
-                    .findFirst();
-            return vm.isPresent();
-        });
     }
 
     public Completable deleteVirtualMachine(String resourceGroup, String vmName) {
