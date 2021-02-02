@@ -30,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ClouderaManagerEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.FreeIPAEndpoints;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ExperienceEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SaltEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SpiEndpoints;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -352,6 +353,13 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
             return new SaltEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockSalt is supported by MockedTestContext only.");
+    }
+
+    public ExperienceEndpoints<T> mockExperience() {
+        if (getTestContext() instanceof MockedTestContext) {
+            return new ExperienceEndpoints<>((T) this, (MockedTestContext) getTestContext());
+        }
+        throw new TestFailException("mockLiftie is supported by MockedTestContext only.");
     }
 
     public ClouderaManagerEndpoints<T> mockCm() {
