@@ -4,7 +4,7 @@ server:
     key-store-type: PKCS12
     key-store: classpath:keystore/infrastructure-mock.p12
     key-store-password: password
-    key-alias: mock-service
+    key-alias: infrastructure-mock
   port: 10090
 spring:
   mvc:

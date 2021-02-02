@@ -41,6 +41,8 @@ public class MockUrlFactory {
 
     private Invocation.Builder getBuilder(String path, String s) {
         ConfigKey config = ConfigKey.builder()
+                /* TODO: there is a JVM bug where the TrustAllCertStore does not work correctly in multi threaded environments
+                    and can default back to the original X509TrustStoreImpl. openjdk:11.0.6 */
                 .withSecure(false)
                 .withDebug(false)
                 .build();
