@@ -32,9 +32,8 @@ public abstract class BackupBase implements Serializable {
     @ApiModelProperty(BackupModelDescription.BACKUP_ADLS_GEN_2_ATTRIBUTES)
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
-    @Valid
     @ApiModelProperty(BackupModelDescription.BACKUP_GCS_ATTRIBUTES)
-    private GcsCloudStorageV1Parameters gcs;
+    private @Valid GcsCloudStorageV1Parameters gcs;
 
     @Valid
     @ApiModelProperty(BackupModelDescription.BACKUP_CLOUDWATCH_ATTRIBUTES)
