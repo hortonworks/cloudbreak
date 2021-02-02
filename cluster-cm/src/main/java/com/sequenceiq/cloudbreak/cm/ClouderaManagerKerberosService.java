@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 
-import java.math.BigDecimal;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -51,9 +49,6 @@ public class ClouderaManagerKerberosService {
     @Inject
     private ClouderaManagerConfigService clouderaManagerConfigService;
 
-    @Inject
-    private ClouderaManagerDeployClientConfigProvider clouderaManagerDeployClientConfigProvider;
-
     public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
@@ -66,9 +61,8 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
-            BigDecimal deployClientConfigCommandId = clouderaManagerDeployClientConfigProvider
-                    .deployClientConfigAndGetCommandId(clustersResourceApi, stack);
-            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClientConfigCommandId);
+            ApiCommand deployClusterConfig = clustersResourceApi.deployClientConfig(cluster.getName());
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfig.getId());
             modificationService.startCluster();
         }
     }
