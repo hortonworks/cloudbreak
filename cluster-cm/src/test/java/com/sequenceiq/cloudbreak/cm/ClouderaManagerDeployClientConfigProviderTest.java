@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,7 +41,6 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.squareup.okhttp.Call;
-import com.squareup.okhttp.HttpUrl;
 import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Protocol;
@@ -58,12 +56,6 @@ public class ClouderaManagerDeployClientConfigProviderTest {
     private static final int SUCCESS_STATUS_CODE = 200;
 
     private static final int NOT_FOUND_STATUS_CODE = 404;
-
-    private static final int RANDOM_PORT = 9999;
-
-    private static final String ACTIVE_COMMAND_TABLE = "/cmf/commands/activeCommandTable";
-
-    private static final String RECENT_COMMAND_TABLE = "/cmf/commands/commandTable";
 
     @Mock
     private ClustersResourceApi clustersResourceApi;
@@ -130,8 +122,7 @@ public class ClouderaManagerDeployClientConfigProviderTest {
         given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
                 .willReturn(response);
         doReturn(null).when(underTest).getCommandIdFromActiveCommands(response);
-        doReturn(null).when(underTest).getCommandIdFromCommandsTable(clustersResourceApi, ACTIVE_COMMAND_TABLE, emptyHeaders);
-        doReturn(null).when(underTest).getCommandIdFromCommandsTable(clustersResourceApi, RECENT_COMMAND_TABLE, emptyHeaders);
+        doReturn(null).when(underTest).getCommandIdFromCommandsTable(clustersResourceApi, emptyHeaders);
         given(underTest.getCommandIdFromActiveCommands(response)).willReturn(null);
         // WHEN
         CloudbreakException exception = assertThrows(CloudbreakException.class,
@@ -139,8 +130,7 @@ public class ClouderaManagerDeployClientConfigProviderTest {
         // THEN
         assertTrue(exception.getMessage().contains("Obtaining Cloudera Manager Deploy config command ID was not possible"));
         verify(underTest, times(1)).getCommandIdFromActiveCommands(response);
-        verify(underTest, times(1)).getCommandIdFromCommandsTable(clustersResourceApi, ACTIVE_COMMAND_TABLE, emptyHeaders);
-        verify(underTest, times(1)).getCommandIdFromCommandsTable(clustersResourceApi, RECENT_COMMAND_TABLE, emptyHeaders);
+        verify(underTest, times(1)).getCommandIdFromCommandsTable(clustersResourceApi, emptyHeaders);
         verify(executorService, times(1)).shutdown();
     }
 
@@ -283,70 +273,6 @@ public class ClouderaManagerDeployClientConfigProviderTest {
         // THEN
         assertTrue(exception.getMessage().contains("error during processing"));
         verify(executorService, times(1)).shutdown();
-    }
-
-    @Test
-    public void testGetDeployClientConfigCommandIdByRecentCommandTable()
-            throws ApiException, CloudbreakException, InterruptedException,
-            ExecutionException, TimeoutException, IOException {
-        // GIVEN
-        Map<String, List<String>> headers = new HashMap<>();
-        List<String> headerList = new ArrayList<>();
-        headerList.add("mycookie");
-        headers.put("Set-Cookie", headerList);
-        Request request = createDefaultRequest();
-        doReturn(executorService).when(underTest).createExecutor();
-        given(executorService.submit(any(Callable.class))).willReturn(future);
-        given(future.get(INTERRUPT_TIMEOUT_SECONDS, TimeUnit.SECONDS)).willThrow(new TimeoutException());
-        given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
-                .willReturn(new ApiResponse<>(SUCCESS_STATUS_CODE, headers,
-                        new ApiCommandList().items(new ArrayList<>())));
-        given(clustersResourceApi.getApiClient()).willReturn(apiClient);
-        given(apiClient.getHttpClient()).willReturn(okHttpClient);
-        given(apiClient.buildRequest(any(), any(), any(), isNull(),
-                any(), any(), any(), isNull())).willReturn(request);
-        given(okHttpClient.newCall(any())).willReturn(requestCall);
-        given(requestCall.execute()).willReturn(
-                createResponse(SUCCESS_STATUS_CODE, "[]", request))
-                .willReturn(
-                createResponse(SUCCESS_STATUS_CODE, createResponseDefaultString(), request));
-        // WHEN
-        BigDecimal result = underTest.deployClientConfigAndGetCommandId(clustersResourceApi, stack);
-        // THEN
-        assertEquals(3L, result.longValue());
-        verify(executorService, times(1)).shutdown();
-        verify(requestCall, times(2)).execute();
-    }
-
-    @Test
-    public void testCreateNewPathSegments() {
-        // GIVEN
-        HttpUrl defaultHttpUrl = new HttpUrl.Builder()
-                .host("localhost")
-                .scheme("https")
-                .port(RANDOM_PORT)
-                .addPathSegment("cluster-proxy")
-                .addPathSegment("proxy")
-                .addPathSegment("crn:mycrn")
-                .addPathSegment("cb-internal")
-                .addPathSegment("api")
-                .addPathSegment("v31")
-                .addPathSegment("cmf")
-                .addPathSegment("commands")
-                .addPathSegment("commandTable")
-                .build();
-        HttpUrl.Builder httpUrlBuilder = new HttpUrl.Builder()
-                .host(defaultHttpUrl.host())
-                .scheme(defaultHttpUrl.scheme())
-                .port(defaultHttpUrl.port());
-        // WHEN
-        underTest.addPathSegmentsFromDefaultUrl(defaultHttpUrl, httpUrlBuilder);
-        List<String> result = httpUrlBuilder.build().pathSegments();
-        // THEN
-        assertFalse(result.contains("api"));
-        assertFalse(result.contains("v31"));
-        assertTrue(result.contains("cluster-proxy"));
-        assertTrue(result.contains("commandTable"));
     }
 
     private ApiCommand createCommand() {

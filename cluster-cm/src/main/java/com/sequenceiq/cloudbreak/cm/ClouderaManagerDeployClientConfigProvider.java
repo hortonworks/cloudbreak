@@ -29,6 +29,7 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
 import com.sequenceiq.cloudbreak.cm.model.CommandResource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -44,17 +45,13 @@ public class ClouderaManagerDeployClientConfigProvider {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(ClouderaManagerDeployClientConfigProvider.class);
 
-    private static final String CMF_COMMANDS_ACTIVE_COMMAND_TABLE_URI_PATH = "/cmf/commands/activeCommandTable";
-
-    private static final String CMF_COMMANDS_RECENT_COMMAND_TABLE_URI_PATH = "/cmf/commands/commandTable";
+    private static final String CMF_COMMANDS_COMMAND_TABLE_URI_PATH = "/cmf/commands/commandTable";
 
     private static final String DEPLOY_CLIENT_CONFIG_COMMAND_NAME = "DeployClusterClientConfig";
 
     private static final int INTERVAL_MINUTES = 30;
 
     private static final int ERROR_CODES_FROM = 400;
-
-    private static final int INVALID_INDEX = -1;
 
     private final Integer interruptTimeoutSeconds;
 
@@ -70,8 +67,8 @@ public class ClouderaManagerDeployClientConfigProvider {
      * - if deployClusterClientConfig CM command times out, use listActiveCommands against
      *   CM API and find the command ID from that response.
      * - if listActiveCommands is empty (in case of the command finishes during the
-     *   deployClusterClientConfig timeout), use /cmf/commands/activeCommandTable call, if that won't work either,
-     *   use /cmf/commands/commandTable call (both with the response cookie of listActiveCommands call)
+     *   deployClusterClientConfig timeout), use /cmf/commands/commandTable call (with the
+     *   response cookie of listActiveCommands call)
      */
     public BigDecimal deployClientConfigAndGetCommandId(
             ClustersResourceApi api, Stack stack) throws CloudbreakException, ApiException {
@@ -92,18 +89,10 @@ public class ClouderaManagerDeployClientConfigProvider {
                 return commandIdFromActiveCommands;
             }
             LOGGER.debug("The last deploy client config command could not be found  "
-                    + "by listing active commands. Trying {} call", CMF_COMMANDS_ACTIVE_COMMAND_TABLE_URI_PATH);
-            BigDecimal commandIdFromRunningCommandsTable = getCommandIdFromCommandsTable(api,
-                    CMF_COMMANDS_ACTIVE_COMMAND_TABLE_URI_PATH, commandListResponse.getHeaders());
-            if (commandIdFromRunningCommandsTable != null) {
-                return commandIdFromRunningCommandsTable;
-            }
-            LOGGER.debug("The last deploy client config command could not be found  "
-                    + "by listing recent commandTable. Trying {} call", CMF_COMMANDS_RECENT_COMMAND_TABLE_URI_PATH);
-            BigDecimal commandIdFromRecentCommandsTable = getCommandIdFromCommandsTable(api,
-                    CMF_COMMANDS_RECENT_COMMAND_TABLE_URI_PATH, commandListResponse.getHeaders());
-            if (commandIdFromRecentCommandsTable != null) {
-                return commandIdFromRecentCommandsTable;
+                    + "by listing active commands. Trying {} call", CMF_COMMANDS_COMMAND_TABLE_URI_PATH);
+            BigDecimal commandIdFromCommandsTable = getCommandIdFromCommandsTable(api, commandListResponse.getHeaders());
+            if (commandIdFromCommandsTable != null) {
+                return commandIdFromCommandsTable;
             } else {
                 throw new CloudbreakException(
                         String.format("Obtaining Cloudera Manager Deploy config command ID was not possible neither by"
@@ -146,30 +135,30 @@ public class ClouderaManagerDeployClientConfigProvider {
     }
 
     @VisibleForTesting
-    BigDecimal getCommandIdFromCommandsTable(ClustersResourceApi api, String path,
+    BigDecimal getCommandIdFromCommandsTable(ClustersResourceApi api,
             Map<String, List<String>> headers) throws CloudbreakException, ApiException {
         try {
             OkHttpClient httpClient = api.getApiClient().getHttpClient();
-            Request request = createRequest(api.getApiClient(), path, headers);
+            Request request = createRequest(api.getApiClient(), headers);
             Response response = httpClient
                     .newCall(request)
                     .execute();
             if (response.code() >= ERROR_CODES_FROM) {
                 LOGGER.debug("{} request against Cloudera Manager API returned with status code: {}, response: {}",
-                        path, response.toString(), response.code());
+                        CMF_COMMANDS_COMMAND_TABLE_URI_PATH, response.toString(), response.code());
                 throw new CloudbreakException(
                         String.format("%s request against CM API returned with status code: %d",
-                                path, response.code()));
+                                CMF_COMMANDS_COMMAND_TABLE_URI_PATH, response.code()));
             }
-            return getCommandIdFromCMResponse(response, path);
+            return getCommandIdFromCMResponse(response);
         } catch (IOException e) {
             throw new CloudbreakException(
                     String.format("DeployClusterClientConfig - error during processing %s CM request",
-                            path), e);
+                            CMF_COMMANDS_COMMAND_TABLE_URI_PATH), e);
         }
     }
 
-    private BigDecimal getCommandIdFromCMResponse(Response response, String path) throws IOException {
+    private BigDecimal getCommandIdFromCMResponse(Response response) throws IOException {
         BigDecimal result = null;
         try (ResponseBody responseBody = response.body()) {
             String responseBodyStr = responseBody.string();
@@ -182,7 +171,7 @@ public class ClouderaManagerDeployClientConfigProvider {
             for (CommandResource command : commandList) {
                 if (DEPLOY_CLIENT_CONFIG_COMMAND_NAME.equals(command.getName())) {
                     LOGGER.debug("Found DeployClusterClientConfig command based on "
-                                    + "{} response [command_id: {}]", path,
+                                    + "{} response [command_id: {}]", CMF_COMMANDS_COMMAND_TABLE_URI_PATH,
                             command.getId());
                     long startTime = command.getStart();
                     if (startTime > currentStartTime) {
@@ -199,7 +188,7 @@ public class ClouderaManagerDeployClientConfigProvider {
     }
 
     // similar as apiClient#Call creator methods - so keep this in one place
-    private Request createRequest(ApiClient apiClient, String path, Map<String, List<String>> headers)
+    private Request createRequest(ApiClient apiClient, Map<String, List<String>> headers)
             throws ApiException {
         List<Pair> queryParams = new ArrayList<>();
         Map<String, String> headerParams = new HashMap<>();
@@ -213,7 +202,7 @@ public class ClouderaManagerDeployClientConfigProvider {
         headerParams.put("Content-Type", localVarContentType);
         String[] authNames = new String[]{"basic"};
         enhanceRequestParams(headers, queryParams, headerParams);
-        Request defaultRequest = apiClient.buildRequest(path, "GET", queryParams, null,
+        Request defaultRequest = apiClient.buildRequest(CMF_COMMANDS_COMMAND_TABLE_URI_PATH, "GET", queryParams, null,
                 headerParams, new HashMap<>(), authNames, null);
         return createRequestFromDefaultRequest(defaultRequest);
     }
@@ -226,7 +215,11 @@ public class ClouderaManagerDeployClientConfigProvider {
                 .host(defaultHttpUrl.host())
                 .scheme(defaultHttpUrl.scheme())
                 .port(defaultHttpUrl.port());
-        addPathSegmentsFromDefaultUrl(defaultHttpUrl, httpUrlBuilder);
+        List<String> pathSegments = Splitter.on("/")
+                .splitToList(CMF_COMMANDS_COMMAND_TABLE_URI_PATH.substring(1));
+        for (String pathSegment : pathSegments) {
+            httpUrlBuilder.addPathSegment(pathSegment);
+        }
         for (String queryParamName : defaultHttpUrl.queryParameterNames()) {
             httpUrlBuilder.addQueryParameter(queryParamName, defaultHttpUrl.queryParameter(queryParamName));
         }
@@ -264,22 +257,5 @@ public class ClouderaManagerDeployClientConfigProvider {
     @VisibleForTesting
     ExecutorService createExecutor() {
         return Executors.newSingleThreadExecutor();
-    }
-
-    @VisibleForTesting
-    void addPathSegmentsFromDefaultUrl(
-            HttpUrl defaultHttpUrl, HttpUrl.Builder httpUrlBuilder) {
-        List<String> defaultPathSegments = defaultHttpUrl.pathSegments();
-        int apiIndex = defaultPathSegments.indexOf("api");
-        int versionNumberIndex =  apiIndex == INVALID_INDEX ? INVALID_INDEX : apiIndex + 1;
-        for (int i = 0; i < defaultPathSegments.size(); i++) {
-            String pathSegment = defaultPathSegments.get(i);
-            if (i != apiIndex && i != versionNumberIndex) {
-                LOGGER.debug("Add path segment to commandTable request: {}", pathSegment);
-                httpUrlBuilder.addPathSegment(pathSegment);
-            } else {
-                LOGGER.debug("Skipping path segment from commandTable request: {}", pathSegment);
-            }
-        }
     }
 }
