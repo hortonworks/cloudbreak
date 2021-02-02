@@ -99,7 +99,6 @@ public class Image {
                 + ", imageCatalogUrl='" + imageCatalogUrl + '\''
                 + ", imageId='" + imageId + '\''
                 + ", imageCatalogName='" + imageCatalogName + '\''
-                + ", userdata=" + userdata + '\''
                 + ", packageVersions=" + packageVersions + '}';
     }
 }

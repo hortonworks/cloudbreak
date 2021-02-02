@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image.userdata;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -48,7 +50,7 @@ public class UserDataBuilder {
         for (InstanceGroupType type : InstanceGroupType.values()) {
             String userData = build(type, cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmParameters, proxyConfig);
             result.put(type, userData);
-            LOGGER.debug("User data for {}, content; {}", type, userData);
+            LOGGER.debug("User data for {}, content; {}", type, anonymize(userData));
         }
         return result;
     }
@@ -91,7 +93,7 @@ public class UserDataBuilder {
                 model.put("proxyUser", auth.getUserName());
                 model.put("proxyPassword", auth.getPassword());
             });
-            LOGGER.info("Proxy config set up for gateway instances' userdata script: {}", proxyConfig);
+            LOGGER.info("Proxy config set up for gateway instances' userdata script: {}", anonymize(proxyConfig.toString()));
         } else {
             model.put("proxyEnabled", Boolean.FALSE);
             LOGGER.info("No proxy config set up for {} instances' userdata script", type);

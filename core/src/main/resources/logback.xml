@@ -6,7 +6,7 @@
     <logger name="org.springframework.statemachine.support" level="ERROR"/>
     <logger name="com.sequenceiq.ambari.client.AmbariClientUtils" level="ERROR"/>
     <logger name="org.apache.kafka.clients.producer" level="ERROR"/>
-    <logger name="com.amazonaws.request" level="DEBUG"/>
+    <!-- <logger name="com.amazonaws.request" level="DEBUG"/> -->
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
