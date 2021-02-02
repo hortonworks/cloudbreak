@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.mock;
 import java.security.KeyManagementException;
 import java.security.SecureRandom;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
@@ -52,6 +54,13 @@ public class ExecuteQueryToMockInfrastructure {
         try (Response response = target.request().get()) {
             return handleResponse.apply(response);
         }
+    }
+
+    public <R> void executeMethod(Method method, String path, Map<String, String> parameters, Entity body, Consumer<Response> proc, Function<WebTarget,
+            WebTarget> deco) {
+        WebTarget target = buildWebTarget(path, deco);
+        parameters.entrySet().stream().forEach(entry -> target.queryParam(entry.getKey(), entry.getValue()));
+        proc.accept(target.request().method(method.getMethodName().toUpperCase(), body));
     }
 
     public void executeConfigure(Map<String, String> pathVariables, MockResponse body) {

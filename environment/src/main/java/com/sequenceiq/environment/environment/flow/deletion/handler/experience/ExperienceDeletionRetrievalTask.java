@@ -47,13 +47,7 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
     }
 
     @Override
-    public boolean exitPolling(ExperiencePollerObject pollerObject) {
-        EnvironmentExperienceDto dto = buildDto(pollerObject);
-        int quantity = experienceConnectorService.getConnectedExperienceCount(dto);
-        if (quantity == 0) {
-            LOGGER.info("No active experience has been found for the environment (CRN: {})", pollerObject.getEnvironmentCrn());
-            return true;
-        }
+    public boolean exitPolling(ExperiencePollerObject experiencePollerObject) {
         return false;
     }
 
