@@ -19,14 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityRequest;
 import com.amazonaws.services.securitytoken.model.GetCallerIdentityResult;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCredentialCachingConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
@@ -47,8 +47,8 @@ public class AwsCredentialVerifier {
         String policies = new String(Base64.getDecoder().decode(awsPlatformParameters.getCredentialPoliciesJson()));
         try {
             Map<String, List<String>> resourcesWithActions = getRequiredActions(policies);
-            AmazonIdentityManagement amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);
-            AWSSecurityTokenService awsSecurityTokenService = awsClient.createAwsSecurityTokenService(awsCredential);
+            AmazonIdentityManagementClient amazonIdentityManagement = awsClient.createAmazonIdentityManagement(awsCredential);
+            AmazonSecurityTokenServiceClient awsSecurityTokenService = awsClient.createSecurityTokenService(awsCredential);
             String arn;
             if (awsCredential.getRoleArn() != null) {
                 arn = awsCredential.getRoleArn();

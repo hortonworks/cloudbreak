@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -72,7 +72,7 @@ public class AwsDefaultRegionSelector {
         boolean regionIsViable = false;
         try {
             LOGGER.debug("Describing regions on EC2 API in '{}'", region);
-            AmazonEC2Client access = awsClient.createAccessWithMinimalRetries(awsCredential, region);
+            AmazonEc2Client access = awsClient.createAccessWithMinimalRetries(awsCredential, region);
             DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
             access.describeRegions(describeRegionsRequest);
             regionIsViable = true;

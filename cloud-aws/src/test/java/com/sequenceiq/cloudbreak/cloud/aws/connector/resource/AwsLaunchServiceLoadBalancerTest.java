@@ -27,12 +27,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
@@ -41,7 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsSubnetIgwExplorer;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
@@ -91,7 +90,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     private static final String REGION = "region";
 
     @Mock
-    private AmazonEC2Client amazonEC2Client;
+    private AmazonEc2Client amazonEC2Client;
 
     @Mock
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
@@ -104,9 +103,6 @@ public class AwsLaunchServiceLoadBalancerTest {
 
     @Mock
     private AwsClient awsClient;
-
-    @Mock
-    private AmazonCloudFormationRetryClient cfRetryClient;
 
     @Mock
     private CloudFormationTemplateBuilder cloudFormationTemplateBuilder;
@@ -306,7 +302,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
             REGION, amazonEC2Client, network, awsNetworkView, false);
 
-        verify(cfRetryClient, times(2)).updateStack(any());
+        verify(cfClient, times(2)).updateStack(any());
         verify(amazonEC2Client, times(1)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(1)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
@@ -326,7 +322,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
             REGION, amazonEC2Client, network, awsNetworkView, false);
 
-        verify(cfRetryClient, times(2)).updateStack(any());
+        verify(cfClient, times(2)).updateStack(any());
         verify(amazonEC2Client, times(1)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(1)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
@@ -346,7 +342,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
             REGION, amazonEC2Client, network, awsNetworkView, false);
 
-        verify(cfRetryClient, times(2)).updateStack(any());
+        verify(cfClient, times(2)).updateStack(any());
         verify(amazonEC2Client, times(2)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(2)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(4)).getStackResourceSummaries();
@@ -368,7 +364,7 @@ public class AwsLaunchServiceLoadBalancerTest {
             assertThrows(CloudConnectorException.class, () -> underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
             REGION, amazonEC2Client, network, awsNetworkView, false));
 
-        verify(cfRetryClient, times(0)).updateStack(any());
+        verify(cfClient, times(0)).updateStack(any());
         verify(amazonEC2Client, times(2)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(2)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(0)).getStackResourceSummaries();
@@ -395,7 +391,7 @@ public class AwsLaunchServiceLoadBalancerTest {
             assertThrows(CloudConnectorException.class, () -> underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
                 REGION, amazonEC2Client, network, awsNetworkView, false));
 
-        verify(cfRetryClient, times(1)).updateStack(any());
+        verify(cfClient, times(1)).updateStack(any());
         verify(amazonEC2Client, times(1)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(1)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(1)).getStackResourceSummaries();
@@ -423,7 +419,7 @@ public class AwsLaunchServiceLoadBalancerTest {
             assertThrows(CloudConnectorException.class, () -> underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
                 REGION, amazonEC2Client, network, awsNetworkView, false));
 
-        verify(cfRetryClient, times(1)).updateStack(any());
+        verify(cfClient, times(1)).updateStack(any());
         verify(amazonEC2Client, times(1)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(1)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(1)).getStackResourceSummaries();
@@ -450,7 +446,7 @@ public class AwsLaunchServiceLoadBalancerTest {
             assertThrows(CloudConnectorException.class, () -> underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
                 REGION, amazonEC2Client, network, awsNetworkView, false));
 
-        verify(cfRetryClient, times(1)).updateStack(any());
+        verify(cfClient, times(1)).updateStack(any());
         verify(amazonEC2Client, times(1)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(1)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
@@ -477,7 +473,7 @@ public class AwsLaunchServiceLoadBalancerTest {
             assertThrows(CloudConnectorException.class, () -> underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
                 REGION, amazonEC2Client, network, awsNetworkView, false));
 
-        verify(cfRetryClient, times(1)).updateStack(any());
+        verify(cfClient, times(1)).updateStack(any());
         verify(amazonEC2Client, times(1)).describeRouteTables(any());
         verify(awsSubnetIgwExplorer, times(1)).hasInternetGatewayOfSubnet(any(), anyString(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
@@ -569,10 +565,9 @@ public class AwsLaunchServiceLoadBalancerTest {
         when(awsNetworkService.getExistingSubnetCidr(any(), any())).thenReturn(List.of(CIDR));
         when(awsNetworkService.getVpcCidrs(any(), any())).thenReturn(List.of(CIDR));
         when(cfStackUtil.getCfStackName(any())).thenReturn(STACK_NAME);
-        when(awsClient.createCloudFormationRetryClient(any(), anyString())).thenReturn(cfRetryClient);
         when(awsClient.createCloudFormationClient(any(), anyString())).thenReturn(cfClient);
-        when(cfRetryClient.updateStack(any())).thenReturn(null);
-        when(cfRetryClient.listStackResources(any())).thenReturn(result);
+        when(cfClient.updateStack(any())).thenReturn(null);
+        when(cfClient.listStackResources(any())).thenReturn(result);
         when(cloudFormationTemplateBuilder.build(any(ModelContext.class))).thenReturn("{}");
         when(awsStackRequestHelper.createUpdateStackRequest(any(), any(), anyString(), anyString())).thenReturn(null);
         when(cfClient.waiters()).thenReturn(waiters);

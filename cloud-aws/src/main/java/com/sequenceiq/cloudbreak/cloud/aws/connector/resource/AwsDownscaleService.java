@@ -22,13 +22,13 @@ import com.amazonaws.services.autoscaling.model.DetachInstancesRequest;
 import com.amazonaws.services.autoscaling.model.DetachInstancesResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -82,10 +82,9 @@ public class AwsDownscaleService {
 
             String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
                     auth.getCloudContext().getLocation().getRegion().value());
-            AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView,
-                    auth.getCloudContext().getLocation().getRegion().value());
+            AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, auth.getCloudContext().getLocation().getRegion().value());
             detachInstances(asGroupName, instanceIds, amazonASClient);
-            AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView,
+            AmazonEc2Client amazonEC2Client = awsClient.createEc2Client(credentialView,
                     auth.getCloudContext().getLocation().getRegion().value());
 
             Long stackId = auth.getCloudContext().getId();
@@ -111,7 +110,7 @@ public class AwsDownscaleService {
         return awsResourceConnector.check(auth, resources);
     }
 
-    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingRetryClient amazonASClient) {
+    private void detachInstances(String asGroupName, List<String> instanceIds, AmazonAutoScalingClient amazonASClient) {
         try {
             DescribeAutoScalingGroupsRequest request = new DescribeAutoScalingGroupsRequest();
             request.setAutoScalingGroupNames(List.of(asGroupName));
@@ -150,7 +149,7 @@ public class AwsDownscaleService {
         return result;
     }
 
-    private void terminateInstances(Long stackId, List<String> instanceIds, AmazonEC2Client amazonEC2Client) {
+    private void terminateInstances(Long stackId, List<String> instanceIds, AmazonEc2Client amazonEC2Client) {
         LOGGER.debug("Terminated instances. [stack: {}, instances: {}]", stackId, instanceIds);
         try {
             amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
@@ -169,7 +168,7 @@ public class AwsDownscaleService {
         }
     }
 
-    private void waitForTerminateInstances(Long stackId, List<String> instanceIds, AmazonEC2Client amazonEC2Client) {
+    private void waitForTerminateInstances(Long stackId, List<String> instanceIds, AmazonEc2Client amazonEC2Client) {
         LOGGER.debug("Polling instance until terminated. [stack: {}, instances: {}]", stackId,
                 instanceIds);
         Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();

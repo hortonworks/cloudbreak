@@ -21,12 +21,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.cloudformation.model.StackResourceSummary;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
 import com.amazonaws.services.ec2.model.Filter;
@@ -43,8 +41,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.efs.AwsEfsFileSystem;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
@@ -119,14 +118,17 @@ public class AwsLaunchService {
     @Inject
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
 
+    @Inject
+    private AwsCloudFormationErrorMessageProvider awsCloudFormationErrorMessageProvider;
+
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         createKeyPair(ac, stack);
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
+        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
+        AmazonEc2Client amazonEC2Client = awsClient.createEc2Client(credentialView, regionName);
         Network network = stack.getNetwork();
         AwsNetworkView awsNetworkView = new AwsNetworkView(network);
         boolean mapPublicIpOnLaunch = awsNetworkService.isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
@@ -134,7 +136,7 @@ public class AwsLaunchService {
 
         ModelContext modelContext = null;
         try {
-            cfRetryClient.describeStacks(describeStacksRequest);
+            cfClient.describeStacks(describeStacksRequest);
             LOGGER.debug("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException ignored) {
             boolean existingVPC = awsNetworkView.isExistingVPC();
@@ -148,24 +150,23 @@ public class AwsLaunchService {
                 buildDefaultModelContext(ac, stack, resourceNotifier, regionName, amazonEC2Client, network, awsNetworkView, mapPublicIpOnLaunch);
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-            cfRetryClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+            cfClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
         }
         LOGGER.debug("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         Waiter<DescribeStacksRequest> creationWaiter = cfClient.waiters().stackCreateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
         run(creationWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s creation failed.", cFStackName),
-                () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, ResourceStatus.CREATE_FAILED));
+                () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.CREATE_FAILED));
 
-        List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfRetryClient, resourceNotifier);
+        List<CloudResource> networkResources = saveGeneratedSubnet(ac, stack, cFStackName, cfClient, resourceNotifier);
         suspendAutoscalingGoupsWhenNewInstancesAreReady(ac, stack);
 
-        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(credentialView, regionName);
-        List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cfRetryClient, amazonASClient, stack.getGroups());
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
+        List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cfClient, amazonASClient, stack.getGroups());
 
         if (mapPublicIpOnLaunch) {
-            associatePublicIpsToGatewayInstances(stack, cFStackName, cfRetryClient, amazonEC2Client, instances);
+            associatePublicIpsToGatewayInstances(stack, cFStackName, cfClient, amazonEC2Client, instances);
         }
 
         awsComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
@@ -182,7 +183,7 @@ public class AwsLaunchService {
 
     @SuppressWarnings("ParameterNumber")
     private ModelContext buildDefaultModelContext(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
-            String regionName, AmazonEC2Client amazonEC2Client, Network network, AwsNetworkView awsNetworkView, boolean mapPublicIpOnLaunch) {
+            String regionName, AmazonEc2Client amazonEC2Client, Network network, AwsNetworkView awsNetworkView, boolean mapPublicIpOnLaunch) {
 
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
@@ -236,7 +237,7 @@ public class AwsLaunchService {
     @VisibleForTesting
     @SuppressWarnings("ParameterNumber")
     void updateCloudformationWithLoadBalancers(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
-            ModelContext modelContext, List<CloudResource> instances, String regionName, AmazonEC2Client amazonEC2Client,
+            ModelContext modelContext, List<CloudResource> instances, String regionName, AmazonEc2Client amazonEC2Client,
             Network network, AwsNetworkView awsNetworkView, boolean mapPublicIpOnLaunch) {
 
         List<CloudLoadBalancer> cloudLoadBalancers = stack.getLoadBalancers();
@@ -260,7 +261,7 @@ public class AwsLaunchService {
     }
 
     private List<AwsLoadBalancer> getAwsLoadBalancers(List<CloudLoadBalancer> cloudLoadBalancers, List<CloudResource> instances,
-            AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+            AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client) {
         LOGGER.debug("Converting internal load balancer model to AWS cloud provider model.");
         List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
         for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
@@ -324,7 +325,7 @@ public class AwsLaunchService {
 
     @VisibleForTesting
     AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
-            AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client, List<AwsLoadBalancer> awsLoadBalancers) {
+            AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client, List<AwsLoadBalancer> awsLoadBalancers) {
         // Check and see if we already have a load balancer whose scheme matches this one.
         AwsLoadBalancer currentLoadBalancer = null;
         LoadBalancerType cloudLbType = cloudLoadBalancer.getType();
@@ -373,7 +374,7 @@ public class AwsLaunchService {
         return new HashSet<>(subnetIds);
     }
 
-    private AwsLoadBalancerScheme determinePublicVsPrivateSchema(Set<String> subnetIds, String vpcId, AmazonEC2Client amazonEC2Client) {
+    private AwsLoadBalancerScheme determinePublicVsPrivateSchema(Set<String> subnetIds, String vpcId, AmazonEc2Client amazonEC2Client) {
         DescribeRouteTablesRequest describeRouteTablesRequest = new DescribeRouteTablesRequest()
                 .withFilters(new Filter().withName("vpc-id").withValues(vpcId));
         List<RouteTable> routeTableList = AwsPageCollector.getAllRouteTables(amazonEC2Client, describeRouteTablesRequest);
@@ -398,31 +399,30 @@ public class AwsLaunchService {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonCloudFormationRetryClient cfRetryClient = awsClient.createCloudFormationRetryClient(credentialView, regionName);
 
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
 
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
         LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        cfRetryClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
+        cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
 
         Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
         run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
-            () -> AwsCloudFormationErrorMessageProvider.getErrorReason(cfRetryClient, cFStackName, ResourceStatus.UPDATE_FAILED));
+            () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED));
 
-        return cfRetryClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
+        return cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
     }
 
-    private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient cfRetryClient,
-            AmazonEC2Client amazonEC2Client, List<CloudResource> instances) {
+    private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationClient cfRetryClient,
+            AmazonEc2Client amazonEC2Client, List<CloudResource> instances) {
         List<Group> gateways = awsNetworkService.getGatewayGroups(stack.getGroups());
         Map<String, List<String>> gatewayGroupInstanceMapping = createGatewayToInstanceMap(instances, gateways);
         setElasticIps(cFStackName, cfRetryClient, amazonEC2Client, gateways, gatewayGroupInstanceMapping);
     }
 
-    private void setElasticIps(String cFStackName, AmazonCloudFormationRetryClient cfRetryClient, AmazonEC2Client amazonEC2Client,
+    private void setElasticIps(String cFStackName, AmazonCloudFormationClient cfRetryClient, AmazonEc2Client amazonEC2Client,
             List<Group> gateways, Map<String, List<String>> gatewayGroupInstanceMapping) {
         Map<String, String> eipAllocationIds = awsElasticIpService.getElasticIpAllocationIds(cfStackUtil.getOutputs(cFStackName, cfRetryClient), cFStackName);
         for (Group gateway : gateways) {
@@ -447,7 +447,7 @@ public class AwsLaunchService {
             try {
                 String region = ac.getCloudContext().getLocation().getRegion().value();
                 LOGGER.debug("Importing public key to {} region on AWS", region);
-                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                AmazonEc2Client client = awsClient.createEc2Client(awsCredential, region);
                 String keyPairName = awsClient.getKeyPairName(ac);
                 ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getInstanceAuthentication().getPublicKey());
                 try {
@@ -469,7 +469,7 @@ public class AwsLaunchService {
         return existingVPC && !existingSubnet && cidr == null;
     }
 
-    private List<CloudResource> saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationRetryClient client,
+    private List<CloudResource> saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
             PersistenceNotifier resourceNotifier) {
         List<CloudResource> resources = new ArrayList<>();
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
@@ -500,7 +500,7 @@ public class AwsLaunchService {
         return resources;
     }
 
-    private String getCreatedVpc(String cFStackName, AmazonCloudFormationRetryClient client) {
+    private String getCreatedVpc(String cFStackName, AmazonCloudFormationClient client) {
         Map<String, String> outputs = cfStackUtil.getOutputs(cFStackName, client);
         if (outputs.containsKey(CREATED_VPC)) {
             return outputs.get(CREATED_VPC);
@@ -510,7 +510,7 @@ public class AwsLaunchService {
         }
     }
 
-    private String getCreatedSubnet(String cFStackName, AmazonCloudFormationRetryClient client) {
+    private String getCreatedSubnet(String cFStackName, AmazonCloudFormationClient client) {
         Map<String, String> outputs = cfStackUtil.getOutputs(cFStackName, client);
         if (outputs.containsKey(CREATED_SUBNET)) {
             return outputs.get(CREATED_SUBNET);
@@ -521,7 +521,7 @@ public class AwsLaunchService {
     }
 
     private void suspendAutoscalingGoupsWhenNewInstancesAreReady(AuthenticatedContext ac, CloudStack stack) {
-        AmazonCloudFormationRetryClient cloudFormationClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         try {
             awsAutoScalingService.scheduleStatusChecks(stack.getGroups(), ac, cloudFormationClient);
@@ -532,7 +532,7 @@ public class AwsLaunchService {
         awsAutoScalingService.suspendAutoScaling(ac, stack);
     }
 
-    private List<String> getPrefixListIds(AmazonEC2Client amazonEC2Client, String regionName, OutboundInternetTraffic outboundInternetTraffic) {
+    private List<String> getPrefixListIds(AmazonEc2Client amazonEC2Client, String regionName, OutboundInternetTraffic outboundInternetTraffic) {
         List<String> result = List.of();
         if (outboundInternetTraffic == OutboundInternetTraffic.DISABLED && CollectionUtils.isNotEmpty(enabledGatewayServices)) {
             Set<String> gatewayRegionServices = enabledGatewayServices.stream()

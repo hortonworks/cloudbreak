@@ -13,12 +13,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.policy.actions.SecurityTokenServiceActions;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
 import com.amazonaws.services.identitymanagement.model.Role;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -32,7 +32,7 @@ public class AwsIDBrokerAssumeRoleValidator {
     @Inject
     private AwsIamService awsIamService;
 
-    public boolean canAssumeRoles(AmazonIdentityManagement iam, InstanceProfile instanceProfile,
+    public boolean canAssumeRoles(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             Collection<Role> roles, ValidationResultBuilder resultBuilder) {
         Collection<String> roleArns = roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new));
 

@@ -14,11 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -31,7 +31,7 @@ public class AwsLogRolePermissionValidator {
     @Inject
     private AwsIamService awsIamService;
 
-    public void validate(AmazonIdentityManagement iam, InstanceProfile instanceProfile,
+    public void validate(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             CloudS3View cloudFileSystem, ValidationResultBuilder validationResultBuilder) {
         SortedSet<String> failedActions = new TreeSet<>();
 

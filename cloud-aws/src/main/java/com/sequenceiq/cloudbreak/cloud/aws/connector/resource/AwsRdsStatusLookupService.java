@@ -7,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DBInstanceNotFoundException;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -29,7 +29,7 @@ public class AwsRdsStatusLookupService {
     public ExternalDatabaseStatus getStatus(AuthenticatedContext ac, DatabaseStack dbStack) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);
+        AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
 
         String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 
@@ -71,7 +71,7 @@ public class AwsRdsStatusLookupService {
     public DescribeDBInstancesResult getDescribeDBInstancesResult(AuthenticatedContext ac, DatabaseStack dbStack) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonRDS rdsClient = awsClient.createRdsClient(credentialView, regionName);
+        AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
 
         String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
 

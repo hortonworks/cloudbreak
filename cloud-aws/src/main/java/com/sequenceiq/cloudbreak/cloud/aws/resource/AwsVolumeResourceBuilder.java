@@ -40,7 +40,7 @@ import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2RetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -60,7 +60,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
-import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -84,9 +83,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private AwsClient awsClient;
-
-    @Inject
-    private Retry retry;
 
     private Function<Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
         EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
@@ -148,7 +144,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, CloudResource subnetResource) {
-        AmazonEc2RetryClient amazonEC2Client = getAmazonEC2Client(auth);
+        AmazonEc2Client amazonEC2Client = getAmazonEC2Client(auth);
         DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(new DescribeSubnetsRequest()
                 .withSubnetIds(subnetResource.getName()));
         return describeSubnetsResult.getSubnets().stream()
@@ -162,7 +158,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         LOGGER.debug("Create volumes on provider" + buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
-        AmazonEc2RetryClient client = getAmazonEC2Client(auth);
+        AmazonEc2Client client = getAmazonEC2Client(auth);
 
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
@@ -265,7 +261,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             throw new PreserveResourceException("Resource will be preserved for later reattachment.");
         }
 
-        AmazonEc2RetryClient client = getAmazonEC2Client(auth);
+        AmazonEc2Client client = getAmazonEC2Client(auth);
         deleteOrphanedVolumes(cloudResourceStatuses, client);
         turnOnDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
 
@@ -273,7 +269,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private void turnOnDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses,
-            AmazonEc2RetryClient client) {
+            AmazonEc2Client client) {
         List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications = cloudResourceStatuses.stream()
                 .filter(cloudResourceStatus -> ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
@@ -290,7 +286,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Delete on termination set to ture. {}", modifyIdentityIdFormatResult);
     }
 
-    private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2RetryClient client) {
+    private void deleteOrphanedVolumes(List<CloudResourceStatus> cloudResourceStatuses, AmazonEc2Client client) {
         cloudResourceStatuses.stream()
                 .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()))
                 .map(CloudResourceStatus::getCloudResource)
@@ -309,7 +305,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     protected List<CloudResourceStatus> checkResources(ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
-        AmazonEc2RetryClient client = getAmazonEC2Client(auth);
+        AmazonEc2Client client = getAmazonEC2Client(auth);
         List<CloudResource> volumeResources = StreamSupport.stream(resources.spliterator(), false)
                 .filter(r -> r.getType().equals(resourceType()))
                 .collect(Collectors.toList());
@@ -379,10 +375,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         return volumeSet -> volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
-    private AmazonEc2RetryClient getAmazonEC2Client(AuthenticatedContext auth) {
+    private AmazonEc2Client getAmazonEC2Client(AuthenticatedContext auth) {
         AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
         String regionName = auth.getCloudContext().getLocation().getRegion().value();
-        return new AmazonEc2RetryClient(awsClient.createAccess(credentialView, regionName), retry);
+        return awsClient.createEc2Client(credentialView, regionName);
     }
 
     @Override

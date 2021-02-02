@@ -8,15 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.LaunchConfiguration;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.StackResource;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 @Component
@@ -33,8 +33,8 @@ public class AutoScalingGroupHandler {
         autoScalingClient.updateAutoScalingGroup(updateAutoScalingGroupRequest);
     }
 
-    public Map<AutoScalingGroup, String> getAutoScalingGroups(AmazonCloudFormationClient cloudFormationClient, AmazonAutoScalingClient autoScalingClient,
-            CloudResource cfResource) {
+    public Map<AutoScalingGroup, String> getAutoScalingGroups(AmazonCloudFormationClient cloudFormationClient,
+            AmazonAutoScalingClient autoScalingClient, CloudResource cfResource) {
         DescribeStackResourcesRequest resourcesRequest = new DescribeStackResourcesRequest();
         resourcesRequest.setStackName(cfResource.getName());
         DescribeStackResourcesResult resourcesResult = cloudFormationClient.describeStackResources(resourcesRequest);

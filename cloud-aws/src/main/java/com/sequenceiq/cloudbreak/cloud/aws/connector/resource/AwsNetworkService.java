@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -28,6 +26,7 @@ import com.amazonaws.services.ec2.model.VpcCidrBlockAssociation;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -57,7 +56,7 @@ public class AwsNetworkService {
     public List<String> getExistingSubnetCidr(AuthenticatedContext ac, CloudStack stack) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
         DescribeSubnetsRequest subnetsRequest = new DescribeSubnetsRequest().withSubnetIds(awsNetworkView.getSubnetList());
         List<Subnet> subnets = ec2Client.describeSubnets(subnetsRequest).getSubnets();
         if (subnets.isEmpty()) {
@@ -70,7 +69,7 @@ public class AwsNetworkService {
         return cidrs;
     }
 
-    public boolean isMapPublicOnLaunch(AwsNetworkView awsNetworkView, AmazonEC2 amazonEC2Client) {
+    public boolean isMapPublicOnLaunch(AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client) {
         boolean mapPublicIpOnLaunch = true;
         if (awsNetworkView.isExistingVPC() && awsNetworkView.isExistingSubnet()) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
@@ -86,7 +85,7 @@ public class AwsNetworkService {
     public String findNonOverLappingCIDR(AuthenticatedContext ac, CloudStack stack) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
 
         DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVpc());
         Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);
@@ -105,7 +104,7 @@ public class AwsNetworkService {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         if (awsNetworkView.isExistingVPC()) {
             String region = ac.getCloudContext().getLocation().getRegion().value();
-            AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), region);
+            AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()), region);
 
             DescribeVpcsRequest vpcRequest = new DescribeVpcsRequest().withVpcIds(awsNetworkView.getExistingVpc());
             Vpc vpc = ec2Client.describeVpcs(vpcRequest).getVpcs().get(0);

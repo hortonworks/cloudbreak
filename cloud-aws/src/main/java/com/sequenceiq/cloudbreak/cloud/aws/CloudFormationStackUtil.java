@@ -28,7 +28,6 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsRequest;
 import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
 import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
-import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
@@ -42,9 +41,10 @@ import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsResult
 import com.amazonaws.services.elasticloadbalancingv2.model.TargetDescription;
 import com.amazonaws.services.elasticloadbalancingv2.model.TargetHealthDescription;
 import com.google.common.base.Splitter;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsTargetGroup;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
@@ -78,7 +78,7 @@ public class CloudFormationStackUtil {
             backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
     public String getAutoscalingGroupName(AuthenticatedContext ac, String instanceGroup, String region) {
-        AmazonCloudFormationRetryClient amazonCfClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonCloudFormationClient amazonCfClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
         return getAutoscalingGroupName(ac, amazonCfClient, instanceGroup);
     }
 
@@ -87,7 +87,7 @@ public class CloudFormationStackUtil {
             maxAttempts = 15,
             backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
-    public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormationRetryClient amazonCFClient, String instanceGroup) {
+    public String getAutoscalingGroupName(AuthenticatedContext ac, AmazonCloudFormationClient amazonCFClient, String instanceGroup) {
         String cFStackName = getCfStackName(ac);
         DescribeStackResourceResult asGroupResource = amazonCFClient.describeStackResource(new DescribeStackResourceRequest()
                 .withStackName(cFStackName)
@@ -95,7 +95,7 @@ public class CloudFormationStackUtil {
         return asGroupResource.getStackResourceDetail().getPhysicalResourceId();
     }
 
-    public Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationRetryClient client) {
+    public Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationClient client) {
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         String outputNotFound = String.format("Couldn't get Cloudformation stack's('%s') output", cFStackName);
         List<Output> cfStackOutputs = client.describeStacks(describeStacksRequest).getStacks()
@@ -107,8 +107,8 @@ public class CloudFormationStackUtil {
         return () -> new CloudConnectorException(msg);
     }
 
-    public List<CloudResource> getInstanceCloudResources(AuthenticatedContext ac, AmazonCloudFormationRetryClient client,
-            AmazonAutoScalingRetryClient amazonASClient, List<Group> groups) {
+    public List<CloudResource> getInstanceCloudResources(AuthenticatedContext ac, AmazonCloudFormationClient client,
+            AmazonAutoScalingClient amazonASClient, List<Group> groups) {
         Map<String, Group> groupNameMapping = groups.stream()
                 .collect(Collectors.toMap(
                         group -> getAutoscalingGroupName(ac, client, group.getName()),
@@ -146,7 +146,7 @@ public class CloudFormationStackUtil {
                 .splitToList(ac.getCloudContext().getName()).get(0), ac.getCloudContext().getId());
     }
 
-    public Map<Group, List<String>> getInstanceIdsByGroups(AmazonAutoScalingRetryClient amazonASClient, Map<String, Group> groupNameMapping) {
+    public Map<Group, List<String>> getInstanceIdsByGroups(AmazonAutoScalingClient amazonASClient, Map<String, Group> groupNameMapping) {
         DescribeAutoScalingGroupsResult result = amazonASClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(groupNameMapping.keySet()));
         return result.getAutoScalingGroups().stream()
@@ -158,7 +158,7 @@ public class CloudFormationStackUtil {
                                 .collect(Collectors.toList())));
     }
 
-    public List<String> getInstanceIds(AmazonAutoScalingRetryClient amazonASClient, String asGroupName) {
+    public List<String> getInstanceIds(AmazonAutoScalingClient amazonASClient, String asGroupName) {
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = amazonASClient
                 .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(asGroupName));
         List<String> instanceIds = new ArrayList<>();
@@ -259,8 +259,8 @@ public class CloudFormationStackUtil {
 
     public FileSystemDescription getEfsByFileSystemId(AuthenticatedContext ac, String fileSystemId) {
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonEfsRetryClient amazonEfsClient =
-                awsClient.createEfsRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonEfsClient amazonEfsClient =
+                awsClient.createElasticFileSystemClient(new AwsCredentialView(ac.getCloudCredential()), region);
 
         DescribeFileSystemsResult efsResult = amazonEfsClient.describeFileSystems(new DescribeFileSystemsRequest()
                 .withFileSystemId(fileSystemId));
@@ -277,8 +277,8 @@ public class CloudFormationStackUtil {
 
     private String getResourceArnByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
         String cFStackName = getCfStackName(ac);
-        AmazonCloudFormationRetryClient amazonCfClient =
-            awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonCloudFormationClient amazonCfClient =
+            awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
         DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
             .withStackName(cFStackName)
             .withLogicalResourceId(logicalId));

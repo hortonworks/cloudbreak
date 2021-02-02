@@ -13,7 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.Tag;
@@ -33,6 +31,7 @@ import com.amazonaws.services.ec2.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -50,7 +49,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -109,9 +107,6 @@ class AwsVolumeResourceBuilderTest {
     @Mock
     private AwsClient awsClient;
 
-    @Mock
-    private Retry retry;
-
     @InjectMocks
     private AwsVolumeResourceBuilder underTest;
 
@@ -134,7 +129,7 @@ class AwsVolumeResourceBuilderTest {
     private Region region;
 
     @Mock
-    private AmazonEC2Client amazonEC2Client;
+    private AmazonEc2Client amazonEC2Client;
 
     @Captor
     private ArgumentCaptor<CreateVolumeRequest> createVolumeRequestCaptor;
@@ -145,7 +140,7 @@ class AwsVolumeResourceBuilderTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(region);
         when(region.value()).thenReturn(REGION_NAME);
-        when(awsClient.createAccess(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
+        when(awsClient.createEc2Client(isA(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonEC2Client);
         when(cloudStack.getTags()).thenReturn(TAGS);
         when(awsTaggingService.prepareEc2Tags(TAGS)).thenReturn(EC2_TAGS);
     }
@@ -241,7 +236,6 @@ class AwsVolumeResourceBuilderTest {
             futureTask.run();
             return futureTask;
         });
-        when(retry.testWith2SecDelayMax15Times(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
     }
 
     private Volume createVolume(String type) {

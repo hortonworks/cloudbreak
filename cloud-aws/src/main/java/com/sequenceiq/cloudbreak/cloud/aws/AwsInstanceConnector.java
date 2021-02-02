@@ -23,8 +23,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.SdkClientException;
-import com.amazonaws.services.ec2.AmazonEC2;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
@@ -36,6 +34,7 @@ import com.amazonaws.services.ec2.model.StartInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
@@ -64,7 +63,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         if (!verifyHostKey) {
             throw new CloudOperationNotSupportedException("Host key verification is disabled on AWS");
         }
-        AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(authenticatedContext).getAmazonEC2Client();
+        AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(authenticatedContext).getAmazonEC2Client();
         GetConsoleOutputRequest getConsoleOutputRequest = new GetConsoleOutputRequest().withInstanceId(vm.getInstanceId());
         GetConsoleOutputResult getConsoleOutputResult = amazonEC2Client.getConsoleOutput(getConsoleOutputRequest);
         try {
@@ -104,8 +103,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     }
 
     private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
-            BiConsumer<AmazonEC2Client, Collection<String>> consumer, String exceptionText) {
-        AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
+            BiConsumer<AmazonEc2Client, Collection<String>> consumer, String exceptionText) {
+        AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
         try {
             Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status);
             if (!instances.isEmpty()) {
@@ -264,7 +263,7 @@ public class AwsInstanceConnector implements InstanceConnector {
         return cloudVmInstanceStatuses;
     }
 
-    private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEC2 amazonEC2Client, String state) {
+    private Collection<String> instanceIdsWhichAreNotInCorrectState(List<CloudInstance> vms, AmazonEc2Client amazonEC2Client, String state) {
         Set<String> instances = vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toCollection(HashSet::new));
         DescribeInstancesResult describeInstances = amazonEC2Client.describeInstances(
                 new DescribeInstancesRequest().withInstanceIds(instances));

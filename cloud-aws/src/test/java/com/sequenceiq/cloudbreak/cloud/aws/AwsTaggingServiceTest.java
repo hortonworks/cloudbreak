@@ -24,7 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.cloudformation.model.Tag;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
@@ -32,6 +31,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
 import com.amazonaws.services.ec2.model.Reservation;
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -79,7 +79,7 @@ public class AwsTaggingServiceTest {
                                 .withRootDeviceName("/dev/sda1"))
                 );
 
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
         Map<String, String> userTags = Map.of("key1", "val1", "key2", "val2");
 
@@ -108,7 +108,7 @@ public class AwsTaggingServiceTest {
         DescribeInstancesResult describeResult = new DescribeInstancesResult()
                 .withReservations(new Reservation());
 
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
         awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, List.of(instance), Map.of());
@@ -139,7 +139,7 @@ public class AwsTaggingServiceTest {
 
         DescribeInstancesResult describeResult = new DescribeInstancesResult()
                 .withReservations(new Reservation().withInstances(awsInstances));
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
         awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, instanceList, Map.of());
@@ -185,7 +185,7 @@ public class AwsTaggingServiceTest {
 
         DescribeInstancesResult describeResult = new DescribeInstancesResult()
                 .withReservations(new Reservation().withInstances(awsInstances));
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(ec2Client.describeInstances(any())).thenReturn(describeResult);
 
         awsTaggingService.tagRootVolumes(authenticatedContext(), ec2Client, instanceList, Map.of());

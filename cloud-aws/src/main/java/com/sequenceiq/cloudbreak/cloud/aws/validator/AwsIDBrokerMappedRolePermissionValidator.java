@@ -16,10 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.amazonaws.auth.policy.Policy;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.Role;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -69,7 +69,7 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
      * @param cloudFileSystem         cloud file system to evaluate
      * @param validationResultBuilder builder for any errors encountered
      */
-    public void validate(AmazonIdentityManagement iam, CloudS3View cloudFileSystem,
+    public void validate(AmazonIdentityManagementClient iam, CloudS3View cloudFileSystem,
             ValidationResultBuilder validationResultBuilder) {
         AccountMappingBase accountMappings = cloudFileSystem.getAccountMapping();
         if (accountMappings != null) {

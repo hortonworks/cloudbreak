@@ -39,14 +39,10 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.regions.RegionUtils;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
@@ -67,14 +63,12 @@ import com.amazonaws.services.ec2.model.SecurityGroup;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
 import com.amazonaws.services.identitymanagement.model.ListRolesRequest;
 import com.amazonaws.services.identitymanagement.model.ListRolesResult;
 import com.amazonaws.services.identitymanagement.model.Role;
-import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.AliasListEntry;
 import com.amazonaws.services.kms.model.DescribeKeyRequest;
 import com.amazonaws.services.kms.model.DescribeKeyResult;
@@ -84,6 +78,10 @@ import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -358,7 +356,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
         try {
             LOGGER.debug("Describing route tables in region {}", region.getRegionName());
             List<RouteTable> allRouteTables = AwsPageCollector.getAllRouteTables(ec2Client, new DescribeRouteTablesRequest());
@@ -395,7 +393,7 @@ public class AwsPlatformResources implements PlatformResources {
         return describeVpcsRequest;
     }
 
-    private Set<CloudNetwork> getCloudNetworks(AmazonEC2Client ec2Client,
+    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client,
             List<RouteTable> describeRouteTablesResult, DescribeVpcsResult describeVpcsResult) {
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
@@ -415,7 +413,7 @@ public class AwsPlatformResources implements PlatformResources {
         return cloudNetworks;
     }
 
-    private List<Subnet> getSubnets(AmazonEC2Client ec2Client, Vpc vpc) {
+    private List<Subnet> getSubnets(AmazonEc2Client ec2Client, Vpc vpc) {
         List<Subnet> awsSubnets = new ArrayList<>();
         DescribeSubnetsResult describeSubnetsResult = null;
         do {
@@ -484,7 +482,7 @@ public class AwsPlatformResources implements PlatformResources {
             // If region is provided then should filter for those region
             if (regionMatch(actualRegion, region)) {
                 Set<CloudSshKey> cloudSshKeys = new HashSet<>();
-                AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), actualRegion.value());
+                AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), actualRegion.value());
 
                 //create sshkey filter view
                 PlatformResourceSshKeyFilterView filter = new PlatformResourceSshKeyFilterView(filters);
@@ -511,7 +509,7 @@ public class AwsPlatformResources implements PlatformResources {
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
-        AmazonEC2Client ec2Client = awsClient.createAccess(new AwsCredentialView(cloudCredential), region.value());
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
 
         //create securitygroup filter view
         PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
@@ -540,7 +538,7 @@ public class AwsPlatformResources implements PlatformResources {
         return new CloudSecurityGroups(result);
     }
 
-    private List<SecurityGroup> fetchSecurityGroups(AmazonEC2Client ec2Client, DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
+    private List<SecurityGroup> fetchSecurityGroups(AmazonEc2Client ec2Client, DescribeSecurityGroupsRequest describeSecurityGroupsRequest) {
         try {
             return ec2Client.describeSecurityGroups(describeSecurityGroupsRequest).getSecurityGroups();
         } catch (AmazonEC2Exception e) {
@@ -555,7 +553,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
-        AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
+        AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
@@ -569,7 +567,7 @@ public class AwsPlatformResources implements PlatformResources {
             }
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
                 try {
-                    fetchAZsIfNeeded(availabilityZonesNeeded, ec2Client, regionListMap, awsRegion, cloudCredential);
+                    fetchAZsIfNeeded(availabilityZonesNeeded, regionListMap, awsRegion, cloudCredential);
                 } catch (AmazonEC2Exception e) {
                     LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
                 }
@@ -583,14 +581,14 @@ public class AwsPlatformResources implements PlatformResources {
         return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
     }
 
-    private void fetchAZsIfNeeded(boolean availabilityZonesNeeded, AmazonEC2Client ec2Client, Map<Region, List<AvailabilityZone>> regionListMap,
+    private void fetchAZsIfNeeded(boolean availabilityZonesNeeded, Map<Region, List<AvailabilityZone>> regionListMap,
             com.amazonaws.services.ec2.model.Region awsRegion, CloudCredential cloudCredential) {
         List<AvailabilityZone> collectedAZs = new ArrayList<>();
         if (availabilityZonesNeeded) {
-            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(ec2Client, awsRegion);
+            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(awsRegion);
             LOGGER.debug("Describing AZs in region {}", awsRegion.getRegionName());
             List<com.amazonaws.services.ec2.model.AvailabilityZone> availabilityZones
-                    = awsAvailabilityZoneProvider.describeAvailabilityZones(cloudCredential, describeAvailabilityZonesRequest, ec2Client, awsRegion);
+                    = awsAvailabilityZoneProvider.describeAvailabilityZones(cloudCredential, describeAvailabilityZonesRequest, awsRegion);
             availabilityZones.stream()
                     .map(com.amazonaws.services.ec2.model.AvailabilityZone::getZoneName)
                     .map(AvailabilityZone::availabilityZone)
@@ -600,9 +598,8 @@ public class AwsPlatformResources implements PlatformResources {
         regionListMap.put(region(awsRegion.getRegionName()), collectedAZs);
     }
 
-    private DescribeAvailabilityZonesRequest getDescribeAvailabilityZonesRequest(AmazonEC2Client ec2Client, com.amazonaws.services.ec2.model.Region awsRegion) {
+    private DescribeAvailabilityZonesRequest getDescribeAvailabilityZonesRequest(com.amazonaws.services.ec2.model.Region awsRegion) {
         DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = new DescribeAvailabilityZonesRequest();
-        ec2Client.setRegion(RegionUtils.getRegion(awsRegion.getRegionName()));
         Filter filter = new Filter();
         filter.setName("region-name");
         Collection<String> list = new ArrayList<>();
@@ -631,17 +628,7 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private DescribeAvailabilityZonesResult describeAvailabilityZonesResult(AmazonEC2Client ec2Client, com.amazonaws.services.ec2.model.Region awsRegion) {
-        try {
-            DescribeAvailabilityZonesRequest describeAvailabilityZonesRequest = getDescribeAvailabilityZonesRequest(ec2Client, awsRegion);
-            return ec2Client.describeAvailabilityZones(describeAvailabilityZonesRequest);
-        } catch (AmazonEC2Exception e) {
-            LOGGER.info("Failed to retrieve AZ from Region: {}!", awsRegion.getRegionName(), e);
-        }
-        return new DescribeAvailabilityZonesResult();
-    }
-
-    private DescribeRegionsResult describeRegionsResult(AmazonEC2Client ec2Client) {
+    private DescribeRegionsResult describeRegionsResult(AmazonEc2Client ec2Client) {
         LOGGER.debug("Getting regions");
         try {
             DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
@@ -693,14 +680,12 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        AmazonEC2Client ec2Client = awsClient.createAccess(cloudCredential);
-
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters, true);
 
         for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || regionListEntry.getKey().value().equals(region.value())) {
-                ec2Client.setRegion(RegionUtils.getRegion(regionListEntry.getKey().value()));
+                AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), regionListEntry.getKey().value());
 
                 DescribeInternetGatewaysRequest describeInternetGatewaysRequest = new DescribeInternetGatewaysRequest();
                 DescribeInternetGatewaysResult describeInternetGatewaysResult = ec2Client.describeInternetGateways(describeInternetGatewaysRequest);
@@ -736,7 +721,7 @@ public class AwsPlatformResources implements PlatformResources {
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-        AmazonIdentityManagement client = awsClient.createAmazonIdentityManagement(awsCredentialView);
+        AmazonIdentityManagementClient client = awsClient.createAmazonIdentityManagement(awsCredentialView);
         String accessConfigType = filters.get(ACCESS_CONFIG_TYPE);
         Set<CloudAccessConfig> cloudAccessConfigSet;
         if (AwsAccessConfigType.ROLE.name().equals(accessConfigType)) {
@@ -754,7 +739,7 @@ public class AwsPlatformResources implements PlatformResources {
 
         CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(new HashSet<>());
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-        AWSKMS client = awsClient.createAWSKMS(awsCredentialView, region.value());
+        AmazonKmsClient client = awsClient.createAWSKMS(awsCredentialView, region.value());
         try {
             ListKeysRequest listKeysRequest = new ListKeysRequest();
             ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
@@ -818,7 +803,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         List<CloudNoSqlTable> noSqlTables = new ArrayList<>();
-        AmazonDynamoDB dynamoDbClient = getAmazonDynamoDB(cloudCredential, region);
+        AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDB(cloudCredential, region);
         ListTablesRequest listTablesRequest = new ListTablesRequest();
         ListTablesResult listTablesResult = null;
         boolean first = true;
@@ -842,12 +827,12 @@ public class AwsPlatformResources implements PlatformResources {
         return enabledRegions;
     }
 
-    private AmazonDynamoDB getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
+    private AmazonDynamoDBClient getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         return awsClient.createDynamoDbClient(awsCredentialView, region.value());
     }
 
-    private Set<CloudAccessConfig> getAccessConfigByInstanceProfile(AmazonIdentityManagement client) {
+    private Set<CloudAccessConfig> getAccessConfigByInstanceProfile(AmazonIdentityManagementClient client) {
         LOGGER.info("Get all Instance profiles from Amazon");
         String queryFailedMessage = "Could not get instance profiles from Amazon: ";
         try {
@@ -886,7 +871,7 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private Set<CloudAccessConfig> getAccessConfigByRole(AmazonIdentityManagement client) {
+    private Set<CloudAccessConfig> getAccessConfigByRole(AmazonIdentityManagementClient client) {
         LOGGER.info("Get all Roles from Amazon");
         String queryFailedMessage = "Could not get roles from Amazon: ";
         try {

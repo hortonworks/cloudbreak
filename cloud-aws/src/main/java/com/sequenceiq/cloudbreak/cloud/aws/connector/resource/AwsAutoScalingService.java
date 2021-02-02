@@ -16,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
@@ -26,7 +25,6 @@ import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.SuspendProcessesRequest;
 import com.amazonaws.services.autoscaling.model.TerminateInstanceInAutoScalingGroupRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.waiters.PollingStrategy;
 import com.amazonaws.waiters.Waiter;
@@ -35,8 +33,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -64,7 +63,7 @@ public class AwsAutoScalingService {
     private CloudFormationStackUtil cloudFormationStackUtil;
 
     public void suspendAutoScaling(AuthenticatedContext ac, CloudStack stack) {
-        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         for (Group group : stack.getGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, group.getName(), ac.getCloudContext().getLocation().getRegion().value());
@@ -73,47 +72,43 @@ public class AwsAutoScalingService {
         }
     }
 
-    public void resumeAutoScaling(AmazonAutoScalingRetryClient amazonASClient, Collection<String> groupNames, List<String> autoScalingPolicies) {
+    public void resumeAutoScaling(AmazonAutoScalingClient amazonASClient, Collection<String> groupNames, List<String> autoScalingPolicies) {
         for (String groupName : groupNames) {
             LOGGER.info("Resume autoscaling group '{}'", groupName);
             amazonASClient.resumeProcesses(new ResumeProcessesRequest().withAutoScalingGroupName(groupName).withScalingProcesses(autoScalingPolicies));
         }
     }
 
-    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient, Date timeBeforeASUpdate)
+    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient, Date timeBeforeASUpdate)
             throws AmazonAutoscalingFailed {
-        AmazonEC2Client amClient = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonEc2Client amClient = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
-        AmazonAutoScalingRetryClient asRetryClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
         for (Group group : groups) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
-            checkLastScalingActivity(asClient, asRetryClient, asGroupName, timeBeforeASUpdate, group);
+            checkLastScalingActivity(asClient, asGroupName, timeBeforeASUpdate, group);
             LOGGER.debug("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(), asGroupName);
-            waitForGroup(amClient, asClient, asRetryClient, asGroupName, group.getInstancesSize(), ac.getCloudContext().getId());
+            waitForGroup(amClient, asClient, asGroupName, group.getInstancesSize(), ac.getCloudContext().getId());
         }
     }
 
     public void scheduleStatusChecks(Map<String, Integer> groupsWithSize, AuthenticatedContext ac, Date timeBeforeASUpdate)
             throws AmazonAutoscalingFailed {
 
-        AmazonEC2Client amClient = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+        AmazonEc2Client amClient = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        AmazonAutoScalingRetryClient asRetryClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
         for (Map.Entry<String, Integer> groupWithSize : groupsWithSize.entrySet()) {
             String autoScalingGroupName = groupWithSize.getKey();
             Integer expectedSize = groupWithSize.getValue();
-            waitForGroup(amClient, asClient, asRetryClient, autoScalingGroupName, expectedSize, ac.getCloudContext().getId());
+            waitForGroup(amClient, asClient, autoScalingGroupName, expectedSize, ac.getCloudContext().getId());
         }
     }
 
-    private void waitForGroup(AmazonEC2Client amClient, AmazonAutoScalingClient asClient, AmazonAutoScalingRetryClient asRetryClient,
-            String autoScalingGroupName, Integer requiredInstanceCount, Long stackId) throws AmazonAutoscalingFailed {
+    private void waitForGroup(AmazonEc2Client amClient, AmazonAutoScalingClient asClient, String autoScalingGroupName, Integer requiredInstanceCount,
+            Long stackId) throws AmazonAutoscalingFailed {
         Waiter<DescribeAutoScalingGroupsRequest> groupInServiceWaiter = asClient.waiters().groupInService();
         PollingStrategy backoff = getBackoffCancellablePollingStrategy(new StackCancellationCheck(stackId));
         try {
@@ -132,7 +127,7 @@ public class AwsAutoScalingService {
             throw new AmazonAutoscalingFailed(e.getMessage(), e);
         }
 
-        List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(asRetryClient, autoScalingGroupName);
+        List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(asClient, autoScalingGroupName);
         if (requiredInstanceCount != 0) {
             List<List<String>> partitionedInstanceIdsList = Lists.partition(instanceIds, MAX_INSTANCE_ID_SIZE);
 
@@ -149,13 +144,13 @@ public class AwsAutoScalingService {
     }
 
     @VisibleForTesting
-    void checkLastScalingActivity(AmazonAutoScalingClient asClient, AmazonAutoScalingRetryClient asRetryClient, String autoScalingGroupName,
+    void checkLastScalingActivity(AmazonAutoScalingClient asClient, String autoScalingGroupName,
             Date timeBeforeASUpdate, Group group) throws AmazonAutoscalingFailed {
         if (group.getInstancesSize() > 0) {
             LOGGER.debug("Check last activity after AS update. Wait for the first if it doesn't exist. [asGroup: {}]", autoScalingGroupName);
             Optional<Activity> firstActivity = Optional.empty();
             try {
-                AutoScalingGroup scalingGroup = asRetryClient
+                AutoScalingGroup scalingGroup = asClient
                         .describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(autoScalingGroupName))
                         .getAutoScalingGroups().stream().findFirst()
                         .orElseThrow(() -> new AmazonAutoscalingFailed("Can not find autoscaling group by name: " + autoScalingGroupName));
@@ -164,7 +159,7 @@ public class AwsAutoScalingService {
                             .getAutoscalingActivitiesWaiter(asClient, timeBeforeASUpdate);
                     autoscalingActivitiesWaiter.run(new WaiterParameters<>(new DescribeScalingActivitiesRequest()
                             .withAutoScalingGroupName(autoScalingGroupName)));
-                    DescribeScalingActivitiesResult describeScalingActivitiesResult = asRetryClient
+                    DescribeScalingActivitiesResult describeScalingActivitiesResult = asClient
                             .describeScalingActivities(new DescribeScalingActivitiesRequest().withAutoScalingGroupName(autoScalingGroupName));
 
                     // if we run into InsufficientInstanceCapacity we can skip to waitForGroup because that method will wait for the required instance count
@@ -188,16 +183,16 @@ public class AwsAutoScalingService {
         }
     }
 
-    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationRetryClient cloudFormationClient)
+    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient)
             throws AmazonAutoscalingFailed {
         scheduleStatusChecks(groups, ac, cloudFormationClient, null);
     }
 
-    public List<AutoScalingGroup> getAutoscalingGroups(AmazonAutoScalingRetryClient amazonASClient, Set<String> groupNames) {
+    public List<AutoScalingGroup> getAutoscalingGroups(AmazonAutoScalingClient amazonASClient, Set<String> groupNames) {
         return amazonASClient.describeAutoScalingGroups(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(groupNames)).getAutoScalingGroups();
     }
 
-    public void updateAutoscalingGroup(AmazonAutoScalingRetryClient amazonASClient, String groupName, Integer newSize) {
+    public void updateAutoscalingGroup(AmazonAutoScalingClient amazonASClient, String groupName, Integer newSize) {
         LOGGER.info("Update '{}' Auto Scaling groups max size to {}, desired capacity to {}", groupName, newSize, newSize);
         amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
                 .withAutoScalingGroupName(groupName)
@@ -206,7 +201,7 @@ public class AwsAutoScalingService {
         LOGGER.debug("Updated Auto Scaling group's desiredCapacity: [to: '{}']", newSize);
     }
 
-    public void terminateInstance(AmazonAutoScalingRetryClient amazonASClient, String instanceId) {
+    public void terminateInstance(AmazonAutoScalingClient amazonASClient, String instanceId) {
         amazonASClient.terminateInstance(new TerminateInstanceInAutoScalingGroupRequest().withShouldDecrementDesiredCapacity(true).withInstanceId(instanceId));
     }
 }

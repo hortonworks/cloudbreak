@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
-import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -37,7 +37,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
         try {
-            AmazonS3 s3Client = awsClient.createS3Client(awsCredentialView);
+            AmazonS3Client s3Client = awsClient.createS3Client(awsCredentialView);
             String bucketLocation = fixBucketLocation(s3Client.getBucketLocation(request.getObjectStoragePath()));
             return ObjectStorageMetadataResponse.builder()
                     .withRegion(bucketLocation)
@@ -60,7 +60,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
-        AmazonIdentityManagement iam = awsClient.createAmazonIdentityManagement(awsCredentialView);
+        AmazonIdentityManagementClient iam = awsClient.createAmazonIdentityManagement(awsCredentialView);
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(

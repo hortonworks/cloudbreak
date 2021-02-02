@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -40,11 +41,8 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.ClientConfiguration;
 import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
@@ -56,8 +54,11 @@ import com.amazonaws.services.ec2.model.StartInstancesResult;
 import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.dyngr.exception.PollerStoppedException;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsInstanceStatusMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -98,7 +99,7 @@ public class AwsInstanceConnectorTest {
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
 
     @Mock
-    private AmazonEC2Client amazonEC2Client;
+    private AmazonEc2Client amazonEC2Client;
 
     @Mock
     private InstanceProfileCredentialsProvider instanceProfileCredentialsProvider;
@@ -106,14 +107,17 @@ public class AwsInstanceConnectorTest {
     @MockBean
     private Tracer tracer;
 
+    @MockBean
+    private SdkClientExceptionMapper sdkClientExceptionMapper;
+
     private AuthenticatedContext authenticatedContext;
 
     private List<CloudInstance> inputList;
 
     @BeforeEach
     public void awsClientSetup() {
-        doReturn(amazonEC2Client).when(awsClient).getAmazonEC2Client(any(AwsSessionCredentialProvider.class), any(ClientConfiguration.class));
-        doReturn(amazonEC2Client).when(awsClient).getAmazonEC2Client(any(BasicAWSCredentials.class), any(ClientConfiguration.class));
+        doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class));
+        doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class), anyString());
         doReturn(instanceProfileCredentialsProvider).when(awsClient).getInstanceProfileProvider();
 
         CloudContext context = new CloudContext(1L, "context", "crn", "AWS", "AWS",

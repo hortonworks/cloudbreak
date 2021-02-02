@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
@@ -30,7 +30,7 @@ public class AwsElasticIpService {
                 .collect(Collectors.toList());
     }
 
-    public void associateElasticIpsToInstances(AmazonEC2 amazonEC2Client, List<String> eipAllocationIds, List<String> instanceIds) {
+    public void associateElasticIpsToInstances(AmazonEc2Client amazonEC2Client, List<String> eipAllocationIds, List<String> instanceIds) {
         if (eipAllocationIds.size() == instanceIds.size()) {
             for (int i = 0; i < eipAllocationIds.size(); i++) {
                 associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i));
@@ -40,7 +40,7 @@ public class AwsElasticIpService {
         }
     }
 
-    private void associateElasticIpToInstance(AmazonEC2 amazonEC2Client, String eipAllocationId, String instanceId) {
+    private void associateElasticIpToInstance(AmazonEc2Client amazonEC2Client, String eipAllocationId, String instanceId) {
         AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
                 .withAllocationId(eipAllocationId)
                 .withInstanceId(instanceId);
@@ -58,7 +58,7 @@ public class AwsElasticIpService {
         }
     }
 
-    public List<String> getFreeIps(Collection<String> eips, AmazonEC2 amazonEC2Client) {
+    public List<String> getFreeIps(Collection<String> eips, AmazonEc2Client amazonEC2Client) {
         DescribeAddressesResult addresses = amazonEC2Client.describeAddresses(new DescribeAddressesRequest().withAllocationIds(eips));
         return addresses.getAddresses().stream().filter(address -> address.getInstanceId() == null)
                 .map(Address::getAllocationId).collect(Collectors.toList());

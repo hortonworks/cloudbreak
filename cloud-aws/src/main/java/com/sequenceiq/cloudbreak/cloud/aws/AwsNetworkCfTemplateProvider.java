@@ -18,9 +18,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.ServiceDetail;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsServiceEndpointView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -122,7 +122,7 @@ public class AwsNetworkCfTemplateProvider {
 
     private List<ServiceDetail> describeVpcServiceDetails(NetworkCreationRequest networkCreationRequest, Map<String, String> endpointNameMappings) {
         AwsCredentialView awsCredential = new AwsCredentialView(networkCreationRequest.getCloudCredential());
-        AmazonEC2Client awsClientAccess = awsClient.createAccess(awsCredential, networkCreationRequest.getRegion().value());
+        AmazonEc2Client awsClientAccess = awsClient.createEc2Client(awsCredential, networkCreationRequest.getRegion().value());
         return awsClientAccess.describeVpcEndpointServices().getServiceDetails().stream()
                 .filter(sd -> endpointNameMappings.containsKey(sd.getServiceName())).collect(Collectors.toList());
     }
