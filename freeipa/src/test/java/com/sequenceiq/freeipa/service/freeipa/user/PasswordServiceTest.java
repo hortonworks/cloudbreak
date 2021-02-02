@@ -17,6 +17,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 
@@ -26,6 +28,18 @@ class PasswordServiceTest {
     private static final long MOCK_TIME = 1576171731141L;
 
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String USER_CRN = Crn.builder(CrnResourceDescriptor.USER)
+            .setAccountId(ACCOUNT_ID)
+            .setResource(UUID.randomUUID().toString())
+            .build()
+            .toString();
+
+    private static final String MACHINE_USER_CRN = Crn.builder(CrnResourceDescriptor.MACHINE_USER)
+            .setAccountId(ACCOUNT_ID)
+            .setResource(UUID.randomUUID().toString())
+            .build()
+            .toString();
 
     @Mock
     private GrpcUmsClient grpcUmsClient;
@@ -37,37 +51,85 @@ class PasswordServiceTest {
     private PasswordService underTest;
 
     @Test
-    void testCalculateExpirationTimeNoPasswordPolicy() {
-        UserManagementProto.Account account = UserManagementProto.Account.newBuilder().build();
-        when(grpcUmsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any())).thenReturn(account);
-
-        assertEquals(Optional.empty(), underTest.calculateExpirationTime(INTERNAL_ACTOR_CRN, ACCOUNT_ID));
+    void testCalculateExpirationTimeForUserNoPasswordPolicies() {
+        setupAccount(Optional.empty(), Optional.empty());
+        assertEquals(Optional.empty(), underTest.calculateExpirationTime(USER_CRN, ACCOUNT_ID));
     }
 
     @Test
-    void testCalculateExpirationTime0PasswordPolicy() {
-        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
-                .setPasswordPolicy(UserManagementProto.WorkloadPasswordPolicy.newBuilder()
-                        .setWorkloadPasswordMaxLifetime(0)
-                        .build())
-                .build();
-        when(grpcUmsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any())).thenReturn(account);
-
-        assertEquals(Optional.empty(), underTest.calculateExpirationTime(INTERNAL_ACTOR_CRN, ACCOUNT_ID));
+    void testCalculateExpirationTimeForUser0GlobalPasswordPolicy() {
+        setupAccount(Optional.of(0L), Optional.empty());
+        assertEquals(Optional.empty(), underTest.calculateExpirationTime(USER_CRN, ACCOUNT_ID));
     }
 
     @Test
-    void testCalculateExpirationTimePasswordPolicy() {
+    void testCalculateExpirationTimeForUserGlobalPasswordPolicy() {
         long lifetime = 18276435L;
-
-        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
-                .setPasswordPolicy(UserManagementProto.WorkloadPasswordPolicy.newBuilder()
-                        .setWorkloadPasswordMaxLifetime(lifetime)
-                        .build())
-                .build();
+        setupAccount(Optional.of(lifetime), Optional.empty());
         when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochMilli(MOCK_TIME));
-        when(grpcUmsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any())).thenReturn(account);
 
-        assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + lifetime)), underTest.calculateExpirationTime(INTERNAL_ACTOR_CRN, ACCOUNT_ID));
+        assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + lifetime)), underTest.calculateExpirationTime(USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testCalculateExpirationTimeForUserMachineUserPasswordPolicy() {
+        setupAccount(Optional.empty(), Optional.of(18276435L));
+        assertEquals(Optional.empty(), underTest.calculateExpirationTime(USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testCalculateExpirationTimeForUserGlobalAndMachineUserPasswordPolicies() {
+        long globalLifetime = 18276435L;
+        setupAccount(Optional.of(globalLifetime), Optional.of(globalLifetime / 2));
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochMilli(MOCK_TIME));
+
+        assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + globalLifetime)), underTest.calculateExpirationTime(USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testCalculateExpirationTimeForMachineUserNoPasswordPolicies() {
+        setupAccount(Optional.empty(), Optional.empty());
+        assertEquals(Optional.empty(), underTest.calculateExpirationTime(MACHINE_USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testCalculateExpirationTimeForMachineUserMuPasswordPolicy() {
+        long lifetime = 2592000000L;
+        setupAccount(Optional.empty(), Optional.of(lifetime));
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochMilli(MOCK_TIME));
+
+        assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + lifetime)), underTest.calculateExpirationTime(MACHINE_USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testCalculateExpirationTimeForMachineUserGlobalPasswordPolicy() {
+        long lifetime = 18276435L;
+        setupAccount(Optional.of(lifetime), Optional.empty());
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochMilli(MOCK_TIME));
+
+        assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + lifetime)), underTest.calculateExpirationTime(MACHINE_USER_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void testCalculateExpirationTimeForMachineUserGlobalAndMachineUserPasswordPolicies() {
+        long machineUserLifetime = 2592000000L;
+        setupAccount(Optional.of(machineUserLifetime / 2), Optional.of(machineUserLifetime));
+        when(clock.getCurrentInstant()).thenReturn(Instant.ofEpochMilli(MOCK_TIME));
+
+        assertEquals(Optional.of(Instant.ofEpochMilli(MOCK_TIME + machineUserLifetime)), underTest.calculateExpirationTime(MACHINE_USER_CRN, ACCOUNT_ID));
+    }
+
+    private void setupAccount(Optional<Long> globalMaxLifetime, Optional<Long> machineUserMaxLifetime) {
+        UserManagementProto.Account.Builder builder = UserManagementProto.Account.newBuilder();
+        globalMaxLifetime.ifPresent(lifetime -> builder.setGlobalPasswordPolicy(
+                UserManagementProto.WorkloadPasswordPolicy.newBuilder()
+                        .setWorkloadPasswordMaxLifetime(lifetime)
+                        .build()));
+        machineUserMaxLifetime.ifPresent(lifetime -> builder.setMachineUserPasswordPolicy(
+                UserManagementProto.WorkloadPasswordPolicy.newBuilder()
+                        .setWorkloadPasswordMaxLifetime(lifetime)
+                        .build()));
+
+        when(grpcUmsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any())).thenReturn(builder.build());
     }
 }

@@ -2881,6 +2881,43 @@ public final class UserManagementGrpc {
      return getProcessWorkloadSSOAuthnReqMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGenerateControlPlaneSSOAuthnReqMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> METHOD_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ = getGenerateControlPlaneSSOAuthnReqMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethod() {
+    return getGenerateControlPlaneSSOAuthnReqMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethod;
+    if ((getGenerateControlPlaneSSOAuthnReqMethod = UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGenerateControlPlaneSSOAuthnReqMethod = UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod) == null) {
+          UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod = getGenerateControlPlaneSSOAuthnReqMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GenerateControlPlaneSSOAuthnReq"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GenerateControlPlaneSSOAuthnReq"))
+                  .build();
+          }
+        }
+     }
+     return getGenerateControlPlaneSSOAuthnReqMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getSetWorkloadSubdomainMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> METHOD_SET_WORKLOAD_SUBDOMAIN = getSetWorkloadSubdomainMethodHelper();
@@ -3177,6 +3214,43 @@ public final class UserManagementGrpc {
      return getSetActorWorkloadCredentialsMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getValidateActorWorkloadCredentialsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> METHOD_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS = getValidateActorWorkloadCredentialsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethod() {
+    return getValidateActorWorkloadCredentialsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethod;
+    if ((getValidateActorWorkloadCredentialsMethod = UserManagementGrpc.getValidateActorWorkloadCredentialsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getValidateActorWorkloadCredentialsMethod = UserManagementGrpc.getValidateActorWorkloadCredentialsMethod) == null) {
+          UserManagementGrpc.getValidateActorWorkloadCredentialsMethod = getValidateActorWorkloadCredentialsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ValidateActorWorkloadCredentials"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ValidateActorWorkloadCredentials"))
+                  .build();
+          }
+        }
+     }
+     return getValidateActorWorkloadCredentialsMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getGetActorWorkloadCredentialsMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> METHOD_GET_ACTOR_WORKLOAD_CREDENTIALS = getGetActorWorkloadCredentialsMethodHelper();
@@ -3436,6 +3510,43 @@ public final class UserManagementGrpc {
      return getSetWorkloadPasswordPolicyMethod;
   }
   @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getUnsetWorkloadPasswordPolicyMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> METHOD_UNSET_WORKLOAD_PASSWORD_POLICY = getUnsetWorkloadPasswordPolicyMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethod() {
+    return getUnsetWorkloadPasswordPolicyMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethod;
+    if ((getUnsetWorkloadPasswordPolicyMethod = UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getUnsetWorkloadPasswordPolicyMethod = UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod) == null) {
+          UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod = getUnsetWorkloadPasswordPolicyMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "UnsetWorkloadPasswordPolicy"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnsetWorkloadPasswordPolicy"))
+                  .build();
+          }
+        }
+     }
+     return getUnsetWorkloadPasswordPolicyMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
   @java.lang.Deprecated // Use {@link #getAssignCloudIdentityMethod()} instead. 
   public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> METHOD_ASSIGN_CLOUD_IDENTITY = getAssignCloudIdentityMethodHelper();
@@ -3693,6 +3804,117 @@ public final class UserManagementGrpc {
         }
      }
      return getGetUserSyncStateModelMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListRoleAssignmentsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> METHOD_LIST_ROLE_ASSIGNMENTS = getListRoleAssignmentsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethod() {
+    return getListRoleAssignmentsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethod;
+    if ((getListRoleAssignmentsMethod = UserManagementGrpc.getListRoleAssignmentsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getListRoleAssignmentsMethod = UserManagementGrpc.getListRoleAssignmentsMethod) == null) {
+          UserManagementGrpc.getListRoleAssignmentsMethod = getListRoleAssignmentsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "ListRoleAssignments"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListRoleAssignments"))
+                  .build();
+          }
+        }
+     }
+     return getListRoleAssignmentsMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGenerateWorkloadAuthTokenMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> METHOD_GENERATE_WORKLOAD_AUTH_TOKEN = getGenerateWorkloadAuthTokenMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethod() {
+    return getGenerateWorkloadAuthTokenMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethod;
+    if ((getGenerateWorkloadAuthTokenMethod = UserManagementGrpc.getGenerateWorkloadAuthTokenMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGenerateWorkloadAuthTokenMethod = UserManagementGrpc.getGenerateWorkloadAuthTokenMethod) == null) {
+          UserManagementGrpc.getGenerateWorkloadAuthTokenMethod = getGenerateWorkloadAuthTokenMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GenerateWorkloadAuthToken"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GenerateWorkloadAuthToken"))
+                  .build();
+          }
+        }
+     }
+     return getGenerateWorkloadAuthTokenMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetWorkloadAuthConfigurationMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> METHOD_GET_WORKLOAD_AUTH_CONFIGURATION = getGetWorkloadAuthConfigurationMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethod() {
+    return getGetWorkloadAuthConfigurationMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethod;
+    if ((getGetWorkloadAuthConfigurationMethod = UserManagementGrpc.getGetWorkloadAuthConfigurationMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getGetWorkloadAuthConfigurationMethod = UserManagementGrpc.getGetWorkloadAuthConfigurationMethod) == null) {
+          UserManagementGrpc.getGetWorkloadAuthConfigurationMethod = getGetWorkloadAuthConfigurationMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "usermanagement.UserManagement", "GetWorkloadAuthConfiguration"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetWorkloadAuthConfiguration"))
+                  .build();
+          }
+        }
+     }
+     return getGetWorkloadAuthConfigurationMethod;
   }
 
   /**
@@ -4513,6 +4735,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Generate a SSO AuthNRequest for control plane SP-initiated login.
+     * </pre>
+     */
+    public void generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGenerateControlPlaneSSOAuthnReqMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Set the workload subdomain for an account if no such workload domain has
      * been set for a different account before.
      * </pre>
@@ -4608,6 +4840,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Validates the actor workloads credentials based on the password policy for the account.
+     * </pre>
+     */
+    public void validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getValidateActorWorkloadCredentialsMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
@@ -4686,6 +4928,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Unsets the workload password policy for an account.
+     * </pre>
+     */
+    public void unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getUnsetWorkloadPasswordPolicyMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -4752,6 +5004,36 @@ public final class UserManagementGrpc {
     public void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
       asyncUnimplementedUnaryCall(getGetUserSyncStateModelMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * List all role assignments in an account.
+     * </pre>
+     */
+    public void listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListRoleAssignmentsMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Generate authentication token for workload API.
+     * </pre>
+     */
+    public void generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGenerateWorkloadAuthTokenMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get authentication configuration for workload API.
+     * </pre>
+     */
+    public void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetWorkloadAuthConfigurationMethodHelper(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -5296,6 +5578,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>(
                   this, METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ)))
           .addMethod(
+            getGenerateControlPlaneSSOAuthnReqMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>(
+                  this, METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ)))
+          .addMethod(
             getSetWorkloadSubdomainMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5352,6 +5641,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>(
                   this, METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS)))
           .addMethod(
+            getValidateActorWorkloadCredentialsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>(
+                  this, METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS)))
+          .addMethod(
             getGetActorWorkloadCredentialsMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5401,6 +5697,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>(
                   this, METHODID_SET_WORKLOAD_PASSWORD_POLICY)))
           .addMethod(
+            getUnsetWorkloadPasswordPolicyMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>(
+                  this, METHODID_UNSET_WORKLOAD_PASSWORD_POLICY)))
+          .addMethod(
             getAssignCloudIdentityMethodHelper(),
             asyncUnaryCall(
               new MethodHandlers<
@@ -5449,6 +5752,27 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>(
                   this, METHODID_GET_USER_SYNC_STATE_MODEL)))
+          .addMethod(
+            getListRoleAssignmentsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>(
+                  this, METHODID_LIST_ROLE_ASSIGNMENTS)))
+          .addMethod(
+            getGenerateWorkloadAuthTokenMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>(
+                  this, METHODID_GENERATE_WORKLOAD_AUTH_TOKEN)))
+          .addMethod(
+            getGetWorkloadAuthConfigurationMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>(
+                  this, METHODID_GET_WORKLOAD_AUTH_CONFIGURATION)))
           .build();
     }
   }
@@ -6339,6 +6663,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Generate a SSO AuthNRequest for control plane SP-initiated login.
+     * </pre>
+     */
+    public void generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGenerateControlPlaneSSOAuthnReqMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Set the workload subdomain for an account if no such workload domain has
      * been set for a different account before.
      * </pre>
@@ -6442,6 +6777,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Validates the actor workloads credentials based on the password policy for the account.
+     * </pre>
+     */
+    public void validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getValidateActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
@@ -6527,6 +6873,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Unsets the workload password policy for an account.
+     * </pre>
+     */
+    public void unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getUnsetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -6600,6 +6957,39 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getGetUserSyncStateModelMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * List all role assignments in an account.
+     * </pre>
+     */
+    public void listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListRoleAssignmentsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Generate authentication token for workload API.
+     * </pre>
+     */
+    public void generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGenerateWorkloadAuthTokenMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Get authentication configuration for workload API.
+     * </pre>
+     */
+    public void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -7412,6 +7802,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Generate a SSO AuthNRequest for control plane SP-initiated login.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGenerateControlPlaneSSOAuthnReqMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Set the workload subdomain for an account if no such workload domain has
      * been set for a different account before.
      * </pre>
@@ -7507,6 +7907,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Validates the actor workloads credentials based on the password policy for the account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getValidateActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
@@ -7585,6 +7995,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Unsets the workload password policy for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getUnsetWorkloadPasswordPolicyMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -7651,6 +8071,36 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) {
       return blockingUnaryCall(
           getChannel(), getGetUserSyncStateModelMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * List all role assignments in an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListRoleAssignmentsMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Generate authentication token for workload API.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGenerateWorkloadAuthTokenMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Get authentication configuration for workload API.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -8540,6 +8990,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Generate a SSO AuthNRequest for control plane SP-initiated login.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> generateControlPlaneSSOAuthnReq(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGenerateControlPlaneSSOAuthnReqMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Set the workload subdomain for an account if no such workload domain has
      * been set for a different account before.
      * </pre>
@@ -8643,6 +9104,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Validates the actor workloads credentials based on the password policy for the account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> validateActorWorkloadCredentials(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getValidateActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Retrieves the actor workload credentials.
      * </pre>
      */
@@ -8728,6 +9200,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Unsets the workload password policy for an account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> unsetWorkloadPasswordPolicy(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getUnsetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Assign a cloud identity to an actor or group.
      * </pre>
      */
@@ -8801,6 +9284,39 @@ public final class UserManagementGrpc {
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) {
       return futureUnaryCall(
           getChannel().newCall(getGetUserSyncStateModelMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * List all role assignments in an account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> listRoleAssignments(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListRoleAssignmentsMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Generate authentication token for workload API.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> generateWorkloadAuthToken(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGenerateWorkloadAuthTokenMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Get authentication configuration for workload API.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getWorkloadAuthConfiguration(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions()), request);
     }
   }
 
@@ -8881,28 +9397,34 @@ public final class UserManagementGrpc {
   private static final int METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED = 74;
   private static final int METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = 75;
   private static final int METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ = 76;
-  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 77;
-  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 78;
-  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 79;
-  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 80;
-  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 81;
-  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 82;
-  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 83;
-  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 84;
-  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 85;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 86;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 87;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 88;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 89;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 90;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 91;
-  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 92;
-  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 93;
-  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 94;
-  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 95;
-  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 96;
-  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 97;
-  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 98;
+  private static final int METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ = 77;
+  private static final int METHODID_SET_WORKLOAD_SUBDOMAIN = 78;
+  private static final int METHODID_CREATE_WORKLOAD_MACHINE_USER = 79;
+  private static final int METHODID_DELETE_WORKLOAD_MACHINE_USER = 80;
+  private static final int METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 81;
+  private static final int METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = 82;
+  private static final int METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = 83;
+  private static final int METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS = 84;
+  private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 85;
+  private static final int METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS = 86;
+  private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 87;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 88;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 89;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 90;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 91;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 92;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 93;
+  private static final int METHODID_UNSET_WORKLOAD_PASSWORD_POLICY = 94;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 95;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 96;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 97;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 98;
+  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 99;
+  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 100;
+  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 101;
+  private static final int METHODID_LIST_ROLE_ASSIGNMENTS = 102;
+  private static final int METHODID_GENERATE_WORKLOAD_AUTH_TOKEN = 103;
+  private static final int METHODID_GET_WORKLOAD_AUTH_CONFIGURATION = 104;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -9229,6 +9751,10 @@ public final class UserManagementGrpc {
           serviceImpl.processWorkloadSSOAuthnReq((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>) responseObserver);
           break;
+        case METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ:
+          serviceImpl.generateControlPlaneSSOAuthnReq((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>) responseObserver);
+          break;
         case METHODID_SET_WORKLOAD_SUBDOMAIN:
           serviceImpl.setWorkloadSubdomain((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>) responseObserver);
@@ -9261,6 +9787,10 @@ public final class UserManagementGrpc {
           serviceImpl.setActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>) responseObserver);
           break;
+        case METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS:
+          serviceImpl.validateActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>) responseObserver);
+          break;
         case METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS:
           serviceImpl.getActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>) responseObserver);
@@ -9289,6 +9819,10 @@ public final class UserManagementGrpc {
           serviceImpl.setWorkloadPasswordPolicy((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>) responseObserver);
           break;
+        case METHODID_UNSET_WORKLOAD_PASSWORD_POLICY:
+          serviceImpl.unsetWorkloadPasswordPolicy((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>) responseObserver);
+          break;
         case METHODID_ASSIGN_CLOUD_IDENTITY:
           serviceImpl.assignCloudIdentity((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>) responseObserver);
@@ -9316,6 +9850,18 @@ public final class UserManagementGrpc {
         case METHODID_GET_USER_SYNC_STATE_MODEL:
           serviceImpl.getUserSyncStateModel((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>) responseObserver);
+          break;
+        case METHODID_LIST_ROLE_ASSIGNMENTS:
+          serviceImpl.listRoleAssignments((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>) responseObserver);
+          break;
+        case METHODID_GENERATE_WORKLOAD_AUTH_TOKEN:
+          serviceImpl.generateWorkloadAuthToken((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>) responseObserver);
+          break;
+        case METHODID_GET_WORKLOAD_AUTH_CONFIGURATION:
+          serviceImpl.getWorkloadAuthConfiguration((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -9455,6 +10001,7 @@ public final class UserManagementGrpc {
               .addMethod(getSetClouderaSSOLoginEnabledMethodHelper())
               .addMethod(getGetIdPMetadataForWorkloadSSOMethodHelper())
               .addMethod(getProcessWorkloadSSOAuthnReqMethodHelper())
+              .addMethod(getGenerateControlPlaneSSOAuthnReqMethodHelper())
               .addMethod(getSetWorkloadSubdomainMethodHelper())
               .addMethod(getCreateWorkloadMachineUserMethodHelper())
               .addMethod(getDeleteWorkloadMachineUserMethodHelper())
@@ -9463,6 +10010,7 @@ public final class UserManagementGrpc {
               .addMethod(getDeleteWorkloadAdministrationGroupNameMethodHelper())
               .addMethod(getListWorkloadAdministrationGroupsMethodHelper())
               .addMethod(getSetActorWorkloadCredentialsMethodHelper())
+              .addMethod(getValidateActorWorkloadCredentialsMethodHelper())
               .addMethod(getGetActorWorkloadCredentialsMethodHelper())
               .addMethod(getGetEventGenerationIdsMethodHelper())
               .addMethod(getAddActorSshPublicKeyMethodHelper())
@@ -9470,6 +10018,7 @@ public final class UserManagementGrpc {
               .addMethod(getDescribeActorSshPublicKeyMethodHelper())
               .addMethod(getDeleteActorSshPublicKeyMethodHelper())
               .addMethod(getSetWorkloadPasswordPolicyMethodHelper())
+              .addMethod(getUnsetWorkloadPasswordPolicyMethodHelper())
               .addMethod(getAssignCloudIdentityMethodHelper())
               .addMethod(getUnassignCloudIdentityMethodHelper())
               .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
@@ -9477,6 +10026,9 @@ public final class UserManagementGrpc {
               .addMethod(getListServicePrincipalCloudIdentitiesMethodHelper())
               .addMethod(getGetDefaultIdentityProviderConnectorMethodHelper())
               .addMethod(getGetUserSyncStateModelMethodHelper())
+              .addMethod(getListRoleAssignmentsMethodHelper())
+              .addMethod(getGenerateWorkloadAuthTokenMethodHelper())
+              .addMethod(getGetWorkloadAuthConfigurationMethodHelper())
               .build();
         }
       }
