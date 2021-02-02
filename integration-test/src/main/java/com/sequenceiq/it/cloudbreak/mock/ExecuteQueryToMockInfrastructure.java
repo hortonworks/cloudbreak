@@ -1,28 +1,24 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
-import java.security.KeyManagementException;
-import java.security.SecureRandom;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import javax.annotation.PostConstruct;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import org.glassfish.jersey.SslConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.mock.response.MockResponse;
 
@@ -48,9 +44,35 @@ public class ExecuteQueryToMockInfrastructure {
     }
 
     public <T> T execute(String path, Function<WebTarget, WebTarget> decorateWebTarget, Function<Response, T> handleResponse) {
+        pollUntilPkixGone();
         WebTarget target = buildWebTarget(path, decorateWebTarget);
         try (Response response = target.request().get()) {
             return handleResponse.apply(response);
+        } catch (Exception e) {
+            Log.log(LOGGER, "Cannot execute query on path: {}", path);
+            throw e;
+        }
+    }
+
+    private void pollUntilPkixGone() {
+        boolean success = false;
+        long attempt = 0;
+        long maxAttempt = 30;
+        long wait = 5;
+        while (!success && attempt < maxAttempt) {
+            WebTarget webTarget = buildWebTarget("/tests/new", w -> w);
+            try (Response ignore = webTarget.request().get()) {
+                success = true;
+            } catch (ProcessingException e) {
+                attempt++;
+                try {
+                    TimeUnit.SECONDS.sleep(wait);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+                LOGGER.info(e.getMessage());
+                Log.log(LOGGER, "Try the next attempt %s/%s,", attempt, maxAttempt);
+            }
         }
     }
 
@@ -70,16 +92,18 @@ public class ExecuteQueryToMockInfrastructure {
         }
     }
 
-    private WebTarget buildWebTarget(String path, Function<WebTarget, WebTarget> decorateWebTarget) {
-        CertificateTrustManager.SavingX509TrustManager x509TrustManager = new CertificateTrustManager.SavingX509TrustManager();
-        TrustManager[] trustManagers = {x509TrustManager};
-        SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
-        try {
-            sslContext.init(null, trustManagers, new SecureRandom());
-        } catch (KeyManagementException e) {
-            throw new TestFailException("Cannot init SSL Context: " + e.getMessage(), e);
-        }
-        Client client = RestClientUtil.createClient(sslContext, true);
+    private synchronized WebTarget buildWebTarget(String path, Function<WebTarget, WebTarget> decorateWebTarget) {
+//        CertificateTrustManager.SavingX509TrustManager x509TrustManager = new CertificateTrustManager.SavingX509TrustManager();
+//        TrustManager[] trustManagers = {x5
+//        09TrustManager};
+//        SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
+//        try {
+//            sslContext.init(null, trustManagers, new SecureRandom());
+//        } catch (KeyManagementException e) {
+//            throw new TestFailException("Cannot init SSL Context: " + e.getMessage(), e);
+//        }
+//        Client client = RestClientUtil.createClient(sslContext, true);
+        Client client = RestClientUtil.get(ConfigKey.builder().withSecure(true).build());
         WebTarget target = client.target(getUrl());
         target = decorateWebTarget.apply(target.path(path));
         return target;

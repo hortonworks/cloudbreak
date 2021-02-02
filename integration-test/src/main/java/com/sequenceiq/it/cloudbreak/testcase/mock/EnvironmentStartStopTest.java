@@ -66,6 +66,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
+        getExecuteQueryToMockInfrastructure().call("/tests/new", w->w);
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
