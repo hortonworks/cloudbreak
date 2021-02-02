@@ -22,6 +22,7 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigureForKerberosArguments;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
@@ -71,6 +72,9 @@ public class ClouderaManagerKerberosServiceTest {
     @Mock
     private ClouderaManagerConfigService clouderaManagerConfigService;
 
+    @Mock
+    private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
+
     @InjectMocks
     private ClouderaManagerKerberosService underTest;
 
@@ -83,12 +87,14 @@ public class ClouderaManagerKerberosServiceTest {
     @Before
     public void init() throws ClouderaManagerClientInitException {
         stack = new Stack();
+        stack.setName("clusterName");
         stack.setGatewayPort(1);
         cluster = new Cluster();
         cluster.setName("clusterName");
         cluster.setCloudbreakUser("user");
         cluster.setCloudbreakPassword("password");
         stack.setCluster(cluster);
+        stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
         when(clouderaManagerApiClientProvider.getClient(anyInt(), anyString(), anyString(), any())).thenReturn(client);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
@@ -112,7 +118,9 @@ public class ClouderaManagerKerberosServiceTest {
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
         when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
-        when(clustersResourceApi.deployClientConfig(cluster.getName())).thenReturn(new ApiCommand().id(BigDecimal.valueOf(2L)));
+        when(clustersResourceApi.listActiveCommands(anyString(), anyString())).thenReturn(new ApiCommandList().addItemsItem(
+                new ApiCommand().name("NotDeployClusterClientConfig").id(BigDecimal.valueOf(1L))));
+        when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(BigDecimal.valueOf(2L));
         when(kerberosDetailService.isAdJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);
 
         underTest.configureKerberosViaApi(client, clientConfig, stack, kerberosConfig);
@@ -120,7 +128,7 @@ public class ClouderaManagerKerberosServiceTest {
         verify(modificationService).stopCluster(false);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.TEN);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
-        verify(clustersResourceApi).deployClientConfig(cluster.getName());
+        verify(clouderaManagerCommonCommandService).getDeployClientConfigCommandId(any(), any(), any());
         verify(modificationService).startCluster();
     }
 
