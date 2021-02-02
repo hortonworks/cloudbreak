@@ -631,7 +631,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_STREAMING_SCALING))
                                 .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
                                 .addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL))
-                                .setPasswordPolicy(workloadPasswordPolicy)
+                                .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(request.getAccountId())
                                 .setExternalAccountId("external-" + request.getAccountId())
                                 .build())
