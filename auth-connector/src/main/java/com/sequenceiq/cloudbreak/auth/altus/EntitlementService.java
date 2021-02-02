@@ -27,6 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
@@ -82,6 +83,10 @@ public class EntitlementService {
 
     public boolean useDataBusCNameEndpointEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_USE_DATABUS_CNAME_ENDPOINT);
+    }
+
+    public boolean useCmSyncCommandPoller(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_USE_CM_SYNC_COMMAND_POLLER);
     }
 
     public boolean automaticUsersyncPollerEnabled(String accountId) {

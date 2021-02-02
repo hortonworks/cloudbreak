@@ -595,6 +595,8 @@ cb:
       connect.timeout.seconds: 125
       read.timeout.seconds: 125
       write.timeout.seconds: 125
+      syncCommandPoller:
+        interrupt.timeout.seconds: 120
 
   workspace.service.cache.ttl: 15
 

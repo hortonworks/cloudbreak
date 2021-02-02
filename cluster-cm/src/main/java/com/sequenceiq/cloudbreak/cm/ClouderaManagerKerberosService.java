@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -31,6 +34,8 @@ public class ClouderaManagerKerberosService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerKerberosService.class);
 
+    private static final String SUMMARY = "SUMMARY";
+
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
@@ -49,6 +54,9 @@ public class ClouderaManagerKerberosService {
     @Inject
     private ClouderaManagerConfigService clouderaManagerConfigService;
 
+    @Inject
+    private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
+
     public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
         Cluster cluster = stack.getCluster();
@@ -61,8 +69,9 @@ public class ClouderaManagerKerberosService {
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, configureForKerberos.getId());
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
-            ApiCommand deployClusterConfig = clustersResourceApi.deployClientConfig(cluster.getName());
-            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfig.getId());
+            List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+            BigDecimal deployClusterConfigId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
+            clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfigId);
             modificationService.startCluster();
         }
     }
