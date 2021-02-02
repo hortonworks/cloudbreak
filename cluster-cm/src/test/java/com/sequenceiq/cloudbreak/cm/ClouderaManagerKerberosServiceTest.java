@@ -71,9 +71,6 @@ public class ClouderaManagerKerberosServiceTest {
     @Mock
     private ClouderaManagerConfigService clouderaManagerConfigService;
 
-    @Mock
-    private ClouderaManagerDeployClientConfigProvider clouderaManagerDeployClientConfigProvider;
-
     @InjectMocks
     private ClouderaManagerKerberosService underTest;
 
@@ -115,7 +112,7 @@ public class ClouderaManagerKerberosServiceTest {
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
         when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
-        when(clouderaManagerDeployClientConfigProvider.deployClientConfigAndGetCommandId(any(), any())).thenReturn(BigDecimal.valueOf(2L));
+        when(clustersResourceApi.deployClientConfig(cluster.getName())).thenReturn(new ApiCommand().id(BigDecimal.valueOf(2L)));
         when(kerberosDetailService.isAdJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);
 
         underTest.configureKerberosViaApi(client, clientConfig, stack, kerberosConfig);
@@ -123,7 +120,7 @@ public class ClouderaManagerKerberosServiceTest {
         verify(modificationService).stopCluster(false);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.TEN);
         verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
-        verify(clouderaManagerDeployClientConfigProvider).deployClientConfigAndGetCommandId(any(), any());
+        verify(clustersResourceApi).deployClientConfig(cluster.getName());
         verify(modificationService).startCluster();
     }
 

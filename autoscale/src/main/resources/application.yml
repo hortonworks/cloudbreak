@@ -69,8 +69,6 @@ cb:
       connect.timeout.seconds: 125
       read.timeout.seconds: 125
       write.timeout.seconds: 125
-      commands:
-        deployClientConfig.interrupt.timeout.seconds: 115
 
 rest:
   debug: false
