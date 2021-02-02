@@ -2,7 +2,7 @@ server:
   servlet:
     context-path: "/dl"
   shutdown: graceful
-  
+
 spring:
   application:
     name: DatalakeService
@@ -135,8 +135,6 @@ cb:
       connect.timeout.seconds: 125
       read.timeout.seconds: 125
       write.timeout.seconds: 125
-      commands:
-        deployClientConfig.interrupt.timeout.seconds: 115
 
 notification:
   urls: http://localhost:3000/notifications
