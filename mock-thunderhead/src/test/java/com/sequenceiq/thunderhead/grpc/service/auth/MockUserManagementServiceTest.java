@@ -150,8 +150,8 @@ public class MockUserManagementServiceTest {
             GetAccountResponse res = observer.getValues().get(0);
             assertThat(res.hasAccount()).isTrue();
             Account account = res.getAccount();
-            assertThat(account.hasPasswordPolicy()).isTrue();
-            WorkloadPasswordPolicy passwordPolicy = account.getPasswordPolicy();
+            assertThat(account.hasGlobalPasswordPolicy()).isTrue();
+            WorkloadPasswordPolicy passwordPolicy = account.getGlobalPasswordPolicy();
             assertThat(passwordPolicy.getWorkloadPasswordMaxLifetime()).isEqualTo(MockUserManagementService.PASSWORD_LIFETIME);
         } finally {
             Files.delete(licenseFilePath);

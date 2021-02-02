@@ -125,7 +125,7 @@ public class PasswordService {
         try {
             String userId = getUserIdFromUserCrn(actorCrn, userCrn);
 
-            Optional<Instant> expirationInstant = calculateExpirationTime(actorCrn, accountId);
+            Optional<Instant> expirationInstant = calculateExpirationTime(userCrn, accountId);
 
             List<SetPasswordRequest> requests = new ArrayList<>();
             for (Stack stack : stacks) {
@@ -157,11 +157,12 @@ public class PasswordService {
     }
 
     @VisibleForTesting
-    Optional<Instant> calculateExpirationTime(String actorCrn, String accountId) {
+    Optional<Instant> calculateExpirationTime(String userCrn, String accountId) {
         LOGGER.debug("calculating expiration time for password in account {}", accountId);
         UserManagementProto.Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
-        if (account.hasPasswordPolicy()) {
-            long maxLifetime = account.getPasswordPolicy().getWorkloadPasswordMaxLifetime();
+        Optional<UserManagementProto.WorkloadPasswordPolicy> passwordPolicy = getPasswordPolicyForUser(account, userCrn);
+        if (passwordPolicy.isPresent()) {
+            long maxLifetime = passwordPolicy.get().getWorkloadPasswordMaxLifetime();
             if (maxLifetime != 0L) {
                 LOGGER.debug("Calculating password expiration by adding lifetime '{}' to current time", maxLifetime);
                 return Optional.of(clock.getCurrentInstant().plusMillis(maxLifetime));
@@ -172,6 +173,21 @@ public class PasswordService {
         } else {
             LOGGER.debug("Account {} does not have a password policy. Using max expiration time for password", accountId);
             return Optional.empty();
+        }
+    }
+
+    private Optional<UserManagementProto.WorkloadPasswordPolicy> getPasswordPolicyForUser(UserManagementProto.Account account, String userCrn) {
+        Crn crn = Crn.safeFromString(userCrn);
+        switch (crn.getResourceType()) {
+            case USER:
+                return account.hasGlobalPasswordPolicy() ? Optional.of(account.getGlobalPasswordPolicy()) : Optional.empty();
+            case MACHINE_USER:
+                if (account.hasMachineUserPasswordPolicy()) {
+                    return Optional.of(account.getMachineUserPasswordPolicy());
+                }
+                return account.hasGlobalPasswordPolicy() ? Optional.of(account.getGlobalPasswordPolicy()) : Optional.empty();
+            default:
+                throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));
         }
     }
 
