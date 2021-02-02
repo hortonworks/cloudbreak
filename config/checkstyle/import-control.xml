@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE import-control PUBLIC
+        "-//Checkstyle//DTD ImportControl Configuration 1.4//EN"
+        "https://checkstyle.org/dtds/import_control_1_4.dtd">
+
+<import-control pkg="com.sequenceiq.cloudbreak.cloud">
+    <allow pkg=".*" regex="true"/> <!-- denylist mode -->
+    <subpackage name="aws">
+        <!-- Restrict aws service client usage in AwsClient class and in client subpackage -->
+        <disallow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
+        <file name="AwsClient">
+            <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
+        </file>
+        <subpackage name="client">
+            <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
+        </subpackage>
+    </subpackage>
+</import-control>

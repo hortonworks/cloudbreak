@@ -6,15 +6,15 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
 @Component
 public class AwsSubnetRequestProvider {
 
-    public List<SubnetRequest> provide(AmazonEC2Client ec2Client, List<NetworkSubnetRequest> publicSubnets,  List<NetworkSubnetRequest> privateSubnets) {
+    public List<SubnetRequest> provide(AmazonEc2Client ec2Client, List<NetworkSubnetRequest> publicSubnets,  List<NetworkSubnetRequest> privateSubnets) {
         List<String> az = getAvailabilityZones(ec2Client);
         List<SubnetRequest> subnets = new ArrayList<>();
         int index = 0;
@@ -45,7 +45,7 @@ public class AwsSubnetRequestProvider {
         return subnets;
     }
 
-    private List<String> getAvailabilityZones(AmazonEC2Client ec2Client) {
+    private List<String> getAvailabilityZones(AmazonEc2Client ec2Client) {
         return ec2Client.describeAvailabilityZones()
                         .getAvailabilityZones()
                         .stream()

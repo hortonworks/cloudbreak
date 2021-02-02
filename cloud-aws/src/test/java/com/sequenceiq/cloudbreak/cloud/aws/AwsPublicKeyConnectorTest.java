@@ -18,10 +18,10 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.publickey.PublicKeyRegisterRequest;
@@ -40,14 +40,14 @@ class AwsPublicKeyConnectorTest {
     private AwsClient awsClient;
 
     @Mock
-    private AmazonEC2Client ec2client;
+    private AmazonEc2Client ec2client;
 
     @InjectMocks
     private AwsPublicKeyConnector underTest;
 
     @BeforeEach
     void setUp() {
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2client);
     }
 
     @Test

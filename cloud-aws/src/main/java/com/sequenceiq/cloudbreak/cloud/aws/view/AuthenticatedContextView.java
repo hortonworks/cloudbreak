@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 
 public class AuthenticatedContextView {
@@ -10,8 +10,8 @@ public class AuthenticatedContextView {
         this.authenticatedContext = authenticatedContext;
     }
 
-    public AmazonEC2Client getAmazonEC2Client() {
-        return authenticatedContext.getParameter(AmazonEC2Client.class);
+    public AmazonEc2Client getAmazonEC2Client() {
+        return authenticatedContext.getParameter(AmazonEc2Client.class);
     }
 
     public String getRegion() {

@@ -4,11 +4,13 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonClientException;
@@ -17,17 +19,18 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
-import com.amazonaws.regions.RegionUtils;
 import com.amazonaws.retry.PredefinedRetryPolicies;
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
-import com.amazonaws.services.cloudformation.AmazonCloudFormationClient;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClient;
+import com.amazonaws.services.autoscaling.AmazonAutoScaling;
+import com.amazonaws.services.cloudformation.AmazonCloudFormation;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClient;
-import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient;
+import com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystem;
+import com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancing;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
@@ -37,10 +40,21 @@ import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsRetryClient;
+import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonClientExceptionHandler;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudWatchClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonElasticLoadBalancingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -63,7 +77,6 @@ public class AwsClient {
 
     private static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
-    @Inject
     private AwsSessionCredentialClient credentialClient;
 
     @Inject
@@ -78,14 +91,18 @@ public class AwsClient {
     @Inject
     private Tracer tracer;
 
+    @Inject
+    private SdkClientExceptionMapper sdkClientExceptionMapper;
+
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         try {
             AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(authenticatedContext);
             String region = authenticatedContextView.getRegion();
-            AmazonEC2Client amazonEC2Client = region != null ?
-                    createAccess(authenticatedContextView.getAwsCredentialView(), region) : createAccess(cloudCredential);
-            authenticatedContext.putParameter(AmazonEC2Client.class,
+            AmazonEc2Client amazonEC2Client = region != null
+                    ? createEc2Client(authenticatedContextView.getAwsCredentialView(), region)
+                    : createEc2Client(authenticatedContextView.getAwsCredentialView());
+            authenticatedContext.putParameter(AmazonEc2Client.class,
                     amazonEC2Client);
         } catch (AmazonServiceException e) {
             throw new CredentialVerificationException(e.getErrorMessage(), e);
@@ -93,147 +110,166 @@ public class AwsClient {
         return authenticatedContext;
     }
 
-    public AmazonEC2Client createAccess(CloudCredential credential) {
-        return createAccess(new AwsCredentialView(credential), awsDefaultZoneProvider.getDefaultZone(credential));
+    public AmazonEc2Client createAccessWithMinimalRetries(AwsCredentialView awsCredential, String regionName) {
+        AmazonEC2 ec2Client = createAccessWithClientConfiguration(awsCredential, regionName, getClientConfigurationWithMinimalRetries());
+        return new AmazonEc2Client(ec2Client, retry);
     }
 
-    public AmazonEC2Client createAccess(AwsCredentialView awsCredential, String regionName) {
+    public AmazonEc2Client createEc2Client(AwsCredentialView awsCredential) {
+        return createEc2Client(awsCredential, awsDefaultZoneProvider.getDefaultZone(awsCredential));
+    }
+
+    public AmazonEc2Client createEc2Client(AwsCredentialView awsCredential, String regionName) {
+        return new AmazonEc2Client(createAccess(awsCredential, regionName), retry);
+    }
+
+    private AmazonEC2 createAccess(AwsCredentialView awsCredential, String regionName) {
         return createAccessWithClientConfiguration(awsCredential, regionName, getDefaultClientConfiguration());
     }
 
-    public AmazonEC2Client createAccessWithMinimalRetries(AwsCredentialView awsCredential, String regionName) {
-        return createAccessWithClientConfiguration(awsCredential, regionName, getClientConfigurationWithMinimalRetries());
-    }
-
-    public AmazonEC2Client createAccessWithClientConfiguration(AwsCredentialView awsCredential, String regionName, ClientConfiguration clientConfiguration) {
-        AmazonEC2Client client = isRoleAssumeRequired(awsCredential) ?
-                getAmazonEC2Client(createAwsSessionCredentialProvider(awsCredential), clientConfiguration) :
-                getAmazonEC2Client(createAwsCredentials(awsCredential), clientConfiguration);
-        client.setRegion(RegionUtils.getRegion(regionName));
-        return client;
-    }
-
-    public AmazonEC2Client getAmazonEC2Client(AwsSessionCredentialProvider awsSessionCredentialProvider, ClientConfiguration clientConfiguration) {
-        AmazonEC2Client client = new AmazonEC2Client(awsSessionCredentialProvider, clientConfiguration);
-        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
-        return client;
-    }
-
-    public AmazonEC2Client getAmazonEC2Client(BasicAWSCredentials basicAWSCredentials, ClientConfiguration clientConfiguration) {
-        AmazonEC2Client client = new AmazonEC2Client(basicAWSCredentials, clientConfiguration);
-        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
-        return client;
+    @VisibleForTesting
+    AmazonEC2 createAccessWithClientConfiguration(AwsCredentialView awsCredential, String regionName, ClientConfiguration clientConfiguration) {
+        return proxy(AmazonEC2Client.builder()
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withClientConfiguration(clientConfiguration)
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withRegion(regionName)
+                .build(), awsCredential, regionName);
     }
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonCloudWatchClient client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonCloudWatchClient(createAwsSessionCredentialProvider(awsCredential)) :
-                new AmazonCloudWatchClient(createAwsCredentials(awsCredential));
-        client.setRegion(RegionUtils.getRegion(regionName));
-        return client;
-    }
-
-    public AWSSecurityTokenService createAwsSecurityTokenService(AwsCredentialView awsCredential) {
-        return isRoleAssumeRequired(awsCredential)
-                ? new AWSSecurityTokenServiceClient(createAwsSessionCredentialProvider(awsCredential))
-                : new AWSSecurityTokenServiceClient(createAwsCredentials(awsCredential));
-    }
-
-    public AmazonIdentityManagement createAmazonIdentityManagement(AwsCredentialView awsCredential) {
-        return AmazonIdentityManagementClientBuilder.standard()
+        AmazonCloudWatch client = proxy(com.amazonaws.services.cloudwatch.AmazonCloudWatchClient.builder()
+                .withCredentials(getCredentialProvider(awsCredential))
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .withRegion(regionName)
+                .build(), awsCredential, regionName);
+        return new AmazonCloudWatchClient(client);
+    }
+
+    public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential) {
+        String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
+        return createSecurityTokenService(awsCredential, region);
+    }
+
+    public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential, String region) {
+        AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withRegion(region)
+                .build(), awsCredential, region);
+        return new AmazonSecurityTokenServiceClient(client);
+    }
+
+    public AmazonSecurityTokenServiceClient createCdpSecurityTokenServiceClient(AwsCredentialView awsCredential) {
+        if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
+                || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential)) {
+            LOGGER.debug("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
+        } else {
+            LOGGER.debug("AWSSecurityTokenServiceClient will use environment variables");
+        }
+
+        String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
+        AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
+                .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withRegion(region)
+                .build(), awsCredential, region);
+        return new AmazonSecurityTokenServiceClient(client);
+    }
+
+    public AmazonIdentityManagementClient createAmazonIdentityManagement(AwsCredentialView awsCredential) {
+        String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
+        AmazonIdentityManagement client = proxy(AmazonIdentityManagementClientBuilder.standard()
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withRegion(region)
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
-                .build();
+                .build(), awsCredential, region);
+        return new AmazonIdentityManagementClient(client);
     }
 
-    public AWSKMS createAWSKMS(AwsCredentialView awsCredential, String regionName) {
-        return AWSKMSClientBuilder.standard()
+    public AmazonKmsClient createAWSKMS(AwsCredentialView awsCredential, String regionName) {
+        AWSKMS client = proxy(AWSKMSClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(regionName)
-                .build();
+                .build(), awsCredential, regionName);
+        return new AmazonKmsClient(client);
     }
 
     public AmazonCloudFormationClient createCloudFormationClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonCloudFormationClient client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonCloudFormationClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
-                new AmazonCloudFormationClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
-        client.setRegion(RegionUtils.getRegion(regionName));
-        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
-        return client;
+        AmazonCloudFormation cloudFormationClient = createCloudFormation(awsCredential, regionName);
+        return new AmazonCloudFormationClient(proxy(cloudFormationClient, awsCredential, regionName), retry);
     }
 
-    public AmazonCloudFormationRetryClient createCloudFormationRetryClient(AwsCredentialView awsCredential, String regionName) {
-        return new AmazonCloudFormationRetryClient(createCloudFormationClient(awsCredential, regionName), retry);
-    }
-
-    public AmazonCloudFormationRetryClient createCloudFormationRetryClient(AmazonCloudFormationClient amazonCloudFormationClient) {
-        return new AmazonCloudFormationRetryClient(amazonCloudFormationClient, retry);
-    }
-
-    public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonElasticLoadBalancingClient client = isRoleAssumeRequired(awsCredential) ?
-            new AmazonElasticLoadBalancingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
-            new AmazonElasticLoadBalancingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
-        client.setRegion(RegionUtils.getRegion(regionName));
-        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
-        return client;
-    }
-
-    public AmazonElasticFileSystemClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
-
-        AmazonElasticFileSystemClient client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonElasticFileSystemClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
-                new AmazonElasticFileSystemClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
-        client.setRegion(RegionUtils.getRegion(regionName));
-        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
-        return client;
-    }
-
-    public AmazonEfsRetryClient createEfsRetryClient(AwsCredentialView awsCredential, String regionName) {
-        return new AmazonEfsRetryClient(createElasticFileSystemClient(awsCredential, regionName), retry);
-    }
-
-    public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
-        AmazonAutoScalingClient client = isRoleAssumeRequired(awsCredential) ?
-                new AmazonAutoScalingClient(createAwsSessionCredentialProvider(awsCredential), getDefaultClientConfiguration()) :
-                new AmazonAutoScalingClient(createAwsCredentials(awsCredential), getDefaultClientConfiguration());
-        client.setRegion(RegionUtils.getRegion(regionName));
-        client.addRequestHandler(new AwsTracingRequestHandler(tracer));
-        return client;
-    }
-
-    public AmazonAutoScalingRetryClient createAutoScalingRetryClient(AwsCredentialView awsCredential, String regionName) {
-        return new AmazonAutoScalingRetryClient(createAutoScalingClient(awsCredential, regionName), retry);
-    }
-
-    public AmazonS3 createS3Client(AwsCredentialView awsCredential) {
-        return AmazonS3ClientBuilder.standard()
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+    @VisibleForTesting
+    AmazonCloudFormation createCloudFormation(AwsCredentialView awsCredential, String regionName) {
+        return com.amazonaws.services.cloudformation.AmazonCloudFormationClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
-                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
-                .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
+                .withRegion(regionName)
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .build();
     }
 
-    public AmazonDynamoDB createDynamoDbClient(AwsCredentialView awsCredential, String region) {
-        return AmazonDynamoDBClientBuilder.standard()
+    public AmazonElasticLoadBalancingClient createElasticLoadBalancingClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonElasticLoadBalancing client = proxy(com.amazonaws.services.elasticloadbalancingv2.AmazonElasticLoadBalancingClient.builder()
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withRegion(regionName)
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withClientConfiguration(getDefaultClientConfiguration())
+                .build(), awsCredential, regionName);
+        return new AmazonElasticLoadBalancingClient(client);
+    }
+
+    public AmazonEfsClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonElasticFileSystem client = proxy(com.amazonaws.services.elasticfilesystem.AmazonElasticFileSystemClient.builder()
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withRegion(regionName)
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .build(), awsCredential, regionName);
+        return new AmazonEfsClient(client, retry);
+    }
+
+    public AmazonAutoScalingClient createAutoScalingClient(AwsCredentialView awsCredential, String regionName) {
+        AmazonAutoScaling client = proxy(com.amazonaws.services.autoscaling.AmazonAutoScalingClient.builder()
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withRegion(regionName)
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withClientConfiguration(getDefaultClientConfiguration())
+                .build(), awsCredential, regionName);
+        return new AmazonAutoScalingClient(client, retry);
+    }
+
+    public AmazonS3Client createS3Client(AwsCredentialView awsCredential) {
+        String regionName = awsDefaultZoneProvider.getDefaultZone(awsCredential);
+        AmazonS3 client = proxy(AmazonS3ClientBuilder.standard()
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
+                .withCredentials(getCredentialProvider(awsCredential))
+                .withRegion(regionName)
+                .withForceGlobalBucketAccessEnabled(Boolean.TRUE)
+                .build(), awsCredential, regionName);
+        return new AmazonS3Client(client);
+    }
+
+    public AmazonDynamoDBClient createDynamoDbClient(AwsCredentialView awsCredential, String region) {
+        final AmazonDynamoDB client = proxy(AmazonDynamoDBClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDynamoDbClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRegion(region)
-                .build();
+                .build(), awsCredential, region);
+        return new AmazonDynamoDBClient(client);
     }
 
-    public AmazonRDS createRdsClient(AwsCredentialView awsCredentialView, String region) {
-        return AmazonRDSClientBuilder.standard()
+    public AmazonRdsClient createRdsClient(AwsCredentialView awsCredentialView, String region) {
+        final AmazonRDS client = proxy(AmazonRDSClientBuilder.standard()
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withCredentials(getCredentialProvider(awsCredentialView))
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withRegion(region)
-                .build();
+                .build(), awsCredentialView, region);
+        return new AmazonRdsClient(client);
     }
 
     private ClientConfiguration getDefaultClientConfiguration() {
@@ -308,8 +344,9 @@ public class AwsClient {
         }
     }
 
-    public InstanceProfileCredentialsProvider getInstanceProfileProvider() {
-        return new InstanceProfileCredentialsProvider();
+    @VisibleForTesting
+    InstanceProfileCredentialsProvider getInstanceProfileProvider() {
+        return InstanceProfileCredentialsProvider.getInstance();
     }
 
     private boolean isRoleAssumeRequired(AwsCredentialView awsCredential) {
@@ -332,6 +369,16 @@ public class AwsClient {
     }
 
     private AwsSessionCredentialProvider createAwsSessionCredentialProvider(AwsCredentialView awsCredential) {
-        return new AwsSessionCredentialProvider(awsCredential, credentialClient);
+        return new AwsSessionCredentialProvider(awsCredential, Objects.requireNonNull(credentialClient));
+    }
+
+    private <T> T proxy(T client, AwsCredentialView awsCredentialView, String region) {
+        AspectJProxyFactory proxyFactory = new AspectJProxyFactory(client);
+        proxyFactory.addAspect(new AmazonClientExceptionHandler(awsCredentialView, region, sdkClientExceptionMapper));
+        return proxyFactory.getProxy();
+    }
+
+    public void setAwsSessionCredentialClient(AwsSessionCredentialClient awsSessionCredentialClient) {
+        this.credentialClient = awsSessionCredentialClient;
     }
 }

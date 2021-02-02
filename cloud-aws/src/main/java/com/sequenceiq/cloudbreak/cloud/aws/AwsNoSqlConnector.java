@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException;
 import com.amazonaws.services.dynamodbv2.model.DeleteTableResult;
 import com.amazonaws.services.dynamodbv2.model.DescribeTableResult;
@@ -12,6 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.ResourceNotFoundException;
 import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.RegionAware;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -38,7 +38,7 @@ public class AwsNoSqlConnector implements NoSqlConnector {
     public NoSqlTableMetadataResponse getNoSqlTableMetaData(NoSqlTableMetadataRequest request) {
         try {
             LOGGER.debug("Calling DynamoDB.describeTable('{}')", request.getTableName());
-            AmazonDynamoDB dynamoDbClient = getAmazonDynamoDB(request);
+            AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDB(request);
             DescribeTableResult describeTableResult = dynamoDbClient.describeTable(request.getTableName());
             LOGGER.debug("Successfully called DynamoDB.describeTable('{}')", request.getTableName());
             return NoSqlTableMetadataResponse.builder()
@@ -62,7 +62,7 @@ public class AwsNoSqlConnector implements NoSqlConnector {
     public NoSqlTableDeleteResponse deleteNoSqlTable(NoSqlTableDeleteRequest request) {
         try {
             LOGGER.debug("Calling DynamoDB.deleteTable('{}')", request.getTableName());
-            AmazonDynamoDB dynamoDbClient = getAmazonDynamoDB(request);
+            AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDB(request);
             DeleteTableResult deleteTableResult = dynamoDbClient.deleteTable(request.getTableName());
             LOGGER.debug("Successfully called DynamoDB.deleteTable('{}')", request.getTableName());
             TableDescription tableDescription = deleteTableResult.getTableDescription();
@@ -93,7 +93,7 @@ public class AwsNoSqlConnector implements NoSqlConnector {
         return AwsConstants.AWS_VARIANT;
     }
 
-    private AmazonDynamoDB getAmazonDynamoDB(RegionAndCredentialAwareRequestBase request) {
+    private AmazonDynamoDBClient getAmazonDynamoDB(RegionAndCredentialAwareRequestBase request) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
         return awsClient.createDynamoDbClient(awsCredentialView, getRegion(request));
     }

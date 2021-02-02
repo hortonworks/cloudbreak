@@ -119,6 +119,10 @@
         <module name="SuperClone" />
         <module name="MutableException" />
         <module name="AvoidStarImport" />
+        <module name="ImportControl">
+            <property name="file" value="${config_loc}/import-control.xml"/>
+            <property name="path" value="cloud-aws/src/main/java.*$"/>
+        </module>
         <module name="PackageAnnotation" />
         <module name="ExecutableStatementCount">
             <property name="max" value="6"/>

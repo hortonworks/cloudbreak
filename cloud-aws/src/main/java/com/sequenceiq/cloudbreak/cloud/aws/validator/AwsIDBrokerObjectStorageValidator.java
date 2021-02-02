@@ -1,8 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
@@ -11,14 +21,6 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.model.CloudIdentityType;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 @Component
 public class AwsIDBrokerObjectStorageValidator {
@@ -38,7 +40,7 @@ public class AwsIDBrokerObjectStorageValidator {
     @Inject
     private AwsIamService awsIamService;
 
-    public ValidationResult validateObjectStorage(AmazonIdentityManagement iam,
+    public ValidationResult validateObjectStorage(AmazonIdentityManagementClient iam,
             SpiFileSystem spiFileSystem,
             ValidationResultBuilder resultBuilder) {
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
@@ -60,7 +62,7 @@ public class AwsIDBrokerObjectStorageValidator {
         return resultBuilder.build();
     }
 
-    private void validateIDBroker(AmazonIdentityManagement iam, InstanceProfile instanceProfile,
+    private void validateIDBroker(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             CloudS3View cloudFileSystem, ValidationResultBuilder resultBuilder) {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, resultBuilder);
 
@@ -80,7 +82,7 @@ public class AwsIDBrokerObjectStorageValidator {
         //awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, resultBuilder);
     }
 
-    private Set<Role> getAllMappedRoles(AmazonIdentityManagement iam, CloudFileSystemView cloudFileSystemView,
+    private Set<Role> getAllMappedRoles(AmazonIdentityManagementClient iam, CloudFileSystemView cloudFileSystemView,
             ValidationResultBuilder resultBuilder) {
         Set<Role> roles = Collections.emptySet();
         AccountMappingBase accountMappings = cloudFileSystemView.getAccountMapping();

@@ -13,9 +13,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 
@@ -47,7 +47,7 @@ public class AwsSubnetRequestProviderTest {
 
     @Test
     public void testProvideWhenTwoAzAvailable() {
-        AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2)));
+        AmazonEc2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2)));
         List<NetworkSubnetRequest> publicSubnets = List.of(createSubnetRequest(CIDR_4), createSubnetRequest(CIDR_5), createSubnetRequest(CIDR_6));
         List<NetworkSubnetRequest> privateSubnets = List.of(createSubnetRequest(CIDR_1), createSubnetRequest(CIDR_2), createSubnetRequest(CIDR_3));
 
@@ -70,7 +70,7 @@ public class AwsSubnetRequestProviderTest {
 
     @Test
     public void testProvideWhenFourAzAvailable() {
-        AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
+        AmazonEc2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
         List<NetworkSubnetRequest> publicSubnets = List.of(createSubnetRequest(CIDR_4), createSubnetRequest(CIDR_5), createSubnetRequest(CIDR_6));
         List<NetworkSubnetRequest> privateSubnets = List.of(createSubnetRequest(CIDR_1), createSubnetRequest(CIDR_2), createSubnetRequest(CIDR_3));
 
@@ -93,7 +93,7 @@ public class AwsSubnetRequestProviderTest {
 
     @Test
     public void testProvideWhenOnlyTwoCidrProvided() {
-        AmazonEC2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
+        AmazonEc2Client ec2Client = createEc2Client(List.of(createAZ(AZ_1), createAZ(AZ_2), createAZ(AZ_3), createAZ(AZ_4)));
         List<NetworkSubnetRequest> publicSubnets = List.of(createSubnetRequest(CIDR_1), createSubnetRequest(CIDR_2));
 
         List<SubnetRequest> actual = underTest.provide(ec2Client, publicSubnets, new ArrayList<>());
@@ -107,8 +107,8 @@ public class AwsSubnetRequestProviderTest {
         assertTrue(actual.size() == 2);
     }
 
-    private AmazonEC2Client createEc2Client(List<AvailabilityZone> availabilityZones) {
-        AmazonEC2Client ec2Client = Mockito.mock(AmazonEC2Client.class);
+    private AmazonEc2Client createEc2Client(List<AvailabilityZone> availabilityZones) {
+        AmazonEc2Client ec2Client = Mockito.mock(AmazonEc2Client.class);
         DescribeAvailabilityZonesResult result = new DescribeAvailabilityZonesResult();
         result.setAvailabilityZones(availabilityZones);
         Mockito.when(ec2Client.describeAvailabilityZones()).thenReturn(result);

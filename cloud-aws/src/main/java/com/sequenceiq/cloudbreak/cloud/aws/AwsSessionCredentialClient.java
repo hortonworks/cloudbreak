@@ -1,15 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import com.amazonaws.SdkClientException;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
-import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
-import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
-import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
-import com.amazonaws.services.securitytoken.model.Credentials;
-import com.fasterxml.jackson.databind.util.StdDateFormat;
-import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCachingConfig;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import java.util.Date;
+
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,8 +12,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.Date;
+import com.amazonaws.SdkClientException;
+import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
+import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
+import com.amazonaws.services.securitytoken.model.Credentials;
+import com.fasterxml.jackson.databind.util.StdDateFormat;
+import com.sequenceiq.cloudbreak.cloud.aws.cache.AwsCachingConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
 @Component
 public class AwsSessionCredentialClient {
@@ -34,10 +35,16 @@ public class AwsSessionCredentialClient {
     private String roleSessionName;
 
     @Inject
-    private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
+    private AwsClient awsClient;
 
-    @Inject
-    private AwsDefaultZoneProvider awsDefaultZoneProvider;
+    /**
+     * AWS clients should only be created by {@link AwsClient}, but it needs {@link AwsSessionCredentialClient} to create them,
+     * so this {@link PostConstruct} setter is used to resolve the circular dependency issue
+     */
+    @PostConstruct
+    public void passToAwsClient() {
+        awsClient.setAwsSessionCredentialClient(this);
+    }
 
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
     public AwsSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
@@ -88,17 +95,8 @@ public class AwsSessionCredentialClient {
         }
     }
 
-    private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
-        if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
-                || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential)) {
-            LOGGER.debug("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
-        } else {
-            LOGGER.debug("AWSSecurityTokenServiceClient will use environment variables");
-        }
-        return AWSSecurityTokenServiceClientBuilder.standard()
-                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
-                .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                .build();
+    private AmazonSecurityTokenServiceClient awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
+        return awsClient.createCdpSecurityTokenServiceClient(awsCredential);
     }
 
 }

@@ -27,11 +27,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVpcEndpointServicesResult;
 import com.amazonaws.services.ec2.model.ServiceDetail;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
@@ -78,8 +78,8 @@ public class AwsNetworkCfTemplateProviderTest {
         JsonNode expectedJson = objectMapper.readTree(new File(expectedTemplate));
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
-        when(awsClient.createAccess(any(), anyString())).thenReturn(ec2Client);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
+        when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcEndpointServices()).thenReturn(describeVpcEndpointServicesResult);
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPrivateAndPublicSubnetRequestList();
@@ -134,8 +134,8 @@ public class AwsNetworkCfTemplateProviderTest {
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/aws-cf-network-publicsubnet-vpcendpoints-differentazs.json"));
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
-        when(awsClient.createAccess(any(), anyString())).thenReturn(ec2Client);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
+        when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcEndpointServices()).thenReturn(createDescribeVpcEndpointServicesResultWithDifferentAzs());
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPublicSubnetRequestList();
@@ -153,8 +153,8 @@ public class AwsNetworkCfTemplateProviderTest {
         JsonNode expectedJson = objectMapper.readTree(new File("src/test/resources/json/aws-cf-network-publicsubnet-vpcendpoints-differentazs.json"));
 
         when(freeMarkerTemplateUtils.processTemplateIntoString(any(), any())).thenCallRealMethod();
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
-        when(awsClient.createAccess(any(), anyString())).thenReturn(ec2Client);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
+        when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcEndpointServices()).thenReturn(createDescribeVpcEndpointServicesResultWithDifferentAzs());
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(true, PrivateEndpointType.USE_VPC_ENDPOINT);
         List<SubnetRequest> subnetRequestList = createPublicSubnetRequestList();

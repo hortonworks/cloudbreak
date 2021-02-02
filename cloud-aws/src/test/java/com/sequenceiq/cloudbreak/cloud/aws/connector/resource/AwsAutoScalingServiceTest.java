@@ -17,14 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
 import com.amazonaws.waiters.Waiter;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -43,9 +42,6 @@ public class AwsAutoScalingServiceTest {
     private AmazonAutoScalingClient amazonAutoScalingClient;
 
     @Mock
-    private AmazonAutoScalingRetryClient amazonAutoScalingRetryClient;
-
-    @Mock
     private Waiter<DescribeScalingActivitiesRequest> describeScalingActivitiesRequestWaiter;
 
     @Test
@@ -58,13 +54,13 @@ public class AwsAutoScalingServiceTest {
         activity1.setStatusCode("FAILED");
         result.setActivities(List.of(activity1));
         Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
-        when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
+        when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         mockDescribeAutoscalingGroup();
 
         Date date = new Date();
         AmazonAutoscalingFailed expected = Assertions.assertThrows(AmazonAutoscalingFailed.class, () ->
-                underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group));
+                underTest.checkLastScalingActivity(amazonAutoScalingClient, "asGroup", date, group));
 
         Assertions.assertEquals(expected.getMessage(), "Description Cause");
     }
@@ -79,12 +75,12 @@ public class AwsAutoScalingServiceTest {
         activity1.setStatusCode("FAILED");
         result.setActivities(List.of(activity1));
         Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
-        when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
+        when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         mockDescribeAutoscalingGroup();
 
         Date date = new Date();
-        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group);
+        underTest.checkLastScalingActivity(amazonAutoScalingClient, "asGroup", date, group);
     }
 
     @Test
@@ -97,12 +93,12 @@ public class AwsAutoScalingServiceTest {
         activity1.setStatusCode("success");
         result.setActivities(List.of(activity1));
         Group group = createGroup("master", InstanceGroupType.GATEWAY, List.of(new CloudInstance("anId", null, null)));
-        when(amazonAutoScalingRetryClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
+        when(amazonAutoScalingClient.describeScalingActivities(any(DescribeScalingActivitiesRequest.class))).thenReturn(result);
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         mockDescribeAutoscalingGroup();
 
         Date date = new Date();
-        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group);
+        underTest.checkLastScalingActivity(amazonAutoScalingClient, "asGroup", date, group);
 
     }
 
@@ -118,7 +114,7 @@ public class AwsAutoScalingServiceTest {
         Group group = createGroup("gateway", InstanceGroupType.CORE, List.of());
 
         Date date = new Date();
-        underTest.checkLastScalingActivity(amazonAutoScalingClient, amazonAutoScalingRetryClient, "asGroup", date, group);
+        underTest.checkLastScalingActivity(amazonAutoScalingClient, "asGroup", date, group);
 
         verify(amazonAutoScalingClient, times(0)).describeScalingActivities(any(DescribeScalingActivitiesRequest.class));
         verify(customAmazonWaiterProvider, times(0)).getAutoscalingActivitiesWaiter(any(), any());
@@ -134,7 +130,7 @@ public class AwsAutoScalingServiceTest {
         autoScalingGroup.setAutoScalingGroupName("asGroup");
         autoScalingGroups.add(autoScalingGroup);
         describeAutoScalingGroupsResult.setAutoScalingGroups(autoScalingGroups);
-        when(amazonAutoScalingRetryClient.describeAutoScalingGroups(any()))
+        when(amazonAutoScalingClient.describeAutoScalingGroups(any()))
                 .thenReturn(describeAutoScalingGroupsResult);
     }
 

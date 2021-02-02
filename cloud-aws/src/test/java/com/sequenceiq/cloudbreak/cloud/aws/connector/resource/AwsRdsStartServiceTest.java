@@ -18,13 +18,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
-import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.StartDBInstanceRequest;
 import com.amazonaws.services.rds.waiters.AmazonRDSWaiters;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterTimedOutException;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -62,7 +62,7 @@ public class AwsRdsStartServiceTest {
     private Region region;
 
     @Mock
-    private AmazonRDS amazonRDS;
+    private AmazonRdsClient amazonRDS;
 
     @Mock
     private DatabaseStack dbStack;

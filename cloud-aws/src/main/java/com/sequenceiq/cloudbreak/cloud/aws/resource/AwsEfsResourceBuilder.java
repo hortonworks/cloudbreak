@@ -35,7 +35,7 @@ import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
 import com.amazonaws.services.elasticfilesystem.model.Tag;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -84,7 +84,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
     public List<CloudResource> build(AwsContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         LOGGER.debug("Create EFS on provider" + buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
-        AmazonEfsRetryClient client = getAmazonEfsClient(auth);
+        AmazonEfsClient client = getAmazonEfsClient(auth);
         Map<String, CloudEfsAttributes> efsSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
@@ -135,7 +135,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
         //   the EC2 security group. Therefore, we cannot first delete the EC2 instance's security group.
         //5. Actually delete the EFS
         //
-        AmazonEfsRetryClient client = getAmazonEfsClient(auth);
+        AmazonEfsClient client = getAmazonEfsClient(auth);
         CloudEfsAttributes efsAttributes = resource.getParameter(CloudResource.ATTRIBUTES, CloudEfsAttributes.class);
         String efsId = efsAttributes.getFileSystemId();
 
@@ -173,7 +173,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     protected List<CloudResourceStatus> checkResources(ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
-        AmazonEfsRetryClient client = getAmazonEfsClient(auth);
+        AmazonEfsClient client = getAmazonEfsClient(auth);
         List<CloudResource> efsResources = StreamSupport.stream(resources.spliterator(), false)
                 .filter(r -> r.getType().equals(resourceType()))
                 .collect(Collectors.toList());
@@ -207,10 +207,10 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
         return 1;
     }
 
-    private AmazonEfsRetryClient getAmazonEfsClient(AuthenticatedContext auth) {
+    private AmazonEfsClient getAmazonEfsClient(AuthenticatedContext auth) {
         AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
         String regionName = auth.getCloudContext().getLocation().getRegion().value();
-        return awsClient.createEfsRetryClient(credentialView, regionName);
+        return awsClient.createElasticFileSystemClient(credentialView, regionName);
     }
 
     private CreateFileSystemRequest creatEfsRequest(CloudResource resource, CloudStack cloudStack, Map<String, CloudEfsAttributes> efsSetMap) {

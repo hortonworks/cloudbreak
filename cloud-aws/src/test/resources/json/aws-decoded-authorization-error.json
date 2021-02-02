@@ -1,0 +1,132 @@
+{
+  "allowed": false,
+  "explicitDeny": false,
+  "matchedStatements": {
+    "items": []
+  },
+  "failures": {
+    "items": []
+  },
+  "context": {
+    "principal": {
+      "id": "...:cdp-provisioning",
+      "arn": "arn:aws:sts::...:assumed-role/.../cdp-provisioning"
+    },
+    "action": "ec2:CreateSecurityGroup",
+    "resource": "arn:aws:ec2:eu-central-1:123456789101:vpc/vpc-id",
+    "conditions": {
+      "items": [
+        {
+          "key": "aws:Region",
+          "values": {
+            "items": [
+              {
+                "value": "eu-central-1"
+              }
+            ]
+          }
+        },
+        {
+          "key": "aws:Service",
+          "values": {
+            "items": [
+              {
+                "value": "ec2"
+              }
+            ]
+          }
+        },
+        {
+          "key": "aws:Resource",
+          "values": {
+            "items": [
+              {
+                "value": "vpc/vpc-id"
+              }
+            ]
+          }
+        },
+        {
+          "key": "aws:Account",
+          "values": {
+            "items": [
+              {
+                "value": "..."
+              }
+            ]
+          }
+        },
+        {
+          "key": "aws:Type",
+          "values": {
+            "items": [
+              {
+                "value": "vpc"
+              }
+            ]
+          }
+        },
+        {
+          "key": "152813717728:Name",
+          "values": {
+            "items": [
+              {
+                "value": "HDPDevTest-EUC1"
+              }
+            ]
+          }
+        },
+        {
+          "key": "ec2:Tenancy",
+          "values": {
+            "items": [
+              {
+                "value": "default"
+              }
+            ]
+          }
+        },
+        {
+          "key": "ec2:VpcID",
+          "values": {
+            "items": [
+              {
+                "value": "vpc-id"
+              }
+            ]
+          }
+        },
+        {
+          "key": "ec2:ResourceTag/Name",
+          "values": {
+            "items": [
+              {
+                "value": "HDPDevTest-EUC1"
+              }
+            ]
+          }
+        },
+        {
+          "key": "ec2:Region",
+          "values": {
+            "items": [
+              {
+                "value": "eu-central-1"
+              }
+            ]
+          }
+        },
+        {
+          "key": "aws:ARN",
+          "values": {
+            "items": [
+              {
+                "value": "arn:aws:ec2:eu-central-1:123456789101:vpc/vpc-id"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

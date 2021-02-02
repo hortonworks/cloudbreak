@@ -21,7 +21,7 @@ import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2RetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
-import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -48,9 +47,6 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private AwsClient awsClient;
-
-    @Inject
-    private Retry retry;
 
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -78,7 +74,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         }
         CloudResource volumeSet = volumeSetOpt.get();
 
-        AmazonEc2RetryClient client = getAmazonEc2RetryClient(auth);
+        AmazonEc2Client client = getAmazonEc2Client(auth);
 
         VolumeSetAttributes volumeSetAttributes = volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
         LOGGER.debug("Creating attach volume requests and submitting to executor for stack '{}',   group '{}'",
@@ -116,7 +112,7 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     protected List<CloudResourceStatus> checkResources(ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
 
-        AmazonEc2RetryClient client = getAmazonEc2RetryClient(auth);
+        AmazonEc2Client client = getAmazonEc2Client(auth);
         List<CloudResource> volumeResources = StreamSupport.stream(resources.spliterator(), false)
                 .filter(r -> r.getType().equals(resourceType()))
                 .collect(Collectors.toList());
@@ -150,10 +146,10 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         return volumeSet -> volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
-    private AmazonEc2RetryClient getAmazonEc2RetryClient(AuthenticatedContext auth) {
+    private AmazonEc2Client getAmazonEc2Client(AuthenticatedContext auth) {
         AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
         String regionName = auth.getCloudContext().getLocation().getRegion().value();
-        return new AmazonEc2RetryClient(awsClient.createAccess(credentialView, regionName), retry);
+        return awsClient.createEc2Client(credentialView, regionName);
     }
 
     @Override

@@ -31,10 +31,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
@@ -45,11 +43,9 @@ import com.amazonaws.services.ec2.model.DescribeVpcsResult;
 import com.amazonaws.services.ec2.model.Region;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.Vpc;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesResult;
-import com.amazonaws.services.kms.AWSKMSClient;
 import com.amazonaws.services.kms.model.AliasListEntry;
 import com.amazonaws.services.kms.model.DescribeKeyRequest;
 import com.amazonaws.services.kms.model.DescribeKeyResult;
@@ -59,6 +55,10 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -94,16 +94,16 @@ public class AwsPlatformResourcesTest {
     private AwsClient awsClient;
 
     @Mock
-    private AmazonIdentityManagement amazonCFClient;
+    private AmazonIdentityManagementClient amazonCFClient;
 
     @Mock
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
 
     @Mock
-    private AWSKMSClient awskmsClient;
+    private AmazonKmsClient awskmsClient;
 
     @Mock
-    private AmazonEC2Client amazonEC2Client;
+    private AmazonEc2Client amazonEC2Client;
 
     @Mock
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
@@ -119,7 +119,7 @@ public class AwsPlatformResourcesTest {
     private final AvailabilityZone availabilityZone = new AvailabilityZone();
 
     @Mock
-    private AmazonDynamoDB amazonDynamoDB;
+    private AmazonDynamoDBClient amazonDynamoDB;
 
     @Before
     public void setUp() {
@@ -129,11 +129,11 @@ public class AwsPlatformResourcesTest {
         Mockito.reset(awsClient);
 
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
-        when(awsClient.createAccess(any(CloudCredential.class))).thenReturn(amazonEC2Client);
-        when(awsClient.createAccess(any(AwsCredentialView.class), any())).thenReturn(amazonEC2Client);
+        when(awsClient.createEc2Client(any(AwsCredentialView.class))).thenReturn(amazonEC2Client);
+        when(awsClient.createEc2Client(any(AwsCredentialView.class), any())).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
         when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
-        when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any(), any()))
+        when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any()))
                 .thenReturn(List.of(availabilityZone));
 
         ReflectionTestUtils.setField(underTest, "vmTypes",
@@ -363,7 +363,7 @@ public class AwsPlatformResourcesTest {
                 new Region().withRegionName(REGION_NAME));
         when(amazonEC2Client.describeRegions(any())).thenReturn(regions);
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
-        when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any(), any())).thenReturn(List.of(
+        when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any())).thenReturn(List.of(
                 new AvailabilityZone().withZoneName(NOT_ENABLED_AZ_NAME),
                 new AvailabilityZone().withZoneName(AZ_NAME)));
     }

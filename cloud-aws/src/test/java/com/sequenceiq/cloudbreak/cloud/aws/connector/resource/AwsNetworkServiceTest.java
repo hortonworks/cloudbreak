@@ -25,7 +25,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
@@ -36,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -100,7 +100,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -113,7 +113,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 100}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
@@ -148,7 +148,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -159,7 +159,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 23}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
@@ -192,7 +192,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -203,7 +203,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 76}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
@@ -236,7 +236,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -247,7 +247,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
@@ -280,14 +280,14 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/24");
@@ -318,13 +318,13 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/24");
@@ -354,7 +354,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -365,7 +365,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
@@ -398,7 +398,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -409,7 +409,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 16}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
@@ -442,7 +442,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -457,7 +457,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
@@ -495,7 +495,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -510,7 +510,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 127, (byte) 127, (byte) 127, (byte) 127, (byte) 127, (byte) 127, (byte) 83}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
@@ -547,7 +547,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -562,7 +562,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 4}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
@@ -599,7 +599,7 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
         com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
@@ -614,7 +614,7 @@ public class AwsNetworkServiceTest {
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 127, (byte) 127, (byte) 127, (byte) 127}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
@@ -651,14 +651,14 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 7}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
@@ -697,14 +697,14 @@ public class AwsNetworkServiceTest {
         Location location = mock(Location.class);
         Vpc vpc = mock(Vpc.class);
         DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
         when(cloudContext.getName()).thenReturn("");
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
-        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("172.14.0.0/16");
@@ -732,11 +732,11 @@ public class AwsNetworkServiceTest {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
-        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudStack.getNetwork()).thenReturn(new Network(new Subnet(null), Map.of("vpcId", "vpc-123")));
         when(cloudContext.getLocation()).thenReturn(Location.location(Region.region("eu-west1")));
-        when(awsClient.createAccess(any(AwsCredentialView.class), anyString())).thenReturn(ec2Client);
+        when(awsClient.createEc2Client(any(AwsCredentialView.class), anyString())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any(DescribeVpcsRequest.class)))
                 .thenReturn(new DescribeVpcsResult().withVpcs(new Vpc()
                         .withCidrBlockAssociationSet(new VpcCidrBlockAssociation().withCidrBlock(cidr1), new VpcCidrBlockAssociation().withCidrBlock(cidr2))));

@@ -247,6 +247,16 @@
       "Resource": [
         "*"
       ]
+    },
+    {
+      "Sid": "DecodeAuthorizationMessage",
+      "Action": [
+        "sts:DecodeAuthorizationMessage"
+      ],
+      "Effect": "Allow",
+      "Resource": [
+        "*"
+      ]
     }
   ],
   "Version": "2012-10-17"

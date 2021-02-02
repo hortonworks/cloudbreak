@@ -24,7 +24,6 @@ import com.amazonaws.auth.policy.Action;
 import com.amazonaws.auth.policy.Policy;
 import com.amazonaws.auth.policy.Resource;
 import com.amazonaws.auth.policy.Statement;
-import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementException;
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.GetInstanceProfileRequest;
@@ -35,6 +34,7 @@ import com.amazonaws.services.identitymanagement.model.Role;
 import com.amazonaws.services.identitymanagement.model.ServiceFailureException;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRequest;
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @Service
@@ -51,7 +51,7 @@ public class AwsIamService {
      * @param validationResultBuilder builder for any errors encountered
      * @return InstanceProfile if instance profile ARN is valid otherwise null
      */
-    public InstanceProfile getInstanceProfile(AmazonIdentityManagement iam, String instanceProfileArn,
+    public InstanceProfile getInstanceProfile(AmazonIdentityManagementClient iam, String instanceProfileArn,
             ValidationResultBuilder validationResultBuilder) {
         InstanceProfile instanceProfile = null;
         if (instanceProfileArn != null && instanceProfileArn.contains("/")) {
@@ -77,7 +77,7 @@ public class AwsIamService {
      * @param validationResultBuilder builder for any errors encountered
      * @return set of valid Role objects
      */
-    public Set<Role> getValidRoles(AmazonIdentityManagement iam, Set<String> roleArns,
+    public Set<Role> getValidRoles(AmazonIdentityManagementClient iam, Set<String> roleArns,
             ValidationResultBuilder validationResultBuilder) {
         return roleArns.stream()
                 .map(roleArn -> getRole(iam, roleArn, validationResultBuilder))
@@ -93,7 +93,7 @@ public class AwsIamService {
      * @param validationResultBuilder builder for any errors encountered
      * @return Role if role ARN is valid otherwise null
      */
-    public Role getRole(AmazonIdentityManagement iam, String roleArn,
+    public Role getRole(AmazonIdentityManagementClient iam, String roleArn,
             ValidationResultBuilder validationResultBuilder) {
         Role role = null;
         if (roleArn != null && roleArn.contains("/")) {
@@ -213,7 +213,7 @@ public class AwsIamService {
      * @param resourceArns    resources to simulate
      * @return List of evaluation results
      */
-    public List<EvaluationResult> simulatePrincipalPolicy(AmazonIdentityManagement iam,
+    public List<EvaluationResult> simulatePrincipalPolicy(AmazonIdentityManagementClient iam,
             String policySourceArn, Collection<String> actionNames, Collection<String> resourceArns)
             throws AmazonIdentityManagementException {
         SimulatePrincipalPolicyRequest simulatePrincipalPolicyRequest =
@@ -234,7 +234,7 @@ public class AwsIamService {
      * @param policies collection of Policy objects to check
      * @return list of evaluation results
      */
-    public List<EvaluationResult> validateRolePolicies(AmazonIdentityManagement iam, Role role,
+    public List<EvaluationResult> validateRolePolicies(AmazonIdentityManagementClient iam, Role role,
             Collection<Policy> policies) throws AmazonIdentityManagementException {
         List<EvaluationResult> evaluationResults = new ArrayList<>();
         for (Policy policy : policies) {

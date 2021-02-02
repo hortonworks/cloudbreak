@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
@@ -21,8 +20,9 @@ import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingRetryClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationRetryClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.converter.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsLifeCycleMapper;
@@ -79,9 +79,9 @@ public class AwsMetadataCollector implements MetadataCollector {
         List<CloudVmMetaDataStatus> collectedCloudVmMetaDataStatuses = new ArrayList<>();
 
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonCloudFormationRetryClient amazonCFClient = awsClient.createCloudFormationRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
-        AmazonAutoScalingRetryClient amazonASClient = awsClient.createAutoScalingRetryClient(new AwsCredentialView(ac.getCloudCredential()), region);
-        AmazonEC2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
+        AmazonCloudFormationClient amazonCFClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()), region);
+        AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
 
         Multimap<String, CloudInstance> instanceGroupMap = getInstanceGroupMap(vms);
 
@@ -164,8 +164,8 @@ public class AwsMetadataCollector implements MetadataCollector {
         return instanceGroupMap;
     }
 
-    private List<Instance> collectInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingRetryClient amazonASClient,
-            AmazonEC2Client amazonEC2Client, AmazonCloudFormationRetryClient amazonCFClient, String group) {
+    private List<Instance> collectInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
+            AmazonEc2Client amazonEC2Client, AmazonCloudFormationClient amazonCFClient, String group) {
 
         LOGGER.debug("Collect aws instances for group: {}", group);
 

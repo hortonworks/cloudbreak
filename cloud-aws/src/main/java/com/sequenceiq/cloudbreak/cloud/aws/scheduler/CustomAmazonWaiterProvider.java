@@ -7,17 +7,13 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.autoscaling.AmazonAutoScalingClient;
 import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest;
 import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesResult;
-import com.amazonaws.services.autoscaling.waiters.DescribeAutoScalingGroupsFunction;
-import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
-import com.amazonaws.services.rds.waiters.DescribeDBInstancesFunction;
 import com.amazonaws.waiters.FixedDelayStrategy;
 import com.amazonaws.waiters.MaxAttemptsRetryStrategy;
 import com.amazonaws.waiters.PollingStrategy;
@@ -26,6 +22,8 @@ import com.amazonaws.waiters.WaiterAcceptor;
 import com.amazonaws.waiters.WaiterBuilder;
 import com.amazonaws.waiters.WaiterExecutorServiceFactory;
 import com.amazonaws.waiters.WaiterState;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifyFailureAcceptor;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifySuccessAcceptor;
 
@@ -48,7 +46,7 @@ public class CustomAmazonWaiterProvider {
 
     public Waiter<DescribeAutoScalingGroupsRequest> getAutoscalingInstancesInServiceWaiter(AmazonAutoScalingClient asClient, Integer requiredCount) {
         return new WaiterBuilder<DescribeAutoScalingGroupsRequest, DescribeAutoScalingGroupsResult>()
-                .withSdkFunction(new DescribeAutoScalingGroupsFunction(asClient))
+                .withSdkFunction(asClient::describeAutoScalingGroups)
                 .withAcceptors(new WaiterAcceptor<DescribeAutoScalingGroupsResult>() {
                     @Override
                     public boolean matches(DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult) {
@@ -89,9 +87,9 @@ public class CustomAmazonWaiterProvider {
                 .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
     }
 
-    public Waiter<DescribeDBInstancesRequest> getDbInstanceStopWaiter(AmazonRDS rdsClient) {
+    public Waiter<DescribeDBInstancesRequest> getDbInstanceStopWaiter(AmazonRdsClient rdsClient) {
         return new WaiterBuilder<DescribeDBInstancesRequest, DescribeDBInstancesResult>()
-                .withSdkFunction(new DescribeDBInstancesFunction(rdsClient))
+                .withSdkFunction(rdsClient::describeDBInstances)
                 .withAcceptors(new WaiterAcceptor<DescribeDBInstancesResult>() {
                     @Override
                     public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
@@ -123,9 +121,9 @@ public class CustomAmazonWaiterProvider {
                 .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
     }
 
-    public Waiter<DescribeDBInstancesRequest> getDbInstanceModifyWaiter(AmazonRDS rdsClient) {
+    public Waiter<DescribeDBInstancesRequest> getDbInstanceModifyWaiter(AmazonRdsClient rdsClient) {
         return new WaiterBuilder<DescribeDBInstancesRequest, DescribeDBInstancesResult>()
-                .withSdkFunction(new DescribeDBInstancesFunction(rdsClient))
+                .withSdkFunction(rdsClient::describeDbInstances)
                 .withAcceptors(describeDbInstanceForModifySuccessAcceptor, describeDbInstanceForModifyFailureAcceptor)
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))

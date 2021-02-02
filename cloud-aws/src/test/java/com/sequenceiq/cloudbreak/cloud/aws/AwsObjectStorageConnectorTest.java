@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -39,7 +39,7 @@ public class AwsObjectStorageConnectorTest {
     private AwsClient awsClient;
 
     @Mock
-    private AmazonS3 s3Client;
+    private AmazonS3Client s3Client;
 
     @InjectMocks
     private AwsObjectStorageConnector underTest;
