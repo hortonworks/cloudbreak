@@ -25,6 +25,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
@@ -296,6 +297,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.endpointgateway.enable}")
     private boolean publicEndpointAccessGatewayEnabled;
+
+    @Value("${auth.mock.cm.sync.command.poller.enable}")
+    private boolean cmSyncCommandPollerEnabled;
 
     private String cbLicense;
 
@@ -606,6 +610,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (publicEndpointAccessGatewayEnabled) {
             builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY));
+        }
+        if (cmSyncCommandPollerEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

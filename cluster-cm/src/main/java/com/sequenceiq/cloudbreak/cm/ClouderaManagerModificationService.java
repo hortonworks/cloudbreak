@@ -5,8 +5,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,7 +68,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.util.CheckedFunction;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -116,6 +115,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Inject
+    private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
 
     private final Stack stack;
 
@@ -358,27 +360,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .map(it -> it.getName() + ": " + it.getClientConfigStalenessStatus())
                 .collect(Collectors.joining(", ")));
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
-        ApiCommand deployClientConfigCmd = checkedMeasure(
-                () -> getApiCommand(commands, "DeployClusterClientConfig", stack.getName(), clustersResourceApi::deployClientConfig),
-                LOGGER,
-                "The DeployClusterClientConfig command registration to CM took {} ms");
-        pollDeployConfig(deployClientConfigCmd);
-        ApiCommand refreshServicesCmd = getApiCommand(commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
+        BigDecimal deployCommandId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
+        pollDeployConfig(deployCommandId);
+        ApiCommand refreshServicesCmd = clouderaManagerCommonCommandService.getApiCommand(
+                commands, "RefreshCluster", stack.getName(), clustersResourceApi::refresh);
         pollRefresh(refreshServicesCmd);
         LOGGER.debug("Config deployed and stale services are refreshed in Cloudera Manager.");
-    }
-
-    private ApiCommand getApiCommand(List<ApiCommand> commands, String commandString, String clusterName, CheckedFunction<String, ApiCommand, ApiException> fn)
-            throws ApiException {
-        Optional<ApiCommand> optionalCommand = commands.stream().filter(cmd -> commandString.equals(cmd.getName())).findFirst();
-        ApiCommand command;
-        if (optionalCommand.isPresent()) {
-            command = optionalCommand.get();
-            LOGGER.debug("{} is already running with id: [{}]", commandString, command.getId());
-        } else {
-            command = fn.apply(clusterName);
-        }
-        return command;
     }
 
     private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
@@ -423,9 +410,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @VisibleForTesting
-    void pollDeployConfig(ApiCommand restartCommand) throws CloudbreakException {
+    void pollDeployConfig(BigDecimal commandId) throws CloudbreakException {
         PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(
-                stack, apiClient, restartCommand.getId());
+                stack, apiClient, commandId);
         handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for config deploy",
                 "Timeout while Cloudera Manager was config deploying services.");
     }
@@ -451,9 +438,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Deploying client configurations on upscaled hosts.");
-        ApiCommand deployCommand = clustersResourceApi.deployClientConfig(stack.getName());
-        pollDeployConfig(deployCommand);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, deployCommand.getId());
+        List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
+        BigDecimal deployCommandId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
+        pollDeployConfig(deployCommandId);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, deployCommandId);
         handlePollingResult(pollingResult, "Cluster was terminated while waiting for parcels activation", "Timeout while Cloudera Manager activate parcels.");
         LOGGER.debug("Parcels are activated on upscaled hosts.");
     }

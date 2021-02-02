@@ -152,6 +152,9 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private PollingResultErrorHandler pollingResultErrorHandler;
 
+    @Mock
+    private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
+
     @Spy
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
@@ -167,6 +170,7 @@ class ClouderaManagerModificationServiceTest {
         cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         stack.setCluster(cluster);
+        stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         hostGroup = new HostGroup();
         hostGroup.setName(HOST_GROUP_NAME);
     }
@@ -385,10 +389,12 @@ class ClouderaManagerModificationServiceTest {
         ApiServiceList apiServiceList = new ApiServiceList();
         apiServiceList.setItems(apiServices);
 
+        when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
+                .thenReturn(new ApiCommand().id(apiCommandId));
         when(servicesResourceApi.readServices(stack.getName(), "SUMMARY")).thenReturn(apiServiceList);
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
-        when(clustersResourceApi.deployClientConfig(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
-        when(clustersResourceApi.refresh(stack.getName())).thenReturn(new ApiCommand().id(apiCommandId));
+
+        when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(apiCommandId);
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(stack, apiClientMock, apiCommandId))
                 .thenReturn(successPollingResult);
         when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClientMock, apiCommandId))
@@ -404,11 +410,11 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(2)).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         verify(clouderaManagerUpgradeService, times(1)).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, apiClientMock);
         verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
-        verify(clustersResourceApi, times(1)).deployClientConfig(stack.getName());
-        verify(clustersResourceApi, times(1)).refresh(stack.getName());
+        verify(clouderaManagerCommonCommandService, times(1)).getDeployClientConfigCommandId(any(), any(), any());
+        verify(clouderaManagerCommonCommandService, times(1)).getApiCommand(any(), any(), any(), any());
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clouderaManagerUpgradeService,
-                clustersResourceApi);
+                clustersResourceApi, clouderaManagerCommonCommandService);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, apiClientMock);
         inOrder.verify(clouderaManagerParcelManagementService).checkParcelApiAvailability(stack, apiClientMock);
         inOrder.verify(clouderaManagerParcelManagementService).setParcelRepos(any(), eq(clouderaManagerResourceApi));
@@ -417,8 +423,8 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(stack), eq(apiClientMock));
         inOrder.verify(clouderaManagerUpgradeService).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, apiClientMock);
-        inOrder.verify(clustersResourceApi).deployClientConfig(stack.getName());
-        inOrder.verify(clustersResourceApi).refresh(stack.getName());
+        inOrder.verify(clouderaManagerCommonCommandService).getDeployClientConfigCommandId(stack, clustersResourceApi, apiCommandList.getItems());
+        inOrder.verify(clouderaManagerCommonCommandService).getApiCommand(any(), any(), any(), any());
     }
 
     @Test
@@ -450,7 +456,7 @@ class ClouderaManagerModificationServiceTest {
         String expectedMessage = "Cluster was terminated while waiting for config deploy";
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(any(), any(), any())).thenReturn(pollingResult);
         doThrow(new CancellationException(expectedMessage)).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
-        CancellationException actual = assertThrows(CancellationException.class, () -> underTest.pollDeployConfig(apiCommand));
+        CancellationException actual = assertThrows(CancellationException.class, () -> underTest.pollDeployConfig(apiCommand.getId()));
         assertEquals(expectedMessage, actual.getMessage());
     }
 
@@ -461,7 +467,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(any(), any(), any())).thenReturn(pollingResult);
         String expectedMessage = "Timeout while Cloudera Manager was config deploying services.";
         doThrow(new CloudbreakException(expectedMessage)).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
-        CloudbreakException actual = assertThrows(CloudbreakException.class, () -> underTest.pollDeployConfig(apiCommand));
+        CloudbreakException actual = assertThrows(CloudbreakException.class, () -> underTest.pollDeployConfig(apiCommand.getId()));
         assertEquals(expectedMessage, actual.getMessage());
     }
 
@@ -496,6 +502,8 @@ class ClouderaManagerModificationServiceTest {
         apiCommandList.setItems(apiCommands);
 
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
+                .thenReturn(new ApiCommand().id(BigDecimal.ONE));
         when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
 
@@ -545,10 +553,11 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getHostsResourceApi(eq(apiClientMock))).thenReturn(hostResourceApi);
     }
 
-    private void setUpDeployClientConfigPolling(PollingResult success) throws ApiException {
+    private void setUpDeployClientConfigPolling(PollingResult success) throws ApiException, CloudbreakException {
         BigDecimal deployClientCommandId = new BigDecimal(100);
-        when(clustersResourceApi.deployClientConfig(eq(STACK_NAME))).thenReturn(new ApiCommand().id(deployClientCommandId));
-
+        when(clustersResourceApi.listActiveCommands(STACK_NAME, "SUMMARY")).thenReturn(new ApiCommandList().addItemsItem(
+                new ApiCommand().id(BigDecimal.ONE).name("notDeployClientConfig")));
+        when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(deployClientCommandId);
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), eq(deployClientCommandId)))
                 .thenReturn(success);
     }
