@@ -14,11 +14,11 @@ public class AnonymizerUtil {
     private static final ReplacePattern[] PATTERNS = {
             //common PW
             new ReplacePattern("(?i)("
-                    + "password=\'|password=|password\":\"|password:|password |"
-                    + "pass=|pass\":\"|pass:|pass |"
-                    + "secret=|secret\":\"|secret:|secret |"
-                    + "key=|key\":\"|key:|key |"
-                    + "credential=|credential\":\"|credential:|credential "
+                    + "password:[\"']|password=[\"']|password=|password\":\"|password:|password |"
+                    + "pass:[\"']|pass=[\"']|pass=|pass\":\"|pass:|pass |"
+                    + "secret:[\"']|secret=[\"']|secret=|secret\":\"|secret:|secret |"
+                    + "key:[\"']|key=[\"']|key=|key\":\"|key:|key |"
+                    + "credential:[\"']|credential=[\"']|credential=|credential\":\"|credential:|credential "
                     + ")([^\\s'\"]*)", REPLACEMENT),
             //WASB
             new ReplacePattern("(?i)(\\.blob\\.core\\.windows\\.net\":\")([^\\s'\"])*", REPLACEMENT),

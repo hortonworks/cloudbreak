@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 
 import javax.persistence.Column;
@@ -101,7 +102,7 @@ public class Component implements ProvisionEntity {
                 + "id=" + id
                 + ", componentType=" + componentType
                 + ", name='" + name + '\''
-                + ", attributes=" + attributes
+                + ", attributes=" + anonymize(attributes.toString())
                 + '}';
     }
 }

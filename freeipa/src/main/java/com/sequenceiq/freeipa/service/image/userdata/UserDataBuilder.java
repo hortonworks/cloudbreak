@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.image.userdata;
 
+import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,7 +48,7 @@ public class UserDataBuilder {
             PlatformParameters parameters, String saltBootPassword, String cbCert,
             CcmConnectivityParameters ccmConnectivityParameters, ProxyConfig proxyConfig) {
         String userData = build(cloudPlatform, cbSshKeyDer, sshUser, parameters, saltBootPassword, cbCert, ccmConnectivityParameters, proxyConfig);
-        LOGGER.debug("User data  content; {}", userData);
+        LOGGER.debug("User data  content; {}", anonymize(userData));
         return userData;
     }
 
@@ -87,7 +89,7 @@ public class UserDataBuilder {
                 model.put("proxyUser", auth.getUserName());
                 model.put("proxyPassword", auth.getPassword());
             });
-            LOGGER.info("Proxy config set up for freeipa instances' userdata script: {}", proxyConfig);
+            LOGGER.info("Proxy config set up for freeipa instances' userdata script: {}", anonymize(proxyConfig.toString()));
         } else {
             model.put("proxyEnabled", Boolean.FALSE);
             LOGGER.info("No proxy config set up for freeipa instances' userdata script");
