@@ -132,7 +132,7 @@ dependencies {
   runtime project(':cloud-openstack')
   runtime project(':cloud-aws')
   runtime project(':cloud-mock')
-  runtime project(':cloud-azure')
+  runtime project(path: ':cloud-azure', configuration: 'shadow')
   runtime project(':cloud-gcp')
   implementation     project(":structuredevent-service-cdp")
   
