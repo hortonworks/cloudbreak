@@ -27,6 +27,10 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
 
     public static final String API_ROOT_V40 = "/{mockUuid}/api/v40";
 
+    public static final String ACTIVE_COMMANDS = "/{mockUuid}/cmf/commands/activeCommandTable";
+
+    public static final String RECENT_COMMANDS = "/{mockUuid}/cmf/commands/commandTable";
+
     private T testDto;
 
     private MockedTestContext mockedTestContext;
@@ -56,6 +60,16 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
         return (CmV31Api.ClustersByClusterName.Hosts<T>) EndpointProxyFactory.create(CmV31Api.ClustersByClusterName.Hosts.class, testDto, mockedTestContext);
     }
 
+    public CmActiveCommandsApi.Cm.ActiveCommandTable<T> cmActiveCommands() {
+        return (CmActiveCommandsApi.Cm.ActiveCommandTable<T>) EndpointProxyFactory.create(
+                CmActiveCommandsApi.Cm.ActiveCommandTable.class, testDto, mockedTestContext);
+    }
+
+    public CmRecentCommandsApi.Cm.RecentCommandTable<T> cmRecentCommands() {
+        return (CmRecentCommandsApi.Cm.RecentCommandTable<T>) EndpointProxyFactory.create(
+                CmRecentCommandsApi.Cm.RecentCommandTable.class, testDto, mockedTestContext);
+    }
+
     public CommandsApplyHostTemplate<T> clustersByClusterNameHostTemplatesByHostTemplateNameCommandsApplyHostTemplate() {
         return (CommandsApplyHostTemplate<T>)
                 EndpointProxyFactory.create(CommandsApplyHostTemplate.class, testDto, mockedTestContext);
@@ -64,6 +78,26 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
     public T profile(String profile, int times) {
         mockedTestContext.getExecuteQueryToMockInfrastructure().execute(testDto.getCrn() + "/profile/" + profile + "/" + times, r -> r);
         return testDto;
+    }
+
+    public interface CmActiveCommandsApi {
+        interface Cm {
+
+            @MockUri(url = ACTIVE_COMMANDS)
+            interface ActiveCommandTable<T extends  CloudbreakTestDto> extends VerificationEndpoint<T> {
+                DefaultResponseConfigure<T, String> get();
+            }
+        }
+    }
+
+    public interface CmRecentCommandsApi {
+        interface Cm {
+
+            @MockUri(url = RECENT_COMMANDS)
+            interface RecentCommandTable<T extends  CloudbreakTestDto> extends VerificationEndpoint<T> {
+                DefaultResponseConfigure<T, String> get();
+            }
+        }
     }
 
     @MockUri(url = API_ROOT_V40)

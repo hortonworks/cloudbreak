@@ -35,3 +35,4 @@ auth:
     ccmv2.enable: false
     environment.experience.deletion.enable: true
     endpointgateway.enable: false
+    cm.sync.command.poller.enable: true
