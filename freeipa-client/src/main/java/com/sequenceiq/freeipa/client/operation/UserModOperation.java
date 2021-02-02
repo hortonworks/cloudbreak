@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.model.User;
 
 public class UserModOperation extends AbstractFreeipaOperation<User> {
@@ -51,10 +52,19 @@ public class UserModOperation extends AbstractFreeipaOperation<User> {
 
     @Override
     public Optional<User> invoke(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        LOGGER.debug("modifying user {}", user);
-        User modified = invoke(freeIpaClient, User.class);
-        LOGGER.debug("modified user {}", user);
-        return Optional.of(modified);
+        try {
+            LOGGER.debug("modifying user {}", user);
+            User modified = invoke(freeIpaClient, User.class);
+            LOGGER.debug("modified user {}", user);
+            return Optional.of(modified);
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isEmptyModlistException(e)) {
+                LOGGER.debug("Workload credentials for user '{}' already set.", getUser());
+            } else {
+                throw e;
+            }
+        }
+        return Optional.empty();
     }
 
     public String getUser() {

@@ -15,11 +15,10 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Lists;
-import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.operation.SetWlCredentialOperation;
+import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
@@ -33,24 +32,20 @@ public class WorkloadCredentialService {
     public void setWorkloadCredential(FreeIpaClient freeIpaClient, String username, WorkloadCredential workloadCredential)
             throws IOException, FreeIpaClientException {
         LOGGER.debug("Setting workload credentials for user '{}'", username);
-        try {
-            getOperation(username, workloadCredential, freeIpaClient).invoke(freeIpaClient);
-        } catch (FreeIpaClientException e) {
-            if (FreeIpaClientExceptionUtil.isEmptyModlistException(e)) {
-                LOGGER.debug("Workload credentials for user '{}' already set.", username);
-            } else {
-                throw e;
-            }
-        }
+        getOperation(username, workloadCredential, freeIpaClient).invoke(freeIpaClient);
     }
 
     public void setWorkloadCredentials(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Map<String, WorkloadCredential> workloadCredentials,
-            BiConsumer<String, String> warnings) throws FreeIpaClientException, IOException {
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
         List<SetWlCredentialOperation> operations = Lists.newArrayList();
         for (Map.Entry<String, WorkloadCredential> entry : workloadCredentials.entrySet()) {
             String username = entry.getKey();
             WorkloadCredential workloadCredential = entry.getValue();
-            operations.add(getOperation(username, workloadCredential, freeIpaClient));
+            try {
+                operations.add(getOperation(username, workloadCredential, freeIpaClient));
+            } catch (IOException e) {
+                recordWarning(username, e, warnings);
+            }
         }
         if (fmsToFreeipaBatchCallEnabled) {
             List<Object> batchCallOperations = operations.stream().map(operation -> operation.getOperationParamsForBatchCall()).collect(Collectors.toList());
