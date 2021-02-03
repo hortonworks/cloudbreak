@@ -29,6 +29,11 @@ echo -e "\n\033[1;96m--- Start thunderhead mock\033[0m\n"
 $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up -d thunderhead-mock
 
 date
+echo -e "\n\033[1;96m--- Copy mock infrastructure infrastructure-mock.p12 cert to certs dir\033[0m\n"
+mkdir -p $INTEGCB_LOCATION/certs/trusted
+cp ../mock-infrastructure/src/main/resources/keystore/infrastructure-mock.cer $INTEGCB_LOCATION/certs/trusted/infrastructure-mock.cer
+
+date
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
 

@@ -10,6 +10,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
@@ -37,7 +39,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentN
 @Component
 public class NetworkV1ToNetworkV4Converter {
 
-    private static final String NO_SUBNET_ID_FOUND_MESSAGE = "No subnet id found for this environment.";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetworkV1ToNetworkV4Converter.class);
 
     @Inject
     private SubnetSelector subnetSelector;
@@ -57,6 +59,9 @@ public class NetworkV1ToNetworkV4Converter {
 
         NetworkV4Request request = new NetworkV4Request();
 
+        if (network.getValue().getCloudPlatform() == null) {
+            throw new IllegalStateException("Unable to determine cloud platform for network since it has not been set!");
+        }
         switch (network.getValue().getCloudPlatform()) {
             case "AWS":
                 request.setAws(getAwsNetworkParameters(Optional.ofNullable(key.getAws()), value));
@@ -71,27 +76,29 @@ public class NetworkV1ToNetworkV4Converter {
                 request.setGcp(getGcpNetworkParameters(Optional.ofNullable(key.getGcp()), value));
                 break;
             default:
+                LOGGER.warn(NetworkV1ToNetworkV4Converter.class.getSimpleName() + " has no implemented action for cloud platform: " +
+                        network.getValue().getCloudPlatform());
         }
         return request;
     }
 
-    private MockNetworkV4Parameters getMockNetworkParameters(Optional<MockNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
-        MockNetworkV1Parameters params = mock.orElse(new MockNetworkV1Parameters());
+    private MockNetworkV4Parameters getMockNetworkParameters(Optional<MockNetworkV1Parameters> mockKey, EnvironmentNetworkResponse value) {
+        MockNetworkV1Parameters params = mockKey.orElse(new MockNetworkV1Parameters());
         return convertToMockNetworkParams(new ImmutablePair<>(params, value));
     }
 
-    private AzureNetworkV4Parameters getAzureNetworkParameters(Optional<AzureNetworkV1Parameters> azure, EnvironmentNetworkResponse value) {
-        AzureNetworkV1Parameters params = azure.orElse(new AzureNetworkV1Parameters());
+    private AzureNetworkV4Parameters getAzureNetworkParameters(Optional<AzureNetworkV1Parameters> azureKey, EnvironmentNetworkResponse value) {
+        AzureNetworkV1Parameters params = azureKey.orElse(new AzureNetworkV1Parameters());
         return convertToAzureStackRequest(new ImmutablePair<>(params, value));
     }
 
-    private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> key, EnvironmentNetworkResponse value) {
-        AwsNetworkV1Parameters params = key.orElse(new AwsNetworkV1Parameters());
+    private AwsNetworkV4Parameters getAwsNetworkParameters(Optional<AwsNetworkV1Parameters> awsKey, EnvironmentNetworkResponse value) {
+        AwsNetworkV1Parameters params = awsKey.orElse(new AwsNetworkV1Parameters());
         return convertToAwsStackRequest(new ImmutablePair<>(params, value));
     }
 
-    private GcpNetworkV4Parameters getGcpNetworkParameters(Optional<GcpNetworkV1Parameters> mock, EnvironmentNetworkResponse value) {
-        GcpNetworkV1Parameters params = mock.orElse(new GcpNetworkV1Parameters());
+    private GcpNetworkV4Parameters getGcpNetworkParameters(Optional<GcpNetworkV1Parameters> gcpKey, EnvironmentNetworkResponse value) {
+        GcpNetworkV1Parameters params = gcpKey.orElse(new GcpNetworkV1Parameters());
         return convertToGcpStackRequest(new ImmutablePair<>(params, value));
     }
 
@@ -202,18 +209,18 @@ public class NetworkV1ToNetworkV4Converter {
 
     public NetworkV1Request convertToNetworkV1Request(NetworkV4Request network) {
         NetworkV1Request response = new NetworkV1Request();
-        response.setAws(getIfNotNull(network.getAws(), this::convertToDistroXRequest));
-        response.setAzure(getIfNotNull(network.getAzure(), this::convertToDistroXRequest));
+        response.setAws(getIfNotNull(network.getAws(), this::convertToAwsNetworkV1Parameters));
+        response.setAzure(getIfNotNull(network.getAzure(), this::convertToAzureNetworkV1Parameters));
         return response;
     }
 
-    private AzureNetworkV1Parameters convertToDistroXRequest(AzureNetworkV4Parameters source) {
+    private AzureNetworkV1Parameters convertToAzureNetworkV1Parameters(AzureNetworkV4Parameters source) {
         AzureNetworkV1Parameters response = new AzureNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
         return response;
     }
 
-    private AwsNetworkV1Parameters convertToDistroXRequest(AwsNetworkV4Parameters source) {
+    private AwsNetworkV1Parameters convertToAwsNetworkV1Parameters(AwsNetworkV4Parameters source) {
         AwsNetworkV1Parameters response = new AwsNetworkV1Parameters();
         response.setSubnetId(source.getSubnetId());
         return response;

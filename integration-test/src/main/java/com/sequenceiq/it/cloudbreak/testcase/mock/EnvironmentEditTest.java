@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import java.util.Map;
 import java.util.UUID;
@@ -143,17 +143,13 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .withPublicKeyId(value)
                 .withPublicKey(INVALID_PUBLIC_KEY)
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.changeAuthentication(), key("all-defined"))
-                .expect(BadRequestException.class, key("all-defined")
-                        .withExpectedMessage(errorPattern))
-
+                .whenException(environmentTestClient.changeAuthentication(), BadRequestException.class, expectedMessage(errorPattern))
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId(null)
                 .withPublicKey(null)
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.changeAuthentication(), key("non-defined"))
-                .expect(BadRequestException.class, key("non-defined")
-                        .withExpectedMessage("1. You should define either the publicKey or the publicKeyId."))
+                .whenException(environmentTestClient.changeAuthentication(), BadRequestException.class,
+                        expectedMessage("1. You should define either the publicKey or the publicKeyId."))
                 .validate();
     }
 
@@ -173,9 +169,9 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .withCidr("cidr")
                 .given(EnvironmentTestDto.class)
                 .withSecurityAccess()
-                .when(environmentTestClient.changeSecurityAccess(), key("cidr-defined"))
-                .expect(BadRequestException.class, key("cidr-defined")
-                        .withExpectedMessage("1. Please add the default or knox security groups, we cannot edit with empty value.\n" +
+                .whenException(environmentTestClient.changeSecurityAccess(), BadRequestException.class,
+                        expectedMessage(
+                                "1. Please add the default or knox security groups, we cannot edit with empty value.\n" +
                                 "2. The CIDR can be replaced with the default and knox security groups, please add to the request\n" +
                                 "3. The CIDR could not be updated in the environment"))
                 .validate();

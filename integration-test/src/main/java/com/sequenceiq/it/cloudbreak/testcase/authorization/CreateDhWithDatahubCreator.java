@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
 public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -54,7 +57,6 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
         //hacky way to let access to image catalog
@@ -78,18 +80,11 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
-
                 // testing unauthorized calls for environment
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentShortPattern(testContext))
-                                .withKey("EnvironmentGetAction"))
-                .when(environmentTestClient.describe(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " +
-                                environmentShortPattern(testContext))
-                                .withKey("EnvironmentGetAction"))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
+                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
+                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
         createDatalake(testContext);
         String recipe1Name = testContext
@@ -111,22 +106,15 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .given(DistroXTestDto.class)
                 .withRecipe(recipe1Name)
-                .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                datahubRecipePattern(recipe1Name))
-                                .withKey("DistroXCreateAction"))
+                .whenException(distroXClient.create(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/useSharedResource' right on" +
+                        " 'recipe' " + datahubRecipePattern(recipe1Name)).withWho(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .withRecipe(recipe2Name)
                 .when(distroXClient.create(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .await(STACK_AVAILABLE, RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .given(RenewDistroXCertificateTestDto.class)
-                .when(distroXClient.renewDistroXCertificateV4(), RunningParameter.who(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .expect(ForbiddenException.class,
-                        RunningParameter.expectedMessage("Doesn't have 'datahub/repairDatahub' right on any of the " +
-                                environmentDhPattern(testContext) +
-                                " or on " +
-                                datahubPattern(testContext))
-                                .withKey("RenewDistroXCertificateAction"))
+                .whenException(distroXClient.renewDistroXCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datahub/repairDatahub'" +
+                        " right on any of the " + environmentDhPattern(testContext) + " or on " + datahubPattern(testContext))
+                        .withWho(Actor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());

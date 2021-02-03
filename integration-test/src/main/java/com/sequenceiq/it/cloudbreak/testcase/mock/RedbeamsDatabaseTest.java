@@ -60,8 +60,7 @@ public class RedbeamsDatabaseTest extends AbstractMockTest {
                 .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
                 .when(databaseTestClient.listV4(), RunningParameter.key(databaseName))
                 .then(RedbeamsDatabaseTestAssertion.containsDatabaseName(databaseName, 1), RunningParameter.key(databaseName))
-                .when(databaseTestClient.createV4(), RunningParameter.key(databaseName))
-                .expect(BadRequestException.class, RunningParameter.key(databaseName))
+                .whenException(databaseTestClient.createV4(), BadRequestException.class)
                 .validate();
     }
 }

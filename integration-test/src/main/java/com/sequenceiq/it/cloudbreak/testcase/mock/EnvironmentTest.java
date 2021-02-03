@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,7 +25,6 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
-import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -67,12 +68,10 @@ public class EnvironmentTest extends AbstractMockTest {
             when = "a create environment request with reference to a non-existing credential is sent",
             then = "a BadRequestException should be returned")
     public void testCreateEnvironmentNotExistCredential(MockedTestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .init(EnvironmentTestDto.class)
-                .when(environmentTestClient.create(), RunningParameter.key(forbiddenKey))
-                .expect(BadRequestException.class, RunningParameter.key(forbiddenKey))
+                .whenException(environmentTestClient.create(), BadRequestException.class)
                 .validate();
     }
 
@@ -111,18 +110,14 @@ public class EnvironmentTest extends AbstractMockTest {
                 .getResponse().setCrn(invalidCrn);
         testContext
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.describeByCrn())
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage(".*Crn provided: " +
+                .whenException(environmentTestClient.describeByCrn(), BadRequestException.class,
+                        expectedMessage(".*Crn provided: " +
                                 "crn:cdp:datalake:us-west-1:acc:datalake:dl has invalid resource type or service type. " +
-                                "Accepted service type / resource type pairs: [(]environments,environment[)].*")
-                                .withKey("EnvironmentGetByCrnAction"))
-                .when(environmentTestClient.deleteMultipleByCrns(invalidCrn, otherInvalidCrn))
-                .expect(BadRequestException.class,
-                        RunningParameter.expectedMessage(".*Crns provided: \\[crn:cdp:datalake:us-west-1:acc:datalake:dl," +
+                                "Accepted service type / resource type pairs: [(]environments,environment[)].*"))
+                .whenException(environmentTestClient.deleteMultipleByCrns(invalidCrn, otherInvalidCrn), BadRequestException.class,
+                        expectedMessage(".*Crns provided: \\[crn:cdp:datalake:us-west-1:acc:datalake:dl," +
                                 "crn:cdp:datahub:us-west-1:acc:cluster:dh\\] have invalid resource type or service type. " +
-                                "Accepted service type / resource type pairs: [(]environments,environment[)].*")
-                                .withKey("EnvironmentDeleteMultipleByCrnsAction"))
+                                "Accepted service type / resource type pairs: [(]environments,environment[)].*"))
                 .validate();
     }
 
@@ -132,12 +127,10 @@ public class EnvironmentTest extends AbstractMockTest {
             when = "a delete request is sent for a non-existing environment",
             then = "a NotFoundException should be returned")
     public void testDeleteEnvironmentNotExist(MockedTestContext testContext) {
-        String forbiddenKey = resourcePropertyProvider().getName();
         testContext
                 .given(CredentialTestDto.class)
                 .init(EnvironmentTestDto.class)
-                .when(environmentTestClient.deleteByName(), RunningParameter.key(forbiddenKey))
-                .expect(NotFoundException.class, RunningParameter.key(forbiddenKey))
+                .whenException(environmentTestClient.deleteByName(), NotFoundException.class)
                 .validate();
     }
 

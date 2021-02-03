@@ -62,6 +62,27 @@ public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> 
     }
 
     @Override
+    public <E extends Exception> T whenException(Class<T> entityClass, Action<T, FreeIpaClient> action, Class<E> expectedException) {
+        return getTestContext().whenException(entityClass, FreeIpaClient.class, action, expectedException, emptyRunningParameter());
+    }
+
+    @Override
+    public <E extends Exception> T whenException(Action<T, FreeIpaClient> action, Class<E> expectedException) {
+        return getTestContext().whenException((T) this, FreeIpaClient.class, action, expectedException, emptyRunningParameter());
+    }
+
+    @Override
+    public <E extends Exception> T whenException(Class<T> entityClass, Action<T, FreeIpaClient> action, Class<E> expectedException,
+            RunningParameter runningParameter) {
+        return getTestContext().whenException(entityClass, FreeIpaClient.class, action, expectedException, runningParameter);
+    }
+
+    @Override
+    public <E extends Exception> T whenException(Action<T, FreeIpaClient> action, Class<E> expectedException, RunningParameter runningParameter) {
+        return getTestContext().whenException((T) this, FreeIpaClient.class, action, expectedException, runningParameter);
+    }
+
+    @Override
     public T then(Assertion<T, FreeIpaClient> assertion) {
         return then(assertion, emptyRunningParameter());
     }

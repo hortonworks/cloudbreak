@@ -47,4 +47,5 @@ public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest
             throw new TestException(e);
         }
     }
+
 }

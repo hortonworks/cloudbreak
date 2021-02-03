@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import javax.inject.Inject;
@@ -77,9 +78,8 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .expect(BadRequestException.class, key(imgCatalogName)
-                        .withExpectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
+                .whenException(imageCatalogTestClient.createV4(), BadRequestException.class,
+                        expectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
                 .validate();
     }
 
@@ -95,9 +95,8 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .expect(BadRequestException.class, key(imgCatalogName)
-                        .withExpectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
+                .whenException(imageCatalogTestClient.createV4(), BadRequestException.class,
+                        expectedMessage(".*The length of the credential's name has to be in range of 5 to 100"))
                 .validate();
     }
 
@@ -113,8 +112,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL)
-                .when(imageCatalogTestClient.createWithoutNameV4(), key(imgCatalogName))
-                .expect(BadRequestException.class, key(imgCatalogName))
+                .whenException(imageCatalogTestClient.createWithoutNameV4(), BadRequestException.class)
                 .validate();
     }
 
@@ -131,9 +129,8 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(invalidURL)
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .expect(BadRequestException.class, key(imgCatalogName)
-                        .withExpectedMessage("A valid image catalog must be available on the given URL"))
+                .whenException(imageCatalogTestClient.createV4(), BadRequestException.class,
+                        expectedMessage("A valid image catalog must be available on the given URL"))
                 .validate();
     }
 
@@ -149,9 +146,8 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(IMG_CATALOG_URL + "/notanimagecatalog")
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .expect(BadRequestException.class, key(imgCatalogName)
-                        .withExpectedMessage(".*A valid image catalog must be available on the given URL.*"))
+                .whenException(imageCatalogTestClient.createV4(), BadRequestException.class,
+                        expectedMessage(".*A valid image catalog must be available on the given URL.*"))
                 .validate();
     }
 
@@ -167,38 +163,10 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(INVALID_IMAGECATALOG_JSON_URL)
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .expect(BadRequestException.class, key(imgCatalogName)
-                        .withExpectedMessage("A valid image catalog must be available on the given URL"))
+                .whenException(imageCatalogTestClient.createV4(), BadRequestException.class,
+                        expectedMessage("A valid image catalog must be available on the given URL"))
                 .validate();
     }
-
-    /*@Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
-            given = "image catalog in the database",
-            when = "calling delete on the existing one and create a new one with the same name",
-            then = "getting an image catalog response so the request was valid")
-    public void testImageCatalogCreationWhenCatalogWithTheSameNameDeletedRightBeforeCreation(MockedTestContext testContext) {
-        String imgCatalogName = resourcePropertyProvider().getName();
-
-        testContext
-                .given(imgCatalogName, ImageCatalogTestDto.class)
-                .withName(imgCatalogName)
-                .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .select(imgCatalog -> imgCatalog.getResponse().getId(), key(imgCatalogName))
-                .when(imageCatalogTestClient.deleteV4(), key(imgCatalogName))
-                .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
-                .when(imageCatalogTestClient.getV4(Boolean.FALSE), key(imgCatalogName))
-                .then((testContext1, entity, cloudbreakClient) -> {
-                    Long firstPostEntityId = testContext1.getSelected(imgCatalogName);
-                    if (entity.getResponse().getId().equals(firstPostEntityId)) {
-                        throw new IllegalArgumentException("The re-created ImageCatalog should have a different id.");
-                    }
-                    return entity;
-                })
-                .validate();
-    }*/
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -215,9 +183,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(catalogKey))
                 .when(imageCatalogTestClient.deleteV4(), key(catalogKey))
-                .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
-                .expect(NotFoundException.class, key(imgCatalogName)
-                        .withExpectedMessage("not found"))
+                .whenException(imageCatalogTestClient.getImagesByNameV4(), NotFoundException.class, expectedMessage("not found"))
                 .validate();
     }
 
@@ -281,8 +247,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .given(imgCatalogName, ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
                 .withUrl(getImageCatalogMockServerSetup().getImageCatalogUrl())
-                .when(imageCatalogTestClient.getImagesByNameV4(), key(imgCatalogName))
-                .expect(NotFoundException.class, key(imgCatalogName))
+                .whenException(imageCatalogTestClient.getImagesByNameV4(), NotFoundException.class)
                 .validate();
     }
 

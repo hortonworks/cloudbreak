@@ -36,8 +36,8 @@ public class RunningParameter {
         return who;
     }
 
-    public RunningParameter withWho(Actor who) {
-        this.who = who;
+    public RunningParameter withWho(Actor actor) {
+        who = actor;
         return this;
     }
 
@@ -134,9 +134,9 @@ public class RunningParameter {
                 .withSkipOnFail(false);
     }
 
-    public static RunningParameter who(Actor who) {
+    public static RunningParameter who(Actor actor) {
         return new RunningParameter()
-                .withWho(who);
+                .withWho(actor);
     }
 
     public static RunningParameter key(String key) {

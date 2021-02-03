@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
@@ -126,9 +128,7 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .when(environmentTestClient.describe())
                 .given(StackTestDto.class)
                 .withEnvironmentCrn("")
-                .when(stackTestClient.createV4(), RunningParameter.key("badRequest"))
-                .expect(BadRequestException.class, RunningParameter.key("badRequest")
-                        .withExpectedMessage("Environment CRN cannot be null or empty."))
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage("Environment CRN cannot be null or empty."))
                 .validate();
     }
 

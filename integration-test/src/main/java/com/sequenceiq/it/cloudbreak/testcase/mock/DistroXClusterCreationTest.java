@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
@@ -144,8 +145,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withCluster(CLUSTER_KEY)
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
-                .when(distroXClient.create(), key("error"))
-                .expect(BadRequestException.class, key("error").withExpectedMessage("Environment state is ENV_STOPPED instead of AVAILABLE"))
+                .whenException(distroXClient.create(), BadRequestException.class, expectedMessage("Environment state is ENV_STOPPED instead of AVAILABLE"))
                 .validate();
     }
 

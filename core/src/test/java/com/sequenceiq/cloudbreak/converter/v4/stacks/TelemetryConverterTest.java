@@ -11,6 +11,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -30,6 +31,7 @@ import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 public class TelemetryConverterTest {
@@ -127,6 +129,43 @@ public class TelemetryConverterTest {
         Telemetry result = underTest.convert(telemetryRequest, StackType.WORKLOAD);
         // THEN
         assertEquals(1, result.getFluentAttributes().size());
+    }
+
+    @Test
+    public void testConvertWhenWorkloadAnalyticsIsNotNullThenItsAttributesShouldBePassed() {
+        WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
+        workloadAnalytics.setDatabusEndpoint(DATABUS_ENDPOINT);
+        workloadAnalytics.setAttributes(Map.of("someAttributeKey", "someOtherStuffForValue"));
+        Telemetry input = new Telemetry();
+        input.setWorkloadAnalytics(workloadAnalytics);
+
+        TelemetryResponse response = underTest.convert(input);
+
+        assertNotNull(response);
+        assertNotNull(response.getWorkloadAnalytics());
+        assertEquals(input.getWorkloadAnalytics().getAttributes(), response.getWorkloadAnalytics().getAttributes());
+    }
+
+    @Test
+    public void testConvertWhenMonitoringIsDisabledThenItShouldBeFalseInTheResult() {
+        ReflectionTestUtils.setField(underTest, "monitoringEnabled", false);
+        TelemetryRequest input = new TelemetryRequest();
+
+        Telemetry result = underTest.convert(input, StackType.WORKLOAD);
+
+        assertNotNull(result);
+        assertFalse(result.getFeatures().getMonitoring().isEnabled());
+    }
+
+    @Test
+    public void testConvertWhenClusterLogCollectionIsDisabledThenItShouldBeFalseInTheResult() {
+        ReflectionTestUtils.setField(underTest, "clusterLogsCollection", false);
+        TelemetryRequest input = new TelemetryRequest();
+
+        Telemetry result = underTest.convert(input, StackType.WORKLOAD);
+
+        assertNotNull(result);
+        assertFalse(result.getFeatures().getClusterLogsCollection().isEnabled());
     }
 
     @Test
@@ -283,6 +322,21 @@ public class TelemetryConverterTest {
         TelemetryRequest result = underTest.convert(response, null);
         // THEN
         assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
+    }
+
+    @Test
+    public void testConvertWithCloudStorageLoggingNotEnabled() {
+        // GIVEN
+        TelemetryResponse response = new TelemetryResponse();
+        FeaturesResponse featuresResponse = new FeaturesResponse();
+        FeatureSetting fs = new FeatureSetting();
+        fs.setEnabled(false);
+        featuresResponse.setCloudStorageLogging(fs);
+        response.setFeatures(featuresResponse);
+        // WHEN
+        TelemetryRequest result = underTest.convert(response, null);
+        // THEN
+        assertFalse(result.getFeatures().getCloudStorageLogging().isEnabled());
     }
 
     @Test

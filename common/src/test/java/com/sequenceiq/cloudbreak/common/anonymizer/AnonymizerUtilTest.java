@@ -29,6 +29,84 @@ public class AnonymizerUtilTest {
     }
 
     @Test
+    public void testWithBothSimpleAndDoubleQuotes() {
+        String testData = ""
+                + "export test1_password=pwd\n"
+                + "export test1_pass=pwd\n"
+                + "export test1_secret=pwd\n"
+                + "export test1_key=pwd\n"
+                + "export test1_credential=pwd\n"
+
+                + "export test2_password:pwd\n"
+                + "export test2_pass:pwd\n"
+                + "export test2_secret:pwd\n"
+                + "export test2_key:pwd\n"
+                + "export test1_credential:pwd\n"
+
+                + "export test3_password:'pwd'\n"
+                + "export test3_pass:'pwd'\n"
+                + "export test3_secret:'pwd'\n"
+                + "export test3_key:'pwd'\n"
+                + "export test3_credential:'pwd'\n"
+
+                + "export test4_password='pwd'\n"
+                + "export test4_pass='pwd'\n"
+                + "export test4_secret='pwd'\n"
+                + "export test4_key='pwd'\n"
+                + "export test4_credential='pwd'\n"
+
+                + "export test5_password=\"pwd\"\n"
+                + "export test5_pass=\"pwd\"\n"
+                + "export test5_secret=\"pwd\"\n"
+                + "export test5_key=\"pwd\"\n"
+                + "export test5_credential=\"pwd\"\n"
+
+                + "export \"test6_password\":\"pwd\"\n"
+                + "export \"test6_pass\":\"pwd\"\n"
+                + "export \"test6_secret\":\"pwd\"\n"
+                + "export \"test6_key\":\"pwd\"\n"
+                + "export \"test6_credential\":\"pwd\"\n";
+
+        String expected = ""
+                + "export test1_password=****\n"
+                + "export test1_pass=****\n"
+                + "export test1_secret=****\n"
+                + "export test1_key=****\n"
+                + "export test1_credential=****\n"
+
+                + "export test2_password:****\n"
+                + "export test2_pass:****\n"
+                + "export test2_secret:****\n"
+                + "export test2_key:****\n"
+                + "export test1_credential:****\n"
+
+                + "export test3_password:'****'\n"
+                + "export test3_pass:'****'\n"
+                + "export test3_secret:'****'\n"
+                + "export test3_key:'****'\n"
+                + "export test3_credential:'****'\n"
+
+                + "export test4_password='****'\n"
+                + "export test4_pass='****'\n"
+                + "export test4_secret='****'\n"
+                + "export test4_key='****'\n"
+                + "export test4_credential='****'\n"
+
+                + "export test5_password=\"****\"\n"
+                + "export test5_pass=\"****\"\n"
+                + "export test5_secret=\"****\"\n"
+                + "export test5_key=\"****\"\n"
+                + "export test5_credential=\"****\"\n"
+
+                + "export \"test6_password\":\"****\"\n"
+                + "export \"test6_pass\":\"****\"\n"
+                + "export \"test6_secret\":\"****\"\n"
+                + "export \"test6_key\":\"****\"\n"
+                + "export \"test6_credential\":\"****\"\n";
+        Assert.assertEquals(expected, anonymize(testData));
+    }
+
+    @Test
     public void testHidePasswordDoubleQuote() {
         String testData = " DC=hortonworks,DC=com \"--ldap-manager-password=2#KQ01DLbUdljJ!AVs\" --ldap-sync-usern\" sd dsds \"";
         Assert.assertEquals(" DC=hortonworks,DC=com \"--ldap-manager-password=" + REPLACEMENT + "\" --ldap-sync-usern\" sd dsds \"",

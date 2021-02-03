@@ -26,8 +26,8 @@ public class TestInvocationListener implements IInvokedMethodListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInvocationListener.class);
 
     @Override
-    public void beforeInvocation(IInvokedMethod method, ITestResult testResult) {
-        LOGGER.info("Before Invocation of: " + method.getTestMethod().getMethodName()
+    public void beforeInvocation(IInvokedMethod invokedMethod, ITestResult testResult) {
+        LOGGER.info("Before Invocation of: " + invokedMethod.getTestMethod().getMethodName()
                 + " with parameters: " + Arrays.toString(testResult.getParameters()));
     }
 
@@ -40,7 +40,7 @@ public class TestInvocationListener implements IInvokedMethodListener {
      * because of each test has it's own Test Context, that has been built by the Given test steps for that thread of test execution.
      */
     @Override
-    public void afterInvocation(IInvokedMethod method, ITestResult testResult) {
+    public void afterInvocation(IInvokedMethod invokedMethod, ITestResult testResult) {
         TestContext testContext;
         JSONObject jsonObject = new JSONObject();
         Object[] parameters = testResult.getParameters();
@@ -87,7 +87,7 @@ public class TestInvocationListener implements IInvokedMethodListener {
             }
         }
         if (jsonObject.length() != 0) {
-            String fileName = "resource_names_" + testContext.getTestMethodName().orElseGet(() -> getDefaultFileNameTag()) + ".json";
+            String fileName = "resource_names_" + testContext.getTestMethodName().orElseGet(this::getDefaultFileNameTag) + ".json";
             try {
                 Files.writeString(Paths.get(fileName), jsonObject.toString());
                 LOGGER.info("Resource file have been created with name: {} and content: {}.", fileName, jsonObject);
