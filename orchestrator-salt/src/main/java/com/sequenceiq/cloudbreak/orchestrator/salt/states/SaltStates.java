@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
@@ -138,14 +139,14 @@ public class SaltStates {
     }
 
     private static Multimap<String, Map<String, String>> applyStateJidInfo(SaltConnector sc, String jid) {
-        Map<?, ?> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid);
         LOGGER.debug("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
     private static Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
-        Map<String, List<Map<String, Object>>> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid, "missing", "True");
+        JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid, "missing", "True");
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }

@@ -1,0 +1,26 @@
+{
+  "return": [
+    {"invalidObj":  []},
+    {
+      "hostname": {
+        "clouds": [],
+        "beacons": [],
+        "modules": [],
+        "states": [],
+        "sdb": [],
+        "grains": [],
+        "renderers": [],
+        "returners": [],
+        "output": [],
+        "utils": [],
+        "log_handlers": [],
+        "executors": [],
+        "proxymodules": [],
+        "engines": [],
+        "thorium": [],
+        "serializers": [],
+        "matchers": []
+      }
+    }
+  ]
+}
