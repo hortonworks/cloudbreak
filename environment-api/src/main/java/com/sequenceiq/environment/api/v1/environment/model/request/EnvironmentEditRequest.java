@@ -33,7 +33,7 @@ public class EnvironmentEditRequest {
     private TelemetryRequest telemetry;
 
     @ApiModelProperty(EnvironmentModelDescription.BACKUP)
-    private @Valid BackupRequest backup;
+    private BackupRequest backup;
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private @Valid SecurityAccessRequest securityAccess;

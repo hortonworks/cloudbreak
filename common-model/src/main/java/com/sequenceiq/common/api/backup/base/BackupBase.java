@@ -2,7 +2,6 @@ package com.sequenceiq.common.api.backup.base;
 
 import java.io.Serializable;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -25,7 +24,6 @@ public abstract class BackupBase implements Serializable {
     @ApiModelProperty(BackupModelDescription.BACKUP_STORAGE_LOCATION)
     private String storageLocation;
 
-    @Valid
     @ApiModelProperty(BackupModelDescription.BACKUP_S3_ATTRIBUTES)
     private S3CloudStorageV1Parameters s3;
 
@@ -33,9 +31,8 @@ public abstract class BackupBase implements Serializable {
     private AdlsGen2CloudStorageV1Parameters adlsGen2;
 
     @ApiModelProperty(BackupModelDescription.BACKUP_GCS_ATTRIBUTES)
-    private @Valid GcsCloudStorageV1Parameters gcs;
+    private GcsCloudStorageV1Parameters gcs;
 
-    @Valid
     @ApiModelProperty(BackupModelDescription.BACKUP_CLOUDWATCH_ATTRIBUTES)
     private BackupCloudwatchParams cloudwatch;
 

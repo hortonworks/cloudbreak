@@ -57,7 +57,7 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     private TelemetryResponse telemetry;
 
     @ApiModelProperty(EnvironmentModelDescription.BACKUP)
-    private @Valid BackupResponse backup;
+    private BackupResponse backup;
 
     @ApiModelProperty(EnvironmentModelDescription.NETWORK)
     private EnvironmentNetworkResponse network;

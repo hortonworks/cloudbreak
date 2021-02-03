@@ -65,7 +65,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     private TelemetryRequest telemetry;
 
     @ApiModelProperty(EnvironmentModelDescription.BACKUP)
-    private @Valid BackupRequest backup;
+    private BackupRequest backup;
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.AUTHENTICATION)

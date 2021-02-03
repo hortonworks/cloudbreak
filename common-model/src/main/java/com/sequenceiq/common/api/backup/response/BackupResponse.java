@@ -5,6 +5,5 @@ import com.sequenceiq.common.api.backup.base.BackupBase;
 import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "BackupResponse")
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class BackupResponse extends BackupBase {
 }
