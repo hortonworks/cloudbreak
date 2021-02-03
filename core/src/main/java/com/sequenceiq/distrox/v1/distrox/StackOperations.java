@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
@@ -109,6 +110,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
 
     @Inject
     private DatabaseBackupRestoreService databaseBackupRestoreService;
+
+    @Inject
+    private ClusterDBValidationService clusterDBValidationService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -240,7 +244,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
-        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, request.getReplaceVms());
+        Boolean replacevms = determineReplaceVmsParameter(stack, request.getReplaceVms());
+        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replacevms);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
         }
@@ -252,6 +257,14 @@ public class StackOperations implements ResourceBasedCrnProvider {
         if (StackType.DATALAKE == stack.getType()) {
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
             clusterUpgradeAvailabilityService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
+        }
+    }
+
+    private Boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
+        if (stack.isDatalake() || replaceVms != null) {
+            return replaceVms;
+        } else {
+            return clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster());
         }
     }
 

@@ -109,6 +109,9 @@ public class ClusterRepairServiceTest {
     @Mock
     private RdsConfigService rdsConfigService;
 
+    @Mock
+    private ClusterDBValidationService clusterDBValidationService;
+
     @InjectMocks
     private ClusterRepairService underTest;
 
@@ -171,8 +174,7 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
-    public void testCanRepairPrewarmedGatewayWithExternalDatabase() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        cluster.setDatabaseServerCrn("dbCrn");
+    public void testCanRepairPrewarmedGatewayWithRepairPossibleBasedOnDBSetup() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -185,28 +187,7 @@ public class ClusterRepairServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
-
-        Result result = underTest.repairWithDryRun(stack.getId());
-
-        assertTrue(result.isSuccess());
-        verifyNoInteractions(stackUpdater, flowManager, resourceService);
-    }
-
-    @Test
-    public void testCanRepairPrewarmedGatewayWithEmbeddedDbOnAttachedDisk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        cluster.setEmbeddedDatabaseOnAttachedDisk(true);
-        HostGroup hostGroup1 = new HostGroup();
-        hostGroup1.setName("hostGroup1");
-        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
-        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_HEALTHY, InstanceGroupType.GATEWAY);
-        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
-
-        when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(image.isPrewarmed()).thenReturn(true);
-        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
 
         Result result = underTest.repairWithDryRun(stack.getId());
 
@@ -216,7 +197,6 @@ public class ClusterRepairServiceTest {
 
     @Test
     public void testCannotRepairBaseImageGateway() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        cluster.setDatabaseServerCrn("dbCrn");
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -229,6 +209,7 @@ public class ClusterRepairServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(false);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
 
         Result result = underTest.repairWithDryRun(stack.getId());
 
@@ -250,6 +231,7 @@ public class ClusterRepairServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(false);
 
         Result result = underTest.repairWithDryRun(stack.getId());
 
