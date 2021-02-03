@@ -1,0 +1,24 @@
+{
+  "return": [
+    {
+      "outputter": "highstate",
+      "data": {
+        "host-10-0-0-6.openstacklocal": {
+          "file_|-/etc/ambari-agent/conf/internal_hostname.sh_|-/etc/ambari-agent/conf/internal_hostname.sh_|-managed": {
+            "comment": "File /etc/ambari-agent/conf/internal_hostname.sh updated",
+            "name": "/etc/ambari-agent/conf/internal_hostname.sh",
+            "start_time": "12:39:37.838303",
+            "result": true,
+            "duration": "17.135 ms",
+            "__run_num__": 10,
+            "changes": {
+              "diff": "New file",
+              "mode": "0755"
+            }
+          }
+        },
+        "host-10-0-0-7.openstacklocal": "Minion did not return"
+      }
+    }
+  ]
+}

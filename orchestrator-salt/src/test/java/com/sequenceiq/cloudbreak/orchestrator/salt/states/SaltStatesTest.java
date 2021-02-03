@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyFullResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FullNodeResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
@@ -137,11 +138,11 @@ public class SaltStatesTest {
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
         String response = IOUtils.toString(responseStream, Charset.defaultCharset());
         responseStream.close();
-        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any(), eq("missing"), eq("True"))).thenReturn(responseMap);
+        JidInfoResponse jidInfoResponse = new ObjectMapper().readValue(response, JidInfoResponse.class);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any(), any(), any())).thenReturn(jidInfoResponse);
 
         Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jobId, "missing", "True");
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(4));
@@ -176,12 +177,12 @@ public class SaltStatesTest {
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_response.json");
         String response = IOUtils.toString(responseStream, Charset.defaultCharset());
         responseStream.close();
-        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq(runningJid), eq("missing"), eq("True"))).thenReturn(responseMap);
+        JidInfoResponse jidInfoResponse = new ObjectMapper().readValue(response, JidInfoResponse.class);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq(runningJid), eq("missing"), eq("True"))).thenReturn(jidInfoResponse);
 
         Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid, "missing", "True");
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", runningJid, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jobId, "missing", "True");
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(4));
@@ -221,8 +222,8 @@ public class SaltStatesTest {
         } catch (SaltExecutionWentWrongException e) {
             assertEquals("other error", e.getMessage());
         }
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid, "missing", "True");
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", runningJid, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jobId, "missing", "True");
     }
 
     @Test
@@ -231,12 +232,12 @@ public class SaltStatesTest {
 
         InputStream responseStream = SaltStatesTest.class.getResourceAsStream("/jid_simple_response.json");
         String response = IOUtils.toString(responseStream);
-        Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
+        JidInfoResponse jidInfoResponse = new ObjectMapper().readValue(response, JidInfoResponse.class);
 
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(jidInfoResponse);
 
         Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.SIMPLE);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(3));
