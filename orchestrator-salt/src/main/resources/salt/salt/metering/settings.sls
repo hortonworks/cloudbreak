@@ -16,14 +16,16 @@
 {% set service_version = salt['pillar.get']('metering:serviceVersion') %}
 {% set stream_name = salt['pillar.get']('metering:streamName') %}
 
-{% if cluster_name and stream_name and stream_name != "Metering" %}
-    {% if "metering_prewarmed_v2" in grains.get('roles', []) or not salt['file.directory_exists' ]('/etc/metering') %}
-        {% set version = 2 %}
-    {% else %}
-        {% set version = 1 %}
-    {% endif %}
+{% set version_data = namespace(entities=[]) %}
+{% for role in grains.get('roles', []) %}
+{% if role.startswith("metering_prewarmed") %}
+  {% set version_data.entities = version_data.entities + [role.split("metering_prewarmed_v")[1]]%}
+{% endif %}
+{% endfor %}
+{% if cluster_name and stream_name and stream_name != "Metering" and version_data.entities|length > 0 %}
+{% set version = version_data.entities[0] | int %}
 {% else %}
-    {% set version = 1 %}
+{% set version = 1 %}
 {% endif %}
 
 {% if salt['pillar.get']('tags:Cloudera-External-Resource-Name') %}
