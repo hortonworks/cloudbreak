@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.job;
 
+import java.util.Collections;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -87,7 +88,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
                     handleFailedSdx(stack, sdx);
                     break;
                 case DELETED_ON_PROVIDER_SIDE:
-                    handleDeletedOnProviderSideSdx(stack, sdx);
+                    handleDeletedOnProviderSideSdx(sdx);
                     break;
                 default:
                     LOGGER.debug("Sdx StatusChecker Job will ignore state '{}' for datalake: '{}'", status.getStatus(), getLocalId());
@@ -108,7 +109,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
 
     private void handleAmbiguousSdx(StackStatusV4Response stack, SdxCluster sdx) {
         if (stack.getStatus() == Status.AVAILABLE && stack.getClusterStatus() == Status.AVAILABLE) {
-            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED, "", sdx);
+            sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+                    Collections.singleton(sdx.getClusterName()), "", sdx);
             logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
         }
     }
@@ -124,7 +126,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void handleDeletedOnProviderSideSdx(StackStatusV4Response stack, SdxCluster sdx) {
+    private void handleDeletedOnProviderSideSdx(SdxCluster sdx) {
         jobService.unschedule(String.valueOf(sdx.getId()));
     }
 
@@ -144,7 +146,8 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void setDeleteFailed(StackStatusV4Response stack, SdxCluster sdx) {
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, ResourceEvent.SDX_CLUSTER_DELETION_FAILED, "", sdx);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, ResourceEvent.SDX_CLUSTER_DELETION_FAILED, stack.getStatusReason(),
+                sdx);
         logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.DELETE_FAILED);
     }
 
@@ -169,9 +172,10 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             setDeleteFailed(stack, sdx);
         } else if (stack.getStatus() == Status.DELETED_ON_PROVIDER_SIDE) {
             setDeletedOnProviderSide(stack, sdx);
-        } else if (stack.getStatus() == Status.AVAILABLE && stack.getClusterStatus() == Status.AMBIGUOUS) {
+        } else if (stack.getStatus() == Status.AMBIGUOUS || (stack.getStatus() == Status.AVAILABLE && stack.getClusterStatus() == Status.AMBIGUOUS)) {
+            String statusReason = stack.getStatus() == Status.AMBIGUOUS ? stack.getStatusReason() : stack.getClusterStatusReason();
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CLUSTER_AMBIGUOUS, ResourceEvent.CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
-                    "", sdx);
+                    Collections.singleton(sdx.getClusterName()), statusReason, sdx);
             logStateChange(DatalakeStatusEnum.RUNNING, DatalakeStatusEnum.CLUSTER_AMBIGUOUS);
         }
     }

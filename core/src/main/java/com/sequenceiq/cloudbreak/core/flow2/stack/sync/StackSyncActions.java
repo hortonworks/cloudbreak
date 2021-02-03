@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
+import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -84,7 +85,8 @@ public class StackSyncActions {
         return new AbstractStackSyncAction<>(GetInstancesStateResult.class) {
             @Override
             protected void doExecute(StackSyncContext context, GetInstancesStateResult payload, Map<Object, Object> variables) {
-                stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), context.isStatusUpdateEnabled());
+                SyncConfig syncConfig = new SyncConfig(context.isStatusUpdateEnabled(), true);
+                stackSyncService.updateInstances(context.getStack(), context.getInstanceMetaData(), payload.getStatuses(), syncConfig);
                 sendEvent(context);
             }
 
