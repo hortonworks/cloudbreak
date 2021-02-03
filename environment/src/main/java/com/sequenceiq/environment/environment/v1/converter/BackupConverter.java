@@ -25,7 +25,11 @@ public class BackupConverter {
     }
 
     public EnvironmentBackup convert(TelemetryRequest request) {
-        return createBackupFromRequest(request.getLogging());
+        EnvironmentBackup backup = null;
+        if (request != null) {
+            return createBackupFromRequest(request.getLogging());
+        }
+        return backup;
     }
 
     public BackupResponse convert(EnvironmentBackup backup) {
