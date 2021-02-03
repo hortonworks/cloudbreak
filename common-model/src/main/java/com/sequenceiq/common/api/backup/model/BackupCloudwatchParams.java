@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.backup.doc.BackupModelDescription;
 
+import com.sequenceiq.common.api.telemetry.model.CloudwatchStreamKey;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -23,7 +24,7 @@ public class BackupCloudwatchParams implements Serializable {
     private String region;
 
     @ApiModelProperty(BackupModelDescription.CLOUDWATCH_PARAMS)
-    private BackupCloudwatchStreamKey streamKey = BackupCloudwatchStreamKey.HOSTNAME;
+    private CloudwatchStreamKey streamKey = CloudwatchStreamKey.HOSTNAME;
 
     public String getInstanceProfile() {
         return instanceProfile;
@@ -33,11 +34,11 @@ public class BackupCloudwatchParams implements Serializable {
         this.instanceProfile = instanceProfile;
     }
 
-    public BackupCloudwatchStreamKey getStreamKey() {
+    public CloudwatchStreamKey getStreamKey() {
         return streamKey;
     }
 
-    public void setStreamKey(BackupCloudwatchStreamKey streamKey) {
+    public void setStreamKey(CloudwatchStreamKey streamKey) {
         this.streamKey = streamKey;
     }
 

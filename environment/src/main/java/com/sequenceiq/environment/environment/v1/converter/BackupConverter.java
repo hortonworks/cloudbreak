@@ -2,6 +2,9 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
+import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
+import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -19,6 +22,10 @@ public class BackupConverter {
 
     public EnvironmentBackup convert(BackupRequest request) {
         return createBackupFromRequest(request);
+    }
+
+    public EnvironmentBackup convert(TelemetryRequest request) {
+        return createBackupFromRequest(request.getLogging());
     }
 
     public BackupResponse convert(EnvironmentBackup backup) {
@@ -57,6 +64,19 @@ public class BackupConverter {
             backupRequest.setCloudwatch(BackupCloudwatchParams.copy(backup.getCloudwatch()));
         }
         return backupRequest;
+    }
+
+    private EnvironmentBackup createBackupFromRequest(LoggingRequest loggingRequest) {
+        EnvironmentBackup backup = null;
+        if (loggingRequest != null) {
+            backup = new EnvironmentBackup();
+            backup.setStorageLocation(loggingRequest.getStorageLocation());
+            backup.setS3(convertS3(loggingRequest.getS3()));
+            backup.setAdlsGen2(convertAdlsV2(loggingRequest.getAdlsGen2()));
+            backup.setGcs(convertGcs(loggingRequest.getGcs()));
+            backup.setCloudwatch(convertBackupCloudwatchParams(loggingRequest.getCloudwatch()));
+        }
+        return backup;
     }
 
     private EnvironmentBackup createBackupFromRequest(BackupRequest backupRequest) {
@@ -111,5 +131,16 @@ public class BackupConverter {
             gcsCloudStorageV1Parameters.setServiceAccountEmail(gcs.getServiceAccountEmail());
         }
         return gcsCloudStorageV1Parameters;
+    }
+
+    private BackupCloudwatchParams convertBackupCloudwatchParams(CloudwatchParams cloudwatchParams) {
+        BackupCloudwatchParams newCloudwatchParams = null;
+        if (cloudwatchParams != null) {
+            newCloudwatchParams = new BackupCloudwatchParams();
+            newCloudwatchParams.setStreamKey(cloudwatchParams.getStreamKey());
+            newCloudwatchParams.setInstanceProfile(cloudwatchParams.getInstanceProfile());
+            newCloudwatchParams.setRegion(cloudwatchParams.getRegion());
+        }
+        return newCloudwatchParams;
     }
 }
