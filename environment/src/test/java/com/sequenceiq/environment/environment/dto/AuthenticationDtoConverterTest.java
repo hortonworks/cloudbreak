@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -80,5 +81,22 @@ class AuthenticationDtoConverterTest {
 
         verify(publicKeyValidator, Mockito.times(1)).validatePublicKey(anyString());
         assertEquals("ssh-rsa AAAASASFAS3532== login", environmentAuthentication.getPublicKey());
+    }
+
+    @Test
+    void testDtoToSshUpdatedAuthenticationWhenValidSshKey() {
+        String testKey = "ssh-rsa AAAASASFAS3532== banana@apple.com";
+        AuthenticationDto dto = AuthenticationDto.builder()
+                .withLoginUserName(LOGIN)
+                .withPublicKey(testKey)
+                .withPublicKeyId(PUBLIC_KEY_ID)
+                .withManagedKey(true)
+                .build();
+
+        EnvironmentAuthentication actual = underTest.dtoToSshUpdatedAuthentication(dto);
+
+        assertEquals("ssh-rsa AAAASASFAS3532== login", actual.getPublicKey());
+        assertNull(actual.getLoginUserName());
+        assertNull(actual.getPublicKeyId());
     }
 }

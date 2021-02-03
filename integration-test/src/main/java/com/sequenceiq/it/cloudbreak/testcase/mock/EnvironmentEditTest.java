@@ -29,6 +29,12 @@ public class EnvironmentEditTest extends AbstractMockTest {
             + "pMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsY"
             + "KR495VFmuOepLYz5I8Dn sequence-eu";
 
+    private static final String NEW_PUBLIC_KEY = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
+            + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
+            + "UYQ/yi0imocARlOiFdPRlZGTN0XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1EaK"
+            + "pMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsY"
+            + "KR495VFmuOepLrttyyt sequence-eu";
+
     private static final String INVALID_PUBLIC_KEY = "invalid-ssh-rsa "
             + "AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
             + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
@@ -150,6 +156,35 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .whenException(environmentTestClient.changeAuthentication(), BadRequestException.class,
                         expectedMessage("1. You should define either the publicKey or the publicKeyId."))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak with existed ssh key",
+            when = "change ssh key",
+            then = "update to new ssh key")
+    public void authenticationEditWhenSetPublicKeyAndNotManaged(MockedTestContext testContext) {
+        testContext
+                .given(EnvironmentAuthenticationTestDto.class)
+                .withPublicKey(PUBLIC_KEY)
+                .given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(false)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+
+                .given(EnvironmentAuthenticationTestDto.class)
+                .withPublicKey(PUBLIC_KEY)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.changeAuthentication())
+                .when(environmentTestClient.describe())
+                .then((tc, t, c) -> {
+                    String publicKey = t.getResponse().getAuthentication().getPublicKey();
+                    if (NEW_PUBLIC_KEY.equals(publicKey)) {
+                        throw new TestFailException("The auth public key must be equals");
+                    }
+                    return t;
+                })
                 .validate();
     }
 
