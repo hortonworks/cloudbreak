@@ -32,6 +32,7 @@ public class EnvironmentEditRequest {
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.BACKUP)
     private BackupRequest backupRequest;
 

@@ -18,7 +18,7 @@ public class EnvironmentBackupLocationValidator {
     }
 
     /**
-     * Validate telemetry related logging storage location.
+     * Validate backup storage location.
      * Currently, filter out cloudwatch (or any other cloud logging service) related validations
      */
     public ValidationResult validateBackupStorageLocation(Environment environment) {

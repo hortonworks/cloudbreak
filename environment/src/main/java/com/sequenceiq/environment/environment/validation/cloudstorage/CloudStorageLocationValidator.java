@@ -76,7 +76,6 @@ public class CloudStorageLocationValidator {
     }
 
     private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {
-        Optional<FileSystemType> response = Optional.empty();
         if (environment.getBackup() != null) {
             EnvironmentBackup backup = environment.getBackup();
             if (backup.getS3() != null) {
@@ -89,7 +88,7 @@ public class CloudStorageLocationValidator {
                 return Optional.of(backup.getGcs().getType());
             }
         }
-        return response;
+        return Optional.empty();
     }
 
     private String getBucketName(Optional<FileSystemType> fileSystemType, String storageLocation) {

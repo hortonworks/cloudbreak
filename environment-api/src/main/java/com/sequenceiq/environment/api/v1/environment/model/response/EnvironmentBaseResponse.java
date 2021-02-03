@@ -21,6 +21,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvi
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import javax.validation.Valid;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @ApiModel(subTypes = {DetailedEnvironmentResponse.class, SimpleEnvironmentResponse.class})
 public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiModel, TaggedResponse {
@@ -54,6 +56,7 @@ public abstract class EnvironmentBaseResponse implements ResourceCrnAwareApiMode
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryResponse telemetry;
 
+    @Valid
     @ApiModelProperty(EnvironmentModelDescription.BACKUP)
     private BackupResponse backupResponse;
 
