@@ -31,8 +31,8 @@ import com.microsoft.azure.management.storage.implementation.StorageAccountInner
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureStorageAccountBuilderService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.StorageAccountParameters;
-import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfoService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfo;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageInfoService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageService;
 import com.sequenceiq.cloudbreak.cloud.azure.storage.SkuTypeResolver;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -124,17 +124,26 @@ public class AzureStorage {
 
     public StorageAccount createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup,
             String region, Boolean encrypted, Map<String, String> tags) throws CloudException {
-        if (!storageAccountExist(client, osStorageName)) {
+        Optional<StorageAccount> storageAccountOptional = findStorageAccount(client, osStorageName);
+        if (storageAccountOptional.isEmpty()) {
             StorageAccountParameters storageAccountParameters = new StorageAccountParameters(
                     storageGroup, osStorageName, region, skuTypeResolver.resolveFromAzureDiskType(storageType), encrypted, tags);
             return azureStorageAccountBuilderService.buildStorageAccount(client, storageAccountParameters);
+        } else {
+            StorageAccount storageAccount = storageAccountOptional.get();
+            String errorMessage = String.format("Storage account creation is not possible "
+                    + "as there is already a storage account with name %s in the resource group %s "
+                    + "in your subscription and the name must be unique across Azure. "
+                    + "In order to proceed, please delete that storage account.", storageAccount.name(), storageAccount.resourceGroupName());
+            LOGGER.warn(errorMessage);
+            throw new CloudbreakServiceException(errorMessage);
         }
-        throw new CloudbreakServiceException(String.format("Trying to delete non-existing storage account %s", osStorageName));
     }
 
     public void deleteStorage(AzureClient client, String osStorageName, String storageGroup)
             throws CloudException {
-        if (storageAccountExist(client, osStorageName)) {
+        Optional<StorageAccount> storageAccountOptional = findStorageAccount(client, osStorageName);
+        if (storageAccountOptional.isPresent()) {
             client.deleteStorageAccount(storageGroup, osStorageName);
         }
     }
@@ -208,18 +217,18 @@ public class AzureStorage {
         return !Strings.isNullOrEmpty(persistentStorageName);
     }
 
-    private boolean storageAccountExist(AzureClient client, String storageName) {
+    private Optional<StorageAccount> findStorageAccount(AzureClient client, String storageName) {
         try {
             StorageAccounts storageAccounts = client.getStorageAccounts();
             for (StorageAccount account : storageAccounts.list()) {
                 if (account.name().equals(storageName)) {
-                    return true;
+                    return Optional.of(account);
                 }
             }
         } catch (RuntimeException ignored) {
-            return false;
+            return Optional.empty();
         }
-        return false;
+        return Optional.empty();
     }
 
     public Optional<String> findStorageAccountIdInVisibleSubscriptions(AzureClient client, String account) {
