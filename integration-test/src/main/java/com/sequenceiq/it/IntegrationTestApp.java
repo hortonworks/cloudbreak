@@ -188,7 +188,7 @@ public class IntegrationTestApp implements CommandLineRunner {
             xmlSuite.setVerbose(2);
             xmlSuite.setListeners(Arrays.asList(TestNgListener.class.getName(), ThreadLocalTestListener.class.getName(),
                     ReportListener.class.getName(), TestInvocationListener.class.getName(), CustomHTMLReporter.class.getName(),
-                    CustomJUnitXMLReporter.class.getName()));
+                    CustomJUnitXMLReporter.class.getName(), TestCaseTimeoutListener.class.getName()));
             LOG.info("Test are running in: {} type of parallel mode, thread count: {} and with test timeout: {}", parallel.toUpperCase(), threadCount, timeOut);
             return xmlSuite;
         }
