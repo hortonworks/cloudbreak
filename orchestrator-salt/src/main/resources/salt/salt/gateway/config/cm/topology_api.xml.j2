@@ -170,12 +170,6 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'LIVY_FOR_SPARK3_API' in exposed and 'LIVY_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
-            <param>
-                <name>LIVYFORSPARK3API</name>
-                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
-            </param>
-            {%- endif %}
             {% if 'NAMENODE' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>NAMENODE</name>
@@ -260,6 +254,12 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
+             {% if 'LIVY_FOR_SPARK3_API' in exposed and 'LIVY_SERVER_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
+             <param>
+               <name>LIVYFORSPARK3API</name>
+               <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+            {%- endif %}
         </provider>
     </gateway>
 
@@ -318,17 +318,6 @@
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVYSERVER_API'] }}</url>
-        {%- endfor %}
-    </service>
-    {%- endif %}
-    {%- endif %}
-
-    {% if 'LIVY_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
-    {% if 'LIVY_FOR_SPARK3_API' in exposed -%}
-    <service>
-        <role>LIVY_FOR_SPARK3</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_FOR_SPARK3'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3_API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -536,5 +525,16 @@
         {%- endfor %}
     </service>
     {%- endif %}
+    {%- endif %}
+
+    {% if 'LIVY_SERVER_FOR_SPARK3' in salt['pillar.get']('gateway:location') -%}
+        {% if 'LIVY_FOR_SPARK3_API' in exposed -%}
+        <service>
+            <role>LIVY_FOR_SPARK3</role>
+            {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER_FOR_SPARK3'] -%}
+            <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3_API'] }}</url>
+            {%- endfor %}
+        </service>
+        {%- endif %}
     {%- endif %}
 </topology>
