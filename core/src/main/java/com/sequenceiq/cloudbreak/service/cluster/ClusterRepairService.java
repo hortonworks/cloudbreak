@@ -26,27 +26,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -54,7 +50,6 @@ import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -64,8 +59,6 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 public class ClusterRepairService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRepairService.class);
-
-    private static final long REQUIRED_CM_DATABASE_COUNT = 2L;
 
     private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
 
@@ -99,7 +92,7 @@ public class ClusterRepairService {
     private CloudbreakEventService eventService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private ClusterDBValidationService clusterDBValidationService;
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -265,7 +258,7 @@ public class ClusterRepairService {
             if (isCreatedFromBaseImage(stack)) {
                 validationResult.add("Action is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
             }
-            if (!stack.getCluster().getEmbeddedDatabaseOnAttachedDisk() && !isGatewayDatabaseAvailable(stack.getCluster())) {
+            if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
                 validationResult.add(
                         "Action is only supported if Cloudera Manager state is stored in external Database or in embedded database on attached disk.");
             }
@@ -280,18 +273,6 @@ public class ClusterRepairService {
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
-    }
-
-    private boolean isGatewayDatabaseAvailable(Cluster cluster) {
-        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
-        long cmRdsCount = rdsConfigs.stream()
-                .filter(rds -> rds.getStatus() == ResourceStatus.USER_MANAGED)
-                .map(RDSConfig::getType)
-                .filter(type -> DatabaseType.CLOUDERA_MANAGER.name().equals(type)
-                        || DatabaseType.CLOUDERA_MANAGER_MANAGEMENT_SERVICE_REPORTS_MANAGER.name().equals(type))
-                .distinct()
-                .count();
-        return cmRdsCount == REQUIRED_CM_DATABASE_COUNT || cluster.getDatabaseServerCrn() != null;
     }
 
     private boolean hasReattachSupportedVolumes(Stack stack, String hostGroupName) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.List;
 
@@ -53,6 +54,16 @@ class UpgradeConverterTest {
         assertEquals(source.getLockComponents(), result.getLockComponents());
         assertEquals(Boolean.FALSE, result.getReplaceVms());
         assertEquals(source.getRuntime(), result.getRuntime());
+    }
+
+    @Test
+    public void testConvertRequestWhenReplaceVmsParamIsNotGiven() {
+        // GIVEN
+        DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
+        // WHEN
+        UpgradeV4Request result = underTest.convert(source);
+        // THEN
+        assertNull(result.getReplaceVms());
     }
 
     @Test
