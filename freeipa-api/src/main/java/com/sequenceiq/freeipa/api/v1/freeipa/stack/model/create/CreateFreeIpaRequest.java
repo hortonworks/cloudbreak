@@ -75,6 +75,7 @@ public class CreateFreeIpaRequest implements TaggableRequest {
     @ApiModelProperty(FreeIpaModelDescriptions.TELEMETRY)
     private TelemetryRequest telemetry;
 
+    @Valid
     @ApiModelProperty(FreeIpaModelDescriptions.BACKUP)
     private BackupRequest backupRequest;
 
