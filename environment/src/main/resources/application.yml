@@ -101,6 +101,16 @@ environment:
   enabledplatforms: AWS,AZURE,YARN,GCP
   enabledParentPlatforms: AWS,MOCK
   enabledChildPlatforms: YARN,MOCK
+  existing:
+    ssh:
+      key:
+        update:
+          support: AWS,MOCK
+  raw:
+    ssh:
+      key:
+        update:
+          support: AZURE,GCP
   tunnel:
     default: DIRECT
   admin.group.default.prefix: cdp_

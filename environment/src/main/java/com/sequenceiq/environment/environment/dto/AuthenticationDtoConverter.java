@@ -21,12 +21,9 @@ public class AuthenticationDtoConverter {
 
     public EnvironmentAuthentication dtoToAuthentication(AuthenticationDto authenticationDto) {
         EnvironmentAuthentication environmentAuthentication = new EnvironmentAuthentication();
-        if (StringUtils.isNotEmpty(authenticationDto.getPublicKey())) {
-            ValidationResult validationResult = publicKeyValidator.validatePublicKey(authenticationDto.getPublicKey());
-            if (!validationResult.hasError()) {
-                List<String> parts = Arrays.asList(StringUtils.split(authenticationDto.getPublicKey(), " "));
-                environmentAuthentication.setPublicKey(String.format("%s %s %s", parts.get(0), parts.get(1), authenticationDto.getLoginUserName()));
-            }
+        if (isValidSshKey(authenticationDto.getPublicKey())) {
+            List<String> parts = Arrays.asList(StringUtils.split(authenticationDto.getPublicKey(), " "));
+            environmentAuthentication.setPublicKey(String.format("%s %s %s", parts.get(0), parts.get(1), authenticationDto.getLoginUserName()));
         }
         environmentAuthentication.setLoginUserName(authenticationDto.getLoginUserName());
         environmentAuthentication.setPublicKeyId(authenticationDto.getPublicKeyId());
@@ -42,5 +39,23 @@ public class AuthenticationDtoConverter {
                 .withManagedKey(authentication.isManagedKey())
                 .build();
         return authenticationDto;
+    }
+
+    public EnvironmentAuthentication dtoToSshUpdatedAuthentication(AuthenticationDto authenticationDto) {
+        EnvironmentAuthentication environmentAuthentication = new EnvironmentAuthentication();
+        if (isValidSshKey(authenticationDto.getPublicKey())) {
+            List<String> parts = Arrays.asList(StringUtils.split(authenticationDto.getPublicKey(), " "));
+            environmentAuthentication.setPublicKey(String.format("%s %s %s", parts.get(0), parts.get(1), authenticationDto.getLoginUserName()));
+        }
+        return environmentAuthentication;
+    }
+
+    private boolean isValidSshKey(String publicKey) {
+        boolean ret = false;
+        if (StringUtils.isNotEmpty(publicKey)) {
+            ValidationResult validationResult = publicKeyValidator.validatePublicKey(publicKey);
+            ret = !validationResult.hasError();
+        }
+        return ret;
     }
 }

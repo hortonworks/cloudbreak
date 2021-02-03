@@ -4,12 +4,14 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
@@ -52,16 +54,24 @@ public class EnvironmentResourceService {
 
     private final Clock clock;
 
+    private final Set<String> supportedExistingSshKeyUpdateProviders;
+
+    private final Set<String> supportedRawSshKeyUpdateProviders;
+
     private ProxyConfigService proxyConfigService;
 
     public EnvironmentResourceService(CredentialService credentialService, NetworkService networkService, CloudPlatformConnectors cloudPlatformConnectors,
-            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter, Clock clock, ProxyConfigService proxyConfigService) {
+            CredentialToCloudCredentialConverter credentialToCloudCredentialConverter, Clock clock, ProxyConfigService proxyConfigService,
+            @Value("${environment.existing.ssh.key.update.support:}") Set<String> supportedExistingSshKeyUpdateProviders,
+            @Value("${environment.raw.ssh.key.update.support:}") Set<String> supportedRawSshKeyUpdateProviders) {
         this.credentialService = credentialService;
         this.networkService = networkService;
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.clock = clock;
         this.proxyConfigService = proxyConfigService;
+        this.supportedExistingSshKeyUpdateProviders = supportedExistingSshKeyUpdateProviders;
+        this.supportedRawSshKeyUpdateProviders = supportedRawSshKeyUpdateProviders;
     }
 
     public Credential getCredentialFromRequest(CredentialAwareEnvRequest request, String accountId) {
@@ -197,5 +207,13 @@ public class EnvironmentResourceService {
                 .withPublicKeyId(publicKeyId)
                 .withRegion(environment.getLocation())
                 .build();
+    }
+
+    public boolean isExistingSshKeyUpdateSupported(Environment environment) {
+        return supportedExistingSshKeyUpdateProviders.stream().anyMatch(s -> s.equalsIgnoreCase(environment.getCloudPlatform()));
+    }
+
+    public boolean isRawSshKeyUpdateSupported(Environment environment) {
+        return supportedRawSshKeyUpdateProviders.stream().anyMatch(s -> s.equalsIgnoreCase(environment.getCloudPlatform()));
     }
 }
