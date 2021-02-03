@@ -2,8 +2,10 @@ package com.sequenceiq.it.cloudbreak.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.IInvokedMethod;
 import org.testng.ITestListener;
 import org.testng.ITestResult;
+import org.testng.internal.InvokedMethod;
 
 public class TestCaseTimeoutListener implements ITestListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestCaseTimeoutListener.class);
@@ -14,6 +16,7 @@ public class TestCaseTimeoutListener implements ITestListener {
         LOGGER.error("Test timed out: '{}' it took: '{}' ms", result.getName(), testRunInMs);
         LOGGER.info("Invoking TestInvocationListener to persist created resources in a JSON output file for clean up job.");
         TestInvocationListener testInvocationListener = new TestInvocationListener();
-        testInvocationListener.afterInvocation(null, result);
+        IInvokedMethod invokedMethod = new InvokedMethod(result.getTestClass(), result.getMethod(), result.getEndMillis(), result);
+        testInvocationListener.afterInvocation(invokedMethod, result);
     }
 }
