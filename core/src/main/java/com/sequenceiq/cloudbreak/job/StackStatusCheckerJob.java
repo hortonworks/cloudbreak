@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
+import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
 import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
@@ -192,11 +193,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(hostStatuses, runningInstances),
                         getNewHealthyHostNames(hostStatuses, runningInstances), extendedHostStatuses.isHostCertExpiring());
             } else {
-                syncInstances(stack, runningInstances);
+                syncInstances(stack, runningInstances, false);
             }
         } catch (RuntimeException e) {
             LOGGER.warn("Error during sync", e);
-            syncInstances(stack, runningInstances);
+            syncInstances(stack, runningInstances, false);
         }
     }
 
@@ -207,7 +208,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
         ifFlowNotRunning(() -> updateStates(stack, failedInstances, newFailedNodeNames, newHealtyHostNames, hostCertExpiring));
-        syncInstances(stack, runningInstances, failedInstances, InstanceSyncState.RUNNING);
+        syncInstances(stack, runningInstances, failedInstances, InstanceSyncState.RUNNING, true);
     }
 
     private void updateStates(Stack stack, Collection<InstanceMetaData> failedInstances, Set<String> newFailedNodeNames, Set<String> newHealtyHostNames,
@@ -246,15 +247,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.CLUSTERMANAGER_NOT_RUNNING);
     }
 
-    private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData) {
-        syncInstances(stack, instanceMetaData, instanceMetaData, InstanceSyncState.DELETED_ON_PROVIDER_SIDE);
+    private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData, boolean cmServerRunning) {
+        syncInstances(stack, instanceMetaData, instanceMetaData, InstanceSyncState.DELETED_ON_PROVIDER_SIDE, cmServerRunning);
     }
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
-            Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState) {
+            Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState, boolean cmServerRunning) {
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, instanceMetaData);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
-        ifFlowNotRunning(() -> syncService.autoSync(stack, runningInstances, instanceStatuses, true, defaultState));
+        SyncConfig syncConfig = new SyncConfig(true, cmServerRunning);
+        ifFlowNotRunning(() -> syncService.autoSync(stack, runningInstances, instanceStatuses, defaultState, syncConfig));
     }
 
     private ClusterStatusResult queryClusterStatus(ClusterApi connector) {
