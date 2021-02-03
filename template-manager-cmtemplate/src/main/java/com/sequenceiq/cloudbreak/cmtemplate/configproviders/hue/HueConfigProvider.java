@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -36,6 +38,8 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
 
     private static final String HUE_SAFETY_VALVE = "hue-hue_service_safety_valve";
 
+    private static final String HUE_KNOX_PROXYHOSTS = "hue-knox_proxyhosts";
+
     private static final String KNOX_PROXYHOSTS = "knox_proxyhosts";
 
     private static final String SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN = "[desktop]\n[[knox]]\nknox_proxyhosts=";
@@ -49,11 +53,7 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         result.add(new ApiClusterTemplateConfig().name("database_type").variable(HUE_HUE_DATABASE_TYPE));
         result.add(new ApiClusterTemplateConfig().name("database_user").variable(HUE_HUE_DATABASE_USER));
         result.add(new ApiClusterTemplateConfig().name("database_password").variable(HUE_DATABASE_PASSWORD));
-        String cdhVersion = getCdhVersionString(source);
-        // CDPD version 7.1.0 and above have a dedicated knox_proxyhosts property to set the knox proxy hosts.
-        if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
-            configureKnoxProxyHostsServiceConfigSafetyValve(source, result);
-        }
+        configureKnoxProxyHostsServiceConfig(source, result);
         return result;
     }
 
@@ -91,11 +91,17 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         return List.of();
     }
 
-    private void configureKnoxProxyHostsServiceConfigSafetyValve(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result) {
+    private void configureKnoxProxyHostsServiceConfig(TemplatePreparationObject source, List<ApiClusterTemplateConfig> result) {
         GatewayView gateway = source.getGatewayView();
+        String cdhVersion = getCdhVersionString(source);
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
-            result.add(new ApiClusterTemplateConfig().name("hue_service_safety_valve").variable(HUE_SAFETY_VALVE));
+            // CDPD version 7.1.0 and above have a dedicated knox_proxyhosts property to set the knox proxy hosts.
+            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+                result.add(new ApiClusterTemplateConfig().name(KNOX_PROXYHOSTS).variable(HUE_KNOX_PROXYHOSTS));
+            } else {
+                result.add(new ApiClusterTemplateConfig().name("hue_service_safety_valve").variable(HUE_SAFETY_VALVE));
+            }
         }
     }
 
@@ -104,16 +110,24 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
         String cdhVersion = getCdhVersionString(source);
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         if (externalFQDNShouldConfigured(gateway, generalClusterConfigs)) {
-            String proxyHosts = String.join(",", generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get(),
-                    generalClusterConfigs.getExternalFQDN());
-            if (generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent()) {
-                proxyHosts = String.join(",", proxyHosts, generalClusterConfigs.getLoadBalancerGatewayFqdn().get());
+            Set<String> proxyHosts = new HashSet<>();
+            if (generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent()) {
+                proxyHosts.add(generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().get());
             }
-            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
-                result.add(new ApiClusterTemplateVariable().name(KNOX_PROXYHOSTS).value(proxyHosts));
-            } else {
-                String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHosts);
-                result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
+            if (StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())) {
+                proxyHosts.add(generalClusterConfigs.getExternalFQDN());
+            }
+            if (generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent()) {
+                proxyHosts.add(generalClusterConfigs.getLoadBalancerGatewayFqdn().get());
+            }
+            if (!proxyHosts.isEmpty()) {
+                String proxyHostsString = String.join(",", proxyHosts);
+                if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
+                    result.add(new ApiClusterTemplateVariable().name(HUE_KNOX_PROXYHOSTS).value(proxyHostsString));
+                } else {
+                    String valveValue = SAFETY_VALVE_KNOX_PROXYHOSTS_KEY_PATTERN.concat(proxyHostsString);
+                    result.add(new ApiClusterTemplateVariable().name(HUE_SAFETY_VALVE).value(valveValue));
+                }
             }
         }
     }
@@ -125,7 +139,8 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
     private boolean externalFQDNShouldConfigured(GatewayView gateway, GeneralClusterConfigs generalClusterConfigs) {
         return gateway != null
                 && generalClusterConfigs.getKnoxUserFacingCertConfigured()
-                && StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())
-                && generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent();
+                && ((StringUtils.isNotEmpty(generalClusterConfigs.getExternalFQDN())
+                && generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().isPresent())
+                || generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent());
     }
 }
