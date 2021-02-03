@@ -41,6 +41,7 @@ import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
+import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -88,6 +89,9 @@ public class EnvironmentResponseConverterTest {
     private TelemetryApiConverter telemetryApiConverter;
 
     @Mock
+    private TunnelConverter tunnelConverter;
+
+    @Mock
     private NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
     @ParameterizedTest
@@ -106,6 +110,7 @@ public class EnvironmentResponseConverterTest {
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
         when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
         when(proxyConfigToProxyResponseConverter.convert(environment.getProxyConfig())).thenReturn(proxyResponse);
+        when(tunnelConverter.convertToTunnelResponse(environment.getTunnel())).thenCallRealMethod();
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
 
@@ -166,6 +171,7 @@ public class EnvironmentResponseConverterTest {
         when(proxyConfigToProxyResponseConverter.convertToView(environment.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
+        when(tunnelConverter.convertToTunnelResponse(environment.getTunnel())).thenCallRealMethod();
 
         SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environment);
 

@@ -17,4 +17,8 @@ public class TunnelConverter {
         }
         return tunnelRequest;
     }
+
+    public Tunnel convertToTunnelResponse(Tunnel tunnel) {
+        return tunnel.useCcmV2() ? Tunnel.CCM : tunnel;
+    }
 }

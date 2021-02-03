@@ -25,6 +25,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.TagResponse;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
+import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -55,11 +56,13 @@ public class EnvironmentResponseConverter {
 
     private final NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
+    private final TunnelConverter tunnelConverter;
+
     public EnvironmentResponseConverter(CredentialToCredentialV1ResponseConverter credentialConverter,
             RegionConverter regionConverter, CredentialViewConverter credentialViewConverter,
             ProxyConfigToProxyResponseConverter proxyConfigToProxyResponseConverter,
             FreeIpaConverter freeIpaConverter, TelemetryApiConverter telemetryApiConverter,
-            NetworkDtoToResponseConverter networkDtoToResponseConverter) {
+            NetworkDtoToResponseConverter networkDtoToResponseConverter, TunnelConverter tunnelConverter) {
         this.credentialConverter = credentialConverter;
         this.regionConverter = regionConverter;
         this.credentialViewConverter = credentialViewConverter;
@@ -67,6 +70,7 @@ public class EnvironmentResponseConverter {
         this.freeIpaConverter = freeIpaConverter;
         this.telemetryApiConverter = telemetryApiConverter;
         this.networkDtoToResponseConverter = networkDtoToResponseConverter;
+        this.tunnelConverter = tunnelConverter;
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
@@ -87,7 +91,7 @@ public class EnvironmentResponseConverter {
                 .withCreated(environmentDto.getCreated())
                 .withTag(getIfNotNull(environmentDto.getTags(), this::environmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
-                .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
+                .withTunnel(tunnelConverter.convertToTunnelResponse(environmentDto.getExperimentalFeatures().getTunnel()))
                 .withIdBrokerMappingSource(environmentDto.getExperimentalFeatures().getIdBrokerMappingSource())
                 .withCloudStorageValidation(environmentDto.getExperimentalFeatures().getCloudStorageValidation())
                 .withAdminGroupName(environmentDto.getAdminGroupName())
@@ -126,7 +130,7 @@ public class EnvironmentResponseConverter {
                 .withFreeIpa(freeIpaConverter.convert(environmentDto.getFreeIpaCreation()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
-                .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
+                .withTunnel(tunnelConverter.convertToTunnelResponse(environmentDto.getExperimentalFeatures().getTunnel()))
                 .withAdminGroupName(environmentDto.getAdminGroupName())
                 .withTag(getIfNotNull(environmentDto.getTags(), this::environmentTagsToTagResponse))
                 .withTelemetry(telemetryApiConverter.convert(environmentDto.getTelemetry()))
