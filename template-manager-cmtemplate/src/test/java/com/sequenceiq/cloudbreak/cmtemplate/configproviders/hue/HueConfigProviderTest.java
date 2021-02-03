@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -148,16 +149,21 @@ public class HueConfigProviderTest {
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
-        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
-        assertThat(paramToVariable).containsOnly(
+        String proxyHostsExpected1 = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedExternalFQDN, expectedInternalFQDN);
+        String expectedSafetyValveValue1 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected1);
+        String expectedSafetyValveValue2 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected2);
+        assertEquals(7, paramToVariable.size());
+        assertThat(paramToVariable).contains(
                 new SimpleEntry<>("hue-hue_database_host", HOST),
                 new SimpleEntry<>("hue-hue_database_port", PORT),
                 new SimpleEntry<>("hue-hue_database_name", DB_NAME),
                 new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
                 new SimpleEntry<>("hue-hue_database_user", USER_NAME),
-                new SimpleEntry<>("hue-hue_database_password", PASSWORD),
-                new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue));
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD));
+        assertThat(paramToVariable).containsAnyOf(
+                new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue1),
+                new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue2));
     }
 
     @Test
@@ -193,15 +199,19 @@ public class HueConfigProviderTest {
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
-        assertThat(paramToVariable).containsOnly(
+        String proxyHostsExpected1 = String.join(",", expectedInternalFQDN, expectedExternalFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedExternalFQDN, expectedInternalFQDN);
+        assertEquals(7, paramToVariable.size());
+        assertThat(paramToVariable).contains(
                 new SimpleEntry<>("hue-hue_database_host", HOST),
                 new SimpleEntry<>("hue-hue_database_port", PORT),
                 new SimpleEntry<>("hue-hue_database_name", DB_NAME),
                 new SimpleEntry<>("hue-hue_database_type", DB_PROVIDER),
                 new SimpleEntry<>("hue-hue_database_user", USER_NAME),
-                new SimpleEntry<>("hue-hue_database_password", PASSWORD),
-                new SimpleEntry<>("knox_proxyhosts", proxyHostsExpected));
+                new SimpleEntry<>("hue-hue_database_password", PASSWORD));
+        assertThat(paramToVariable).containsAnyOf(
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected1),
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected2));
     }
 
     @Test
@@ -271,12 +281,11 @@ public class HueConfigProviderTest {
         rdsConfig.setConnectionPassword(PASSWORD);
 
         String expectedExternalFQDN = "myaddress.cloudera.site";
-        String expectedInternalFQDN = "private-gateway.cloudera.site";
         String expectedLBFQDN = "loadbalancer-gateway.cloudera.site";
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
         generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
         generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
-        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.of(expectedInternalFQDN));
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.empty());
         generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
 
         TemplatePreparationObject tpo = new Builder()
@@ -289,10 +298,48 @@ public class HueConfigProviderTest {
         List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
         Map<String, String> paramToVariable =
             result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
-        String proxyHostsExpected = String.join(",", expectedInternalFQDN, expectedExternalFQDN, expectedLBFQDN);
-        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
-        assertThat(paramToVariable).contains(
-            new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue));
+        String proxyHostsExpected1 = String.join(",", expectedExternalFQDN, expectedLBFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedLBFQDN, expectedExternalFQDN);
+        String expectedSafetyValveValue1 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected1);
+        String expectedSafetyValveValue2 = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected2);
+        assertThat(paramToVariable).containsAnyOf(
+            new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue1),
+            new SimpleEntry<>("hue-hue_service_safety_valve", expectedSafetyValveValue2));
+    }
+
+    @Test
+    public void getProxyHostsWhenLoadBalancerConfiguredPost710() {
+        BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
+
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setType(HUE);
+        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        rdsConfig.setConnectionUserName(USER_NAME);
+        rdsConfig.setConnectionPassword(PASSWORD);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedLBFQDN = "loadbalancer-gateway.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.empty());
+        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+            .withGeneralClusterConfigs(generalClusterConfigs)
+            .withGateway(new Gateway(), "", new HashSet<>())
+            .withBlueprintView(blueprintView)
+            .withRdsConfigs(Set.of(rdsConfig))
+            .build();
+
+        List<ApiClusterTemplateVariable> result = underTest.getServiceConfigVariables(tpo);
+        Map<String, String> paramToVariable =
+            result.stream().collect(Collectors.toMap(ApiClusterTemplateVariable::getName, ApiClusterTemplateVariable::getValue));
+        String proxyHostsExpected1 = String.join(",", expectedExternalFQDN, expectedLBFQDN);
+        String proxyHostsExpected2 = String.join(",", expectedLBFQDN, expectedExternalFQDN);
+        assertThat(paramToVariable).containsAnyOf(
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected1),
+            new SimpleEntry<>("hue-knox_proxyhosts", proxyHostsExpected2));
     }
 
     private BlueprintView getMockBlueprintView(String bpVersion, String tmplVersion) {
