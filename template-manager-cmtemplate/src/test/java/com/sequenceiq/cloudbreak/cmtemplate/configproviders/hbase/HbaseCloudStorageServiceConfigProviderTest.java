@@ -22,6 +22,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
@@ -151,6 +152,30 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     }
 
     @Test
+    public void testConfigurationNeededWhenDatalake727AWSNoEntitlement() {
+        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(false);
+
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.7", CloudPlatform.AWS);
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        assertTrue(configurationNeeded);
+    }
+
+    @Test
+    public void testConfigurationNotNeededWhenDatalake727AzureNoEntitlement() {
+        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(false);
+
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.7", CloudPlatform.AZURE);
+        String inputJson = getBlueprintText("input/clouderamanager.bp");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+
+        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        assertFalse(configurationNeeded);
+    }
+
+    @Test
     public void testIsConfigurationNeededWhenAttachedCluster() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
@@ -165,6 +190,11 @@ public class HbaseCloudStorageServiceConfigProviderTest {
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(boolean includeLocations, boolean datalakeCluster, String cdhVersion) {
+        return getTemplatePreparationObject(includeLocations, datalakeCluster, cdhVersion, CloudPlatform.AWS);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(boolean includeLocations, boolean datalakeCluster, String cdhVersion,
+            CloudPlatform cloudPlatform) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
@@ -188,7 +218,9 @@ public class HbaseCloudStorageServiceConfigProviderTest {
         return Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
                 .withSharedServiceConfigs(sharedServicesConfigsView)
-                .withHostgroupViews(Set.of(master, worker)).build();
+                .withHostgroupViews(Set.of(master, worker))
+                .withCloudPlatform(cloudPlatform)
+                .build();
     }
 
     private String getBlueprintText(String path) {
