@@ -110,8 +110,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures()))
-                .withBackup((request.getBackupRequest() != null && isNotEmpty(request.getBackupRequest().getStorageLocation())) ?
-                        backupConverter.convert(request.getBackupRequest()) : backupConverter.convert(request.getTelemetry()))
+                .withBackup(backupConverter.convert(request.getBackupRequest()))
                 .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
@@ -301,7 +300,6 @@ public class EnvironmentApiConverter {
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                 accountTelemetryService.getOrDefault(accountId).getFeatures())));
-        NullUtil.doIfNotNull(request.getBackupRequest(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackupRequest())));
         NullUtil.doIfNotNull(request.getBackupRequest(), backupRequest -> builder.withBackup(backupConverter.convert(request.getBackupRequest())));
         NullUtil.doIfNotNull(request.getSecurityAccess(), securityAccess -> builder.withSecurityAccess(securityAccessRequestToDto(securityAccess)));
         NullUtil.doIfNotNull(request.getAws(), awsParams -> builder.withParameters(awsParamsToParametersDto(awsParams, null)));
