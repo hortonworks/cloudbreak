@@ -14,7 +14,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +58,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -299,6 +299,8 @@ public class AwsLaunchServiceLoadBalancerTest {
         Network network = new Network(new Subnet(CIDR));
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
+
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE), false);
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
@@ -317,6 +319,8 @@ public class AwsLaunchServiceLoadBalancerTest {
         Network network = new Network(new Subnet(CIDR));
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PUBLIC_ID_1), anyString())).thenReturn(true);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
+
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC), false);
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
@@ -336,6 +340,7 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PUBLIC_ID_1), anyString())).thenReturn(true);
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE), false);
 
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null, instances,
@@ -355,6 +360,8 @@ public class AwsLaunchServiceLoadBalancerTest {
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PUBLIC_ID_1), anyString())).thenReturn(false);
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(true);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
+
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE), true);
 
         CloudConnectorException exception =
@@ -377,6 +384,8 @@ public class AwsLaunchServiceLoadBalancerTest {
             AwsTargetGroup.getTargetGroupName(PORT, AwsLoadBalancerScheme.INTERNAL));
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
+
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE), false);
         List<StackResourceSummary> summaries = createSummaries(Set.of(LoadBalancerType.PRIVATE), false);
         summaries.remove(0);
@@ -402,6 +411,8 @@ public class AwsLaunchServiceLoadBalancerTest {
             AwsTargetGroup.getTargetGroupName(PORT, AwsLoadBalancerScheme.INTERNAL));
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
+
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE), false);
         List<StackResourceSummary> summaries = createSummaries(Set.of(LoadBalancerType.PRIVATE), false);
         StackResourceSummary tgSummary = summaries.get(0);
@@ -428,6 +439,8 @@ public class AwsLaunchServiceLoadBalancerTest {
             AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.INTERNAL));
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
+
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE), false);
         List<StackResourceSummary> summaries = createSummaries(Set.of(LoadBalancerType.PRIVATE), false);
         summaries.remove(1);
@@ -453,6 +466,7 @@ public class AwsLaunchServiceLoadBalancerTest {
             AwsLoadBalancer.getLoadBalancerName(AwsLoadBalancerScheme.INTERNAL));
 
         when(awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(new DescribeRouteTablesResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE), false);
         List<StackResourceSummary> summaries = createSummaries(Set.of(LoadBalancerType.PRIVATE), false);
         StackResourceSummary lbSummary = summaries.get(1);

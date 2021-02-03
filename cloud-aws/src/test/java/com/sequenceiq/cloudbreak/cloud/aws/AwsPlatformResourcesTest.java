@@ -331,7 +331,7 @@ public class AwsPlatformResourcesTest {
     @Test
     public void networksSubnetsShouldBeFilteredByEnabledRegions() {
         DescribeRouteTablesResult routeTables = new DescribeRouteTablesResult();
-        when(amazonEC2Client.describeRouteTables()).thenReturn(routeTables);
+        when(amazonEC2Client.describeRouteTables(any())).thenReturn(routeTables);
         DescribeVpcsResult vpcs = new DescribeVpcsResult().withVpcs(new Vpc());
         when(amazonEC2Client.describeVpcs(any())).thenReturn(vpcs);
         DescribeSubnetsResult subnets = new DescribeSubnetsResult();
