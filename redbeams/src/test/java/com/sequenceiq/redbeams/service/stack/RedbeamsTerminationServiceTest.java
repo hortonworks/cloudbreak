@@ -138,7 +138,7 @@ class RedbeamsTerminationServiceTest {
 
     @ParameterizedTest
     @EnumSource(value = Status.class, names = {"DELETE_REQUESTED", "PRE_DELETE_IN_PROGRESS", "DELETE_IN_PROGRESS", "DELETE_COMPLETED"})
-    void testTerminateWhenTerminationIsInProgress(Status status) {
+    void testTerminateWhenTerminationIsInOneOfTheStatesAndArchivedShouldNotCallTermination(Status status) {
         when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
         dbStack.getDbStackStatus().setStatus(status);
         server.setArchived(true);
@@ -151,6 +151,40 @@ class RedbeamsTerminationServiceTest {
         verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
         verify(cancelService, never()).cancelRunningFlows(1L);
         verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"DELETE_REQUESTED", "PRE_DELETE_IN_PROGRESS", "DELETE_IN_PROGRESS"})
+    void testTerminateWhenTerminationIsInOneOfTheStatesAndNOTArchivedShouldNotCallTermination(Status status) {
+        when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
+        dbStack.getDbStackStatus().setStatus(status);
+        server.setArchived(false);
+        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
+
+        DatabaseServerConfig terminatingServer = underTest.terminateByCrn(SERVER_CRN_STRING, true);
+
+        assertEquals(server, terminatingServer);
+
+        verify(dbStackStatusUpdater, never()).updateStatus(anyLong(), any());
+        verify(cancelService, never()).cancelRunningFlows(1L);
+        verify(flowManager, never()).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"DELETE_COMPLETED"})
+    void testTerminateWhenTerminationIsInOneOfTheStatesAndNOTArchivedShouldCallTermination(Status status) {
+        when(databaseServerConfigService.getByCrn(SERVER_CRN_STRING)).thenReturn(server);
+        dbStack.getDbStackStatus().setStatus(status);
+        server.setArchived(false);
+        when(dbStackService.getByCrn(SERVER_CRN_STRING)).thenReturn(dbStack);
+
+        DatabaseServerConfig terminatingServer = underTest.terminateByCrn(SERVER_CRN_STRING, true);
+
+        assertEquals(server, terminatingServer);
+
+        verify(dbStackStatusUpdater).updateStatus(anyLong(), any());
+        verify(cancelService).cancelRunningFlows(1L);
+        verify(flowManager).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), any());
     }
 
     @Test
