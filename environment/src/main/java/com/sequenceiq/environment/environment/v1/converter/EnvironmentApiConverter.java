@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto.EnvironmentChangeCredentialDtoBuilder.anEnvironmentChangeCredentialDto;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -110,7 +109,7 @@ public class EnvironmentApiConverter {
                 .withLocation(locationRequestToDto(request.getLocation()))
                 .withTelemetry(telemetryApiConverter.convert(request.getTelemetry(),
                         accountTelemetryService.getOrDefault(accountId).getFeatures()))
-                .withBackup(backupConverter.convert(request.getBackupRequest()))
+                .withBackup(backupConverter.convert(request.getTelemetry()))
                 .withRegions(locationRequestToRegions(request.getLocation(), cloudPlatform))
                 .withAuthentication(authenticationRequestToDto(request.getAuthentication()))
                 .withAdminGroupName(request.getAdminGroupName())
