@@ -29,10 +29,10 @@ import com.amazonaws.services.cloudformation.model.StackResourceSummary;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
-import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.PrefixList;
+import com.amazonaws.services.ec2.model.RouteTable;
 import com.amazonaws.waiters.Waiter;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
@@ -375,9 +376,9 @@ public class AwsLaunchService {
     private AwsLoadBalancerScheme determinePublicVsPrivateSchema(Set<String> subnetIds, String vpcId, AmazonEC2Client amazonEC2Client) {
         DescribeRouteTablesRequest describeRouteTablesRequest = new DescribeRouteTablesRequest()
                 .withFilters(new Filter().withName("vpc-id").withValues(vpcId));
-        DescribeRouteTablesResult describeRouteTablesResult = amazonEC2Client.describeRouteTables(describeRouteTablesRequest);
+        List<RouteTable> routeTableList = AwsPageCollector.getAllRouteTables(amazonEC2Client, describeRouteTablesRequest);
         return subnetIds.stream()
-            .anyMatch(subnetId -> awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnetId, vpcId))
+            .anyMatch(subnetId -> awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(routeTableList, subnetId, vpcId))
                 ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL;
     }
 
