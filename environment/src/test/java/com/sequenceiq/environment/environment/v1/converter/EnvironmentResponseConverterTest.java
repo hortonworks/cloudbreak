@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -88,6 +89,9 @@ public class EnvironmentResponseConverterTest {
     private TelemetryApiConverter telemetryApiConverter;
 
     @Mock
+    private BackupConverter backupConverter;
+
+    @Mock
     private NetworkDtoToResponseConverter networkDtoToResponseConverter;
 
     @ParameterizedTest
@@ -98,6 +102,7 @@ public class EnvironmentResponseConverterTest {
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
         TelemetryResponse telemetryResponse = mock(TelemetryResponse.class);
+        BackupResponse backupResponse = mock(BackupResponse.class);
         ProxyResponse proxyResponse = mock(ProxyResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
 
@@ -105,6 +110,7 @@ public class EnvironmentResponseConverterTest {
         when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
         when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
+        when(backupConverter.convert(environment.getBackup())).thenReturn(backupResponse);
         when(proxyConfigToProxyResponseConverter.convert(environment.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
