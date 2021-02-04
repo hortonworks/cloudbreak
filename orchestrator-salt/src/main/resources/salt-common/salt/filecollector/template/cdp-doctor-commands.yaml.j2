@@ -6,6 +6,14 @@ commands:
       report: false
     - command: netstat -tlpn
       output: /tmp/doctor_netstat.txt
+    - command: free -h
+      output: /tmp/doctor_free.txt
+    - command: ps -eo pid,ppid,cmd,%mem,%cpu --sort=-%mem | head
+      output: /tmp/doctor_top_proc.txt
+    - command: df -h
+      output: /tmp/doctor_disk_free.txt
+    - command: du -a -h --max-depth=1 /var/log | sort -r -h | head -20
+      output: /tmp/doctor_disk_logs.txt
     - command: nslookup $(hostname -i)
       output: /tmp/doctor_r_nslookup_output.txt
     - command: nslookup $(hostname -f)

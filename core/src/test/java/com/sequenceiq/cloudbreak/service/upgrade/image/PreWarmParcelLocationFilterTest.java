@@ -23,7 +23,7 @@ public class PreWarmParcelLocationFilterTest {
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
-        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE)));
+        assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE, null)));
     }
 
     @Test
@@ -125,7 +125,7 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {
-        return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD);
+        return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD, null);
     }
 
 }

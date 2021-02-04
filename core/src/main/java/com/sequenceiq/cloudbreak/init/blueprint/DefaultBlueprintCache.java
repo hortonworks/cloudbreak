@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.init.blueprint;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
 @Service
 public class DefaultBlueprintCache {
@@ -60,6 +62,8 @@ public class DefaultBlueprintCache {
                         bp.setTags(new Json(tagParameters));
                         JsonNode description = jsonNode.get("description");
                         bp.setDescription(description == null ? split[0] : description.asText(split[0]));
+                        JsonNode blueprintUpgradeOption = jsonNode.get("blueprintUpgradeOption");
+                        bp.setBlueprintUpgradeOption(getBlueprintUpgradeOption(blueprintUpgradeOption));
                         defaultBlueprints.put(bp.getName(), bp);
                     }
                 }
@@ -81,5 +85,12 @@ public class DefaultBlueprintCache {
                 .stream()
                 .filter(e -> StringUtils.isNoneBlank(e.getValue()))
                 .collect(Collectors.toMap(e -> e.getKey(), e -> Sets.newHashSet(e.getValue().split(";"))));
+    }
+
+    private BlueprintUpgradeOption getBlueprintUpgradeOption(JsonNode blueprintUpgradeOption) {
+        return Optional.ofNullable(blueprintUpgradeOption)
+                .map(JsonNode::asText)
+                .map(BlueprintUpgradeOption::valueOf)
+                .orElse(BlueprintUpgradeOption.ENABLED);
     }
 }
