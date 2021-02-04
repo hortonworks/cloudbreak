@@ -57,6 +57,10 @@ public enum Status {
                 || DELETE_REQUESTED.equals(this);
     }
 
+    public boolean isDeleteCompleted() {
+        return DELETE_COMPLETED.equals(this);
+    }
+
     public boolean isDeleteInProgressOrFailed() {
         return PRE_DELETE_IN_PROGRESS.equals(this)
                 || DELETE_IN_PROGRESS.equals(this)
