@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -49,14 +50,32 @@ public class LiftieConnector implements LiftieApi {
         this.client = client;
     }
 
+
     @Override
+    public @NotNull ListClustersResponse listPagedClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable Integer page,
+            @Nullable String workload) {
+        return listClusters(env, tenant, page, workload);
+    }
+
+    @Override
+    public @NotNull ListClustersResponse listClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable String workload) {
+        return listClusters(env, tenant, null, workload);
+    }
+
+    @Override
+    public @NotNull ListClustersResponse listPagedClusters(@NotNull String env, @NotNull String tenant, @Nullable Integer page) {
+        return listClusters(env, tenant, page, null);
+    }
+
     @NotNull
-    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, Integer page) {
+    @Override
+    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable Integer page, @Nullable String workload) {
         LOGGER.debug("About to connect Liftie API to list clusters");
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClustersEndpoint());
         Map<String, String> queryParams = new LinkedHashMap<>();
         putIfPresent(queryParams, "env", env);
         putIfPresent(queryParams, "tenant", tenant);
+        putIfPresent(queryParams, "workloads", workload);
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
         webTarget = setQueryParams(webTarget, queryParams);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);

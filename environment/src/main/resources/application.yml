@@ -214,6 +214,7 @@ experience:
   scan:
     protocol: https
     liftie:
+      workloads: mon-platform
       api:
         port: 10090
         address: localhost
