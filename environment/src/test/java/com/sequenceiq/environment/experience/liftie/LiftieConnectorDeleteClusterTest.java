@@ -2,9 +2,8 @@ package com.sequenceiq.environment.experience.liftie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -22,24 +21,21 @@ class LiftieConnectorDeleteClusterTest extends LiftieConnectorTestBase {
 
     private static final String LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG = "Unable to resolve Liftie response!";
 
-    private static final String LIFTIE_CLUSTER_ENDPOINT_PATH = "somewhereOverTheRainbow";
-
     private static final String TEST_CLUSTER_ID = "someClusterId";
 
     @Override
     @BeforeEach
     void setUp() {
         super.setUp();
-        when(getMockClient().target(LIFTIE_CLUSTER_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
-        when(getMockWebTarget().queryParam(anyString(), anyString())).thenReturn(getMockWebTarget());
-        when(getMockLiftiePathProvider().getPathToClusterEndpoint(TEST_CLUSTER_ID)).thenReturn(LIFTIE_CLUSTER_ENDPOINT_PATH);
+        lenient().when(getMockClient().target(LIFTIE_CLUSTER_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
+        lenient().when(getMockLiftiePathProvider().getPathToClusterEndpoint(TEST_CLUSTER_ID)).thenReturn(LIFTIE_CLUSTER_ENDPOINT_PATH);
     }
 
     @Test
     void testInvocationBuilderProviderShouldCreateCallForExecutionBasedOnTheWebTarget() {
-        when(getMockWebTarget().getUri()).thenReturn(URI.create(LIFTIE_CLUSTER_ENDPOINT_PATH));
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
-        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), DeleteClusterResponse.class)).thenReturn(Optional.of(new DeleteClusterResponse()));
+        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), DeleteClusterResponse.class))
+                .thenReturn(Optional.of(new DeleteClusterResponse()));
 
         getUnderTest().deleteCluster(TEST_CLUSTER_ID);
 
@@ -54,7 +50,7 @@ class LiftieConnectorDeleteClusterTest extends LiftieConnectorTestBase {
 
         verify(getMockRetryableWebTarget(), times(ONCE)).delete(any());
         verify(getMockRetryableWebTarget(), times(ONCE)).delete(getMockInvocationBuilder());
-        verify(getMockResponseReader(), never()).read(any(), any(), any());
+        verify(getMockResponseReader(), times(ONCE)).read(LIFTIE_CLUSTER_ENDPOINT_PATH, null, DeleteClusterResponse.class);
     }
 
     @Test

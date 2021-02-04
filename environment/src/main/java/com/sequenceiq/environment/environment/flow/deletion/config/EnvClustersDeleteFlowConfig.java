@@ -5,10 +5,12 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDe
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.ENV_CLUSTERS_DELETE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.ENV_CLUSTERS_DELETE_FINAL_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.ENV_CLUSTERS_DELETE_INIT_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvClustersDeleteState.XP_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.FINISH_ENV_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.HANDLED_FAILED_ENV_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATAHUB_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATALAKE_CLUSTERS_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_XP_DELETE_EVENT;
 
 import java.util.List;
 
@@ -31,7 +33,10 @@ public class EnvClustersDeleteFlowConfig extends AbstractFlowConfiguration<EnvCl
             .from(ENV_CLUSTERS_DELETE_INIT_STATE).to(DATAHUB_CLUSTERS_DELETE_STARTED_STATE)
             .event(START_DATAHUB_CLUSTERS_DELETE_EVENT).defaultFailureEvent()
 
-            .from(DATAHUB_CLUSTERS_DELETE_STARTED_STATE).to(DATALAKE_CLUSTERS_DELETE_STARTED_STATE)
+            .from(DATAHUB_CLUSTERS_DELETE_STARTED_STATE).to(XP_DELETE_STARTED_STATE)
+            .event(START_XP_DELETE_EVENT).defaultFailureEvent()
+
+            .from(XP_DELETE_STARTED_STATE).to(DATALAKE_CLUSTERS_DELETE_STARTED_STATE)
             .event(START_DATALAKE_CLUSTERS_DELETE_EVENT).defaultFailureEvent()
 
             .from(DATALAKE_CLUSTERS_DELETE_STARTED_STATE).to(ENV_CLUSTERS_DELETE_FINAL_STATE)
