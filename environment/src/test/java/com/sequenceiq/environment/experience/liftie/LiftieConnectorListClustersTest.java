@@ -47,7 +47,7 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
     void testSettingNecessaryQueryParamsOnWebTarget() {
         int pageNumber = 1;
 
-        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, pageNumber);
+        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, pageNumber, null);
 
         verify(getMockWebTarget(), times(ONCE)).queryParam(ENV_QUERY_PARAM_KEY, TEST_ENV_NAME);
         verify(getMockWebTarget(), times(ONCE)).queryParam(TENANT_QUERY_PARAM_KEY, TEST_TENANT);
@@ -57,14 +57,14 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
 
     @Test
     void testWhenPageIsNullThenItShouldNotBeSetAsQueryParam() {
-        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         verify(getMockWebTarget(), never()).queryParam(eq(PAGE_QUERY_PARAM_KEY), any());
     }
 
     @Test
     void testInvocationBuilderProviderShouldCreateCallForExecutionBasedOnTheWebTarget() {
-        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         verify(getMockInvocationBuilderProvider(), times(ONCE)).createInvocationBuilder(getMockWebTarget());
     }
@@ -73,7 +73,7 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
     void testWhenCallExecutionReturnsNullThenNoResponseReadingHappens() {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(null);
 
-        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         verify(getMockRetryableWebTarget(), times(ONCE)).get(any());
         verify(getMockRetryableWebTarget(), times(ONCE)).get(getMockInvocationBuilder());
@@ -84,7 +84,7 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
     void testWhenCallExecutionReturnsNullThenThenEmptyResponseShouldReturn() {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(null);
 
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         assertNotNull(result);
 
@@ -99,7 +99,7 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
         doThrow(RuntimeException.class).when(getMockResponseReader()).read(any(), any(), any());
 
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         assertNotNull(result);
 
@@ -114,7 +114,7 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class)).thenReturn(Optional.empty());
 
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         assertNotNull(result);
 
@@ -132,7 +132,7 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class)).thenReturn(Optional.of(expected));
 
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null);
+        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         assertEquals(expected, result);
     }
