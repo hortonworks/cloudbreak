@@ -11,7 +11,7 @@ public interface LiftieApi {
     @NotNull ListClustersResponse listPagedClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable Integer page,
             @Nullable String workload);
 
-    @NotNull ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable Integer page, @Nullable String workload);
+    @NotNull ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable String workload, @Nullable Integer page);
 
     @NotNull ListClustersResponse listClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable String workload);
 
