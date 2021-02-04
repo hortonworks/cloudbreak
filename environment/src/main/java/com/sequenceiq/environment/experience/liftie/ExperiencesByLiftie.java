@@ -77,7 +77,7 @@ public class ExperiencesByLiftie implements Experience {
         if (first.getPage().getTotalPages() > 1) {
             int currentPage = first.getPage().getNumber() + 1;
             while (currentPage <= first.getPage().getTotalPages()) {
-                ListClustersResponse response = liftieApi.listClusters(environmentName, tenant, currentPage, workload);
+                ListClustersResponse response = liftieApi.listClusters(environmentName, tenant, workload, currentPage);
                 if (!listClustersResponseValidator.isListClustersResponseEmpty(response)) {
                     clustersResponses.add(response);
                 }

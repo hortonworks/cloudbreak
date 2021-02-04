@@ -13,7 +13,7 @@ public interface Experience {
      * @param environment the {@link EnvironmentExperienceDto} DTO class that contains the
      *                    necessary data for the deletion.
      *                    This object cannot be null since its content is can be crucial.
-     * @return
+     * @return number of connected clusters
      */
     int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment);
 
