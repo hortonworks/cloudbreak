@@ -166,8 +166,6 @@ cb:
     disabled.instance.types:
     distrox:
       enabled.instance.types: >
-        t2.large,
-        t2.xlarge,
         m5.xlarge,
         m5.2xlarge,
         m5.4xlarge,
