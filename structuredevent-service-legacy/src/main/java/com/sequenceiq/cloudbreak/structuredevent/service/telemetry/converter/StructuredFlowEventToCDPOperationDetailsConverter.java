@@ -9,7 +9,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.RequestProcessingStepMapper;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
 
 @Component
 public class StructuredFlowEventToCDPOperationDetailsConverter {
@@ -18,7 +18,7 @@ public class StructuredFlowEventToCDPOperationDetailsConverter {
     private String appVersion;
 
     @Inject
-    private RequestProcessingStepMapper requestProcessingStepMapper;
+    private ClusterRequestProcessingStepMapper clusterRequestProcessingStepMapper;
 
     public UsageProto.CDPOperationDetails convert(StructuredFlowEvent structuredFlowEvent) {
         if (structuredFlowEvent == null) {
@@ -39,7 +39,7 @@ public class StructuredFlowEventToCDPOperationDetailsConverter {
             cdpOperationDetails.setFlowChainId(flowDetails.getFlowChainId() != null ? flowDetails.getFlowChainId() : "");
         }
 
-        cdpOperationDetails.setCdpRequestProcessingStep(requestProcessingStepMapper.mapIt(structuredFlowEvent.getFlow()));
+        cdpOperationDetails.setCdpRequestProcessingStep(clusterRequestProcessingStepMapper.mapIt(structuredFlowEvent.getFlow()));
         cdpOperationDetails.setApplicationVersion(appVersion);
 
         return cdpOperationDetails.build();

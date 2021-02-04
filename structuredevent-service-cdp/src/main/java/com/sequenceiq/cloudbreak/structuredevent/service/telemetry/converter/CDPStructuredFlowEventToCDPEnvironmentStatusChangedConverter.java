@@ -35,7 +35,7 @@ public class CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter {
         cdpEnvironmentStatusChangedBuilder.setNewStatus(status);
 
         UsageProto.CDPEnvironmentStatusChanged ret = cdpEnvironmentStatusChangedBuilder.build();
-        LOGGER.debug("Converted telemetry event: {}", ret);
+        LOGGER.debug("Converted CDPEnvironmentStatusChanged event: {}", ret);
         return ret;
     }
 
