@@ -3,7 +3,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 
-{% set cdp_telemetry_version = '0.3.3' %}
+{% set cdp_telemetry_version = '0.3.6' %}
 {% set cdp_telemetry_rpm_location = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/'%}
 {% set cdp_telemetry_rpm_repo_url = cdp_telemetry_rpm_location + 'cdp_telemetry-' + cdp_telemetry_version + '.x86_64.rpm' %}
 {% set cdp_telemetry_package_name = 'cdp-telemetry' %}
@@ -81,6 +81,17 @@ fail_if_telemetry_rpm_is_not_installed:
     - mode: '0750'
     - failhard: True
 
+{% if telemetry.cdpTelemetryVersion > 3 and filecollector.destination == "SUPPORT" %}
+/opt/cdp-telemetry/conf/extra-dbus-headers.yaml:
+   file.managed:
+    - source: salt://filecollector/template/extra-dbus-headers.yaml.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: '0750'
+    - failhard: True
+{% endif %}
+
 {% if not filecollector.skipValidation and filecollector.destination == "CLOUD_STORAGE" %}
 create_test_cloud_storage_file:
   cmd.run:
@@ -111,7 +122,7 @@ check_td_agent_running_systemctl:
   cmd.run:
     - name: "systemctl is-active --quiet td-agent"
     - failhard: True
-{% elif not filecollector.skipValidation and filecollector.destination == "SUPPORT" %}
+{% elif filecollector.dbusUrl and filecollector.destination == "SUPPORT" %}
 check_support_dbus_connection:
   cmd.run:
     - name: "cdp-telemetry utils check-connection --url {{ filecollector.dbusUrl }}"

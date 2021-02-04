@@ -2,6 +2,7 @@ package com.sequenceiq.common.api.telemetry.doc;
 
 public class DiagnosticsModelDescription {
     public static final String ISSUE = "Issue number or JIRA ticket number related to this diagnostic collection request.";
+    public static final String UUID = "Unique identifier for the diagnostics flow. If it's empty, flow ID will be used.";
     public static final String TICKET = "Optional ticket or case number for Cloudera Manager based diagnostic collection request.";
     public static final String LABELS = "With labels you can filter what kind of logs you'd like to collect.";
     public static final String START_TIME = "Start time for the time interval of the diagnostic collection request.";

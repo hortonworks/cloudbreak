@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionFailureEvent;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -43,6 +45,10 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
+        if (StringUtils.isBlank(parameters.getUuid())) {
+            LOGGER.debug("UUID is empty for diagnostics... Use flow ID as UUID.");
+            parameters.setUuid(event.getHeaders().get(FlowConstants.FLOW_ID));
+        }
         Map<String, Object> parameterMap = parameters.toMap();
         try {
             LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);

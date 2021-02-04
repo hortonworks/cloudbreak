@@ -22,6 +22,8 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_ISSUE = "issue";
 
+    private static final String PARAMS_UUID = "uuid";
+
     private static final String PARAMS_TICKET = "ticket";
 
     private static final String PARAM_DESCRIPTION = "description";
@@ -88,6 +90,7 @@ public class DiagnosticsParamsConverter {
         request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
         request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
         request.setSkipValidation((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_VALIDATION)).orElse(false));
+        request.setUuid(Optional.ofNullable(props.get(PARAMS_UUID)).map(Object::toString).orElse(null));
         return request;
     }
 
