@@ -57,7 +57,6 @@ public class LiftieController {
         return liftieExperienceStoreService.changeById(id, clusterView);
     }
 
-
     @PostMapping(value = "mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
     public ClusterView putClusterId(@PathVariable("id") String id, @RequestBody String status) throws Exception {
         return liftieExperienceStoreService.setStatusById(id, status);
