@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.RolledbackResourcesException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -42,7 +43,7 @@ public class CloudFailureHandler {
     @Inject
     private ApplicationContext applicationContext;
 
-    public void rollback(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
+    public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
             Group group, ResourceBuilders resourceBuilders, Integer fullNodeCount) {
         if (failuresList.isEmpty()) {
             return;
@@ -67,7 +68,7 @@ public class CloudFailureHandler {
                     LOGGER.info("Number of failures is more than the threshold so error will throw");
                     failures = resourceStatuses.stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
                     doRollbackAndDecreaseNodeCount(auth, resourceStatuses, failures, group, ctx, resourceBuilders, stx.getUpscale());
-                    throwError(failuresList);
+                    throwRolledbackException(failuresList);
                 } else if (!failures.isEmpty()) {
                     LOGGER.info("Decrease node counts because threshold was higher");
                     handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, stx.getUpscale());
@@ -127,6 +128,7 @@ public class CloudFailureHandler {
         List<ComputeResourceBuilder<ResourceBuilderContext>> compute = resourceBuilders.compute(auth.getCloudContext().getPlatform());
         Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
         LOGGER.info("InstanceGroup {} node count decreased with one so the new node size is: {}", group.getName(), group.getInstancesSize());
+
         if (getRemovableInstanceTemplates(group, ids).size() <= 0 && !upscale) {
             LOGGER.info("InstanceGroup node count lower than 1 which is incorrect so error will throw");
             throwError(statuses);
@@ -145,7 +147,7 @@ public class CloudFailureHandler {
                             futures.clear();
                         }
                     } catch (Exception e) {
-                        LOGGER.debug("Resource can not be deleted. Reason: {} ", e.getMessage());
+                        LOGGER.warn("Resource can not be deleted. Reason: " + e.getMessage(), e);
                     }
                 }
             }
@@ -165,6 +167,10 @@ public class CloudFailureHandler {
 
     private <T> T createThread(String name, Object... args) {
         return (T) applicationContext.getBean(name, args);
+    }
+
+    private void throwRolledbackException(List<CloudResourceStatus> statuses) {
+        throw new RolledbackResourcesException(statuses.get(0).getStatusReason());
     }
 
     private void throwError(List<CloudResourceStatus> statuses) {

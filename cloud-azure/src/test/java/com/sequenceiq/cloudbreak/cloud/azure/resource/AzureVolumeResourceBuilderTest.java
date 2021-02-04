@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -175,7 +176,7 @@ public class AzureVolumeResourceBuilderTest {
     }
 
     @Test
-    public void deleteTestWhenDiskIsDeletedOnAzure() throws InterruptedException {
+    public void deleteTestWhenDiskIsDeletedOnAzure() throws PreserveResourceException {
         CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
@@ -190,7 +191,7 @@ public class AzureVolumeResourceBuilderTest {
     }
 
     @Test
-    public void deleteTestWhenDiskIsOnAzureAndNotAttached() throws InterruptedException {
+    public void deleteTestWhenDiskIsOnAzureAndNotAttached() throws PreserveResourceException {
         CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
@@ -211,6 +212,9 @@ public class AzureVolumeResourceBuilderTest {
         diskList.add(disk1);
         diskList.add(disk2);
         diskList.add(disk3);
+        Disk disk = mock(Disk.class);
+        when(disk.isAttachedToVirtualMachine()).thenReturn(false);
+        when(azureClient.getDiskById(any())).thenReturn(disk);
         when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
         when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
@@ -223,7 +227,7 @@ public class AzureVolumeResourceBuilderTest {
     }
 
     @Test
-    public void deleteTestWhenDiskIsOnAzureAndAttached() throws InterruptedException {
+    public void deleteTestWhenDiskIsOnAzureAndAttached() throws PreserveResourceException {
         CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
@@ -248,16 +252,20 @@ public class AzureVolumeResourceBuilderTest {
         diskList.add(disk1);
         diskList.add(disk2);
         diskList.add(disk3);
+        Disk disk = mock(Disk.class);
+        when(disk.isAttachedToVirtualMachine()).thenReturn(true);
+        when(disk.virtualMachineId()).thenReturn("instance1");
+        when(azureClient.getDiskById(any())).thenReturn(disk);
         when(pagedList.stream()).thenAnswer(invocation -> diskList.stream());
         when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
-        when(azureClient.getVirtualMachine(any(), eq("instance1"))).thenReturn(virtualMachine);
+        when(azureClient.getVirtualMachine(eq("instance1"))).thenReturn(virtualMachine);
         ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
         underTest.delete(context, auth, volumeSetResource);
 
-        verify(azureUtils, times(1)).deleteManagedDisks(any(), captor.capture());
-        verify(azureClient, times(1)).getVirtualMachine(eq("resource-group"), eq("instance1"));
+        verify(azureClient, times(1)).getVirtualMachine(eq("instance1"));
         verify(azureClient, times(1)).detachDiskFromVm(eq("vol1"), eq(virtualMachine));
+        verify(azureUtils, times(1)).deleteManagedDisks(any(), captor.capture());
         Collection<String> deletedAzureManagedDisks = captor.getValue();
         assertThat(deletedAzureManagedDisks, containsInAnyOrder("vol1"));
     }
