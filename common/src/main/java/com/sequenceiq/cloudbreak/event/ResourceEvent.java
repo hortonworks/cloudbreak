@@ -155,6 +155,7 @@ public enum ResourceEvent {
     STACK_PROVISIONING("stack.provisioning"),
     STACK_INFRASTRUCTURE_TIME("stack.infrastructure.time"),
     STACK_INFRASTRUCTURE_CREATE_FAILED("stack.infrastructure.create.failed"),
+    STACK_INFRASTRUCTURE_ROLLBACK("stack.infrastructure.rollback"),
     STACK_INFRASTRUCTURE_ROLLBACK_FAILED("stack.infrastructure.rollback.failed"),
     STACK_REMOVING_INSTANCE("stack.removing.instance"),
     STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP("stack.scaling.terminating.host.from.hostgroup"),

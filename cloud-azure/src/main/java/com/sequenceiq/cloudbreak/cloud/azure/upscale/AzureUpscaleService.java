@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.RolledbackResourcesException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -99,16 +100,26 @@ public class AzureUpscaleService {
             return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
+        } catch (RolledbackResourcesException e) {
+            rollbackInstances(ac, stack, resources, newInstances, templateResources, osDiskResources);
+            throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back with resources: %s, %s",
+                    stackName, e.getMessage()), e);
         } catch (Exception e) {
-            List<CloudInstance> newCloudInstances = newInstances.stream()
-                    .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null))
-                    .collect(Collectors.toList());
-            List<CloudResource> allRemovableResource = new ArrayList<>();
-            allRemovableResource.addAll(templateResources);
-            allRemovableResource.addAll(osDiskResources);
-            azureTerminationHelperService.downscale(ac, stack, newCloudInstances, resources, allRemovableResource);
-            throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure: %s, %s", stackName, e.getMessage()), e);
+            rollbackInstances(ac, stack, resources, newInstances, templateResources, osDiskResources);
+            throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back: %s, %s", stackName,
+                    e.getMessage()), e);
         }
+    }
+
+    public void rollbackInstances(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudResource> newInstances,
+            List<CloudResource> templateResources, List<CloudResource> osDiskResources) {
+        List<CloudInstance> newCloudInstances = newInstances.stream()
+                .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null))
+                .collect(Collectors.toList());
+        List<CloudResource> allRemovableResource = new ArrayList<>();
+        allRemovableResource.addAll(templateResources);
+        allRemovableResource.addAll(osDiskResources);
+        azureTerminationHelperService.downscale(ac, stack, newCloudInstances, resources, allRemovableResource);
     }
 
     private void purgeExistingInstances(AzureStackView azureStackView) {
