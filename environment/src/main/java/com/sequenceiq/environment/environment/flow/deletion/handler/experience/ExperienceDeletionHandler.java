@@ -1,15 +1,17 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATALAKE_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -18,6 +20,8 @@ import reactor.bus.Event;
 
 @Component
 public class ExperienceDeletionHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceDeletionHandler.class);
 
     private final EntitlementService entitlementService;
 
@@ -40,18 +44,19 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
 
     @Override
     public void accept(Event<EnvironmentDeletionDto> environmentDeletionDtoEvent) {
+        LOGGER.debug("Accepting XP Delete event");
         EnvironmentDeletionDto environmentDeletionDto = environmentDeletionDtoEvent.getData();
         EnvironmentDto envDto = environmentDeletionDtoEvent.getData().getEnvironmentDto();
 
         try {
-            if (true /*entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())*/) {
+            if (entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())) {
                 environmentService.findEnvironmentById(envDto.getId())
                         .ifPresent(environmentExperienceDeletionAction::execute);
             }
             EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDeletionDto);
             eventSender().sendEvent(envDeleteEvent, environmentDeletionDtoEvent.getHeaders());
         } catch (Exception e) {
-            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+            EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
                     .withEnvironmentID(envDto.getId())
                     .withException(e)
                     .withResourceCrn(envDto.getResourceCrn())
@@ -68,7 +73,7 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(START_FREEIPA_DELETE_EVENT.selector())
+                .withSelector(START_DATALAKE_CLUSTERS_DELETE_EVENT.selector())
                 .build();
     }
 

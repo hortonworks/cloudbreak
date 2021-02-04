@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionExcept
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
+import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
@@ -68,6 +69,9 @@ class EnvironmentResourceDeletionServiceTest {
 
     @MockBean
     private ClusterTemplateV4Endpoint clusterTemplateV4Endpoint;
+
+    @MockBean
+    private ExperienceConnectorService experienceConnectorService;
 
     @Mock
     private ClusterTemplateViewV4Responses clusterTemplateViewV4Responses;
