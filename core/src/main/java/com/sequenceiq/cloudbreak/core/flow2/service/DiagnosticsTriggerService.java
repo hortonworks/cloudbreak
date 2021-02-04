@@ -68,7 +68,7 @@ public class DiagnosticsTriggerService {
     private DataBusEndpointProvider dataBusEndpointProvider;
 
     public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn,
-            String userCrn) {
+            String userCrn, String uuid) {
         Stack stack = stackService.getByCrn(stackCrn);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
@@ -85,6 +85,8 @@ public class DiagnosticsTriggerService {
         DiagnosticParameters parameters = diagnosticsDataToParameterConverter.convert(request, telemetry,
                 StringUtils.upperCase(stack.getType().getResourceType()), clusterVersion,
                 accountId, stack.getRegion(), databusEndpoint);
+        // TODO: use DiagnosticParameters builder for UUID + decrease parameters in the converter above
+        parameters.setUuid(uuid);
         DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())
@@ -95,6 +97,11 @@ public class DiagnosticsTriggerService {
                 .withHostGroups(parameters.getHostGroups())
                 .build();
         return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
+    }
+
+    public FlowIdentifier startDiagnosticsCollection(BaseDiagnosticsCollectionRequest request, String stackCrn,
+            String userCrn) {
+        return startDiagnosticsCollection(request, stackCrn, userCrn, null);
     }
 
     public FlowIdentifier startCmDiagnostics(BaseCmDiagnosticsCollectionRequest request, String stackCrn, String userCrn) {

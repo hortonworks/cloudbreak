@@ -32,6 +32,8 @@ public class SdxDiagnosticsActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDiagnosticsActions.class);
 
+    private static final String DIAGNOSTICS_UUID_PARAM = "uuid";
+
     @Inject
     private SdxDiagnosticsFlowService diagnosticsFlowService;
 
@@ -47,6 +49,7 @@ public class SdxDiagnosticsActions {
             @Override
             protected void doExecute(SdxContext context, SdxDiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 LOGGER.debug("Start diagnostics collection for sdx cluster with id: {}", context.getSdxId());
+                payload.getProperties().put(DIAGNOSTICS_UUID_PARAM, context.getFlowId());
                 FlowIdentifier flowIdentifier = diagnosticsFlowService.startDiagnosticsCollection(payload.getProperties());
                 SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(payload.getResourceId(),
                         payload.getUserId(), payload.getProperties(), flowIdentifier);

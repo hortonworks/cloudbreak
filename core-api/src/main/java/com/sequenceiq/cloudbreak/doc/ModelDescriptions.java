@@ -127,14 +127,6 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_ID = "id that could indentify an existing cluster defintion";
     }
 
-    public static class DiagnosticsModelDescription {
-        public static final String ISSUE = "Issue number or JIRA ticket number related to this diagnostic collection request.";
-        public static final String LABELS = "With labels you can filter what kind of logs you'd like to collect.";
-        public static final String START_TIME = "Start time for the time interval of the diagnostic collection request.";
-        public static final String END_TIME = "END time for the time interval of the diagnostic collection request.";
-        public static final String DESTINATION = "Destination for the diagnostic collection request.";
-    }
-
     public static class StackModelDescription {
         public static final String TENANANT = "name of the tenant";
         public static final String CRN = "the unique crn of the resource";

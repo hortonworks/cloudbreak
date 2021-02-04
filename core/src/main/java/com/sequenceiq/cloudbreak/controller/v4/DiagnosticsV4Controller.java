@@ -51,7 +51,7 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
     public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
-        return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
+        return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn, request.getUuid());
     }
 
     @Override

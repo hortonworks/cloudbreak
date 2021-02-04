@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.telemetry.converter;
 
 import java.nio.file.Paths;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -70,7 +69,6 @@ public class DiagnosticsDataToParameterConverter {
         }
         builder.withDestination(request.getDestination());
         builder.withDescription(request.getDescription());
-        builder.withUuid(UUID.randomUUID().toString());
         builder.withClusterType(clusterType);
         builder.withClusterVersion(clusterVersion);
         builder.withAccountId(accountId);
