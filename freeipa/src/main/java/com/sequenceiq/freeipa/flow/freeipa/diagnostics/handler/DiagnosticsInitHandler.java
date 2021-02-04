@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
+import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsFlowService;
@@ -42,6 +43,8 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
+        parameters.setUuid(event.getHeaders().get(FlowConstants.FLOW_ID));
+
         Map<String, Object> parameterMap = parameters.toMap();
         try {
             LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);

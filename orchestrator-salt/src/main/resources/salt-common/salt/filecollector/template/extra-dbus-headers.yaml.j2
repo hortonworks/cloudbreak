@@ -1,0 +1,10 @@
+{%- from 'filecollector/settings.sls' import filecollector with context %}
+udx-uuid: "{{ filecollector.uuid }}"
+udx-full-filename: "$filename"
+udx-hostname: "$hostname"
+udx-creator-crn: "{{ filecollector.creatorCrn }}"
+udx-environment-crn: "{{ filecollector.environmentCrn }}"
+udx-resource-crn: "{{ filecollector.resourceCrn }}"
+udx-accountid: "{{ filecollector.accountId }}"
+udx-part-number: "$filePartNum"
+udx-total-parts: "$fileTotalNum"
