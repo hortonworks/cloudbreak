@@ -52,7 +52,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(new Long(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
@@ -73,7 +73,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(new Long(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(pollingResult);
@@ -96,7 +96,7 @@ class EnvironmentExperienceDeletionActionTest {
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
-                eq(new Long(EXPERIENCE_RETRYING_INTERVAL)),
+                eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(pollingResult);

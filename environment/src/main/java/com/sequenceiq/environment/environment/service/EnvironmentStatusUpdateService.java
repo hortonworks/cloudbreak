@@ -29,7 +29,7 @@ public class EnvironmentStatusUpdateService {
     }
 
     public EnvironmentDto updateEnvironmentStatusAndNotify(CommonContext context, Payload payload, EnvironmentStatus environmentStatus,
-            ResourceEvent resourceEvent, Enum envState) {
+            ResourceEvent resourceEvent, Enum<?> envState) {
         LOGGER.info("Flow entered into {}", envState.name());
         return environmentService
                 .findEnvironmentById(payload.getResourceId())
@@ -45,7 +45,7 @@ public class EnvironmentStatusUpdateService {
     }
 
     public EnvironmentDto updateFailedEnvironmentStatusAndNotify(CommonContext context, BaseFailedFlowEvent failedFlowEvent,
-            EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Enum envState) {
+            EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Enum<?> envState) {
         LOGGER.info("Flow entered into {}", envState.name());
         return environmentService
                 .findEnvironmentById(failedFlowEvent.getResourceId())

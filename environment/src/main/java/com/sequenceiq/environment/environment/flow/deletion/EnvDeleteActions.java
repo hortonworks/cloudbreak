@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_CLUSTER_DEFINITION_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
@@ -69,24 +68,6 @@ public class EnvDeleteActions {
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
-    }
-
-    @Bean(name = "XP_DELETE_STARTED_STATE")
-    public Action<?, ?> experienceDeleteAction() {
-        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
-            @Override
-            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
-                EnvironmentDto envDto = environmentStatusUpdateService
-                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.XP_DELETE_IN_PROGRESS,
-                                ResourceEvent.ENVIRONMENT_XP_DELETION_STARTED, EnvDeleteState.XP_DELETE_STARTED_STATE);
-                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
-                        .withEnvironmentDto(envDto)
-                        .withForceDelete(payload.isForceDelete())
-                        .withId(payload.getResourceId())
-                        .build();
-                sendEvent(context, DELETE_EXPERIENCE_EVENT.selector(), environmentDeletionDto);
-            }
-        };
     }
 
     @Bean(name = "FREEIPA_DELETE_STARTED_STATE")

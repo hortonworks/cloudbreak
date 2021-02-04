@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.datahub;
 
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_DATALAKE_CLUSTERS_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.START_XP_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATAHUB_CLUSTERS_EVENT;
 
 import java.util.concurrent.TimeUnit;
@@ -86,7 +86,7 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(START_DATALAKE_CLUSTERS_DELETE_EVENT.selector())
+                .withSelector(START_XP_DELETE_EVENT.selector())
                 .build();
     }
 }

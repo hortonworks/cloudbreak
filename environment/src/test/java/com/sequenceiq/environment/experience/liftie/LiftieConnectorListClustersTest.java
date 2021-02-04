@@ -1,12 +1,12 @@
 package com.sequenceiq.environment.experience.liftie;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -34,6 +34,8 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
 
     private static final String TEST_ENV_NAME = "someEnv";
 
+    private static final ListClustersResponse EMPTY_RESPONSE = new ListClustersResponse();
+
     @Override
     @BeforeEach
     void setUp() {
@@ -41,13 +43,16 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
         when(getMockLiftiePathProvider().getPathToClustersEndpoint()).thenReturn(LIFTIE_CLUSTER_ENDPOINT_PATH);
         when(getMockClient().target(LIFTIE_CLUSTER_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockWebTarget().queryParam(anyString(), anyString())).thenReturn(getMockWebTarget());
+        lenient().when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class))
+                .thenReturn(Optional.of(EMPTY_RESPONSE));
+        when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
     }
 
     @Test
     void testSettingNecessaryQueryParamsOnWebTarget() {
         int pageNumber = 1;
 
-        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, pageNumber, null);
+        getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, pageNumber);
 
         verify(getMockWebTarget(), times(ONCE)).queryParam(ENV_QUERY_PARAM_KEY, TEST_ENV_NAME);
         verify(getMockWebTarget(), times(ONCE)).queryParam(TENANT_QUERY_PARAM_KEY, TEST_TENANT);
@@ -70,71 +75,41 @@ class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
     }
 
     @Test
-    void testWhenCallExecutionReturnsNullThenNoResponseReadingHappens() {
-        when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(null);
-
+    void testWhenCallExecutionReturnsEmptyResponseReadingHappens() {
         getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
         verify(getMockRetryableWebTarget(), times(ONCE)).get(any());
         verify(getMockRetryableWebTarget(), times(ONCE)).get(getMockInvocationBuilder());
-        verify(getMockResponseReader(), never()).read(any(), any(), any());
+        verify(getMockResponseReader(), times(ONCE)).read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class);
     }
 
     @Test
-    void testWhenCallExecutionReturnsNullThenThenEmptyResponseShouldReturn() {
-        when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(null);
-
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
-
-        assertNotNull(result);
-
-        assertNull(result.getClusters());
-
-        assertNotNull(result.getPage());
-        assertEquals(0, result.getPage().getTotalPages());
-    }
-
-    @Test
-    void testWhenCallExecutionReturnsResponseButItThrowsRuntimeExceptionThenEmptyResponseShouldReturn() {
+    void testWhenCallExecutionReturnsResponseButItThrowsRuntimeExceptionThenIllegalStateExceptionIsThrown() {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
         doThrow(RuntimeException.class).when(getMockResponseReader()).read(any(), any(), any());
 
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
-
-        assertNotNull(result);
-
-        assertNull(result.getClusters());
-
-        assertNotNull(result.getPage());
-        assertEquals(0, result.getPage().getTotalPages());
+        assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasCauseExactlyInstanceOf(RuntimeException.class);
     }
 
     @Test
-    void testWhenResponseReaderReturnsEmptyResultWhichThrowsIllegalStateExceptionThenEmptyResponseShouldReturn() {
+    void testWhenResponseReaderReturnsEmptyResultWhichThrowsIllegalStateExceptionThenIllegalStateExceptionIsThrown() {
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class)).thenReturn(Optional.empty());
 
-        ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
-
-        assertNotNull(result);
-
-        assertNull(result.getClusters());
-
-        assertNotNull(result.getPage());
-        assertEquals(0, result.getPage().getTotalPages());
+        assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
+                .isExactlyInstanceOf(IllegalStateException.class)
+                .hasCauseExactlyInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void testWhenResponseReaderReturnsNonEmptyResultThenThatShouldReturn() {
-        ListClustersResponse expected = new ListClustersResponse();
-
         when(getMockWebTarget().getUri()).thenReturn(URI.create(LIFTIE_CLUSTER_ENDPOINT_PATH));
-        when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
-        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class)).thenReturn(Optional.of(expected));
 
         ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
-        assertEquals(expected, result);
+        assertEquals(EMPTY_RESPONSE, result);
     }
 
 }

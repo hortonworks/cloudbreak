@@ -65,6 +65,6 @@ public class EnvironmentExperienceTest extends AbstractMockTest {
     }
 
     private void proc(Response res) {
-        String str = res.readEntity(String.class);
+        res.readEntity(String.class);
     }
 }

@@ -12,7 +12,6 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteStat
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.RDBMS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE;
-import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.XP_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
@@ -24,7 +23,6 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_UMS_RESOURCE_DELETE_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_XP_DELETE_EVENT;
 
 import java.util.List;
 
@@ -42,10 +40,7 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     private static final List<Transition<EnvDeleteState, EnvDeleteStateSelectors>> TRANSITIONS
             = new Transition.Builder<EnvDeleteState, EnvDeleteStateSelectors>().defaultFailureEvent(EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT)
 
-            .from(INIT_STATE).to(XP_DELETE_STARTED_STATE)
-            .event(START_XP_DELETE_EVENT).defaultFailureEvent()
-
-            .from(XP_DELETE_STARTED_STATE).to(FREEIPA_DELETE_STARTED_STATE)
+            .from(INIT_STATE).to(FREEIPA_DELETE_STARTED_STATE)
             .event(START_FREEIPA_DELETE_EVENT).defaultFailureEvent()
 
             .from(FREEIPA_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
@@ -92,7 +87,7 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
     @Override
     public EnvDeleteStateSelectors[] getInitEvents() {
         return new EnvDeleteStateSelectors[]{
-                START_XP_DELETE_EVENT
+                START_FREEIPA_DELETE_EVENT
         };
     }
 

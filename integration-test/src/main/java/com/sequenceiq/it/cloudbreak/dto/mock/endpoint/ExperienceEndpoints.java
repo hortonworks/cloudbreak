@@ -48,18 +48,18 @@ public final class ExperienceEndpoints<T extends CloudbreakTestDto> {
         return testDto;
     }
 
-
     @MockUri(url = LIFTIE_API_ROOT)
     public interface Liftie {
 
         interface Cluster<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+
+            DefaultResponseConfigure<T, Object> get();
 
             interface ByClusterId<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
 
                 DefaultResponseConfigure<T, Object> delete();
             }
 
-            DefaultResponseConfigure<T, Object> get();
         }
 
         interface Mocksupport<T extends CloudbreakTestDto> {

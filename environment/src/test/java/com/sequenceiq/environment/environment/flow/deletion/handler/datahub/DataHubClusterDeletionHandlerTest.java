@@ -95,7 +95,7 @@ class DataHubClusterDeletionHandlerTest {
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(ENV_NAME);
         assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(ENV_ID);
         assertThat(capturedDeleteEvent.getResourceCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(capturedDeleteEvent.selector()).isEqualTo("START_DATALAKE_CLUSTERS_DELETE_EVENT");
+        assertThat(capturedDeleteEvent.selector()).isEqualTo("START_XP_DELETE_EVENT");
     }
 
     @Test
@@ -109,7 +109,7 @@ class DataHubClusterDeletionHandlerTest {
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(ENV_NAME);
         assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(ENV_ID);
         assertThat(capturedDeleteEvent.getResourceCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(capturedDeleteEvent.selector()).isEqualTo("START_DATALAKE_CLUSTERS_DELETE_EVENT");
+        assertThat(capturedDeleteEvent.selector()).isEqualTo("START_XP_DELETE_EVENT");
     }
 
     @Test

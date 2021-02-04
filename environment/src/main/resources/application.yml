@@ -5,9 +5,6 @@ server:
 
 server.port: 8088
 
-cert:
-  validation: false
-
 opentracing:
   jaeger:
     log-spans: false

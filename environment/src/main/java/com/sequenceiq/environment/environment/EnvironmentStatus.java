@@ -98,7 +98,8 @@ public enum EnvironmentStatus {
                 DELETE_INITIATED,
                 DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
                 DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
-                PUBLICKEY_DELETE_IN_PROGRESS
+                PUBLICKEY_DELETE_IN_PROGRESS,
+                XP_DELETE_IN_PROGRESS
         ).contains(this);
     }
 

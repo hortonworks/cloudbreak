@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.deletion;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.HANDLED_FAILED_ENV_CLUSTERS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATAHUB_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATALAKE_CLUSTERS_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +26,7 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDele
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
@@ -44,10 +46,15 @@ public class EnvClustersDeleteActions {
 
     private final EnvironmentMetricService metricService;
 
-    public EnvClustersDeleteActions(EnvironmentService environmentService, EventSenderService eventService, EnvironmentMetricService metricService) {
+    private final EnvironmentStatusUpdateService environmentStatusUpdateService;
+
+    public EnvClustersDeleteActions(EnvironmentService environmentService, EventSenderService eventService, EnvironmentMetricService metricService,
+            EnvironmentStatusUpdateService environmentStatusUpdateService) {
+
         this.environmentService = environmentService;
         this.eventService = eventService;
         this.metricService = metricService;
+        this.environmentStatusUpdateService = environmentStatusUpdateService;
     }
 
     @Bean(name = "DATAHUB_CLUSTERS_DELETE_STARTED_STATE")
@@ -63,6 +70,25 @@ public class EnvClustersDeleteActions {
                 EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
                         envClustersDeleteState, logDeleteState);
                 sendEvent(context, DELETE_DATAHUB_CLUSTERS_EVENT.selector(), envDto);
+            }
+        };
+    }
+
+    @Bean(name = "XP_DELETE_STARTED_STATE")
+    public Action<?, ?> experienceDeleteAction() {
+        return new AbstractEnvClustersDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
+                        EnvironmentStatus.XP_DELETE_IN_PROGRESS,
+                        ResourceEvent.ENVIRONMENT_XP_DELETION_STARTED,
+                        EnvClustersDeleteState.XP_DELETE_STARTED_STATE);
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_EXPERIENCE_EVENT.selector(), environmentDeletionDto);
             }
         };
     }

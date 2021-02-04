@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATAHUB_CLUSTERS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_DATALAKE_CLUSTERS_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_EXPERIENCE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -39,6 +40,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -119,6 +121,9 @@ class EnvClustersDeleteActionsTest {
 
     @Mock
     private Event<Object> event;
+
+    @Mock
+    private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
     @InjectMocks
     private EnvClustersDeleteActions underTest;
@@ -205,7 +210,6 @@ class EnvClustersDeleteActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
         verify(environment, never()).setStatus(any());
         verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
@@ -260,7 +264,6 @@ class EnvClustersDeleteActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
         verify(environment, never()).setStatus(any());
         verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
@@ -285,6 +288,44 @@ class EnvClustersDeleteActionsTest {
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 
         verifyDeleteActionSuccessEvent(DELETE_DATALAKE_CLUSTERS_EVENT);
+    }
+
+    @Test
+    void experienceDeleteActionFailure() {
+        Action<?, ?> action = configureAction(() -> underTest.experienceDeleteAction());
+
+
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any()))
+                .thenThrow(new IllegalStateException(MESSAGE));
+        when(failureEvent.event()).thenReturn(FAILURE_EVENT);
+
+        action.execute(stateContext);
+
+        verify(environmentService, never()).save(any(Environment.class));
+        verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
+        verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
+        verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
+
+        verifyFailureEvent();
+    }
+
+    @Test
+    void experienceDeleteAction() {
+        Action<?, ?> action = configureAction(() -> underTest.experienceDeleteAction());
+
+        when(environmentDto.getId()).thenReturn(ENVIRONMENT_ID);
+        when(environmentDto.getName()).thenReturn(ENVIRONMENT_NAME);
+        when(environmentDto.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(any(), any(), any(), any(), any()))
+                .thenReturn(environmentDto);
+
+        action.execute(stateContext);
+
+        verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
+        verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
+
+        verifyDeleteActionSuccessEvent(DELETE_EXPERIENCE_EVENT);
     }
 
     private void setActionPrivateFields(Action<?, ?> action) {

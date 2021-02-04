@@ -137,7 +137,8 @@ public enum EnvironmentStatus {
             S3GUARD_TABLE_DELETE_IN_PROGRESS,
             DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
             DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
-            PUBLICKEY_DELETE_IN_PROGRESS
+            PUBLICKEY_DELETE_IN_PROGRESS,
+            XP_DELETE_IN_PROGRESS
     );
 
     private String description;

@@ -1,6 +1,10 @@
 package com.sequenceiq.environment.experience.liftie;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+
+import java.net.URI;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
@@ -8,16 +12,22 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
 
+@ExtendWith(MockitoExtension.class)
 class LiftieConnectorTestBase {
 
     protected static final int ONCE = 1;
 
+    protected static final String LIFTIE_CLUSTER_ENDPOINT_PATH = "somewhereOverTheRainbow";
+
+    @InjectMocks
     private LiftieConnector underTest;
 
     @Mock
@@ -46,9 +56,10 @@ class LiftieConnectorTestBase {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        underTest = new LiftieConnector(mockLiftiePathProvider, mockResponseReader, mockRetryableWebTarget, mockClient, mockInvocationBuilderProvider);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        lenient().when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(getMockWebTarget());
+        lenient().when(mockWebTarget.getUri()).thenReturn(URI.create(LIFTIE_CLUSTER_ENDPOINT_PATH));
+
     }
 
     protected LiftieConnector getUnderTest() {

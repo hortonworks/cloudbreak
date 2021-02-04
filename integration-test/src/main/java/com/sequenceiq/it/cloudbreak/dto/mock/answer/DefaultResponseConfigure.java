@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Entity;
@@ -94,7 +95,7 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
     }
 
     public T execute(Consumer<Response> proc, Entity body) {
-        executeQuery.executeMethod(method, pathReplaced(path), parameters, body, proc, w->w);
+        executeQuery.executeMethod(method, pathReplaced(path), parameters, body, proc, Function.identity());
         return testDto;
     }
 

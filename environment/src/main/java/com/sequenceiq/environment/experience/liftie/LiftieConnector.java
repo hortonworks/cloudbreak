@@ -22,7 +22,6 @@ import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
-import com.sequenceiq.environment.experience.liftie.responses.PageStats;
 
 @Component
 public class LiftieConnector implements LiftieApi {
@@ -50,26 +49,25 @@ public class LiftieConnector implements LiftieApi {
         this.client = client;
     }
 
-
     @Override
     public @NotNull ListClustersResponse listPagedClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable Integer page,
             @Nullable String workload) {
-        return listClusters(env, tenant, page, workload);
+        return listClusters(env, tenant, workload, page);
     }
 
     @Override
     public @NotNull ListClustersResponse listClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable String workload) {
-        return listClusters(env, tenant, null, workload);
+        return listClusters(env, tenant, workload, null);
     }
 
     @Override
     public @NotNull ListClustersResponse listPagedClusters(@NotNull String env, @NotNull String tenant, @Nullable Integer page) {
-        return listClusters(env, tenant, page, null);
+        return listClusters(env, tenant, null, page);
     }
 
     @NotNull
     @Override
-    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable Integer page, @Nullable String workload) {
+    public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable String workload, @Nullable Integer page) {
         LOGGER.debug("About to connect Liftie API to list clusters");
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClustersEndpoint());
         Map<String, String> queryParams = new LinkedHashMap<>();
@@ -80,20 +78,12 @@ public class LiftieConnector implements LiftieApi {
         webTarget = setQueryParams(webTarget, queryParams);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = retryableWebTarget.get(call)) {
-            if (result != null) {
-                return responseReader.read(webTarget.getUri().toString(), result, ListClustersResponse.class)
-                        .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
-            }
-        } catch (RuntimeException re) {
-            LOGGER.warn("Something happened while the Liftie connection has attempted!", re);
+            return responseReader.read(webTarget.getUri().toString(), result, ListClustersResponse.class)
+                    .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Something happened while the Liftie connection has attempted!", e);
+            throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
         }
-        LOGGER.info("Liftie response was null! I don not know what to do so we are expecting this as a normal behavior ¯\\_(ツ)_/¯ ");
-        //TODO: figure out the proper way to handle such a case when the result is null (why can it be null, is it a "good" way of having it, etc.)
-        ListClustersResponse empty = new ListClustersResponse();
-        PageStats ps = new PageStats();
-        ps.setTotalPages(0);
-        empty.setPage(ps);
-        return empty;
     }
 
     @Override
@@ -102,14 +92,12 @@ public class LiftieConnector implements LiftieApi {
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClusterEndpoint(clusterId));
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = retryableWebTarget.delete(call)) {
-            if (result != null) {
-                return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
-                        .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
-            }
-        } catch (RuntimeException re) {
-            LOGGER.warn("Something happened while the Liftie connection has attempted!", re);
+            return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
+                    .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+        } catch (RuntimeException e) {
+            LOGGER.warn("Something happened while the Liftie connection has attempted!", e);
+            throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
         }
-        throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG);
     }
 
     private WebTarget setQueryParams(WebTarget webTarget, Map<String, String> nameValuePairs) {
