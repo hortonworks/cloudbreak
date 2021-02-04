@@ -59,6 +59,7 @@ public class EnvironmentModelDescription {
     public static final String LOCATION_DISPLAY_NAME = "Display name of the location of the environment.";
     public static final String NETWORK = "Network related specifics of the environment.";
     public static final String TELEMETRY = "Telemetry related specifics of the environment.";
+    public static final String BACKUP = "Backup related specifics of the environment.";
 
     public static final String CREDENTIAL_RESPONSE = "Credential of the environment.";
     public static final String CLOUD_PLATFORM = "Cloud platform of the environment.";

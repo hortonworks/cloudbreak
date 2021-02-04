@@ -99,6 +99,7 @@ public class EnvironmentDtoConverter {
                 .withLocationDto(environmentToLocationDto(environment))
                 .withRegions(environment.getRegionSet())
                 .withTelemetry(environment.getTelemetry())
+                .withBackup(environment.getBackup())
                 .withEnvironmentStatus(environment.getStatus())
                 .withCreator(environment.getCreator())
                 .withAuthentication(authenticationDtoConverter.authenticationToDto(environment.getAuthentication()))
@@ -137,6 +138,7 @@ public class EnvironmentDtoConverter {
         environment.setLongitude(location.getLongitude());
         environment.setLocation(location.getName());
         environment.setTelemetry(creationDto.getTelemetry());
+        environment.setBackup(creationDto.getBackup());
         environment.setLocationDisplayName(location.getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());

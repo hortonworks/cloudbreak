@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.converter.EnvironmentStatusConverter;
@@ -61,6 +62,10 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json telemetry;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json backup;
 
     @Column(nullable = false)
     private String location;
@@ -290,6 +295,19 @@ public class Environment implements AuthResource, AccountAwareResource {
         }
     }
 
+    public EnvironmentBackup getBackup() {
+        if (backup != null && backup.getValue() != null) {
+            return JsonUtil.readValueOpt(backup.getValue(), EnvironmentBackup.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setBackup(EnvironmentBackup backup) {
+        if (backup != null) {
+            this.backup = new Json(backup);
+        }
+    }
+
     @Override
     public String getResourceCrn() {
         return resourceCrn;
@@ -398,6 +416,10 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setTelemetry(Json telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public void setBackup(Json backup) {
+        this.backup = backup;
     }
 
     public String getAdminGroupName() {

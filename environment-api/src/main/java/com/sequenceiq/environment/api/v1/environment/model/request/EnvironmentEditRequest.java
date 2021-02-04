@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -30,6 +31,9 @@ public class EnvironmentEditRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.TELEMETRY)
     private TelemetryRequest telemetry;
+
+    @ApiModelProperty(EnvironmentModelDescription.BACKUP)
+    private @Valid BackupRequest backup;
 
     @ApiModelProperty(EnvironmentModelDescription.SECURITY_ACCESS)
     private @Valid SecurityAccessRequest securityAccess;
@@ -85,6 +89,14 @@ public class EnvironmentEditRequest {
 
     public void setTelemetry(TelemetryRequest telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public BackupRequest getBackup() {
+        return backup;
+    }
+
+    public void setBackup(BackupRequest backup) {
+        this.backup = backup;
     }
 
     public SecurityAccessRequest getSecurityAccess() {
