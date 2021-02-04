@@ -83,6 +83,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private Map<DiskType, DisplayName> diskDisplayNames() {
         Map<DiskType, DisplayName> map = new HashMap<>();
+        map.put(diskType(GcpDiskType.HDD.name()), displayName(GcpDiskType.HDD.displayName()));
         map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
         map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
 
@@ -91,6 +92,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private Map<String, VolumeParameterType> diskMappings() {
         Map<String, VolumeParameterType> map = new HashMap<>();
+        map.put(GcpDiskType.HDD.name(), VolumeParameterType.MAGNETIC);
         map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
         map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
 
