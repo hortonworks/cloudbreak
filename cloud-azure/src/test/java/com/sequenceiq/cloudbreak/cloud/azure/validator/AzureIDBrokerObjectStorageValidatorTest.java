@@ -385,6 +385,7 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         RoleASsignmentBuilder(AzureClient client) {
             roleAssignmentsPagedList = Mockito.spy(PagedList.class);
             when(client.listRoleAssignments()).thenReturn(roleAssignmentsPagedList);
+            when(client.listRoleAssignmentsByScopeInner(any())).thenReturn(roleAssignmentsPagedList);
         }
 
         RoleASsignmentBuilder withAssignment(String principalId, String scope) {

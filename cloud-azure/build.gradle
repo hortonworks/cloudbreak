@@ -19,6 +19,7 @@ dependencies {
 
   compile (group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion)
   compile (group: 'com.squareup.okhttp3',               name: 'okhttp-urlconnection',       version: okhttpVersion)
+  compile (group: 'com.squareup.okhttp3',               name: 'logging-interceptor',        version: okhttpVersion)
 
   compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
     exclude group: 'org.slf4j'

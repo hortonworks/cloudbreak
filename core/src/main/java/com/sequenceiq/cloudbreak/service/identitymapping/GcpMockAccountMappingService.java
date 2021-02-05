@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.identitymapping;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -9,11 +11,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 
 @Component
 public class GcpMockAccountMappingService {
@@ -27,14 +29,11 @@ public class GcpMockAccountMappingService {
 
     private final CloudPlatformConnectors cloudPlatformConnectors;
 
-    private final CredentialToCloudCredentialConverter credentialConverter;
-
     public GcpMockAccountMappingService(CloudPlatformConnectors cloudPlatformConnectors, CredentialToCloudCredentialConverter credentialConverter) {
         this.cloudPlatformConnectors = cloudPlatformConnectors;
-        this.credentialConverter = credentialConverter;
     }
 
-    public Map<String, String> getGroupMappings(String region, Credential credential, String adminGroupName) {
+    public Map<String, String> getGroupMappings(String region, CloudCredential credential, String adminGroupName) {
         String projectId = getProjectId(region, credential);
         if (StringUtils.isNotEmpty(adminGroupName)) {
             return replaceProjectName(getGroupMappings(adminGroupName), projectId);
@@ -44,14 +43,14 @@ public class GcpMockAccountMappingService {
         }
     }
 
-    public Map<String, String> getUserMappings(String region, Credential credential) {
+    public Map<String, String> getUserMappings(String region, CloudCredential credential) {
         String projectName = getProjectId(region, credential);
         return replaceProjectName(MOCK_IDBROKER_USER_MAPPINGS, projectName);
     }
 
-    private String getProjectId(String region, Credential credential) {
-        IdentityService identityService = getIdentityService(credential.cloudPlatform());
-        return identityService.getAccountId(region, credentialConverter.convert(credential));
+    private String getProjectId(String region, CloudCredential credential) {
+        IdentityService identityService = getIdentityService(GCP);
+        return identityService.getAccountId(region, credential);
     }
 
     private IdentityService getIdentityService(String platform) {
