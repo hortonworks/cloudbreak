@@ -48,6 +48,9 @@ public class ClusterUseCaseMapper {
             case "CLUSTER_CREATION_FINISHED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.CREATE_FINISHED;
                 break;
+            case "VALIDATE_CLOUD_CONFIG_FAILED_STATE":
+            case "VALIDATE_KERBEROS_CONFIG_FAILED_STATE":
+            case "EXTERNAL_DATABASE_CREATION_FAILED_STATE":
             case "CLUSTER_CREATION_FAILED_STATE":
             case "STACK_CREATION_FAILED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.CREATE_FAILED;
@@ -55,6 +58,8 @@ public class ClusterUseCaseMapper {
             case "TERMINATION_FINISHED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.DELETE_FINISHED;
                 break;
+            case "CLUSTER_TERMINATION_FAILED_STATE":
+            case "EXTERNAL_DATABASE_TERMINATION_FAILED_STATE":
             case "TERMINATION_FAILED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.DELETE_FAILED;
                 break;

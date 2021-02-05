@@ -1026,6 +1026,8 @@ message CDPOperationDetails {
     string flowId = 7;
     // Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
     string flowChainId = 8;
+    // Flow state when this event is written
+    string flowState = 9;
 }
 
 message CDPEnvironmentDetails {

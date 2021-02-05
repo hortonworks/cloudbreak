@@ -35,8 +35,12 @@ public class StructuredFlowEventToCDPOperationDetailsConverter {
 
         FlowDetails flowDetails = structuredFlowEvent.getFlow();
         if (flowDetails != null) {
-            cdpOperationDetails.setFlowId(flowDetails.getFlowId() != null ? flowDetails.getFlowId() : "");
-            cdpOperationDetails.setFlowChainId(flowDetails.getFlowChainId() != null ? flowDetails.getFlowChainId() : "");
+            String flowId = flowDetails.getFlowId() != null ? flowDetails.getFlowId() : "";
+            cdpOperationDetails.setFlowId(flowId);
+            // We will use flow id if there is no flowchain id, this helps to correlate requests
+            cdpOperationDetails.setFlowChainId(flowDetails.getFlowChainId() != null ? flowDetails.getFlowChainId() : flowId);
+            cdpOperationDetails.setFlowState(flowDetails.getFlowState() != null &&
+                    !"unknown".equals(flowDetails.getFlowState()) ? flowDetails.getFlowState() : "");
         }
 
         cdpOperationDetails.setCdpRequestProcessingStep(clusterRequestProcessingStepMapper.mapIt(structuredFlowEvent.getFlow()));
@@ -44,5 +48,4 @@ public class StructuredFlowEventToCDPOperationDetailsConverter {
 
         return cdpOperationDetails.build();
     }
-
 }
