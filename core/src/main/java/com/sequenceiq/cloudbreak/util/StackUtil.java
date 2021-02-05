@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.time.Duration;
 import java.util.Date;
 import java.util.HashSet;
@@ -14,6 +17,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -32,9 +36,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 @Service
 public class StackUtil {
@@ -149,8 +150,10 @@ public class StackUtil {
         return agents;
     }
 
-    private Map<String, Map<String, String>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
+    @VisibleForTesting
+    Map<String, Map<String, String>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
         return volumeSets.stream()
+                .filter(volumeSet -> StringUtils.isNotEmpty(volumeSet.getInstanceId()))
                 .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(),
                         resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
                 .map(entry -> {

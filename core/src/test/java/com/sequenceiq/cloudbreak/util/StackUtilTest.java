@@ -7,7 +7,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -17,11 +20,16 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.common.api.type.ResourceType;
 
 public class StackUtilTest {
 
@@ -30,6 +38,9 @@ public class StackUtilTest {
 
     @Mock
     private CredentialClientService credentialClientService;
+
+    @Mock
+    private ResourceAttributeUtil resourceAttributeUtil;
 
     @InjectMocks
     private final StackUtil stackUtil = new StackUtil();
@@ -79,5 +90,42 @@ public class StackUtilTest {
         CloudCredential result = stackUtil.getCloudCredential(stack);
         assertEquals(result.getId(), cloudCredential.getId());
         assertEquals(result.getName(), cloudCredential.getName());
+    }
+
+    @Test
+    public void testCreateInstanceToVolumeInfoMapWhenEveryVolumeSetAreAttachedToInstance() {
+        List<Resource> volumeSets = new ArrayList<>();
+        volumeSets.add(getVolumeSetResource("anInstanceId"));
+        volumeSets.add(getVolumeSetResource("secInstanceId"));
+        volumeSets.add(getVolumeSetResource("thirdInstanceId"));
+
+        Map<String, Map<String, String>> actual = stackUtil.createInstanceToVolumeInfoMap(volumeSets);
+
+        assertEquals(volumeSets.size(), actual.size());
+    }
+
+    @Test
+    public void testCreateInstanceToVolumeInfoMapWhenNotEveryVolumeSetAreAttachedToInstance() {
+        List<Resource> volumeSets = new ArrayList<>();
+        volumeSets.add(getVolumeSetResource("anInstanceId"));
+        volumeSets.add(getVolumeSetResource("secInstanceId"));
+        volumeSets.add(getVolumeSetResource("thirdInstanceId"));
+        volumeSets.add(getVolumeSetResource(null));
+        volumeSets.add(getVolumeSetResource(null));
+
+        Map<String, Map<String, String>> actual = stackUtil.createInstanceToVolumeInfoMap(volumeSets);
+
+        int numberOfVolumeSetsWithoutInstanceReference = 2;
+        assertEquals(volumeSets.size() - numberOfVolumeSetsWithoutInstanceReference, actual.size());
+    }
+
+    private Resource getVolumeSetResource(String instanceID) {
+        Resource resource = new Resource();
+        resource.setResourceType(ResourceType.AZURE_VOLUMESET);
+        resource.setInstanceId(instanceID);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes.Builder()
+                .build();
+        resource.setAttributes(new Json(volumeSetAttributes));
+        return resource;
     }
 }
