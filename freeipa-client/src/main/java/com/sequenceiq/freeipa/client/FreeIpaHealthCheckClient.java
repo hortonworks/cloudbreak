@@ -86,6 +86,7 @@ public class FreeIpaHealthCheckClient implements AutoCloseable {
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL &&
                 response.getStatus() != Response.Status.SERVICE_UNAVAILABLE.getStatusCode()) {
             String message = String.format("Invoke FreeIPA health check failed: %d", response.getStatus());
+            LOGGER.warn("{}, reason: {}", message, response.readEntity(String.class));
             throw new FreeIpaClientException(message, response.getStatus());
         }
     }
