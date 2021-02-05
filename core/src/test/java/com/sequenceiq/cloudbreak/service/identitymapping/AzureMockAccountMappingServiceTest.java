@@ -8,10 +8,8 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.dto.credential.azure.AzureCredentialAttributes;
 
 class AzureMockAccountMappingServiceTest {
 
@@ -26,15 +24,13 @@ class AzureMockAccountMappingServiceTest {
 
     private AzureMockAccountMappingService underTest;
 
-    private Credential credential;
+    private CloudCredential credential;
 
     @BeforeEach
     void setUp() {
         underTest = new AzureMockAccountMappingService();
-        credential = Credential.builder()
-                .cloudPlatform(CloudPlatform.AZURE.name())
-                .azure(AzureCredentialAttributes.builder().subscriptionId(SUBSCRIPTION_ID).build())
-                .build();
+        Map<String, Object> attributes = Map.of("azure", Map.of("subscriptionId", SUBSCRIPTION_ID));
+        credential = new CloudCredential("id", "name", attributes, false);
     }
 
     @Test

@@ -7,6 +7,7 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_START_STATE;
+import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_STORAGE_VALIDATION_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_ENV_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_STACK_CREATION_IN_PROGRESS_STATE;
@@ -26,12 +27,12 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
             .defaultFailureEvent(SDX_CREATE_FAILED_EVENT)
 
             .from(INIT_STATE)
-            .to(SDX_CREATION_WAIT_RDS_STATE)
-            .event(SdxCreateEvent.ENV_WAIT_EVENT).defaultFailureEvent()
+            .to(SDX_CREATION_STORAGE_VALIDATION_STATE)
+            .event(SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT).defaultFailureEvent()
 
-            .from(INIT_STATE)
+            .from(SDX_CREATION_STORAGE_VALIDATION_STATE)
             .to(SDX_CREATION_WAIT_RDS_STATE)
-            .event(SdxCreateEvent.RDS_WAIT_EVENT).defaultFailureEvent()
+            .event(SdxCreateEvent.STORAGE_VALIDATION_SUCCESS_EVENT).defaultFailureEvent()
 
             .from(SDX_CREATION_WAIT_RDS_STATE)
             .to(SDX_CREATION_WAIT_ENV_STATE)
@@ -70,7 +71,7 @@ public class SdxCreateFlowConfig extends AbstractFlowConfiguration<SdxCreateStat
     @Override
     public SdxCreateEvent[] getInitEvents() {
         return new SdxCreateEvent[]{
-                SdxCreateEvent.RDS_WAIT_EVENT
+                SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT
         };
     }
 
