@@ -43,7 +43,7 @@ class CmMgmtServiceConfigMemoryService implements CmConfigServiceDelegate {
         serviceMonitor.ifPresent(apiRole ->
                 addConfig(apiRole,
                     createApiConfig("firehose_non_java_memory_bytes",
-                        sMONMemoryWorkaroundService.firehoseNonJavaMemoryBytes(stack.getType(), components)
+                        sMONMemoryWorkaroundService.firehoseNonJavaMemoryBytes(stack.getType(), components, stack.getFullNodeCount())
                     )
                 )
         );

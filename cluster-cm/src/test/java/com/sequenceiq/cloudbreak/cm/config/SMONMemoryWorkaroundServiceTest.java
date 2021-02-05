@@ -19,6 +19,10 @@ public class SMONMemoryWorkaroundServiceTest {
 
     @Before
     public void setUp() {
+        ReflectionTestUtils.setField(underTest, "smonSmallClusterMaxSize", 10);
+        ReflectionTestUtils.setField(underTest, "smonMediumClusterMaxSize", 100);
+        ReflectionTestUtils.setField(underTest, "smonLargeClusterMaxSize", 500);
+
         // DL
         ReflectionTestUtils.setField(underTest, "datalakeNormalFirehoseHeapsize", 1);
         ReflectionTestUtils.setField(underTest, "datalakeExtensiveFirehoseHeapsize", 3);
@@ -55,33 +59,69 @@ public class SMONMemoryWorkaroundServiceTest {
     }
 
     @Test
-    public void getFirehoseHeapsizeWhenDHAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
-        Assert.assertEquals("6442450944", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+    public void getFirehoseHeapsizeWhenDHSMALLAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
+        Assert.assertEquals("4294967296", underTest.firehoseHeapsize(StackType.WORKLOAD,
                 Sets.newHashSet("REGIONSERVER")));
     }
 
     @Test
     public void getFirehoseNonJavaMemoryBytesWhenDLAndNoRegionServerInTheBlueprintShouldReturnLowMemoryforDL() {
         Assert.assertEquals("1073741824", underTest.firehoseNonJavaMemoryBytes(StackType.DATALAKE,
-                Sets.newHashSet()));
+                Sets.newHashSet(), 3));
     }
 
     @Test
-    public void getFirehoseNonJavaMemoryBytesWhenDLAndRegionServerInTheBlueprintShouldReturnHighMemoryforDL() {
+    public void getFirehoseNonJavaMemoryBytesWhenDLSMALLAndRegionServerInTheBlueprintShouldReturnHighMemoryforDL() {
         Assert.assertEquals("3221225472", underTest.firehoseNonJavaMemoryBytes(StackType.DATALAKE,
-                Sets.newHashSet("REGIONSERVER")));
+                Sets.newHashSet("REGIONSERVER"), 3));
     }
 
     @Test
-    public void getFirehoseNonJavaMemoryBytesWhenDHAndNoRegionServerInTheBlueprintShouldReturnLowMemoryforDH() {
+    public void getFirehoseNonJavaMemoryBytesWhenDHSMALLAndNoRegionServerInTheBlueprintShouldReturnLowMemoryforDH() {
         Assert.assertEquals("2147483648", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
-                Sets.newHashSet()));
+                Sets.newHashSet(), 1));
     }
 
     @Test
-    public void getFirehoseNonJavaMemoryBytesWhenDHAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
+    public void getFirehoseNonJavaMemoryBytesWhenDHMEDIUMAndNoRegionServerInTheBlueprintShouldReturnLowMemoryforDH() {
+        Assert.assertEquals("2147483648", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+                Sets.newHashSet(), 99));
+    }
+
+    @Test
+    public void getFirehoseNonJavaMemoryBytesWhenDHLARGEAndNoRegionServerInTheBlueprintShouldReturnLowMemoryforDH() {
+        Assert.assertEquals("7516192768", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+                Sets.newHashSet(), 499));
+    }
+
+    @Test
+    public void getFirehoseNonJavaMemoryBytesWhenDHGIGAAndNoRegionServerInTheBlueprintShouldReturnLowMemoryforDH() {
+        Assert.assertEquals("11811160064", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+                Sets.newHashSet(), 1000));
+    }
+
+    @Test
+    public void getFirehoseNonJavaMemoryBytesWhenDHSMALLAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
         Assert.assertEquals("6442450944", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
-                Sets.newHashSet("REGIONSERVER")));
+                Sets.newHashSet("REGIONSERVER"), 1));
+    }
+
+    @Test
+    public void getFirehoseNonJavaMemoryBytesWhenDHMEDIUMAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
+        Assert.assertEquals("6442450944", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+                Sets.newHashSet("REGIONSERVER"), 99));
+    }
+
+    @Test
+    public void getFirehoseNonJavaMemoryBytesWhenDHLARGEAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
+        Assert.assertEquals("7516192768", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+                Sets.newHashSet("REGIONSERVER"), 499));
+    }
+
+    @Test
+    public void getFirehoseNonJavaMemoryBytesWhenDHGIGAAndRegionServerInTheBlueprintShouldReturnHighMemoryforDH() {
+        Assert.assertEquals("11811160064", underTest.firehoseNonJavaMemoryBytes(StackType.WORKLOAD,
+                Sets.newHashSet("REGIONSERVER"), 1000));
     }
 
 }
