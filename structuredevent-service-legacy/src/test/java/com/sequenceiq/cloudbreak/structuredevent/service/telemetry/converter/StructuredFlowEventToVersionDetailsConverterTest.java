@@ -49,7 +49,8 @@ class StructuredFlowEventToVersionDetailsConverterTest {
         Assert.assertEquals("7.2.7", versionDetails.getCrVersion());
         Assert.assertEquals("2021-02-04", versionDetails.getOsPatchLevel());
         Assert.assertEquals("3000.5", versionDetails.getSaltVersion());
-        Assert.assertTrue(versionDetails.getAll().contains("something"));
+        Assert.assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
+                " salt=3000.5, stack=7.2.7", versionDetails.getAll());
     }
 
     private StructuredFlowEvent createStructuredFlowEvent() {

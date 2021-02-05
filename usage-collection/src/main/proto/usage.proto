@@ -965,47 +965,61 @@ message CDPClusterStatus {
   enum Value {
     // A value indicating the enum is unset.
     UNSET = 0;
-    // The status when CDP CP is trying to create an environment.
+    // The status when CDP CP is trying to create a cluster.
     CREATE_STARTED = 1;
-    // The status when CDP CP is done creating an environment.
+    // The status when CDP CP is done creating a cluster.
     CREATE_FINISHED = 2;
-    // The status when CDP CP failed to provision an environment.
+    // The status when CDP CP failed to provision a cluster.
     CREATE_FAILED = 3;
 
-    // The status when CDP CP is trying to delete an environment.
+    // The status when CDP CP is trying to delete a cluster.
     DELETE_STARTED = 4;
-    // The status when CDP CP is done deleting an environment.
+    // The status when CDP CP is done deleting a cluster.
     DELETE_FINISHED = 5;
-    //  The status when CDP CP failed to delete an environment.
+    //  The status when CDP CP failed to delete a cluster.
     DELETE_FAILED = 6;
 
-    // The status when an environment is trying to suspend.
+    // The status when a cluster is trying to suspend.
     SUSPEND_STARTED = 7;
-    // The status when an environment is suspended.
+    // The status when a cluster is suspended.
     SUSPEND_FINISHED = 8;
-    // The status when an environment failed to suspend.
+    // The status when a cluster failed to suspend.
     SUSPEND_FAILED = 9;
 
-    // The status when an environment is trying to resume.
+    // The status when a cluster is trying to resume.
     RESUME_STARTED = 10;
-    // The status when an environment completed resuming.
+    // The status when a cluster completed resuming.
     RESUME_FINISHED = 11;
-    // The status when an environment failed to resume.
+    // The status when a cluster failed to resume.
     RESUME_FAILED = 12;
 
-    // The status when an environment is trying to resume.
+    // The status when a cluster is trying to resume.
     UPGRADE_STARTED = 13;
-    // The status when an environment completed resuming.
+    // The status when a cluster completed resuming.
     UPGRADE_FINISHED = 14;
-    // The status when an environment failed to resume.
+    // The status when a cluster failed to resume.
     UPGRADE_FAILED = 15;
 
-    // The status when an environment is trying to resume.
+    // The status when a cluster is trying to resume.
     REPAIR_STARTED = 16;
-    // The status when an environment completed resuming.
+    // The status when a cluster completed resuming.
     REPAIR_FINISHED = 17;
-    // The status when an environment failed to resume.
+    // The status when a cluster failed to resume.
     REPAIR_FAILED = 18;
+
+    // The status when a cluster is trying to resume.
+    UPSCALE_STARTED = 19;
+    // The status when a cluster completed resuming.
+    UPSCALE_FINISHED = 20;
+    // The status when a cluster failed to resume.
+    UPSCALE_FAILED = 21;
+
+    // The status when a cluster is trying to resume.
+    DOWNSCALE_STARTED = 22;
+    // The status when a cluster completed resuming.
+    DOWNSCALE_FINISHED = 23;
+    // The status when a cluster failed to resume.
+    DOWNSCALE_FAILED = 24;
   }
 }
 
@@ -1120,8 +1134,10 @@ message CDPClusterShape {
   string clusterTemplateName = 1;
   // Number of nodes
   int32 nodes = 2;
+  // Detailed node count per host group
+  string hostGroupNodeCount = 3;
   // Definition details in a json format
-  string definitionDetails = 3;
+  string definitionDetails = 4;
 }
 
 message CDPVersionDetails {
