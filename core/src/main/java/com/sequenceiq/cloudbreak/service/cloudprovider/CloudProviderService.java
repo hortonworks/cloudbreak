@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
+import com.sequenceiq.cloudbreak.service.identitymapping.ObjectStorageValidateRequestDecorator;
 
 @Service
 public class CloudProviderService {
@@ -27,6 +28,9 @@ public class CloudProviderService {
 
     @Inject
     private CloudStorageConverter cloudStorageConverter;
+
+    @Inject
+    private ObjectStorageValidateRequestDecorator objectStorageValidateRequestDecorator;
 
     public CloudProviderService(CloudPlatformConnectors cloudPlatformConnectors) {
         this.cloudPlatformConnectors = cloudPlatformConnectors;
@@ -39,6 +43,9 @@ public class CloudProviderService {
 
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
         ObjectStorageConnector objectStorageConnector = getCloudConnector(request).objectStorage();
+        if (request.getMockAccountMappingSettings() != null) {
+            objectStorageValidateRequestDecorator.decorateWithMockAccountMapping(request);
+        }
         SpiFileSystem spiFileSystem = cloudStorageConverter.requestToSpiFileSystem(request.getCloudStorageRequest());
         request.setSpiFileSystem(spiFileSystem);
         return objectStorageConnector.validateObjectStorage(request);

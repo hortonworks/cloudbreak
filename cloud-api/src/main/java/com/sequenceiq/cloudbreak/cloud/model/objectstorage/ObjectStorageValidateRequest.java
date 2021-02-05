@@ -22,6 +22,10 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
     private SpiFileSystem spiFileSystem;
 
+    private String logsLocationBase;
+
+    private MockAccountMappingSettings mockAccountMappingSettings;
+
     public ObjectStorageValidateRequest() {
     }
 
@@ -30,6 +34,8 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.cloudPlatform = builder.cloudPlatform;
         this.cloudStorageRequest = builder.cloudStorageRequest;
         this.spiFileSystem = builder.spiFileSystem;
+        this.logsLocationBase = builder.logsLocationBase;
+        this.mockAccountMappingSettings = builder.mockAccountMappingSettings;
     }
 
     public static Builder builder() {
@@ -68,6 +74,22 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         this.spiFileSystem = spiFileSystem;
     }
 
+    public String getLogsLocationBase() {
+        return logsLocationBase;
+    }
+
+    public void setLogsLocationBase(String logsLocationBase) {
+        this.logsLocationBase = logsLocationBase;
+    }
+
+    public MockAccountMappingSettings getMockAccountMappingSettings() {
+        return mockAccountMappingSettings;
+    }
+
+    public void setMockAccountMappingSettings(MockAccountMappingSettings mockAccountMappingSettings) {
+        this.mockAccountMappingSettings = mockAccountMappingSettings;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -80,12 +102,13 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
         return Objects.equals(credential, request.credential) &&
                 Objects.equals(cloudPlatform, request.cloudPlatform) &&
                 Objects.equals(cloudStorageRequest, request.cloudStorageRequest) &&
-                Objects.equals(spiFileSystem, request.spiFileSystem);
+                Objects.equals(spiFileSystem, request.spiFileSystem) &&
+                Objects.equals(logsLocationBase, request.logsLocationBase);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem);
+        return Objects.hash(credential, cloudPlatform, cloudStorageRequest, spiFileSystem, logsLocationBase);
     }
 
     @Override
@@ -94,6 +117,7 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", cloudStorageRequest='" + JsonUtil.writeValueAsStringSilent(cloudStorageRequest) + '\'' +
                 ", spiFileSystem='" + spiFileSystem + '\'' +
+                ", logsLocationBase='" + logsLocationBase + '\'' +
                 '}';
     }
 
@@ -117,6 +141,10 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
         private SpiFileSystem spiFileSystem;
 
+        private String logsLocationBase;
+
+        private MockAccountMappingSettings mockAccountMappingSettings;
+
         public Builder withCredential(CloudCredential credential) {
             this.credential = credential;
             return this;
@@ -134,6 +162,16 @@ public class ObjectStorageValidateRequest implements CloudPlatformAware {
 
         public Builder withSpiFileSystem(SpiFileSystem spiFileSystem) {
             this.spiFileSystem = spiFileSystem;
+            return this;
+        }
+
+        public Builder withLogsLocationBase(String logsLocationBase) {
+            this.logsLocationBase = logsLocationBase;
+            return this;
+        }
+
+        public Builder withMockSettings(String region, String adminGroupName) {
+            this.mockAccountMappingSettings = new MockAccountMappingSettings(region, adminGroupName);
             return this;
         }
 
