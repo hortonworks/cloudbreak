@@ -1131,6 +1131,10 @@ message CDPVersionDetails {
   string cdpdVersion = 3;
   // Salt Version
   string saltVersion = 4;
+  // Date when the OS was updated last time
+  string osPatchLevel = 5;
+  // Key value pairs of every version what we know
+  string all = 6;
 }
 
 message CDPClusterDetails {

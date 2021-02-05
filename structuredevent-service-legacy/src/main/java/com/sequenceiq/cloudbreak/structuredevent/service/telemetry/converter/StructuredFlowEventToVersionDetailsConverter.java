@@ -23,10 +23,17 @@ public class StructuredFlowEventToVersionDetailsConverter {
                 if (image != null) {
                     Map<String, String> packageVersions = image.getPackageVersions();
                     if (packageVersions != null) {
-                        versionDetails.setCmVersion(packageVersions.getOrDefault("cm", ""));
-                        versionDetails.setCdpdVersion(packageVersions.getOrDefault("stack", ""));
+                        String cmVersion = String.format("%s-%s",
+                                packageVersions.getOrDefault("cm", ""), packageVersions.getOrDefault("cm-build-number", ""));
+                        String cdpdVersion = String.format("%s-%s",
+                                packageVersions.getOrDefault("stack", ""), packageVersions.getOrDefault("cdh-build-number", ""));
+
+                        versionDetails.setCmVersion(cmVersion);
+                        versionDetails.setCdpdVersion(cdpdVersion);
                         versionDetails.setCrVersion(packageVersions.getOrDefault("stack", ""));
                         versionDetails.setSaltVersion(packageVersions.getOrDefault("salt", ""));
+                        versionDetails.setOsPatchLevel(packageVersions.getOrDefault("date", ""));
+                        versionDetails.setAll(packageVersions.toString());
                     }
                 }
             }

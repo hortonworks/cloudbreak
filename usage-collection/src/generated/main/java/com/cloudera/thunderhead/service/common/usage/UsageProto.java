@@ -72173,6 +72173,42 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getSaltVersionBytes();
+
+    /**
+     * <pre>
+     * Date when the OS was updated last time
+     * </pre>
+     *
+     * <code>string osPatchLevel = 5;</code>
+     */
+    java.lang.String getOsPatchLevel();
+    /**
+     * <pre>
+     * Date when the OS was updated last time
+     * </pre>
+     *
+     * <code>string osPatchLevel = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getOsPatchLevelBytes();
+
+    /**
+     * <pre>
+     * Key value pairs of every version what we know
+     * </pre>
+     *
+     * <code>string all = 6;</code>
+     */
+    java.lang.String getAll();
+    /**
+     * <pre>
+     * Key value pairs of every version what we know
+     * </pre>
+     *
+     * <code>string all = 6;</code>
+     */
+    com.google.protobuf.ByteString
+        getAllBytes();
   }
   /**
    * Protobuf type {@code usage.CDPVersionDetails}
@@ -72191,6 +72227,8 @@ public final class UsageProto {
       cmVersion_ = "";
       cdpdVersion_ = "";
       saltVersion_ = "";
+      osPatchLevel_ = "";
+      all_ = "";
     }
 
     @java.lang.Override
@@ -72239,6 +72277,18 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               saltVersion_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              osPatchLevel_ = s;
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              all_ = s;
               break;
             }
             default: {
@@ -72441,6 +72491,90 @@ public final class UsageProto {
       }
     }
 
+    public static final int OSPATCHLEVEL_FIELD_NUMBER = 5;
+    private volatile java.lang.Object osPatchLevel_;
+    /**
+     * <pre>
+     * Date when the OS was updated last time
+     * </pre>
+     *
+     * <code>string osPatchLevel = 5;</code>
+     */
+    public java.lang.String getOsPatchLevel() {
+      java.lang.Object ref = osPatchLevel_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        osPatchLevel_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Date when the OS was updated last time
+     * </pre>
+     *
+     * <code>string osPatchLevel = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getOsPatchLevelBytes() {
+      java.lang.Object ref = osPatchLevel_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        osPatchLevel_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ALL_FIELD_NUMBER = 6;
+    private volatile java.lang.Object all_;
+    /**
+     * <pre>
+     * Key value pairs of every version what we know
+     * </pre>
+     *
+     * <code>string all = 6;</code>
+     */
+    public java.lang.String getAll() {
+      java.lang.Object ref = all_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        all_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Key value pairs of every version what we know
+     * </pre>
+     *
+     * <code>string all = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAllBytes() {
+      java.lang.Object ref = all_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        all_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -72467,6 +72601,12 @@ public final class UsageProto {
       if (!getSaltVersionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, saltVersion_);
       }
+      if (!getOsPatchLevelBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, osPatchLevel_);
+      }
+      if (!getAllBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, all_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -72487,6 +72627,12 @@ public final class UsageProto {
       }
       if (!getSaltVersionBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, saltVersion_);
+      }
+      if (!getOsPatchLevelBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, osPatchLevel_);
+      }
+      if (!getAllBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, all_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -72512,6 +72658,10 @@ public final class UsageProto {
           .equals(other.getCdpdVersion());
       result = result && getSaltVersion()
           .equals(other.getSaltVersion());
+      result = result && getOsPatchLevel()
+          .equals(other.getOsPatchLevel());
+      result = result && getAll()
+          .equals(other.getAll());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -72531,6 +72681,10 @@ public final class UsageProto {
       hash = (53 * hash) + getCdpdVersion().hashCode();
       hash = (37 * hash) + SALTVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getSaltVersion().hashCode();
+      hash = (37 * hash) + OSPATCHLEVEL_FIELD_NUMBER;
+      hash = (53 * hash) + getOsPatchLevel().hashCode();
+      hash = (37 * hash) + ALL_FIELD_NUMBER;
+      hash = (53 * hash) + getAll().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -72672,6 +72826,10 @@ public final class UsageProto {
 
         saltVersion_ = "";
 
+        osPatchLevel_ = "";
+
+        all_ = "";
+
         return this;
       }
 
@@ -72702,6 +72860,8 @@ public final class UsageProto {
         result.cmVersion_ = cmVersion_;
         result.cdpdVersion_ = cdpdVersion_;
         result.saltVersion_ = saltVersion_;
+        result.osPatchLevel_ = osPatchLevel_;
+        result.all_ = all_;
         onBuilt();
         return result;
       }
@@ -72764,6 +72924,14 @@ public final class UsageProto {
         }
         if (!other.getSaltVersion().isEmpty()) {
           saltVersion_ = other.saltVersion_;
+          onChanged();
+        }
+        if (!other.getOsPatchLevel().isEmpty()) {
+          osPatchLevel_ = other.osPatchLevel_;
+          onChanged();
+        }
+        if (!other.getAll().isEmpty()) {
+          all_ = other.all_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -73147,6 +73315,184 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         saltVersion_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object osPatchLevel_ = "";
+      /**
+       * <pre>
+       * Date when the OS was updated last time
+       * </pre>
+       *
+       * <code>string osPatchLevel = 5;</code>
+       */
+      public java.lang.String getOsPatchLevel() {
+        java.lang.Object ref = osPatchLevel_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          osPatchLevel_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Date when the OS was updated last time
+       * </pre>
+       *
+       * <code>string osPatchLevel = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getOsPatchLevelBytes() {
+        java.lang.Object ref = osPatchLevel_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          osPatchLevel_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Date when the OS was updated last time
+       * </pre>
+       *
+       * <code>string osPatchLevel = 5;</code>
+       */
+      public Builder setOsPatchLevel(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        osPatchLevel_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Date when the OS was updated last time
+       * </pre>
+       *
+       * <code>string osPatchLevel = 5;</code>
+       */
+      public Builder clearOsPatchLevel() {
+        
+        osPatchLevel_ = getDefaultInstance().getOsPatchLevel();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Date when the OS was updated last time
+       * </pre>
+       *
+       * <code>string osPatchLevel = 5;</code>
+       */
+      public Builder setOsPatchLevelBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        osPatchLevel_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object all_ = "";
+      /**
+       * <pre>
+       * Key value pairs of every version what we know
+       * </pre>
+       *
+       * <code>string all = 6;</code>
+       */
+      public java.lang.String getAll() {
+        java.lang.Object ref = all_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          all_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Key value pairs of every version what we know
+       * </pre>
+       *
+       * <code>string all = 6;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAllBytes() {
+        java.lang.Object ref = all_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          all_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Key value pairs of every version what we know
+       * </pre>
+       *
+       * <code>string all = 6;</code>
+       */
+      public Builder setAll(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        all_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Key value pairs of every version what we know
+       * </pre>
+       *
+       * <code>string all = 6;</code>
+       */
+      public Builder clearAll() {
+        
+        all_ = getDefaultInstance().getAll();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Key value pairs of every version what we know
+       * </pre>
+       *
+       * <code>string all = 6;</code>
+       */
+      public Builder setAllBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        all_ = value;
         onChanged();
         return this;
       }
@@ -79485,34 +79831,34 @@ public final class UsageProto {
       "imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"X\n\017C" +
       "DPClusterShape\022\033\n\023clusterTemplateName\030\001 " +
       "\001(\t\022\r\n\005nodes\030\002 \001(\005\022\031\n\021definitionDetails\030" +
-      "\003 \001(\t\"c\n\021CDPVersionDetails\022\021\n\tcrVersion\030" +
-      "\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030" +
-      "\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\"\241\001\n\021CDPCluste" +
-      "rDetails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.C" +
-      "DPClusterShape\0220\n\016versionDetails\030\002 \001(\0132\030" +
-      ".usage.CDPVersionDetails\022,\n\014imageDetails" +
-      "\030\003 \001(\0132\026.usage.CDPImageDetails\"\226\001\n\024CDPDa" +
-      "talakeRequested\0224\n\020operationDetails\030\001 \001(" +
-      "\0132\032.usage.CDPOperationDetails\022\026\n\016environ" +
-      "mentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030." +
-      "usage.CDPClusterDetails\"\313\001\n\030CDPDatalakeS" +
-      "tatusChanged\0224\n\020operationDetails\030\001 \001(\0132\032" +
-      ".usage.CDPOperationDetails\0220\n\toldStatus\030" +
-      "\002 \001(\0162\035.usage.CDPClusterStatus.Value\0220\n\t" +
-      "newStatus\030\003 \001(\0162\035.usage.CDPClusterStatus" +
-      ".Value\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDat" +
-      "ahubRequested\0224\n\020operationDetails\030\001 \001(\0132" +
-      "\032.usage.CDPOperationDetails\022\026\n\016environme" +
-      "ntCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.us" +
-      "age.CDPClusterDetails\"\312\001\n\027CDPDatahubStat" +
-      "usChanged\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
-      "age.CDPOperationDetails\0220\n\toldStatus\030\002 \001" +
-      "(\0162\035.usage.CDPClusterStatus.Value\0220\n\tnew" +
-      "Status\030\003 \001(\0162\035.usage.CDPClusterStatus.Va" +
-      "lue\022\025\n\rfailureReason\030\004 \001(\tBV\n-com.cloude" +
-      "ra.thunderhead.service.common.usageB\nUsa" +
-      "geProtoZ\031com/cloudera/cdp/protobufb\006prot" +
-      "o3"
+      "\003 \001(\t\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion" +
+      "\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion" +
+      "\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLe" +
+      "vel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDet" +
+      "ails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPCl" +
+      "usterShape\0220\n\016versionDetails\030\002 \001(\0132\030.usa" +
+      "ge.CDPVersionDetails\022,\n\014imageDetails\030\003 \001" +
+      "(\0132\026.usage.CDPImageDetails\"\226\001\n\024CDPDatala" +
+      "keRequested\0224\n\020operationDetails\030\001 \001(\0132\032." +
+      "usage.CDPOperationDetails\022\026\n\016environment" +
+      "Crn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usag" +
+      "e.CDPClusterDetails\"\313\001\n\030CDPDatalakeStatu" +
+      "sChanged\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
+      "ge.CDPOperationDetails\0220\n\toldStatus\030\002 \001(" +
+      "\0162\035.usage.CDPClusterStatus.Value\0220\n\tnewS" +
+      "tatus\030\003 \001(\0162\035.usage.CDPClusterStatus.Val" +
+      "ue\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDatahub" +
+      "Requested\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
+      "age.CDPOperationDetails\022\026\n\016environmentCr" +
+      "n\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage." +
+      "CDPClusterDetails\"\312\001\n\027CDPDatahubStatusCh" +
+      "anged\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
+      "CDPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035" +
+      ".usage.CDPClusterStatus.Value\0220\n\tnewStat" +
+      "us\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
+      "\025\n\rfailureReason\030\004 \001(\tBV\n-com.cloudera.t" +
+      "hunderhead.service.common.usageB\nUsagePr" +
+      "otoZ\031com/cloudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -79903,7 +80249,7 @@ public final class UsageProto {
     internal_static_usage_CDPVersionDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPVersionDetails_descriptor,
-        new java.lang.String[] { "CrVersion", "CmVersion", "CdpdVersion", "SaltVersion", });
+        new java.lang.String[] { "CrVersion", "CmVersion", "CdpdVersion", "SaltVersion", "OsPatchLevel", "All", });
     internal_static_usage_CDPClusterDetails_descriptor =
       getDescriptor().getMessageTypes().get(63);
     internal_static_usage_CDPClusterDetails_fieldAccessorTable = new
