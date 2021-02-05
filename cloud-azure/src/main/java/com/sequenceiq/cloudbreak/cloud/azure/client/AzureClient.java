@@ -57,7 +57,6 @@ import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.priv
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentMode;
 import com.microsoft.azure.management.resources.DeploymentOperations;
-import com.microsoft.azure.management.resources.GenericResource;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
 import com.microsoft.azure.management.resources.Subscription;
@@ -739,10 +738,6 @@ public class AzureClient {
 
     public void deleteGenericResourceById(String databaseServerId) {
         handleAuthException(() -> azure.genericResources().deleteById(databaseServerId));
-    }
-
-    public GenericResource getGenericResource(String resourceGroup, String namespace, String resourceType,  String resourceId) {
-        return handleAuthException(() -> azure.genericResources().get(resourceGroup, namespace, resourceType, resourceId));
     }
 
     public PagedList<PrivateZone> getPrivateDnsZoneList() {

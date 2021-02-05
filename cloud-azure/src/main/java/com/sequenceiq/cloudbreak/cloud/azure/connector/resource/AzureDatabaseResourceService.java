@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
-import com.microsoft.azure.management.resources.GenericResource;
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDatabaseTemplateProvider;
@@ -50,10 +50,6 @@ public class AzureDatabaseResourceService {
     private static final int POSTGRESQL_SERVER_PORT = 5432;
 
     private static final String DATABASE_SERVER_FQDN = "databaseServerFQDN";
-
-    private static final String PSQL_NAMESPACE = "Microsoft.DBforPostgreSQL";
-
-    private static final String RESOURCE_TYPE = "servers";
 
     @Inject
     private AzureDatabaseTemplateBuilder azureDatabaseTemplateBuilder;
@@ -226,12 +222,10 @@ public class AzureDatabaseResourceService {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
+
         try {
-            String serverId = stack.getDatabaseServer().getServerId();
-            LOGGER.debug("Retrieving database. Resource group: {}, namespace: {}, resource type: {}, name: {}", resourceGroupName, PSQL_NAMESPACE,
-                    RESOURCE_TYPE, serverId);
-            GenericResource genericResource = client.getGenericResource(resourceGroupName, PSQL_NAMESPACE, RESOURCE_TYPE, serverId);
-            if (genericResource == null) {
+            ResourceGroup resourceGroup = client.getResourceGroup(resourceGroupName);
+            if (resourceGroup == null) {
                 return ExternalDatabaseStatus.DELETED;
             }
             return ExternalDatabaseStatus.STARTED;

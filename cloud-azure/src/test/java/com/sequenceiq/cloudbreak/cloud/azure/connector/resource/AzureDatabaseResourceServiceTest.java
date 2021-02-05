@@ -13,7 +13,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.microsoft.azure.management.resources.GenericResource;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
@@ -36,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -56,6 +53,7 @@ class AzureDatabaseResourceServiceTest {
     @Mock
     private AuthenticatedContext ac;
 
+    @Mock
     private DatabaseStack databaseStack;
 
     @Mock
@@ -77,18 +75,12 @@ class AzureDatabaseResourceServiceTest {
     void initTests() {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(ac.getParameter(AzureClient.class)).thenReturn(client);
-        databaseStack = createStack();
-    }
-
-    private DatabaseStack createStack() {
-        DatabaseServer databaseServer = new DatabaseServer.Builder().serverId("id").build();
-        return new DatabaseStack(null, databaseServer, Collections.emptyMap(), null);
     }
 
     @Test
     void shouldReturnDeletedStatusInCaseOfMissingResourceGroup() {
+        when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(null);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
-        when(client.getGenericResource(eq(RESOURCE_GROUP_NAME), any(), any(), any())).thenReturn(null);
 
         ExternalDatabaseStatus actual = victim.getDatabaseServerStatus(ac, databaseStack);
 
@@ -97,8 +89,8 @@ class AzureDatabaseResourceServiceTest {
 
     @Test
     void shouldReturnStartedStatusInCaseOfExistingResourceGroup() {
+        when(client.getResourceGroup(RESOURCE_GROUP_NAME)).thenReturn(resourceGroup);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, databaseStack)).thenReturn(RESOURCE_GROUP_NAME);
-        when(client.getGenericResource(eq(RESOURCE_GROUP_NAME), any(), any(), any())).thenReturn(mock(GenericResource.class));
 
         ExternalDatabaseStatus actual = victim.getDatabaseServerStatus(ac, databaseStack);
 
