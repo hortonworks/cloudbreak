@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
@@ -62,6 +63,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
         private LocationResponse location;
 
         private TelemetryResponse telemetry;
+
+        private BackupResponse backup;
 
         private EnvironmentNetworkResponse network;
 
@@ -131,6 +134,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withTelemetry(TelemetryResponse telemetry) {
             this.telemetry = telemetry;
+            return this;
+        }
+
+        public Builder withBackup(BackupResponse backup) {
+            this.backup = backup;
             return this;
         }
 
@@ -236,6 +244,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setStatusReason(statusReason);
             simpleEnvironmentResponse.setCreated(created);
             simpleEnvironmentResponse.setTelemetry(telemetry);
+            simpleEnvironmentResponse.setBackup(backup);
             simpleEnvironmentResponse.setTunnel(tunnel);
             simpleEnvironmentResponse.setAws(aws);
             simpleEnvironmentResponse.setAzure(azure);

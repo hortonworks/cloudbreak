@@ -64,7 +64,7 @@ public class RedbeamsTerminationService {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Terminate called for: {} with force: {}", dbStack, force);
         }
-        if (dbStack.getStatus().isDeleteInProgressOrCompleted()) {
+        if (dbStack.getStatus().isDeleteInProgressOrCompleted() && !deletetedOnProviderSide(server, dbStack)) {
             LOGGER.debug("DatabaseServer with crn {} is already being deleted", dbStack.getResourceCrn());
             return server;
         }
@@ -77,6 +77,11 @@ public class RedbeamsTerminationService {
         flowManager.notify(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(),
                 new RedbeamsEvent(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector(), dbStack.getId(), force));
         return server;
+    }
+
+    private boolean deletetedOnProviderSide(DatabaseServerConfig server, DBStack dbStack) {
+        // This is the case when user only delete the database on the provider but not the Cloudformation template
+        return !server.isArchived() && dbStack.getStatus().isDeleteCompleted();
     }
 
     public Set<DatabaseServerConfig> terminateMultipleByCrn(Set<String> crns, boolean force) {

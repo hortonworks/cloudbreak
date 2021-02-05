@@ -42,6 +42,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
 
     private EnvironmentTelemetry telemetry;
 
+    private EnvironmentBackup backup;
+
     private boolean archived;
 
     private Long deletionTimestamp = -1L;
@@ -165,6 +167,14 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
 
     public void setTelemetry(EnvironmentTelemetry telemetry) {
         this.telemetry = telemetry;
+    }
+
+    public EnvironmentBackup getBackup() {
+        return backup;
+    }
+
+    public void setBackup(EnvironmentBackup backup) {
+        this.backup = backup;
     }
 
     public boolean isArchived() {
@@ -398,6 +408,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
 
         private EnvironmentTelemetry telemetry;
 
+        private EnvironmentBackup backup;
+
         private boolean archived;
 
         private Long deletionTimestamp = -1L;
@@ -528,6 +540,11 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
             return this;
         }
 
+        public Builder withBackup(EnvironmentBackup backup) {
+            this.backup = backup;
+            return this;
+        }
+
         public Builder withAuthentication(AuthenticationDto authentication) {
             this.authentication = authentication;
             return this;
@@ -603,6 +620,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
             environmentDto.setCredentialView(credentialView);
             environmentDto.setCloudPlatform(cloudPlatform);
             environmentDto.setTelemetry(telemetry);
+            environmentDto.setBackup(backup);
             environmentDto.setRegions(regions);
             environmentDto.setArchived(archived);
             environmentDto.setDeletionTimestamp(deletionTimestamp);

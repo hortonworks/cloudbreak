@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 
 @Component
@@ -58,6 +59,36 @@ public class CloudStorageLocationValidator {
             }
         }
         return response;
+    }
+
+    public void validateBackup(String storageLocation, Environment environment, ValidationResultBuilder resultBuilder) {
+        Optional<FileSystemType> fileSystemType = getBackupFileSystemType(environment);
+        String bucketName = getBucketName(fileSystemType, storageLocation);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
+        ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
+        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
+        resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
+                        response.getRegion(),
+                        bucketName,
+                        environment.getLocation()));
+    }
+
+    private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {
+        if (environment.getBackup() != null) {
+            EnvironmentBackup backup = environment.getBackup();
+            if (backup.getS3() != null) {
+                return Optional.of(backup.getS3().getType());
+            }
+            if (backup.getAdlsGen2() != null) {
+                return Optional.of(backup.getAdlsGen2().getType());
+            }
+            if (backup.getGcs() != null) {
+                return Optional.of(backup.getGcs().getType());
+            }
+        }
+        return Optional.empty();
     }
 
     private String getBucketName(Optional<FileSystemType> fileSystemType, String storageLocation) {

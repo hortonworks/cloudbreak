@@ -51,13 +51,13 @@ public class CloudwatchParams implements Serializable {
 
     @JsonIgnore
     public static CloudwatchParams copy(CloudwatchParams cloudwatchParams) {
-        CloudwatchParams newCloudwatchParams = null;
-        if (cloudwatchParams != null) {
-            newCloudwatchParams = new CloudwatchParams();
-            newCloudwatchParams.setStreamKey(cloudwatchParams.getStreamKey());
-            newCloudwatchParams.setInstanceProfile(cloudwatchParams.getInstanceProfile());
-            newCloudwatchParams.setRegion(cloudwatchParams.getRegion());
+        if (cloudwatchParams == null) {
+            return null;
         }
+        CloudwatchParams newCloudwatchParams = new CloudwatchParams();
+        newCloudwatchParams.setStreamKey(cloudwatchParams.getStreamKey());
+        newCloudwatchParams.setInstanceProfile(cloudwatchParams.getInstanceProfile());
+        newCloudwatchParams.setRegion(cloudwatchParams.getRegion());
         return newCloudwatchParams;
     }
 

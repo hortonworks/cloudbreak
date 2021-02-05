@@ -15,47 +15,47 @@ public class ClusterUseCaseMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUseCaseMapper.class);
 
     @Inject
-    private RequestProcessingStepMapper requestProcessingStepMapper;
+    private ClusterRequestProcessingStepMapper clusterRequestProcessingStepMapper;
 
     // At the moment we need to introduce a complex logic to figure out the use case
     public UsageProto.CDPClusterStatus.Value useCase(FlowDetails flow) {
         UsageProto.CDPClusterStatus.Value useCase = UsageProto.CDPClusterStatus.Value.UNSET;
-        if (requestProcessingStepMapper.isFirstStep(flow)) {
-            String flowEvent = flow.getFlowEvent();
-            useCase = firstStepToUseCaseMapping(flowEvent);
-        } else if (requestProcessingStepMapper.isLastStep(flow)) {
+        if (clusterRequestProcessingStepMapper.isFirstStep(flow)) {
+            useCase = firstStepToUseCaseMapping(flow.getFlowType());
+        } else if (clusterRequestProcessingStepMapper.isLastStep(flow)) {
             String flowState = flow.getFlowState();
             useCase = lastStepToUseCaseMapping(flowState);
         }
         return useCase;
     }
 
-    private UsageProto.CDPClusterStatus.Value firstStepToUseCaseMapping(String flowEvent) {
+    private UsageProto.CDPClusterStatus.Value firstStepToUseCaseMapping(String flowType) {
         UsageProto.CDPClusterStatus.Value useCase = UsageProto.CDPClusterStatus.Value.UNSET;
-        switch (flowEvent) {
-            case "START_ENVIRONMENT_INITIALIZATION_EVENT":
+        switch (flowType) {
+            case "CloudConfigValidationFlowConfig":
                 useCase = UsageProto.CDPClusterStatus.Value.CREATE_STARTED;
                 break;
             default:
-                LOGGER.debug("Flow state: {}", flowEvent);
+                LOGGER.debug("Flow type: {}", flowType);
         }
-        LOGGER.debug("Mapping flow event to use-case: {}, {}", flowEvent, useCase);
+        LOGGER.debug("Mapping flow type to use-case: {}, {}", flowType, useCase);
         return useCase;
     }
 
     private UsageProto.CDPClusterStatus.Value lastStepToUseCaseMapping(String flowState) {
         UsageProto.CDPClusterStatus.Value useCase = UsageProto.CDPClusterStatus.Value.UNSET;
         switch (flowState) {
-            case "ENV_CREATION_FINISHED_STATE":
+            case "CLUSTER_CREATION_FINISHED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.CREATE_FINISHED;
                 break;
-            case "ENV_CREATION_FAILED_STATE":
+            case "CLUSTER_CREATION_FAILED_STATE":
+            case "STACK_CREATION_FAILED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.CREATE_FAILED;
                 break;
-            case "ENV_DELETE_FINISHED_STATE":
+            case "TERMINATION_FINISHED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.DELETE_FINISHED;
                 break;
-            case "ENV_DELETE_FAILED_STATE":
+            case "TERMINATION_FAILED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.DELETE_FAILED;
                 break;
             default:

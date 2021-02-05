@@ -15,31 +15,30 @@ public class EnvironmentUseCaseMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUseCaseMapper.class);
 
     @Inject
-    private RequestProcessingStepMapper requestProcessingStepMapper;
+    private EnvironmentRequestProcessingStepMapper environmentRequestProcessingStepMapper;
 
     // At the moment we need to introduce a complex logic to figure out the use case
     public UsageProto.CDPEnvironmentStatus.Value useCase(FlowDetails flow) {
         UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        if (requestProcessingStepMapper.isFirstStep(flow)) {
-            String flowEvent = flow.getFlowEvent();
-            useCase = firstStepToUseCaseMapping(flowEvent);
-        } else if (requestProcessingStepMapper.isLastStep(flow)) {
+        if (environmentRequestProcessingStepMapper.isFirstStep(flow)) {
+            useCase = firstStepToUseCaseMapping(flow.getFlowType());
+        } else if (environmentRequestProcessingStepMapper.isLastStep(flow)) {
             String flowState = flow.getFlowState();
             useCase = lastStepToUseCaseMapping(flowState);
         }
         return useCase;
     }
 
-    private UsageProto.CDPEnvironmentStatus.Value firstStepToUseCaseMapping(String flowEvent) {
+    private UsageProto.CDPEnvironmentStatus.Value firstStepToUseCaseMapping(String flowType) {
         UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        switch (flowEvent) {
-            case "START_ENVIRONMENT_INITIALIZATION_EVENT":
+        switch (flowType) {
+            case "EnvCreationFlowConfig":
                 useCase = UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
                 break;
             default:
-                LOGGER.debug("Flow state: {}", flowEvent);
+                LOGGER.debug("Flow type: {}", flowType);
         }
-        LOGGER.debug("Mapping flow event to use-case: {}, {}", flowEvent, useCase);
+        LOGGER.debug("Mapping flow type to use-case: {}, {}", flowType, useCase);
         return useCase;
     }
 

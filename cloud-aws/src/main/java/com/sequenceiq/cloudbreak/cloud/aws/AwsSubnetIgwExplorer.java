@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.Route;
 import com.amazonaws.services.ec2.model.RouteTable;
 
@@ -22,8 +21,8 @@ public class AwsSubnetIgwExplorer {
 
     private static final String IGW_PREFIX = "igw-";
 
-    public boolean hasInternetGatewayOfSubnet(DescribeRouteTablesResult describeRouteTablesResult, String subnetId, String vpcId) {
-        Optional<RouteTable> routeTable = getRouteTableForSubnet(describeRouteTablesResult, subnetId, vpcId);
+    public boolean hasInternetGatewayOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId) {
+        Optional<RouteTable> routeTable = getRouteTableForSubnet(routeTables, subnetId, vpcId);
         LOGGER.debug("Route table for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeTable);
 
         Optional<Route> routeWithInternetGateway = getRouteWithInternetGateway(routeTable);
@@ -32,8 +31,8 @@ public class AwsSubnetIgwExplorer {
         return routeWithInternetGateway.isPresent();
     }
 
-    private Optional<RouteTable> getRouteTableForSubnet(DescribeRouteTablesResult describeRouteTablesResult, String subnetId, String vpcId) {
-        List<RouteTable> routeTables = describeRouteTablesResult.getRouteTables().stream()
+    private Optional<RouteTable> getRouteTableForSubnet(List<RouteTable> tableList, String subnetId, String vpcId) {
+        List<RouteTable> routeTables = tableList.stream()
                 .filter(rt -> rt.getVpcId().equalsIgnoreCase(vpcId))
                 .collect(Collectors.toList());
         LOGGER.debug("Route tables for VPC '{}' (current subnet is '{}'): '{}'", vpcId, subnetId, routeTables);

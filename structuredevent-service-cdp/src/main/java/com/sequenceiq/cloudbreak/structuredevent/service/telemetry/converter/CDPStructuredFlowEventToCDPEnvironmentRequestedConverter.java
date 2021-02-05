@@ -42,7 +42,7 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
         cdpEnvironmentRequestedBuilder.setTelemetryFeatureDetails(convertTelemetryFeatureDetails(environmentDetails));
 
         UsageProto.CDPEnvironmentRequested ret = cdpEnvironmentRequestedBuilder.build();
-        LOGGER.debug("Converted telemetry event: {}", ret);
+        LOGGER.debug("Converted CDPEnvironmentRequested event: {}", ret);
         return ret;
     }
 

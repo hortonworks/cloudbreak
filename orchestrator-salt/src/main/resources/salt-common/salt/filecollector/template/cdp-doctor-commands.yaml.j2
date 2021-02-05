@@ -14,6 +14,8 @@ commands:
       output: /tmp/doctor_disk_free.txt
     - command: du -a -h --max-depth=1 /var/log | sort -r -h | head -20
       output: /tmp/doctor_disk_logs.txt
+    - command: lsblk
+      output: /tmp/doctor_lsblk.txt
     - command: nslookup $(hostname -i)
       output: /tmp/doctor_r_nslookup_output.txt
     - command: nslookup $(hostname -f)
