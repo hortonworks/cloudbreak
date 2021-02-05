@@ -5,18 +5,23 @@ import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowCha
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.api.type.DataHubStartAction;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
+import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
@@ -133,5 +138,29 @@ public class EnvironmentReactorFlowManager {
 
         eventSender.sendEvent(envStackConfigUpdatesEvent,
             new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+    }
+
+    public void triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
+            PublicEndpointAccessGateway endpointAccessGateway, Set<String> subnetIds, String userCrn) {
+        LOGGER.info("Load balancer update flow triggered.");
+        if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway)) {
+            if (subnetIds != null && !subnetIds.isEmpty()) {
+                LOGGER.debug("Adding Endpoint Gateway with subnet ids {}", subnetIds);
+            } else {
+                LOGGER.debug("Adding Endpoint Gateway using environment subnets.");
+            }
+        }
+        LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()
+            .withAccepted(new Promise<>())
+            .withSelector(LoadBalancerUpdateStateSelectors.LOAD_BALANCER_UPDATE_START_EVENT.selector())
+            .withResourceId(envId)
+            .withResourceName(envName)
+            .withResourceCrn(envCrn)
+            .withEnvironmentDto(environmentDto)
+            .withPublicEndpointAccessGateway(endpointAccessGateway)
+            .withSubnetIds(subnetIds)
+            .build();
+
+        eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 }

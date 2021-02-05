@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -17,11 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -202,7 +202,7 @@ class AwsEnvironmentNetworkConverterTest {
 
         Network network = underTest.convertToNetwork(awsNetwork);
 
-        assertEquals(VPC_ID, network.getStringParameter(AwsNetworkView.VPC_ID));
+        assertEquals(VPC_ID, network.getStringParameter(NetworkConstants.VPC_ID));
     }
 
     private Set<CreatedSubnet> createCreatedSubnets() {

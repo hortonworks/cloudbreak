@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,12 +28,14 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentAuthenticationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
@@ -51,6 +54,7 @@ import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
@@ -259,6 +263,19 @@ public class EnvironmentApiConverterTest {
         assertNull(actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
         assertEquals("myResourceGroup",
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
+    }
+
+    @Test
+    void testInitLoadBalancerDto() {
+        Set<String> subnetIds = Set.of("id1, id2");
+        EnvironmentLoadBalancerUpdateRequest request = new EnvironmentLoadBalancerUpdateRequest();
+        request.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
+        request.setSubnetIds(subnetIds);
+
+        EnvironmentLoadBalancerDto environmentLbDto = underTest.initLoadBalancerDto(request);
+
+        assertEquals(PublicEndpointAccessGateway.ENABLED, environmentLbDto.getEndpointAccessGateway());
+        assertEquals(subnetIds, environmentLbDto.getEndpointGatewaySubnetIds());
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {
