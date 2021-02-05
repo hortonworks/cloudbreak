@@ -478,27 +478,14 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
-          "hdfs-GATEWAY-BASE",
-          "hms-GATEWAY-BASE",
-          "hive_on_tez-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "livy-GATEWAY-BASE",
-          "yarn-NODEMANAGER-WORKER",
-          "yarn-GATEWAY-BASE"
+          "yarn-NODEMANAGER-WORKER"
         ]
       },
       {
         "refName": "compute",
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
-          "hdfs-GATEWAY-BASE",
-          "hms-GATEWAY-BASE",
-          "hive_on_tez-GATEWAY-BASE",
-          "tez-GATEWAY-BASE",
-          "spark_on_yarn-GATEWAY-BASE",
-          "yarn-NODEMANAGER-COMPUTE",
-          "yarn-GATEWAY-BASE"
+          "yarn-NODEMANAGER-COMPUTE"
         ]
       },
       {
