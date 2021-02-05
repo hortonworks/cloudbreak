@@ -61101,6 +61101,24 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getFlowChainIdBytes();
+
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    java.lang.String getFlowState();
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getFlowStateBytes();
   }
   /**
    * Protobuf type {@code usage.CDPOperationDetails}
@@ -61123,6 +61141,7 @@ public final class UsageProto {
       cdpRequestProcessingStep_ = 0;
       flowId_ = "";
       flowChainId_ = "";
+      flowState_ = "";
     }
 
     @java.lang.Override
@@ -61195,6 +61214,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               flowChainId_ = s;
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              flowState_ = s;
               break;
             }
             default: {
@@ -61548,6 +61573,48 @@ public final class UsageProto {
       }
     }
 
+    public static final int FLOWSTATE_FIELD_NUMBER = 9;
+    private volatile java.lang.Object flowState_;
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    public java.lang.String getFlowState() {
+      java.lang.Object ref = flowState_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        flowState_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFlowStateBytes() {
+      java.lang.Object ref = flowState_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        flowState_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -61586,6 +61653,9 @@ public final class UsageProto {
       if (!getFlowChainIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, flowChainId_);
       }
+      if (!getFlowStateBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, flowState_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -61620,6 +61690,9 @@ public final class UsageProto {
       if (!getFlowChainIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, flowChainId_);
       }
+      if (!getFlowStateBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, flowState_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -61651,6 +61724,8 @@ public final class UsageProto {
           .equals(other.getFlowId());
       result = result && getFlowChainId()
           .equals(other.getFlowChainId());
+      result = result && getFlowState()
+          .equals(other.getFlowState());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -61678,6 +61753,8 @@ public final class UsageProto {
       hash = (53 * hash) + getFlowId().hashCode();
       hash = (37 * hash) + FLOWCHAINID_FIELD_NUMBER;
       hash = (53 * hash) + getFlowChainId().hashCode();
+      hash = (37 * hash) + FLOWSTATE_FIELD_NUMBER;
+      hash = (53 * hash) + getFlowState().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -61827,6 +61904,8 @@ public final class UsageProto {
 
         flowChainId_ = "";
 
+        flowState_ = "";
+
         return this;
       }
 
@@ -61861,6 +61940,7 @@ public final class UsageProto {
         result.cdpRequestProcessingStep_ = cdpRequestProcessingStep_;
         result.flowId_ = flowId_;
         result.flowChainId_ = flowChainId_;
+        result.flowState_ = flowState_;
         onBuilt();
         return result;
       }
@@ -61938,6 +62018,10 @@ public final class UsageProto {
         }
         if (!other.getFlowChainId().isEmpty()) {
           flowChainId_ = other.flowChainId_;
+          onChanged();
+        }
+        if (!other.getFlowState().isEmpty()) {
+          flowState_ = other.flowState_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -62653,6 +62737,95 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         flowChainId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object flowState_ = "";
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public java.lang.String getFlowState() {
+        java.lang.Object ref = flowState_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          flowState_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFlowStateBytes() {
+        java.lang.Object ref = flowState_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          flowState_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public Builder setFlowState(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        flowState_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public Builder clearFlowState() {
+        
+        flowState_ = getDefaultInstance().getFlowState();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public Builder setFlowStateBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        flowState_ = value;
         onChanged();
         return this;
       }
@@ -79789,76 +79962,77 @@ public final class UsageProto {
       "ILED\020\014\022\023\n\017UPGRADE_STARTED\020\r\022\024\n\020UPGRADE_F" +
       "INISHED\020\016\022\022\n\016UPGRADE_FAILED\020\017\022\022\n\016REPAIR_" +
       "STARTED\020\020\022\023\n\017REPAIR_FINISHED\020\021\022\021\n\rREPAIR" +
-      "_FAILED\020\022\"\363\001\n\023CDPOperationDetails\022\021\n\tacc" +
+      "_FAILED\020\022\"\206\002\n\023CDPOperationDetails\022\021\n\tacc" +
       "ountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014res" +
       "ourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022\032\n" +
       "\022applicationVersion\030\005 \001(\t\022G\n\030cdpRequestP" +
       "rocessingStep\030\006 \001(\0162%.usage.CDPRequestPr" +
       "ocessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013fl" +
-      "owChainId\030\010 \001(\t\"\362\002\n\025CDPEnvironmentDetail" +
-      "s\022D\n\017environmentType\030\001 \001(\0162+.usage.CDPEn" +
-      "vironmentsEnvironmentType.Value\022\016\n\006regio" +
-      "n\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001" +
-      "(\005\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016network" +
-      "Details\030\005 \001(\0132\030.usage.CDPNetworkDetails\022" +
-      "5\n\nawsDetails\030\006 \001(\0132\037.usage.CDPEnvironme" +
-      "ntAwsDetailsH\000\0229\n\014azureDetails\030\007 \001(\0132!.u" +
-      "sage.CDPEnvironmentAzureDetailsH\000B!\n\037env" +
-      "ironmentCloudProviderDetails\"9\n\032CDPEnvir" +
-      "onmentAzureDetails\022\033\n\023singleResourceGrou" +
-      "p\030\001 \001(\010\"\032\n\030CDPEnvironmentAwsDetails\"a\n%C" +
-      "DPEnvironmentTelemetryFeatureDetails\022\031\n\021" +
-      "workloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogsCo" +
-      "llection\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005pro" +
-      "xy\030\001 \001(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networ" +
-      "kType\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023num" +
-      "berPublicSubnets\030\003 \001(\005\022\034\n\024numberPrivateS" +
-      "ubnets\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030" +
-      "\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPP" +
-      "roxyDetails\"\212\002\n\027CDPEnvironmentRequested\022" +
-      "4\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOpe" +
-      "rationDetails\0228\n\022environmentDetails\030\002 \001(" +
-      "\0132\034.usage.CDPEnvironmentDetails\0220\n\016netwo" +
-      "rkDetails\030\003 \001(\0132\030.usage.CDPNetworkDetail" +
-      "s\022M\n\027telemetryFeatureDetails\030\004 \001(\0132,.usa" +
-      "ge.CDPEnvironmentTelemetryFeatureDetails" +
-      "\"\326\001\n\033CDPEnvironmentStatusChanged\0224\n\020oper" +
-      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
-      "etails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnv" +
-      "ironmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162" +
-      "!.usage.CDPEnvironmentStatus.Value\022\025\n\rfa" +
-      "ilureReason\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007" +
-      "imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"X\n\017C" +
-      "DPClusterShape\022\033\n\023clusterTemplateName\030\001 " +
-      "\001(\t\022\r\n\005nodes\030\002 \001(\005\022\031\n\021definitionDetails\030" +
-      "\003 \001(\t\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion" +
-      "\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion" +
-      "\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLe" +
-      "vel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDet" +
-      "ails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPCl" +
-      "usterShape\0220\n\016versionDetails\030\002 \001(\0132\030.usa" +
-      "ge.CDPVersionDetails\022,\n\014imageDetails\030\003 \001" +
-      "(\0132\026.usage.CDPImageDetails\"\226\001\n\024CDPDatala" +
-      "keRequested\0224\n\020operationDetails\030\001 \001(\0132\032." +
-      "usage.CDPOperationDetails\022\026\n\016environment" +
-      "Crn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usag" +
-      "e.CDPClusterDetails\"\313\001\n\030CDPDatalakeStatu" +
-      "sChanged\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
-      "ge.CDPOperationDetails\0220\n\toldStatus\030\002 \001(" +
-      "\0162\035.usage.CDPClusterStatus.Value\0220\n\tnewS" +
-      "tatus\030\003 \001(\0162\035.usage.CDPClusterStatus.Val" +
-      "ue\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDatahub" +
-      "Requested\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
-      "age.CDPOperationDetails\022\026\n\016environmentCr" +
-      "n\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage." +
-      "CDPClusterDetails\"\312\001\n\027CDPDatahubStatusCh" +
-      "anged\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
-      "CDPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035" +
-      ".usage.CDPClusterStatus.Value\0220\n\tnewStat" +
-      "us\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
-      "\025\n\rfailureReason\030\004 \001(\tBV\n-com.cloudera.t" +
-      "hunderhead.service.common.usageB\nUsagePr" +
-      "otoZ\031com/cloudera/cdp/protobufb\006proto3"
+      "owChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t\"\362\002\n\025C" +
+      "DPEnvironmentDetails\022D\n\017environmentType\030" +
+      "\001 \001(\0162+.usage.CDPEnvironmentsEnvironment" +
+      "Type.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOfAv" +
+      "ailabilityZones\030\003 \001(\005\022\031\n\021availabilityZon" +
+      "es\030\004 \001(\t\0220\n\016networkDetails\030\005 \001(\0132\030.usage" +
+      ".CDPNetworkDetails\0225\n\nawsDetails\030\006 \001(\0132\037" +
+      ".usage.CDPEnvironmentAwsDetailsH\000\0229\n\014azu" +
+      "reDetails\030\007 \001(\0132!.usage.CDPEnvironmentAz" +
+      "ureDetailsH\000B!\n\037environmentCloudProvider" +
+      "Details\"9\n\032CDPEnvironmentAzureDetails\022\033\n" +
+      "\023singleResourceGroup\030\001 \001(\010\"\032\n\030CDPEnviron" +
+      "mentAwsDetails\"a\n%CDPEnvironmentTelemetr" +
+      "yFeatureDetails\022\031\n\021workloadAnalytics\030\001 \001" +
+      "(\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\" \n\017CDP" +
+      "ProxyDetails\022\r\n\005proxy\030\001 \001(\010\"\310\001\n\021CDPNetwo" +
+      "rkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connec" +
+      "tivity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(" +
+      "\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027servi" +
+      "ceEndpointCreation\030\005 \001(\t\022,\n\014proxyDetails" +
+      "\030\006 \001(\0132\026.usage.CDPProxyDetails\"\212\002\n\027CDPEn" +
+      "vironmentRequested\0224\n\020operationDetails\030\001" +
+      " \001(\0132\032.usage.CDPOperationDetails\0228\n\022envi" +
+      "ronmentDetails\030\002 \001(\0132\034.usage.CDPEnvironm" +
+      "entDetails\0220\n\016networkDetails\030\003 \001(\0132\030.usa" +
+      "ge.CDPNetworkDetails\022M\n\027telemetryFeature" +
+      "Details\030\004 \001(\0132,.usage.CDPEnvironmentTele" +
+      "metryFeatureDetails\"\326\001\n\033CDPEnvironmentSt" +
+      "atusChanged\0224\n\020operationDetails\030\001 \001(\0132\032." +
+      "usage.CDPOperationDetails\0224\n\toldStatus\030\002" +
+      " \001(\0162!.usage.CDPEnvironmentStatus.Value\022" +
+      "4\n\tnewStatus\030\003 \001(\0162!.usage.CDPEnvironmen" +
+      "tStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"8\n\017" +
+      "CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014imag" +
+      "eCatalog\030\002 \001(\t\"X\n\017CDPClusterShape\022\033\n\023clu" +
+      "sterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\031\n" +
+      "\021definitionDetails\030\003 \001(\t\"\206\001\n\021CDPVersionD" +
+      "etails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002" +
+      " \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion" +
+      "\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(" +
+      "\t\"\241\001\n\021CDPClusterDetails\022,\n\014clusterShape\030" +
+      "\001 \001(\0132\026.usage.CDPClusterShape\0220\n\016version" +
+      "Details\030\002 \001(\0132\030.usage.CDPVersionDetails\022" +
+      ",\n\014imageDetails\030\003 \001(\0132\026.usage.CDPImageDe" +
+      "tails\"\226\001\n\024CDPDatalakeRequested\0224\n\020operat" +
+      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
+      "ails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterD" +
+      "etails\030\003 \001(\0132\030.usage.CDPClusterDetails\"\313" +
+      "\001\n\030CDPDatalakeStatusChanged\0224\n\020operation" +
+      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
+      "s\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterS" +
+      "tatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.C" +
+      "DPClusterStatus.Value\022\025\n\rfailureReason\030\004" +
+      " \001(\t\"\225\001\n\023CDPDatahubRequested\0224\n\020operatio" +
+      "nDetails\030\001 \001(\0132\032.usage.CDPOperationDetai" +
+      "ls\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDet" +
+      "ails\030\003 \001(\0132\030.usage.CDPClusterDetails\"\312\001\n" +
+      "\027CDPDatahubStatusChanged\0224\n\020operationDet" +
+      "ails\030\001 \001(\0132\032.usage.CDPOperationDetails\0220" +
+      "\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterStat" +
+      "us.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPC" +
+      "lusterStatus.Value\022\025\n\rfailureReason\030\004 \001(" +
+      "\tBV\n-com.cloudera.thunderhead.service.co" +
+      "mmon.usageB\nUsageProtoZ\031com/cloudera/cdp" +
+      "/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -80183,7 +80357,7 @@ public final class UsageProto {
     internal_static_usage_CDPOperationDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPOperationDetails_descriptor,
-        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", });
+        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", "FlowState", });
     internal_static_usage_CDPEnvironmentDetails_descriptor =
       getDescriptor().getMessageTypes().get(52);
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
