@@ -17,7 +17,12 @@ public class DNDecommissionStatusCheckerTask extends ClusterBasedStatusCheckerTa
     @Override
     public boolean checkStatus(AmbariOperations t) {
         AmbariClient ambariClient = t.getAmbariClient();
-        Map<String, Long> dataNodes = ambariClient.getDecommissioningDataNodes();
+        Map<String, Long> dataNodes = ambariClient.getDecommissioningDataNodes(true);
+        if (dataNodes.isEmpty()) {
+            LOGGER.info("DataNode decommision seems to be empty with forced_metrics_fetch parameter,"
+                + " validating the results without it ");
+            dataNodes = ambariClient.getDecommissioningDataNodes();
+        }
         boolean finished = dataNodes.isEmpty();
         if (!finished) {
             LOGGER.info("DataNode decommission is in progress: {}", dataNodes);
