@@ -3,6 +3,12 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.cluster;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.CREATE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.CREATE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.CREATE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DOWNSCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DOWNSCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPSCALE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPSCALE_FINISHED;
 
 import java.util.EnumSet;
 
@@ -26,7 +32,10 @@ public class ClusterRequestedLogger implements LegacyTelemetryEventLogger {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterRequestedLogger.class);
 
-    private static final EnumSet<UsageProto.CDPClusterStatus.Value> TRIGGER_CASES = EnumSet.of(CREATE_STARTED, CREATE_FINISHED, CREATE_FAILED);
+    private static final EnumSet<UsageProto.CDPClusterStatus.Value> TRIGGER_CASES = EnumSet.of(CREATE_STARTED, CREATE_FINISHED, CREATE_FAILED,
+            UPGRADE_FINISHED, UPGRADE_FAILED,
+            UPSCALE_FINISHED, UPSCALE_FAILED,
+            DOWNSCALE_FINISHED, DOWNSCALE_FAILED);
 
     @Inject
     private UsageReporter usageReporter;
