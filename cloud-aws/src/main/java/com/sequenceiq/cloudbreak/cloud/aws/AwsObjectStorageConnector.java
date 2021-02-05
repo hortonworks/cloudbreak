@@ -64,7 +64,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(
-                iam, spiFileSystem, resultBuilder);
+                iam, spiFileSystem, request.getLogsLocationBase(), resultBuilder);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()

@@ -18,6 +18,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -29,6 +30,8 @@ import com.sequenceiq.datalake.flow.create.event.RdsWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.StackCreationWaitRequest;
+import com.sequenceiq.datalake.flow.create.event.StorageValidationRequest;
+import com.sequenceiq.datalake.flow.create.event.StorageValidationSuccessEvent;
 import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
@@ -38,7 +41,6 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class SdxCreateActions {
@@ -57,8 +59,8 @@ public class SdxCreateActions {
     @Inject
     private SdxMetricService metricService;
 
-    @Bean(name = "SDX_CREATION_WAIT_RDS_STATE")
-    public Action<?, ?> rdsCreation() {
+    @Bean(name = "SDX_CREATION_STORAGE_VALIDATION_STATE")
+    public Action<?, ?> storageValidation() {
         return new AbstractSdxAction<>(SdxEvent.class) {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
@@ -68,12 +70,34 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                RdsWaitRequest req = new RdsWaitRequest(context);
+                StorageValidationRequest req = new StorageValidationRequest(context);
                 sendEvent(context, req.selector(), req);
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return SdxCreateFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
+    @Bean(name = "SDX_CREATION_WAIT_RDS_STATE")
+    public Action<?, ?> rdsCreation() {
+        return new AbstractSdxAction<>(StorageValidationSuccessEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    StorageValidationSuccessEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, StorageValidationSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+                RdsWaitRequest req = new RdsWaitRequest(context);
+                sendEvent(context, req.selector(), req);
+            }
+
+            @Override
+            protected Object getFailurePayload(StorageValidationSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return SdxCreateFailedEvent.from(payload, ex);
             }
         };

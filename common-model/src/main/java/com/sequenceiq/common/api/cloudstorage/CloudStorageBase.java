@@ -57,6 +57,6 @@ public abstract class CloudStorageBase implements Serializable {
 
     public void setAccountMapping(AccountMappingBase accountMapping) {
         this.accountMapping = accountMapping;
-    }
 
+    }
 }
