@@ -169,16 +169,19 @@ SaltOrchestrator implements HostOrchestrator {
         LOGGER.debug("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        List<SaltConnector> saltConnectors = saltService.createSaltConnector(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             uploadSaltConfig(sc, gatewayTargets, exitModel);
             Set<String> allTargets = targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             uploadSignKey(sc, primaryGateway, gatewayTargets, allTargets, exitModel);
-            OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, params);
+            OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, saltConnectors, allGatewayConfigs, targets, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during the salt bootstrap", e);
             throw new CloudbreakOrchestratorFailedException(e);
+        } finally {
+            saltConnectors.forEach(SaltConnector::close);
         }
         LOGGER.debug("SaltBootstrap finished");
     }
@@ -302,6 +305,7 @@ SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
+        List<SaltConnector> saltConnectors = saltService.createSaltConnector(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             if (!gatewayTargets.isEmpty()) {
                 uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
@@ -310,12 +314,14 @@ SaltOrchestrator implements HostOrchestrator {
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
-            OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, params);
+            OrchestratorBootstrap saltBootstrap = new SaltBootstrap(sc, saltConnectors, allGatewayConfigs, nodes, params);
             Callable<Boolean> saltBootstrapRunner = saltRunner.runner(saltBootstrap, exitCriteria, exitModel);
             saltBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during salt upscale", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        } finally {
+            saltConnectors.forEach(SaltConnector::close);
         }
     }
 

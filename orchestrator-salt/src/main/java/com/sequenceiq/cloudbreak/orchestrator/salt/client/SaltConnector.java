@@ -85,7 +85,10 @@ public class SaltConnector implements Closeable {
 
     private final SaltErrorResolver saltErrorResolver;
 
+    private final String hostname;
+
     public SaltConnector(GatewayConfig gatewayConfig, SaltErrorResolver saltErrorResolver, boolean debug, Tracer tracer) {
+        this.hostname = gatewayConfig.getHostname();
         ClientTracingFeature tracingFeature = new ClientTracingFeature.Builder(tracer)
                 .withTraceSerialization(false)
                 .withDecorators(List.of(new TracingClientSpanDecorator())).build();
@@ -343,6 +346,10 @@ public class SaltConnector implements Closeable {
 
     public SaltErrorResolver getSaltErrorResolver() {
         return saltErrorResolver;
+    }
+
+    public String getHostname() {
+        return hostname;
     }
 
     private String toJson(Object target) {

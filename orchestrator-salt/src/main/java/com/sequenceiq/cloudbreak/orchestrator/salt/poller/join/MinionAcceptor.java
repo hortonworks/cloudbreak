@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,7 @@ public class MinionAcceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MinionAcceptor.class);
 
-    private final SaltConnector sc;
+    private final Collection<SaltConnector> saltConnectors;
 
     private final List<Minion> minions;
 
@@ -28,31 +29,36 @@ public class MinionAcceptor {
 
     private final FingerprintCollector fingerprintCollector;
 
-    public MinionAcceptor(SaltConnector sc, List<Minion> minions, MinionFingerprintMatcher fingerprintMatcher, FingerprintCollector fingerprintCollector) {
-        this.sc = sc;
+    public MinionAcceptor(Collection<SaltConnector> saltConnectors, List<Minion> minions, MinionFingerprintMatcher fingerprintMatcher,
+            FingerprintCollector fingerprintCollector) {
+        this.saltConnectors = saltConnectors;
         this.minions = minions;
         this.fingerprintMatcher = fingerprintMatcher;
         this.fingerprintCollector = fingerprintCollector;
     }
 
     public void acceptMinions() throws CloudbreakOrchestratorFailedException {
-        List<String> unacceptedMinions = fetchUnacceptedMinionsFromMaster(minions);
-        if (!unacceptedMinions.isEmpty()) {
-            proceedWithAcceptingMinions(unacceptedMinions);
-        } else {
-            LOGGER.info("No unaccepted minions found on master");
+        for (SaltConnector sc : saltConnectors) {
+            LOGGER.info("Running for master: [{}]", sc.getHostname());
+            List<String> unacceptedMinions = fetchUnacceptedMinionsFromMaster(sc, minions);
+            if (!unacceptedMinions.isEmpty()) {
+                proceedWithAcceptingMinions(sc, unacceptedMinions);
+            } else {
+                LOGGER.info("No unaccepted minions found on master");
+            }
         }
     }
 
-    private void proceedWithAcceptingMinions(List<String> unacceptedMinions) throws CloudbreakOrchestratorFailedException {
+    private void proceedWithAcceptingMinions(SaltConnector sc, List<String> unacceptedMinions) throws CloudbreakOrchestratorFailedException {
         LOGGER.info("There are unaccepted minions on master: {}", unacceptedMinions);
-        Map<String, String> fingerprintsFromMaster = fetchFingerprintsFromMaster(unacceptedMinions);
+        Map<String, String> fingerprintsFromMaster = fetchFingerprintsFromMaster(sc, unacceptedMinions);
         List<Minion> minionsToAccept = minions.stream().filter(minion -> unacceptedMinions.contains(minion.getId())).collect(Collectors.toList());
         FingerprintsResponse fingerprintsResponse = fingerprintCollector.collectFingerprintFromMinions(sc, minionsToAccept);
-        acceptMatchingFingerprints(fingerprintsFromMaster, fingerprintsResponse, minionsToAccept);
+        acceptMatchingFingerprints(sc, fingerprintsFromMaster, fingerprintsResponse, minionsToAccept);
     }
 
-    private void acceptMatchingFingerprints(Map<String, String> fingerprintsFromMaster, FingerprintsResponse fingerprintsResponse, List<Minion> minions) {
+    private void acceptMatchingFingerprints(SaltConnector sc, Map<String, String> fingerprintsFromMaster, FingerprintsResponse fingerprintsResponse,
+            List<Minion> minions) {
         Map<String, String> fingerprintByMinion = mapFingerprintByMinion(fingerprintsResponse, minions);
         List<String> minionsToAccept = fingerprintMatcher.collectMinionsWithMatchingFp(fingerprintsFromMaster, fingerprintByMinion);
         LOGGER.info("Following minions will be accepted: {}", minionsToAccept);
@@ -66,7 +72,7 @@ public class MinionAcceptor {
                 .collect(Collectors.toMap(fp -> minionIdByAddress.get(fp.getAddress()), Fingerprint::getFingerprint));
     }
 
-    private List<String> fetchUnacceptedMinionsFromMaster(List<Minion> minions) throws CloudbreakOrchestratorFailedException {
+    private List<String> fetchUnacceptedMinionsFromMaster(SaltConnector sc, List<Minion> minions) throws CloudbreakOrchestratorFailedException {
         Set<String> minionId = minions.stream().map(Minion::getId).collect(Collectors.toSet());
         LOGGER.debug("Minions should join: {}", minionId);
         MinionKeysOnMasterResponse response = sc.wheel("key.list_all", null, MinionKeysOnMasterResponse.class);
@@ -77,7 +83,7 @@ public class MinionAcceptor {
         return response.getUnacceptedMinions();
     }
 
-    private Map<String, String> fetchFingerprintsFromMaster(List<String> minions) throws CloudbreakOrchestratorFailedException {
+    private Map<String, String> fetchFingerprintsFromMaster(SaltConnector sc, List<String> minions) throws CloudbreakOrchestratorFailedException {
         Map<String, String> unacceptedMinions;
         try {
             MinionFingersOnMasterResponse response = sc.wheel("key.finger", minions, MinionFingersOnMasterResponse.class);
