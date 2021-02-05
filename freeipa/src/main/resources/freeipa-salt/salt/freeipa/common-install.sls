@@ -10,18 +10,12 @@ update_cnames:
         - file: /opt/salt/scripts/update_cnames.sh
 
 one_week_next_update_grace_period:
-  file.replace:
-    - name: /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
-    - pattern: ^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=.*
-    - repl: ca.crl.MasterCRL.nextUpdateGracePeriod=10080
+  cmd.run:
+    - names:
+      - service pki-tomcatd@pki-tomcat stop
+      - sed -i 's/^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=.*/ca.crl.MasterCRL.nextUpdateGracePeriod=10080/' /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
+      - service pki-tomcatd@pki-tomcat start
     - unless: grep "^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=10080$" /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
-
-restart_pki-tomcat:
-  service.running:
-    - name: pki-tomcatd@pki-tomcat
-    - onlyif: test -f /etc/ipa/default.conf
-    - watch:
-      - file: /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
 
 /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py:
   file.managed:
