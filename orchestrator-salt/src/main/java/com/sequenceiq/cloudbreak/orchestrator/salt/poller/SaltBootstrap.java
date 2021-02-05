@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -39,6 +40,8 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final SaltConnector sc;
 
+    private final Collection<SaltConnector> saltConnectors;
+
     private final List<GatewayConfig> allGatewayConfigs;
 
     private final Set<Node> originalTargets;
@@ -47,8 +50,10 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private Set<Node> targets;
 
-    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets, BootstrapParams params) {
+    public SaltBootstrap(SaltConnector sc, Collection<SaltConnector> saltConnectors, List<GatewayConfig> allGatewayConfigs, Set<Node> targets,
+            BootstrapParams params) {
         this.sc = sc;
+        this.saltConnectors = saltConnectors;
         this.allGatewayConfigs = allGatewayConfigs;
         originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
@@ -86,7 +91,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 params.setRestartNeeded(false);
             }
 
-            createMinionAcceptor(saltAction).acceptMinions();
+            createMinionAcceptor().acceptMinions();
         }
 
         MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(sc);
@@ -107,10 +112,11 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         return true;
     }
 
-    protected MinionAcceptor createMinionAcceptor(SaltAction saltAction) {
+    protected MinionAcceptor createMinionAcceptor() {
+        List<Minion> minions = createMinionsFromOriginalTargets();
         return params.isSaltBootstrapFpSupported() ?
-                new MinionAcceptor(sc, saltAction.getMinions(), new EqualMinionFpMatcher(), new FingerprintFromSbCollector())
-                : new MinionAcceptor(sc, saltAction.getMinions(), new AcceptAllFpMatcher(), new DummyFingerprintCollector());
+                new MinionAcceptor(saltConnectors, minions, new EqualMinionFpMatcher(), new FingerprintFromSbCollector())
+                : new MinionAcceptor(saltConnectors, minions, new AcceptAllFpMatcher(), new DummyFingerprintCollector());
     }
 
     private SaltAction createBootstrap(boolean restartNeededFlagSupported, boolean restartNeeded) {
@@ -157,6 +163,12 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         // set due to compatibility reasons
         minion.setServer(getGatewayPrivateIps().get(0));
         return minion;
+    }
+
+    private List<Minion> createMinionsFromOriginalTargets() {
+        return originalTargets.stream()
+                .map(ot -> createMinion(ot, params.isRestartNeededFlagSupported(), params.isRestartNeeded()))
+                .collect(Collectors.toList());
     }
 
     /***

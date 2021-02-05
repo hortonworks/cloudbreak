@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -117,6 +118,8 @@ public class SaltOrchestratorTest {
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
 
+    private List<SaltConnector> saltConnectors;
+
     @Before
     public void setUp() throws Exception {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
@@ -133,7 +136,9 @@ public class SaltOrchestratorTest {
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
                 .thenReturn(callable);
-        when(saltService.createSaltConnector(any())).thenReturn(saltConnector);
+        when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
+        saltConnectors = List.of(saltConnector);
+        when(saltService.createSaltConnector(anyCollection())).thenReturn(saltConnectors);
         when(saltService.getPrimaryGatewayConfig(anyList())).thenReturn(gatewayConfig);
     }
 
@@ -145,12 +150,13 @@ public class SaltOrchestratorTest {
                 .thenReturn(mock(OrchestratorBootstrapRunner.class));
 
         BootstrapParams bootstrapParams = mock(BootstrapParams.class);
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
 
-        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, bootstrapParams, exitCriteriaModel);
+        saltOrchestrator.bootstrap(allGatewayConfigs, targets, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         // salt.zip, master_sign.pem, master_sign.pub
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(Collections.singletonList(gatewayConfig)), eq(targets),
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
     }
 
@@ -165,7 +171,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(2)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),  eq(saltConnectors),
                 eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
 

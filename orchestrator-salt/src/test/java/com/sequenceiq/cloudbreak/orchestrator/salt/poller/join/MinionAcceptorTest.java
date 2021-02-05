@@ -41,7 +41,7 @@ class MinionAcceptorTest {
         when(response.getAllMinions()).thenReturn(List.of("m2.d"));
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(sc, List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -61,7 +61,7 @@ class MinionAcceptorTest {
         when(response.getUnacceptedMinions()).thenReturn(List.of());
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(sc, List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
         underTest.acceptMinions();
     }
 
@@ -81,7 +81,7 @@ class MinionAcceptorTest {
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
         when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenThrow(new RuntimeException("failure"));
 
-        MinionAcceptor underTest = new MinionAcceptor(sc, List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -104,7 +104,7 @@ class MinionAcceptorTest {
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(keysOnMasterResponse);
         when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenReturn(fingersOnMasterResponse);
 
-        MinionAcceptor underTest = new MinionAcceptor(sc, List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -151,7 +151,7 @@ class MinionAcceptorTest {
         when(fingerprintCollector.collectFingerprintFromMinions(eq(sc), argThat(arg -> arg.containsAll(List.of(m1, m2, m3))))).thenReturn(fingerprintsResponse);
         when(fingerprintsResponse.getFingerprints()).thenReturn(List.of(fp2, fp1, fp3));
 
-        MinionAcceptor underTest = spy(new MinionAcceptor(sc, List.of(m1, m2, m3, m4),  new EqualMinionFpMatcher(), fingerprintCollector));
+        MinionAcceptor underTest = spy(new MinionAcceptor(List.of(sc), List.of(m1, m2, m3, m4),  new EqualMinionFpMatcher(), fingerprintCollector));
 
         underTest.acceptMinions();
 

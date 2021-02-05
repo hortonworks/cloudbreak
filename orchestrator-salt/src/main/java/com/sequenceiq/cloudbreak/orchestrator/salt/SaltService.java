@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -32,6 +34,10 @@ public class SaltService {
 
     public SaltConnector createSaltConnector(GatewayConfig gatewayConfig) {
         return new SaltConnector(gatewayConfig, saltErrorResolver, restDebug, tracer);
+    }
+
+    public List<SaltConnector> createSaltConnector(Collection<GatewayConfig> gatewayConfigs) {
+        return gatewayConfigs.stream().map(this::createSaltConnector).collect(Collectors.toList());
     }
 
     public GatewayConfig getPrimaryGatewayConfig(List<GatewayConfig> allGatewayConfigs) throws CloudbreakOrchestratorFailedException {
