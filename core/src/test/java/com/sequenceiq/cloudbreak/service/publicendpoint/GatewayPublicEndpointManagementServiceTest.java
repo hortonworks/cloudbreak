@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -842,5 +843,62 @@ class GatewayPublicEndpointManagementServiceTest {
         Set<String> loadBalancerEndpoints = underTest.getLoadBalancerNamesForStack(stack);
 
         Assertions.assertEquals(Set.of(validEndpoint), loadBalancerEndpoints);
+    }
+
+    @Test
+    void testUpdateDnsEntryForLoadBalancers() {
+        SecurityConfig securityConfig = new SecurityConfig();
+        Cluster cluster = TestUtil.cluster();
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setEndpoint("gateway");
+        loadBalancer.setDns("http://cloud.dns");
+        loadBalancer.setHostedZoneId("1");
+        loadBalancer.setType(LoadBalancerType.PUBLIC);
+        Stack stack = cluster.getStack();
+        stack.setSecurityConfig(securityConfig);
+        stack.setCluster(cluster);
+        stack.setLoadBalancers(Set.of(loadBalancer));
+        String envName = "anEnvName";
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
+            .builder()
+            .withName(envName)
+            .build();
+        String accountWorkloadSubdomain = "aWorkloadSubdomain";
+        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
+            .setWorkloadSubdomain(accountWorkloadSubdomain)
+            .build();
+
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
+        when(dnsManagementService.createOrUpdateDnsEntryWithCloudDns(any(), any(), any(), any(), any(), any())).thenReturn(Boolean.TRUE);
+        when(grpcUmsClient.getAccountDetails(USER_CRN, "123", Optional.empty())).thenReturn(umsAccount);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            boolean result = underTest.updateDnsEntryForLoadBalancers(stack);
+            assert result;
+        });
+    }
+
+    @Test
+    void testUpdateDnsEntryForLoadBalancersMissingLb() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of());
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            boolean result = underTest.updateDnsEntryForLoadBalancers(stack);
+            assertFalse(result);
+        });
+    }
+
+    @Test
+    void testUpdateDnsEntryForLoadBalancersPemDisabled() {
+        ReflectionTestUtils.setField(underTest, "certGenerationEnabled", Boolean.FALSE);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            boolean result = underTest.updateDnsEntryForLoadBalancers(new Stack());
+            assert result;
+        });
     }
 }

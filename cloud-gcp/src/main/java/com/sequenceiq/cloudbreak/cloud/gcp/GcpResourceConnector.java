@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -137,5 +138,12 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         return List.of();
+    }
+
+    @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) {
+
+        throw new UnsupportedOperationException("GCP load balancers are not currently supported.");
     }
 }

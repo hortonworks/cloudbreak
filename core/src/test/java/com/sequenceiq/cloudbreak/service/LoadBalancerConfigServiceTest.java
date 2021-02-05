@@ -109,14 +109,10 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     @Test
     public void testGetKnoxGatewayWhenNoGateway() {
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName("gateway");
-        instanceGroup.setInstanceGroupType(InstanceGroupType.CORE);
         Cluster cluster = new Cluster();
         cluster.setBlueprint(blueprint);
         Stack stack = new Stack();
         stack.setCluster(cluster);
-        stack.setInstanceGroups(Set.of(instanceGroup));
 
         when(blueprint.getBlueprintText()).thenReturn("{}");
 
@@ -160,6 +156,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment);
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
+            assertEquals(1, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
         });
     }
 
@@ -351,6 +348,19 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     }
 
     @Test
+    public void testCreateLoadBalancerNoEnvironmentNetwork() {
+        Stack stack = createStack(StackType.DATALAKE, null);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, null);
+            assert loadBalancers.isEmpty();
+        });
+    }
+
+    @Test
     public void testGetLoadBalancerUserFacingFQDN() {
         Set<LoadBalancer> loadBalancers = createLoadBalancers();
 
@@ -414,6 +424,24 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment);
             assertEquals(0, loadBalancers.size());
+        });
+    }
+
+    @Test
+    public void testCreateLoadBalancerDryRun() {
+        Stack stack = createStack(StackType.DATALAKE, PRIVATE_ID_1);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            boolean result = underTest.isLoadBalancerCreationConfigured(stack, environment);
+            assert result;
+            assertEquals("Target groups should not be set on a dry run",
+                0, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
         });
     }
 

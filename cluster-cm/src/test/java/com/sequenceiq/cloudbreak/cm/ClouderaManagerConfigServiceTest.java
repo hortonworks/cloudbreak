@@ -106,4 +106,46 @@ public class ClouderaManagerConfigServiceTest {
         underTest.disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, new ApiClient(), TEST_CLUSTER_NAME);
         verify(clouderaManagerApiFactory, never()).getServicesResourceApi(any());
     }
+
+    @Test
+    public void testModifyServiceConfigValue() throws ApiException {
+        String hueType = "HUE";
+        String hueName = "hue-1";
+        String configName = "config_setting";
+        String configValue = "new-config-value";
+        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
+        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(hueName).type(hueType));
+
+        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
+
+        underTest.modifyServiceConfigValue(new ApiClient(), TEST_CLUSTER_NAME, hueType, configName, configValue);
+
+        ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
+        verify(serviceResourceApi, times(1))
+            .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(hueName), eq(""), apiServiceConfigArgumentCaptor.capture());
+
+        ApiServiceConfig actualBody = apiServiceConfigArgumentCaptor.getValue();
+        assertFalse(actualBody.getItems().isEmpty());
+        ApiConfig actualApiConfig = actualBody.getItems().get(0);
+        assertEquals(configName, actualApiConfig.getName());
+        assertEquals(configValue, actualApiConfig.getValue());
+    }
+
+    @Test
+    public void testModifyServiceConfigValueServiceMissing() throws ApiException {
+        String hueType = "HUE";
+        String hueName = "hue-1";
+        String configName = "config_setting";
+        String configValue = "new-config-value";
+        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
+        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name("hbase-1").type("HBASE"));
+
+        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
+
+        underTest.modifyServiceConfigValue(new ApiClient(), TEST_CLUSTER_NAME, hueType, configName, configValue);
+
+        verify(serviceResourceApi, never()).updateServiceConfig(any(), any(), any(), any());
+    }
 }

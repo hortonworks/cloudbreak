@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import com.sequenceiq.cloudbreak.core.network.SubnetTest;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -105,7 +106,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
             network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
         });
 
-        assertEquals(PUBLIC_ID_1, network[0].getAttributes().getValue(ENDPOINT_ID));
+        assertEquals(PUBLIC_ID_1, network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     @Test
@@ -143,7 +144,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
             network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
         });
 
-        assertNull(network[0].getAttributes().getValue(ENDPOINT_ID));
+        assertNull(network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     @Test
@@ -162,7 +163,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
             network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
         });
 
-        assertNull(network[0].getAttributes().getValue(ENDPOINT_ID));
+        assertNull(network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     private CloudSubnet getCloudSubnet(String availabilityZone) {

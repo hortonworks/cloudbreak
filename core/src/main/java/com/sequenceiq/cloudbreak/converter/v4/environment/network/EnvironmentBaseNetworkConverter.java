@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.CLOUD_PLATFORM;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -46,14 +50,14 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         }
         LOGGER.debug("Chosen subnet: {}", cloudSubnet.get());
 
-        attributes.put("subnetId", cloudSubnet.get().getId());
-        attributes.put("cloudPlatform", getCloudPlatform().name());
+        attributes.put(SUBNET_ID, cloudSubnet.get().getId());
+        attributes.put(CLOUD_PLATFORM, getCloudPlatform().name());
         attributes.putAll(getAttributesForLegacyNetwork(source));
         if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())
             && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(source, cloudSubnet.get().getId());
             if (endpointGatewaySubnet.isPresent()) {
-                attributes.put("endpointGatewaySubnetId", endpointGatewaySubnet.get().getId());
+                attributes.put(ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnet.get().getId());
             } else {
                 throw new BadRequestException("Could not find public subnet in availability zone: " + cloudSubnet.get().getAvailabilityZone());
             }

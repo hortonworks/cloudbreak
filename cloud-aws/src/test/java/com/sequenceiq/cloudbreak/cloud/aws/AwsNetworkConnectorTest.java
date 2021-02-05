@@ -52,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.service.subnetselector.SubnetFilterStrategyType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -69,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -268,7 +268,7 @@ public class AwsNetworkConnectorTest {
         String existingVpc = "vpc-1";
         String cidrBlock = "10.0.0.0/16";
 
-        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
+        Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
         DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock);
@@ -284,7 +284,7 @@ public class AwsNetworkConnectorTest {
     public void testGetNetworkCidrWithoutResult() {
         String existingVpc = "vpc-1";
 
-        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
+        Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
         DescribeVpcsResult describeVpcsResult = describeVpcsResult();
@@ -304,7 +304,7 @@ public class AwsNetworkConnectorTest {
         String cidrBlock1 = "10.0.0.0/16";
         String cidrBlock2 = "10.23.0.0/16";
 
-        Network network = new Network(null, Map.of(AwsNetworkView.VPC_ID, existingVpc, "region", "us-west-2"));
+        Network network = new Network(null, Map.of(NetworkConstants.VPC_ID, existingVpc, "region", "us-west-2"));
         CloudCredential credential = new CloudCredential();
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
         DescribeVpcsResult describeVpcsResult = describeVpcsResult(cidrBlock1, cidrBlock2);

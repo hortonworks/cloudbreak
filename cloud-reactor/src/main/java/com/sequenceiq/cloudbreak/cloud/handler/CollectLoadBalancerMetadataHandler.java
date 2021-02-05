@@ -8,12 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
+import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -24,10 +22,10 @@ public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHan
     private static final Logger LOGGER = LoggerFactory.getLogger(CollectLoadBalancerMetadataHandler.class);
 
     @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
+    private EventBus eventBus;
 
     @Inject
-    private EventBus eventBus;
+    private LoadBalancerMetadataService loadBalancerMetadataService;
 
     @Override
     public Class<CollectLoadBalancerMetadataRequest> type() {
@@ -39,10 +37,8 @@ public class CollectLoadBalancerMetadataHandler implements CloudPlatformEventHan
         LOGGER.debug("Received event: {}", collectLBMetadataRequestEvent);
         CollectLoadBalancerMetadataRequest request = collectLBMetadataRequestEvent.getData();
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
-
-            List<CloudLoadBalancerMetadata> loadBalancerStatuses = connector.metadata().collectLoadBalancer(ac, request.getTypesPresentInStack());
+            List<CloudLoadBalancerMetadata> loadBalancerStatuses = loadBalancerMetadataService.collectMetadata(request.getCloudContext(),
+                request.getCloudCredential(), request.getTypesPresentInStack());
             CollectLoadBalancerMetadataResult collectLBMetadataResult =
                 new CollectLoadBalancerMetadataResult(request.getResourceId(), loadBalancerStatuses);
 

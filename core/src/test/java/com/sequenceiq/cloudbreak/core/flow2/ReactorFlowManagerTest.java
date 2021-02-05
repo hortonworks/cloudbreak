@@ -134,6 +134,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null);
         underTest.triggerDatalakeDatabaseRestore(STACK_ID, null, null);
         underTest.triggerAutoTlsCertificatesRotation(STACK_ID, new CertificatesRotationV4Request());
+        underTest.triggerStackLoadBalancerUpdate(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

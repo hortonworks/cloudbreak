@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.ENDPOINT_GATEWAY_SUBNET_ID;
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.IGW;
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDR;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_CIDRS;
-import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView.VPC_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.INTERNET_GATEWAY_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -73,14 +73,14 @@ public class AwsNetworkViewTest {
 
     @Test
     public void testIgw() {
-        when(network.getStringParameter(IGW)).thenReturn("igw-123");
+        when(network.getStringParameter(INTERNET_GATEWAY_ID)).thenReturn("igw-123");
         assertTrue(underTest.isExistingIGW());
         assertEquals("igw-123", underTest.getExistingIgw());
     }
 
     @Test
     public void testNoIgw() {
-        when(network.getStringParameter(IGW)).thenReturn(null);
+        when(network.getStringParameter(INTERNET_GATEWAY_ID)).thenReturn(null);
         assertFalse(underTest.isExistingIGW());
         assertNull(underTest.getExistingIgw());
     }

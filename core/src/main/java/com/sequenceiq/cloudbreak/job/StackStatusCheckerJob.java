@@ -145,7 +145,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.EXTERNAL_DATABASE_CREATION_FAILED,
                 Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                 Status.EXTERNAL_DATABASE_DELETION_FINISHED,
-                Status.EXTERNAL_DATABASE_DELETION_FAILED
+                Status.EXTERNAL_DATABASE_DELETION_FAILED,
+                Status.LOAD_BALANCER_UPDATE_FINISHED,
+                Status.LOAD_BALANCER_UPDATE_FAILED
         );
     }
 
@@ -164,7 +166,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.MAINTENANCE_MODE_ENABLED,
                 Status.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
                 Status.BACKUP_IN_PROGRESS,
-                Status.RESTORE_IN_PROGRESS
+                Status.RESTORE_IN_PROGRESS,
+                Status.LOAD_BALANCER_UPDATE_IN_PROGRESS
         );
     }
 

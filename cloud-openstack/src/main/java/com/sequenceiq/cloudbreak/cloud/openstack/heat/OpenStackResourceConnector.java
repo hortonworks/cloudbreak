@@ -401,6 +401,12 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
+    @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("OpenStack load balancers are not currently supported.");
+    }
+
     private List<CloudResourceStatus> updateHeatStack(AuthenticatedContext authenticatedContext, List<CloudResource> resources, String heatTemplate,
             Map<String, String> parameters) {
         CloudResource resource = utils.getHeatResource(resources);
