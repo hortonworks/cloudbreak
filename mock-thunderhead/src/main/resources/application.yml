@@ -19,7 +19,7 @@ auth:
     cloudstoragevalidation.enable:
       global: true
       aws: true
-      azure: false
+      azure: true
       gcp: false
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub

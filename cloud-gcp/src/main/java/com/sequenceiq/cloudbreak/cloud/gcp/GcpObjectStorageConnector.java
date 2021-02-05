@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.api.services.storage.Storage;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpStorageFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 
@@ -32,6 +35,9 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
 
     @Inject
     private GcpStorageFactory gcpStorageFactory;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
@@ -51,6 +57,12 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
+        String accountId = Crn.safeFromString(request.getCredential().getId()).getAccountId();
+        if (!entitlementService.gcpCloudStorageValidationEnabled(accountId)) {
+            LOGGER.info("Gcp Cloud storage validation entitlement is missing, not validating cloudStorageRequest: {}",
+                    JsonUtil.writeValueAsStringSilent(request));
+            return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
+        }
         Storage storage = gcpStorageFactory.buildStorage(request.getCredential(), request.getCredential().getName());
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 

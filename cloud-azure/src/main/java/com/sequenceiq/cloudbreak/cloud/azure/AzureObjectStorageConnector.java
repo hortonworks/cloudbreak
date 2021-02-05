@@ -4,10 +4,14 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.StorageAccount;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
@@ -20,10 +24,13 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @Service
 public class AzureObjectStorageConnector implements ObjectStorageConnector {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureObjectStorageConnector.class);
 
     private static final int ACCESS_DENIED_ERROR_CODE = 403;
 
@@ -32,6 +39,9 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
 
     @Inject
     private AzureIDBrokerObjectStorageValidator azureIDBrokerObjectStorageValidator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
@@ -52,11 +62,18 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
+        String accountId = Crn.safeFromString(request.getCredential().getId()).getAccountId();
+        if (!entitlementService.azureCloudStorageValidationEnabled(accountId)) {
+            LOGGER.info("Azure Cloud storage validation entitlement is missing, not validating cloudStorageRequest: {}",
+                    JsonUtil.writeValueAsStringSilent(request));
+            return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
+        }
         AzureClient client = azureClientService.getClient(request.getCredential());
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
+        resultBuilder.prefix("Cloud Storage validation failed");
         ValidationResult validationResult = azureIDBrokerObjectStorageValidator.validateObjectStorage(
-                client, spiFileSystem, resultBuilder);
+                client, spiFileSystem, request.getLogsLocationBase(), resultBuilder);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()

@@ -68,6 +68,7 @@ import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
 import com.amazonaws.services.elasticfilesystem.model.LifeCycleState;
 import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
 import com.amazonaws.waiters.Waiter;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -220,6 +221,9 @@ public class AwsRepairTest {
     @MockBean
     private CustomAmazonWaiterProvider customAmazonWaiterProvider;
 
+    @MockBean
+    private EntitlementService entitlementService;
+
     @Test
     public void repairStack() throws Exception {
         setup();
@@ -271,6 +275,8 @@ public class AwsRepairTest {
         when(amazonEfsClient.deleteMountTarget(any())).thenReturn(deleteMtResult);
         when(amazonEfsClient.deleteFileSystem(any())).thenReturn(deleteFileSystemResult);
         when(amazonEfsClient.deleteFileSystem(any())).thenReturn(deleteFileSystemResult);
+
+        when(entitlementService.awsCloudStorageValidationEnabled(any())).thenReturn(Boolean.TRUE);
     }
 
     private void setupRetryService() {

@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.RDS_WAIT_EVENT;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
@@ -122,7 +122,7 @@ public class SdxRetryServiceTest {
         FlowLog successfulFlowLog = new FlowLog();
         successfulFlowLog.setFlowId("FLOW_ID_1");
         successfulFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
-        successfulFlowLog.setNextEvent(RDS_WAIT_EVENT.name());
+        successfulFlowLog.setNextEvent(STORAGE_VALIDATION_WAIT_EVENT.name());
         successfulFlowLog.setCreated(1L);
         successfulFlowLog.setCurrentState(SDX_CREATION_WAIT_RDS_STATE.name());
         flowLogs.add(successfulFlowLog);

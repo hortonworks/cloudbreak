@@ -23,6 +23,7 @@ import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsInstanceProfileEC2TrustValidatorTest {
@@ -152,18 +153,19 @@ public class AwsInstanceProfileEC2TrustValidatorTest {
 
     private void checkInvalidInstanceProfileTrust(InstanceProfile instanceProfile) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        assertThat(awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile,
+        assertThat(awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, CloudIdentityType.ID_BROKER,
                 validationResultBuilder)).isFalse();
         ValidationResult validationResult = validationResultBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(Collections.singletonList(
-                String.format("The instance profile (%s) doesn't have an EC2 trust relationship.",
+                String.format("The instance profile (%s) doesn't have an EC2 trust relationship. " +
+                                "Please check if you've used the correct Instance profile when setting up Data Access.",
                         instanceProfile.getArn())));
     }
 
     private void checkValidInstanceProfileTrust(InstanceProfile instanceProfile) {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
-        assertThat(awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile,
+        assertThat(awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, CloudIdentityType.ID_BROKER,
                 validationResultBuilder)).isTrue();
         assertThat(validationResultBuilder.build().hasError()).isFalse();
     }

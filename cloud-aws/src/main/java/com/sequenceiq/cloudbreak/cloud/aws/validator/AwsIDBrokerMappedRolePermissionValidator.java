@@ -29,6 +29,8 @@ import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 public abstract class AwsIDBrokerMappedRolePermissionValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsIDBrokerMappedRolePermissionValidator.class);
 
+    private static final int MAX_SIZE = 5;
+
     @Inject
     private AwsIamService awsIamService;
 
@@ -100,11 +102,18 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
                 }
             }
             if (!failedActions.isEmpty()) {
-                String errorMessage = String.format("The role(s) (%s) don't have the required permissions:%n%s",
-                                String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
-                                String.join("\n", failedActions));
-                LOGGER.warn(errorMessage);
-                validationResultBuilder.error(errorMessage);
+                String validationErrorMessage = String.format("Data Access Role (%s) is not set up correctly. " +
+                                "Please follow the official documentation on required policies for Data Access Role.%n" +
+                                "Missing policies (chunked):%n%s",
+                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                        String.join("\n", failedActions.stream().limit(MAX_SIZE).collect(Collectors.toSet())));
+
+                String fullErrorMessage = String.format("Data Access Role (%s) is not set up correctly. Missing policies:%n%s",
+                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                        String.join("\n", failedActions));
+
+                LOGGER.info(fullErrorMessage);
+                validationResultBuilder.error(validationErrorMessage);
             }
         }
     }

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.AwsAccessConfigType.INSTANCE_PROFILE;
+import static com.sequenceiq.cloudbreak.cloud.aws.util.AwsValidationMessageUtil.getAdviceMessage;
+import static com.sequenceiq.common.model.CloudIdentityType.ID_BROKER;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -52,7 +56,8 @@ public class AwsIDBrokerAssumeRoleValidator {
                 LOGGER.error("Unable to check assume role from instance profile {} for roles {} due to {}",
                         instanceProfile.getArn(), roleArns, e.getMessage(), e);
                 if ("AccessDenied".equals(e.getErrorCode())) {
-                    resultBuilder.error("Unable to check assume role: " + e.getErrorMessage());
+                    resultBuilder.error(String.format("Unable to check assume role from Instance profile %s from roles %s because access is denied.",
+                            instanceProfile.getArn(), roleArns));
                     return false;
                 }
                 return true;
@@ -66,8 +71,9 @@ public class AwsIDBrokerAssumeRoleValidator {
             return true;
         } else {
             resultBuilder.error(
-                    String.format("IDBroker instance profile (%s) doesn't have permissions to assume " +
-                            "the role(s): %s", instanceProfile.getArn(), roleArns));
+                    String.format("Data Access Instance profile (%s) doesn't have permissions to assume " +
+                                    "the role(s): %s. " + getAdviceMessage(INSTANCE_PROFILE, ID_BROKER),
+                            instanceProfile.getArn(), roleArns));
             return false;
         }
     }
