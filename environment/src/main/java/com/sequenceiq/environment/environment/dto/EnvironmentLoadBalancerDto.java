@@ -4,13 +4,10 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.environment.environment.domain.Environment;
 
 public class EnvironmentLoadBalancerDto implements Payload {
 
     private Long id;
-
-    private Environment environment;
 
     private EnvironmentDto environmentDto;
 
@@ -25,14 +22,6 @@ public class EnvironmentLoadBalancerDto implements Payload {
     @Override
     public Long getResourceId() {
         return id;
-    }
-
-    public Environment getEnvironment() {
-        return environment;
-    }
-
-    public void setEnvironment(Environment environment) {
-        this.environment = environment;
     }
 
     public EnvironmentDto getEnvironmentDto() {
@@ -76,8 +65,6 @@ public class EnvironmentLoadBalancerDto implements Payload {
 
         private Long id;
 
-        private Environment environment;
-
         private EnvironmentDto environmentDto;
 
         private PublicEndpointAccessGateway endpointAccessGateway;
@@ -86,11 +73,6 @@ public class EnvironmentLoadBalancerDto implements Payload {
 
         public Builder withId(Long id) {
             this.id = id;
-            return this;
-        }
-
-        public Builder withEnvironment(Environment environment) {
-            this.environment = environment;
             return this;
         }
 
@@ -112,7 +94,6 @@ public class EnvironmentLoadBalancerDto implements Payload {
         public EnvironmentLoadBalancerDto build() {
             EnvironmentLoadBalancerDto environmentLoadBalancerDto = new EnvironmentLoadBalancerDto();
             environmentLoadBalancerDto.setId(id);
-            environmentLoadBalancerDto.setEnvironment(environment);
             environmentLoadBalancerDto.setEnvironmentDto(environmentDto);
             environmentLoadBalancerDto.setEndpointAccessGateway(endpointAccessGateway);
             environmentLoadBalancerDto.setEndpointGatewaySubnetIds(endpointGatewaySubnetIds);

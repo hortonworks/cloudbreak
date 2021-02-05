@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -107,7 +108,7 @@ public class AwsEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     public Network convertToNetwork(BaseNetwork baseNetwork) {
         AwsNetwork awsNetwork = (AwsNetwork) baseNetwork;
         Map<String, Object> param = new HashMap<>();
-        param.put(AwsNetworkView.VPC_ID, awsNetwork.getVpcId());
+        param.put(NetworkConstants.VPC_ID, awsNetwork.getVpcId());
         param.put(AwsNetworkView.REGION, awsNetwork.getEnvironments().stream().findFirst().get().getLocation());
         return new Network(null, param);
     }

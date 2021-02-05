@@ -331,9 +331,9 @@ public class EnvironmentApiConverter {
     }
 
     public EnvironmentLoadBalancerDto initLoadBalancerDto(EnvironmentLoadBalancerUpdateRequest request) {
-        EnvironmentLoadBalancerDto.Builder builder = EnvironmentLoadBalancerDto.builder()
+        return EnvironmentLoadBalancerDto.builder()
             .withEndpointAccessGateway(request.getPublicEndpointAccessGateway())
-            .withEndpointGatewaySubnetIds(request.getSubnetIds());
-        return builder.build();
+            .withEndpointGatewaySubnetIds(request.getSubnetIds())
+            .build();
     }
 }

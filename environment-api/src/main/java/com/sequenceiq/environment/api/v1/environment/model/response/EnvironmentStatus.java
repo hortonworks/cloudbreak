@@ -60,7 +60,12 @@ public enum EnvironmentStatus {
     START_SYNCHRONIZE_USERS_STARTED("Starting to synchronize users"),
     START_SYNCHRONIZE_USERS_FAILED("Failed to synchronize users"),
 
-    FREEIPA_DELETED_ON_PROVIDER_SIDE("Free IPA deleted on cloud provider side");
+    FREEIPA_DELETED_ON_PROVIDER_SIDE("Free IPA deleted on cloud provider side"),
+
+    LOAD_BALANCER_ENV_UPDATE_STARTED("Starting load balancer update for environment"),
+    LOAD_BALANCER_ENV_UPDATE_FAILED("Failed to update environment with load balancer"),
+    LOAD_BALANCER_STACK_UPDATE_STARTED("Starting load balancer update for all data lakes and data hubs"),
+    LOAD_BALANCER_STACK_UPDATE_FAILED("Failed to update data lakes and data hubs with load balancer");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

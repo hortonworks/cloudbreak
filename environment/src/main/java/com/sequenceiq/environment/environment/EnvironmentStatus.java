@@ -59,7 +59,12 @@ public enum EnvironmentStatus {
     START_SYNCHRONIZE_USERS_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_SYNCHRONIZE_USERS_STARTED),
     START_SYNCHRONIZE_USERS_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_SYNCHRONIZE_USERS_FAILED),
 
-    FREEIPA_DELETED_ON_PROVIDER_SIDE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE);
+    FREEIPA_DELETED_ON_PROVIDER_SIDE(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE),
+
+    LOAD_BALANCER_ENV_UPDATE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_STARTED),
+    LOAD_BALANCER_ENV_UPDATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_ENV_UPDATE_FAILED),
+    LOAD_BALANCER_STACK_UPDATE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_STACK_UPDATE_STARTED),
+    LOAD_BALANCER_STACK_UPDATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_STACK_UPDATE_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,
