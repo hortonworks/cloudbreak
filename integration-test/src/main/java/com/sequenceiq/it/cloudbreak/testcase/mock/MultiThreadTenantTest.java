@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
-import com.sequenceiq.it.cloudbreak.actor.Actor;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -88,6 +88,9 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
+
+    @Inject
+    private CloudbreakActor cloudbreakActor;
 
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
@@ -171,7 +174,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     }
 
     protected void createUser(MockedTestContext testContext, String tenant, String user) {
-        testContext.as(Actor.create(tenant, user));
+        testContext.as(cloudbreakActor.create(tenant, user));
     }
 
     protected void initializeDefaultBlueprints(MockedTestContext testContext) {

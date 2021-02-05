@@ -11,18 +11,22 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class FreeIpaSyncAction extends AbstractFreeIpaAction<FreeIpaUserSyncTestDto> {
+public class FreeIpaSynchronizeAllUsersAction extends AbstractFreeIpaAction<FreeIpaUserSyncTestDto> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaSyncAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaSynchronizeAllUsersAction.class);
 
     @Override
     protected FreeIpaUserSyncTestDto freeIpaAction(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironments()));
+        Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", testDto.getEnvironmentCrn(), testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA sync request: %n"), testDto.getRequest());
         SyncOperationStatus syncOperationStatus = client.getFreeIpaClient()
                 .getUserV1Endpoint()
                 .synchronizeAllUsers(testDto.getRequest());
         testDto.setOperationId(syncOperationStatus.getOperationId());
+        LOGGER.info("Sync is in state: [{}], sync operation: [{}] with type: [{}]", syncOperationStatus.getStatus(),
+                syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType());
+        Log.when(LOGGER, format(" Sync is in state: [%s], sync operation: [%s] with type: [%s]", syncOperationStatus.getStatus(),
+                syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType()));
         return testDto;
     }
 }

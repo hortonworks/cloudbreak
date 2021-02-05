@@ -142,6 +142,9 @@ SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
 
+    @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
+    private int maxCloudStorageValidationRetry;
+
     @Inject
     private SaltRunner saltRunner;
 
@@ -464,6 +467,29 @@ SaltOrchestrator implements HostOrchestrator {
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) {
         LOGGER.debug("Change primary gateway is not implemented, yet");
+    }
+
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
+    @Override
+    public void validateCloudStorageBackup(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            runValidation(sc, new StateAllRunner(targetHostnames, allNodes, "validation/cloud-storage-backup"), exitCriteriaModel);
+            LOGGER.debug("Completed validating cloud storage");
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.warn("CloudbreakOrchestratorException occurred during cloud storage validation", e);
+            throw e;
+        } catch (ExecutionException e) {
+            LOGGER.warn("Error occurred during cloud storage validation", e);
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e);
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during cloud storage validation", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
@@ -1033,6 +1059,13 @@ SaltOrchestrator implements HostOrchestrator {
             throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, retryOnFail);
         Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, true);
+        saltJobRunBootstrapRunner.call();
+    }
+
+    private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
+        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, true);
+        Callable<Boolean> saltJobRunBootstrapRunner =
+                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry, false);
         saltJobRunBootstrapRunner.call();
     }
 

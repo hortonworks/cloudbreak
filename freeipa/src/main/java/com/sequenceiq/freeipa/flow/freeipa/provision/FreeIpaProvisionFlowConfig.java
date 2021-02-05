@@ -14,6 +14,10 @@ import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEven
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.FREEIPA_PROVISION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.HOST_METADATASETUP_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.HOST_METADATASETUP_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.ORCHESTRATOR_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.ORCHESTRATOR_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.VALIDATING_CLOUD_STORAGE_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent.VALIDATING_CLOUD_STORAGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.CLUSTERPROXY_UPDATE_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.COLLECTING_HOST_METADATA_STATE;
@@ -23,6 +27,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionStat
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.FREEIPA_PROVISION_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.FREEIPA_PROVISION_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.INIT_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.ORCHESTRATOR_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState.VALIDATING_CLOUD_STORAGE_STATE;
 
 import java.util.List;
 
@@ -44,8 +50,12 @@ public class FreeIpaProvisionFlowConfig extends AbstractFlowConfiguration<FreeIp
             .from(INIT_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(FREEIPA_PROVISION_EVENT).noFailureEvent()
             .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
-            .from(COLLECTING_HOST_METADATA_STATE).to(FREEIPA_INSTALL_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
+            .from(COLLECTING_HOST_METADATA_STATE).to(ORCHESTRATOR_CONFIG_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
+            .from(ORCHESTRATOR_CONFIG_STATE).to(VALIDATING_CLOUD_STORAGE_STATE).event(ORCHESTRATOR_CONFIG_FINISHED_EVENT)
+                    .failureEvent(ORCHESTRATOR_CONFIG_FAILED_EVENT)
+            .from(VALIDATING_CLOUD_STORAGE_STATE).to(FREEIPA_INSTALL_STATE).event(VALIDATING_CLOUD_STORAGE_FINISHED_EVENT)
+                    .failureEvent(VALIDATING_CLOUD_STORAGE_FAILED_EVENT)
             .from(FREEIPA_INSTALL_STATE).to(CLUSTERPROXY_UPDATE_REGISTRATION_STATE)
                     .event(FREEIPA_INSTALL_FINISHED_EVENT).failureEvent(FREEIPA_INSTALL_FAILED_EVENT)
             .from(CLUSTERPROXY_UPDATE_REGISTRATION_STATE).to(FREEIPA_POST_INSTALL_STATE)

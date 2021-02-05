@@ -341,6 +341,10 @@ service UserManagement {
   rpc ProcessWorkloadSSOAuthnReq(ProcessWorkloadSSOAuthnReqRequest)
     returns (ProcessWorkloadSSOAuthnReqResponse) {}
 
+  // Generate a SSO AuthNRequest for control plane SP-initiated login.
+  rpc GenerateControlPlaneSSOAuthnReq(GenerateControlPlaneSSOAuthnReqRequest)
+    returns (GenerateControlPlaneSSOAuthnReqResponse) {}
+
   // Set the workload subdomain for an account if no such workload domain has
   // been set for a different account before.
   rpc SetWorkloadSubdomain(SetWorkloadSubdomainRequest)
@@ -388,6 +392,10 @@ service UserManagement {
   rpc SetActorWorkloadCredentials(SetActorWorkloadCredentialsRequest)
     returns (SetActorWorkloadCredentialsResponse) {}
 
+  // Validates the actor workloads credentials based on the password policy for the account.
+  rpc ValidateActorWorkloadCredentials(ValidateActorWorkloadCredentialsRequest)
+    returns (ValidateActorWorkloadCredentialsResponse) {}
+
   // Retrieves the actor workload credentials.
   rpc GetActorWorkloadCredentials(GetActorWorkloadCredentialsRequest)
     returns (GetActorWorkloadCredentialsResponse) {}
@@ -424,6 +432,10 @@ service UserManagement {
   rpc SetWorkloadPasswordPolicy (SetWorkloadPasswordPolicyRequest)
     returns (SetWorkloadPasswordPolicyResponse) {}
 
+  // Unsets the workload password policy for an account.
+  rpc UnsetWorkloadPasswordPolicy (UnsetWorkloadPasswordPolicyRequest)
+    returns (UnsetWorkloadPasswordPolicyResponse) {}
+
   // Assign a cloud identity to an actor or group.
   rpc AssignCloudIdentity (AssignCloudIdentityRequest)
     returns (AssignCloudIdentityResponse) {}
@@ -451,6 +463,18 @@ service UserManagement {
   // Get user sync state model, including actors, groups, workload administration groups, etc
   rpc GetUserSyncStateModel (GetUserSyncStateModelRequest)
     returns (GetUserSyncStateModelResponse) {}
+
+  // List all role assignments in an account.
+  rpc ListRoleAssignments (ListRoleAssignmentsRequest)
+      returns (ListRoleAssignmentsResponse) {}
+
+  // Generate authentication token for workload API.
+  rpc GenerateWorkloadAuthToken (GenerateWorkloadAuthTokenRequest)
+    returns (GenerateWorkloadAuthTokenResponse) {}
+
+  // Get authentication configuration for workload API.
+  rpc GetWorkloadAuthConfiguration(GetWorkloadAuthConfigurationRequest)
+    returns (GetWorkloadAuthConfigurationResponse) {}
 }
 
 // The state of the actor.
@@ -1182,8 +1206,10 @@ message Account {
   // Note that this is ensured to be unique, that is, there will not be two
   // accounts with the same workload sub domain.
   string workloadSubdomain = 14;
-  // The workload password policy.
-  WorkloadPasswordPolicy passwordPolicy = 15;
+  // The global workload password policy.
+  WorkloadPasswordPolicy globalPasswordPolicy = 15;
+  // The workload password policy for machine users.
+  WorkloadPasswordPolicy machineUserPasswordPolicy = 16;
 }
 
 // Either the accountId or externalAccountId is required to get
@@ -1736,9 +1762,10 @@ message ListMachineUsersRequest {
   // Whether to include workload machine users. All regular machine users are
   // workload machine users. This is a subset of the internal machine users,
   // which have a password set. This field has no effect if internal machine
-  // users are requested because all workload machine users will already be
-  // included in the results. Note that this has no impact when listing by name
-  // or CRN. For those calls, internal machine users are always returned.
+  // users are requested (`includeInternal` is `true`) because all workload
+  // machine users will already be included in the results. Note that this has
+  // no impact when listing by name or CRN. For those calls, internal machine
+  // users are always returned.
   bool includeWorkloadMachineUsers = 7;
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 3;
@@ -1756,6 +1783,9 @@ message DeleteMachineUserRequest {
   string accountId = 1;
   // The name or crn of the machine user to delete.
   string machineUserNameOrCrn = 2;
+  // Whether to delete the machine user immediately (and in rare cases risk
+  // orphaning associated resources) or spend more time to fully clean up.
+  bool unsafeDelete = 3;
 }
 
 message DeleteMachineUserResponse {
@@ -1778,6 +1808,18 @@ message WorkloadPasswordPolicyStorage {
   // Account-wide max lifetime, in ms, of actors workload passwords.
   // The magic value 0 indicates that passwords never expire.
   uint64 workloadPasswordMaxLifetime = 1;
+  // The min length of a password. Can be any number between 6 and 256.
+  // The default minimum password length is 1.
+  uint32 minPasswordLength = 2;
+  // Whether passwords must include upper case characters. The default is 'false'.
+  bool mustIncludeUpperCaseCharacters = 3;
+  // Whether passwords must include lower case characters. The default is 'false'.
+  bool mustIncludeLowerCaseCharacters = 4;
+  // Whether passwords must include numbers. The default is 'false'.
+  bool mustIncludeNumbers = 5;
+  // Whether passwords must include symbols. The symbols are '#', '&', '*', '$', '%',
+  // '@', '^', '.', '_', and '!'. The default is 'false'.
+  bool mustIncludeSymbols = 6;
 }
 
 // Object used to serialize account metadata that does not require its own
@@ -1790,8 +1832,11 @@ message AccountDetails {
   repeated EntitlementGrant entitlement = 2;
   // Whether login using Cloudera SSO is disabled
   bool clouderaSSOLoginDisabled = 3;
-  // The account workload password policy
-  WorkloadPasswordPolicyStorage passwordPolicy = 4;
+  // The global password policy.
+  WorkloadPasswordPolicyStorage globalPasswordPolicy = 4;
+  // The password policy for machine users. If set, this will be used for enforcing
+  // password complexity for machine users instead of the global password policy
+  WorkloadPasswordPolicyStorage machineUsersPasswordPolicy = 5;
 }
 
 // Set Account Messages request object.
@@ -2040,6 +2085,10 @@ message ListGroupMembersRequest {
   // See the PageToken comment in paging.proto on paging usage.
   int32 pageSize = 3;
   paging.PageToken pageToken = 4;
+  // Whether to list the group memberships of a deleted group. When it is 'true',
+  // the request must pass group CRN. It must ALWAYS be 'false' for public API calls,
+  // irrespective of whether the request contains a group name or CRN.
+  bool includeDeleted = 5;
 }
 
 message ListGroupMembersResponse {
@@ -2163,7 +2212,10 @@ message LdapProviderDetails {
   // certificate can match or chain to. For self-signed certificates, the certificate is its own CA, and must be provided.
   // For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509 CERTIFICATE", and "CERTIFICATE".
   // If the user is setup with a referral, we must provide certificates which can verify connection to every server
-  repeated string tlsCaCertificates = 10;
+  repeated string tlsCaCertificates = 10 [(options.FieldExtension.sensitive) = true];
+
+  // Indicates whether a start TLS request should be initiated on connecting to ldap.
+  bool startTls = 19;
 
   // All LDAP servers are slightly different in their own way. Information required to create a UMS user might be stored under
   // a different attribute. Following properties would help in mapping attributes from a given LDAP server.
@@ -2227,6 +2279,8 @@ message SamlProviderInfo {
   string metadata = 1;
   // The certs provided to us in the IdP metadata xml.
   repeated SamlCert certs = 2;
+  // The XML SAML metadata we provided to the customer.
+  string cdpSpMetadata = 3;
 }
 
 // Information about an LDAP identity provider connector. Certain fields may
@@ -2280,7 +2334,10 @@ message LdapProviderInfo {
   // certificate can match or chain to. For self-signed certificates, the certificate is its own CA, and must be provided.
   // For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509 CERTIFICATE", and "CERTIFICATE".
   // If the user is setup with a referral, we must provide certificates which can verify connection to every server
-  repeated string tlsCaCertificates = 10;
+  repeated string tlsCaCertificates = 10 [(options.FieldExtension.sensitive) = true];
+
+  // Indicates whether a start TLS request should be initiated on connecting to ldap.
+  bool startTls = 19;
 
   // All LDAP servers are slightly different in their own way. Information required to create a UMS user might be stored under
   // a different attribute. Following properties would help in mapping attributes from a given LDAP server.
@@ -2421,6 +2478,8 @@ message SamlIdpDetails {
   string metadataXml = 1 [(options.FieldExtension.skipLogging) = true];
   // The certs provided to us in the IdP metadata xml.
   repeated SamlCert certs = 2;
+  // The XML SAML metadata we provided to the customer.
+  string cdpSpMetadata = 3;
 }
 
 // The IdP connector details for a LDAP typed connector. Used only for
@@ -2474,7 +2533,10 @@ message LdapIdpDetails {
   // certificate can match or chain to. For self-signed certificates, the certificate is its own CA, and must be provided.
   // For PEM encoded certificates, supported types are "TRUSTED CERTIFICATE", "X509 CERTIFICATE", and "CERTIFICATE".
   // If the user is setup with a referral, we must provide certificates which can verify connection to every server
-  repeated string tlsCaCertificates = 10;
+  repeated string tlsCaCertificates = 10 [(options.FieldExtension.sensitive) = true];
+
+  // Indicates whether a start TLS request should be initiated on connecting to ldap.
+  bool startTls = 19;
 
   // All LDAP servers are slightly different in their own way. Information required to create a UMS user might be stored under
   // a different attribute. Following properties would help in mapping attributes from a given LDAP server.
@@ -2604,11 +2666,21 @@ message IdpAuthnRequest {
   // Where to send the authn request. This can be either cloudera sso or a
   // customer identity provider.
   string destination = 1;
-  // The HTTP method to use to send the request. This is one
+  // The HTTP method to use to send the request. This is one of
   // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST' or
-  // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'
+  // 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect'.
   string binding = 2;
-  // The authn response - a SAML 2.0 signed authn response.
+  // A SAML 2.0 authn request. This is unsigned unless the customer's IdP metadata specifies
+  // `WantAuthnRequestsSigned="true"`.
+  // How we send a signed request is dependent on the `binding`:
+  // - HTTP-POST: Send the authnRequest with an embedded signature.
+  // - HTTP-Redirect: Send the authnRequest as three query parameters:
+  //   - The unsigned authnRequest.
+  //   - The signature.
+  //   - The signing algorithm.
+  // Note: we currently only support signing authn requests over HTTP-POST (that is, the
+  // `IDPSSODescriptor` > `SingleSignOnService` `Binding` is HTTP-POST).
+  // See CDPCP-3590.
   string authnRequest = 3 [(options.FieldExtension.skipLogging) = true];
 }
 
@@ -2865,6 +2937,10 @@ message ActorDetails {
   repeated StoredKerberosKey kerberosKeys = 2;
   // A list of ssh public keys for the actor.
   repeated SshPublicKeyStorage sshPublicKeys = 3;
+  // The version of the actor's workload credentials. Version numbering begins at
+  // zero. The version is incremented whenever any change is persisted to the actor's
+  // password hash, password hash expiration, kerberos keys, or ssh public keys.
+  int64 workloadCredentialsVersion = 7;
   // Cloud identities assigned to the actor.
   CloudIdentitiesStorage cloudIdentities = 5;
 }
@@ -2892,6 +2968,16 @@ message SetActorWorkloadCredentialsRequest {
 }
 
 message SetActorWorkloadCredentialsResponse {
+}
+
+message ValidateActorWorkloadCredentialsRequest {
+  // The actor's CRN
+  string actorCrn = 1;
+  // The CDP workload password to validate.
+  string password = 2 [(options.FieldExtension.sensitive) = true];
+}
+
+message ValidateActorWorkloadCredentialsResponse {
 }
 
 // Definition of a Kerberos Key used in rpc calls (vs storage)
@@ -2925,6 +3011,8 @@ message GetActorWorkloadCredentialsResponse {
   string workloadUsername = 4;
   // A list of Ssh public keys for the actor.
   repeated SshPublicKey sshPublicKey = 5;
+  // The version number of the workload credentials. Version numbering begins at zero.
+  int64 workloadCredentialsVersion = 6;
 }
 
 message GetEventGenerationIdsRequest {
@@ -3056,16 +3144,43 @@ message WorkloadPasswordPolicy {
   // Account-wide max lifetime, in ms, of actors workload passwords.
   // The magic value 0 indicates that passwords never expire.
   uint64 workloadPasswordMaxLifetime = 1;
+  // The min length of a password. Can be any number between 6 and 256.
+  // The default minimum password length is 1.
+  uint32 minPasswordLength = 2;
+  // Whether passwords must include upper case characters. The default is 'false'.
+  bool mustIncludeUpperCaseCharacters = 3;
+  // Whether passwords must include lower case characters. The default is 'false'.
+  bool mustIncludeLowerCaseCharacters = 4;
+  // Whether passwords must include numbers. The default is 'false'.
+  bool mustIncludeNumbers = 5;
+  // Whether passwords must include symbols. The symbols are '#', '&', '*', '$', '%',
+  // '@', '^', '.', '_', and '!'. The default is 'false'.
+  bool mustIncludeSymbols = 6;
 }
 
 message SetWorkloadPasswordPolicyRequest {
   // The account ID
   string accountId = 1;
-  // The password policy to set.
-  WorkloadPasswordPolicy policy = 2;
+  // The global password policy to set.
+  WorkloadPasswordPolicy globalPolicy = 2;
+  // The password policy for machine users. If set, this will be used for enforcing
+  // password complexity for machine users instead of the global password policy
+  WorkloadPasswordPolicy machineUsersPolicy = 3;
 }
 
 message SetWorkloadPasswordPolicyResponse {
+}
+
+message UnsetWorkloadPasswordPolicyRequest {
+  // The account ID
+  string accountId = 1;
+  // Whether to unset the global password policy.
+  bool unsetGlobalPolicy = 2;
+  // Whether to unset the machine user policy
+  bool unsetMachineUsersPolicy = 3;
+}
+
+message UnsetWorkloadPasswordPolicyResponse {
 }
 
 // A namespace for cloud identities. All cloud identities exist within a cloud
@@ -3218,7 +3333,8 @@ message GetUserSyncStateModelRequest {
   // The account id.
   string accountId = 1;
   // The rights checks to be performed on each actor. The response model contains
-  // all actors and the results of these rights checks for each actor.
+  // actors that pass at least one of these rights checks. The results of the rights
+  // checks are included in the response for each included actor.
   repeated RightsCheck rightsCheck = 2;
 }
 
@@ -3226,8 +3342,9 @@ message GetUserSyncStateModelResponse {
   // Event generation ids when the user sync state model is created. The responses are guaranteed
   // to be at least as recent as the event generation ids.
   EventGenerationIds eventGenerationIds = 1;
-  // All users and machine users in this account, along with supporting information needed for
-  // user sync.
+  // Users and machine users in this account, along with supporting information needed for
+  // user sync. Only users and machine users that have passed at least one right check from the
+  // request are included.
   repeated UserSyncActor actor = 2;
   // All groups in this account.
   repeated Group group = 3;
@@ -3250,9 +3367,10 @@ message ActorWorkloadCredentials {
   repeated ActorKerberosKey kerberosKeys = 2;
   // A list of Ssh public keys for the actor.
   repeated SshPublicKey sshPublicKey = 5;
+  // The version number of the workload credentials. Version numbering begins at zero.
+  int64 workloadCredentialsVersion = 6;
 }
 
-//
 message RightsCheckResult {
   // Results of a rights checks, returned in the same order as
   // the right list in the corresponding RightsCheck
@@ -3286,4 +3404,130 @@ message UserSyncActorDetails {
   string workloadUsername = 4;
   // The actor's cloud identities
   repeated CloudIdentity cloudIdentity = 5;
+}
+
+// Encapsulation of metadata associated with actors in workload clusters.
+// This metadata is used by user sync to optimize the updating of workload
+// credentials.
+message WorkloadUserSyncActorMetadata {
+  // sint64 encodes negative numbers more efficiently than int64. This gives
+  // us the option of using -1 as an "unknown" version value on the workload
+  // side, with compact encoding.
+  sint64 workloadCredentialsVersion = 1;
+}
+
+message RoleAssignmentRecord {
+  // The CRN of an assignee to whom role is assigned.
+  string assigneeCrn = 1;
+  // The CRN of a role assigned to an assignee.
+  string roleCrn = 2;
+}
+
+message ListRoleAssignmentsRequest {
+  // Account for which to list the resource role assignments
+  string accountId = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 2;
+  paging.PageToken pageToken = 3;
+}
+
+message ListRoleAssignmentsResponse {
+  // The list of role assignments in an account.
+  repeated RoleAssignmentRecord roleAssignment = 1;
+  // See the PageToken comment in paging.proto on paging usage.
+  paging.PageToken nextPageToken = 2;
+}
+
+message GenerateWorkloadAuthTokenRequest {
+  // The workload endpoint URL which will receive and validate the auth token.
+  string workloadEndpointUrl = 1;
+}
+
+message GenerateWorkloadAuthTokenResponse {
+  // The authentication token
+  string token = 1;
+  // When the token will expire (in ms from the Java epoch of 1970-01-01T00:00:00Z)
+  uint64 expireAt = 2;
+}
+
+message GetWorkloadAuthConfigurationRequest {
+  string accountId = 1;
+}
+
+// Metadata describing the configuration
+// This response contains all required and recommended data defined by the OpenId-Connect-Discovery 1.0
+// spec [https://openid.net/specs/openid-connect-discovery-1_0.html], for maximum compatibility now and in the future.
+message GetWorkloadAuthConfigurationResponse {
+  // URL using the https scheme with no query or fragment component that the OP asserts as its Issuer Identifier.
+  // This MUST be identical to the iss Claim value in ID Tokens issued from this Issuer.
+  string issuer = 1;
+  // URL of the OP's OAuth 2.0 Authorization Endpoint (Empty)
+  string authorizationEndpoint = 2;
+  // URL of the OP's OAuth 2.0 Token Endpoint
+  string tokenEndpoint = 3;
+  // URL of the OP's UserInfo Endpoint (Empty)
+  string userInfoEndpoint = 4;
+  // URL of the OP's Dynamic Client Registration Endpoint (Empty)
+  string registrationEndpoint = 5;
+  // JSON Web Key Set document
+  // This contains the signing key(s) the RP uses to validate signatures from the OP.
+  JsonWebKeySet jwks = 6;
+  // An array containing a list of the OAuth 2.0 scope values that this server supports. (Empty)
+  repeated string scopesSupported = 7;
+  // An array containing a list of the OAuth 2.0 response_type values that this OP supports. (id_token)
+  repeated string responseTypesSupported = 8;
+  // An array containing a list of the Claim Names of the Claims that this OP MAY be able to supply values for.
+  repeated string claimsSupported = 9;
+  // array containing a list of the Subject Identifier types that this OP supports. (public)
+  repeated string subjectTypesSupported = 10;
+  // An array containing a list of the JWS signing algorithms (alg values) supported for the ID Token to encode the Claims in a JWT. (RS256)
+  repeated string idTokenSigningAlgValuesSupported = 11;
+}
+
+// JWK Set, defined by JSON Web Key (JWK) [https://tools.ietf.org/html/rfc7517]
+message JsonWebKeySet {
+  // JsonWebKey set.
+  repeated JsonWebKey keys = 1;
+}
+
+// JSON Web Key, defined by JSON Web Key (JWK) [https://tools.ietf.org/html/rfc7517]
+message JsonWebKey {
+  // The "kty" (key type) parameter
+  string kty = 1;
+  // The "use" (public key use) parameter
+  string use = 2;
+  // The "key_ops" (key operations) parameter
+  repeated string key_ops = 3;
+  // The "alg" (algorithm) parameter
+  string alg = 4;
+  // The "kid" (key ID) parameter
+  string kid = 5;
+  // The "x5u" (X.509 URL) parameter
+  string x5u = 6;
+  // The "x5c" (X.509 certificate chain) parameter
+  repeated string x5c = 7;
+  // The "x5t" (X.509 certificate SHA-1 thumbprint) parameter
+  string x5t = 8;
+  // The "x5t#S256" (X.509 certificate SHA-256 thumbprint) parameter
+  string x5t_S256 = 9;
+  // RSA key modulus "n"
+  string n = 10;
+  // RSA key public exponent "e"
+  string e = 11;
+}
+
+message GenerateControlPlaneSSOAuthnReqRequest {
+  // The account id.
+  string accountId = 1;
+  // The identity provider name or CRN to use to login.
+  // The identity provider should be a SAML IdP.
+  // This field is optional. Default IdP will be used if the value is not set.
+  string identityProviderNameOrCrn = 2;
+  // The SAML RelayState.
+  string relayState = 3;
+}
+
+message GenerateControlPlaneSSOAuthnReqResponse {
+  // SAML AuthnRequest to login with IdP.
+  IdpAuthnRequest authnRequest = 1;
 }

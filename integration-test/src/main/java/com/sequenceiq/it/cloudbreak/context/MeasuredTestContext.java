@@ -6,11 +6,11 @@ import java.util.Map;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
-import com.sequenceiq.it.cloudbreak.actor.Actor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
@@ -42,7 +42,7 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public TestContext as(Actor actor) {
+    public TestContext as(CloudbreakUser actor) {
         wrappedTestContext.as(actor);
         return this;
     }
@@ -98,18 +98,38 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    protected String getActingUserAccessKey() {
+    public String getActingUserAccessKey() {
         return wrappedTestContext.getActingUserAccessKey();
     }
 
     @Override
-    protected void setActingUser(CloudbreakUser actingUser) {
+    public Crn getActingUserCrn() {
+        return wrappedTestContext.getActingUserCrn();
+    }
+
+    @Override
+    public String getActingUserName() {
+        return wrappedTestContext.getActingUserName();
+    }
+
+    @Override
+    public void setActingUser(CloudbreakUser actingUser) {
         wrappedTestContext.setActingUser(actingUser);
     }
 
     @Override
-    protected CloudbreakUser getActingUser() {
+    public CloudbreakUser setActingUser(RunningParameter runningParameter) {
+        return wrappedTestContext.setActingUser(runningParameter);
+    }
+
+    @Override
+    public CloudbreakUser getActingUser() {
         return wrappedTestContext.getActingUser();
+    }
+
+    @Override
+    public CloudbreakUser getRealUmsUserByKey(String userKey) {
+        return wrappedTestContext.getRealUmsUserByKey(userKey);
     }
 
     @Override
@@ -252,11 +272,6 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     protected <T extends CloudbreakTestDto> T getEntityFromEntityClass(Class<T> entityClass, RunningParameter runningParameter) {
         return wrappedTestContext.getEntityFromEntityClass(entityClass, runningParameter);
-    }
-
-    @Override
-    public CloudbreakUser getWho(RunningParameter runningParameter) {
-        return wrappedTestContext.getWho(runningParameter);
     }
 
     @Override

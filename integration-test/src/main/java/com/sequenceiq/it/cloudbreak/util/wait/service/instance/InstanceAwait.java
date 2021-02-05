@@ -28,7 +28,7 @@ public class InstanceAwait {
             }
             String name = entity.getName();
             Log.await(LOGGER, String.format("%s for %s", name, desiredStatuses));
-            MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.getWho(runningParameter).getAccessKey());
+            MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
             desiredStatuses.forEach((hostGroup, instanceStatus) -> {
                 InstanceWaitObject waitObject = new InstanceWaitObject(testContext, name, hostGroup, (InstanceStatus) instanceStatus);

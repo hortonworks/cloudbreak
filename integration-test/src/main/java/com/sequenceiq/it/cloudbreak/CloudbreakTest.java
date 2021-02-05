@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +13,6 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.PropertySource;
-import org.springframework.util.StringUtils;
 import org.testng.ITestContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeSuite;
@@ -23,6 +23,8 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 
 public class CloudbreakTest extends GherkinTest {
+
+    public static final String INTEGRATIONTEST_CLOUDBREAK_SERVER = "INTEGRATIONTEST_CLOUDBREAK_SERVER";
 
     public static final String CLOUDBREAK_SERVER_ROOT = "CLOUDBREAK_SERVER_ROOT";
 
@@ -60,16 +62,16 @@ public class CloudbreakTest extends GherkinTest {
     @Value("${server.contextPath:/cb}")
     private String cbRootContextPath;
 
-    @Value("${integrationtest.user.accesskey}")
+    @Value("${integrationtest.user.accesskey:}")
     private String accesskey;
 
-    @Value("${integrationtest.user.secretkey}")
+    @Value("${integrationtest.user.secretkey:}")
     private String secretkey;
 
-    @Value("${integrationtest.user.crn}")
+    @Value("${integrationtest.user.crn:}")
     private String userCrn;
 
-    @Value("${integrationtest.user.name}")
+    @Value("${integrationtest.user.name:}")
     private String userName;
 
     @Value("${mock.imagecatalog.server:localhost}")
@@ -97,12 +99,9 @@ public class CloudbreakTest extends GherkinTest {
 
         LOGGER.info("CloudbreakTest default values ::: ");
         IntegrationTestContext testContext = getItContext();
-        if (StringUtils.isEmpty(accesskey)) {
-            throw new NullPointerException("INTEGRATIONTEST_USER_ACCESSKEY should be set");
-        }
-        if (StringUtils.isEmpty(secretkey)) {
-            throw new NullPointerException("INTEGRATIONTEST_USER_SECRETKEY should be set");
-        }
+        checkNonEmpty("integrationtest.user.accesskey", accesskey);
+        checkNonEmpty("integrationtest.user.secretkey", secretkey);
+
         testContext.putContextParam(CLOUDBREAK_SERVER_ROOT, server + cbRootContextPath);
         testContext.putContextParam(ACCESS_KEY, accesskey);
         testContext.putContextParam(SECRET_KEY, secretkey);
@@ -114,7 +113,14 @@ public class CloudbreakTest extends GherkinTest {
         testContext.putContextParam(AUTOSCALE_CLIENT_ID, autoscaleUaaClientId);
         testContext.putContextParam(AUTOSCALE_SECRET, autoscaleUaaClientSecret);
 
-        testParameter.put("INTEGRATIONTEST_CLOUDBREAK_SERVER", server + cbRootContextPath);
+        testParameter.put(INTEGRATIONTEST_CLOUDBREAK_SERVER, server + cbRootContextPath);
+        testParameter.put(ACCESS_KEY, accesskey);
+        testParameter.put(SECRET_KEY, secretkey);
+        testParameter.put(USER_CRN, userCrn);
+        testParameter.put(USER_NAME, userName);
+
+        LOGGER.info(" Default user details in test parameters:: \nACCESS_KEY: {} \nSECRET_KEY: {} \nUSER_CRN: {} \nUSER_NAME: {} ",
+                testParameter.get(ACCESS_KEY), testParameter.get(SECRET_KEY), testParameter.get(USER_CRN), testParameter.get(USER_NAME));
 
         try {
             CloudbreakClient client = CloudbreakClient.created();
@@ -162,7 +168,7 @@ public class CloudbreakTest extends GherkinTest {
                     LOGGER.info("processing property source ::: " + propertySource.getName());
                     for (String key : ((EnumerablePropertySource) propertySource).getPropertyNames()) {
                         String value = propertySource.getProperty(key).toString();
-                        if (!StringUtils.isEmpty(value)) {
+                        if (StringUtils.isNotBlank(value)) {
                             rtn.put(key, propertySource.getProperty(key).toString());
                         }
                     }
@@ -170,6 +176,13 @@ public class CloudbreakTest extends GherkinTest {
             }
         }
         return rtn;
+    }
+
+    private void checkNonEmpty(String name, String value) {
+        if (StringUtils.isBlank(value)) {
+            throw new NullPointerException(String.format("Following variable must be set whether as environment variables or (test) application.yml:: %s",
+                    name.replaceAll("\\.", "_").toUpperCase()));
+        }
     }
 }
 

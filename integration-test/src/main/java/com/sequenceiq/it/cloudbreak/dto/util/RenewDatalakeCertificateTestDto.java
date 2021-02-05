@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
 @Prototype
@@ -26,6 +27,11 @@ public class RenewDatalakeCertificateTestDto extends AbstractSdxTestDto<Object, 
         SdxTestDto sdxTestDto = getTestContext().get(SdxTestDto.class);
         if (sdxTestDto != null) {
             this.stackCrn = sdxTestDto.getCrn();
+        } else {
+            SdxInternalTestDto sdxInternalTestDto = getTestContext().get(SdxInternalTestDto.class);
+            if (sdxInternalTestDto != null) {
+                this.stackCrn = sdxInternalTestDto.getCrn();
+            }
         }
         return this;
     }
