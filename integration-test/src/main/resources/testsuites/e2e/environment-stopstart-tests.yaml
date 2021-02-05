@@ -1,0 +1,5 @@
+name: "environment-stopstart-tests"
+tests:
+  - name: "environment_stopstart_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
