@@ -42,12 +42,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.StackInfoService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
@@ -165,6 +167,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private Credential credential;
 
     @Mock
+    private CloudCredential cloudCredential;
+
+    @Mock
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    @Mock
     private PlacementSettingsV4Request placementSettings;
 
     @Mock
@@ -238,8 +246,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
         when(placementSettings.getRegion()).thenReturn(REGION);
         when(placementSettings.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
-        when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
+        when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
     }
 

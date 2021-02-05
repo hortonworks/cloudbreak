@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.AwsAccessConfigType.INSTANCE_PROFILE;
+import static com.sequenceiq.cloudbreak.cloud.aws.util.AwsValidationMessageUtil.getAdviceMessage;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -16,13 +19,14 @@ import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
 public class AwsInstanceProfileEC2TrustValidator {
     @Inject
     private AwsIamService awsIamService;
 
-    public boolean isTrusted(InstanceProfile instanceProfile, ValidationResultBuilder resultBuilder) {
+    public boolean isTrusted(InstanceProfile instanceProfile, CloudIdentityType cloudIdentityType, ValidationResultBuilder resultBuilder) {
         List<Role> instanceProfileRoles = instanceProfile.getRoles();
         for (Role role : instanceProfileRoles) {
             Policy assumeRolePolicy = awsIamService.getAssumeRolePolicy(role);
@@ -36,7 +40,8 @@ public class AwsInstanceProfileEC2TrustValidator {
             }
         }
         resultBuilder.error(
-                String.format("The instance profile (%s) doesn't have an EC2 trust relationship.",
+                String.format("The instance profile (%s) doesn't have an EC2 trust relationship. " +
+                                getAdviceMessage(INSTANCE_PROFILE, cloudIdentityType),
                         instanceProfile.getArn()));
         return false;
     }

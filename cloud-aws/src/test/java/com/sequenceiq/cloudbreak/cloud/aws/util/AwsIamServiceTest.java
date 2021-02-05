@@ -38,6 +38,7 @@ import com.amazonaws.services.identitymanagement.model.ServiceFailureException;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @ExtendWith(MockitoExtension.class)
 public class AwsIamServiceTest {
@@ -49,9 +50,9 @@ public class AwsIamServiceTest {
 
     @Test
     public void invalidInstanceProfileArn() {
-        assertThat(awsIamService.getInstanceProfile(iam, null, null)).isNull();
-        assertThat(awsIamService.getInstanceProfile(iam, "", null)).isNull();
-        assertThat(awsIamService.getInstanceProfile(iam, "abc", null)).isNull();
+        assertThat(awsIamService.getInstanceProfile(iam, null, null, null)).isNull();
+        assertThat(awsIamService.getInstanceProfile(iam, "", null, null)).isNull();
+        assertThat(awsIamService.getInstanceProfile(iam, "abc", null, null)).isNull();
     }
 
     @Test
@@ -60,14 +61,15 @@ public class AwsIamServiceTest {
 
         String instanceProfileArn = "account/missingInstanceProfile";
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
-        InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
+        InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn, CloudIdentityType.ID_BROKER,
                 validationRequestBuilder);
 
         assertThat(instanceProfile).isNull();
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-                Collections.singletonList(String.format("Instance profile (%s) doesn't exist.",
+                Collections.singletonList(String.format("Instance profile (%s) doesn't exists on AWS side. " +
+                                "Please check if you've used the correct Instance profile when setting up Data Access.",
                         instanceProfileArn)));
     }
 
@@ -77,14 +79,15 @@ public class AwsIamServiceTest {
 
         String instanceProfileArn = "account/potentialInstanceProfile";
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
-        InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
+        InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn, CloudIdentityType.ID_BROKER,
                 validationRequestBuilder);
 
         assertThat(instanceProfile).isNull();
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-                Collections.singletonList(String.format("Instance profile (%s) doesn't exist.",
+                Collections.singletonList(String.format("Instance profile (%s) doesn't exists on AWS side. " +
+                                "Please check if you've used the correct Instance profile when setting up Data Access.",
                         instanceProfileArn)));
     }
 
@@ -98,7 +101,7 @@ public class AwsIamServiceTest {
         when(iam.getInstanceProfile(any(GetInstanceProfileRequest.class))).thenReturn(getInstanceProfileResult);
 
         ValidationResultBuilder validationRequestBuilder = new ValidationResultBuilder();
-        InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn,
+        InstanceProfile instanceProfile = awsIamService.getInstanceProfile(iam, instanceProfileArn, CloudIdentityType.ID_BROKER,
                 validationRequestBuilder);
 
         assertThat(instanceProfile.getArn()).isEqualTo(instanceProfileArn);
@@ -124,7 +127,8 @@ public class AwsIamServiceTest {
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-                Collections.singletonList(String.format("Role (%s) doesn't exist.", roleArn)));
+                Collections.singletonList(String.format("Role (%s) doesn't exists on AWS side. " +
+                        "Please check if you've used the correct Role when setting up Data Access.", roleArn)));
     }
 
     @Test
@@ -139,7 +143,8 @@ public class AwsIamServiceTest {
         ValidationResult validationResult = validationRequestBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(
-                Collections.singletonList(String.format("Role (%s) doesn't exist.", roleArn)));
+                Collections.singletonList(String.format("Role (%s) doesn't exists on AWS side. " +
+                        "Please check if you've used the correct Role when setting up Data Access.", roleArn)));
     }
 
     @Test

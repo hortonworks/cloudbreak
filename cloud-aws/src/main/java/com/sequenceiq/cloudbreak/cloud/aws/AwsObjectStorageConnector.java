@@ -2,9 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
@@ -19,11 +23,14 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @Service
 public class AwsObjectStorageConnector implements ObjectStorageConnector {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsObjectStorageConnector.class);
 
     private static final int ACCESS_DENIED_ERROR_CODE = 403;
 
@@ -32,6 +39,9 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
     @Inject
     private AwsIDBrokerObjectStorageValidator awsIDBrokerObjectStorageValidator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
@@ -59,12 +69,19 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
+        String accountId = Crn.safeFromString(request.getCredential().getId()).getAccountId();
+        if (!entitlementService.awsCloudStorageValidationEnabled(accountId)) {
+            LOGGER.info("Aws Cloud storage validation entitlement is missing, not validating cloudStorageRequest: {}",
+                    JsonUtil.writeValueAsStringSilent(request));
+            return ObjectStorageValidateResponse.builder().withStatus(ResponseStatus.OK).build();
+        }
         AwsCredentialView awsCredentialView = new AwsCredentialView(request.getCredential());
         AmazonIdentityManagementClient iam = awsClient.createAmazonIdentityManagement(awsCredentialView);
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        resultBuilder.prefix("Cloud Storage validation failed");
         ValidationResult validationResult = awsIDBrokerObjectStorageValidator.validateObjectStorage(
-                iam, spiFileSystem, resultBuilder);
+                iam, spiFileSystem, request.getLogsLocationBase(), resultBuilder);
         ObjectStorageValidateResponse response;
         if (validationResult.hasError()) {
             response = ObjectStorageValidateResponse.builder()

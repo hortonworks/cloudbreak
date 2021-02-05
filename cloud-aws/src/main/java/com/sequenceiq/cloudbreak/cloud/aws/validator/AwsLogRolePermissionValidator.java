@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -28,18 +30,21 @@ public class AwsLogRolePermissionValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLogRolePermissionValidator.class);
 
+    private static final Pattern EXTRACT_BUCKET_PATTERN = Pattern.compile("^s3.?://([^/]*)");
+
     @Inject
     private AwsIamService awsIamService;
 
     public void validate(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, ValidationResultBuilder validationResultBuilder) {
+            CloudS3View cloudFileSystem, String logLocationBase, ValidationResultBuilder validationResultBuilder) {
         SortedSet<String> failedActions = new TreeSet<>();
-
-        // TODO need to figure out how to get LOGS_LOCATION_BASE value
+        if (logLocationBase == null) {
+            return;
+        }
         Map<String, String> replacements = Map.ofEntries(
-                Map.entry("${LOGS_LOCATION_BASE}", "")
+                Map.entry("${LOGS_LOCATION_BASE}", removeProtocol(logLocationBase)),
+                Map.entry("${LOGS_BUCKET}", parseBucket(logLocationBase))
         );
-
         Policy policy = awsIamService.getPolicy("aws-cdp-log-policy.json", replacements);
         List<Role> roles = instanceProfile.getRoles();
         List<Policy> policies = Collections.singletonList(policy);
@@ -57,10 +62,28 @@ public class AwsLogRolePermissionValidator {
         }
 
         if (!failedActions.isEmpty()) {
-            validationResultBuilder.error(String.format("The log role (%s) don't have the required permissions: %n%s",
-                    String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
-                    String.join("\n", failedActions)));
+            String validationErrorMessage = String.format("Logger Instance Profile (%s) is not set up correctly. " +
+                            "Please follow the official documentation on required policies for Logger Instance Profile.\n" +
+                            "Missing policies:%n%s",
+                    String.join(", ", instanceProfile.getArn()),
+                    String.join("\n", failedActions));
+
+            LOGGER.info(validationErrorMessage);
+            validationResultBuilder.error(validationErrorMessage);
         }
+    }
+
+    private String removeProtocol(String logLocationBase) {
+        return logLocationBase.replaceFirst("^s3.?://", "");
+    }
+
+    private String parseBucket(String logLocationBase) {
+        String result = "";
+        Matcher m = EXTRACT_BUCKET_PATTERN.matcher(logLocationBase);
+        if (m.find()) {
+            result = m.group(1);
+        }
+        return result;
     }
 
     /**

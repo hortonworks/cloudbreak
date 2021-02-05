@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.util;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.AwsAccessConfigType.INSTANCE_PROFILE;
+import static com.sequenceiq.cloudbreak.cloud.aws.AwsAccessConfigType.ROLE;
+import static com.sequenceiq.cloudbreak.cloud.aws.util.AwsValidationMessageUtil.getAdviceMessage;
+import static com.sequenceiq.common.model.CloudIdentityType.ID_BROKER;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
@@ -36,6 +41,7 @@ import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyRe
 import com.amazonaws.services.identitymanagement.model.SimulatePrincipalPolicyResult;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 @Service
 public class AwsIamService {
@@ -52,7 +58,7 @@ public class AwsIamService {
      * @return InstanceProfile if instance profile ARN is valid otherwise null
      */
     public InstanceProfile getInstanceProfile(AmazonIdentityManagementClient iam, String instanceProfileArn,
-            ValidationResultBuilder validationResultBuilder) {
+            CloudIdentityType cloudIdentityType, ValidationResultBuilder validationResultBuilder) {
         InstanceProfile instanceProfile = null;
         if (instanceProfileArn != null && instanceProfileArn.contains("/")) {
             String instanceProfileName = instanceProfileArn.split("/", 2)[1];
@@ -61,7 +67,8 @@ public class AwsIamService {
             try {
                 instanceProfile = iam.getInstanceProfile(instanceProfileRequest).getInstanceProfile();
             } catch (NoSuchEntityException | ServiceFailureException e) {
-                String msg = String.format("Instance profile (%s) doesn't exist.", instanceProfileArn);
+                String msg = String.format("Instance profile (%s) doesn't exists on AWS side. " +
+                        getAdviceMessage(INSTANCE_PROFILE, cloudIdentityType), instanceProfileArn);
                 LOGGER.error(msg, e);
                 validationResultBuilder.error(msg);
             }
@@ -102,7 +109,7 @@ public class AwsIamService {
             try {
                 role = iam.getRole(roleRequest).getRole();
             } catch (NoSuchEntityException | ServiceFailureException e) {
-                String msg = String.format("Role (%s) doesn't exist.", roleArn);
+                String msg = String.format("Role (%s) doesn't exists on AWS side. " + getAdviceMessage(ROLE, ID_BROKER), roleArn);
                 LOGGER.debug(msg, e);
                 validationResultBuilder.error(msg);
             }

@@ -77,7 +77,8 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
         ValidationResult validationResult = validationResultBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(Collections.singletonList(
-                String.format("IDBroker instance profile (%s) doesn't have permissions to assume the role(s): %s",
+                String.format("Data Access Instance profile (%s) doesn't have permissions to assume the role(s): %s. " +
+                                "Please check if you've used the correct Instance profile when setting up Data Access.",
                         instanceProfile.getArn(), Collections.singletonList(role.getArn()))));
     }
 
@@ -107,7 +108,8 @@ public class AwsIDBrokerAssumeRoleValidatorTest {
         ValidationResult validationResult = validationResultBuilder.build();
         assertThat(validationResult.hasError()).isTrue();
         assertThat(validationResult.getErrors()).isEqualTo(Collections.singletonList(
-                String.format("IDBroker instance profile (%s) doesn't have permissions to assume the role(s): %s",
+                String.format("Data Access Instance profile (%s) doesn't have permissions to assume the role(s): %s. " +
+                                "Please check if you've used the correct Instance profile when setting up Data Access.",
                         instanceProfile.getArn(), Collections.singletonList(role2.getArn()))));
     }
 }
