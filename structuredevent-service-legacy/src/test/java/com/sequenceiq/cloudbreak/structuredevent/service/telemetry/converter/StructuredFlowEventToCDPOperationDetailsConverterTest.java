@@ -44,12 +44,14 @@ public class StructuredFlowEventToCDPOperationDetailsConverterTest {
     public void testInitProcessingType() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowState("unknown");
         flowDetails.setNextFlowState("INIT_STATE");
         structuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
 
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.INIT, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowState());
     }
 
     @Test
@@ -62,6 +64,7 @@ public class StructuredFlowEventToCDPOperationDetailsConverterTest {
         UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
 
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowState());
     }
 
     @Test
@@ -90,5 +93,22 @@ public class StructuredFlowEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
         Assert.assertEquals("flowId", details.getFlowId());
         Assert.assertEquals("flowChainId", details.getFlowChainId());
+    }
+
+    @Test
+    public void testNoFlowChain() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowId("flowId");
+        flowDetails.setFlowState("SOMETHING");
+        flowDetails.setNextFlowState("FINAL_STATE");
+        structuredFlowEvent.setFlow(flowDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("flowId", details.getFlowId());
+        Assert.assertEquals("flowId", details.getFlowChainId());
+        Assert.assertEquals("SOMETHING", details.getFlowState());
     }
 }

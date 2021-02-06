@@ -44,12 +44,14 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     public void testInitProcessingType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowState("unknown");
         flowDetails.setNextFlowState("INIT_STATE");
         cdpStructuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
 
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.INIT, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowState());
     }
 
     @Test
@@ -62,6 +64,7 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
 
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowState());
     }
 
     @Test
@@ -92,4 +95,20 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals("flowChainId", details.getFlowChainId());
     }
 
+    @Test
+    public void testNoFlowChain() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        flowDetails.setFlowId("flowId");
+        flowDetails.setFlowState("SOMETHING");
+        flowDetails.setNextFlowState("FINAL_STATE");
+        cdpStructuredFlowEvent.setFlow(flowDetails);
+
+        UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("flowId", details.getFlowId());
+        Assert.assertEquals("flowId", details.getFlowChainId());
+        Assert.assertEquals("SOMETHING", details.getFlowState());
+    }
 }

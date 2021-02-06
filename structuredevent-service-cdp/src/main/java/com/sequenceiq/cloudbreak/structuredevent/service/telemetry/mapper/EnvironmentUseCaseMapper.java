@@ -35,6 +35,15 @@ public class EnvironmentUseCaseMapper {
             case "EnvCreationFlowConfig":
                 useCase = UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
                 break;
+            case "EnvDeleteFlowConfig":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.DELETE_STARTED;
+                break;
+            case "EnvStartFlowConfig":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.RESUME_STARTED;
+                break;
+            case "EnvStopFlowConfig":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_STARTED;
+                break;
             default:
                 LOGGER.debug("Flow type: {}", flowType);
         }
@@ -56,6 +65,18 @@ public class EnvironmentUseCaseMapper {
                 break;
             case "ENV_DELETE_FAILED_STATE":
                 useCase = UsageProto.CDPEnvironmentStatus.Value.DELETE_FAILED;
+                break;
+            case "ENV_START_FINISHED_STATE":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.RESUME_FINISHED;
+                break;
+            case "ENV_START_FAILED_STATE":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.RESUME_FAILED;
+                break;
+            case "ENV_STOP_FINISHED_STATE":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FINISHED;
+                break;
+            case "ENV_STOP_FAILED_STATE":
+                useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FAILED;
                 break;
             default:
                 LOGGER.debug("Flow state: {}", flowState);

@@ -60225,7 +60225,7 @@ public final class UsageProto {
       UNSET(0),
       /**
        * <pre>
-       * The status when CDP CP is trying to create an environment.
+       * The status when CDP CP is trying to create a cluster.
        * </pre>
        *
        * <code>CREATE_STARTED = 1;</code>
@@ -60233,7 +60233,7 @@ public final class UsageProto {
       CREATE_STARTED(1),
       /**
        * <pre>
-       * The status when CDP CP is done creating an environment.
+       * The status when CDP CP is done creating a cluster.
        * </pre>
        *
        * <code>CREATE_FINISHED = 2;</code>
@@ -60241,7 +60241,7 @@ public final class UsageProto {
       CREATE_FINISHED(2),
       /**
        * <pre>
-       * The status when CDP CP failed to provision an environment.
+       * The status when CDP CP failed to provision a cluster.
        * </pre>
        *
        * <code>CREATE_FAILED = 3;</code>
@@ -60249,7 +60249,7 @@ public final class UsageProto {
       CREATE_FAILED(3),
       /**
        * <pre>
-       * The status when CDP CP is trying to delete an environment.
+       * The status when CDP CP is trying to delete a cluster.
        * </pre>
        *
        * <code>DELETE_STARTED = 4;</code>
@@ -60257,7 +60257,7 @@ public final class UsageProto {
       DELETE_STARTED(4),
       /**
        * <pre>
-       * The status when CDP CP is done deleting an environment.
+       * The status when CDP CP is done deleting a cluster.
        * </pre>
        *
        * <code>DELETE_FINISHED = 5;</code>
@@ -60265,7 +60265,7 @@ public final class UsageProto {
       DELETE_FINISHED(5),
       /**
        * <pre>
-       *  The status when CDP CP failed to delete an environment.
+       *  The status when CDP CP failed to delete a cluster.
        * </pre>
        *
        * <code>DELETE_FAILED = 6;</code>
@@ -60273,7 +60273,7 @@ public final class UsageProto {
       DELETE_FAILED(6),
       /**
        * <pre>
-       * The status when an environment is trying to suspend.
+       * The status when a cluster is trying to suspend.
        * </pre>
        *
        * <code>SUSPEND_STARTED = 7;</code>
@@ -60281,7 +60281,7 @@ public final class UsageProto {
       SUSPEND_STARTED(7),
       /**
        * <pre>
-       * The status when an environment is suspended.
+       * The status when a cluster is suspended.
        * </pre>
        *
        * <code>SUSPEND_FINISHED = 8;</code>
@@ -60289,7 +60289,7 @@ public final class UsageProto {
       SUSPEND_FINISHED(8),
       /**
        * <pre>
-       * The status when an environment failed to suspend.
+       * The status when a cluster failed to suspend.
        * </pre>
        *
        * <code>SUSPEND_FAILED = 9;</code>
@@ -60297,7 +60297,7 @@ public final class UsageProto {
       SUSPEND_FAILED(9),
       /**
        * <pre>
-       * The status when an environment is trying to resume.
+       * The status when a cluster is trying to resume.
        * </pre>
        *
        * <code>RESUME_STARTED = 10;</code>
@@ -60305,7 +60305,7 @@ public final class UsageProto {
       RESUME_STARTED(10),
       /**
        * <pre>
-       * The status when an environment completed resuming.
+       * The status when a cluster completed resuming.
        * </pre>
        *
        * <code>RESUME_FINISHED = 11;</code>
@@ -60313,7 +60313,7 @@ public final class UsageProto {
       RESUME_FINISHED(11),
       /**
        * <pre>
-       * The status when an environment failed to resume.
+       * The status when a cluster failed to resume.
        * </pre>
        *
        * <code>RESUME_FAILED = 12;</code>
@@ -60321,7 +60321,7 @@ public final class UsageProto {
       RESUME_FAILED(12),
       /**
        * <pre>
-       * The status when an environment is trying to resume.
+       * The status when a cluster is trying to resume.
        * </pre>
        *
        * <code>UPGRADE_STARTED = 13;</code>
@@ -60329,7 +60329,7 @@ public final class UsageProto {
       UPGRADE_STARTED(13),
       /**
        * <pre>
-       * The status when an environment completed resuming.
+       * The status when a cluster completed resuming.
        * </pre>
        *
        * <code>UPGRADE_FINISHED = 14;</code>
@@ -60337,7 +60337,7 @@ public final class UsageProto {
       UPGRADE_FINISHED(14),
       /**
        * <pre>
-       * The status when an environment failed to resume.
+       * The status when a cluster failed to resume.
        * </pre>
        *
        * <code>UPGRADE_FAILED = 15;</code>
@@ -60345,7 +60345,7 @@ public final class UsageProto {
       UPGRADE_FAILED(15),
       /**
        * <pre>
-       * The status when an environment is trying to resume.
+       * The status when a cluster is trying to resume.
        * </pre>
        *
        * <code>REPAIR_STARTED = 16;</code>
@@ -60353,7 +60353,7 @@ public final class UsageProto {
       REPAIR_STARTED(16),
       /**
        * <pre>
-       * The status when an environment completed resuming.
+       * The status when a cluster completed resuming.
        * </pre>
        *
        * <code>REPAIR_FINISHED = 17;</code>
@@ -60361,12 +60361,60 @@ public final class UsageProto {
       REPAIR_FINISHED(17),
       /**
        * <pre>
-       * The status when an environment failed to resume.
+       * The status when a cluster failed to resume.
        * </pre>
        *
        * <code>REPAIR_FAILED = 18;</code>
        */
       REPAIR_FAILED(18),
+      /**
+       * <pre>
+       * The status when a cluster is trying to resume.
+       * </pre>
+       *
+       * <code>UPSCALE_STARTED = 19;</code>
+       */
+      UPSCALE_STARTED(19),
+      /**
+       * <pre>
+       * The status when a cluster completed resuming.
+       * </pre>
+       *
+       * <code>UPSCALE_FINISHED = 20;</code>
+       */
+      UPSCALE_FINISHED(20),
+      /**
+       * <pre>
+       * The status when a cluster failed to resume.
+       * </pre>
+       *
+       * <code>UPSCALE_FAILED = 21;</code>
+       */
+      UPSCALE_FAILED(21),
+      /**
+       * <pre>
+       * The status when a cluster is trying to resume.
+       * </pre>
+       *
+       * <code>DOWNSCALE_STARTED = 22;</code>
+       */
+      DOWNSCALE_STARTED(22),
+      /**
+       * <pre>
+       * The status when a cluster completed resuming.
+       * </pre>
+       *
+       * <code>DOWNSCALE_FINISHED = 23;</code>
+       */
+      DOWNSCALE_FINISHED(23),
+      /**
+       * <pre>
+       * The status when a cluster failed to resume.
+       * </pre>
+       *
+       * <code>DOWNSCALE_FAILED = 24;</code>
+       */
+      DOWNSCALE_FAILED(24),
       UNRECOGNIZED(-1),
       ;
 
@@ -60380,7 +60428,7 @@ public final class UsageProto {
       public static final int UNSET_VALUE = 0;
       /**
        * <pre>
-       * The status when CDP CP is trying to create an environment.
+       * The status when CDP CP is trying to create a cluster.
        * </pre>
        *
        * <code>CREATE_STARTED = 1;</code>
@@ -60388,7 +60436,7 @@ public final class UsageProto {
       public static final int CREATE_STARTED_VALUE = 1;
       /**
        * <pre>
-       * The status when CDP CP is done creating an environment.
+       * The status when CDP CP is done creating a cluster.
        * </pre>
        *
        * <code>CREATE_FINISHED = 2;</code>
@@ -60396,7 +60444,7 @@ public final class UsageProto {
       public static final int CREATE_FINISHED_VALUE = 2;
       /**
        * <pre>
-       * The status when CDP CP failed to provision an environment.
+       * The status when CDP CP failed to provision a cluster.
        * </pre>
        *
        * <code>CREATE_FAILED = 3;</code>
@@ -60404,7 +60452,7 @@ public final class UsageProto {
       public static final int CREATE_FAILED_VALUE = 3;
       /**
        * <pre>
-       * The status when CDP CP is trying to delete an environment.
+       * The status when CDP CP is trying to delete a cluster.
        * </pre>
        *
        * <code>DELETE_STARTED = 4;</code>
@@ -60412,7 +60460,7 @@ public final class UsageProto {
       public static final int DELETE_STARTED_VALUE = 4;
       /**
        * <pre>
-       * The status when CDP CP is done deleting an environment.
+       * The status when CDP CP is done deleting a cluster.
        * </pre>
        *
        * <code>DELETE_FINISHED = 5;</code>
@@ -60420,7 +60468,7 @@ public final class UsageProto {
       public static final int DELETE_FINISHED_VALUE = 5;
       /**
        * <pre>
-       *  The status when CDP CP failed to delete an environment.
+       *  The status when CDP CP failed to delete a cluster.
        * </pre>
        *
        * <code>DELETE_FAILED = 6;</code>
@@ -60428,7 +60476,7 @@ public final class UsageProto {
       public static final int DELETE_FAILED_VALUE = 6;
       /**
        * <pre>
-       * The status when an environment is trying to suspend.
+       * The status when a cluster is trying to suspend.
        * </pre>
        *
        * <code>SUSPEND_STARTED = 7;</code>
@@ -60436,7 +60484,7 @@ public final class UsageProto {
       public static final int SUSPEND_STARTED_VALUE = 7;
       /**
        * <pre>
-       * The status when an environment is suspended.
+       * The status when a cluster is suspended.
        * </pre>
        *
        * <code>SUSPEND_FINISHED = 8;</code>
@@ -60444,7 +60492,7 @@ public final class UsageProto {
       public static final int SUSPEND_FINISHED_VALUE = 8;
       /**
        * <pre>
-       * The status when an environment failed to suspend.
+       * The status when a cluster failed to suspend.
        * </pre>
        *
        * <code>SUSPEND_FAILED = 9;</code>
@@ -60452,7 +60500,7 @@ public final class UsageProto {
       public static final int SUSPEND_FAILED_VALUE = 9;
       /**
        * <pre>
-       * The status when an environment is trying to resume.
+       * The status when a cluster is trying to resume.
        * </pre>
        *
        * <code>RESUME_STARTED = 10;</code>
@@ -60460,7 +60508,7 @@ public final class UsageProto {
       public static final int RESUME_STARTED_VALUE = 10;
       /**
        * <pre>
-       * The status when an environment completed resuming.
+       * The status when a cluster completed resuming.
        * </pre>
        *
        * <code>RESUME_FINISHED = 11;</code>
@@ -60468,7 +60516,7 @@ public final class UsageProto {
       public static final int RESUME_FINISHED_VALUE = 11;
       /**
        * <pre>
-       * The status when an environment failed to resume.
+       * The status when a cluster failed to resume.
        * </pre>
        *
        * <code>RESUME_FAILED = 12;</code>
@@ -60476,7 +60524,7 @@ public final class UsageProto {
       public static final int RESUME_FAILED_VALUE = 12;
       /**
        * <pre>
-       * The status when an environment is trying to resume.
+       * The status when a cluster is trying to resume.
        * </pre>
        *
        * <code>UPGRADE_STARTED = 13;</code>
@@ -60484,7 +60532,7 @@ public final class UsageProto {
       public static final int UPGRADE_STARTED_VALUE = 13;
       /**
        * <pre>
-       * The status when an environment completed resuming.
+       * The status when a cluster completed resuming.
        * </pre>
        *
        * <code>UPGRADE_FINISHED = 14;</code>
@@ -60492,7 +60540,7 @@ public final class UsageProto {
       public static final int UPGRADE_FINISHED_VALUE = 14;
       /**
        * <pre>
-       * The status when an environment failed to resume.
+       * The status when a cluster failed to resume.
        * </pre>
        *
        * <code>UPGRADE_FAILED = 15;</code>
@@ -60500,7 +60548,7 @@ public final class UsageProto {
       public static final int UPGRADE_FAILED_VALUE = 15;
       /**
        * <pre>
-       * The status when an environment is trying to resume.
+       * The status when a cluster is trying to resume.
        * </pre>
        *
        * <code>REPAIR_STARTED = 16;</code>
@@ -60508,7 +60556,7 @@ public final class UsageProto {
       public static final int REPAIR_STARTED_VALUE = 16;
       /**
        * <pre>
-       * The status when an environment completed resuming.
+       * The status when a cluster completed resuming.
        * </pre>
        *
        * <code>REPAIR_FINISHED = 17;</code>
@@ -60516,12 +60564,60 @@ public final class UsageProto {
       public static final int REPAIR_FINISHED_VALUE = 17;
       /**
        * <pre>
-       * The status when an environment failed to resume.
+       * The status when a cluster failed to resume.
        * </pre>
        *
        * <code>REPAIR_FAILED = 18;</code>
        */
       public static final int REPAIR_FAILED_VALUE = 18;
+      /**
+       * <pre>
+       * The status when a cluster is trying to resume.
+       * </pre>
+       *
+       * <code>UPSCALE_STARTED = 19;</code>
+       */
+      public static final int UPSCALE_STARTED_VALUE = 19;
+      /**
+       * <pre>
+       * The status when a cluster completed resuming.
+       * </pre>
+       *
+       * <code>UPSCALE_FINISHED = 20;</code>
+       */
+      public static final int UPSCALE_FINISHED_VALUE = 20;
+      /**
+       * <pre>
+       * The status when a cluster failed to resume.
+       * </pre>
+       *
+       * <code>UPSCALE_FAILED = 21;</code>
+       */
+      public static final int UPSCALE_FAILED_VALUE = 21;
+      /**
+       * <pre>
+       * The status when a cluster is trying to resume.
+       * </pre>
+       *
+       * <code>DOWNSCALE_STARTED = 22;</code>
+       */
+      public static final int DOWNSCALE_STARTED_VALUE = 22;
+      /**
+       * <pre>
+       * The status when a cluster completed resuming.
+       * </pre>
+       *
+       * <code>DOWNSCALE_FINISHED = 23;</code>
+       */
+      public static final int DOWNSCALE_FINISHED_VALUE = 23;
+      /**
+       * <pre>
+       * The status when a cluster failed to resume.
+       * </pre>
+       *
+       * <code>DOWNSCALE_FAILED = 24;</code>
+       */
+      public static final int DOWNSCALE_FAILED_VALUE = 24;
 
 
       public final int getNumber() {
@@ -60561,6 +60657,12 @@ public final class UsageProto {
           case 16: return REPAIR_STARTED;
           case 17: return REPAIR_FINISHED;
           case 18: return REPAIR_FAILED;
+          case 19: return UPSCALE_STARTED;
+          case 20: return UPSCALE_FINISHED;
+          case 21: return UPSCALE_FAILED;
+          case 22: return DOWNSCALE_STARTED;
+          case 23: return DOWNSCALE_FINISHED;
+          case 24: return DOWNSCALE_FAILED;
           default: return null;
         }
       }
@@ -61101,6 +61203,24 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getFlowChainIdBytes();
+
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    java.lang.String getFlowState();
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getFlowStateBytes();
   }
   /**
    * Protobuf type {@code usage.CDPOperationDetails}
@@ -61123,6 +61243,7 @@ public final class UsageProto {
       cdpRequestProcessingStep_ = 0;
       flowId_ = "";
       flowChainId_ = "";
+      flowState_ = "";
     }
 
     @java.lang.Override
@@ -61195,6 +61316,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               flowChainId_ = s;
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              flowState_ = s;
               break;
             }
             default: {
@@ -61548,6 +61675,48 @@ public final class UsageProto {
       }
     }
 
+    public static final int FLOWSTATE_FIELD_NUMBER = 9;
+    private volatile java.lang.Object flowState_;
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    public java.lang.String getFlowState() {
+      java.lang.Object ref = flowState_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        flowState_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Flow state when this event is written
+     * </pre>
+     *
+     * <code>string flowState = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFlowStateBytes() {
+      java.lang.Object ref = flowState_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        flowState_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -61586,6 +61755,9 @@ public final class UsageProto {
       if (!getFlowChainIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, flowChainId_);
       }
+      if (!getFlowStateBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, flowState_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -61620,6 +61792,9 @@ public final class UsageProto {
       if (!getFlowChainIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, flowChainId_);
       }
+      if (!getFlowStateBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, flowState_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -61651,6 +61826,8 @@ public final class UsageProto {
           .equals(other.getFlowId());
       result = result && getFlowChainId()
           .equals(other.getFlowChainId());
+      result = result && getFlowState()
+          .equals(other.getFlowState());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -61678,6 +61855,8 @@ public final class UsageProto {
       hash = (53 * hash) + getFlowId().hashCode();
       hash = (37 * hash) + FLOWCHAINID_FIELD_NUMBER;
       hash = (53 * hash) + getFlowChainId().hashCode();
+      hash = (37 * hash) + FLOWSTATE_FIELD_NUMBER;
+      hash = (53 * hash) + getFlowState().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -61827,6 +62006,8 @@ public final class UsageProto {
 
         flowChainId_ = "";
 
+        flowState_ = "";
+
         return this;
       }
 
@@ -61861,6 +62042,7 @@ public final class UsageProto {
         result.cdpRequestProcessingStep_ = cdpRequestProcessingStep_;
         result.flowId_ = flowId_;
         result.flowChainId_ = flowChainId_;
+        result.flowState_ = flowState_;
         onBuilt();
         return result;
       }
@@ -61938,6 +62120,10 @@ public final class UsageProto {
         }
         if (!other.getFlowChainId().isEmpty()) {
           flowChainId_ = other.flowChainId_;
+          onChanged();
+        }
+        if (!other.getFlowState().isEmpty()) {
+          flowState_ = other.flowState_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -62653,6 +62839,95 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         flowChainId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object flowState_ = "";
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public java.lang.String getFlowState() {
+        java.lang.Object ref = flowState_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          flowState_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFlowStateBytes() {
+        java.lang.Object ref = flowState_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          flowState_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public Builder setFlowState(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        flowState_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public Builder clearFlowState() {
+        
+        flowState_ = getDefaultInstance().getFlowState();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Flow state when this event is written
+       * </pre>
+       *
+       * <code>string flowState = 9;</code>
+       */
+      public Builder setFlowStateBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        flowState_ = value;
         onChanged();
         return this;
       }
@@ -71289,10 +71564,28 @@ public final class UsageProto {
 
     /**
      * <pre>
+     * Detailed node count per host group
+     * </pre>
+     *
+     * <code>string hostGroupNodeCount = 3;</code>
+     */
+    java.lang.String getHostGroupNodeCount();
+    /**
+     * <pre>
+     * Detailed node count per host group
+     * </pre>
+     *
+     * <code>string hostGroupNodeCount = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getHostGroupNodeCountBytes();
+
+    /**
+     * <pre>
      * Definition details in a json format
      * </pre>
      *
-     * <code>string definitionDetails = 3;</code>
+     * <code>string definitionDetails = 4;</code>
      */
     java.lang.String getDefinitionDetails();
     /**
@@ -71300,7 +71593,7 @@ public final class UsageProto {
      * Definition details in a json format
      * </pre>
      *
-     * <code>string definitionDetails = 3;</code>
+     * <code>string definitionDetails = 4;</code>
      */
     com.google.protobuf.ByteString
         getDefinitionDetailsBytes();
@@ -71320,6 +71613,7 @@ public final class UsageProto {
     private CDPClusterShape() {
       clusterTemplateName_ = "";
       nodes_ = 0;
+      hostGroupNodeCount_ = "";
       definitionDetails_ = "";
     }
 
@@ -71359,6 +71653,12 @@ public final class UsageProto {
               break;
             }
             case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              hostGroupNodeCount_ = s;
+              break;
+            }
+            case 34: {
               java.lang.String s = input.readStringRequireUtf8();
 
               definitionDetails_ = s;
@@ -71451,14 +71751,56 @@ public final class UsageProto {
       return nodes_;
     }
 
-    public static final int DEFINITIONDETAILS_FIELD_NUMBER = 3;
+    public static final int HOSTGROUPNODECOUNT_FIELD_NUMBER = 3;
+    private volatile java.lang.Object hostGroupNodeCount_;
+    /**
+     * <pre>
+     * Detailed node count per host group
+     * </pre>
+     *
+     * <code>string hostGroupNodeCount = 3;</code>
+     */
+    public java.lang.String getHostGroupNodeCount() {
+      java.lang.Object ref = hostGroupNodeCount_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        hostGroupNodeCount_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Detailed node count per host group
+     * </pre>
+     *
+     * <code>string hostGroupNodeCount = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getHostGroupNodeCountBytes() {
+      java.lang.Object ref = hostGroupNodeCount_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        hostGroupNodeCount_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DEFINITIONDETAILS_FIELD_NUMBER = 4;
     private volatile java.lang.Object definitionDetails_;
     /**
      * <pre>
      * Definition details in a json format
      * </pre>
      *
-     * <code>string definitionDetails = 3;</code>
+     * <code>string definitionDetails = 4;</code>
      */
     public java.lang.String getDefinitionDetails() {
       java.lang.Object ref = definitionDetails_;
@@ -71477,7 +71819,7 @@ public final class UsageProto {
      * Definition details in a json format
      * </pre>
      *
-     * <code>string definitionDetails = 3;</code>
+     * <code>string definitionDetails = 4;</code>
      */
     public com.google.protobuf.ByteString
         getDefinitionDetailsBytes() {
@@ -71513,8 +71855,11 @@ public final class UsageProto {
       if (nodes_ != 0) {
         output.writeInt32(2, nodes_);
       }
+      if (!getHostGroupNodeCountBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, hostGroupNodeCount_);
+      }
       if (!getDefinitionDetailsBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, definitionDetails_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, definitionDetails_);
       }
       unknownFields.writeTo(output);
     }
@@ -71532,8 +71877,11 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(2, nodes_);
       }
+      if (!getHostGroupNodeCountBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, hostGroupNodeCount_);
+      }
       if (!getDefinitionDetailsBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, definitionDetails_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, definitionDetails_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -71555,6 +71903,8 @@ public final class UsageProto {
           .equals(other.getClusterTemplateName());
       result = result && (getNodes()
           == other.getNodes());
+      result = result && getHostGroupNodeCount()
+          .equals(other.getHostGroupNodeCount());
       result = result && getDefinitionDetails()
           .equals(other.getDefinitionDetails());
       result = result && unknownFields.equals(other.unknownFields);
@@ -71572,6 +71922,8 @@ public final class UsageProto {
       hash = (53 * hash) + getClusterTemplateName().hashCode();
       hash = (37 * hash) + NODES_FIELD_NUMBER;
       hash = (53 * hash) + getNodes();
+      hash = (37 * hash) + HOSTGROUPNODECOUNT_FIELD_NUMBER;
+      hash = (53 * hash) + getHostGroupNodeCount().hashCode();
       hash = (37 * hash) + DEFINITIONDETAILS_FIELD_NUMBER;
       hash = (53 * hash) + getDefinitionDetails().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
@@ -71711,6 +72063,8 @@ public final class UsageProto {
 
         nodes_ = 0;
 
+        hostGroupNodeCount_ = "";
+
         definitionDetails_ = "";
 
         return this;
@@ -71741,6 +72095,7 @@ public final class UsageProto {
         com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterShape result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterShape(this);
         result.clusterTemplateName_ = clusterTemplateName_;
         result.nodes_ = nodes_;
+        result.hostGroupNodeCount_ = hostGroupNodeCount_;
         result.definitionDetails_ = definitionDetails_;
         onBuilt();
         return result;
@@ -71796,6 +72151,10 @@ public final class UsageProto {
         }
         if (other.getNodes() != 0) {
           setNodes(other.getNodes());
+        }
+        if (!other.getHostGroupNodeCount().isEmpty()) {
+          hostGroupNodeCount_ = other.hostGroupNodeCount_;
+          onChanged();
         }
         if (!other.getDefinitionDetails().isEmpty()) {
           definitionDetails_ = other.definitionDetails_;
@@ -71957,13 +72316,102 @@ public final class UsageProto {
         return this;
       }
 
+      private java.lang.Object hostGroupNodeCount_ = "";
+      /**
+       * <pre>
+       * Detailed node count per host group
+       * </pre>
+       *
+       * <code>string hostGroupNodeCount = 3;</code>
+       */
+      public java.lang.String getHostGroupNodeCount() {
+        java.lang.Object ref = hostGroupNodeCount_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          hostGroupNodeCount_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Detailed node count per host group
+       * </pre>
+       *
+       * <code>string hostGroupNodeCount = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getHostGroupNodeCountBytes() {
+        java.lang.Object ref = hostGroupNodeCount_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          hostGroupNodeCount_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Detailed node count per host group
+       * </pre>
+       *
+       * <code>string hostGroupNodeCount = 3;</code>
+       */
+      public Builder setHostGroupNodeCount(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        hostGroupNodeCount_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Detailed node count per host group
+       * </pre>
+       *
+       * <code>string hostGroupNodeCount = 3;</code>
+       */
+      public Builder clearHostGroupNodeCount() {
+        
+        hostGroupNodeCount_ = getDefaultInstance().getHostGroupNodeCount();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Detailed node count per host group
+       * </pre>
+       *
+       * <code>string hostGroupNodeCount = 3;</code>
+       */
+      public Builder setHostGroupNodeCountBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        hostGroupNodeCount_ = value;
+        onChanged();
+        return this;
+      }
+
       private java.lang.Object definitionDetails_ = "";
       /**
        * <pre>
        * Definition details in a json format
        * </pre>
        *
-       * <code>string definitionDetails = 3;</code>
+       * <code>string definitionDetails = 4;</code>
        */
       public java.lang.String getDefinitionDetails() {
         java.lang.Object ref = definitionDetails_;
@@ -71982,7 +72430,7 @@ public final class UsageProto {
        * Definition details in a json format
        * </pre>
        *
-       * <code>string definitionDetails = 3;</code>
+       * <code>string definitionDetails = 4;</code>
        */
       public com.google.protobuf.ByteString
           getDefinitionDetailsBytes() {
@@ -72002,7 +72450,7 @@ public final class UsageProto {
        * Definition details in a json format
        * </pre>
        *
-       * <code>string definitionDetails = 3;</code>
+       * <code>string definitionDetails = 4;</code>
        */
       public Builder setDefinitionDetails(
           java.lang.String value) {
@@ -72019,7 +72467,7 @@ public final class UsageProto {
        * Definition details in a json format
        * </pre>
        *
-       * <code>string definitionDetails = 3;</code>
+       * <code>string definitionDetails = 4;</code>
        */
       public Builder clearDefinitionDetails() {
         
@@ -72032,7 +72480,7 @@ public final class UsageProto {
        * Definition details in a json format
        * </pre>
        *
-       * <code>string definitionDetails = 3;</code>
+       * <code>string definitionDetails = 4;</code>
        */
       public Builder setDefinitionDetailsBytes(
           com.google.protobuf.ByteString value) {
@@ -79779,7 +80227,7 @@ public final class UsageProto {
       "\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_FINISHED\020" +
       "\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME_STARTED\020" +
       "\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUME_FAILED\020" +
-      "\014\"\225\003\n\020CDPClusterStatus\"\200\003\n\005Value\022\t\n\005UNSE" +
+      "\014\"\231\004\n\020CDPClusterStatus\"\204\004\n\005Value\022\t\n\005UNSE" +
       "T\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FINISH" +
       "ED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_STARTE" +
       "D\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_FAILE" +
@@ -79789,76 +80237,81 @@ public final class UsageProto {
       "ILED\020\014\022\023\n\017UPGRADE_STARTED\020\r\022\024\n\020UPGRADE_F" +
       "INISHED\020\016\022\022\n\016UPGRADE_FAILED\020\017\022\022\n\016REPAIR_" +
       "STARTED\020\020\022\023\n\017REPAIR_FINISHED\020\021\022\021\n\rREPAIR" +
-      "_FAILED\020\022\"\363\001\n\023CDPOperationDetails\022\021\n\tacc" +
-      "ountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014res" +
-      "ourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022\032\n" +
-      "\022applicationVersion\030\005 \001(\t\022G\n\030cdpRequestP" +
-      "rocessingStep\030\006 \001(\0162%.usage.CDPRequestPr" +
-      "ocessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013fl" +
-      "owChainId\030\010 \001(\t\"\362\002\n\025CDPEnvironmentDetail" +
-      "s\022D\n\017environmentType\030\001 \001(\0162+.usage.CDPEn" +
-      "vironmentsEnvironmentType.Value\022\016\n\006regio" +
-      "n\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001" +
-      "(\005\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016network" +
-      "Details\030\005 \001(\0132\030.usage.CDPNetworkDetails\022" +
-      "5\n\nawsDetails\030\006 \001(\0132\037.usage.CDPEnvironme" +
-      "ntAwsDetailsH\000\0229\n\014azureDetails\030\007 \001(\0132!.u" +
-      "sage.CDPEnvironmentAzureDetailsH\000B!\n\037env" +
-      "ironmentCloudProviderDetails\"9\n\032CDPEnvir" +
-      "onmentAzureDetails\022\033\n\023singleResourceGrou" +
-      "p\030\001 \001(\010\"\032\n\030CDPEnvironmentAwsDetails\"a\n%C" +
-      "DPEnvironmentTelemetryFeatureDetails\022\031\n\021" +
-      "workloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogsCo" +
-      "llection\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005pro" +
-      "xy\030\001 \001(\010\"\310\001\n\021CDPNetworkDetails\022\023\n\013networ" +
-      "kType\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023num" +
-      "berPublicSubnets\030\003 \001(\005\022\034\n\024numberPrivateS" +
-      "ubnets\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030" +
-      "\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPP" +
-      "roxyDetails\"\212\002\n\027CDPEnvironmentRequested\022" +
-      "4\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOpe" +
-      "rationDetails\0228\n\022environmentDetails\030\002 \001(" +
-      "\0132\034.usage.CDPEnvironmentDetails\0220\n\016netwo" +
-      "rkDetails\030\003 \001(\0132\030.usage.CDPNetworkDetail" +
-      "s\022M\n\027telemetryFeatureDetails\030\004 \001(\0132,.usa" +
-      "ge.CDPEnvironmentTelemetryFeatureDetails" +
-      "\"\326\001\n\033CDPEnvironmentStatusChanged\0224\n\020oper" +
-      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
-      "etails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnv" +
-      "ironmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162" +
-      "!.usage.CDPEnvironmentStatus.Value\022\025\n\rfa" +
-      "ilureReason\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007" +
-      "imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"X\n\017C" +
-      "DPClusterShape\022\033\n\023clusterTemplateName\030\001 " +
-      "\001(\t\022\r\n\005nodes\030\002 \001(\005\022\031\n\021definitionDetails\030" +
-      "\003 \001(\t\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion" +
-      "\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion" +
-      "\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLe" +
-      "vel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDet" +
-      "ails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPCl" +
-      "usterShape\0220\n\016versionDetails\030\002 \001(\0132\030.usa" +
-      "ge.CDPVersionDetails\022,\n\014imageDetails\030\003 \001" +
-      "(\0132\026.usage.CDPImageDetails\"\226\001\n\024CDPDatala" +
-      "keRequested\0224\n\020operationDetails\030\001 \001(\0132\032." +
-      "usage.CDPOperationDetails\022\026\n\016environment" +
-      "Crn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usag" +
-      "e.CDPClusterDetails\"\313\001\n\030CDPDatalakeStatu" +
-      "sChanged\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
-      "ge.CDPOperationDetails\0220\n\toldStatus\030\002 \001(" +
-      "\0162\035.usage.CDPClusterStatus.Value\0220\n\tnewS" +
-      "tatus\030\003 \001(\0162\035.usage.CDPClusterStatus.Val" +
-      "ue\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDatahub" +
-      "Requested\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
-      "age.CDPOperationDetails\022\026\n\016environmentCr" +
-      "n\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage." +
-      "CDPClusterDetails\"\312\001\n\027CDPDatahubStatusCh" +
-      "anged\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
-      "CDPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035" +
-      ".usage.CDPClusterStatus.Value\0220\n\tnewStat" +
-      "us\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
-      "\025\n\rfailureReason\030\004 \001(\tBV\n-com.cloudera.t" +
-      "hunderhead.service.common.usageB\nUsagePr" +
-      "otoZ\031com/cloudera/cdp/protobufb\006proto3"
+      "_FAILED\020\022\022\023\n\017UPSCALE_STARTED\020\023\022\024\n\020UPSCAL" +
+      "E_FINISHED\020\024\022\022\n\016UPSCALE_FAILED\020\025\022\025\n\021DOWN" +
+      "SCALE_STARTED\020\026\022\026\n\022DOWNSCALE_FINISHED\020\027\022" +
+      "\024\n\020DOWNSCALE_FAILED\020\030\"\206\002\n\023CDPOperationDe" +
+      "tails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030" +
+      "\002 \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiator" +
+      "Crn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n" +
+      "\030cdpRequestProcessingStep\030\006 \001(\0162%.usage." +
+      "CDPRequestProcessingStep.Value\022\016\n\006flowId" +
+      "\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState" +
+      "\030\t \001(\t\"\362\002\n\025CDPEnvironmentDetails\022D\n\017envi" +
+      "ronmentType\030\001 \001(\0162+.usage.CDPEnvironment" +
+      "sEnvironmentType.Value\022\016\n\006region\030\002 \001(\t\022!" +
+      "\n\031numberOfAvailabilityZones\030\003 \001(\005\022\031\n\021ava" +
+      "ilabilityZones\030\004 \001(\t\0220\n\016networkDetails\030\005" +
+      " \001(\0132\030.usage.CDPNetworkDetails\0225\n\nawsDet" +
+      "ails\030\006 \001(\0132\037.usage.CDPEnvironmentAwsDeta" +
+      "ilsH\000\0229\n\014azureDetails\030\007 \001(\0132!.usage.CDPE" +
+      "nvironmentAzureDetailsH\000B!\n\037environmentC" +
+      "loudProviderDetails\"9\n\032CDPEnvironmentAzu" +
+      "reDetails\022\033\n\023singleResourceGroup\030\001 \001(\010\"\032" +
+      "\n\030CDPEnvironmentAwsDetails\"a\n%CDPEnviron" +
+      "mentTelemetryFeatureDetails\022\031\n\021workloadA" +
+      "nalytics\030\001 \001(\t\022\035\n\025clusterLogsCollection\030" +
+      "\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\"" +
+      "\310\001\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001" +
+      "(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPublic" +
+      "Subnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 " +
+      "\001(\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022,\n\014" +
+      "proxyDetails\030\006 \001(\0132\026.usage.CDPProxyDetai" +
+      "ls\"\212\002\n\027CDPEnvironmentRequested\0224\n\020operat" +
+      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
+      "ails\0228\n\022environmentDetails\030\002 \001(\0132\034.usage" +
+      ".CDPEnvironmentDetails\0220\n\016networkDetails" +
+      "\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M\n\027tele" +
+      "metryFeatureDetails\030\004 \001(\0132,.usage.CDPEnv" +
+      "ironmentTelemetryFeatureDetails\"\326\001\n\033CDPE" +
+      "nvironmentStatusChanged\0224\n\020operationDeta" +
+      "ils\030\001 \001(\0132\032.usage.CDPOperationDetails\0224\n" +
+      "\toldStatus\030\002 \001(\0162!.usage.CDPEnvironmentS" +
+      "tatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage.C" +
+      "DPEnvironmentStatus.Value\022\025\n\rfailureReas" +
+      "on\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001" +
+      " \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPCluster" +
+      "Shape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005no" +
+      "des\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n" +
+      "\021definitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionD" +
+      "etails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002" +
+      " \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion" +
+      "\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(" +
+      "\t\"\241\001\n\021CDPClusterDetails\022,\n\014clusterShape\030" +
+      "\001 \001(\0132\026.usage.CDPClusterShape\0220\n\016version" +
+      "Details\030\002 \001(\0132\030.usage.CDPVersionDetails\022" +
+      ",\n\014imageDetails\030\003 \001(\0132\026.usage.CDPImageDe" +
+      "tails\"\226\001\n\024CDPDatalakeRequested\0224\n\020operat" +
+      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
+      "ails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterD" +
+      "etails\030\003 \001(\0132\030.usage.CDPClusterDetails\"\313" +
+      "\001\n\030CDPDatalakeStatusChanged\0224\n\020operation" +
+      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
+      "s\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterS" +
+      "tatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.C" +
+      "DPClusterStatus.Value\022\025\n\rfailureReason\030\004" +
+      " \001(\t\"\225\001\n\023CDPDatahubRequested\0224\n\020operatio" +
+      "nDetails\030\001 \001(\0132\032.usage.CDPOperationDetai" +
+      "ls\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDet" +
+      "ails\030\003 \001(\0132\030.usage.CDPClusterDetails\"\312\001\n" +
+      "\027CDPDatahubStatusChanged\0224\n\020operationDet" +
+      "ails\030\001 \001(\0132\032.usage.CDPOperationDetails\0220" +
+      "\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterStat" +
+      "us.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPC" +
+      "lusterStatus.Value\022\025\n\rfailureReason\030\004 \001(" +
+      "\tBV\n-com.cloudera.thunderhead.service.co" +
+      "mmon.usageB\nUsageProtoZ\031com/cloudera/cdp" +
+      "/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -80183,7 +80636,7 @@ public final class UsageProto {
     internal_static_usage_CDPOperationDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPOperationDetails_descriptor,
-        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", });
+        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", "FlowState", });
     internal_static_usage_CDPEnvironmentDetails_descriptor =
       getDescriptor().getMessageTypes().get(52);
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
@@ -80243,7 +80696,7 @@ public final class UsageProto {
     internal_static_usage_CDPClusterShape_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterShape_descriptor,
-        new java.lang.String[] { "ClusterTemplateName", "Nodes", "DefinitionDetails", });
+        new java.lang.String[] { "ClusterTemplateName", "Nodes", "HostGroupNodeCount", "DefinitionDetails", });
     internal_static_usage_CDPVersionDetails_descriptor =
       getDescriptor().getMessageTypes().get(62);
     internal_static_usage_CDPVersionDetails_fieldAccessorTable = new
