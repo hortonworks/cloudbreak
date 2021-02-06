@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -59,13 +60,7 @@ public class AzurePlatformParametersTest {
         assertEquals(workerAsMap.get(AS_FAULT_DOMAIN_COUNTER_KEY), 5);
         assertEquals(workerAsMap.get(AS_UPDATE_DOMAIN_COUNTER_KEY), 50);
 
-        assertTrue(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().containsKey(AS_KEY));
-        assertThat(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().get(AS_KEY), IsInstanceOf.instanceOf(Map.class));
-
-        Map<Object, Object> computeAsMap = (Map<Object, Object>) instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().get(AS_KEY);
-        assertEquals(computeAsMap.get(AS_NAME_KEY), STACK_NAME + "-" + COMPUTE_GROUP_NAME + "-as");
-        assertEquals(computeAsMap.get(AS_FAULT_DOMAIN_COUNTER_KEY), 2);
-        assertEquals(computeAsMap.get(AS_UPDATE_DOMAIN_COUNTER_KEY), 20);
+        assertFalse(instanceGroupParameterResponseMap.get(COMPUTE_GROUP_NAME).getParameters().containsKey(AS_KEY));
     }
 
     private InstanceGroupParameterRequest getRequestWithoutAs(String groupName) {
