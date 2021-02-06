@@ -66975,6 +66975,24 @@ public final class UsageProto {
      * <code>.usage.CDPProxyDetails proxyDetails = 6;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPProxyDetailsOrBuilder getProxyDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+     * </pre>
+     *
+     * <code>string publicEndpointAccessGateway = 7;</code>
+     */
+    java.lang.String getPublicEndpointAccessGateway();
+    /**
+     * <pre>
+     * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+     * </pre>
+     *
+     * <code>string publicEndpointAccessGateway = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getPublicEndpointAccessGatewayBytes();
   }
   /**
    * Protobuf type {@code usage.CDPNetworkDetails}
@@ -66994,6 +67012,7 @@ public final class UsageProto {
       numberPublicSubnets_ = 0;
       numberPrivateSubnets_ = 0;
       serviceEndpointCreation_ = "";
+      publicEndpointAccessGateway_ = "";
     }
 
     @java.lang.Override
@@ -67059,6 +67078,12 @@ public final class UsageProto {
                 proxyDetails_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              publicEndpointAccessGateway_ = s;
               break;
             }
             default: {
@@ -67278,6 +67303,48 @@ public final class UsageProto {
       return getProxyDetails();
     }
 
+    public static final int PUBLICENDPOINTACCESSGATEWAY_FIELD_NUMBER = 7;
+    private volatile java.lang.Object publicEndpointAccessGateway_;
+    /**
+     * <pre>
+     * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+     * </pre>
+     *
+     * <code>string publicEndpointAccessGateway = 7;</code>
+     */
+    public java.lang.String getPublicEndpointAccessGateway() {
+      java.lang.Object ref = publicEndpointAccessGateway_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        publicEndpointAccessGateway_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+     * </pre>
+     *
+     * <code>string publicEndpointAccessGateway = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getPublicEndpointAccessGatewayBytes() {
+      java.lang.Object ref = publicEndpointAccessGateway_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        publicEndpointAccessGateway_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -67310,6 +67377,9 @@ public final class UsageProto {
       if (proxyDetails_ != null) {
         output.writeMessage(6, getProxyDetails());
       }
+      if (!getPublicEndpointAccessGatewayBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, publicEndpointAccessGateway_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -67339,6 +67409,9 @@ public final class UsageProto {
       if (proxyDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getProxyDetails());
+      }
+      if (!getPublicEndpointAccessGatewayBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, publicEndpointAccessGateway_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -67371,6 +67444,8 @@ public final class UsageProto {
         result = result && getProxyDetails()
             .equals(other.getProxyDetails());
       }
+      result = result && getPublicEndpointAccessGateway()
+          .equals(other.getPublicEndpointAccessGateway());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -67396,6 +67471,8 @@ public final class UsageProto {
         hash = (37 * hash) + PROXYDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getProxyDetails().hashCode();
       }
+      hash = (37 * hash) + PUBLICENDPOINTACCESSGATEWAY_FIELD_NUMBER;
+      hash = (53 * hash) + getPublicEndpointAccessGateway().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -67545,6 +67622,8 @@ public final class UsageProto {
           proxyDetails_ = null;
           proxyDetailsBuilder_ = null;
         }
+        publicEndpointAccessGateway_ = "";
+
         return this;
       }
 
@@ -67581,6 +67660,7 @@ public final class UsageProto {
         } else {
           result.proxyDetails_ = proxyDetailsBuilder_.build();
         }
+        result.publicEndpointAccessGateway_ = publicEndpointAccessGateway_;
         onBuilt();
         return result;
       }
@@ -67649,6 +67729,10 @@ public final class UsageProto {
         }
         if (other.hasProxyDetails()) {
           mergeProxyDetails(other.getProxyDetails());
+        }
+        if (!other.getPublicEndpointAccessGateway().isEmpty()) {
+          publicEndpointAccessGateway_ = other.publicEndpointAccessGateway_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -68173,6 +68257,95 @@ public final class UsageProto {
           proxyDetails_ = null;
         }
         return proxyDetailsBuilder_;
+      }
+
+      private java.lang.Object publicEndpointAccessGateway_ = "";
+      /**
+       * <pre>
+       * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+       * </pre>
+       *
+       * <code>string publicEndpointAccessGateway = 7;</code>
+       */
+      public java.lang.String getPublicEndpointAccessGateway() {
+        java.lang.Object ref = publicEndpointAccessGateway_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          publicEndpointAccessGateway_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+       * </pre>
+       *
+       * <code>string publicEndpointAccessGateway = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getPublicEndpointAccessGatewayBytes() {
+        java.lang.Object ref = publicEndpointAccessGateway_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          publicEndpointAccessGateway_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+       * </pre>
+       *
+       * <code>string publicEndpointAccessGateway = 7;</code>
+       */
+      public Builder setPublicEndpointAccessGateway(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        publicEndpointAccessGateway_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+       * </pre>
+       *
+       * <code>string publicEndpointAccessGateway = 7;</code>
+       */
+      public Builder clearPublicEndpointAccessGateway() {
+        
+        publicEndpointAccessGateway_ = getDefaultInstance().getPublicEndpointAccessGateway();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+       * </pre>
+       *
+       * <code>string publicEndpointAccessGateway = 7;</code>
+       */
+      public Builder setPublicEndpointAccessGatewayBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        publicEndpointAccessGateway_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -80262,56 +80435,57 @@ public final class UsageProto {
       "mentTelemetryFeatureDetails\022\031\n\021workloadA" +
       "nalytics\030\001 \001(\t\022\035\n\025clusterLogsCollection\030" +
       "\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\"" +
-      "\310\001\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001" +
+      "\355\001\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001" +
       "(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPublic" +
       "Subnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 " +
       "\001(\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022,\n\014" +
       "proxyDetails\030\006 \001(\0132\026.usage.CDPProxyDetai" +
-      "ls\"\212\002\n\027CDPEnvironmentRequested\0224\n\020operat" +
-      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
-      "ails\0228\n\022environmentDetails\030\002 \001(\0132\034.usage" +
-      ".CDPEnvironmentDetails\0220\n\016networkDetails" +
-      "\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M\n\027tele" +
-      "metryFeatureDetails\030\004 \001(\0132,.usage.CDPEnv" +
-      "ironmentTelemetryFeatureDetails\"\326\001\n\033CDPE" +
-      "nvironmentStatusChanged\0224\n\020operationDeta" +
-      "ils\030\001 \001(\0132\032.usage.CDPOperationDetails\0224\n" +
-      "\toldStatus\030\002 \001(\0162!.usage.CDPEnvironmentS" +
-      "tatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage.C" +
-      "DPEnvironmentStatus.Value\022\025\n\rfailureReas" +
-      "on\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001" +
-      " \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPCluster" +
-      "Shape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005no" +
-      "des\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n" +
-      "\021definitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionD" +
-      "etails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002" +
-      " \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion" +
-      "\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(" +
-      "\t\"\241\001\n\021CDPClusterDetails\022,\n\014clusterShape\030" +
-      "\001 \001(\0132\026.usage.CDPClusterShape\0220\n\016version" +
-      "Details\030\002 \001(\0132\030.usage.CDPVersionDetails\022" +
-      ",\n\014imageDetails\030\003 \001(\0132\026.usage.CDPImageDe" +
-      "tails\"\226\001\n\024CDPDatalakeRequested\0224\n\020operat" +
-      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
-      "ails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterD" +
-      "etails\030\003 \001(\0132\030.usage.CDPClusterDetails\"\313" +
-      "\001\n\030CDPDatalakeStatusChanged\0224\n\020operation" +
+      "ls\022#\n\033publicEndpointAccessGateway\030\007 \001(\t\"" +
+      "\212\002\n\027CDPEnvironmentRequested\0224\n\020operation" +
       "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
-      "s\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterS" +
-      "tatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.C" +
-      "DPClusterStatus.Value\022\025\n\rfailureReason\030\004" +
-      " \001(\t\"\225\001\n\023CDPDatahubRequested\0224\n\020operatio" +
-      "nDetails\030\001 \001(\0132\032.usage.CDPOperationDetai" +
-      "ls\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDet" +
-      "ails\030\003 \001(\0132\030.usage.CDPClusterDetails\"\312\001\n" +
-      "\027CDPDatahubStatusChanged\0224\n\020operationDet" +
+      "s\0228\n\022environmentDetails\030\002 \001(\0132\034.usage.CD" +
+      "PEnvironmentDetails\0220\n\016networkDetails\030\003 " +
+      "\001(\0132\030.usage.CDPNetworkDetails\022M\n\027telemet" +
+      "ryFeatureDetails\030\004 \001(\0132,.usage.CDPEnviro" +
+      "nmentTelemetryFeatureDetails\"\326\001\n\033CDPEnvi" +
+      "ronmentStatusChanged\0224\n\020operationDetails" +
+      "\030\001 \001(\0132\032.usage.CDPOperationDetails\0224\n\tol" +
+      "dStatus\030\002 \001(\0162!.usage.CDPEnvironmentStat" +
+      "us.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDPE" +
+      "nvironmentStatus.Value\022\025\n\rfailureReason\030" +
+      "\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(" +
+      "\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPClusterSha" +
+      "pe\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005nodes" +
+      "\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021de" +
+      "finitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDeta" +
+      "ils\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(" +
+      "\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004 " +
+      "\001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241" +
+      "\001\n\021CDPClusterDetails\022,\n\014clusterShape\030\001 \001" +
+      "(\0132\026.usage.CDPClusterShape\0220\n\016versionDet" +
+      "ails\030\002 \001(\0132\030.usage.CDPVersionDetails\022,\n\014" +
+      "imageDetails\030\003 \001(\0132\026.usage.CDPImageDetai" +
+      "ls\"\226\001\n\024CDPDatalakeRequested\0224\n\020operation" +
+      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
+      "s\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDeta" +
+      "ils\030\003 \001(\0132\030.usage.CDPClusterDetails\"\313\001\n\030" +
+      "CDPDatalakeStatusChanged\0224\n\020operationDet" +
       "ails\030\001 \001(\0132\032.usage.CDPOperationDetails\0220" +
       "\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterStat" +
       "us.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPC" +
       "lusterStatus.Value\022\025\n\rfailureReason\030\004 \001(" +
-      "\tBV\n-com.cloudera.thunderhead.service.co" +
-      "mmon.usageB\nUsageProtoZ\031com/cloudera/cdp" +
-      "/protobufb\006proto3"
+      "\t\"\225\001\n\023CDPDatahubRequested\0224\n\020operationDe" +
+      "tails\030\001 \001(\0132\032.usage.CDPOperationDetails\022" +
+      "\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDetail" +
+      "s\030\003 \001(\0132\030.usage.CDPClusterDetails\"\312\001\n\027CD" +
+      "PDatahubStatusChanged\0224\n\020operationDetail" +
+      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\to" +
+      "ldStatus\030\002 \001(\0162\035.usage.CDPClusterStatus." +
+      "Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClus" +
+      "terStatus.Value\022\025\n\rfailureReason\030\004 \001(\tBV" +
+      "\n-com.cloudera.thunderhead.service.commo" +
+      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
+      "otobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -80672,7 +80846,7 @@ public final class UsageProto {
     internal_static_usage_CDPNetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPNetworkDetails_descriptor,
-        new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", });
+        new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", "PublicEndpointAccessGateway", });
     internal_static_usage_CDPEnvironmentRequested_descriptor =
       getDescriptor().getMessageTypes().get(58);
     internal_static_usage_CDPEnvironmentRequested_fieldAccessorTable = new

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnviro
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
@@ -187,6 +188,27 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getNumberPrivateSubnets());
         Assert.assertEquals(2,
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getNumberPublicSubnets());
+        Assert.assertEquals("DISABLED",
+                environmentRequested.getEnvironmentDetails().getNetworkDetails().getPublicEndpointAccessGateway());
+    }
+
+    @Test
+    public void testConversionPublicEndpointAccessGateway() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
+                .build();
+
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals("ENABLED",
+                environmentRequested.getEnvironmentDetails().getNetworkDetails().getPublicEndpointAccessGateway());
     }
 
     @Test
