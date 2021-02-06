@@ -51,10 +51,6 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzurePlatformParameters.class);
 
-    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 2;
-
-    private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
-
     private static final int START_LABEL = 98;
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
@@ -174,17 +170,8 @@ public class AzurePlatformParameters implements PlatformParameters {
             if (groupParameterRequest.getParameters().containsKey("availabilitySet")) {
                 instanceGroupParameterResponse.setGroupName(groupParameterRequest.getGroupName());
                 instanceGroupParameterResponse.setParameters(groupParameterRequest.getParameters());
-
             } else {
                 Map<String, Object> parameters = groupParameterRequest.getParameters();
-
-                Map<String, Object> availabilitySet = new HashMap<>();
-                availabilitySet.put("name", String.format("%s-%s-as", groupParameterRequest.getStackName(), groupParameterRequest.getGroupName()));
-                availabilitySet.put("faultDomainCount", DEFAULT_FAULT_DOMAIN_COUNTER);
-                availabilitySet.put("updateDomainCount", DEFAULT_UPDATE_DOMAIN_COUNTER);
-
-                parameters.put("availabilitySet", availabilitySet);
-
                 instanceGroupParameterResponse.setGroupName(groupParameterRequest.getGroupName());
                 instanceGroupParameterResponse.setParameters(parameters);
             }
