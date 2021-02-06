@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.converter.instance;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -45,7 +45,7 @@ public class InstanceGroupRequestToInstanceGroupConverter {
     }
 
     private void addInstanceMetadatas(InstanceGroupRequest request, InstanceGroup instanceGroup, String hostname, String domain) {
-        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        Set<InstanceMetaData> instanceMetaDataSet = new LinkedHashSet<>();
         for (int i = 0; i < request.getNodeCount(); i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceGroup(instanceGroup);
