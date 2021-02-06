@@ -89,6 +89,19 @@ replace_ranger_group_before_import() {
   fi
 }
 
+close_existing_connections() {
+  SERVICE=$1
+  doLog "INFO Closing existing connections to ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${SERVICE}' AND pid <> pg_backend_pid();" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to close connections to ${SERVICE}"
+}
+
+limit_incomming_connection() {
+  SERVICE=$1
+  COUNT=$2
+  doLog "INFO limit existing connections to ${COUNT}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "alter user ${SERVICE} connection limit ${COUNT};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to limit connections to ${SERVICE}"
+}
+
 restore_db_from_local() {
   SERVICE=$1
   BACKUP="${BACKUPS_DIR}/${SERVICE}_backup"
@@ -96,12 +109,16 @@ restore_db_from_local() {
   if [[ "$SERVICE" == "ranger" ]]; then
     replace_ranger_group_before_import $RANGERGROUP $BACKUP
   fi
+  limit_incomming_connection $SERVICE 0
+  close_existing_connections $SERVICE
   doLog "INFO Restoring $SERVICE"
 
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
   psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
   psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" <"$BACKUP" >$LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
   doLog "INFO Succesfully restored ${SERVICE}"
+
+  limit_incomming_connection $SERVICE -1
 }
 
 run_restore() {
