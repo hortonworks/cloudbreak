@@ -102,11 +102,27 @@ move_backup_to_cloud () {
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
 }
 
+close_existing_connections() {
+  SERVICE=$1
+  doLog "INFO Closing existing connections to ${SERVICE}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = '${SERVICE}' AND pid <> pg_backend_pid();" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to close connections to ${SERVICE}"
+}
+
+limit_incomming_connection() {
+  SERVICE=$1
+  COUNT=$2
+  doLog "INFO limit existing connections to ${COUNT}"
+  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "alter user ${SERVICE} connection limit ${COUNT};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to limit connections to ${SERVICE}"
+}
+
 backup_database_for_service() {
   SERVICE="$1"
+  limit_incomming_connection $SERVICE 0
+  close_existing_connections $SERVICE
   doLog "INFO Dumping ${SERVICE}"
   LOCAL_BACKUP=${DATE_DIR}/${SERVICE}_backup
   pg_dump --host="$HOST" --port="$PORT" --username="$USERNAME" --dbname="$SERVICE" --format=plain --file="$LOCAL_BACKUP" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to dump ${SERVICE}"
+  limit_incomming_connection $SERVICE -1
 
   if [[ "$SERVICE" == "ranger" ]]; then
     replace_ranger_group_before_export $RANGERGROUP $LOCAL_BACKUP
