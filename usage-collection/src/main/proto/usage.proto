@@ -1096,6 +1096,8 @@ message CDPNetworkDetails {
     string serviceEndpointCreation = 5;
     // Metadata around what type of proxy is used in this environment
     CDPProxyDetails proxyDetails = 6;
+    // Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+    string publicEndpointAccessGateway = 7;
 }
 
 // Generated when Environment creation has been requested or finished
