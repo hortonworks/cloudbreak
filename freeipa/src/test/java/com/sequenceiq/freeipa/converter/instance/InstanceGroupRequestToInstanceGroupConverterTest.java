@@ -72,8 +72,11 @@ public class InstanceGroupRequestToInstanceGroupConverterTest {
         assertThat(result.getSecurityGroup()).isEqualTo(securityGroup);
         assertThat(result.getNodeCount()).isEqualTo(nodeCount);
         assertThat(result.getInstanceMetaData().size()).isEqualTo(nodeCount);
+        int i = 0;
         for (InstanceMetaData instanceMetaData : result.getInstanceMetaData()) {
             assertThat(instanceMetaData.getInstanceGroup()).isEqualTo(result);
+            assertThat(instanceMetaData.getDiscoveryFQDN()).startsWith(HOSTNAME + i);
+            i++;
         }
     }
 
