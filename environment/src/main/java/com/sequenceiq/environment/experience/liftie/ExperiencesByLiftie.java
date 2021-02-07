@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.experience.liftie;
 
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
+import static com.sequenceiq.environment.experience.liftie.LiftieIgnorableClusterStatuses.DELETED;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ExperiencesByLiftie implements Experience {
     @Override
     public int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment) {
         throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
-        List<ClusterView> clusterViews = getClusterViewsForAllProvidedWorkload(environment.getName(), environment.getAccountId());
+        List<ClusterView> clusterViews = getClusterViewsForWorkloads(environment.getName(), environment.getAccountId());
         return countNotDeletedClusters(clusterViews);
     }
 
@@ -47,11 +48,11 @@ public class ExperiencesByLiftie implements Experience {
     public void deleteConnectedExperiences(@NotNull EnvironmentExperienceDto environment) {
         throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
         LOGGER.debug("Getting Liftie cluster list for environment '{}'", environment.getName());
-        List<ClusterView> clusterViews = getClusterViewsForAllProvidedWorkload(environment.getName(), environment.getAccountId());
+        List<ClusterView> clusterViews = getClusterViewsForWorkloads(environment.getName(), environment.getAccountId());
         LOGGER.debug("Starting Liftie clusters deletion for environment '{}'", environment.getName());
         clusterViews.stream()
-                .filter(cv -> LiftieIgnorableStatuses.notContains(cv.getClusterStatus().getStatus()))
-                .forEach(cv -> liftieApi.deleteCluster(cv.getClusterId()));
+                .filter(cluster -> LiftieIgnorableClusterStatuses.notContains(cluster.getClusterStatus().getStatus()))
+                .forEach(cluster -> liftieApi.deleteCluster(cluster.getClusterId()));
         LOGGER.debug("Liftie clusters delete requests submitted for environment '{}'", environment.getName());
     }
 
@@ -60,7 +61,7 @@ public class ExperiencesByLiftie implements Experience {
         return ExperienceSource.LIFTIE;
     }
 
-    private List<ClusterView> getClusterViewsForAllProvidedWorkload(String environmentName, String accountId) {
+    private List<ClusterView> getClusterViewsForWorkloads(String environmentName, String accountId) {
         List<ClusterView> clusterViews = new LinkedList<>();
         workloadProvider.getWorkloadsLabels().forEach(workload -> clusterViews.addAll(getClusterViewsForWorkload(environmentName, accountId, workload)));
         return clusterViews;
@@ -69,7 +70,7 @@ public class ExperiencesByLiftie implements Experience {
     private List<ClusterView> getClusterViewsForWorkload(String environmentName, String tenant, String workload) {
         List<ClusterView> clusterViews = new LinkedList<>();
         List<ListClustersResponse> clustersResponses = new LinkedList<>();
-        ListClustersResponse first = liftieApi.listClustersWithWorkloadFilter(environmentName, tenant, workload);
+        ListClustersResponse first = liftieApi.listClusters(environmentName, tenant, workload, null);
         if (listClustersResponseValidator.isListClustersResponseEmpty(first)) {
             return clusterViews;
         }
@@ -93,7 +94,8 @@ public class ExperiencesByLiftie implements Experience {
     private int countNotDeletedClusters(List<ClusterView> clusterViews) {
         return Math.toIntExact(clusterViews
                 .stream()
-                .filter(clusterView -> LiftieIgnorableStatuses.notContains(clusterView.getClusterStatus().getStatus()))
+                .map(clusterView -> clusterView.getClusterStatus().getStatus())
+                .filter(clusterStatus -> DELETED.isNotEqualTo(clusterStatus))
                 .count());
     }
 

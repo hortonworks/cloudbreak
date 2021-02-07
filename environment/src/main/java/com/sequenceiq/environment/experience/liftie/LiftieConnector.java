@@ -49,22 +49,6 @@ public class LiftieConnector implements LiftieApi {
         this.client = client;
     }
 
-    @Override
-    public @NotNull ListClustersResponse listPagedClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable Integer page,
-            @Nullable String workload) {
-        return listClusters(env, tenant, workload, page);
-    }
-
-    @Override
-    public @NotNull ListClustersResponse listClustersWithWorkloadFilter(@NotNull String env, @NotNull String tenant, @Nullable String workload) {
-        return listClusters(env, tenant, workload, null);
-    }
-
-    @Override
-    public @NotNull ListClustersResponse listPagedClusters(@NotNull String env, @NotNull String tenant, @Nullable Integer page) {
-        return listClusters(env, tenant, null, page);
-    }
-
     @NotNull
     @Override
     public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable String workload, @Nullable Integer page) {
