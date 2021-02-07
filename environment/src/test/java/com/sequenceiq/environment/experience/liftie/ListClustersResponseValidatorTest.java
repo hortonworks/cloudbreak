@@ -76,7 +76,7 @@ class ListClustersResponseValidatorTest {
         ListClustersResponse response = new ListClustersResponse();
         response.setClusters(Map.of("someCluster", new ClusterView()));
         PageStats ps = new PageStats();
-        ps.setTotalPages(Integer.MAX_VALUE); // doesn't matter until it is greater than zero
+        ps.setTotalPages(Integer.MAX_VALUE);
         response.setPage(ps);
         return response;
     }
