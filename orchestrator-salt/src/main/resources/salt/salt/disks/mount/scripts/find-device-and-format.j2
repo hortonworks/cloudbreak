@@ -10,7 +10,8 @@ LOG_FILE=/var/log/find_device_and_format.log
 VERSION="V1.0"
 
 # INPUT - expected lists
-#   ATTACHED_VOLUME_NAME_LIST - contains a list of volume device names attached to the instance, format: space separated list
+#   ATTACHED_VOLUME_NAME_LIST - contains a list of volume device names attached to the instance, format: space separated list,
+#                               in case of Azure Logical Unit Numbers passsed to find the actual devices
 #   ATTACHED_VOLUME_SERIAL_LIST - contains a list of volume serial ids, format: space separated list
 #
 # OUTPUT:
@@ -104,6 +105,26 @@ save_env_vars_to_log_file() {
     log $LOG_FILE CLOUD_PLATFORM=$CLOUD_PLATFORM
 }
 
+get_temporary_disk_device_name() {
+  if [[ $CLOUD_PLATFORM -eq AZURE ]]; then
+    temporary_device_name="$(ls -l /dev/disk/azure/ | awk '{print $9"\t"$11}' | grep -E '(resource[^-])' | cut -f2 | cut -f3 -d'/')"
+    if [[ -n $temporary_device_name ]]; then
+      temporary_disk_path="/dev/$temporary_device_name"
+      log $LOG_FILE "found temporary disk: $temporary_disk_path"
+      echo "$temporary_disk_path"
+      return 0
+    else
+      log $LOG_FILE "no temporary disk found"
+      echo ""
+      return 0
+    fi
+  else
+    log $LOG_FILE "The 'get_temporary_disk_device_name' function can only be used on the Azure platform."
+    echo ""
+    return 0
+  fi
+}
+
 main() {
     log $LOG_FILE "started, version: $VERSION"
     save_env_vars_to_log_file
@@ -114,7 +135,13 @@ main() {
     if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "some volumes are missing"
     fi
-    ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
+
+    local ephemeral_device_name_list=""
+    if [[ $CLOUD_PLATFORM -eq AZURE ]]; then
+      ephemeral_device_name_list=$(get_temporary_disk_device_name)
+    else
+      ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
+    fi
     log $LOG_FILE found devices: $device_name_list $ephemeral_device_name_list
 
     format_disks_if_unformatted "$device_name_list $ephemeral_device_name_list"
