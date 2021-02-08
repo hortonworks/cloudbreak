@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentPattern;
 
 import java.util.List;
 import java.util.Map;
@@ -120,11 +121,6 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
-    }
-
-    private String environmentPattern(TestContext testContext) {
-        return String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:environment:.*[]]\\.",
-                testContext.get(EnvironmentTestDto.class).getName());
     }
 
     private void testCheckRightUtil(TestContext testContext, String dhCrn) {

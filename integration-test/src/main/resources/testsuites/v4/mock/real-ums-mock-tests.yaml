@@ -4,6 +4,7 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.CreateDhWithDatahubCreator
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.CredentialCreateTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.DataStewardTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.DatalakeDatahubCreateAuthTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvironmentCreateTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvStopStartWithEnvAdmin
