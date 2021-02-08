@@ -10,6 +10,8 @@ public class AuthUserKeys {
 
     public static final String ENV_ADMIN_A = "CB-Machine-EnvAdminA";
 
+    public static final String ENV_DATA_STEWARD = "CB-Machine-DataSteward";
+
     public static final String DH_ADMIN_A = "CB-Machine-DhAdminA";
 
     public static final String DH_ADMIN_B = "CB-Machine-DhAdminB";

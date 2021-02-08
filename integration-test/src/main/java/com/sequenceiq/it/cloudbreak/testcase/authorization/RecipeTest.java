@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.who;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datahubRecipePattern;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
@@ -54,19 +55,19 @@ public class RecipeTest extends AbstractIntegrationTest {
                 })
                 .whenException(recipeTestClient.getV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(recipeTestClient.getV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
-                                        patternWithName(testContext.get(RecipeTestDto.class).getName()))
+                                datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .when(recipeTestClient.deleteV4(), who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .when(recipeTestClient.listV4())
@@ -80,7 +81,4 @@ public class RecipeTest extends AbstractIntegrationTest {
                 .validate();
     }
 
-    private String patternWithName(String name) {
-        return String.format("[\\[]name='%s', crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[]].", name);
-    }
 }

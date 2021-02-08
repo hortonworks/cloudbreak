@@ -25,6 +25,7 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
+    @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);

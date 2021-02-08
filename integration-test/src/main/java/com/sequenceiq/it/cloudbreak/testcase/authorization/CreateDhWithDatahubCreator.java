@@ -1,6 +1,10 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datahubPattern;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datahubRecipePattern;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentDatahubPattern;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentPattern;
 
 import java.util.List;
 import java.util.Map;
@@ -36,6 +40,7 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
 
 public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
@@ -87,9 +92,9 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentShortPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
@@ -121,29 +126,11 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .await(STACK_AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))
                 .given(RenewDistroXCertificateTestDto.class)
                 .whenException(distroXClient.renewDistroXCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datahub/repairDatahub'" +
-                        " right on any of the " + environmentDhPattern(testContext) + " or on " + datahubPattern(testContext))
+                        " right on any of the " + environmentDatahubPattern(testContext) + " or on " + datahubPattern(testContext))
                         .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
-    }
-
-    private String environmentDhPattern(TestContext testContext) {
-        return "'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*";
-    }
-
-    private String environmentShortPattern(TestContext testContext) {
-        return String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:environment:.*",
-                testContext.get(EnvironmentTestDto.class).getName());
-    }
-
-    private String datahubPattern(TestContext testContext) {
-        return String.format("'cluster'[(]-s[)] [\\[]name='%s', crn='crn:cdp:datahub:us-west-1:.*:cluster:.*",
-                testContext.get(DistroXTestDto.class).getName());
-    }
-
-    private String datahubRecipePattern(String recipeName) {
-        return String.format("[\\[]name='%s', crn='crn:cdp:datahub:us-west-1:.*:recipe:.*'[]]\\.", recipeName);
     }
 
     private void testCheckRightUtil(TestContext testContext, String dhCrn) {

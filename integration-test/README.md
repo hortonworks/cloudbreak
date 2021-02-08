@@ -87,6 +87,8 @@ Test cases are located under folder `https://github.com/hortonworks/cloudbreak/t
  - Integration Tests: `mock`
  - End To End Tests: `e2e`
  - Smoke Tests: `smoke`
+ - Real UMS Tests: `authorization` (UMS host and cache timeout values needs to be changed before running these tests)
+
 *Note:*
 [E2E tests](https://github.com/hortonworks/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e) are organized into domain-specific packages (distrox, sdx etc.).
 

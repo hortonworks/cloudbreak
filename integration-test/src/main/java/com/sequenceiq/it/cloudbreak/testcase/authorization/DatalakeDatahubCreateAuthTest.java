@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datalakePattern;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
@@ -95,10 +96,6 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                         " right on any of the 'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
                         datalakePattern(testContext.get(sdxInternal).getName())).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
-    }
-
-    private String datalakePattern(String name) {
-        return String.format("'datalake'[(]-s[)] [\\[]name='%s', crn='crn:cdp:datalake:us-west-1:.*:datalake:.*\\.", name);
     }
 
 }

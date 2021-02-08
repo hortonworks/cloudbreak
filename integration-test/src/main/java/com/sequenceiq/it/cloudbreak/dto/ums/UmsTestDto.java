@@ -25,6 +25,8 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
 
     private static final String ENV_ADMIN_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin";
 
+    private static final String DATA_STEWARD_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataSteward";
+
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
     }
@@ -46,6 +48,11 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
 
     public UmsTestDto withEnvironmentAdmin() {
         getRequest().setRoleCrn(ENV_ADMIN_CRN);
+        return this;
+    }
+
+    public UmsTestDto withDataSteward() {
+        getRequest().setRoleCrn(DATA_STEWARD_CRN);
         return this;
     }
 
