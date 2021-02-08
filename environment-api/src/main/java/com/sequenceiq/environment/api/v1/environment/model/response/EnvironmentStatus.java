@@ -95,6 +95,13 @@ public enum EnvironmentStatus {
             CREATE_FAILED,
             DELETE_FAILED,
             UPDATE_FAILED,
+            START_FREEIPA_FAILED,
+            START_DATAHUB_FAILED,
+            START_DATALAKE_FAILED,
+            START_SYNCHRONIZE_USERS_FAILED,
+            STOP_DATAHUB_FAILED,
+            STOP_DATALAKE_FAILED,
+            STOP_FREEIPA_FAILED,
             FREEIPA_DELETED_ON_PROVIDER_SIDE
     );
 
