@@ -1020,6 +1020,20 @@ message CDPClusterStatus {
     DOWNSCALE_FINISHED = 23;
     // The status when a cluster failed to resume.
     DOWNSCALE_FAILED = 24;
+
+    // The status when CB is trying to renew the public facing certificate of the cluster, Letsencrypt certificate
+    RENEW_PUBLIC_CERT_STARTED = 25;
+    // The status when CB is done renewing the public facing certificate of the cluster, Letsencrypt certificate
+    RENEW_PUBLIC_CERT_FINISHED = 26;
+    // The status when CB could not renew the public facing certificate of the cluster, Letsencrypt certificate
+    RENEW_PUBLIC_CERT_FAILED = 27;
+
+    // The status when CB is trying to renew the internal certificates of the cluster
+    RENEW_CLUSTER_INTERNAL_CERT_STARTED = 28;
+    // The status when CB is done renewing the internal certificates of the cluster
+    RENEW_CLUSTER_INTERNAL_CERT_FINISHED = 29;
+    // The status when CB could not renew the internal certificates of the cluster
+    RENEW_CLUSTER_INTERNAL_CERT_FAILED = 30;
   }
 }
 

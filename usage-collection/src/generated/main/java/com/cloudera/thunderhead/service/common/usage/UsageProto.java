@@ -60415,6 +60415,54 @@ public final class UsageProto {
        * <code>DOWNSCALE_FAILED = 24;</code>
        */
       DOWNSCALE_FAILED(24),
+      /**
+       * <pre>
+       * The status when CB is trying to renew the public facing certificate of the cluster, Letsencrypt certificate
+       * </pre>
+       *
+       * <code>RENEW_PUBLIC_CERT_STARTED = 25;</code>
+       */
+      RENEW_PUBLIC_CERT_STARTED(25),
+      /**
+       * <pre>
+       * The status when CB is done renewing the public facing certificate of the cluster, Letsencrypt certificate
+       * </pre>
+       *
+       * <code>RENEW_PUBLIC_CERT_FINISHED = 26;</code>
+       */
+      RENEW_PUBLIC_CERT_FINISHED(26),
+      /**
+       * <pre>
+       * The status when CB could not renew the public facing certificate of the cluster, Letsencrypt certificate
+       * </pre>
+       *
+       * <code>RENEW_PUBLIC_CERT_FAILED = 27;</code>
+       */
+      RENEW_PUBLIC_CERT_FAILED(27),
+      /**
+       * <pre>
+       * The status when CB is trying to renew the internal certificates of the cluster
+       * </pre>
+       *
+       * <code>RENEW_CLUSTER_INTERNAL_CERT_STARTED = 28;</code>
+       */
+      RENEW_CLUSTER_INTERNAL_CERT_STARTED(28),
+      /**
+       * <pre>
+       * The status when CB is done renewing the internal certificates of the cluster
+       * </pre>
+       *
+       * <code>RENEW_CLUSTER_INTERNAL_CERT_FINISHED = 29;</code>
+       */
+      RENEW_CLUSTER_INTERNAL_CERT_FINISHED(29),
+      /**
+       * <pre>
+       * The status when CB could not renew the internal certificates of the cluster
+       * </pre>
+       *
+       * <code>RENEW_CLUSTER_INTERNAL_CERT_FAILED = 30;</code>
+       */
+      RENEW_CLUSTER_INTERNAL_CERT_FAILED(30),
       UNRECOGNIZED(-1),
       ;
 
@@ -60618,6 +60666,54 @@ public final class UsageProto {
        * <code>DOWNSCALE_FAILED = 24;</code>
        */
       public static final int DOWNSCALE_FAILED_VALUE = 24;
+      /**
+       * <pre>
+       * The status when CB is trying to renew the public facing certificate of the cluster, Letsencrypt certificate
+       * </pre>
+       *
+       * <code>RENEW_PUBLIC_CERT_STARTED = 25;</code>
+       */
+      public static final int RENEW_PUBLIC_CERT_STARTED_VALUE = 25;
+      /**
+       * <pre>
+       * The status when CB is done renewing the public facing certificate of the cluster, Letsencrypt certificate
+       * </pre>
+       *
+       * <code>RENEW_PUBLIC_CERT_FINISHED = 26;</code>
+       */
+      public static final int RENEW_PUBLIC_CERT_FINISHED_VALUE = 26;
+      /**
+       * <pre>
+       * The status when CB could not renew the public facing certificate of the cluster, Letsencrypt certificate
+       * </pre>
+       *
+       * <code>RENEW_PUBLIC_CERT_FAILED = 27;</code>
+       */
+      public static final int RENEW_PUBLIC_CERT_FAILED_VALUE = 27;
+      /**
+       * <pre>
+       * The status when CB is trying to renew the internal certificates of the cluster
+       * </pre>
+       *
+       * <code>RENEW_CLUSTER_INTERNAL_CERT_STARTED = 28;</code>
+       */
+      public static final int RENEW_CLUSTER_INTERNAL_CERT_STARTED_VALUE = 28;
+      /**
+       * <pre>
+       * The status when CB is done renewing the internal certificates of the cluster
+       * </pre>
+       *
+       * <code>RENEW_CLUSTER_INTERNAL_CERT_FINISHED = 29;</code>
+       */
+      public static final int RENEW_CLUSTER_INTERNAL_CERT_FINISHED_VALUE = 29;
+      /**
+       * <pre>
+       * The status when CB could not renew the internal certificates of the cluster
+       * </pre>
+       *
+       * <code>RENEW_CLUSTER_INTERNAL_CERT_FAILED = 30;</code>
+       */
+      public static final int RENEW_CLUSTER_INTERNAL_CERT_FAILED_VALUE = 30;
 
 
       public final int getNumber() {
@@ -60663,6 +60759,12 @@ public final class UsageProto {
           case 22: return DOWNSCALE_STARTED;
           case 23: return DOWNSCALE_FINISHED;
           case 24: return DOWNSCALE_FAILED;
+          case 25: return RENEW_PUBLIC_CERT_STARTED;
+          case 26: return RENEW_PUBLIC_CERT_FINISHED;
+          case 27: return RENEW_PUBLIC_CERT_FAILED;
+          case 28: return RENEW_CLUSTER_INTERNAL_CERT_STARTED;
+          case 29: return RENEW_CLUSTER_INTERNAL_CERT_FINISHED;
+          case 30: return RENEW_CLUSTER_INTERNAL_CERT_FAILED;
           default: return null;
         }
       }
@@ -80400,7 +80502,7 @@ public final class UsageProto {
       "\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_FINISHED\020" +
       "\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME_STARTED\020" +
       "\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUME_FAILED\020" +
-      "\014\"\231\004\n\020CDPClusterStatus\"\204\004\n\005Value\022\t\n\005UNSE" +
+      "\014\"\361\005\n\020CDPClusterStatus\"\334\005\n\005Value\022\t\n\005UNSE" +
       "T\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FINISH" +
       "ED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_STARTE" +
       "D\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_FAILE" +
@@ -80413,79 +80515,84 @@ public final class UsageProto {
       "_FAILED\020\022\022\023\n\017UPSCALE_STARTED\020\023\022\024\n\020UPSCAL" +
       "E_FINISHED\020\024\022\022\n\016UPSCALE_FAILED\020\025\022\025\n\021DOWN" +
       "SCALE_STARTED\020\026\022\026\n\022DOWNSCALE_FINISHED\020\027\022" +
-      "\024\n\020DOWNSCALE_FAILED\020\030\"\206\002\n\023CDPOperationDe" +
-      "tails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030" +
-      "\002 \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiator" +
-      "Crn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n" +
-      "\030cdpRequestProcessingStep\030\006 \001(\0162%.usage." +
-      "CDPRequestProcessingStep.Value\022\016\n\006flowId" +
-      "\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState" +
-      "\030\t \001(\t\"\362\002\n\025CDPEnvironmentDetails\022D\n\017envi" +
-      "ronmentType\030\001 \001(\0162+.usage.CDPEnvironment" +
-      "sEnvironmentType.Value\022\016\n\006region\030\002 \001(\t\022!" +
-      "\n\031numberOfAvailabilityZones\030\003 \001(\005\022\031\n\021ava" +
-      "ilabilityZones\030\004 \001(\t\0220\n\016networkDetails\030\005" +
-      " \001(\0132\030.usage.CDPNetworkDetails\0225\n\nawsDet" +
-      "ails\030\006 \001(\0132\037.usage.CDPEnvironmentAwsDeta" +
-      "ilsH\000\0229\n\014azureDetails\030\007 \001(\0132!.usage.CDPE" +
-      "nvironmentAzureDetailsH\000B!\n\037environmentC" +
-      "loudProviderDetails\"9\n\032CDPEnvironmentAzu" +
-      "reDetails\022\033\n\023singleResourceGroup\030\001 \001(\010\"\032" +
-      "\n\030CDPEnvironmentAwsDetails\"a\n%CDPEnviron" +
-      "mentTelemetryFeatureDetails\022\031\n\021workloadA" +
-      "nalytics\030\001 \001(\t\022\035\n\025clusterLogsCollection\030" +
-      "\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\"" +
-      "\355\001\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001" +
-      "(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPublic" +
-      "Subnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 " +
-      "\001(\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022,\n\014" +
-      "proxyDetails\030\006 \001(\0132\026.usage.CDPProxyDetai" +
-      "ls\022#\n\033publicEndpointAccessGateway\030\007 \001(\t\"" +
-      "\212\002\n\027CDPEnvironmentRequested\0224\n\020operation" +
-      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
-      "s\0228\n\022environmentDetails\030\002 \001(\0132\034.usage.CD" +
-      "PEnvironmentDetails\0220\n\016networkDetails\030\003 " +
-      "\001(\0132\030.usage.CDPNetworkDetails\022M\n\027telemet" +
-      "ryFeatureDetails\030\004 \001(\0132,.usage.CDPEnviro" +
-      "nmentTelemetryFeatureDetails\"\326\001\n\033CDPEnvi" +
-      "ronmentStatusChanged\0224\n\020operationDetails" +
-      "\030\001 \001(\0132\032.usage.CDPOperationDetails\0224\n\tol" +
-      "dStatus\030\002 \001(\0162!.usage.CDPEnvironmentStat" +
-      "us.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDPE" +
-      "nvironmentStatus.Value\022\025\n\rfailureReason\030" +
-      "\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(" +
-      "\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPClusterSha" +
-      "pe\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005nodes" +
-      "\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021de" +
-      "finitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDeta" +
-      "ils\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(" +
-      "\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004 " +
-      "\001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241" +
-      "\001\n\021CDPClusterDetails\022,\n\014clusterShape\030\001 \001" +
-      "(\0132\026.usage.CDPClusterShape\0220\n\016versionDet" +
-      "ails\030\002 \001(\0132\030.usage.CDPVersionDetails\022,\n\014" +
-      "imageDetails\030\003 \001(\0132\026.usage.CDPImageDetai" +
-      "ls\"\226\001\n\024CDPDatalakeRequested\0224\n\020operation" +
-      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
-      "s\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDeta" +
-      "ils\030\003 \001(\0132\030.usage.CDPClusterDetails\"\313\001\n\030" +
-      "CDPDatalakeStatusChanged\0224\n\020operationDet" +
-      "ails\030\001 \001(\0132\032.usage.CDPOperationDetails\0220" +
-      "\n\toldStatus\030\002 \001(\0162\035.usage.CDPClusterStat" +
-      "us.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPC" +
-      "lusterStatus.Value\022\025\n\rfailureReason\030\004 \001(" +
-      "\t\"\225\001\n\023CDPDatahubRequested\0224\n\020operationDe" +
-      "tails\030\001 \001(\0132\032.usage.CDPOperationDetails\022" +
-      "\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDetail" +
-      "s\030\003 \001(\0132\030.usage.CDPClusterDetails\"\312\001\n\027CD" +
-      "PDatahubStatusChanged\0224\n\020operationDetail" +
-      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\to" +
-      "ldStatus\030\002 \001(\0162\035.usage.CDPClusterStatus." +
-      "Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClus" +
-      "terStatus.Value\022\025\n\rfailureReason\030\004 \001(\tBV" +
-      "\n-com.cloudera.thunderhead.service.commo" +
-      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
-      "otobufb\006proto3"
+      "\024\n\020DOWNSCALE_FAILED\020\030\022\035\n\031RENEW_PUBLIC_CE" +
+      "RT_STARTED\020\031\022\036\n\032RENEW_PUBLIC_CERT_FINISH" +
+      "ED\020\032\022\034\n\030RENEW_PUBLIC_CERT_FAILED\020\033\022\'\n#RE" +
+      "NEW_CLUSTER_INTERNAL_CERT_STARTED\020\034\022(\n$R" +
+      "ENEW_CLUSTER_INTERNAL_CERT_FINISHED\020\035\022&\n" +
+      "\"RENEW_CLUSTER_INTERNAL_CERT_FAILED\020\036\"\206\002" +
+      "\n\023CDPOperationDetails\022\021\n\taccountId\030\001 \001(\t" +
+      "\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014resourceName\030\003 " +
+      "\001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022\032\n\022application" +
+      "Version\030\005 \001(\t\022G\n\030cdpRequestProcessingSte" +
+      "p\030\006 \001(\0162%.usage.CDPRequestProcessingStep" +
+      ".Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013flowChainId\030\010 " +
+      "\001(\t\022\021\n\tflowState\030\t \001(\t\"\362\002\n\025CDPEnvironmen" +
+      "tDetails\022D\n\017environmentType\030\001 \001(\0162+.usag" +
+      "e.CDPEnvironmentsEnvironmentType.Value\022\016" +
+      "\n\006region\030\002 \001(\t\022!\n\031numberOfAvailabilityZo" +
+      "nes\030\003 \001(\005\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016" +
+      "networkDetails\030\005 \001(\0132\030.usage.CDPNetworkD" +
+      "etails\0225\n\nawsDetails\030\006 \001(\0132\037.usage.CDPEn" +
+      "vironmentAwsDetailsH\000\0229\n\014azureDetails\030\007 " +
+      "\001(\0132!.usage.CDPEnvironmentAzureDetailsH\000" +
+      "B!\n\037environmentCloudProviderDetails\"9\n\032C" +
+      "DPEnvironmentAzureDetails\022\033\n\023singleResou" +
+      "rceGroup\030\001 \001(\010\"\032\n\030CDPEnvironmentAwsDetai" +
+      "ls\"a\n%CDPEnvironmentTelemetryFeatureDeta" +
+      "ils\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035\n\025cluste" +
+      "rLogsCollection\030\002 \001(\t\" \n\017CDPProxyDetails" +
+      "\022\r\n\005proxy\030\001 \001(\010\"\355\001\n\021CDPNetworkDetails\022\023\n" +
+      "\013networkType\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t" +
+      "\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034\n\024numberP" +
+      "rivateSubnets\030\004 \001(\005\022\037\n\027serviceEndpointCr" +
+      "eation\030\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usa" +
+      "ge.CDPProxyDetails\022#\n\033publicEndpointAcce" +
+      "ssGateway\030\007 \001(\t\"\212\002\n\027CDPEnvironmentReques" +
+      "ted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CD" +
+      "POperationDetails\0228\n\022environmentDetails\030" +
+      "\002 \001(\0132\034.usage.CDPEnvironmentDetails\0220\n\016n" +
+      "etworkDetails\030\003 \001(\0132\030.usage.CDPNetworkDe" +
+      "tails\022M\n\027telemetryFeatureDetails\030\004 \001(\0132," +
+      ".usage.CDPEnvironmentTelemetryFeatureDet" +
+      "ails\"\326\001\n\033CDPEnvironmentStatusChanged\0224\n\020" +
+      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
+      "ionDetails\0224\n\toldStatus\030\002 \001(\0162!.usage.CD" +
+      "PEnvironmentStatus.Value\0224\n\tnewStatus\030\003 " +
+      "\001(\0162!.usage.CDPEnvironmentStatus.Value\022\025" +
+      "\n\rfailureReason\030\004 \001(\t\"8\n\017CDPImageDetails" +
+      "\022\017\n\007imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"" +
+      "t\n\017CDPClusterShape\022\033\n\023clusterTemplateNam" +
+      "e\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022hostGroupNodeC" +
+      "ount\030\003 \001(\t\022\031\n\021definitionDetails\030\004 \001(\t\"\206\001" +
+      "\n\021CDPVersionDetails\022\021\n\tcrVersion\030\001 \001(\t\022\021" +
+      "\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023" +
+      "\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(" +
+      "\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDetails\022,\n\014" +
+      "clusterShape\030\001 \001(\0132\026.usage.CDPClusterSha" +
+      "pe\0220\n\016versionDetails\030\002 \001(\0132\030.usage.CDPVe" +
+      "rsionDetails\022,\n\014imageDetails\030\003 \001(\0132\026.usa" +
+      "ge.CDPImageDetails\"\226\001\n\024CDPDatalakeReques" +
+      "ted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CD" +
+      "POperationDetails\022\026\n\016environmentCrn\030\002 \001(" +
+      "\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClu" +
+      "sterDetails\"\313\001\n\030CDPDatalakeStatusChanged" +
+      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
+      "erationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usag" +
+      "e.CDPClusterStatus.Value\0220\n\tnewStatus\030\003 " +
+      "\001(\0162\035.usage.CDPClusterStatus.Value\022\025\n\rfa" +
+      "ilureReason\030\004 \001(\t\"\225\001\n\023CDPDatahubRequeste" +
+      "d\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPO" +
+      "perationDetails\022\026\n\016environmentCrn\030\002 \001(\t\022" +
+      "0\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClust" +
+      "erDetails\"\312\001\n\027CDPDatahubStatusChanged\0224\n" +
+      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
+      "tionDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage.C" +
+      "DPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(\016" +
+      "2\035.usage.CDPClusterStatus.Value\022\025\n\rfailu" +
+      "reReason\030\004 \001(\tBV\n-com.cloudera.thunderhe" +
+      "ad.service.common.usageB\nUsageProtoZ\031com" +
+      "/cloudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
