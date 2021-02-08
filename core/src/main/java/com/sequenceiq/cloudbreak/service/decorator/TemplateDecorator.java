@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -84,6 +85,10 @@ public class TemplateDecorator {
                 .filter(curr -> curr.value().equals(template.getInstanceType())).findFirst().get();
         Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
         VolumeParameterType volumeParameterType = map.get(volumeTemplate.getVolumeType());
+
+        if (volumeParameterType == null) {
+            throw new BadRequestException("Volume type not supported: " + volumeTemplate.getVolumeType());
+        }
 
         return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
     }

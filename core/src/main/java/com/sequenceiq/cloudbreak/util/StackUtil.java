@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -135,8 +136,10 @@ public class StackUtil {
         return agents;
     }
 
-    private Map<String, Map<String, Object>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
+    @VisibleForTesting
+    Map<String, Map<String, Object>> createInstanceToVolumeInfoMap(List<Resource> volumeSets) {
         return volumeSets.stream()
+                .filter(volumeSet -> StringUtils.isNotEmpty(volumeSet.getInstanceId()))
                 .map(volumeSet -> new ImmutableEntry<>(volumeSet.getInstanceId(),
                         resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class)))
                 .map(entry -> {

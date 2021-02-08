@@ -522,12 +522,12 @@ public class AzureUtils {
 
             Observable<String> deletionObservable = azureClient.deleteManagedDisksAsync(managedDiskIds)
                     .doOnError(throwable -> {
-                        LOGGER.error("Error happened during the deletion of the managed disks ", throwable);
-                        throw new CloudbreakServiceException("Can't delete all managed disks: ", throwable);
+                        LOGGER.error("Error happened during the deletion of the managed disks: " + managedDiskIds, throwable);
+                        throw new CloudbreakServiceException("Can't delete all managed disks: " + managedDiskIds, throwable);
                     })
-                    .doOnCompleted(() -> LOGGER.debug("Delete managed disks completed successfully"))
+                    .doOnCompleted(() -> LOGGER.info("Delete managed disks completed successfully: {}", managedDiskIds))
                     .subscribeOn(Schedulers.io());
-            deletionObservable.subscribe(disk -> LOGGER.debug("Deleting {}", disk));
+            deletionObservable.subscribe(disk -> LOGGER.info("Deleting {}, managed disks ids: {}", disk, managedDiskIds));
             deletionObservable.toCompletable().await();
         }
     }
