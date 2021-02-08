@@ -65,7 +65,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
             CloudResource deletedResource;
             try {
                 deletedResource = builder.delete(context, auth, resource);
-            } catch (InterruptedException ignored) {
+            } catch (PreserveResourceException ignored) {
                 LOGGER.debug("Preserve resource for later use.");
                 CloudResourceStatus status = new CloudResourceStatus(resource, ResourceStatus.CREATED);
                 return new ResourceRequestResult<>(FutureResult.SUCCESS, Collections.singletonList(status));
