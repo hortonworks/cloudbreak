@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
@@ -12,10 +14,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
 
@@ -46,26 +49,36 @@ public class CmTemplateValidator implements BlueprintValidator {
     @Override
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
+        Versioned blueprintVersion = () -> templateProcessor.getVersion().get();
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
         for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
             if (services.contains(role.name()) && adjustment < 0) {
-                if (!entitlementService.isEntitledFor(accountId, role.getEntitledFor())) {
-                    throw new BadRequestException(String.format("'%s' service is not enabled to scale",
-                            role.name()));
-                } else {
-                    LOGGER.info("Account is entitled for {} so scaling is enabled.", role.getEntitledFor());
-                }
+                validateRole(accountId, role, blueprintVersion);
             }
         }
         for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
             if (services.contains(role.name()) && adjustment > 0) {
-                if (!entitlementService.isEntitledFor(accountId, role.getEntitledFor())) {
-                    throw new BadRequestException(String.format("'%s' service is not enabled to scale",
-                            role.name()));
-                } else {
-                    LOGGER.info("Account is entitled for {} so scaling is enabled.", role.getEntitledFor());
-                }
+                validateRole(accountId, role, blueprintVersion);
             }
         }
+    }
+
+    private void validateRole(String accountId, EntitledForServiceScale role, Versioned blueprintVersion) {
+        boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
+        boolean entitledFor = entitlementService.isEntitledFor(accountId, role.getEntitledFor());
+        if (role.getBlockedUntilCDPVersion().isPresent() && !versionEnablesScaling && !entitledFor) {
+            throw new BadRequestException(String.format("'%s' service is not enabled to scale until CDP %s",
+                    role.name(), role.getBlockedUntilCDPVersion().get()));
+        } else if (role.getBlockedUntilCDPVersion().isEmpty() && !entitledFor) {
+            throw new BadRequestException(String.format("'%s' service is not enabled to scale",
+                    role.name()));
+        } else {
+            LOGGER.info("Account is entitled for {} so scaling is enabled.", role.getEntitledFor());
+        }
+    }
+
+    public boolean isVersionEnablesScaling(Versioned blueprintVersion, EntitledForServiceScale role) {
+        return role.getBlockedUntilCDPVersion().isPresent()
+                && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
     }
 }

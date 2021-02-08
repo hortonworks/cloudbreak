@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.cloud.model.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -21,6 +20,11 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
 
 @Service
@@ -41,7 +45,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
                 doStop(ac, resources, getStarted(statuses));
                 statuses = check(ac, vms);
                 logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
-                rebootedVmsStatus = doStart(ac,resources, getStopped(statuses));
+                rebootedVmsStatus = doStart(ac, resources, getStopped(statuses));
                 logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
             }
         } catch (Exception e) {
@@ -73,7 +77,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     private List<CloudVmInstanceStatus> doStart(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> instances) {
         List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
-        for (CloudInstance instance: instances) {
+        for (CloudInstance instance : instances) {
             try {
                 rebootedVmsStatus.addAll(start(ac, resources, List.of(instance)));
             } catch (Exception e) {
@@ -84,7 +88,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
     }
 
     private void doStop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> instances) {
-        for (CloudInstance instance: instances) {
+        for (CloudInstance instance : instances) {
             try {
                 stop(ac, resources, List.of(instance));
             } catch (Exception e) {
