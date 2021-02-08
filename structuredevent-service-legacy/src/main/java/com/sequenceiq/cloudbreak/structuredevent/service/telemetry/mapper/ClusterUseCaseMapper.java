@@ -28,6 +28,7 @@ public class ClusterUseCaseMapper {
         return useCase;
     }
 
+    //CHECKSTYLE:OFF: CyclomaticComplexity
     private UsageProto.CDPClusterStatus.Value firstStepToUseCaseMapping(String flowType) {
         UsageProto.CDPClusterStatus.Value useCase = UsageProto.CDPClusterStatus.Value.UNSET;
         switch (flowType) {
@@ -52,12 +53,19 @@ public class ClusterUseCaseMapper {
             case "SaltUpdateFlowConfig":
                 useCase = UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED;
                 break;
+            case "ClusterCertificateRenewFlowConfig":
+                useCase = UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_STARTED;
+                break;
+            case "CertRotationFlowConfig":
+                useCase = UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_STARTED;
+                break;
             default:
                 LOGGER.debug("Flow type: {}", flowType);
         }
         LOGGER.debug("Mapping flow type to use-case: {}, {}", flowType, useCase);
         return useCase;
     }
+    //CHECKSTYLE:ON
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
     private UsageProto.CDPClusterStatus.Value lastStepToUseCaseMapping(String flowState) {
@@ -117,6 +125,18 @@ public class ClusterUseCaseMapper {
             case "SALT_UPDATE_FAILED_STATE":
             case "CLUSTER_UPGRADE_FAILED_STATE":
                 useCase = UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED;
+                break;
+            case "CLUSTER_CERTIFICATE_RENEWAL_FINISHED_STATE":
+                useCase = UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FINISHED;
+                break;
+            case "CLUSTER_CERTIFICATE_RENEW_FAILED_STATE":
+                useCase = UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FAILED;
+                break;
+            case "CERT_ROTATION_FINISHED_STATE":
+                useCase = UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FINISHED;
+                break;
+            case "CERT_ROTATION_FAILED_STATE":
+                useCase = UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FAILED;
                 break;
             default:
                 LOGGER.debug("Flow state: {}", flowState);
