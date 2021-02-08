@@ -19,11 +19,13 @@ import javax.ws.rs.core.Response.Status.Family;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class LiftieResponseReaderTest {
 
     private static final String TEST_TARGET = "someCallDestination";
@@ -38,13 +40,12 @@ class LiftieResponseReaderTest {
     @BeforeEach
     void setUp() {
         underTest = new LiftieResponseReader();
-        MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    void testReadWhenResponseIsNullThenIllegalArgumentExceptionShouldCome() {
-        IllegalArgumentException expectedException = assertThrows(
-                IllegalArgumentException.class, () -> underTest.read(TEST_TARGET, null, GENERAL_TYPE_FOR_TEST));
+    void testReadWhenResponseIsNullThenIllegalStateExceptionShouldCome() {
+        IllegalStateException expectedException = assertThrows(
+                IllegalStateException.class, () -> underTest.read(TEST_TARGET, null, GENERAL_TYPE_FOR_TEST));
 
         assertEquals("Response should not be null!", expectedException.getMessage());
     }

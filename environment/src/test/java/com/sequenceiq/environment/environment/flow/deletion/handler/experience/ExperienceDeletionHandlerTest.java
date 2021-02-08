@@ -4,9 +4,10 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,10 +17,12 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -34,6 +37,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 
 import reactor.bus.Event;
 
+@ExtendWith(MockitoExtension.class)
 class ExperienceDeletionHandlerTest {
 
     private static final String TEST_ACCOUNT_ID = "someAccountId";
@@ -73,25 +77,23 @@ class ExperienceDeletionHandlerTest {
     @Captor
     private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEvent;
 
+    @InjectMocks
     private ExperienceDeletionHandler underTest;
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        lenient().when(mockEnvironmentDeletionDtoEvent.getHeaders()).thenReturn(mockEventHeaders);
+        lenient().when(mockEnvironmentDeletionDtoEvent.getData()).thenReturn(mockEnvironmentDeletionDto);
+        lenient().when(mockEnvironmentDeletionDto.getResourceId()).thenReturn(TEST_ENV_ID);
+        lenient().when(mockEnvironmentDeletionDto.getEnvironmentDto()).thenReturn(mockEnvironmentDto);
+        lenient().when(mockEnvironmentDeletionDto.isForceDelete()).thenReturn(true);
+        lenient().when(mockEnvironmentDto.getAccountId()).thenReturn(TEST_ACCOUNT_ID);
+        lenient().when(mockEnvironmentDto.getResourceCrn()).thenReturn(TEST_ENV_CRN);
+        lenient().when(mockEnvironmentDto.getName()).thenReturn(TEST_ENV_NAME);
+        lenient().when(mockEnvironmentDto.getId()).thenReturn(TEST_ENV_ID);
+        lenient().when(mockEnvironmentDto.getResourceId()).thenReturn(TEST_ENV_ID);
+        lenient().doAnswer(i -> null).when(mockEventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
 
-        when(mockEnvironmentDeletionDtoEvent.getHeaders()).thenReturn(mockEventHeaders);
-        when(mockEnvironmentDeletionDtoEvent.getData()).thenReturn(mockEnvironmentDeletionDto);
-        when(mockEnvironmentDeletionDto.getResourceId()).thenReturn(TEST_ENV_ID);
-        when(mockEnvironmentDeletionDto.getEnvironmentDto()).thenReturn(mockEnvironmentDto);
-        when(mockEnvironmentDto.getAccountId()).thenReturn(TEST_ACCOUNT_ID);
-        when(mockEnvironmentDto.getResourceCrn()).thenReturn(TEST_ENV_CRN);
-        when(mockEnvironmentDto.getName()).thenReturn(TEST_ENV_NAME);
-        when(mockEnvironmentDto.getId()).thenReturn(TEST_ENV_ID);
-        when(mockEnvironmentDto.getResourceId()).thenReturn(TEST_ENV_ID);
-
-        doAnswer(i -> null).when(mockEventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
-
-        underTest = new ExperienceDeletionHandler(mockEventSender, mockEntitlementService, mockEnvironmentService, mockEnvironmentExperienceDeletionAction);
     }
 
     @Test
@@ -107,7 +109,7 @@ class ExperienceDeletionHandlerTest {
 
         verify(mockEntitlementService, times(ONCE)).isExperienceDeletionEnabled(any());
         verify(mockEntitlementService, times(ONCE)).isExperienceDeletionEnabled(TEST_ACCOUNT_ID);
-        verify(mockEnvironmentExperienceDeletionAction, never()).execute(any());
+        verify(mockEnvironmentExperienceDeletionAction, never()).execute(any(), anyBoolean());
 
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
@@ -119,11 +121,10 @@ class ExperienceDeletionHandlerTest {
     @Test
     void testAcceptIfEntitlementServiceTellsExperienceDeletionEnabledIsEnabledButEnvironmentIsNotExistsForIdThenDeleteActionShouldNotHappen() {
         when(mockEntitlementService.isExperienceDeletionEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
-        when(mockEnvironmentService.findEnvironmentById(TEST_ENV_ID)).thenReturn(Optional.empty());
 
         underTest.accept(mockEnvironmentDeletionDtoEvent);
 
-        verify(mockEnvironmentExperienceDeletionAction, never()).execute(any());
+        verify(mockEnvironmentExperienceDeletionAction, never()).execute(any(), anyBoolean());
 
         EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
@@ -140,8 +141,8 @@ class ExperienceDeletionHandlerTest {
 
         underTest.accept(mockEnvironmentDeletionDtoEvent);
 
-        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(any());
-        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(env);
+        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(any(), anyBoolean());
+        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(env, true);
         verify(mockEventSender, times(ONCE)).sendEvent(any(EnvDeleteEvent.class), eq(mockEventHeaders));
         verify(mockEventSender, never()).sendEvent(any(EnvDeleteFailedEvent.class), any());
 
@@ -157,12 +158,13 @@ class ExperienceDeletionHandlerTest {
         Environment env = new Environment();
         when(mockEntitlementService.isExperienceDeletionEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(mockEnvironmentService.findEnvironmentById(TEST_ENV_ID)).thenReturn(Optional.of(env));
-        doThrow(new RuntimeException()).when(mockEnvironmentExperienceDeletionAction).execute(env);
+
+        doThrow(new RuntimeException()).when(mockEnvironmentExperienceDeletionAction).execute(any(Environment.class), anyBoolean());
 
         underTest.accept(mockEnvironmentDeletionDtoEvent);
 
-        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(any());
-        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(env);
+        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(any(), anyBoolean());
+        verify(mockEnvironmentExperienceDeletionAction, times(ONCE)).execute(env, true);
         verify(mockEventSender, times(ONCE)).sendEvent(any(EnvClusterDeleteFailedEvent.class), eq(mockEventHeaders));
         verify(mockEventSender, never()).sendEvent(any(EnvDeleteEvent.class), any());
 

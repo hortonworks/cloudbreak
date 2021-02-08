@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.experience.liftie.responses;
 
+import java.util.StringJoiner;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.annotations.ApiModel;
@@ -29,4 +31,11 @@ public class StatusMessage {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", StatusMessage.class.getSimpleName() + "[", "]")
+                .add("message='" + message + "'")
+                .add("status='" + status + "'")
+                .toString();
+    }
 }
