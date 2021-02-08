@@ -47,7 +47,7 @@ public interface InstanceConnector {
      * @param instanceIds          a VM instances that need to be rebooted.
      * @return status of instances
      */
-    List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> instanceIds);
+    List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> instanceIds);
 
     /**
      * Invoked to check whether the instances have already reached a StatusGroup.PERMANENT state.

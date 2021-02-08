@@ -192,7 +192,7 @@ public class TestApplicationContext {
                 .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         when(instanceConnector.stop(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STOPPED)));
-        when(instanceConnector.reboot(any(), any()))
+        when(instanceConnector.reboot(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         when(instanceConnector.getConsoleOutput(any(), eq(cloudInstance)))
                 .thenReturn(g.getSshFingerprint() + "    RSA/n-----END SSH HOST KEY FINGERPRINTS-----");

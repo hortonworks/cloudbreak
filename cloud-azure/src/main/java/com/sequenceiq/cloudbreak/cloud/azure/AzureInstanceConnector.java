@@ -69,7 +69,7 @@ public class AzureInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         LOGGER.info("Rebooting vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         List<Completable> completables = new ArrayList<>();

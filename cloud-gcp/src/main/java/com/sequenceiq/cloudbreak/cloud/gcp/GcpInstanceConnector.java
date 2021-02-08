@@ -3,7 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.cloud.model.*;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,10 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractInstanceConnector;
 
 @Service
@@ -33,8 +32,75 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
     private boolean verifyHostKey;
 
     @Override
-    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
-        throw new CloudOperationNotSupportedException("Reboot instances operation is not supported on GCP");
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
+        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
+
+        try {
+            if (!vms.isEmpty()) {
+                List<CloudVmInstanceStatus> statuses = check(ac, vms);
+                doStop(ac, resources, getStarted(statuses));
+                statuses = check(ac, vms);
+                logInvalidStatuses(getNotStopped(statuses), InstanceStatus.STOPPED);
+                rebootedVmsStatus = doStart(ac,resources, getStopped(statuses));
+                logInvalidStatuses(getNotStarted(statuses), InstanceStatus.STARTED);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to send reboot request to Google Cloud: ", e);
+            throw e;
+        }
+        return rebootedVmsStatus;
+    }
+
+    public void logInvalidStatuses(List<CloudVmInstanceStatus> instances, InstanceStatus targetStatus) {
+        if (CollectionUtils.isNotEmpty(instances)) {
+            StringBuilder warnMessage = new StringBuilder("Unable to reboot ");
+            warnMessage.append(instances.stream().map(instance -> String.format("instance %s because of invalid status %s",
+                    instance.getCloudInstance().getInstanceId(), instance.getStatus().toString())).collect(Collectors.joining(", ")));
+            warnMessage.append(String.format(". Instances should be in %s state.", targetStatus.toString()));
+            LOGGER.warn(warnMessage.toString());
+        }
+    }
+
+    private List<CloudVmInstanceStatus> getNotStarted(List<CloudVmInstanceStatus> statuses) {
+        return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STARTED)
+                .collect(Collectors.toList());
+    }
+
+    private List<CloudVmInstanceStatus> getNotStopped(List<CloudVmInstanceStatus> statuses) {
+        return statuses.stream().filter(status -> status.getStatus() != InstanceStatus.STOPPED)
+                .collect(Collectors.toList());
+    }
+
+    private List<CloudVmInstanceStatus> doStart(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> instances) {
+        List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
+        for (CloudInstance instance: instances) {
+            try {
+                rebootedVmsStatus.addAll(start(ac, resources, List.of(instance)));
+            } catch (Exception e) {
+                LOGGER.warn(String.format("Unable to start instance %s", instance), e);
+            }
+        }
+        return rebootedVmsStatus;
+    }
+
+    private void doStop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> instances) {
+        for (CloudInstance instance: instances) {
+            try {
+                stop(ac, resources, List.of(instance));
+            } catch (Exception e) {
+                LOGGER.warn(String.format("Unable to stop instance %s", instance), e);
+            }
+        }
+    }
+
+    private List<CloudInstance> getStopped(List<CloudVmInstanceStatus> statuses) {
+        return statuses.stream().filter(status -> status.getStatus() == InstanceStatus.STOPPED)
+                .map(status -> status.getCloudInstance()).collect(Collectors.toList());
+    }
+
+    private List<CloudInstance> getStarted(List<CloudVmInstanceStatus> statuses) {
+        return statuses.stream().filter(status -> status.getStatus() == InstanceStatus.STARTED)
+                .map(status -> status.getCloudInstance()).collect(Collectors.toList());
     }
 
     @Override

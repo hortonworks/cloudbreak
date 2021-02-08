@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
+import com.sequenceiq.freeipa.entity.Resource;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,10 +68,16 @@ public class RebootActions {
     private StackService stackService;
 
     @Inject
+    private ResourceService resourceService;
+
+    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Inject
+    private ResourceToCloudResourceConverter resourceToCloudResourceConverter;
 
     @Inject
     @Qualifier("conversionService")
@@ -93,7 +103,9 @@ public class RebootActions {
             protected Selectable createRequest(RebootContext context) {
                 List<CloudInstance> cloudInstances = context.getInstanceMetaDataList().stream().map(instanceMetaData ->
                         conversionService.convert(instanceMetaData, CloudInstance.class)).collect(Collectors.toList());
-                return new RebootInstancesRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
+                List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
+
+                return new RebootInstancesRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
 
             @Override
@@ -202,6 +214,11 @@ public class RebootActions {
                 payloadConverters.add(new RebootInstancesResultToCleanupFailureEventConverter());
             }
         };
+    }
+
+    private List<CloudResource> getCloudResources(Long stackId) {
+        List<Resource> resources = resourceService.findAllByStackId(stackId);
+        return resourceToCloudResourceConverter.convert(resources);
     }
 
 }
