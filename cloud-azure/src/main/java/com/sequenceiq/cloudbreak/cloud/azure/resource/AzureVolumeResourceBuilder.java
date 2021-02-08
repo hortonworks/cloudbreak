@@ -200,8 +200,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     @Override
-
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    @Retryable(value = RuntimeException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public CloudResource delete(AzureContext context, AuthenticatedContext auth, CloudResource resource) throws PreserveResourceException {
         LOGGER.info("Delete the disks from the instances if they are not reattached. {}", resource);
         VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(resource);

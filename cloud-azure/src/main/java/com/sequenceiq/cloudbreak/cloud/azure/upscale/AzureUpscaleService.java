@@ -114,7 +114,7 @@ public class AzureUpscaleService {
     public void rollbackInstances(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudResource> newInstances,
             List<CloudResource> templateResources, List<CloudResource> osDiskResources) {
         List<CloudInstance> newCloudInstances = newInstances.stream()
-                .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null))
+                .map(cloudResource -> new CloudInstance(cloudResource.getInstanceId(), null, null, cloudResource.getParameters()))
                 .collect(Collectors.toList());
         List<CloudResource> allRemovableResource = new ArrayList<>();
         allRemovableResource.addAll(templateResources);
