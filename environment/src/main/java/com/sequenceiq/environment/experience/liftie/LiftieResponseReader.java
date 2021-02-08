@@ -21,7 +21,7 @@ public class LiftieResponseReader implements ResponseReader {
 
     @Override
     public <T> Optional<T> read(String target, Response response, Class<T> expectedType) {
-        throwIfNull(response, () -> new IllegalArgumentException("Response should not be null!"));
+        throwIfNull(response, () -> new IllegalStateException("Response should not be null!"));
         T result = null;
         LOGGER.debug("Going to read response from the Liftie call");
         if (response.getStatusInfo().getFamily().equals(SUCCESSFUL)) {
