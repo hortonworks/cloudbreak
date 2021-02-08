@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.experience.liftie.responses;
 
+import java.util.StringJoiner;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -76,4 +78,15 @@ public class ClusterView {
         this.clusterStatus = clusterStatus;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ClusterView.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("clusterId='" + clusterId + "'")
+                .add("environmentCrn='" + environmentCrn + "'")
+                .add("accountId='" + accountId + "'")
+                .add("clusterType='" + clusterType + "'")
+                .add("clusterStatus=" + clusterStatus)
+                .toString();
+    }
 }
