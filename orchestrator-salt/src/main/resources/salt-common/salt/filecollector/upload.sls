@@ -17,7 +17,7 @@ filecollector_upload_to_cloud_storage:
 
 {% if filecollector.destination == "SUPPORT" %}
 
-{% if telemetry.cdpTelemetryVersion > 3 %}
+{% if filecollector.updatePackage or telemetry.cdpTelemetryVersion > 3 %}
     {% set extra_dbus_header_file_param = "-e /opt/cdp-telemetry/conf/extra-dbus-headers.yaml" %}
 {% else %}
     {% set extra_dbus_header_file_param = "" %}
