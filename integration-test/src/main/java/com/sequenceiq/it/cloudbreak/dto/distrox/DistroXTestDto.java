@@ -57,6 +57,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private GeneratedBlueprintV4Response generatedBlueprintV4Response;
 
+    private Optional<String> removableInstanceId = Optional.empty();
+
     @Inject
     private DistroXTestClient distroXTestClient;
 
@@ -272,5 +274,13 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public String getCrn() {
         return getResponse().getCrn();
+    }
+
+    public void setRemovableInstanceId(String removableInstanceId) {
+        this.removableInstanceId = Optional.of(removableInstanceId);
+    }
+
+    public Optional<String> getRemovableInstanceId() {
+        return removableInstanceId;
     }
 }

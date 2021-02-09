@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstalla
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDistributeListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDownloadListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeRuntimeListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.SilentCMDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
@@ -60,6 +61,10 @@ public class ClouderaManagerPollingServiceProvider {
     private static final int INFINITE_ATTEMPT = -1;
 
     private static final long POLL_FOR_15_MINUTES = TimeUnit.MINUTES.toSeconds(15);
+
+    private static final long POLL_FOR_5_MINUTES = TimeUnit.MINUTES.toSeconds(5);
+
+    private static final long POLL_FOR_10_MINUTES = TimeUnit.MINUTES.toSeconds(10);
 
     private static final long POLL_FOR_ONE_HOUR = TimeUnit.HOURS.toSeconds(1);
 
@@ -164,10 +169,19 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerApplyHostTemplateListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
     }
 
-    public PollingResult startPollingCmHostDecommissioning(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+    public PollingResult startPollingCmHostDecommissioning(Stack stack, ApiClient apiClient, BigDecimal commandId,
+            boolean onlyLostNodesAffected, int removableHostsCount) {
         LOGGER.debug("Waiting for Cloudera Manager to decommission host. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithAttemptListener(stack, apiClient, commandId, INFINITE_ATTEMPT,
-                new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
+        if (onlyLostNodesAffected) {
+            long timeout = POLL_FOR_10_MINUTES + removableHostsCount * POLL_FOR_5_MINUTES;
+            LOGGER.info("Cloudera Manager decommission host command will have {} minutes timeout, " +
+                    "since all affected nodes are already deleted from provider side.", TimeUnit.SECONDS.toMinutes(timeout));
+            return pollCommandWithTimeListener(stack, apiClient, commandId, timeout,
+                    new SilentCMDecommissionHostListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
+        } else {
+            return pollCommandWithAttemptListener(stack, apiClient, commandId, INFINITE_ATTEMPT,
+                    new ClouderaManagerDecommissionHostListenerTask(clouderaManagerApiPojoFactory, cloudbreakEventService));
+        }
     }
 
     public PollingResult startPollingCmManagementServiceStartup(Stack stack, ApiClient apiClient, BigDecimal commandId) {

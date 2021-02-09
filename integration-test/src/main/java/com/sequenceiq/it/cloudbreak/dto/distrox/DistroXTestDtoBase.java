@@ -1,9 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGro
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
 
@@ -43,11 +39,6 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
 
     public DistroXTestDtoBase<T> withEnvironmentName(String environmentName) {
         getRequest().setEnvironmentName(environmentName);
-        return this;
-    }
-
-    public DistroXTestDtoBase<T> withGatewayPort(Integer port) {
-        getRequest().setGatewayPort(port);
         return this;
     }
 
@@ -138,41 +129,10 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         return this;
     }
 
-    public DistroXTestDtoBase<T> withInternalSdx(String key) {
-        SdxInternalClusterRequest sdxInternalClusterRequest = getTestContext().get(key);
-
-        SdxV1Request sdxRequest = new SdxV1Request();
-        sdxRequest.setName(sdxInternalClusterRequest.getStackV4Request().getName());
-        return withSdx(sdxRequest);
-    }
-
     public DistroXTestDtoBase<T> withInstanceGroupsEntity(Collection<DistroXInstanceGroupTestDto> instanceGroups) {
         getRequest().setInstanceGroups(instanceGroups.stream()
                 .map(DistroXInstanceGroupTestDto::getRequest)
                 .collect(Collectors.toSet()));
-        return this;
-    }
-
-    public DistroXTestDtoBase<T> withDefaultInstanceGroups() {
-        return withInstanceGroups(DistroXInstanceGroupTestDto.class.getSimpleName());
-    }
-
-    public DistroXTestDtoBase<T> replaceInstanceGroups(String... keys) {
-        Stream.of(keys)
-                .map(this::getInstanceGroupV1Request)
-                .forEach(ig -> {
-                    List<InstanceGroupV1Request> instanceGroups = new ArrayList<>(getRequest().getInstanceGroups());
-                    getRequest().setInstanceGroups(new HashSet<>());
-                    for (int i = 0; i < instanceGroups.size(); i++) {
-                        InstanceGroupV1Request old = instanceGroups.get(i);
-                        if (old.getName().equals(ig.getName())) {
-                            getRequest().getInstanceGroups().add(ig);
-                        } else {
-                            getRequest().getInstanceGroups().add(old);
-                        }
-                    }
-
-                });
         return this;
     }
 
