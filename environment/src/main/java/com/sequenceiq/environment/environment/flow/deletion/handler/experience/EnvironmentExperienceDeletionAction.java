@@ -46,18 +46,25 @@ public class EnvironmentExperienceDeletionAction {
      */
     public void execute(Environment environment, boolean forceDelete) {
         EnvironmentExperienceDto environmentExperienceDto = createEnvironmentExperienceDto(environment);
-        if (callDelete(environmentExperienceDto, forceDelete)) {
+        if (isDeleteCallWasSuccessful(environmentExperienceDto, forceDelete)) {
             waitForResult(environment, forceDelete);
         }
     }
 
-    private boolean callDelete(EnvironmentExperienceDto environmentExperienceDto, boolean forceDelete) {
+    private boolean isDeleteCallWasSuccessful(EnvironmentExperienceDto environmentExperienceDto, boolean forceDelete) {
         try {
             experienceConnectorService.deleteConnectedExperiences(environmentExperienceDto);
             return true;
         } catch (IllegalArgumentException e) {
             LOGGER.debug("Rethrow IllegalArgumentException during experienceConnectorService.deleteConnectedExperiences", e);
             throw e;
+        } catch (IllegalStateException ise) {
+            if (!forceDelete) {
+                LOGGER.debug(IllegalStateException.class.getSimpleName() + " has occurred as the result of calling " +
+                        "experienceConnectorService.deleteConnectedExperiences!", ise);
+                throw new IllegalStateException("Unable to delete connected experience(s)!");
+            }
+            return false;
         } catch (RuntimeException e) {
             if (!forceDelete) {
                 LOGGER.debug("Rethrow exception during experienceConnectorService.deleteConnectedExperiences", e);
