@@ -1076,6 +1076,13 @@ message CDPEnvironmentDetails {
     }
 }
 
+message CDPFreeIPADetails {
+    // Number of nodes
+    int32 nodes = 1;
+    // Shows whether spot is used for any FreeIPA nodes
+    bool spot = 2;
+}
+
 // Azure specific environment details.
 message CDPEnvironmentAzureDetails {
     bool singleResourceGroup = 1;
@@ -1124,6 +1131,8 @@ message CDPEnvironmentRequested {
     CDPNetworkDetails networkDetails = 3;
     // Data collection metadata
     CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;
+    // FreeIPA metadata
+    CDPFreeIPADetails freeIPA = 5;
 }
 
 // Generated when Environment status has changed

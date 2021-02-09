@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,18 +11,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.reflect.Whitebox;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
-import com.sequenceiq.environment.network.dao.domain.RegistrationType;
-import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -49,6 +41,8 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
         Whitebox.setInternalState(operationDetailsConverter, "environmentRequestProcessingStepMapper", new EnvironmentRequestProcessingStepMapper());
         Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
+        Whitebox.setInternalState(underTest, "networkDetailsConverter", new EnvironmentDetailsToCDPNetworkDetailsConverter());
+        Whitebox.setInternalState(underTest, "freeIPADetailsConverter", new EnvironmentDetailsToCDPFreeIPADetailsConverter());
     }
 
     @Test
@@ -139,102 +133,6 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
 
         Assert.assertEquals("CLUSTER_PROXY",
                 environmentRequested.getEnvironmentDetails().getNetworkDetails().getConnectivity());
-    }
-
-    @Test
-    public void testConversionNetworkShouldReturnNetworkRelatedFields() {
-        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
-        cdpStructuredFlowEvent.setPayload(environmentDetails);
-
-        CloudSubnet privateSubnet = new CloudSubnet();
-        privateSubnet.setType(SubnetType.PRIVATE);
-
-        CloudSubnet dwxSubnet = new CloudSubnet();
-        dwxSubnet.setType(SubnetType.DWX);
-
-        CloudSubnet mlxSubnet = new CloudSubnet();
-        mlxSubnet.setType(SubnetType.MLX);
-
-        CloudSubnet publicSubnet1 = new CloudSubnet();
-        publicSubnet1.setType(SubnetType.PUBLIC);
-
-        CloudSubnet publicSubnet2 = new CloudSubnet();
-        publicSubnet2.setType(SubnetType.PUBLIC);
-
-        NetworkDto networkDto = NetworkDto.builder()
-                .withRegistrationType(RegistrationType.EXISTING)
-                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
-                .withSubnetMetas(Map.of(
-                        "1", dwxSubnet,
-                        "2", mlxSubnet,
-                        "3", publicSubnet1,
-                        "4", publicSubnet2,
-                        "5", privateSubnet
-                        )
-                )
-                .build();
-
-        when(environmentDetails.getNetwork()).thenReturn(networkDto);
-
-        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
-
-        Assert.assertEquals("EXISTING",
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getNetworkType());
-        Assert.assertEquals("ENABLED",
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getServiceEndpointCreation());
-        Assert.assertEquals("EXISTING",
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getNetworkType());
-        Assert.assertEquals(3,
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getNumberPrivateSubnets());
-        Assert.assertEquals(2,
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getNumberPublicSubnets());
-        Assert.assertEquals("DISABLED",
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getPublicEndpointAccessGateway());
-    }
-
-    @Test
-    public void testConversionPublicEndpointAccessGateway() {
-        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
-        cdpStructuredFlowEvent.setPayload(environmentDetails);
-
-        NetworkDto networkDto = NetworkDto.builder()
-                .withRegistrationType(RegistrationType.EXISTING)
-                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
-                .withUsePublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
-                .build();
-
-        when(environmentDetails.getNetwork()).thenReturn(networkDto);
-
-        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
-
-        Assert.assertEquals("ENABLED",
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getPublicEndpointAccessGateway());
-    }
-
-    @Test
-    public void testConversionProxyWhenProxyPresentedShouldReturnProxyTrue() {
-        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
-        cdpStructuredFlowEvent.setPayload(environmentDetails);
-
-        when(environmentDetails.getProxyConfigConfigured()).thenReturn(true);
-
-        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
-
-        Assert.assertEquals(true,
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getProxyDetails().getProxy());
-    }
-
-    @Test
-    public void testConversionProxyWhenProxyNotPresentedShouldReturnProxyFalse() {
-        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
-        cdpStructuredFlowEvent.setPayload(environmentDetails);
-
-        when(environmentDetails.getProxyConfigConfigured()).thenReturn(false);
-
-        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
-
-        Assert.assertEquals(false,
-                environmentRequested.getEnvironmentDetails().getNetworkDetails().getProxyDetails().getProxy());
     }
 
     @Test

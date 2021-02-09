@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -27,4 +28,6 @@ public interface EnvironmentDetails {
     boolean getProxyConfigConfigured();
 
     EnvironmentFeatures getEnvironmentTelemetryFeatures();
+
+    FreeIpaCreationDto getFreeIpaCreation();
 }

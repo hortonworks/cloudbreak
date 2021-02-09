@@ -99,6 +99,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.location = location;
     }
 
+    @Override
     public Long getId() {
         return id;
     }
@@ -107,6 +108,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.id = id;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -210,14 +212,17 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.network = network;
     }
 
+    @Override
     public String getAccountId() {
         return accountId;
     }
 
+    @Override
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
 
+    @Override
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -242,6 +247,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.creator = creator;
     }
 
+    @Override
     public FreeIpaCreationDto getFreeIpaCreation() {
         return freeIpaCreation;
     }
@@ -258,6 +264,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.authentication = authentication;
     }
 
+    @Override
     public String getStatusReason() {
         return statusReason;
     }
