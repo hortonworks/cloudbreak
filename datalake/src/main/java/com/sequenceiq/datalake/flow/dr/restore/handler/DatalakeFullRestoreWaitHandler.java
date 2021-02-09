@@ -9,7 +9,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeRestoreSuccessEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
@@ -36,7 +36,7 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
     private int durationInMinutes;
 
     @Inject
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Override
     public String selector() {
@@ -58,7 +58,7 @@ public class DatalakeFullRestoreWaitHandler extends ExceptionCatcherEventHandler
             LOGGER.info("Start polling datalake full restore status for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes,
                 TimeUnit.MINUTES);
-            sdxDatabaseDrService.waitForDatalakeDrRestoreOperation(sdxId, request.getOperationId(), request.getUserId(),
+            sdxBackupRestoreService.waitForDatalakeDrRestoreOperation(sdxId, request.getOperationId(), request.getUserId(),
                 pollingConfig, "Full restore");
             response = new DatalakeRestoreSuccessEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {

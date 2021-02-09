@@ -1,11 +1,17 @@
 package com.sequenceiq.datalake.service.sdx.dr;
 
+import java.util.UUID;
+
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.reset;
 
-import java.util.UUID;
-
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.datalake.entity.operation.SdxOperation;
+import com.sequenceiq.datalake.entity.operation.SdxOperationType;
+import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import org.assertj.core.util.Strings;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,7 +39,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 
 @ExtendWith(MockitoExtension.class)
 @RunWith(MockitoJUnitRunner.class)
-public class SdxDatabaseDrServiceTest {
+public class SdxBackupRestoreServiceTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String BACKUPID = UUID.randomUUID().toString();
@@ -56,8 +62,11 @@ public class SdxDatabaseDrServiceTest {
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
 
+    @Mock
+    private SdxOperationRepository sdxOperationRepository;
+
     @InjectMocks
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     private SdxCluster sdxCluster;
 
@@ -79,7 +88,7 @@ public class SdxDatabaseDrServiceTest {
     @Test
     public void triggerDatabaseBackupSuccess() {
         when(sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(Mockito.any(DatalakeDatabaseBackupStartEvent.class))).thenReturn(flowIdentifier);
-        SdxDatabaseBackupResponse backupResponse = sdxDatabaseDrService.triggerDatabaseBackup(sdxCluster, BACKUPID, BACKUPLOCATION);
+        SdxDatabaseBackupResponse backupResponse = sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, BACKUPID, BACKUPLOCATION);
         Assert.assertEquals(flowIdentifier, backupResponse.getFlowIdentifier());
         ArgumentCaptor<DatalakeDatabaseBackupStartEvent> eventArgumentCaptor = ArgumentCaptor.forClass(DatalakeDatabaseBackupStartEvent.class);
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseBackupFlow(eventArgumentCaptor.capture());
@@ -91,9 +100,35 @@ public class SdxDatabaseDrServiceTest {
     }
 
     @Test
+    public void testgetDatabaseBackupStatus() {
+        when(sdxOperationRepository.findSdxOperationByOperationId(Mockito.anyString())).thenReturn(null);
+        try {
+            sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, BACKUPID);
+            Assert.fail("Exception should have been thrown");
+        } catch (NotFoundException notFoundException) {
+            String exceptedMessage = String.format("Status with id: [%s] not found", BACKUPID);
+            Assert.assertEquals(exceptedMessage, notFoundException.getLocalizedMessage());
+        }
+
+        reset(sdxOperationRepository);
+        SdxOperation sdxOperation = new SdxOperation();
+        sdxOperation.setOperationType(SdxOperationType.RESTORE);
+        sdxOperation.setSdxClusterId(sdxCluster.getId());
+        sdxOperation.setOperationId(BACKUPID);
+        when(sdxOperationRepository.findSdxOperationByOperationId(Mockito.anyString())).thenReturn(sdxOperation);
+        try {
+            sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, BACKUPID);
+            Assert.fail("Exception should have been thrown");
+        } catch (CloudbreakApiException cloudbreakApiException) {
+            String exceptedMessage = String.format("Invalid operation-id: [%s]. provided", BACKUPID);
+            Assert.assertEquals(exceptedMessage, cloudbreakApiException.getLocalizedMessage());
+        }
+    }
+
+    @Test
     public void triggerDatabaseRestoreSuccess() {
         when(sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(Mockito.any(DatalakeDatabaseRestoreStartEvent.class))).thenReturn(flowIdentifier);
-        SdxDatabaseRestoreResponse restoreResponse = sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, BACKUPID, RESTOREID, BACKUPLOCATION);
+        SdxDatabaseRestoreResponse restoreResponse = sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, BACKUPID, RESTOREID, BACKUPLOCATION);
         Assert.assertEquals(flowIdentifier, restoreResponse.getFlowIdentifier());
         ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> eventArgumentCaptor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
         verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseRestoreFlow(eventArgumentCaptor.capture());

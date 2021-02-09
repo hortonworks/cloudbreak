@@ -8,7 +8,7 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFail
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgressEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
-import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
@@ -35,7 +35,7 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
     private int durationInMinutes;
 
     @Inject
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Override
     public String selector() {
@@ -56,7 +56,7 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
         try {
             LOGGER.info("Start polling datalake database restore for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
-            sdxDatabaseDrService.waitCloudbreakFlow(sdxId, pollingConfig, "Database restore");
+            sdxBackupRestoreService.waitCloudbreakFlow(sdxId, pollingConfig, "Database restore");
             response = new DatalakeFullRestoreInProgressEvent(sdxId, userId, request.getOperationId());
         } catch (UserBreakException userBreakException) {
             LOGGER.info("Database restore polling exited before timeout. Cause: ", userBreakException);

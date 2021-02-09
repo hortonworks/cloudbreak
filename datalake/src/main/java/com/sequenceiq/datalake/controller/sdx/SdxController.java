@@ -17,6 +17,7 @@ import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -36,7 +37,7 @@ import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRotationService;
-import com.sequenceiq.datalake.service.sdx.dr.SdxDatabaseDrService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -52,6 +53,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 
 @Controller
 public class SdxController implements SdxEndpoint {
@@ -81,7 +84,7 @@ public class SdxController implements SdxEndpoint {
     private SdxMetricService metricService;
 
     @Inject
-    private SdxDatabaseDrService sdxDatabaseDrService;
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     @Inject
     private RangerCloudIdentityService rangerCloudIdentityService;
@@ -262,7 +265,31 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupResponse backupDatabaseByName(@ResourceName String name, String backupId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxDatabaseDrService.triggerDatabaseBackup(sdxCluster, backupId, backupLocation);
+        try {
+            SdxDatabaseBackupStatusResponse response = sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, backupId);
+            SdxDatabaseBackupResponse sdxDatabaseBackupResponse = new SdxDatabaseBackupResponse();
+            sdxDatabaseBackupResponse.setOperationId(backupId);
+            return sdxDatabaseBackupResponse;
+        } catch (NotFoundException notFoundException) {
+            return sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupId, backupLocation);
+        }
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxBackupResponse backupDatalakeByName(@ResourceName String name, String backupLocation,
+                                                        String backupName) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster, backupLocation, backupName);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
+    public SdxBackupStatusResponse backupDatalakeStatusByName(@ResourceName String name,
+                                                        String backupId,
+                                                        String backupName) {
+        return sdxBackupRestoreService.getDatalakeBackupStatus(name, backupId, backupName,
+                ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Override
@@ -270,21 +297,21 @@ public class SdxController implements SdxEndpoint {
     public SdxDatabaseRestoreResponse restoreDatabaseByName(@ResourceName String name, String backupId,
                                                             String restoreId, String backupLocation) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxDatabaseDrService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation);
+        return sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, backupId, restoreId, backupLocation);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.BACKUP_DATALAKE)
     public SdxDatabaseBackupStatusResponse getBackupDatabaseStatusByName(@ResourceName String name, String operationId) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxDatabaseDrService.getDatabaseBackupStatus(sdxCluster, operationId);
+        return sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, operationId);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESTORE_DATALAKE)
     public SdxDatabaseRestoreStatusResponse getRestoreDatabaseStatusByName(@ResourceName String name, String operationId) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        return sdxDatabaseDrService.getDatabaseRestoreStatus(sdxCluster, operationId);    }
+        return sdxBackupRestoreService.getDatabaseRestoreStatus(sdxCluster, operationId);    }
 
     @Override
     @InternalOnly

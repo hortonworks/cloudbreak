@@ -13,6 +13,12 @@ public class DatalakeDatabaseDrStartBaseEvent extends SdxEvent  {
         drStatus = new SdxOperation(operationType, sdxId);
     }
 
+    public DatalakeDatabaseDrStartBaseEvent(String selector, String userId,
+                                            SdxOperation drStatus) {
+        super(selector, drStatus.getSdxClusterId(), userId);
+        this.drStatus = drStatus;
+    }
+
     public SdxOperation getDrStatus() {
         return drStatus;
     }

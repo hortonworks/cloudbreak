@@ -39,6 +39,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
+import com.sequenceiq.sdx.api.model.SdxBackupResponse;
+import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -182,6 +184,22 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list advertised datalake versions", produces = MediaType.APPLICATION_JSON, nickname = "advertisedruntimes")
     List<AdvertisedRuntime> advertisedRuntimes(@QueryParam("cloudPlatform") String cloudPlatform);
+
+    @POST
+    @Path("{name}/backupDatalake")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "backup the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalake")
+    SdxBackupResponse backupDatalakeByName(@PathParam("name") String name,
+            @QueryParam("backupLocation") String backupLocation,
+            @QueryParam("backupName") String backupName);
+
+    @POST
+    @Path("{name}/backupDatalakeStatus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "backup status of the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalakeStatus")
+    SdxBackupStatusResponse backupDatalakeStatusByName(@PathParam("name") String name,
+            @QueryParam("backupId") String backupId,
+            @QueryParam("backupName") String backupName);
 
     @POST
     @Path("{name}/backupDatabase")
