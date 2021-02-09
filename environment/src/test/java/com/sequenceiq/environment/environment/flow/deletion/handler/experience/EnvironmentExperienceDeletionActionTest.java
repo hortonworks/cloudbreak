@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -34,6 +36,12 @@ class EnvironmentExperienceDeletionActionTest {
 
     private static final String FAILURE_BASIC_MSG = "Failed to delete Experience!";
 
+    private static final String GENERIC_TEST_EXCEPTION_MESSAGE = "something bad";
+
+    private static final boolean NO_FORCE_DELETE = false;
+
+    private static final boolean FORCE_DELETE = true;
+
     private static final int ONCE = 1;
 
     @Mock
@@ -60,7 +68,7 @@ class EnvironmentExperienceDeletionActionTest {
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
                 .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
-        underTest.execute(new Environment(), false);
+        underTest.execute(new Environment(), NO_FORCE_DELETE);
 
         verify(mockExperienceConnectorService, times(ONCE)).deleteConnectedExperiences(any());
         verify(mockExperienceConnectorService, times(ONCE)).deleteConnectedExperiences(any(EnvironmentExperienceDto.class));
@@ -78,7 +86,7 @@ class EnvironmentExperienceDeletionActionTest {
                 .thenReturn(pollingResult);
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
-                () -> underTest.execute(new Environment(), false));
+                () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
 
         assertNotNull(expectedException);
         assertEquals(FAILURE_BASIC_MSG, expectedException.getMessage());
@@ -101,7 +109,7 @@ class EnvironmentExperienceDeletionActionTest {
                 .thenReturn(pollingResult);
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
-                () -> underTest.execute(new Environment(), false));
+                () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
 
         assertNotNull(expectedException);
         assertEquals(expectedExceptionMessage, expectedException.getMessage());
@@ -120,7 +128,7 @@ class EnvironmentExperienceDeletionActionTest {
                 eq(1)))
                 .thenReturn(pollingResult);
 
-        underTest.execute(new Environment(), true);
+        underTest.execute(new Environment(), FORCE_DELETE);
 
         verify(mockExperiencePollingFailureResolver, never()).getMessageForFailure(any());
     }
@@ -129,7 +137,7 @@ class EnvironmentExperienceDeletionActionTest {
     void testForceDeleteWitExperienceConnectorNonArgumentErrorShouldNotThrow() {
         doThrow(new IllegalStateException()).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
 
-        underTest.execute(new Environment(), true);
+        underTest.execute(new Environment(), FORCE_DELETE);
 
         verify(mockExperiencePollingFailureResolver, never()).getMessageForFailure(any());
     }
@@ -138,7 +146,7 @@ class EnvironmentExperienceDeletionActionTest {
     void testNotForcedDeleteWitExperienceConnectorNonArgumentErrorShouldRethrow() {
         doThrow(new IllegalStateException()).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
 
-        assertThatThrownBy(() -> underTest.execute(new Environment(), false))
+        assertThatThrownBy(() -> underTest.execute(new Environment(), NO_FORCE_DELETE))
                 .isExactlyInstanceOf(IllegalStateException.class);
 
         verify(mockExperiencePollingFailureResolver, never()).getMessageForFailure(any());
@@ -148,9 +156,40 @@ class EnvironmentExperienceDeletionActionTest {
     void testForceDeleteWitExperienceConnectorArgumentErrorShouldRethrow() {
         doThrow(new IllegalArgumentException()).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
 
-        assertThatThrownBy(() -> underTest.execute(new Environment(), true))
+        assertThatThrownBy(() -> underTest.execute(new Environment(), FORCE_DELETE))
             .isExactlyInstanceOf(IllegalArgumentException.class);
 
         verify(mockExperiencePollingFailureResolver, never()).getMessageForFailure(any());
     }
+
+    @Test
+    void testWhenDeletionThrowsRuntimeExceptionOtherThanIllegalStateAndArgumentExceptionWithoutForceDeleteThenItShouldBeRethrown() {
+        RuntimeException expectedException = new RuntimeException(GENERIC_TEST_EXCEPTION_MESSAGE);
+        doThrow(expectedException).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
+
+        RuntimeException resultException = assertThrows(RuntimeException.class, () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
+
+        assertEquals(expectedException, resultException);
+        assertEquals(expectedException.getMessage(), resultException.getMessage());
+
+        verify(mockExperienceConnectorService, times(ONCE)).deleteConnectedExperiences(any(EnvironmentExperienceDto.class));
+    }
+
+    @Test
+    void testWhenDeletionThrowsRuntimeExceptionOtherThanIllegalStateAndArgumentExceptionWithForceDeleteFalseShouldReturn() {
+        doThrow(new RuntimeException(GENERIC_TEST_EXCEPTION_MESSAGE)).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
+
+        underTest.execute(new Environment(), FORCE_DELETE);
+
+        verify(mockExperienceConnectorService, times(ONCE)).deleteConnectedExperiences(any(EnvironmentExperienceDto.class));
+        verify(mockExperiencePollingService, never())
+                .pollWithTimeout(
+                        any(ExperienceDeletionRetrievalTask.class),
+                        any(ExperiencePollerObject.class),
+                        anyLong(),
+                        anyInt(),
+                        anyInt()
+                );
+    }
+
 }
