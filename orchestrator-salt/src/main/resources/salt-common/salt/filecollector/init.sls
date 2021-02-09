@@ -81,7 +81,7 @@ fail_if_telemetry_rpm_is_not_installed:
     - mode: '0750'
     - failhard: True
 
-{% if telemetry.cdpTelemetryVersion > 3 and filecollector.destination == "SUPPORT" %}
+{% if (filecollector.updatePackage or telemetry.cdpTelemetryVersion > 3) and filecollector.destination == "SUPPORT" %}
 /opt/cdp-telemetry/conf/extra-dbus-headers.yaml:
    file.managed:
     - source: salt://filecollector/template/extra-dbus-headers.yaml.j2
