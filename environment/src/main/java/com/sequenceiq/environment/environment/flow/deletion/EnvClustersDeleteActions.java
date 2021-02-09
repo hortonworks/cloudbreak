@@ -74,15 +74,15 @@ public class EnvClustersDeleteActions {
         };
     }
 
-    @Bean(name = "XP_DELETE_STARTED_STATE")
+    @Bean(name = "EXPERIENCE_DELETE_STARTED_STATE")
     public Action<?, ?> experienceDeleteAction() {
         return new AbstractEnvClustersDeleteAction<>(EnvDeleteEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
                 EnvironmentDto envDto = environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
-                        EnvironmentStatus.XP_DELETE_IN_PROGRESS,
-                        ResourceEvent.ENVIRONMENT_XP_DELETION_STARTED,
-                        EnvClustersDeleteState.XP_DELETE_STARTED_STATE);
+                        EnvironmentStatus.EXPERIENCE_DELETE_IN_PROGRESS,
+                        ResourceEvent.ENVIRONMENT_EXPERIENCE_DELETION_STARTED,
+                        EnvClustersDeleteState.EXPERIENCE_DELETE_STARTED_STATE);
                 EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
                         .withEnvironmentDto(envDto)
                         .withForceDelete(payload.isForceDelete())

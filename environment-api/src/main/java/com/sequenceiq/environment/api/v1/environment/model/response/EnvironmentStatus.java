@@ -22,7 +22,7 @@ public enum EnvironmentStatus {
     FREEIPA_CREATION_IN_PROGRESS("Free IPA creation in progress"),
     FREEIPA_DELETE_IN_PROGRESS("Free IPA deletion in progress"),
 
-    XP_DELETE_IN_PROGRESS("Experience delete in progress"),
+    EXPERIENCE_DELETE_IN_PROGRESS("Experience deletion in progress"),
 
     CLUSTER_DEFINITION_CLEANUP_PROGRESS("Cleaning up cluster definitions"),
 
@@ -138,7 +138,7 @@ public enum EnvironmentStatus {
             DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
             DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
             PUBLICKEY_DELETE_IN_PROGRESS,
-            XP_DELETE_IN_PROGRESS
+            EXPERIENCE_DELETE_IN_PROGRESS
     );
 
     private String description;
