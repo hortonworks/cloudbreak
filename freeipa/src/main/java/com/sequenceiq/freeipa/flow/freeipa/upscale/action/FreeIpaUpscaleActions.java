@@ -64,10 +64,12 @@ import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesRequest;
@@ -376,6 +378,32 @@ public class FreeIpaUpscaleActions {
                         .collect(Collectors.toList());
                 setUpscaleHosts(variables, hosts);
                 sendEvent(context, UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_ORCHESTRATOR_CONFIG_STATE")
+    public Action<?, ?> orchestratorConfig() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Configuring the orchestrator");
+                OrchestratorConfigRequest request = new OrchestratorConfigRequest(stack.getId());
+                sendEvent(context, request.selector(), request);
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_VALIDATING_CLOUD_STORAGE_STATE")
+    public Action<?, ?> validateFreeIpaCloudStorage() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Validating cloud storage");
+                ValidateCloudStorageRequest request = new ValidateCloudStorageRequest(stack.getId());
+                sendEvent(context, request.selector(), request);
             }
         };
     }
