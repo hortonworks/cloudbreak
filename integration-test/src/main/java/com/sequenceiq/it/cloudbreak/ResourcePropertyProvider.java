@@ -14,7 +14,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 @Component
 public class ResourcePropertyProvider {
 
-    private static final int MAX_LENGTH = 40;
+    private static final int MAX_LENGTH = 19;
 
     private static final int ENVIRONMENT_NAME_MAX_LENGTH = 28;
 
