@@ -22,7 +22,7 @@ public enum EnvironmentStatus {
     FREEIPA_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS),
     FREEIPA_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_DELETE_IN_PROGRESS),
 
-    XP_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.XP_DELETE_IN_PROGRESS),
+    EXPERIENCE_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.EXPERIENCE_DELETE_IN_PROGRESS),
 
     RDBMS_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.RDBMS_DELETE_IN_PROGRESS),
 
@@ -99,7 +99,7 @@ public enum EnvironmentStatus {
                 DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
                 DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
                 PUBLICKEY_DELETE_IN_PROGRESS,
-                XP_DELETE_IN_PROGRESS
+                EXPERIENCE_DELETE_IN_PROGRESS
         ).contains(this);
     }
 
