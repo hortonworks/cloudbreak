@@ -259,14 +259,6 @@
                 "value": "ranger-provider"
               },
               {
-                "name": "xml.providers.flowPersistenceProvider.file-provider.enabled",
-                "value": "false"
-              },
-              {
-                "name": "xml.providers.flowPersistenceProvider.database-provider.enabled",
-                "value": "true"
-              },
-              {
                 "name": "nifi.registry.properties.ignored",
                 "value": "nifi.registry.security.identity.provider,nifi.registry.kerberos.spnego.principal,nifi.registry.kerberos.spnego.keytab.location,nifi.registry.kerberos.spnego.authentication.expiration"
               },
