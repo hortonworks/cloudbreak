@@ -46,6 +46,7 @@
     <suppress files="com[\\/]sequenceiq[\\/]mock[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="client[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="api[\\/]" checks="ExecutableStatementCount"/>
+    <suppress files="BlueprintTestBase" checks="LineLength"/>
 
     <!-- suppressing checks in application runner classes -->
     <suppress id="sysout" files="VersionedApplication.java"/>
