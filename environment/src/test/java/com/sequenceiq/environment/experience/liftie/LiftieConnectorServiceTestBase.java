@@ -21,14 +21,14 @@ import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
 
 @ExtendWith(MockitoExtension.class)
-class LiftieConnectorTestBase {
+class LiftieConnectorServiceTestBase {
 
     protected static final int ONCE = 1;
 
     protected static final String LIFTIE_CLUSTER_ENDPOINT_PATH = "somewhereOverTheRainbow";
 
     @InjectMocks
-    private LiftieConnector underTest;
+    private LiftieConnectorService underTest;
 
     @Mock
     private InvocationBuilderProvider mockInvocationBuilderProvider;
@@ -62,7 +62,7 @@ class LiftieConnectorTestBase {
 
     }
 
-    protected LiftieConnector getUnderTest() {
+    protected LiftieConnectorService getUnderTest() {
         return underTest;
     }
 

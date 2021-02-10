@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -29,6 +30,9 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
 
     private final EnvironmentExperienceDeletionAction environmentExperienceDeletionAction;
 
+    @Value("${environment.experience.scan.enabled}")
+    private boolean experienceDeletionEnabled;
+
     protected ExperienceDeletionHandler(EventSender eventSender, EntitlementService entitlementService, EnvironmentService environmentService,
             EnvironmentExperienceDeletionAction environmentExperienceDeletionAction) {
         super(eventSender);
@@ -49,9 +53,13 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
         EnvironmentDto envDto = environmentDeletionDtoEvent.getData().getEnvironmentDto();
 
         try {
-            if (entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())) {
-                environmentService.findEnvironmentById(envDto.getId())
-                        .ifPresent(environment -> environmentExperienceDeletionAction.execute(environment, environmentDeletionDto.isForceDelete()));
+            if (experienceDeletionEnabled) {
+                if (entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())) {
+                    environmentService.findEnvironmentById(envDto.getId())
+                            .ifPresent(environment -> environmentExperienceDeletionAction.execute(environment, environmentDeletionDto.isForceDelete()));
+                }
+            } else {
+                LOGGER.debug("Experience deletion is disabled by Spring config.");
             }
             EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDeletionDto);
             eventSender().sendEvent(envDeleteEvent, environmentDeletionDtoEvent.getHeaders());
