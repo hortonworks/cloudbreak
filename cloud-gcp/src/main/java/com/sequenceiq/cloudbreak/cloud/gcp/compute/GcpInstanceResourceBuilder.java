@@ -446,18 +446,19 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Compute compute = context.getCompute();
         String instanceId = instance.getInstanceId();
         try {
+            LOGGER.info("Gcp operations are preparing: instanceId: {}, projectId: {}, availabilityZone: {}", instanceId, projectId, availabilityZone);
             Get get = compute.instances().get(projectId, availabilityZone, instanceId);
-            String state = stopRequest ? "RUNNING" : "TERMINATED";
             Instance instanceResponse = get.execute();
-            if (state.equals(instanceResponse.getStatus())) {
-                Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()
-                        : executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());
-                CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
-                return new CloudVmInstanceStatus(operationAwareCloudInstance, InstanceStatus.IN_PROGRESS);
+            Operation operation;
+            if (stopRequest) {
+                LOGGER.info("Stop operation executed");
+                operation = compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
             } else {
-                LOGGER.debug("Instance {} is not in {} state - won't start it.", state, instanceId);
-                return null;
+                LOGGER.info("Start operation executed");
+                operation = executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());
             }
+            CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
+            return new CloudVmInstanceStatus(operationAwareCloudInstance, InstanceStatus.IN_PROGRESS);
         } catch (TokenResponseException e) {
             throw getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
