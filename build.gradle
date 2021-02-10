@@ -235,6 +235,14 @@ subprojects {
         buildVersion = project.version
       }
     }
+    if (project.name in ['freeipa-client']) {
+      buildInfo.configure {
+        destination = file("$project.buildDir")
+        basename = project.jar.baseName
+        buildVersion = project.version
+        version = project.version
+      }
+    }
   }
 
   compileJava {
