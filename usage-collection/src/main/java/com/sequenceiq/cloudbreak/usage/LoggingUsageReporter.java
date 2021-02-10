@@ -104,6 +104,22 @@ public class LoggingUsageReporter implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpDatalakeSync(UsageProto.CDPDatalakeSync details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpDatalakeSync(details)
+                .build());
+    }
+
+    @Override
+    public void cdpDatahubSync(UsageProto.CDPDatahubSync details) {
+        checkNotNull(details);
+        log(eventBuilder()
+                .setCdpDatahubSync(details)
+                .build());
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

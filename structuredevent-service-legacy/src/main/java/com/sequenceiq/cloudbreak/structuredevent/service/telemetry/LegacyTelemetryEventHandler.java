@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.LegacyTelemetryEventLogger;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.cluster.ClusterSyncLogger;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
@@ -22,6 +24,9 @@ public class LegacyTelemetryEventHandler<T extends StructuredEvent> implements E
 
     @Inject
     private List<LegacyTelemetryEventLogger> legacyTelemetryEventLoggers;
+
+    @Inject
+    private ClusterSyncLogger clusterSyncLogger;
 
     @Override
     public String selector() {
@@ -38,6 +43,9 @@ public class LegacyTelemetryEventHandler<T extends StructuredEvent> implements E
                 for (LegacyTelemetryEventLogger legacyTelemetryEventLogger : legacyTelemetryEventLoggers) {
                     legacyTelemetryEventLogger.log(flowEvent);
                 }
+            } else if (data instanceof StructuredSyncEvent) {
+                StructuredSyncEvent syncEvent = (StructuredSyncEvent) data;
+                clusterSyncLogger.log(syncEvent);
             }
         } catch (Exception e) {
             LOGGER.warn("Cannot perform sending telemetry log!", e);
