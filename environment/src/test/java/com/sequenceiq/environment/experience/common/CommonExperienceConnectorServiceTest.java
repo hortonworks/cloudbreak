@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.net.URI;
+import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -19,7 +20,6 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
+import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
 import com.sequenceiq.environment.experience.common.responses.DeleteCommonExperienceWorkspaceResponse;
 
@@ -79,6 +80,9 @@ class CommonExperienceConnectorServiceTest {
     void testGetWorkspaceNamesConnectedToEnvShouldObtainWebTargetFromCreator() {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
 
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
+
         underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(any(), any());
@@ -86,9 +90,29 @@ class CommonExperienceConnectorServiceTest {
     }
 
     @Test
+    void testGetWorkspaceNamesConnectedToEnvShouldReturnTheNameOfClustersFromTheCallResult() {
+        CpInternalEnvironmentResponse response = createCpInternalEnvironmentResponse();
+
+        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(response));
+
+        Set<String> result = underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+
+        assertEquals(response.getResults().size(), result.size());
+        response.getResults()
+                .stream()
+                .map(cluster -> cluster.getName())
+                .forEach(clusterName -> assertTrue(result.contains(clusterName)));
+    }
+
+    @Test
     void testGetWorkspaceNamesConnectedToEnvShouldObtainInvocationBuilderFromCreator() {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
+
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
         underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
@@ -101,6 +125,9 @@ class CommonExperienceConnectorServiceTest {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
 
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
+
         underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockRetryableWebTarget, times(ONCE)).get(any());
@@ -108,15 +135,15 @@ class CommonExperienceConnectorServiceTest {
     }
 
     @Test
-    void testGetWorkspaceNamesConnectedToEnvWhenCallResultIsEmptyThenEmptyOptionalShouldReturn() {
+    void testGetWorkspaceNamesConnectedToEnvWhenCallResultIsEmptyThenIllegalStateExceptionShouldBeThrown() {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(null);
 
-        Set<String> result = underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
+                () -> underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
     }
 
     @Test
@@ -124,6 +151,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
         underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
@@ -138,9 +166,10 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class)).thenReturn(Optional.empty());
 
-        Set<String> result = underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
+                () -> underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
-        assertTrue(CollectionUtils.isEmpty(result));
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
     }
 
     @Test
@@ -158,15 +187,15 @@ class CommonExperienceConnectorServiceTest {
     }
 
     @Test
-    void testGetWorkspaceNamesConnectedToEnvWhenCallExecutionThrowsExceptionThenEmptyResultShouldReturn() {
+    void testGetWorkspaceNamesConnectedToEnvWhenCallExecutionThrowsExceptionThenIllegalStateExceptionShouldBeThrown() {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenThrow(new RuntimeException());
 
-        Set<String> result = underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
+                () -> underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
-        assertTrue(CollectionUtils.isEmpty(result));
-
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
         verify(mockCommonExperienceResponseReader, never()).read(any(), any(), any());
     }
 
@@ -273,6 +302,24 @@ class CommonExperienceConnectorServiceTest {
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
 
         verify(mockCommonExperienceResponseReader, never()).read(any(), any(), any());
+    }
+
+    private CpInternalEnvironmentResponse createCpInternalEnvironmentResponse() {
+        CpInternalEnvironmentResponse response = new CpInternalEnvironmentResponse();
+        response.setResults(createCpInternalClusters(5));
+        return response;
+    }
+
+    private Set<CpInternalCluster> createCpInternalClusters(int quantity) {
+        Set<CpInternalCluster> clusters = new LinkedHashSet<>(quantity);
+        for (int i = 0; i < quantity; i++) {
+            CpInternalCluster c = new CpInternalCluster();
+            c.setName("cluster_" + i);
+            c.setStatus("AVAILABLE");
+            c.setCrn("cluster_" + i + "_crn");
+            clusters.add(c);
+        }
+        return clusters;
     }
 
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.experience.common;
 
-import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -55,9 +54,10 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         if (result.isPresent()) {
             Optional<CpInternalEnvironmentResponse> response = responseReader
                     .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
-            return response.map(CommonExperienceConnectorService::getExperienceNamesFromListResponse).orElseGet(Set::of);
+            return response.map(CommonExperienceConnectorService::getExperienceNamesFromListResponse)
+                    .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
         }
-        return Collections.emptySet();
+        throw new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
 
     @NotNull
