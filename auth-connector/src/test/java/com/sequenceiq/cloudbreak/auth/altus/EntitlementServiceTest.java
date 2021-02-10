@@ -114,9 +114,6 @@ class EntitlementServiceTest {
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 
-                {"CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK", (EntitlementCheckFunction) EntitlementService::embeddedDatabaseOnAttachedDiskEnabled, false},
-                {"CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK", (EntitlementCheckFunction) EntitlementService::embeddedDatabaseOnAttachedDiskEnabled, true},
-
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
 

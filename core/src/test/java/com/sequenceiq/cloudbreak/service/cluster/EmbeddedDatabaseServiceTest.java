@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
@@ -32,9 +31,6 @@ public class EmbeddedDatabaseServiceTest {
     private static final String CLOUDPLATFORM = "cloudplatform";
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private CloudParameterCache cloudParameterCache;
 
     @InjectMocks
@@ -44,7 +40,6 @@ public class EmbeddedDatabaseServiceTest {
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabled() {
         // GIVEN
         Stack stack = createStack(1);
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
         Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(true);
         // WHEN
         boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
@@ -56,7 +51,6 @@ public class EmbeddedDatabaseServiceTest {
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenAttachedDiskEntitlementIsEnabledButNoDisksAttachedSupported() {
         // GIVEN
         Stack stack = createStack(0);
-        Mockito.when(entitlementService.embeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID)).thenReturn(true);
         Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(false);
         // WHEN
         boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
