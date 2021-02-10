@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
@@ -37,12 +36,10 @@ public class EmbeddedDatabaseConfigProvider {
     public Map<String, Object> collectEmbeddedDatabaseConfigs(Stack stack) {
         Map<String, Object> result;
         if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)) {
-            LOGGER.info("Attached disk will be used to store data for postgres sql server, as '{}' entitlement is enabled",
-                    Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
+            LOGGER.info("Attached disk will be used to store data for postgres sql server");
             result = createEmbeddedDbOnAttachedDiskConfig();
         } else {
-            LOGGER.info("Default settings for data storage will be used for postgres sql server, as '{}' entitlement is disabled or no disks attached",
-                    Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK);
+            LOGGER.info("Default settings for data storage will be used for postgres sql server as no disks are attached");
             result = Map.of(
                     POSTGRES_DIRECTORY_KEY, POSTGRES_DEFAULT_DIRECTORY,
                     POSTGRES_LOG_DIRECTORY_KEY, POSTGRES_DEFAULT_LOG_DIRECTORY,
