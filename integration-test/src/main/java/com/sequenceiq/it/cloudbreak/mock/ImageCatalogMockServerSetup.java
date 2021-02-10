@@ -78,6 +78,15 @@ public class ImageCatalogMockServerSetup {
                 cdhRuntime);
     }
 
+    public String getFreeIpaImageCatalogUrlWitdDefaultImageUuid(String defaultImageUuid) {
+        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s",
+                mockImageCatalogServer,
+                "freeipa-catalog",
+                cbVersion,
+                cdhRuntime,
+                defaultImageUuid);
+    }
+
     public String getImageCatalogUrl() {
         return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s",
                 mockImageCatalogServer,
@@ -92,6 +101,15 @@ public class ImageCatalogMockServerSetup {
                 "catalog-with-prewarmed",
                 cbVersion,
                 cdhRuntime);
+    }
+
+    public String getPreWarmedImageCatalogUrlWithDefaultImageUuid(String defaultImageUuid) {
+        return String.format("http://%s/thunderhead/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s",
+                mockImageCatalogServer,
+                "catalog-with-prewarmed",
+                cbVersion,
+                cdhRuntime,
+                defaultImageUuid);
     }
 
     public String getPreWarmedImageCatalogUrlWithCmAndCdhVersions(String cmVersion, String cdhVersion) {

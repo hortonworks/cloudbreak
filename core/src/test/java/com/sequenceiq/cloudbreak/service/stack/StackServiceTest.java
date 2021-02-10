@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -33,7 +35,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -291,5 +295,23 @@ public class StackServiceTest {
         Set<AutoscaleStack> stackSet = aliveStackCaptor.getValue();
         assertNotNull(stackSet);
         assertEquals(availableStack.getStackStatus(), stackSet.iterator().next().getStackStatus());
+    }
+
+    @Test
+    public void testGetImagesOfAliveStacksWithValidImage() {
+        when(stackRepository.findImagesOfAliveStacks())
+                .thenReturn(List.of(new Json("{\"imageName\":\"mockimage/hdc-hdp--1710161226.tar.gz\"}")));
+
+        final List<Image> result = underTest.getImagesOfAliveStacks();
+
+        assertEquals("mockimage/hdc-hdp--1710161226.tar.gz", result.get(0).getImageName());
+    }
+
+    @Test
+    public void testGetImagesOfAliveStacksWithInvalidImage() {
+        when(stackRepository.findImagesOfAliveStacks())
+                .thenReturn(List.of(new Json("[]")));
+
+        assertThrows("Could not deserialize image from string []", IllegalStateException.class, () -> underTest.getImagesOfAliveStacks());
     }
 }

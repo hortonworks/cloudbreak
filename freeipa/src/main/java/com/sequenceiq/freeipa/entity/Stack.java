@@ -17,6 +17,7 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -109,6 +110,9 @@ public class Stack implements AccountAwareResource {
 
     @OneToOne(cascade = CascadeType.ALL)
     private StackStatus stackStatus;
+
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "stack")
+    private ImageEntity image;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -303,6 +307,14 @@ public class Stack implements AccountAwareResource {
 
     public void setStackStatus(StackStatus stackStatus) {
         this.stackStatus = stackStatus;
+    }
+
+    public ImageEntity getImage() {
+        return image;
+    }
+
+    public void setImage(ImageEntity image) {
+        this.image = image;
     }
 
     public String getDatabusCredential() {

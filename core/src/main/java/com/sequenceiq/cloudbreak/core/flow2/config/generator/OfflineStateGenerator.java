@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterFlowConfig;
@@ -375,6 +376,11 @@ public class OfflineStateGenerator {
 
         @Override
         public Set<Stack> findAllAliveWithInstanceGroups() {
+            return null;
+        }
+
+        @Override
+        public List<Json> findImagesOfAliveStacks() {
             return null;
         }
 

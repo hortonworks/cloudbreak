@@ -20,7 +20,9 @@ public class MockImageCatalogController {
     public String auth(@RequestParam("catalog-name") String name,
             @RequestParam("cb-version") String cbVersion,
             @RequestParam("runtime") String runtime,
-            @RequestParam(name = "cm", required = false) String cm) {
-        return imageCatalogMockService.getImageCatalogByName(name, cbVersion, runtime, cm);
+            @RequestParam(name = "cm", required = false) String cm,
+            @RequestParam(name = "default-image-uuid", required = false) String defaultImageUuid,
+            @RequestParam(name = "non-default-image-uuid", required = false) String nonDefaultImageUuid) {
+        return imageCatalogMockService.getImageCatalogByName(name, cbVersion, runtime, cm, defaultImageUuid, nonDefaultImageUuid);
     }
 }

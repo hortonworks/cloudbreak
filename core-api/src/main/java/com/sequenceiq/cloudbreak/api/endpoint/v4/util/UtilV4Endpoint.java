@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValida
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ResourceEventResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.SecurityRulesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.StackMatrixV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImagesListV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.AccountPreferencesDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsValidationOpDescription;
@@ -91,4 +92,10 @@ public interface UtilV4Endpoint {
     @ApiOperation(value = UtilityOpDescription.RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
             nickname = "renewCertificate")
     Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request);
+
+    @GET
+    @Path("used_images")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedImages")
+    UsedImagesListV4Response usedImages();
 }

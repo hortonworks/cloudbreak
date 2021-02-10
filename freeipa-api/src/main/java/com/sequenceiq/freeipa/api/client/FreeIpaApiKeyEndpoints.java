@@ -15,6 +15,7 @@ import com.sequenceiq.freeipa.api.v1.kerberos.KerberosConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements FreeIpaClient {
 
@@ -80,5 +81,10 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     @Override
     public CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
         return getEndpoint(CDPStructuredEventV1Endpoint.class);
+    }
+
+    @Override
+    public UtilV1Endpoint utilV1Endpoint() {
+        return getEndpoint(UtilV1Endpoint.class);
     }
 }

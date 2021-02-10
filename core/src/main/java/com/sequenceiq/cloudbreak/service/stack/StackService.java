@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -663,6 +664,20 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
 
     public Set<Stack> getAllAliveWithInstanceGroups() {
         return stackRepository.findAllAliveWithInstanceGroups();
+    }
+
+    public List<Image> getImagesOfAliveStacks() {
+        return stackRepository.findImagesOfAliveStacks().stream()
+                .map(image -> {
+                    try {
+                        return image.get(Image.class);
+                    } catch (IOException e) {
+                        final String message = "Could not deserialize image from string " + image.getValue();
+                        LOGGER.error(message, e);
+                        throw new IllegalStateException(message, e);
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public List<StackStatusView> getByStatuses(List<Status> statuses) {

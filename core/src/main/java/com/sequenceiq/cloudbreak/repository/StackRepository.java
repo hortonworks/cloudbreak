@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
@@ -106,6 +107,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
             + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<Stack> findAllAliveWithInstanceGroups();
+
+    @Query("SELECT im.image FROM Stack s LEFT JOIN s.instanceGroups ig LEFT JOIN ig.instanceMetaData im "
+            + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null) AND im.image is not null")
+    List<Json> findImagesOfAliveStacks();
 
     @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
             + "WHERE s.stackStatus.status IN :statuses AND (s.type is not 'TEMPLATE' OR s.type is null)")
