@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -20,8 +19,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class EmbeddedDatabaseService {
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private CloudParameterCache cloudParameterCache;
@@ -31,7 +28,6 @@ public class EmbeddedDatabaseService {
         String databaseCrn = cluster == null ? "" : cluster.getDatabaseServerCrn();
         return DatabaseAvailabilityType.NONE == externalDatabase
                 && StringUtils.isEmpty(databaseCrn)
-                && entitlementService.embeddedDatabaseOnAttachedDiskEnabled(accountId)
                 && cloudParameterCache.isVolumeAttachmentSupported(stack.cloudPlatform());
     }
 

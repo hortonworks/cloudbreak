@@ -15,7 +15,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_I
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
@@ -601,9 +600,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatabaseWireEncryption) {
             builder.addEntitlements(createEntitlement(CDP_CB_DATABASE_WIRE_ENCRYPTION));
-        }
-        if (enableEmbeddedDatabaseOnAttachedDisk) {
-            builder.addEntitlements(createEntitlement(CDP_EMBEDDED_DATABASE_ON_ATTACHED_DISK));
         }
         if (datalakeLoadBalancerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_LOAD_BALANCER));
