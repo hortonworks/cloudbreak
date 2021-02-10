@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
@@ -159,5 +160,9 @@ public class StackService implements ResourceCrnAndNameProvider {
     @Override
     public EnumSet<Crn.ResourceType> getCrnTypes() {
         return EnumSet.of(Crn.ResourceType.FREEIPA, Crn.ResourceType.ENVIRONMENT);
+    }
+
+    public List<ImageEntity> getImagesOfAliveStacks() {
+        return stackRepository.findImagesOfAliveStacks();
     }
 }

@@ -12,7 +12,7 @@
         },
         "os": "centos7",
         "os_type": "redhat7",
-        "uuid": "f6e778fc-7f17-4535-9021-515351df3691",
+        "uuid": "DEFAULT_IMAGE_UUID",
         "defaultImage": true,
         "package-versions": {
           "cm": "CM_VERSION",
@@ -68,7 +68,7 @@
         },
         "os": "centos7",
         "os_type": "redhat7",
-        "uuid": "1a6eadd2-5B95-4EC9-B300-13dc43208b64",
+        "uuid": "NON_DEFAULT_IMAGE_UUID",
         "package-versions": {
           "cm": "7.x.0",
           "salt": "2017.7.5",
@@ -118,11 +118,11 @@
     "cloudbreak": [
       {
         "images": [
-          "f6e778fc-7f17-4535-9021-515351df3691",
-          "1a6eadd2-5B95-4EC9-B300-13dc43208b64"
+          "NON_DEFAULT_IMAGE_UUID",
+          "DEFAULT_IMAGE_UUID"
         ],
         "defaults": [
-          "f6e778fc-7f17-4535-9021-515351df3691"
+          "DEFAULT_IMAGE_UUID"
         ],
         "versions": [
           "CB_VERSION"

@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.util.DeploymentPreferencesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RepoConfigValidationAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SecurityRulesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.StackMatrixAction;
+import com.sequenceiq.it.cloudbreak.action.v4.util.UsedImagesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.VersionCheckAction;
 import com.sequenceiq.it.cloudbreak.dto.RawCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.securityrule.SecurityRulesTestDto;
@@ -21,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.dto.util.CloudStorageMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RepoConfigValidationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.UsedImagesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 
 @Service
@@ -60,6 +62,10 @@ public class UtilTestClient {
 
     public Action<RawCloudbreakTestDto, CloudbreakClient> checkRightRaw() {
         return new CheckRightRawAction();
+    }
+
+    public Action<UsedImagesTestDto, CloudbreakClient> usedImages() {
+        return new UsedImagesAction();
     }
 
 }
