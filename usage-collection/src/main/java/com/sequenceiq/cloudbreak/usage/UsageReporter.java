@@ -94,4 +94,17 @@ public interface UsageReporter {
     void cdpDatahubStatusChanged(
             UsageProto.CDPDatahubStatusChanged details);
 
+    /**
+     * Reports that an CDP Datalake has been periodically synced.
+     * @param details the event details
+     */
+    void cdpDatalakeSync(
+            UsageProto.CDPDatalakeSync details);
+
+    /**
+     * Reports that an CDP Datahub has been periodically synced.
+     * @param details the event details
+     */
+    void cdpDatahubSync(
+            UsageProto.CDPDatahubSync details);
 }

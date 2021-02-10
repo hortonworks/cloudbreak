@@ -14,6 +14,8 @@ option go_package = "com/cloudera/cdp/protobuf";
 
 // A usage event.
 message Event {
+  // Deprecated event types
+  reserved 8, 9, 10, 11, 12, 13, 14, 15, 20, 21;
   // The event's ID.
   string id = 1;
   // The event timestamp in ms from the Java epoch of 1970-01-01T00:00:00Z.
@@ -43,22 +45,6 @@ message Event {
     AltusIamUserInteractiveLogin altusIamUserInteractiveLogin = 7;
     // An Altus user interactively login failure.
     AltusIamUserInteractiveLoginFailure altusIamUserInteractiveLoginFailure = 26;
-    // An Altus Data Engineering job was submitted.
-    AltusDataEngineeringJobSubmitted altusDataEngineeringJobSubmitted = 8;
-    // An Altus Data Engineering job's status changed.
-    AltusDataEngineeringJobStatusChanged altusDataEngineeringJobStatusChanged = 9;
-    // An Altus Data Engineering cluster was created
-    AltusDataEngineeringClusterCreated altusDataEngineeringClusterCreated = 10;
-    // An Altus Data Engineering cluster's status changed.
-    AltusDataEngineeringClusterStatusChanged altusDataEngineeringClusterStatusChanged = 11;
-    // An Altus Analytic DB cluster was created
-    AltusAnalyticDbClusterCreated altusAnalyticDbClusterCreated = 12;
-    // An Altus Analytic DB cluster's status changed.
-    AltusAnalyticDbClusterStatusChanged altusAnalyticDbClusterStatusChanged = 13;
-    // An Altus environment was created.
-    AltusEnvironmentsEnvironmentCreated altusEnvironmentsEnvironmentCreated = 14;
-    // An Altus environment was deleted.
-    AltusEnvironmentsEnvironmentDeleted altusEnvironmentsEnvironmentDeleted = 15;
     // An Altus machine user was created.
     AltusIamMachineUserCreated altusIamMachineUserCreated = 16;
     // An Altus machine user was deleted.
@@ -67,10 +53,6 @@ message Event {
     AltusIamAccessKeyCreated altusIamAccessKeyCreated = 18;
     // An Altus access key was deleted.
     AltusIamAccessKeyDeleted altusIamAccessKeyDeleted = 19;
-    // An Altus SDX namespace was created.
-    AltusSdxNamespaceCreated altusSdxNamespaceCreated = 20;
-    // An Altus SDX namespace's status changed.
-    AltusSdxNamespaceStatusChanged altusSdxNamespaceStatusChanged = 21;
     // A CDP Datalake cluster was requested to create.
     CDPDatalakeClusterRequested cdpDatalakeClusterRequested = 22;
     // A CDP Datalake cluster's status changed.
@@ -95,6 +77,10 @@ message Event {
     CDPDatahubRequested cdpDatahubRequested = 34;
     // A CDP DataHub was requested to create
     CDPDatahubStatusChanged cdpDatahubStatusChanged = 35;
+    // Sync event for a CDP Datalake cluster
+    CDPDatalakeSync cdpDatalakeSync = 36;
+    // Sync event for a CDP Datahub cluster
+    CDPDatahubSync cdpDatahubSync = 37;
   }
 }
 
@@ -197,348 +183,6 @@ message AltusIamUserInteractiveLoginFailure {
   string userId = 1;
 }
 
-// The type of an Altus environment.
-message AltusEnvironmentsEnvironmentType {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // AWS
-    AWS = 1;
-    // Azure
-    AZURE = 2;
-  }
-}
-
-// The type of an Altus Data Engineering job.
-message AltusDataEngineeringJobType {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // Hive
-    HIVE = 1;
-    // Spark
-    SPARK = 2;
-    // YARN
-    YARN = 3;
-    // PySpark
-    PYSPARK = 4;
-  }
-}
-
-// The failure action of an Altus Data Engineering job.
-message AltusDataEngineeringJobFailureAction {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // Do nothing.
-    NONE = 1;
-    // Interrupt all jobs in the job queue.
-    INTERRUPT_JOB_QUEUE = 2;
-  }
-}
-
-// Generated when an Altus Data Engineering job was submitted.
-message AltusDataEngineeringJobSubmitted {
-  // The Altus job ID of the job.
-  string jobId = 1;
-  // The Altus account ID of the job.
-  string accountId = 2;
-  // The type of the job.
-  AltusDataEngineeringJobType.Value jobType = 3;
-  // The name of the job.
-  string jobName = 4;
-  // The job submission group ID of the job.
-  string jobSubmissionGroupId = 5;
-  // The job submission group name of the job.
-  string jobSubmissionGroupName = 6;
-  // The index of this job in its job submission group.
-  int32 jobSubmissionGroupIndex = 7;
-  // The size of the job's submission group.
-  int32 jobSubmissionGroupSize = 8;
-  // The CRN of the job's environment.
-  string environmentCrn = 9;
-  // The the environment type of the job's environment.
-  AltusEnvironmentsEnvironmentType.Value environmentType = 10;
-  // The CRN of the job's cluster.
-  string clusterCrn = 11;
-  // The CRN of the job's submitter.
-  string submitterCrn = 12;
-  // What action to take when the job completes unsuccessfully.
-  AltusDataEngineeringJobFailureAction.Value failureAction = 13;
-  // Whether the cluster of the job was configured to send data to Workload
-  // Analytics.
-  bool sendDataToWorkloadAnalytics = 14;
-  // The CRN for the job.
-  string crn = 15;
-}
-
-// The status of an Altus Data Engineering job.
-message AltusDataEngineeringJobStatus {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // This is the initial status for a job.
-    QUEUED = 1;
-    // A job is transitioned to this status before we start submitting it to the
-    // cluster.
-    SUBMITTING = 2;
-    // That status of a job that we know has been submitted to the cluster. It
-    // remains with this status until we know it has succesfully completed,
-    // failed or been terminated or interrupted.
-    RUNNING = 3;
-    // When we notice a job has completed execution on the cluster without being
-    // terminated it has this status. Note that a job with this status may have
-    // failed somehow while executing on the cluster.
-    COMPLETED = 4;
-    // When we have received a termination request for a job, it will be reported
-    // as having this status until it either terminates, fails, completes or is
-    // interrupted.
-    TERMINATING = 5;
-    // If we receive a request to terminate a job before having submitted it to
-    // the cluster, or if it is reported has having completed execution on the
-    // cluster with a terminated status it has this status.
-    TERMINATED = 6;
-    // A job has this status when we hit errors processing it in this service or
-    // on behalf of this service in Director. This status is not used if a job
-    // fails during execution on the cluster but is otherwise processed by this
-    // service as normal.
-    FAILED = 7;
-    // If the cluster is deleted out from under the job. It ends up with this
-    // status.
-    INTERRUPTED = 8;
-  }
-}
-
-// Generated when an Altus Data Engineering job's status changed.
-message AltusDataEngineeringJobStatusChanged {
-  // The Altus job ID of the job.
-  string jobId = 1;
-  // The job's status before the change.
-  AltusDataEngineeringJobStatus.Value oldStatus = 2;
-  // The job's status after the change.
-  AltusDataEngineeringJobStatus.Value newStatus = 3;
-}
-
-// Atlus Data Engineering cluster automatic termination conditions.
-message AltusDataEngineeringAutomaticTerminationCondition {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // The cluster does not auto-terminate.
-    NONE = 1;
-    // The cluster auto-terminates when it has no queued jobs.
-    EMPTY_JOB_QUEUE = 2;
-  }
-}
-
-// Generated when a valid Altus Data Engineering cluster creation request has
-// been made.
-message AltusDataEngineeringClusterCreated {
-  // The Altus cluster ID of the cluster.
-  string clusterId = 1;
-  // The Altus account ID of the cluster.
-  string accountId = 2;
-  // The user-supplied cluster name.
-  string clusterName = 3;
-  // The environment type.
-  AltusEnvironmentsEnvironmentType.Value environmentType = 4;
-  // The CRN of the cluster's environment.
-  string environmentCrn = 5;
-  // The CDH version of the cluster.
-  string cdhVersion = 6;
-  // The service type of the cluster.
-  string serviceType = 7;
-  // The instance type of the cluster.
-  string instanceType = 8;
-  // Whether the cluster has a user-supplied bootstrap script.
-  bool hasBootstrapScript = 9;
-  // The CRN of the cluster's SDX namespace. This will be empty if SDX is not
-  // in use.
-  string namespaceCrn = 10;
-  // The automatic termination condition of the cluster.
-  AltusDataEngineeringAutomaticTerminationCondition.Value automaticTerminationCondition = 11;
-  // The number of jobs submitted to the cluster at cluster creation time.
-  uint32 jobs = 12;
-  // The CRN for the cluster.
-  string crn = 13;
-  // The CRN of the cluster's creator.
-  string creatorCrn = 14;
-  // Whether the cluster is a secured cluster.
-  bool secured = 15;
-}
-
-// The status of an Altus Data Engineering cluster.
-message AltusDataEngineeringClusterStatus {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // The status of a cluster that is being created.
-    CREATING = 1;
-    // The status for a cluster that has succesfully been created.
-    CREATED = 2;
-    // The status of a cluster that is being terminated.
-    TERMINATING = 3;
-    // The status for a cluster that has failed creation or termination.
-    FAILED = 4;
-    // The status for a cluster that has been terminated.
-    TERMINATED = 5;
-  }
-}
-
-// Generated when an Altus Data Engineering cluster's status changed.
-message AltusDataEngineeringClusterStatusChanged {
-  // The Altus cluster ID of the cluster.
-  string clusterId = 1;
-  // The cluster's status before the change.
-  AltusDataEngineeringClusterStatus.Value oldStatus = 2;
-  // The cluster's status after the change.
-  AltusDataEngineeringClusterStatus.Value newStatus = 3;
-  // A set of failure codes for the cluster. This will only be set if newStatus
-  // is FAILED.
-  repeated string failureCodes = 4;
-  // A failure message for the cluster. This will only be set if newStatus is
-  // FAILED.
-  string failureReason = 5;
-}
-
-// Generated when a valid Altus Analytic DB cluster creation request has
-// been made.
-message AltusAnalyticDbClusterCreated {
-  // The Altus cluster ID of the cluster.
-  string clusterId = 1;
-  // The Altus account ID of the cluster.
-  string accountId = 2;
-  // The user-supplied cluster name.
-  string clusterName = 3;
-  // The environment type.
-  AltusEnvironmentsEnvironmentType.Value environmentType = 4;
-  // The CRN of the cluster's environment.
-  string environmentCrn = 5;
-  // The CDH version of the cluster.
-  string cdhVersion = 6;
-  // The instance type of the cluster.
-  string instanceType = 7;
-  // Whether the cluster has a user-supplied bootstrap script.
-  bool hasBootstrapScript = 8;
-  // The CRN of the cluster's SDX namespace. This will be empty if SDX is not
-  // in use.
-  string namespaceCrn = 9;
-  // The CRN for the cluster.
-  string crn = 10;
-  // The CRN of the cluster's creator.
-  string creatorCrn = 11;
-  // Whether the cluster is a secured cluster.
-  bool secured = 12;
-}
-
-// The status of an Altus Analytic DB cluster.
-message AltusAnalyticDbClusterStatus {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // The status of a cluster that is being created.
-    CREATING = 1;
-    // The status for a cluster that has succesfully been created.
-    CREATED = 2;
-    // The status of a cluster that is being terminated.
-    TERMINATING = 3;
-    // The status for a cluster that has failed creation or termination.
-    FAILED = 4;
-    // The status for a cluster that has been terminated.
-    TERMINATED = 5;
-  }
-}
-
-// Generated when an Altus Analytic DB cluster's status changed.
-message AltusAnalyticDbClusterStatusChanged {
-  // The Altus cluster ID of the cluster.
-  string clusterId = 1;
-  // The cluster's status before the change.
-  AltusAnalyticDbClusterStatus.Value oldStatus = 2;
-  // The cluster's status after the change.
-  AltusAnalyticDbClusterStatus.Value newStatus = 3;
-  // A set of failure codes for the cluster. This will only be set if newStatus
-  // is FAILED.
-  repeated string failureCodes = 4;
-  // A failure message for the cluster. This will only be set if newStatus is
-  // FAILED.
-  string failureReason = 5;
-}
-
-// AWS-specific environment details.
-message AltusEnvironmentsEnvironmentAwsDetails {
-  // The name of the instance profile of the enviroment.
-  string instanceProfileName = 1;
-  // The S3 guard configuration for the environment.
-  AltusEnvironmentsEnvironmentS3GuardConfiguration s3Guard = 2;
-}
-
-// Azure-specific environment details.
-message AltusEnvironmentsEnvironmentAzureDetails {
-}
-
-// Secured clusters configuration for an environment.
-message AltusEnvironmentsEnvironmentSecuredClustersConfiguration {
-  // Whether secured clusters are enabled.
-  bool enabled = 1;
-}
-
-// S3-guard configuration for an environment.
-message AltusEnvironmentsEnvironmentS3GuardConfiguration {
-  // Whether S3 guard is enabled.
-  bool enabled = 1;
-}
-
-// Navigator configuration for an environment.
-message AltusEnvironmentsEnvironmentNavigatorConfiguration {
-  // Whether Navigator is enabled.
-  bool enabled = 1;
-}
-
-// Workload Analytics configuration for an environment.
-message AltusEnvironmentsEnvironmentWorkloadAnalyticsConfiguration {
-  // Whether Workload Analytics is enabled.
-  bool enabled = 1;
-}
-
-// Generated when an Altus environment has been created.
-message AltusEnvironmentsEnvironmentCreated {
-  // The Altus environment ID of the new environment. This uniquely identifies
-  // the environment within Altus. This ID is immutable.
-  string environmentId = 1;
-  // The Altus account ID of the environment.
-  string accountId = 2;
-  // The user-supplied environment name.
-  string environmentName = 3;
-  // The environment type.
-  AltusEnvironmentsEnvironmentType.Value environmentType = 4;
-  // The region of the environment.
-  string region = 5;
-  // The log archive location of the environment.
-  string logArchiveLocation = 6;
-  // Cloud provider specific details of the environment.
-  oneof cloudProviderDetails {
-    AltusEnvironmentsEnvironmentAwsDetails awsDetails = 7;
-    AltusEnvironmentsEnvironmentAzureDetails azureDetails = 8;
-  }
-  // The secured clusters configuration of the environment.
-  AltusEnvironmentsEnvironmentSecuredClustersConfiguration securedClustersConfiguration = 9;
-  // The Navigator configuration of the environment.
-  AltusEnvironmentsEnvironmentNavigatorConfiguration navigatorConfiguration = 10;
-  // The Workload Analytics configuration of the environment.
-  AltusEnvironmentsEnvironmentWorkloadAnalyticsConfiguration workloadAnalyticsConfiguration = 11;
-  // The CRN for the environment.
-  string crn = 12;
-  // The creator CRN for the environment.
-  string creatorCrn = 13;
-}
-
-// Generated when an Altus environment has been deleted.
-message AltusEnvironmentsEnvironmentDeleted {
-  // The Altus environment ID of the deleted environment.
-  string environmentId = 1;
-}
-
 // Generated when an Altus IAM machine user has been created.
 message AltusIamMachineUserCreated {
   // The Altus machine user ID of the new machine user. This uniquely identifies
@@ -581,46 +225,6 @@ message AltusIamAccessKeyCreated {
 message AltusIamAccessKeyDeleted {
   // The Altus access key ID of the deleted access key.
   string accessKeyId = 1;
-}
-
-// Generated when a valid Altus SDX namespace creation request has been made.
-message AltusSdxNamespaceCreated {
-  // The Altus namespace ID of the namespace.
-  string namespaceId = 1;
-  // The Altus account ID of the namepsace.
-  string accountId = 2;
-  // The user-supplied namespace name.
-  string namespaceName = 3;
-  // The CRN for the namespace.
-  string crn = 4;
-}
-
-// The status of an Altus SDX namespace.
-message AltusSdxNamespaceStatus {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // The status of a namespace that is being created.
-    CREATING = 1;
-    // The status for a namespace that has succesfully been created.
-    CREATED = 2;
-    // The status of a namespace that is being deleted.
-    DELETING = 3;
-    // The status for a namespace that has failed creation or deletion.
-    FAILED = 4;
-    // The status for a namespace that has been deleted.
-    DELETED = 5;
-  }
-}
-
-// Generated when an Altus SDX namespace's status changed.
-message AltusSdxNamespaceStatusChanged {
-  // The Altus namespace ID of the namespace.
-  string namespaceId = 1;
-  // The namespace's status before the change.
-  AltusSdxNamespaceStatus.Value oldStatus = 2;
-  // The namespace's status after the change.
-  AltusSdxNamespaceStatus.Value newStatus = 3;
 }
 
 // The type of a CDP environment.
@@ -993,32 +597,32 @@ message CDPClusterStatus {
     // The status when a cluster failed to resume.
     RESUME_FAILED = 12;
 
-    // The status when a cluster is trying to resume.
+    // The status when a cluster is trying to upgrade.
     UPGRADE_STARTED = 13;
-    // The status when a cluster completed resuming.
+    // The status when a cluster completed upgrading.
     UPGRADE_FINISHED = 14;
-    // The status when a cluster failed to resume.
+    // The status when a cluster failed to upgrade.
     UPGRADE_FAILED = 15;
 
-    // The status when a cluster is trying to resume.
+    // The status when a cluster is trying to repair.
     REPAIR_STARTED = 16;
-    // The status when a cluster completed resuming.
+    // The status when a cluster completed repairing.
     REPAIR_FINISHED = 17;
-    // The status when a cluster failed to resume.
+    // The status when a cluster failed to repair.
     REPAIR_FAILED = 18;
 
-    // The status when a cluster is trying to resume.
+    // The status when a cluster is trying to upscale.
     UPSCALE_STARTED = 19;
-    // The status when a cluster completed resuming.
+    // The status when a cluster completed upscaling.
     UPSCALE_FINISHED = 20;
-    // The status when a cluster failed to resume.
+    // The status when a cluster failed to upscale.
     UPSCALE_FAILED = 21;
 
-    // The status when a cluster is trying to resume.
+    // The status when a cluster is trying to downscale.
     DOWNSCALE_STARTED = 22;
-    // The status when a cluster completed resuming.
+    // The status when a cluster completed downscaling.
     DOWNSCALE_FINISHED = 23;
-    // The status when a cluster failed to resume.
+    // The status when a cluster failed to downscale.
     DOWNSCALE_FAILED = 24;
 
     // The status when CB is trying to renew the public facing certificate of the cluster, Letsencrypt certificate
@@ -1234,4 +838,31 @@ message CDPDatahubStatusChanged {
   CDPClusterStatus.Value newStatus = 3;
   // Describe the reason of the failure if any
   string failureReason = 4;
+}
+
+message CDPSyncDetails {
+  // Status of the stack
+  string status = 1;
+  // Detailed status of the stack
+  string detailedStatus = 2;
+  // The timestamp of the start of the cluster creation
+  uint64 clusterCreationStarted = 3;
+  // The timestamp of the finish of the cluster creation
+  uint64 clusterCreationFinished = 4;
+}
+
+// Generated periodically for Datalake clusters
+message CDPDatalakeSync {
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // Additional metadata about the cluster
+  CDPSyncDetails syncDetails = 2;
+}
+
+// Generated periodically for Datahub clusters
+message CDPDatahubSync {
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // Additional metadata about the cluster
+  CDPSyncDetails syncDetails = 2;
 }
