@@ -14,9 +14,9 @@ import com.sequenceiq.mock.experience.response.common.CpInternalEnvironmentRespo
 @Service
 public class ExperienceStoreService {
 
-    private Map<String, CpInternalEnvironmentResponse> store = new ConcurrentHashMap<>();
+    private final Map<String, CpInternalEnvironmentResponse> store = new ConcurrentHashMap<>();
 
-    private AtomicLong idCounter = new AtomicLong();
+    private final AtomicLong idCounter = new AtomicLong();
 
     private String createID() {
         return String.valueOf(idCounter.getAndIncrement());
@@ -29,7 +29,7 @@ public class ExperienceStoreService {
     public void deleteById(String env) {
         CpInternalEnvironmentResponse exp = store.get(env);
         if (exp != null) {
-            exp.getResults().stream().forEach(experience -> experience.setStatus("DELETED"));
+            exp.getResults().forEach(experience -> experience.setStatus("DELETED"));
         }
     }
 

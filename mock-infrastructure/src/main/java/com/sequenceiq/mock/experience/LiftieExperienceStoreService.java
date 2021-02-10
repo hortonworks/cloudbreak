@@ -15,25 +15,25 @@ import com.sequenceiq.mock.experience.response.liftie.StatusMessage;
 
 @Service
 public class LiftieExperienceStoreService {
-    private Map<String, ClusterView> store = new ConcurrentHashMap<>();
+    private final Map<String, ClusterView> store = new ConcurrentHashMap<>();
 
-    private AtomicLong idCounter = new AtomicLong();
+    private final AtomicLong idCounter = new AtomicLong();
 
     private String createID() {
         return String.valueOf(idCounter.getAndIncrement());
     }
 
-    public void create(String env) {
+    public void create(String env, String tenant) {
         String id = "liftie" + createID();
         StatusMessage clusterStatus = new StatusMessage();
         clusterStatus.setMessage("");
         clusterStatus.setStatus("RUNNING");
-        store.put(id, new ClusterView(id, id, env, "tenant", "X", clusterStatus));
+        store.put(id, new ClusterView(id, id, env, tenant, "X", clusterStatus));
     }
 
     public void createIfNotExist(String env, String tenant) {
-        if (!store.values().stream().anyMatch(cluster -> env.equals(cluster.getEnv()))) {
-            create(env);
+        if (store.values().stream().noneMatch(cluster -> env.equals(cluster.getEnv()))) {
+            create(env, tenant);
         }
     }
 

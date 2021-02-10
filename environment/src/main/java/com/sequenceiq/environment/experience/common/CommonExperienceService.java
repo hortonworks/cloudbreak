@@ -105,13 +105,13 @@ public class CommonExperienceService implements Experience {
     }
 
     private Set<CommonExperience> identifyConfiguredExperiences(ExperienceServicesConfig config) {
-        Set<CommonExperience> experiences = config.getExperiences()
+        Set<CommonExperience> experiences = config.getConfigs()
                 .stream()
                 .filter(this::isExperienceConfigured)
                 .collect(toSet());
         if (experiences.isEmpty()) {
             LOGGER.info("There are no - properly - configured experience endpoints in environment service! If you would like to check them, specify them" +
-                    " in the application.yml!");
+                    " in the experiences-config.yml!");
             return Collections.emptySet();
         } else {
             String names = String.join(", ", new HashSet<>(experiences.stream().map(CommonExperience::getName).collect(toSet())));

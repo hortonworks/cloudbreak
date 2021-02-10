@@ -23,7 +23,7 @@ class CommonExperienceWebTargetProvider {
 
     private final Client client;
 
-    CommonExperienceWebTargetProvider(@Value("${experience.scan.path.componentToReplace}") String componentToReplaceInPath, Client client) {
+    CommonExperienceWebTargetProvider(@Value("${environment.experience.path.componentToReplace}") String componentToReplaceInPath, Client client) {
         throwIfTrue(isEmpty(componentToReplaceInPath),
                 () -> new IllegalArgumentException("Component what should be replaced in experience path must not be empty or null."));
         this.componentToReplaceInPath = componentToReplaceInPath;

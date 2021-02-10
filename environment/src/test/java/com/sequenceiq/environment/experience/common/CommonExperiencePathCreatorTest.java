@@ -7,19 +7,17 @@ import org.junit.jupiter.api.Test;
 
 class CommonExperiencePathCreatorTest {
 
-    private static final String XP_PROTOCOL = "https";
-
     private CommonExperiencePathCreator underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new CommonExperiencePathCreator(XP_PROTOCOL);
+        underTest = new CommonExperiencePathCreator();
     }
 
     @Test
     void testCreatePathToExperienceShouldCombineThePathCorretly() {
         CommonExperience xp = createCommonExperience();
-        String expected = XP_PROTOCOL + "://" + xp.getHostAddress() + ":" + xp.getPort() + xp.getInternalEnvEndpoint();
+        String expected = xp.getAddress() + xp.getInternalEnvironmentEndpoint();
 
         String result = underTest.createPathToExperience(xp);
 
@@ -28,10 +26,10 @@ class CommonExperiencePathCreatorTest {
 
     private CommonExperience createCommonExperience() {
         CommonExperience cxp = new CommonExperience();
-        cxp.setHostAddress("someHostAddress");
         cxp.setName("someXpName");
-        cxp.setInternalEnvEndpoint("someInternalEnvEndpoint");
-        cxp.setPort("somePort");
+        cxp.setDescription("someDescription");
+        cxp.setInternalEnvironmentEndpoint("someInternalEnvEndpoint");
+        cxp.setAddress("https://someHostAddress:somePort");
         return cxp;
     }
 

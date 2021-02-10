@@ -9,7 +9,7 @@ public class CommonExperienceValidator {
     private static final String ENV_VAR_PATTERN_REGEX = "\\$\\{.*}";
 
     public boolean isExperienceFilled(CommonExperience xp) {
-        return xp != null && isGivenExperienceValuesAreFilled(xp.getInternalEnvEndpoint(), xp.getHostAddress(), xp.getPort());
+        return xp != null && isGivenExperienceValuesAreFilled(xp.getInternalEnvironmentEndpoint(), xp.getAddress());
     }
 
     private boolean isGivenExperienceValuesAreFilled(String... valuesToCheck) {

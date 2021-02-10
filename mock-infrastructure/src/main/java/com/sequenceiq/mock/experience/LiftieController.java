@@ -5,6 +5,7 @@ import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.mock.experience.response.liftie.ClusterView;
 import com.sequenceiq.mock.experience.response.liftie.DeleteClusterResponse;
 import com.sequenceiq.mock.experience.response.liftie.ListClustersResponse;
@@ -27,13 +29,18 @@ public class LiftieController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiftieController.class);
 
+    @Value("${mock.experiences.liftie.createDummyCluster}")
+    private boolean createDummyCluster;
+
     @Inject
     private LiftieExperienceStoreService liftieExperienceStoreService;
 
     @GetMapping(value = "cluster", produces = MediaType.APPLICATION_JSON)
     public ListClustersResponse listCluster(@RequestParam("env") String env, @RequestParam("tenant") String tenant) throws Exception {
-        //this should be deleted, when branch rebased to master
-        liftieExperienceStoreService.createIfNotExist(env, tenant);
+        if (createDummyCluster) {
+            LOGGER.debug("Creting dummy Liftie cluster if it does not exist in the local store");
+            liftieExperienceStoreService.createIfNotExist(env, tenant);
+        }
         return liftieExperienceStoreService.get(env);
     }
 
@@ -41,14 +48,14 @@ public class LiftieController {
     public DeleteClusterResponse deleteCluster(@PathVariable("id") String id) throws Exception {
         liftieExperienceStoreService.deleteById(id);
         DeleteClusterResponse deleteClusterResponse = new DeleteClusterResponse();
-        deleteClusterResponse.setMessage("megyez");
-        deleteClusterResponse.setStatus("deleted");
+        deleteClusterResponse.setMessage("Delete success");
+        deleteClusterResponse.setStatus("DELETED");
         return deleteClusterResponse;
     }
 
     @PostMapping(value = "mocksupport/{crn}", produces = MediaType.APPLICATION_JSON)
     public ListClustersResponse createNew(@PathVariable("crn") String env) throws Exception {
-        liftieExperienceStoreService.create(env);
+        liftieExperienceStoreService.create(env, ThreadBasedUserCrnProvider.getAccountId());
         return liftieExperienceStoreService.get(env);
     }
 

@@ -8,10 +8,8 @@ public class LiftiePathProvider {
 
     private final String liftieBasePath;
 
-    public LiftiePathProvider(@Value("${experience.scan.liftie.api.port}") String liftiePort,
-            @Value("${experience.scan.liftie.api.address}") String liftieAddress,
-            @Value("${experience.scan.protocol}") String liftieProtocol) {
-        this.liftieBasePath = String.format("%s://%s:%s/liftie/api/v1", liftieProtocol, liftieAddress, liftiePort);
+    public LiftiePathProvider(@Value("${environment.experience.liftie.address}") String liftieApi) {
+        this.liftieBasePath = String.format("%s/liftie/api/v1", liftieApi);
     }
 
     public String getPathToClustersEndpoint() {

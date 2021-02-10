@@ -1,10 +1,14 @@
 package com.sequenceiq.mock.experience;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,15 +30,28 @@ public class DwxController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DwxController.class);
 
+    @Value("${mock.experiences.dwx.createDummyCluster}")
+    private boolean createDummyCluster;
+
     @Inject
     private ExperienceStoreService experienceStoreService;
 
     @GetMapping(value = "/{crn}", produces = MediaType.APPLICATION_JSON)
     public CpInternalEnvironmentResponse listCluster(@PathVariable("crn") String env) throws Exception {
         experienceStoreService.createIfNotExist(env);
-        //this should be deleted, when branch rebased to master
-        experienceStoreService.addExperienceTo(env);
-        return experienceStoreService.get(env);
+        if (createDummyCluster) {
+            LOGGER.debug("Creting dummy DWX cluster if it does not exist in the local store");
+            if (experienceStoreService.get(env) == null || experienceStoreService.get(env).getResults().isEmpty()) {
+                experienceStoreService.addExperienceTo(env);
+            }
+        }
+        CpInternalEnvironmentResponse response = new CpInternalEnvironmentResponse();
+        Set<CpInternalCluster> nonDeletedClusters = experienceStoreService.get(env).getResults()
+                .stream()
+                .filter(c -> !"DELETED".equals(c.getStatus()))
+                .collect(Collectors.toSet());
+        response.setResults(nonDeletedClusters);
+        return response;
     }
 
     @DeleteMapping(value = "/{crn}", produces = MediaType.APPLICATION_JSON)
@@ -42,8 +59,8 @@ public class DwxController {
         experienceStoreService.deleteById(env);
         DeleteCommonExperienceWorkspaceResponse deleteCommonExperienceWorkspaceResponse = new DeleteCommonExperienceWorkspaceResponse();
         deleteCommonExperienceWorkspaceResponse.setName(env);
-        deleteCommonExperienceWorkspaceResponse.setStatusReason("fain");
-        deleteCommonExperienceWorkspaceResponse.setStatus("deleted");
+        deleteCommonExperienceWorkspaceResponse.setStatusReason("Delete success");
+        deleteCommonExperienceWorkspaceResponse.setStatus("DELETED");
         return deleteCommonExperienceWorkspaceResponse;
     }
 

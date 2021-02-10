@@ -1,20 +1,22 @@
 package com.sequenceiq.environment.experience.common;
 
+import java.util.StringJoiner;
+
 public class CommonExperience {
 
     private String name;
 
-    private String internalEnvEndpoint;
+    private String description;
 
-    private String hostAddress;
+    private String internalEnvironmentEndpoint;
 
-    private String port;
+    private String address;
 
-    public CommonExperience(String name, String hostAddress, String internalEnvEndpoint, String port) {
+    public CommonExperience(String name, String description, String internalEnvironmentEndpoint, String address) {
         this.name = name;
-        this.hostAddress = hostAddress;
-        this.internalEnvEndpoint = internalEnvEndpoint;
-        this.port = port;
+        this.description = description;
+        this.internalEnvironmentEndpoint = internalEnvironmentEndpoint;
+        this.address = address;
     }
 
     public CommonExperience() {
@@ -28,28 +30,37 @@ public class CommonExperience {
         this.name = name;
     }
 
-    public String getInternalEnvEndpoint() {
-        return internalEnvEndpoint;
+    public String getDescription() {
+        return description;
     }
 
-    public void setInternalEnvEndpoint(String internalEnvEndpoint) {
-        this.internalEnvEndpoint = internalEnvEndpoint;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getHostAddress() {
-        return hostAddress;
+    public String getInternalEnvironmentEndpoint() {
+        return internalEnvironmentEndpoint;
     }
 
-    public void setHostAddress(String hostAddress) {
-        this.hostAddress = hostAddress;
+    public void setInternalEnvironmentEndpoint(String internalEnvironmentEndpoint) {
+        this.internalEnvironmentEndpoint = internalEnvironmentEndpoint;
     }
 
-    public String getPort() {
-        return port;
+    public String getAddress() {
+        return address;
     }
 
-    public void setPort(String port) {
-        this.port = port;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", CommonExperience.class.getSimpleName() + "[", "]")
+                .add("name='" + name + "'")
+                .add("description='" + description + "'")
+                .add("internalEnvironmentEndpoint='" + internalEnvironmentEndpoint + "'")
+                .add("address='" + address + "'")
+                .toString();
+    }
 }
