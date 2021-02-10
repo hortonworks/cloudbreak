@@ -9,6 +9,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +80,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+        Set<String> hueHostGroups = getHueHostGroups(stack);
 
         if (StringUtils.isEmpty(gatewayIp)) {
             Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
@@ -95,7 +98,11 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         if (success) {
             try {
                 String fullQualifiedDomainName = getDomainNameProvider()
-                        .getFullyQualifiedEndpointName(endpointName, environment.getName(), getWorkloadSubdomain(userCrn));
+                        .getFullyQualifiedEndpointName(
+                                hueHostGroups,
+                                endpointName,
+                                environment.getName(),
+                                getWorkloadSubdomain(userCrn));
                 if (fullQualifiedDomainName != null) {
                     LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
                     return fullQualifiedDomainName;
@@ -107,9 +114,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return null;
     }
 
+    public Set<String> getHueHostGroups(Stack stack) {
+        return new CmTemplateProcessor(stack.getCluster().getBlueprint().getBlueprintText())
+                .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
+    }
+
     public void updateDnsEntryForLoadBalancers(Stack stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
-
+        Set<String> hueHostGroups = getHueHostGroups(stack);
         if (loadBalancerOptional.isEmpty()) {
             LOGGER.error("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
         } else {
@@ -137,14 +149,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             }
 
             if (dnsRegistered) {
-                setLoadBalancerFqdn(loadBalancer, endpoint, environment.getName(), userCrn);
+                setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment.getName(), userCrn);
             }
         }
     }
 
-    private void setLoadBalancerFqdn(LoadBalancer loadBalancer, String endpoint, String envName, String userCrn) {
+    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, String envName, String userCrn) {
         loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
-            endpoint, envName, getWorkloadSubdomain(userCrn)));
+                hueHostGroups, endpoint, envName, getWorkloadSubdomain(userCrn)));
         loadBalancerPersistenceService.save(loadBalancer);
         LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
     }
@@ -219,6 +231,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         SecurityConfig securityConfig = stack.getSecurityConfig();
+        Set<String> hueHostGroups = getHueHostGroups(stack);
         try {
             KeyPair keyPair = getKeyPairForStack(stack);
             String endpointName = getEndpointNameForStack(stack);
@@ -228,13 +241,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             String workloadSubdomain = getWorkloadSubdomain(userCrn);
 
             String commonName = getDomainNameProvider().getCommonName(endpointName, environmentName, workloadSubdomain);
-            String fullyQualifiedEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(endpointName, environmentName, workloadSubdomain);
+            String fullyQualifiedEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
+                    hueHostGroups, endpointName, environmentName, workloadSubdomain);
             List<String> subjectAlternativeNames = new ArrayList<>();
             subjectAlternativeNames.add(commonName);
             subjectAlternativeNames.add(fullyQualifiedEndpointName);
             for (String loadBalancerEndpoint : loadBalancerEndpoints) {
                 String loadBalancerEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
-                    loadBalancerEndpoint, environmentName, workloadSubdomain);
+                        hueHostGroups, loadBalancerEndpoint, environmentName, workloadSubdomain);
                 subjectAlternativeNames.add(loadBalancerEndpointName);
             }
 

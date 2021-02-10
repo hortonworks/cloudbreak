@@ -22,6 +22,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
+import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,6 +156,9 @@ public class StackCreatorService {
     @Inject
     private StackRuntimeVersionValidator stackRuntimeVersionValidator;
 
+    @Inject
+    private HueWorkaroundValidatorService hueWorkaroundValidatorService;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
@@ -185,6 +191,7 @@ public class StackCreatorService {
                 LOGGER,
                 "Stack request converted to stack took {} ms for stack {}", stackName);
             Future<StatedImage> imgFromCatalogFuture = determineImageCatalog(stackName, platformString, stackRequest, blueprint, user, workspace);
+            hueWorkaroundValidatorService.validateForStackRequest(getHueHostGroups(blueprint.getBlueprintText()), stackStub.getName());
 
             savedStack = transactionService.required(() -> {
                 Stack stack = measure(() ->
@@ -276,6 +283,11 @@ public class StackCreatorService {
         metricService.submit(STACK_PREPARATION, System.currentTimeMillis() - start);
 
         return response;
+    }
+
+    private Set<String> getHueHostGroups(String blueprintText) {
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprintText);
+        return cmTemplateProcessor.getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
     StackType determineStackTypeBasedOnTheUsedApi(Stack stack, boolean distroxRequest) {

@@ -7,10 +7,14 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageFailed;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.cloudstorage.ValidateCloudStorageSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.hostmetadatasetup.HostMetadataSetupSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigFailed;
+import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInstallFreeIpaSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
@@ -34,6 +38,10 @@ public enum UpscaleFlowEvent implements FlowEvent {
     UPSCALE_HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
     UPSCALE_HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
     UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT("UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT"),
+    UPSCALE_ORCHESTRATOR_CONFIG_FINISHED_EVENT(EventSelectorUtil.selector(OrchestratorConfigSuccess.class)),
+    UPSCALE_ORCHESTRATOR_CONFIG_FAILED_EVENT(EventSelectorUtil.selector(OrchestratorConfigFailed.class)),
+    UPSCALE_VALIDATING_CLOUD_STORAGE_FINISHED_EVENT(EventSelectorUtil.selector(ValidateCloudStorageSuccess.class)),
+    UPSCALE_VALIDATING_CLOUD_STORAGE_FAILED_EVENT(EventSelectorUtil.selector(ValidateCloudStorageFailed.class)),
     UPSCALE_FREEIPA_INSTALL_FINISHED_EVENT(EventSelectorUtil.selector(InstallFreeIpaServicesSuccess.class)),
     UPSCALE_FREEIPA_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(InstallFreeIpaServicesFailed.class)),
     UPSCALE_UPDATE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterProxyUpdateRegistrationSuccess.class)),
