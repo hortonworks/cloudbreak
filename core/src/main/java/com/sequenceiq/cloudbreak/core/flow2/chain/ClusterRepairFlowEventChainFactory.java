@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
@@ -83,7 +84,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                         instanceGroup.getId());
                 boolean primaryGatewayRepairable = primaryGatewayHostName.isPresent() && hostNames.contains(primaryGatewayHostName.get());
                 boolean singlePrimaryGatewayRepairable = primaryGatewayRepairable && !stack.isMultipleGateway();
-                if (singlePrimaryGatewayRepairable) {
+                if (singlePrimaryGatewayRepairable || StackType.DATALAKE.equals(stack.getType())) {
                     repairConfig.setSinglePrimaryGateway(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
                 } else if (primaryGatewayRepairable) {
                     repairConfig.setChangePGW(true);
