@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 
-class LiftieConnectorDeleteClusterTest extends LiftieConnectorTestBase {
+class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTestBase {
 
     private static final String LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG = "Unable to resolve Liftie response!";
 

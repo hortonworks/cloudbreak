@@ -21,9 +21,9 @@ class ExperienceServicesConfigTest {
 
     @Test
     void testWhenSettingTheExperiencesWithNullThenEmptyListShouldReturnInsteadOfNull() {
-        underTest.setExperiences(null);
+        underTest.setConfigs(null);
 
-        List<CommonExperience> result = underTest.getExperiences();
+        List<CommonExperience> result = underTest.getConfigs();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());

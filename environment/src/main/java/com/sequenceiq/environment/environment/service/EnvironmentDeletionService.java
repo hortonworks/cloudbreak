@@ -141,7 +141,7 @@ public class EnvironmentDeletionService {
                 throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
                         "This must be terminated before Environment deletion.");
             } else {
-                throw new BadRequestException("The given environment [\" + env.getName() + \"] has " + amountOfConnectedExperiences +
+                throw new BadRequestException("The given environment [" + env.getName() + "] has " + amountOfConnectedExperiences +
                         " connected experiences. " + "These must be terminated before Environment deletion.");
             }
         }

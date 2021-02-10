@@ -11,18 +11,18 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.environment.experience.common.CommonExperience;
 
 @Component
-@ConfigurationProperties("experience.scan.config")
+@ConfigurationProperties("environment.experience")
 public class ExperienceServicesConfig {
 
-    private List<CommonExperience> experiences;
+    private List<CommonExperience> configs;
 
     @NotNull
-    public List<CommonExperience> getExperiences() {
-        return experiences != null ? experiences : new LinkedList<>();
+    public List<CommonExperience> getConfigs() {
+        return configs != null ? configs : new LinkedList<>();
     }
 
-    public void setExperiences(List<CommonExperience> experiences) {
-        this.experiences = experiences;
+    public void setConfigs(List<CommonExperience> configs) {
+        this.configs = configs;
     }
 
 }

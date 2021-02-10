@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.experience.liftie.LiftieIgnorableCluste
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.constraints.NotNull;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.Experience;
 import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.api.LiftieApi;
+import com.sequenceiq.environment.experience.config.LiftieWorkloadsConfig;
 import com.sequenceiq.environment.experience.liftie.responses.ClusterView;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
@@ -24,17 +26,17 @@ public class ExperiencesByLiftie implements Experience {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperiencesByLiftie.class);
 
-    private final ExperienceIndependentLiftieClusterWorkloadProvider workloadProvider;
-
     private final ListClustersResponseValidator listClustersResponseValidator;
 
     private final LiftieApi liftieApi;
 
-    public ExperiencesByLiftie(ExperienceIndependentLiftieClusterWorkloadProvider workloadProvider, LiftieApi liftieApi,
+    private final Set<LiftieWorkload> workloads;
+
+    public ExperiencesByLiftie(LiftieWorkloadsConfig workloadConfig, LiftieApi liftieApi,
             ListClustersResponseValidator listClustersResponseValidator) {
         this.listClustersResponseValidator = listClustersResponseValidator;
-        this.workloadProvider = workloadProvider;
         this.liftieApi = liftieApi;
+        this.workloads = identifyConfiguredWorkloads(workloadConfig);
     }
 
     @Override
@@ -61,9 +63,20 @@ public class ExperiencesByLiftie implements Experience {
         return ExperienceSource.LIFTIE;
     }
 
+    private Set<LiftieWorkload> identifyConfiguredWorkloads(LiftieWorkloadsConfig config) {
+        Set<LiftieWorkload> workloads = config.getWorkloads();
+        if (workloads.isEmpty()) {
+            LOGGER.info("There are no configured Liftie Workload types in environment service! If you would like to check them, specify them" +
+                    " in the experiences-config.yml!");
+        } else {
+            LOGGER.info("The following Liftie Workloads are configured: {}", workloads);
+        }
+        return workloads;
+    }
+
     private List<ClusterView> getClusterViewsForWorkloads(String environmentName, String accountId) {
         List<ClusterView> clusterViews = new LinkedList<>();
-        workloadProvider.getWorkloadsLabels().forEach(workload -> clusterViews.addAll(getClusterViewsForWorkload(environmentName, accountId, workload)));
+        workloads.forEach(workload -> clusterViews.addAll(getClusterViewsForWorkload(environmentName, accountId, workload.getName())));
         return clusterViews;
     }
 
@@ -95,7 +108,7 @@ public class ExperiencesByLiftie implements Experience {
         return Math.toIntExact(clusterViews
                 .stream()
                 .map(clusterView -> clusterView.getClusterStatus().getStatus())
-                .filter(clusterStatus -> DELETED.isNotEqualTo(clusterStatus))
+                .filter(DELETED::isNotEqualTo)
                 .count());
     }
 

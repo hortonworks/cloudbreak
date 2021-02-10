@@ -13,6 +13,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -82,6 +84,9 @@ class ExperienceDeletionHandlerTest {
 
     @BeforeEach
     void setUp() {
+        Field experienceDeletionEnabledField = ReflectionUtils.findField(ExperienceDeletionHandler.class, "experienceDeletionEnabled");
+        ReflectionUtils.makeAccessible(experienceDeletionEnabledField);
+        ReflectionUtils.setField(experienceDeletionEnabledField, underTest, true);
         lenient().when(mockEnvironmentDeletionDtoEvent.getHeaders()).thenReturn(mockEventHeaders);
         lenient().when(mockEnvironmentDeletionDtoEvent.getData()).thenReturn(mockEnvironmentDeletionDto);
         lenient().when(mockEnvironmentDeletionDto.getResourceId()).thenReturn(TEST_ENV_ID);
@@ -93,7 +98,24 @@ class ExperienceDeletionHandlerTest {
         lenient().when(mockEnvironmentDto.getId()).thenReturn(TEST_ENV_ID);
         lenient().when(mockEnvironmentDto.getResourceId()).thenReturn(TEST_ENV_ID);
         lenient().doAnswer(i -> null).when(mockEventSender).sendEvent(baseNamedFlowEvent.capture(), any(Event.Headers.class));
+    }
 
+    @Test
+    void testExperienceDeletionDisabled() {
+        Field experienceDeletionEnabledField = ReflectionUtils.findField(ExperienceDeletionHandler.class, "experienceDeletionEnabled");
+        ReflectionUtils.makeAccessible(experienceDeletionEnabledField);
+        ReflectionUtils.setField(experienceDeletionEnabledField, underTest, false);
+
+        underTest.accept(mockEnvironmentDeletionDtoEvent);
+
+        verify(mockEntitlementService, never()).isExperienceDeletionEnabled(any());
+        verify(mockEnvironmentExperienceDeletionAction, never()).execute(any(), anyBoolean());
+
+        EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
+        assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
+        assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
+        assertThat(capturedDeleteEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
+        assertThat(capturedDeleteEvent.selector()).isEqualTo("START_DATALAKE_CLUSTERS_DELETE_EVENT");
     }
 
     @Test

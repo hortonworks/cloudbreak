@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
-class LiftieConnectorListClustersTest extends LiftieConnectorTestBase {
+class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestBase {
 
     private static final String LIFTIE_CLUSTER_ENDPOINT_PATH = "somewhereOverTheRainbow";
 

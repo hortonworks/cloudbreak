@@ -105,10 +105,13 @@ public class EnvironmentExperienceDeletionAction {
     }
 
     private void processFailure(Pair<PollingResult, Exception> result) {
+        String rootMsg = "Failed to delete Experience!";
         if (result.getRight() == null) {
-            throw new ExperienceOperationFailedException("Failed to delete Experience!");
+            LOGGER.debug("Experience deletion has failed but no exception has come from the polling result!");
+            throw new ExperienceOperationFailedException(rootMsg);
         }
-        throw new ExperienceOperationFailedException("Failed to delete Experience! " + experiencePollingFailureResolver.getMessageForFailure(result));
+        throw new ExperienceOperationFailedException(String.format("%s %s", rootMsg, experiencePollingFailureResolver.getMessageForFailure(result)),
+                result.getRight());
     }
 
 }

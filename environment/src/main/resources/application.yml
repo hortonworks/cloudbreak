@@ -126,6 +126,9 @@ environment:
         replacement: "FPW: [REDACTED]"
       - value: cdpHashedPassword=.*[']
         replacement: "[CDP PWD ATTRS REDACTED]"
+  experience:
+    scan:
+      enabled: false
 
 cb:
   authentication:
@@ -207,19 +210,4 @@ spring:
 notification:
   urls: http://localhost:3000/notifications
 
-experience:
-  scan:
-    protocol: https
-    liftie:
-      workloads: mon-platform
-      api:
-        port: 10090
-        address: localhost
-    path:
-      componentToReplace: "{crn}"
-    config:
-      experiences:
-        - name: DWX
-          hostAddress: localhost
-          internalEnvEndpoint: /dwx/{crn}
-          port: 10090
+

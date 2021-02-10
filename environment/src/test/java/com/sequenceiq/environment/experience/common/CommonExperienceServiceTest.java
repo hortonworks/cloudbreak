@@ -25,18 +25,14 @@ import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
-@ExtendWith({MockitoExtension.class})
+@ExtendWith(MockitoExtension.class)
 class CommonExperienceServiceTest {
-
-    private static final String XP_PROTOCOL = "https";
 
     private static final String TENANT = "someTenantValue";
 
     private static final String ENV_CRN = "someEnvCrnValue";
 
-    private static final String XP_PORT = "9999";
-
-    private static final String XP_HOST_ADDRESS = "127.0.0.1";
+    private static final String XP_API = "https://127.0.0.1:9999";
 
     private static final String XP_INTERNAL_ENV_ENDPOINT = "/somexp/api/v3/cp-internal/environment/{crn}";
 
@@ -70,9 +66,8 @@ class CommonExperienceServiceTest {
         lenient().when(mockEnvironment.getAccountId()).thenReturn(TENANT);
         lenient().when(mockEnvironment.getName()).thenReturn(TEST_XP_NAME);
         lenient().when(mockCommonExperience.getName()).thenReturn(TEST_XP_NAME);
-        lenient().when(mockCommonExperience.getInternalEnvEndpoint()).thenReturn(XP_INTERNAL_ENV_ENDPOINT);
-        lenient().when(mockCommonExperience.getHostAddress()).thenReturn(XP_HOST_ADDRESS);
-        lenient().when(mockCommonExperience.getPort()).thenReturn(XP_PORT);
+        lenient().when(mockCommonExperience.getInternalEnvironmentEndpoint()).thenReturn(XP_INTERNAL_ENV_ENDPOINT);
+        lenient().when(mockCommonExperience.getAddress()).thenReturn(XP_API);
     }
 
     @Test
@@ -107,7 +102,7 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenNoConfiguredExperienceExistsThenNoXpConnectorServiceCallHappens() {
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(Collections.emptyList());
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(Collections.emptyList());
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
@@ -119,7 +114,7 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenNoConfiguredExperienceExistsThenZeroReturns() {
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(Collections.emptyList());
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(Collections.emptyList());
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
@@ -131,7 +126,7 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenHaveConfiguredExperienceButItsNotProperlyFilledThenNoXpConnectorServiceCallHappens() {
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(false);
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
@@ -144,7 +139,7 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenHaveConfiguredExperienceButItsNotProperlyFilledThenZeroReturns() {
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(false);
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
@@ -157,9 +152,9 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredThenPathToExperienceShouldBeCombindedProperly() {
-        String expectedPath = XP_PROTOCOL + "://" + XP_HOST_ADDRESS + ":" + XP_PORT + XP_INTERNAL_ENV_ENDPOINT;
+        String expectedPath = XP_API + XP_INTERNAL_ENV_ENDPOINT;
         when(mockCommonExperiencePathCreator.createPathToExperience(mockCommonExperience)).thenReturn(expectedPath);
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
@@ -175,7 +170,7 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredButHasNoActiveWorkspaceForEnvThenZeroReturns() {
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
         when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Collections.emptySet());
@@ -190,7 +185,7 @@ class CommonExperienceServiceTest {
 
     @Test
     void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredAndHasActiveWorkspaceForEnvThenCountReturns() {
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
         when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of("SomeConnectedXP"));
@@ -207,7 +202,7 @@ class CommonExperienceServiceTest {
     void testDeleteConnectedExperiences() {
         String xpPath = "somePath";
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
-        when(mockExperienceServicesConfig.getExperiences()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockCommonExperiencePathCreator.createPathToExperience(mockCommonExperience)).thenReturn(xpPath);
         when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of(TEST_XP_NAME));
 

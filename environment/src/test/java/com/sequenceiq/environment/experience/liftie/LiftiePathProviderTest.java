@@ -6,19 +6,15 @@ import org.junit.jupiter.api.Test;
 
 class LiftiePathProviderTest {
 
-    private static final String CLUSTER_ENDPOINT_FORMAT_TEMPLATE = "%s://%s:%s/liftie/api/v1/cluster";
+    private static final String CLUSTER_ENDPOINT_FORMAT_TEMPLATE = "%s/liftie/api/v1/cluster";
 
-    private static final String LIFTIE_PORT = "1234";
-
-    private static final String LIFTIE_ADDRESS = "localhost";
-
-    private static final String LIFTIE_PROTOCOL = "https";
+    private static final String LIFTIE_API = "https://localhost:1234";
 
     private LiftiePathProvider underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new LiftiePathProvider(LIFTIE_PORT, LIFTIE_ADDRESS, LIFTIE_PROTOCOL);
+        underTest = new LiftiePathProvider(LIFTIE_API);
     }
 
     @Test
@@ -41,7 +37,7 @@ class LiftiePathProviderTest {
     }
 
     private String getExpectedClusterEndpointPathString() {
-        return String.format(CLUSTER_ENDPOINT_FORMAT_TEMPLATE, LIFTIE_PROTOCOL, LIFTIE_ADDRESS, LIFTIE_PORT);
+        return String.format(CLUSTER_ENDPOINT_FORMAT_TEMPLATE, LIFTIE_API);
     }
 
 }

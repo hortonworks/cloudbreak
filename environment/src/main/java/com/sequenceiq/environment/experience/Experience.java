@@ -8,7 +8,7 @@ public interface Experience {
 
     /**
      * Operation that counts and returns the number of clusters/workspaces that
-     * is connected to the environment given environment.
+     * is connected to the given environment.
      *
      * @param environment the {@link EnvironmentExperienceDto} DTO class that contains the
      *                    necessary data for the deletion.
