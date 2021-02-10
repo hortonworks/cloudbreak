@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -x
 
-./gradlew -Penv=jenkins -b build.gradle buildInfo build uploadBootArchives -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+./gradlew -Penv=jenkins -b build.gradle buildInfo build uploadBootArchives :freeipa-client:uploadArchives -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
 
 if [[ "${RUN_SONARQUBE}" == "true" ]]; then
     ./gradlew -Penv=jenkins -b build.gradle core:sonarqube core:jacocoTestReport
