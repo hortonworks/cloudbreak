@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience.common;
 
+import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -50,7 +51,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     public Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        Optional<Response> result = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.get(call));
+        Optional<Response> result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
             Optional<CpInternalEnvironmentResponse> response = responseReader
                     .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
@@ -65,7 +66,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        Optional<Response> response = executeCall(webTarget.getUri().toString(), () -> retryableWebTarget.delete(call));
+        Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call));
         if (response.isPresent()) {
             return responseReader.read(webTarget.getUri().toString(), response.get(), DeleteCommonExperienceWorkspaceResponse.class)
                     .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
@@ -73,8 +74,8 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
         throw new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
 
-    private Optional<Response> executeCall(String path, Callable<Response> toCall) {
-        LOGGER.debug("About to connect to experience on path: {}", path);
+    private Optional<Response> executeCall(URI path, Callable<Response> toCall) {
+        LOGGER.debug("About to connect to experience on path: {}", path.toString());
         try {
             return Optional.ofNullable(toCall.call());
         } catch (Exception re) {

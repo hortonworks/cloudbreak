@@ -1,0 +1,14 @@
+environment:
+  experience:
+    liftie:
+      workloads:
+        - name: mon-platform
+          description: Monitoring Clusters
+      address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
+    path:
+      componentToReplace: "{environmentCrn}"
+    configs:
+      - name: DWX
+        description: Data Warehouse Clusters
+        address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
+        internalEnvironmentEndpoint: /dwx/{environmentCrn}

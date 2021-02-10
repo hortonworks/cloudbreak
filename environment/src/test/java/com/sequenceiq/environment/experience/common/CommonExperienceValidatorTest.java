@@ -10,9 +10,7 @@ import org.junit.jupiter.params.provider.ArgumentsSource;
 
 class CommonExperienceValidatorTest {
 
-    private static final String XP_PORT = "somePortValue";
-
-    private static final String XP_HOST_ADDRESS = "somePrefixValue";
+    private static final String XP_HOST_ADDRESS = "somePrefixValue:somePortValue";
 
     private static final String XP_ENV_ENDPOINT = "someInfixValue";
 
@@ -33,7 +31,7 @@ class CommonExperienceValidatorTest {
 
     @Test
     void testIsExperienceFilledWhenAllTheFieldsAreValidThenTrueReturns() {
-        boolean result = underTest.isExperienceFilled(new CommonExperience("awesomeXP", XP_HOST_ADDRESS, XP_ENV_ENDPOINT, XP_PORT));
+        boolean result = underTest.isExperienceFilled(new CommonExperience("awesomeXP", "awesomeDescription", XP_ENV_ENDPOINT, XP_HOST_ADDRESS));
 
         assertTrue(result);
     }

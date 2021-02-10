@@ -2,8 +2,10 @@ package com.sequenceiq.environment.experience.liftie;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
+import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -14,7 +16,7 @@ import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.ResponseReader;
@@ -23,12 +25,14 @@ import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
-@Component
-public class LiftieConnector implements LiftieApi {
+@Service
+public class LiftieConnectorService implements LiftieApi {
+
+    private static final String LIFTIE_CALL_EXEC_FAILED_MSG = "Something happened while the Liftie connection has attempted!";
 
     private static final String LIFTIE_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve Liftie response!";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LiftieConnector.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LiftieConnectorService.class);
 
     private final InvocationBuilderProvider invocationBuilderProvider;
 
@@ -40,7 +44,7 @@ public class LiftieConnector implements LiftieApi {
 
     private final Client client;
 
-    public LiftieConnector(LiftiePathProvider liftiePathProvider, LiftieResponseReader liftieResponseReader, RetryableWebTarget retryableWebTarget,
+    public LiftieConnectorService(LiftiePathProvider liftiePathProvider, LiftieResponseReader liftieResponseReader, RetryableWebTarget retryableWebTarget,
             Client client, InvocationBuilderProvider invocationBuilderProvider) {
         this.invocationBuilderProvider = invocationBuilderProvider;
         this.liftiePathProvider = liftiePathProvider;
@@ -61,11 +65,11 @@ public class LiftieConnector implements LiftieApi {
         putIfPresent(queryParams, "page", page != null ? page.toString() : null);
         webTarget = setQueryParams(webTarget, queryParams);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        try (Response result = retryableWebTarget.get(call)) {
+        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, ListClustersResponse.class)
                     .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {
-            LOGGER.warn("Something happened while the Liftie connection has attempted!", e);
+            LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
             throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
         }
     }
@@ -75,12 +79,22 @@ public class LiftieConnector implements LiftieApi {
         LOGGER.debug("About to connect Liftie API to delete cluster {}", clusterId);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClusterEndpoint(clusterId));
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        try (Response result = retryableWebTarget.delete(call)) {
+        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
                     .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {
-            LOGGER.warn("Something happened while the Liftie connection has attempted!", e);
+            LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
             throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+        }
+    }
+
+    private Response executeCall(URI path, Callable<Response> toCall) {
+        LOGGER.debug("About to connect to Liftie on path: {}", path);
+        try {
+            return toCall.call();
+        } catch (Exception re) {
+            LOGGER.warn("Liftie http call execution has failed due to:", re);
+            throw new IllegalStateException(re);
         }
     }
 
