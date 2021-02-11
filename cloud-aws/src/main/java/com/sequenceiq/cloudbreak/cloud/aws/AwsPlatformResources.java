@@ -5,6 +5,11 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.ST1;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
@@ -23,13 +28,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,6 +52,9 @@ import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
@@ -58,7 +66,10 @@ import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
+import com.amazonaws.services.ec2.model.DiskInfo;
 import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.InstanceStorageInfo;
+import com.amazonaws.services.ec2.model.InstanceTypeInfo;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.KeyPairInfo;
@@ -109,21 +120,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
-import com.sequenceiq.cloudbreak.cloud.model.PropertySpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
-import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
@@ -133,7 +138,6 @@ import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
 @Service
@@ -143,9 +147,29 @@ public class AwsPlatformResources implements PlatformResources {
 
     private static final int UNAUTHORIZED = 403;
 
-    private static final String OPEN_CIDR_BLOCK = "0.0.0.0/0";
-
     private static final String ENABLED_AVAILABILITY_ZONES_FILE = "enabled-availability-zones";
+
+    private static final int SEGMENT = 100;
+
+    private static final int MINIMUM_MAGNETIC_SIZE = 1;
+
+    private static final int ONE = 1;
+
+    private static final int MAXIMUM_MAGNETIC_SIZE = 1024;
+
+    private static final int TWENTY_FOUR = 24;
+
+    private static final int MAXIMUM_ST1_SIZE = 17592;
+
+    private static final int MINIMUM_SSD_SIZE = 1;
+
+    private static final int MAXIMUM_SSD_SIZE = 17592;
+
+    private static final int MINIMUM_ST1_SIZE = 500;
+
+    private static final int MAX_RESULTS = 1000;
+
+    private static final int ONE_THOUSAND = 1000;
 
     @Inject
     private AwsClient awsClient;
@@ -187,11 +211,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
-    private final Map<Region, Set<VmType>> vmTypes = new HashMap<>();
-
     private final Map<Region, VmType> defaultVmTypes = new HashMap<>();
-
-    private final Map<Region, VmType> defaultDistroxVmTypes = new HashMap<>();
 
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
@@ -204,67 +224,10 @@ public class AwsPlatformResources implements PlatformResources {
         readEnabledRegionsAndAvailabilityZones();
         regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
         regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
-        readVmTypes();
-    }
-
-    private String getDefinition(String parameter, String type) {
-        return Strings.isNullOrEmpty(parameter) ? resourceDefinition(type) : FileReaderUtils.readFileFromClasspathQuietly(parameter);
     }
 
     public String resourceDefinition(String resource) {
         return cloudbreakResourceReaderService.resourceDefinition("aws", resource);
-    }
-
-    private void readVmTypes() {
-        Map<String, VmType> vmTypeMap = new TreeMap<>();
-        String vm = getDefinition(awsVmParameterDefinitionPath, "vm");
-        String zoneVms = getDefinition(awsVmParameterDefinitionPath, "zone-vm");
-        try {
-            VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
-            for (VmSpecification vmSpecification : oVms.getItems()) {
-                PropertySpecification properties = vmSpecification.getMetaSpecification().getProperties();
-                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
-                        .withCpuAndMemory(Integer.valueOf(properties.getCpu()), Float.valueOf(properties.getMemory()))
-                        .withPrice(properties.getPrice())
-                        .withVolumeEncryptionSupport(Boolean.TRUE.equals(properties.getEncryptionSupported()));
-                for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
-                    addConfig(builder, configSpecification);
-                }
-                VmTypeMeta vmTypeMeta = builder.create();
-                vmTypeMap.put(vmSpecification.getValue(), VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, vmSpecification.getExtended()));
-            }
-            ZoneVmSpecifications zoneVmSpecifications = JsonUtil.readValue(zoneVms, ZoneVmSpecifications.class);
-            for (ZoneVmSpecification zvs : zoneVmSpecifications.getItems()) {
-                Region region = region(zvs.getZone());
-                if (!enabledRegions.contains(region)) {
-                    continue;
-                }
-                Set<VmType> regionVmTypes = new HashSet<>();
-                for (String vmTypeString : zvs.getVmTypes()) {
-                    VmType vmType = vmTypeMap.get(vmTypeString);
-                    if (vmType != null) {
-                        regionVmTypes.add(vmType);
-                    }
-                }
-                vmTypes.put(region, regionVmTypes);
-                Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
-                        .filter(enabledInstanceTypeFilter)
-                        .ifPresent(vmType -> defaultVmTypes.put(region, vmType));
-                if (restrictInstanceTypes) {
-                    Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
-                            .filter(enabledDistroxInstanceTypeFilter)
-                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region, vmType));
-                } else {
-                    Optional.ofNullable(vmTypeMap.get(zvs.getDefaultVmType()))
-                            .filter(enabledInstanceTypeFilter)
-                            .ifPresent(vmType -> defaultDistroxVmTypes.put(region, vmType));
-                }
-            }
-        } catch (IOException e) {
-            LOGGER.error("Cannot initialize platform parameters for aws", e);
-        } catch (NumberFormatException e) {
-            LOGGER.error("One of CPU or Memory fields has unexpected format", e);
-        }
     }
 
     private void addConfig(VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
@@ -272,11 +235,11 @@ public class AwsPlatformResources implements PlatformResources {
             builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
         } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
             builder.withEphemeralConfig(volumeParameterConfig(configSpecification));
-        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.MAGNETIC.name())) {
+        } else if (configSpecification.getVolumeParameterType().equals(MAGNETIC.name())) {
             builder.withMagneticConfig(volumeParameterConfig(configSpecification));
         } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.SSD.name())) {
             builder.withSsdConfig(volumeParameterConfig(configSpecification));
-        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.ST1.name())) {
+        } else if (configSpecification.getVolumeParameterType().equals(ST1.name())) {
             builder.withSt1Config(volumeParameterConfig(configSpecification));
         }
     }
@@ -675,10 +638,38 @@ public class AwsPlatformResources implements PlatformResources {
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
 
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        AmazonEC2Client ec2Client = awsClient.createAccess(awsCredentialView, region.getRegionName());
+
+        List<String> instanceTypes = ec2Client
+                .describeInstanceTypeOfferings(getOfferingsRequest(region))
+                .getInstanceTypeOfferings()
+                .stream()
+                .map(e -> e.getInstanceType())
+                .collect(Collectors.toList());
+
+        Set<VmType> awsInstances = new HashSet<>();
+        for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment = actualSegment + SEGMENT) {
+            DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
+            request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
+            getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
+        }
+        fillUpAvailabilityZones(region, enabledInstanceTypeFilter, regions, cloudVmResponses, defaultCloudVmResponses, awsInstances);
+        filterInstancesByFilters(enabledInstanceTypeFilter, cloudVmResponses);
+
+        return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    private void fillUpAvailabilityZones(Region region,
+        Predicate<VmType> enabledInstanceTypeFilter,
+        CloudRegions regions,
+        Map<String, Set<VmType>> cloudVmResponses,
+        Map<String, VmType> defaultCloudVmResponses,
+        Set<VmType> awsInstances) {
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(region);
         if (availabilityZones != null && !availabilityZones.isEmpty()) {
             for (AvailabilityZone availabilityZone : availabilityZones) {
-                Set<VmType> types = vmTypes.get(region).stream()
+                Set<VmType> types = awsInstances.stream()
                         .filter(enabledInstanceTypeFilter)
                         .collect(Collectors.toSet());
                 cloudVmResponses.put(availabilityZone.value(), types);
@@ -687,8 +678,84 @@ public class AwsPlatformResources implements PlatformResources {
         } else {
             LOGGER.info("Availability zones is null or empty in {}", region.getRegionName());
         }
+    }
 
-        return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    private DescribeInstanceTypeOfferingsRequest getOfferingsRequest(Region region) {
+        return new DescribeInstanceTypeOfferingsRequest()
+                .withLocationType("region")
+                .withFilters(new Filter().withName("location").withValues(region.getRegionName()))
+                .withMaxResults(MAX_RESULTS);
+    }
+
+    private void filterInstancesByFilters(Predicate<VmType> enabledInstanceTypeFilter, Map<String, Set<VmType>> cloudVmResponses) {
+        if (restrictInstanceTypes) {
+            cloudVmResponses.entrySet().forEach(az -> {
+                Set<VmType> vmTypes = cloudVmResponses.get(az.getKey())
+                        .stream()
+                        .filter(enabledDistroxInstanceTypeFilter)
+                        .collect(Collectors.toSet());
+                cloudVmResponses.put(az.getKey(), vmTypes);
+            });
+        } else {
+            cloudVmResponses.entrySet().forEach(az -> {
+                Set<VmType> vmTypes = cloudVmResponses.get(az.getKey())
+                        .stream()
+                        .filter(enabledInstanceTypeFilter)
+                        .collect(Collectors.toSet());
+                cloudVmResponses.put(az.getKey(), vmTypes);
+            });
+        }
+    }
+
+    private void getVmTypesWithAwsCall(Set<VmType> awsInstances, DescribeInstanceTypesResult describeInstanceTypesResult) {
+        for (InstanceTypeInfo instanceType : describeInstanceTypesResult.getInstanceTypes()) {
+            if (!instanceType.isBareMetal()) {
+                VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
+                        .withCpuAndMemory(instanceType.getVCpuInfo().getDefaultVCpus(), getMemory(instanceType))
+                        .withMagneticConfig(new VolumeParameterConfig(
+                                MAGNETIC,
+                                MINIMUM_MAGNETIC_SIZE,
+                                MAXIMUM_MAGNETIC_SIZE,
+                                ONE,
+                                TWENTY_FOUR))
+                        .withSsdConfig(new VolumeParameterConfig(
+                                SSD,
+                                MINIMUM_SSD_SIZE,
+                                MAXIMUM_SSD_SIZE,
+                                ONE,
+                                TWENTY_FOUR))
+                        .withSt1Config(new VolumeParameterConfig(
+                                ST1,
+                                MINIMUM_ST1_SIZE,
+                                MAXIMUM_ST1_SIZE,
+                                ONE,
+                                TWENTY_FOUR));
+                if (instanceType.getInstanceStorageSupported()) {
+                    InstanceStorageInfo instanceStorageInfo = instanceType.getInstanceStorageInfo();
+                    DiskInfo diskInfo = instanceStorageInfo.getDisks().get(0);
+                    vmTypeMetaBuilder.withEphemeralConfig(new VolumeParameterConfig(
+                            EPHEMERAL,
+                            diskInfo.getSizeInGB().intValue(),
+                            diskInfo.getSizeInGB().intValue(),
+                            diskInfo.getCount(),
+                            diskInfo.getCount()));
+                }
+                if (Boolean.valueOf(instanceType.getEbsInfo().getEncryptionSupport())) {
+                    vmTypeMetaBuilder.withVolumeEncryptionSupport(true);
+                }
+                VmType vmType = vmTypeWithMeta(instanceType.getInstanceType(), vmTypeMetaBuilder.create(), true);
+                awsInstances.add(vmType);
+            }
+        }
+    }
+
+    private float getMemory(InstanceTypeInfo instanceType) {
+        return (float) instanceType.getMemoryInfo().getSizeInMiB() / ONE_THOUSAND;
+    }
+
+    @NotNull
+    private List<String> getInstanceTypes(List<String> instanceTypes, int i) {
+        return instanceTypes.subList(i, (i + SEGMENT) < instanceTypes.size() ? (i + SEGMENT) : instanceTypes.size());
     }
 
     @Override
