@@ -37,6 +37,7 @@ auth:
     environment.experience.deletion.enable: true
     endpointgateway.enable: false
     cm.sync.command.poller.enable: true
+    user.sync.credentials.update.optimization.enable: true
     azure:
       disk:
         SSEWithCMK.enable: true

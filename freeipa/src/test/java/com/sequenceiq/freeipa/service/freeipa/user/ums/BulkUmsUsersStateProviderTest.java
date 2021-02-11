@@ -145,6 +145,7 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                 .setPasswordHashExpirationDate(response.getPasswordHashExpirationDate())
                 .addAllKerberosKeys(response.getKerberosKeysList())
                 .addAllSshPublicKey(response.getSshPublicKeyList())
+                .setWorkloadCredentialsVersion(response.getWorkloadCredentialsVersion())
                 .build();
     }
 }

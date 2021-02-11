@@ -241,6 +241,11 @@ public class MockUserManagementServiceTest {
 
                 {"enableAzureDiskSSEWithCMK false", "enableAzureDiskSSEWithCMK", false, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", false},
                 {"enableAzureDiskSSEWithCMK true", "enableAzureDiskSSEWithCMK", true, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", true},
+
+                {"userSyncCredentialsUpdateOptimizationEnabled false", "userSyncCredentialsUpdateOptimizationEnabled", false,
+                        "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
+                {"userSyncCredentialsUpdateOptimizationEnabled true", "userSyncCredentialsUpdateOptimizationEnabled", true,
+                        "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", true},
         };
     }
 

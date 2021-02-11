@@ -13,13 +13,19 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
+import javax.inject.Inject;
+
 @Service
 public class FreeIpaUsersStateProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUsersStateProvider.class);
+
+    @Inject
+    private UserMetadataConverter userMetadataConverter;
 
     public UsersState getUsersState(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         LOGGER.debug("Retrieving all users from FreeIPA");
@@ -29,6 +35,7 @@ public class FreeIpaUsersStateProvider {
                 .filter(user -> !IPA_PROTECTED_USERS.contains(user.getUid()))
                 .forEach(user -> {
                     builder.addUser(fromIpaUser(user));
+                    userMetadataConverter.toUserMetadata(user).ifPresent(meta -> builder.addUserMetadata(user.getUid(), meta));
                     if (null != user.getMemberOfGroup()) {
                         user.getMemberOfGroup().stream()
                                 .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
@@ -63,6 +70,7 @@ public class FreeIpaUsersStateProvider {
             if (ipaUserOptional.isPresent()) {
                 com.sequenceiq.freeipa.client.model.User ipaUser = ipaUserOptional.get();
                 builder.addUser(fromIpaUser(ipaUser));
+                userMetadataConverter.toUserMetadata(ipaUser).ifPresent(meta -> builder.addUserMetadata(ipaUser.getUid(), meta));
                 if (ipaUser.getMemberOfGroup() != null) {
                     ipaUser.getMemberOfGroup().stream()
                             .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))

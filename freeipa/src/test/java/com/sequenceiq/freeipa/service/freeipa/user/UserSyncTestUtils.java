@@ -1,11 +1,16 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 public class UserSyncTestUtils {
     public static final String ACCOUNT_ID = UUID.randomUUID().toString();
@@ -32,5 +37,14 @@ public class UserSyncTestUtils {
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();
         umsEventGenerationIds.setEventGenerationIds(Map.of(UUID.randomUUID().toString(), UUID.randomUUID().toString()));
         return umsEventGenerationIds;
+    }
+
+    public static WorkloadCredential createWorkloadCredential(String hashedPassword, long credentialsVersion) {
+        return new WorkloadCredential(hashedPassword,
+                List.of(),
+                Optional.of(Instant.now()),
+                List.of(UserManagementProto.SshPublicKey.newBuilder().setPublicKey("fakepublickey").build(),
+                        UserManagementProto.SshPublicKey.newBuilder().setPublicKey("anotherfakepublickey").build()),
+                credentialsVersion);
     }
 }

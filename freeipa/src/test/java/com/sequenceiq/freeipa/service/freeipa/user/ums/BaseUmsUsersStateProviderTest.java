@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
@@ -107,22 +108,25 @@ class BaseUmsUsersStateProviderTest {
         Multimap<String, String> groupsPerMember = Multimaps.invertFrom(usersState.getGroupMembership(),
                 ArrayListMultimap.<String, String>create());
         testData.users.forEach(u ->
-                verifyActor(u.getCrn(), u.getWorkloadUsername(), usersState, workloadUsersWithAccess,
+                verifyActor(u.getCrn(), u.getWorkloadUsername(), workloadUsersWithAccess,
                         groupsPerMember.get(u.getWorkloadUsername()),
-                        state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername())));
+                        state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername()),
+                        usersState.getUserMetadataMap().get(u.getWorkloadUsername())));
         testData.machineUsers.forEach(u ->
-                verifyActor(u.getCrn(), u.getWorkloadUsername(), usersState, workloadUsersWithAccess,
+                verifyActor(u.getCrn(), u.getWorkloadUsername(), workloadUsersWithAccess,
                         groupsPerMember.get(u.getWorkloadUsername()),
-                        state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername())));
+                        state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername()),
+                        usersState.getUserMetadataMap().get(u.getWorkloadUsername())));
 
         assertEquals(testData.servicePrincipalCloudIdentities, state.getServicePrincipalCloudIdentities());
     }
 
     private void verifyActor(
             String actorCrn, String workloadUsername,
-            UsersState usersState, Set<String> workloadUsersWithAccess,
+            Set<String> workloadUsersWithAccess,
             Collection<String> actualGroups,
-            WorkloadCredential workloadCredential) {
+            WorkloadCredential workloadCredential,
+            UserMetadata userMetadata) {
         if (testData.memberCrnToActorRights.get(actorCrn).get(UserSyncConstants.RIGHTS.get(0))) {
             assertTrue(workloadUsersWithAccess.contains(workloadUsername));
             Map<String, Boolean> expectedGroupMembership = testData.memberCrnToGroupMembership.get(actorCrn);
@@ -144,9 +148,12 @@ class BaseUmsUsersStateProviderTest {
             testData.wagsForOtherEnvironment.forEach(wag ->
                     assertFalse(actualGroups.contains(wag.getWorkloadAdministrationGroupName())));
             verifyWorkloadCredential(actorCrn, workloadCredential);
+            assertEquals(actorCrn, userMetadata.getCrn());
+            assertEquals(workloadCredential.getVersion(), userMetadata.getWorkloadCredentialsVersion());
         } else {
             assertFalse(workloadUsersWithAccess.contains(workloadUsername));
             assertNull(workloadCredential);
+            assertNull(userMetadata);
         }
     }
 
@@ -157,6 +164,7 @@ class BaseUmsUsersStateProviderTest {
         assertEquals(expected.getPasswordHash(), workloadCredential.getHashedPassword());
         assertEquals(expected.getKerberosKeysList(), workloadCredential.getKeys());
         assertEquals(expected.getSshPublicKeyList(), workloadCredential.getSshPublicKeys());
+        assertEquals(expected.getWorkloadCredentialsVersion(), workloadCredential.getVersion());
     }
 
     private static String createEnvironmentCrn() {
@@ -239,6 +247,7 @@ class BaseUmsUsersStateProviderTest {
                             .setPublicKeyFingerprint(RandomStringUtils.randomAlphabetic(10))
                             .setDescription(RandomStringUtils.randomAlphabetic(10))
                             .build())
+                    .setWorkloadCredentialsVersion(randomNonNegativeLong())
                     .build();
         }
 
@@ -363,6 +372,11 @@ class BaseUmsUsersStateProviderTest {
                                     .build())
                             .build())
                     .build();
+        }
+
+        private static long randomNonNegativeLong() {
+            long val = RANDOM.nextLong();
+            return val == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(val);
         }
     }
 }

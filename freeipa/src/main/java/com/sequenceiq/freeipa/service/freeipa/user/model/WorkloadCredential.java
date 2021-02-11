@@ -19,12 +19,15 @@ public class WorkloadCredential {
 
     private final ImmutableList<SshPublicKey> sshPublicKeys;
 
+    private final long version;
+
     public WorkloadCredential(String hashedPassword, Collection<ActorKerberosKey> keys, Optional<Instant> expirationDate,
-            Collection<SshPublicKey> sshPublicKeys) {
+            Collection<SshPublicKey> sshPublicKeys, long version) {
         this.hashedPassword = hashedPassword;
         this.keys = ImmutableList.copyOf(keys);
         this.expirationDate = expirationDate;
         this.sshPublicKeys = ImmutableList.copyOf(sshPublicKeys);
+        this.version = version;
     }
 
     public String getHashedPassword() {
@@ -41,5 +44,9 @@ public class WorkloadCredential {
 
     public ImmutableList<SshPublicKey> getSshPublicKeys() {
         return sshPublicKeys;
+    }
+
+    public long getVersion() {
+        return version;
     }
 }
