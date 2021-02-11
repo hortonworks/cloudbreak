@@ -49,6 +49,7 @@ public class ActorHandler {
     public void handleActor(
             EnvironmentAccessRights environmentAccessRights,
             FmsUser fmsUser,
+            String actorCrn,
             Supplier<Collection<String>> groupCrnMembershipSupplier,
             Supplier<Collection<String>> wagMembershipSupplier,
             Supplier<WorkloadCredential> workloadCredentialSupplier,
@@ -87,6 +88,7 @@ public class ActorHandler {
             }
 
             umsUsersStateBuilder.addWorkloadCredentials(workloadUsername, workloadCredential);
+            umsUsersStateBuilder.addUserCrn(workloadUsername, actorCrn);
             umsUsersStateBuilder.addUserCloudIdentities(workloadUsername, cloudIdentityList);
             usersStateBuilder.addUser(fmsUser);
         }

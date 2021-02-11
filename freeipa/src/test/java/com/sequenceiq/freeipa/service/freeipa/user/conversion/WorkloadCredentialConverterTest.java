@@ -22,6 +22,7 @@ class WorkloadCredentialConverterTest {
         long passwordExpiration = System.currentTimeMillis();
         List<UserManagementProto.SshPublicKey> sshPublicKeys = List.of(
                 UserManagementProto.SshPublicKey.newBuilder().build());
+        long workloadCredentialsVersion = 123L;
 
         Optional<Instant> expectedPasswordExpiration = Optional.of(Instant.ofEpochMilli(passwordExpiration));
 
@@ -31,6 +32,7 @@ class WorkloadCredentialConverterTest {
                         .setPasswordHashExpirationDate(passwordExpiration)
                         .addAllKerberosKeys(kerberosKeys)
                         .addAllSshPublicKey(sshPublicKeys)
+                        .setWorkloadCredentialsVersion(workloadCredentialsVersion)
                         .build();
 
         WorkloadCredential workloadCredential = underTest.toWorkloadCredential(actorWorkloadCredentials);
@@ -39,6 +41,7 @@ class WorkloadCredentialConverterTest {
         assertEquals(expectedPasswordExpiration, workloadCredential.getExpirationDate());
         assertIterableEquals(kerberosKeys, workloadCredential.getKeys());
         assertIterableEquals(sshPublicKeys, workloadCredential.getSshPublicKeys());
+        assertEquals(workloadCredentialsVersion, workloadCredential.getVersion());
     }
 
     @Test
@@ -49,6 +52,7 @@ class WorkloadCredentialConverterTest {
         long passwordExpiration = 0;
         List<UserManagementProto.SshPublicKey> sshPublicKeys = List.of(
                 UserManagementProto.SshPublicKey.newBuilder().build());
+        long workloadCredentialsVersion = 0L;
 
         Optional<Instant> expectedPasswordExpiration = Optional.empty();
 
@@ -58,6 +62,7 @@ class WorkloadCredentialConverterTest {
                         .setPasswordHashExpirationDate(passwordExpiration)
                         .addAllKerberosKeys(kerberosKeys)
                         .addAllSshPublicKey(sshPublicKeys)
+                        .setWorkloadCredentialsVersion(workloadCredentialsVersion)
                         .build();
 
         WorkloadCredential workloadCredential = underTest.toWorkloadCredential(actorWorkloadCredentials);
@@ -66,6 +71,7 @@ class WorkloadCredentialConverterTest {
         assertEquals(expectedPasswordExpiration, workloadCredential.getExpirationDate());
         assertIterableEquals(kerberosKeys, workloadCredential.getKeys());
         assertIterableEquals(sshPublicKeys, workloadCredential.getSshPublicKeys());
+        assertEquals(workloadCredentialsVersion, workloadCredential.getVersion());
     }
 
     @Test
@@ -76,7 +82,7 @@ class WorkloadCredentialConverterTest {
         long passwordExpiration = System.currentTimeMillis();
         List<UserManagementProto.SshPublicKey> sshPublicKeys = List.of(
                 UserManagementProto.SshPublicKey.newBuilder().build());
-
+        long workloadCredentialsVersion = 123L;
         Optional<Instant> expectedPasswordExpiration = Optional.of(Instant.ofEpochMilli(passwordExpiration));
 
         UserManagementProto.GetActorWorkloadCredentialsResponse actorWorkloadCredentials =
@@ -85,6 +91,7 @@ class WorkloadCredentialConverterTest {
                         .setPasswordHashExpirationDate(passwordExpiration)
                         .addAllKerberosKeys(kerberosKeys)
                         .addAllSshPublicKey(sshPublicKeys)
+                        .setWorkloadCredentialsVersion(workloadCredentialsVersion)
                         .build();
 
         WorkloadCredential workloadCredential = underTest.toWorkloadCredential(actorWorkloadCredentials);
@@ -93,6 +100,7 @@ class WorkloadCredentialConverterTest {
         assertEquals(expectedPasswordExpiration, workloadCredential.getExpirationDate());
         assertIterableEquals(kerberosKeys, workloadCredential.getKeys());
         assertIterableEquals(sshPublicKeys, workloadCredential.getSshPublicKeys());
+        assertEquals(workloadCredentialsVersion, workloadCredential.getVersion());
     }
 
     @Test
@@ -103,6 +111,7 @@ class WorkloadCredentialConverterTest {
         long passwordExpiration = 0;
         List<UserManagementProto.SshPublicKey> sshPublicKeys = List.of(
                 UserManagementProto.SshPublicKey.newBuilder().build());
+        long workloadCredentialsVersion = 123L;
 
         Optional<Instant> expectedPasswordExpiration = Optional.empty();
 
@@ -112,6 +121,7 @@ class WorkloadCredentialConverterTest {
                         .setPasswordHashExpirationDate(passwordExpiration)
                         .addAllKerberosKeys(kerberosKeys)
                         .addAllSshPublicKey(sshPublicKeys)
+                        .setWorkloadCredentialsVersion(workloadCredentialsVersion)
                         .build();
 
         WorkloadCredential workloadCredential = underTest.toWorkloadCredential(actorWorkloadCredentials);
@@ -120,5 +130,6 @@ class WorkloadCredentialConverterTest {
         assertEquals(expectedPasswordExpiration, workloadCredential.getExpirationDate());
         assertIterableEquals(kerberosKeys, workloadCredential.getKeys());
         assertIterableEquals(sshPublicKeys, workloadCredential.getSshPublicKeys());
+        assertEquals(workloadCredentialsVersion, workloadCredential.getVersion());
     }
 }

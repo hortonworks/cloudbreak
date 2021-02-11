@@ -36,6 +36,8 @@ class UmsCredentialProviderTest {
 
     private static final List<ActorKerberosKey> ACTOR_KERBEROS_KEY_LIST = List.of(ACTOR_KERBEROS_KEY_01, ACTOR_KERBEROS_KEY_02);
 
+    private static final long WORKLOAD_CREDENTIALS_VERSION = 17L;
+
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
@@ -52,12 +54,14 @@ class UmsCredentialProviderTest {
                 .setPasswordHash(PASSWORD_HASH)
                 .addAllKerberosKeys(ACTOR_KERBEROS_KEY_LIST)
                 .setPasswordHashExpirationDate(EXPIRATION_DATE)
+                .setWorkloadCredentialsVersion(WORKLOAD_CREDENTIALS_VERSION)
                 .build();
         when(grpcUmsClient.getActorWorkloadCredentials(any(), eq("user"), any())).thenReturn(response);
         WorkloadCredential credential = underTest.getCredentials("user", Optional.empty());
         assertEquals(credential.getHashedPassword(), PASSWORD_HASH);
         assertEquals(credential.getExpirationDate(), Optional.of(Instant.ofEpochMilli(EXPIRATION_DATE)));
         assertTrue(credential.getKeys().containsAll(ACTOR_KERBEROS_KEY_LIST));
+        assertEquals(WORKLOAD_CREDENTIALS_VERSION, credential.getVersion());
     }
 
     @Test
@@ -66,9 +70,11 @@ class UmsCredentialProviderTest {
                 .setPasswordHash(PASSWORD_HASH)
                 .addAllKerberosKeys(ACTOR_KERBEROS_KEY_LIST)
                 .setPasswordHashExpirationDate(0)
+                .setWorkloadCredentialsVersion(WORKLOAD_CREDENTIALS_VERSION)
                 .build();
         when(grpcUmsClient.getActorWorkloadCredentials(any(), eq("user"), any())).thenReturn(response);
         WorkloadCredential credential = underTest.getCredentials("user", Optional.empty());
         assertEquals(credential.getExpirationDate(), Optional.empty());
+        assertEquals(WORKLOAD_CREDENTIALS_VERSION, credential.getVersion());
     }
 }

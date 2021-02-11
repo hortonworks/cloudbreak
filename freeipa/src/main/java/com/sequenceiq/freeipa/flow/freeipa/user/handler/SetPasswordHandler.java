@@ -7,6 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -41,6 +43,9 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
     @Inject
     private WorkloadCredentialService workloadCredentialService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(SetPasswordRequest.class);
@@ -58,8 +63,13 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
             if (FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
                 WorkloadCredential workloadCredential = umsCredentialProvider.getCredentials(request.getUserCrn(), MDCUtils.getRequestId());
 
+                String accountId = Crn.fromString(stack.getEnvironmentCrn()).getAccountId();
+                boolean credentialsUpdateOptimizationEnabled = entitlementService.usersyncCredentialsUpdateOptimizationEnabled(accountId);
+                LOGGER.info("Credentials update optimization is{} enabled for account {}", credentialsUpdateOptimizationEnabled ? "" : " not", accountId);
+
                 LOGGER.info("IPA has password hash support. Credentials information from UMS will be used.");
-                workloadCredentialService.setWorkloadCredential(freeIpaClient, request.getUsername(), workloadCredential);
+                workloadCredentialService.setWorkloadCredential(credentialsUpdateOptimizationEnabled, freeIpaClient, request.getUsername(),
+                        request.getUserCrn(), workloadCredential);
                 if (StringUtils.isBlank(workloadCredential.getHashedPassword())) {
                     LOGGER.info("IPA has password hash support but user does not have a password set in UMS; using the provided password directly.");
                     freeIpaClient.userSetPasswordWithExpiration(

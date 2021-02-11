@@ -26,18 +26,22 @@ public class UsersStateDifference {
 
     private ImmutableSet<FmsUser> usersToAdd;
 
+    private final ImmutableSet<String> usersWithCredentialsToUpdate;
+
     private ImmutableSet<String> usersToRemove;
 
     private ImmutableMultimap<String, String> groupMembershipToAdd;
 
     private ImmutableMultimap<String, String> groupMembershipToRemove;
 
+    @SuppressWarnings("checkstyle:ExecutableStatementCount")
     public UsersStateDifference(ImmutableSet<FmsGroup> groupsToAdd, ImmutableSet<FmsGroup> groupsToRemove,
-            ImmutableSet<FmsUser> usersToAdd, ImmutableSet<String> usersToRemove,
+            ImmutableSet<FmsUser> usersToAdd, ImmutableSet<String> usersWithCredentialsToUpdate, ImmutableSet<String> usersToRemove,
             ImmutableMultimap<String, String> groupMembershipToAdd, ImmutableMultimap<String, String> groupMembershipToRemove) {
         this.groupsToAdd = requireNonNull(groupsToAdd);
         this.groupsToRemove = requireNonNull(groupsToRemove);
         this.usersToAdd = requireNonNull(usersToAdd);
+        this.usersWithCredentialsToUpdate = requireNonNull(usersWithCredentialsToUpdate);
         this.usersToRemove = requireNonNull(usersToRemove);
         this.groupMembershipToAdd = requireNonNull(groupMembershipToAdd);
         this.groupMembershipToRemove = requireNonNull(groupMembershipToRemove);
@@ -53,6 +57,10 @@ public class UsersStateDifference {
 
     public ImmutableSet<FmsUser> getUsersToAdd() {
         return usersToAdd;
+    }
+
+    public ImmutableSet<String> getUsersWithCredentialsToUpdate() {
+        return usersWithCredentialsToUpdate;
     }
 
     public ImmutableSet<String> getUsersToRemove() {
@@ -73,17 +81,20 @@ public class UsersStateDifference {
                 + "groupsToAdd=" + groupsToAdd
                 + ", groupsToRemove=" + groupsToRemove
                 + ", usersToAdd=" + usersToAdd
+                + ", usersWithCredentialsToUpdate=" + usersWithCredentialsToUpdate
                 + ", usersToRemove=" + usersToRemove
                 + ", groupMembershipToAdd=" + groupMembershipToAdd
                 + ", groupMembershipToRemove=" + groupMembershipToRemove
                 + '}';
     }
 
-    public static UsersStateDifference fromUmsAndIpaUsersStates(UmsUsersState umsState, UsersState ipaState) {
+    public static UsersStateDifference fromUmsAndIpaUsersStates(UmsUsersState umsState, FreeIpaUsersState ipaState,
+            boolean credentialsUpdateOptimizationEnabled) {
         return new UsersStateDifference(
                 calculateGroupsToAdd(umsState, ipaState),
                 calculateGroupsToRemove(umsState, ipaState),
                 calculateUsersToAdd(umsState, ipaState),
+                calculateUsersWithCredentialsToUpdate(umsState, ipaState, credentialsUpdateOptimizationEnabled),
                 calculateUsersToRemove(umsState, ipaState),
                 calculateGroupMembershipToAdd(umsState, ipaState),
                 calculateGroupMembershipToRemove(umsState, ipaState));
@@ -96,13 +107,14 @@ public class UsersStateDifference {
                 ImmutableSet.of(),
                 ImmutableSet.of(),
                 ImmutableSet.of(),
+                ImmutableSet.of(),
                 ImmutableSet.of(deletedUser),
                 ImmutableMultimap.of(),
                 ImmutableMultimap.copyOf(groupMembershipsToRemove));
     }
 
-    public static ImmutableSet<FmsUser> calculateUsersToAdd(UmsUsersState umsState, UsersState ipaState) {
-        ImmutableSet<FmsUser> usersToAdd = ImmutableSet.copyOf(Sets.difference(umsState.getUsersState().getUsers(), ipaState.getUsers())
+    public static ImmutableSet<FmsUser> calculateUsersToAdd(UmsUsersState umsState, FreeIpaUsersState ipaState) {
+        ImmutableSet<FmsUser> usersToAdd = ImmutableSet.copyOf(Sets.difference(umsState.getUsersState().getUsers(), ipaState.getUsersState().getUsers())
                 .stream()
                 .filter(fmsUser -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(fmsUser.getName()))
                 .collect(Collectors.toSet()));
@@ -113,9 +125,42 @@ public class UsersStateDifference {
         return usersToAdd;
     }
 
-    public static ImmutableSet<String> calculateUsersToRemove(UmsUsersState umsState, UsersState ipaState) {
+    public static ImmutableSet<String> calculateUsersWithCredentialsToUpdate(UmsUsersState umsState, FreeIpaUsersState ipaState,
+            boolean credentialsUpdateOptimizationEnabled) {
+        ImmutableSet<String> usersWithCredentialsToUpdate;
+
+        if (!credentialsUpdateOptimizationEnabled) {
+            usersWithCredentialsToUpdate = ImmutableSet.copyOf(umsState.getUsersState().getUsers().stream()
+                    .map(FmsUser::getName)
+                    .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
+                    .collect(Collectors.toSet()));
+        } else {
+            ImmutableSet.Builder<String> usersWithCredentialsToUpdateBuilder = ImmutableSet.builder();
+            umsState.getUsersState().getUsers().stream()
+                    .map(FmsUser::getName)
+                    .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
+                    .forEach(username -> {
+                        UserMetadata ipaUserMetadata = ipaState.getUserMetadataMap().get(username);
+                        if (ipaUserMetadata == null) {
+                            usersWithCredentialsToUpdateBuilder.add(username);
+                        } else {
+                            WorkloadCredential umsCredential = umsState.getUsersWorkloadCredentialMap().get(username);
+                            if (ipaUserMetadata.getWorkloadCredentialsVersion() < umsCredential.getVersion()) {
+                                usersWithCredentialsToUpdateBuilder.add(username);
+                            }
+                        }
+                    });
+            usersWithCredentialsToUpdate = usersWithCredentialsToUpdateBuilder.build();
+        }
+
+        LOGGER.info("usersWithCredentialsToUpdate size = {}", usersWithCredentialsToUpdate.size());
+        LOGGER.debug("usersWithCredentialsToUpdate = {}", usersWithCredentialsToUpdate);
+        return usersWithCredentialsToUpdate;
+    }
+
+    public static ImmutableSet<String> calculateUsersToRemove(UmsUsersState umsState, FreeIpaUsersState ipaState) {
         Collection<String> umsStateUsers = umsState.getUsersState().getGroupMembership().get(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
-        Collection<String> ipaStateUsers = ipaState.getGroupMembership().get(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
+        Collection<String> ipaStateUsers = ipaState.getUsersState().getGroupMembership().get(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
 
         ImmutableSet<String> usersToRemove = ImmutableSet.copyOf(ipaStateUsers.stream()
                 .filter(ipaUser -> !umsStateUsers.contains(ipaUser))
@@ -128,8 +173,8 @@ public class UsersStateDifference {
         return usersToRemove;
     }
 
-    public static ImmutableSet<FmsGroup> calculateGroupsToAdd(UmsUsersState umsState, UsersState ipaState) {
-        ImmutableSet<FmsGroup> groupsToAdd = ImmutableSet.copyOf(Sets.difference(umsState.getUsersState().getGroups(), ipaState.getGroups())
+    public static ImmutableSet<FmsGroup> calculateGroupsToAdd(UmsUsersState umsState, FreeIpaUsersState ipaState) {
+        ImmutableSet<FmsGroup> groupsToAdd = ImmutableSet.copyOf(Sets.difference(umsState.getUsersState().getGroups(), ipaState.getUsersState().getGroups())
                 .stream()
                 .filter(fmsGroup -> !FreeIpaChecks.IPA_PROTECTED_GROUPS.contains(fmsGroup.getName()))
                 .collect(Collectors.toSet()));
@@ -140,10 +185,10 @@ public class UsersStateDifference {
         return groupsToAdd;
     }
 
-    public static ImmutableSet<FmsGroup> calculateGroupsToRemove(UmsUsersState umsState, UsersState ipaState) {
+    public static ImmutableSet<FmsGroup> calculateGroupsToRemove(UmsUsersState umsState, FreeIpaUsersState ipaState) {
         Set<FmsGroup> allControlPlaneGroups = Sets.union(umsState.getWorkloadAdministrationGroups(), umsState.getUsersState().getGroups());
 
-        ImmutableSet<FmsGroup> groupsToRemove = ImmutableSet.copyOf(Sets.difference(ipaState.getGroups(), allControlPlaneGroups)
+        ImmutableSet<FmsGroup> groupsToRemove = ImmutableSet.copyOf(Sets.difference(ipaState.getUsersState().getGroups(), allControlPlaneGroups)
                 .stream()
                 .filter(fmsGroup -> !FreeIpaChecks.IPA_PROTECTED_GROUPS.contains(fmsGroup.getName()))
                 .collect(Collectors.toSet()));
@@ -154,10 +199,10 @@ public class UsersStateDifference {
         return groupsToRemove;
     }
 
-    public static ImmutableMultimap<String, String> calculateGroupMembershipToAdd(UmsUsersState umsState, UsersState ipaState) {
+    public static ImmutableMultimap<String, String> calculateGroupMembershipToAdd(UmsUsersState umsState, FreeIpaUsersState ipaState) {
         Multimap<String, String> groupMembershipToAdd = HashMultimap.create();
         umsState.getUsersState().getGroupMembership().forEach((group, user) -> {
-            if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group) && !ipaState.getGroupMembership().containsEntry(group, user)) {
+            if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group) && !ipaState.getUsersState().getGroupMembership().containsEntry(group, user)) {
                 LOGGER.debug("adding user : {} to group : {}", user, group);
                 groupMembershipToAdd.put(group, user);
             }
@@ -169,9 +214,9 @@ public class UsersStateDifference {
         return ImmutableMultimap.copyOf(groupMembershipToAdd);
     }
 
-    public static ImmutableMultimap<String, String> calculateGroupMembershipToRemove(UmsUsersState umsState, UsersState ipaState) {
+    public static ImmutableMultimap<String, String> calculateGroupMembershipToRemove(UmsUsersState umsState, FreeIpaUsersState ipaState) {
         Multimap<String, String> groupMembershipToRemove = HashMultimap.create();
-        ipaState.getGroupMembership().forEach((group, user) -> {
+        ipaState.getUsersState().getGroupMembership().forEach((group, user) -> {
             if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group) && !umsState.getUsersState().getGroupMembership().containsEntry(group, user)) {
                 LOGGER.debug("removing user : {} to group : {}", user, group);
                 groupMembershipToRemove.put(group, user);
