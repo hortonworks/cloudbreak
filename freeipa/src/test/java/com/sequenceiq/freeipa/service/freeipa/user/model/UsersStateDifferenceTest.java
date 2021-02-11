@@ -1,16 +1,22 @@
 package com.sequenceiq.freeipa.service.freeipa.user.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.freeipa.client.FreeIpaChecks;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 
 class UsersStateDifferenceTest {
 
@@ -220,5 +226,72 @@ class UsersStateDifferenceTest {
         // groups that exist in both or only ums will not be added
         assertFalse(groupMembershipsToRemove.get(group).contains(userBoth));
         assertFalse(groupMembershipsToRemove.get(group).contains(userUms));
+    }
+
+    @Test
+    void testCalculateUsersWithCredentialsToUpdateWithUpdateOptimization() {
+        testCalculateUsersWithCredentialsToUpdate(true);
+    }
+
+    @Test
+    void testCalculateUsersWithCredentialsToUpdateWithoutUpdateOptimization() {
+        testCalculateUsersWithCredentialsToUpdate(false);
+    }
+
+    private void testCalculateUsersWithCredentialsToUpdate(boolean updatedOptimizationEnabled) {
+        UmsUsersState.Builder umsUsersStateBuilder = UmsUsersState.newBuilder();
+        UsersState.Builder usersStateBuilderForUms = UsersState.newBuilder();
+        UsersState.Builder usersStateBuilderForIpa = UsersState.newBuilder();
+
+        FmsUser userUms = addUmsUser("userUms", 1L, umsUsersStateBuilder, usersStateBuilderForUms);
+
+        FmsUser userWithNoIpaMetadata = addUmsUser("userWithNoIpaMetadata", 0L, umsUsersStateBuilder, usersStateBuilderForUms);
+        addIpaUser(userWithNoIpaMetadata.getName(), Optional.empty(), usersStateBuilderForIpa);
+
+        FmsUser userWithStaleIpaCredentials = addUmsUser("userWithStaleIpaCredentials", 2L, umsUsersStateBuilder, usersStateBuilderForUms);
+        addIpaUser(userWithStaleIpaCredentials.getName(), Optional.of(1L), usersStateBuilderForIpa);
+
+        FmsUser userWithUpToDateIpaCredentials = addUmsUser("userWithUpToDateIpaCredentials", 5L, umsUsersStateBuilder, usersStateBuilderForUms);
+        addIpaUser(userWithUpToDateIpaCredentials.getName(), Optional.of(5L), usersStateBuilderForIpa);
+
+        FmsUser userProtected = addUmsUser(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), 0L, umsUsersStateBuilder, usersStateBuilderForUms);
+        addIpaUser(userProtected.getName(), Optional.empty(), usersStateBuilderForIpa);
+
+        UmsUsersState umsUsersState = umsUsersStateBuilder.setUsersState(usersStateBuilderForUms.build()).build();
+        UsersState ipaUsersState = usersStateBuilderForIpa.build();
+
+        ImmutableSet<String> usersWithCredentialsToUpdate = UsersStateDifference.calculateUsersWithCredentialsToUpdate(
+                umsUsersState, ipaUsersState, updatedOptimizationEnabled);
+
+        // User that exists only in UMS requires credentials update
+        assertTrue(usersWithCredentialsToUpdate.contains(userUms.getName()));
+        // User whose IPA credentials version is unknown requires credentials update
+        assertTrue(usersWithCredentialsToUpdate.contains(userWithNoIpaMetadata.getName()));
+        // User with stale IPA credentials requires credentials update
+        assertTrue(usersWithCredentialsToUpdate.contains(userWithStaleIpaCredentials.getName()));
+        // User with up-to-date IPA credentials requires credentials update if update optimization is disabled
+        assertEquals(!updatedOptimizationEnabled, usersWithCredentialsToUpdate.contains(userWithUpToDateIpaCredentials.getName()));
+        // We never update credentials for protected users
+        assertFalse(usersWithCredentialsToUpdate.contains(userProtected.getName()));
+    }
+
+    private FmsUser addUmsUser(String username, long umsCredentialsVersion, UmsUsersState.Builder umsStateBuilder,
+            UsersState.Builder usersStateBuilder) {
+        FmsUser fmsUser = new FmsUser().withName(username);
+        usersStateBuilder.addUser(fmsUser);
+        umsStateBuilder.addWorkloadCredentials(username, UserSyncTestUtils.createWorkloadCredential("hashedPassword", umsCredentialsVersion));
+        return fmsUser;
+    }
+
+    private void addIpaUser(String username, Optional<Long> ipaCredentialsVersion, UsersState.Builder usersStateBuilder) {
+        FmsUser fmsUser = new FmsUser().withName(username);
+        usersStateBuilder.addUser(fmsUser);
+        if (ipaCredentialsVersion.isPresent()) {
+            String crn = Crn.builder(CrnResourceDescriptor.USER)
+                    .setAccountId(UUID.randomUUID().toString())
+                    .setResource(UUID.randomUUID().toString())
+                    .build().toString();
+            usersStateBuilder.addUserMetadata(username, new UserMetadata(crn, ipaCredentialsVersion.get()));
+        }
     }
 }

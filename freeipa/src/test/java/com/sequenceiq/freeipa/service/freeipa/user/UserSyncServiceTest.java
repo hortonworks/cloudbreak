@@ -202,6 +202,7 @@ class UserSyncServiceTest {
                 ImmutableSet.of(groupToAdd1, groupToAdd2),
                 ImmutableSet.of(groupToRemove1, groupToRemove2),
                 ImmutableSet.of(userToAdd1, userToAdd2),
+                ImmutableSet.of(),
                 ImmutableSet.of(userToRemove1, userToRemove2),
                 ImmutableMultimap.<String, String>builder()
                         .put(groupToAdd1.getName(), userToAdd1.getName())

@@ -135,6 +135,7 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                         actorHandler.handleActor(
                                 environmentAccessChecker.hasAccess(memberCrn, requestIdOptional),
                                 fmsUser,
+                                memberCrn,
                                 groupMembershipSupplier,
                                 wagMembershipSupplier,
                                 workloadCredentialSupplier,

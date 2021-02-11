@@ -121,6 +121,7 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
             actorHandler.handleActor(
                     environmentAccessRights,
                     fmsUserConverter.toFmsUser(actor.getActorDetails()),
+                    actor.getActorDetails().getCrn(),
                     groupMembershipSupplier,
                     wagMembershipSupplier,
                     workloadCredentialSupplier,

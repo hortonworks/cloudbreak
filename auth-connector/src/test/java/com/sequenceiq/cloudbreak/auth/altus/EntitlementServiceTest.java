@@ -124,7 +124,12 @@ class EntitlementServiceTest {
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", (EntitlementCheckFunction) EntitlementService::publicEndpointAccessGatewayEnabled, true},
 
                 {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, false},
-                {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, true}
+                {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, true},
+
+                {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
+                        (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, false},
+                {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
+                        (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, true}
         };
     }
 

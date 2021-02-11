@@ -14,7 +14,8 @@ public class WorkloadCredentialConverter {
         return new WorkloadCredential(actorWorkloadCredentials.getPasswordHash(),
                 actorWorkloadCredentials.getKerberosKeysList(),
                 toOptionalInstant(actorWorkloadCredentials.getPasswordHashExpirationDate()),
-                actorWorkloadCredentials.getSshPublicKeyList());
+                actorWorkloadCredentials.getSshPublicKeyList(),
+                actorWorkloadCredentials.getWorkloadCredentialsVersion());
     }
 
     public WorkloadCredential toWorkloadCredential(
@@ -22,7 +23,8 @@ public class WorkloadCredentialConverter {
         return new WorkloadCredential(actorWorkloadCredentials.getPasswordHash(),
                 actorWorkloadCredentials.getKerberosKeysList(),
                 toOptionalInstant(actorWorkloadCredentials.getPasswordHashExpirationDate()),
-                actorWorkloadCredentials.getSshPublicKeyList());
+                actorWorkloadCredentials.getSshPublicKeyList(),
+                actorWorkloadCredentials.getWorkloadCredentialsVersion());
     }
 
     private Optional<Instant> toOptionalInstant(long epochMillis) {
