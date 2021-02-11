@@ -20,6 +20,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
+import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -108,6 +111,9 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     @Inject
     private BlueprintValidator blueprintValidator;
 
+    @Inject
+    private HueWorkaroundValidatorService hueWorkaroundValidatorService;
+
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
     }
@@ -134,6 +140,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
                     .collect(Collectors.joining("; ")));
         }
+        hueWorkaroundValidatorService.validateForBlueprintRequest(getHueHostGroups(blueprint.getBlueprintText()));
     }
 
     public Blueprint deleteByWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -154,6 +161,11 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public void decorateWithCrn(Blueprint bp, String accountId, String creator) {
         bp.setResourceCrn(createCRN(accountId));
         bp.setCreator(creator);
+    }
+
+    private Set<String> getHueHostGroups(String blueprintText) {
+        return new CmTemplateProcessor(blueprintText)
+                .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
     public PlatformRecommendation getRecommendation(Long workspaceId, String blueprintName, String credentialName,

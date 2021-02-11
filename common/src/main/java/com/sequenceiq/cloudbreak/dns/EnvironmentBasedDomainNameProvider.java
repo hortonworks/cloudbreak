@@ -2,13 +2,18 @@ package com.sequenceiq.cloudbreak.dns;
 
 import static com.google.common.hash.Hashing.sipHash24;
 
+import java.util.Set;
 import java.util.regex.Pattern;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 
 @Component
 public class EnvironmentBasedDomainNameProvider {
@@ -29,6 +34,9 @@ public class EnvironmentBasedDomainNameProvider {
 
     @Value("${gateway.cert.base.domain.name:wl.cloudera.site}")
     private String rootDomain;
+
+    @Inject
+    private HueWorkaroundValidatorService hueWorkaroundValidatorService;
 
     public String getDomainName(String environmentName, String accountName) {
         if (StringUtils.isEmpty(environmentName)) {
@@ -56,12 +64,18 @@ public class EnvironmentBasedDomainNameProvider {
         return result;
     }
 
-    public String getFullyQualifiedEndpointName(String endpointName, String environmentName, String accountName) {
+    public String getFullyQualifiedEndpointName(Set<String> hueHostGroups, String endpointName, String environmentName, String accountName) {
         if (StringUtils.isEmpty(endpointName)) {
             throw new IllegalStateException("Endpoint name must be specified!");
         }
         String domain = getDomainName(environmentName, accountName);
-        return endpointName + DOMAIN_PART_DELIMITER + domain;
+        String fullyQualifiedEndpointName = endpointName + DOMAIN_PART_DELIMITER + domain;
+        try {
+            hueWorkaroundValidatorService.validateForEnvironmentDomainName(hueHostGroups, fullyQualifiedEndpointName);
+        } catch (Exception e) {
+            throw new IllegalStateException(e.getMessage());
+        }
+        return fullyQualifiedEndpointName;
     }
 
     //It is responsible for creating a CN for the generated CSR, so the result could not exceed 64 chars.

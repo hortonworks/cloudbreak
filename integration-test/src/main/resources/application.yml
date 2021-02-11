@@ -74,7 +74,7 @@ integrationtest:
   runtimeVersion: 7.2.7
   upgrade:
     currentRuntimeVersion: 7.2.0
-    targetRuntimeVersion: 7.2.6
+    targetRuntimeVersion: 7.2.2
   privateEndpointEnabled: false
 
   spot:

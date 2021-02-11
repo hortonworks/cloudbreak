@@ -16,6 +16,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_FREEIPA_POST_INSTALL_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_HOST_METADATASETUP_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_HOST_METADATASETUP_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ORCHESTRATOR_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_ORCHESTRATOR_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_SAVE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_STARTING_FINISHED_EVENT;
@@ -28,6 +30,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATING_CLOUD_STORAGE_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATING_CLOUD_STORAGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ADD_INSTANCES_STATE;
@@ -38,6 +42,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_F
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_FREEIPA_INSTALL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_FREEIPA_POST_INSTALL_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_ORCHESTRATOR_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_RECORD_HOSTNAMES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_SAVE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_STARTING_STATE;
@@ -46,6 +51,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_U
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATE_INSTANCES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATING_CLOUD_STORAGE_STATE;
 
 import java.util.List;
 
@@ -95,9 +101,17 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(UPSCALE_HOST_METADATASETUP_FAILED_EVENT)
 
-                    .from(UPSCALE_RECORD_HOSTNAMES_STATE).to(UPSCALE_FREEIPA_INSTALL_STATE)
+                    .from(UPSCALE_RECORD_HOSTNAMES_STATE).to(UPSCALE_ORCHESTRATOR_CONFIG_STATE)
                     .event(UPSCALE_RECORD_HOSTNAMES_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(UPSCALE_ORCHESTRATOR_CONFIG_STATE).to(UPSCALE_VALIDATING_CLOUD_STORAGE_STATE)
+                    .event(UPSCALE_ORCHESTRATOR_CONFIG_FINISHED_EVENT)
+                    .failureEvent(UPSCALE_ORCHESTRATOR_CONFIG_FAILED_EVENT)
+
+                    .from(UPSCALE_VALIDATING_CLOUD_STORAGE_STATE).to(UPSCALE_FREEIPA_INSTALL_STATE)
+                    .event(UPSCALE_VALIDATING_CLOUD_STORAGE_FINISHED_EVENT)
+                    .failureEvent(UPSCALE_VALIDATING_CLOUD_STORAGE_FAILED_EVENT)
 
                     .from(UPSCALE_FREEIPA_INSTALL_STATE).to(UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_STATE)
                     .event(UPSCALE_FREEIPA_INSTALL_FINISHED_EVENT)

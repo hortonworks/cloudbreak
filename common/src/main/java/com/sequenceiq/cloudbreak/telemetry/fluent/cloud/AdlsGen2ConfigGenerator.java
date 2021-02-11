@@ -43,6 +43,9 @@ public class AdlsGen2ConfigGenerator extends CloudStorageConfigGenerator<AdlsGen
                 return new AdlsGen2Config(folderPrefix, storageWithSuffix[0], null, secure);
             } else {
                 String[] splitByDomain = split[1].split(AZURE_DFS_DOMAIN_SUFFIX);
+                if (splitByDomain.length == 0) {
+                    throw new CloudbreakServiceException("Invalid ADLS storage location: " + location);
+                }
                 String account = splitByDomain[0];
                 if (splitByDomain.length > 1) {
                     String folderPrefixAfterDomain = splitByDomain[1];
