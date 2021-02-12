@@ -237,6 +237,7 @@ public class ModelDescriptions {
         public static final String FLOW_ID = "Flow identifier for the current stack creation. Only returned during the stack create request/response.";
         public static final String EXTERNAL_DATABASE = "External database parameters for the stack.";
         public static final String ENDPOINT_GATEWAY_FLOWS = "A list of stack and the flow id for the add endpoint gateway flow";
+        public static final String ENABLE_LOAD_BALANCER = "Enable load balancer.";
     }
 
     public static class ClusterModelDescription {

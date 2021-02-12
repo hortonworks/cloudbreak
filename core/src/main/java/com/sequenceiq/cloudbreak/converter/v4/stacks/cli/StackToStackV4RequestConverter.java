@@ -80,6 +80,9 @@ public class StackToStackV4RequestConverter extends AbstractConversionServiceAwa
         stackV4Request.setCluster(getConversionService().convert(source.getCluster(), ClusterV4Request.class));
         stackV4Request.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
                 databaseAvailabilityTypeToExternalDatabaseRequestConverter::convert));
+        if (!source.getLoadBalancers().isEmpty()) {
+            stackV4Request.setEnableLoadBalancer(true);
+        }
         stackV4Request.setInstanceGroups(getInstanceGroups(source));
         prepareImage(source, stackV4Request);
         prepareTags(source, stackV4Request);

@@ -11,10 +11,11 @@
     "externalDatabase": {
       "availabilityType": "HA"
     },
+    "enableLoadBalancer": true,
     "instanceGroups": [{
       "nodeCount": 1,
       "name": "manager",
-      "type": "GATEWAY",
+      "type": "CORE",
       "recoveryMode": "MANUAL",
       "template": {
         "aws": {},
@@ -94,7 +95,7 @@
       {
         "nodeCount": 2,
         "name": "master",
-        "type": "CORE",
+        "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {},

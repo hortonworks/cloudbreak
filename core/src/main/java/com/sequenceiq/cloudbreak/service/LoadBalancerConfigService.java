@@ -152,14 +152,14 @@ public class LoadBalancerConfigService {
     }
 
     public boolean isLoadBalancerCreationConfigured(Stack stack, DetailedEnvironmentResponse environment) {
-        return !setupLoadBalancers(stack, environment, true).isEmpty();
+        return !setupLoadBalancers(stack, environment, true, false).isEmpty();
     }
 
-    public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment) {
-        return setupLoadBalancers(stack, environment, false);
+    public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean loadBalancerFlagEnabled) {
+        return setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
     }
 
-    public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun) {
+    public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
         if (dryRun) {
             LOGGER.info("Checking if load balancers are enabled and configurable for stack {}", stack.getName());
         } else {
@@ -167,8 +167,12 @@ public class LoadBalancerConfigService {
         }
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if (isLoadBalancerEnabled(stack.getType(), environment) && getSupportedPlatforms().contains(stack.getCloudPlatform())) {
-            LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
+        if (getSupportedPlatforms().contains(stack.getCloudPlatform()) && (loadBalancerFlagEnabled || isLoadBalancerEnabled(stack.getType(), environment))) {
+            if (!loadBalancerFlagEnabled) {
+                LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
+            } else {
+                LOGGER.debug("Load balancer is explicitly defined for the stack.");
+            }
             Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
             if (knoxTargetGroup.isPresent()) {
                 if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
