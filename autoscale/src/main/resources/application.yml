@@ -29,6 +29,7 @@ periscope:
     schema: public
     cert.file: database.crt
     ssl: false
+  stack.collection.period: 60000
 
 cb:
   server:

@@ -90,6 +90,7 @@ public class LeaderElectionServiceTest {
         when(timerFactory.get()).thenReturn(timer);
         when(clock.getCurrentTime()).thenReturn(5000L);
         when(applicationContext.getBean(eq("CronTimeEvaluator"), eq(CronTimeEvaluator.class))).thenReturn(cronTimeEvaluator);
+        ReflectionTestUtils.setField(underTest, "stackCollectionPeriod", 10000L);
         ReflectionTestUtils.setField(underTest, "heartbeatThresholdRate", 70000);
     }
 
