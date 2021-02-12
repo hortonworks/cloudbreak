@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.monitor.handler;
 
 import javax.inject.Inject;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
+import com.sequenceiq.periscope.service.AutoScalingException;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.MetricService;
 
@@ -92,7 +94,9 @@ public class ScalingRequest implements Runnable {
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
-            LOGGER.info("Sending request to add {} instance(s) into host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
+            String actionMsg = String.format("add %s instance(s) into host group '%s' on cluster '%s', triggered policy '%s'",
+                    scalingAdjustment, hostGroup, cluster.getId(), policy.getName());
+            LOGGER.info("Sending request to {}", actionMsg);
             Long stackId = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setWithClusterEvent(true);
@@ -100,7 +104,7 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getUser().getId(), updateStackJson).close();
+            checkResponse(cloudbreakClient.autoscaleEndpoint().putStack(stackId, cluster.getUser().getId(), updateStackJson), actionMsg);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Upscale successfully triggered";
             metricService.incrementCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -123,7 +127,9 @@ public class ScalingRequest implements Runnable {
         String statusReason = null;
         ScalingStatus scalingStatus = null;
         try {
-            LOGGER.info("Sending request to remove {} node(s) from host group '{}', triggered policy '{}'", scalingAdjustment, hostGroup, policy.getName());
+            String actionMsg = String.format("remove %s node(s) from host group '%s' on cluster '%s', triggered policy '%s'",
+                    scalingAdjustment, hostGroup, cluster.getId(), policy.getName());
+            LOGGER.info("Sending request to {}", actionMsg);
             Long stackId = cloudbreakClient.autoscaleEndpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -131,7 +137,7 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getUser().getId(), updateClusterJson).close();
+            checkResponse(cloudbreakClient.autoscaleEndpoint().putCluster(stackId, cluster.getUser().getId(), updateClusterJson), actionMsg);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = "Downscale successfully triggered";
             metricService.incrementCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
@@ -148,5 +154,18 @@ public class ScalingRequest implements Runnable {
     private void createHistoryAndNotify(int totalNodes, String statusReason, ScalingStatus scalingStatus) {
         History history = historyService.createEntry(scalingStatus, StringUtils.substring(statusReason, 0, STATUSREASON_MAX_LENGTH), totalNodes, policy);
         notificationSender.send(history);
+    }
+
+    private void checkResponse(Response response, String actionMsg) {
+        try {
+            Response.StatusType statusInfo = response.getStatusInfo();
+            if (statusInfo.getFamily() != Response.Status.Family.SUCCESSFUL) {
+                String exceptionMsg = String.format("Scaling request failed in Cloudbreak: %s, reason: %s, statuscode: %d",
+                        actionMsg, statusInfo.getReasonPhrase(), statusInfo.getStatusCode());
+                throw new AutoScalingException(exceptionMsg);
+            }
+        } finally {
+            response.close();
+        }
     }
 }
