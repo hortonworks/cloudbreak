@@ -10,7 +10,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -21,6 +20,8 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 
+import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+
 public class KeyStoreUtil {
 
     private KeyStoreUtil() throws IllegalAccessException {
@@ -29,7 +30,7 @@ public class KeyStoreUtil {
 
     public static KeyStore createKeyStore(String clientCert, String clientKey) throws Exception {
         KeyPair keyPair = createKeyPair(clientKey);
-        Certificate privateCertificate = convertCertificate(clientCert);
+        Certificate privateCertificate = PkiUtil.fromCertificatePem(clientCert);
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(null);
@@ -53,16 +54,6 @@ public class KeyStoreUtil {
         }
     }
 
-    private static Certificate convertCertificate(String cert) throws IOException, CertificateException {
-        try (Reader reader = new StringReader(cert)) {
-            try (PEMParser pemParser = new PEMParser(reader)) {
-                X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
-                return new JcaX509CertificateConverter().getCertificate(certificateHolder);
-            }
-        }
-
-    }
-
     public static KeyPair createKeyPair(String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         try (Reader reader = new StringReader(clientKey)) {
             try (PEMParser pemParser = new PEMParser(reader)) {
@@ -84,4 +75,5 @@ public class KeyStoreUtil {
             }
         }
     }
+
 }

@@ -34,6 +34,8 @@ public class SslConfig {
     @Column(nullable = false)
     private SslCertificateType sslCertificateType = SslCertificateType.NONE;
 
+    private Integer sslCertificateActiveVersion;
+
     public Long getId() {
         return id;
     }
@@ -57,4 +59,13 @@ public class SslConfig {
     public void setSslCertificateType(SslCertificateType sslCertificateType) {
         this.sslCertificateType = sslCertificateType;
     }
+
+    public Integer getSslCertificateActiveVersion() {
+        return sslCertificateActiveVersion;
+    }
+
+    public void setSslCertificateActiveVersion(Integer sslCertificateActiveVersion) {
+        this.sslCertificateActiveVersion = sslCertificateActiveVersion;
+    }
+
 }

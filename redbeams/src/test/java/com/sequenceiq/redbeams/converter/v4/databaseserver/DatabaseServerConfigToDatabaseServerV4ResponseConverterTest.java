@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,6 +19,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.TestData;
@@ -25,7 +27,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
@@ -42,8 +46,25 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final int PORT = 5432;
 
+    private static final String STATUS_REASON = "Lorem ipsum";
+
+    private static final String ENVIRONMENT_ID = "myenvironment";
+
+    private static final Set<String> CERTS = Set.of("my-cert");
+
+    private static final int CERT_MAX_VERSION = 3;
+
+    private static final int CERT_ACTIVE_VERSION = 2;
+
+    private static final int CERT_LEGACY_MAX_VERSION = 1;
+
+    private static final String CLOUD_PLATFORM = CloudPlatform.AWS.name();
+
     @Mock
     private ConversionService conversionService;
+
+    @Mock
+    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
     @InjectMocks
     private DatabaseServerConfigToDatabaseServerV4ResponseConverter converter;
@@ -60,14 +81,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         initializeSecrets(server);
         server.setCreationDate(System.currentTimeMillis());
-        server.setEnvironmentId("myenvironment");
+        server.setEnvironmentId(ENVIRONMENT_ID);
         server.setClusterCrn("myclustercrn");
         server.setResourceStatus(ResourceStatus.SERVICE_MANAGED);
         DBStack dbStack = new DBStack();
-        DBStackStatus dbStackStatus = new DBStackStatus();
-        dbStackStatus.setStatus(Status.CREATE_IN_PROGRESS);
-        dbStackStatus.setStatusReason("Lorem ipsum");
-        dbStack.setDBStackStatus(dbStackStatus);
+        initDBStackStatus(dbStack);
         server.setDbStack(dbStack);
         when(conversionService.convert(anyString(), eq(SecretResponse.class))).thenReturn(new SecretResponse());
 
@@ -93,6 +111,13 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response.getStatusReason()).isEqualTo(dbStack.getStatusReason());
     }
 
+    private void initDBStackStatus(DBStack dbStack) {
+        DBStackStatus dbStackStatus = new DBStackStatus();
+        dbStackStatus.setStatus(Status.CREATE_IN_PROGRESS);
+        dbStackStatus.setStatusReason(STATUS_REASON);
+        dbStack.setDBStackStatus(dbStackStatus);
+    }
+
     @Test
     public void testConversionWhenUserManaged() {
         DatabaseServerConfig server = new DatabaseServerConfig();
@@ -105,7 +130,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
         initializeSecrets(server);
         server.setCreationDate(System.currentTimeMillis());
-        server.setEnvironmentId("myenvironment");
+        server.setEnvironmentId(ENVIRONMENT_ID);
         server.setResourceStatus(ResourceStatus.USER_MANAGED);
         when(conversionService.convert(anyString(), eq(SecretResponse.class))).thenReturn(new SecretResponse());
 
@@ -129,6 +154,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response).isNotNull();
         assertThat(response.getSslConfig()).isNotNull();
         assertThat(response.getSslConfig().getSslMode()).isEqualTo(SslMode.DISABLED);
+        assertThat(response.getStatus()).isEqualTo(Status.UNKNOWN);
     }
 
     @Test
@@ -144,6 +170,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(response).isNotNull();
         assertThat(response.getSslConfig()).isNotNull();
         assertThat(response.getSslConfig().getSslMode()).isEqualTo(SslMode.DISABLED);
+        assertThat(response.getStatus()).isEqualTo(Status.AVAILABLE);
     }
 
     @Test
@@ -151,13 +178,17 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setResourceCrn(TestData.getTestCrn(RESOURCE_TYPE_DATABASE_SERVER, RESOURCE_ID));
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
-        server.setDbStack(new DBStack());
+
+        DBStack dbStack = new DBStack();
+        initDBStackStatus(dbStack);
+        server.setDbStack(dbStack);
 
         DatabaseServerV4Response response = converter.convert(server);
 
         assertThat(response).isNotNull();
         assertThat(response.getSslConfig()).isNotNull();
         assertThat(response.getSslConfig().getSslMode()).isEqualTo(SslMode.DISABLED);
+        assertThat(response.getStatus()).isEqualTo(dbStack.getStatus());
     }
 
     @Test
@@ -168,13 +199,17 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
         DBStack dbStack = new DBStack();
         dbStack.setSslConfig(new SslConfig());
+        initDBStackStatus(dbStack);
         server.setDbStack(dbStack);
 
         DatabaseServerV4Response response = converter.convert(server);
 
         assertThat(response).isNotNull();
-        assertThat(response.getSslConfig()).isNotNull();
-        assertThat(response.getSslConfig().getSslMode()).isEqualTo(SslMode.DISABLED);
+        SslConfigV4Response sslConfigV4Response = response.getSslConfig();
+        assertThat(sslConfigV4Response).isNotNull();
+        assertThat(sslConfigV4Response.getSslMode()).isEqualTo(SslMode.DISABLED);
+        assertThat(sslConfigV4Response.getSslCertificateType()).isEqualTo(SslCertificateType.NONE);
+        assertThat(response.getStatus()).isEqualTo(dbStack.getStatus());
     }
 
     @Test
@@ -192,27 +227,50 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         DatabaseServerV4Response response = converter.convert(server);
 
         assertThat(response).isNotNull();
-        assertThat(response.getSslConfig()).isNotNull();
-        assertThat(response.getSslConfig().getSslMode()).isEqualTo(SslMode.ENABLED);
+        SslConfigV4Response sslConfigV4Response = response.getSslConfig();
+        assertThat(sslConfigV4Response).isNotNull();
+        assertThat(sslConfigV4Response.getSslMode()).isEqualTo(SslMode.ENABLED);
+        assertThat(sslConfigV4Response.getSslCertificateType()).isEqualTo(SslCertificateType.BRING_YOUR_OWN);
     }
 
     @Test
-    void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwned() {
+    void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedAndActiveVersionMissing() {
+        testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedInternal(null, CERT_LEGACY_MAX_VERSION);
+    }
+
+    private void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedInternal(Integer certActiveVersionInput,
+            int certActiveVersionExpected) {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setResourceCrn(TestData.getTestCrn(RESOURCE_TYPE_DATABASE_SERVER, RESOURCE_ID));
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
 
         DBStack dbStack = new DBStack();
+        dbStack.setCloudPlatform(CLOUD_PLATFORM);
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        sslConfig.setSslCertificates(CERTS);
+        sslConfig.setSslCertificateActiveVersion(certActiveVersionInput);
         dbStack.setSslConfig(sslConfig);
         server.setDbStack(dbStack);
+
+        when(databaseServerSslCertificateConfig.getMaxVersionByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_MAX_VERSION);
+        when(databaseServerSslCertificateConfig.getLegacyMaxVersionByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_LEGACY_MAX_VERSION);
 
         DatabaseServerV4Response response = converter.convert(server);
 
         assertThat(response).isNotNull();
-        assertThat(response.getSslConfig()).isNotNull();
-        assertThat(response.getSslConfig().getSslMode()).isEqualTo(SslMode.ENABLED);
+        SslConfigV4Response sslConfigV4Response = response.getSslConfig();
+        assertThat(sslConfigV4Response).isNotNull();
+        assertThat(sslConfigV4Response.getSslMode()).isEqualTo(SslMode.ENABLED);
+        assertThat(sslConfigV4Response.getSslCertificateType()).isEqualTo(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        assertThat(sslConfigV4Response.getSslCertificates()).isSameAs(CERTS);
+        assertThat(sslConfigV4Response.getSslCertificateHighestAvailableVersion()).isEqualTo(CERT_MAX_VERSION);
+        assertThat(sslConfigV4Response.getSslCertificateActiveVersion()).isEqualTo(certActiveVersionExpected);
+    }
+
+    @Test
+    void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedAndActiveVersionPresent() {
+        testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedInternal(CERT_ACTIVE_VERSION, CERT_ACTIVE_VERSION);
     }
 
     private void initializeSecrets(DatabaseServerConfig server) {
