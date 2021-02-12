@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.security.KeyFactory;
@@ -43,6 +44,7 @@ import org.bouncycastle.asn1.x509.GeneralName;
 import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.crypto.CryptoException;
 import org.bouncycastle.crypto.Signer;
 import org.bouncycastle.crypto.digests.SHA256Digest;
@@ -106,8 +108,8 @@ public class PkiUtil {
         RSAKeyParameters rsaKeyParameters = CACHE.get(privateKeyPem);
 
         if (rsaKeyParameters == null) {
-            try (PEMParser pEMParser = new PEMParser(new StringReader(clarifyPemKey(privateKeyPem)))) {
-                PEMKeyPair pemKeyPair = (PEMKeyPair) pEMParser.readObject();
+            try (PEMParser pemParser = new PEMParser(new StringReader(clarifyPemKey(privateKeyPem)))) {
+                PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();
 
                 KeyFactory factory = KeyFactory.getInstance("RSA");
                 KeySpec publicKeySpec = new X509EncodedKeySpec(pemKeyPair.getPublicKeyInfo().getEncoded());
@@ -140,7 +142,6 @@ public class PkiUtil {
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
             keyGen.initialize(KEY_SIZE, new SecureRandom());
             return keyGen.generateKeyPair();
-
         } catch (Exception e) {
             throw new PkiException("Failed to generate PK for the cluster!", e);
         }
@@ -150,7 +151,6 @@ public class PkiUtil {
         try {
             PKCS10CertificationRequest csr = generateCsr(identity, publicAddress);
             return selfsign(csr, publicAddress, signKey);
-
         } catch (Exception e) {
             throw new PkiException("Failed to create signed cert for the cluster!", e);
         }
@@ -222,14 +222,30 @@ public class PkiUtil {
             PEMKeyPair pemKeyPair = (PEMKeyPair) pp.readObject();
             return new JcaPEMKeyConverter().getKeyPair(pemKeyPair);
         } catch (IOException e) {
-            LOGGER.info("Cannot parse KeyPair from private key pem content, skip it. {}", e.getMessage(), e);
+            LOGGER.info("Cannot parse KeyPair from private key PEM content, skip it. {}", e.getMessage(), e);
         }
         return null;
     }
 
+    public static X509Certificate fromCertificatePem(String certPem) {
+        try (Reader reader = new StringReader(certPem)) {
+            try (PEMParser pemParser = new PEMParser(reader)) {
+                Object pemObject = pemParser.readObject();
+                if (!(pemObject instanceof X509CertificateHolder)) {
+                    throw new PkiException(String.format("Cannot parse X.509 certificate from PEM content. Expected \"%s\" object, got \"%s\".",
+                            X509CertificateHolder.class.getName(), pemObject == null ? "null" : pemObject.getClass().getName()));
+                }
+                return new JcaX509CertificateConverter().getCertificate((X509CertificateHolder) pemObject);
+            }
+        } catch (PkiException pe) {
+            throw pe;
+        } catch (Exception e) {
+            throw new PkiException("Cannot parse X.509 certificate from PEM content", e);
+        }
+    }
+
     private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey)
             throws Exception {
-
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
                 .find("SHA256withRSA");
         AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder()
@@ -300,4 +316,5 @@ public class PkiUtil {
     private static String clarifyPemKey(String rawPem) {
         return "-----BEGIN RSA PRIVATE KEY-----\n" + rawPem.replaceAll("-----(.*)-----|\n", "") + "\n-----END RSA PRIVATE KEY-----";
     }
+
 }

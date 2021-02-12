@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.converter.stack;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request.RDS_NAME_MAX_LENGTH;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +45,8 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackRequest;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
-import com.sequenceiq.redbeams.configuration.DatabaseServerSSlCertificateConfig;
+import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
+import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.domain.stack.DatabaseServer;
@@ -69,8 +71,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseServerV4RequestToDBStackConverter.class);
 
-    private static final DBStackStatus NEW_STATUS = new DBStackStatus();
-
     private static final String DBSTACK_NAME_PREFIX = "dbstck";
 
     @Value("${cb.enabledplatforms:}")
@@ -78,9 +78,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     @Value("${redbeams.ssl.enabled:}")
     private boolean sslEnabled;
-
-    @Value("${info.app.version:}")
-    private String version;
 
     @Inject
     private EnvironmentService environmentService;
@@ -131,7 +128,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
-    private DatabaseServerSSlCertificateConfig databaseServerSSlCertificateConfig;
+    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
     @PostConstruct
     public void initSupportedPlatforms() {
@@ -174,13 +171,66 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return dbStack;
     }
 
-    public SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
+    private SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
         SslConfig sslConfig = new SslConfig();
         if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
-            sslConfig.setSslCertificates(databaseServerSSlCertificateConfig.getCertsByPlatform(dbStack.getCloudPlatform()));
+            String cloudPlatform = dbStack.getCloudPlatform();
+            // TODO Determine the highest available SSL cert version for GCP
+            int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByPlatform(cloudPlatform);
+            sslConfig.setSslCertificateActiveVersion(maxVersion);
+            // TODO Add SslConfig.sslCertificateMaxVersion and keep it up-to-date (mostly for GCP)
+
+            Set<String> certs;
+            int numberOfCerts = databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(cloudPlatform);
+            if (numberOfCerts == 0) {
+                // TODO Initialize SSL cert for GCP
+                // This is possible for cloud platforms where SSL is supported, but the certs are not pre-registered in CB; see e.g. GCP
+                certs = Collections.emptySet();
+            } else if (numberOfCerts == 1 || !CloudPlatform.AZURE.equals(source.getCloudPlatform())) {
+                SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByPlatformAndVersion(cloudPlatform, maxVersion);
+                ensureExistingCert(cloudPlatform, maxVersion, cert);
+                certs = Collections.singleton(cert.getCertPem());
+            } else {
+                // In Azure and for > 1 certs, include both the most recent cert and the preceding one
+                Set<SslCertificateEntry> certsTemp =
+                        databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(cloudPlatform, maxVersion - 1, maxVersion)
+                                .stream()
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet());
+                ensureNonNullCertsCountEqualsTwo(cloudPlatform, maxVersion, certsTemp);
+                certs = certsTemp
+                        .stream()
+                        .map(SslCertificateEntry::getCertPem)
+                        .collect(Collectors.toSet());
+                ensureUniqueCertsCountEqualsTwo(cloudPlatform, maxVersion, certs);
+            }
+            sslConfig.setSslCertificates(certs);
+
             sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         }
         return sslConfig;
+    }
+
+    private void ensureExistingCert(String cloudPlatform, int maxVersion, SslCertificateEntry cert) {
+        if (cert == null) {
+            throw new IllegalStateException(String.format("Could not find SSL certificate version %d for cloud platform \"%s\"", maxVersion, cloudPlatform));
+        }
+    }
+
+    private void ensureNonNullCertsCountEqualsTwo(String cloudPlatform, int maxVersion, Set<SslCertificateEntry> certsTemp) {
+        if (certsTemp.size() != 2) {
+            throw new IllegalStateException(
+                    String.format("Could not find SSL certificate(s) when requesting versions [%d, %d] for cloud platform \"%s\": " +
+                            "expected 2 certificates, got %d", maxVersion - 1, maxVersion, cloudPlatform, certsTemp.size()));
+        }
+    }
+
+    private void ensureUniqueCertsCountEqualsTwo(String cloudPlatform, int maxVersion, Set<String> certs) {
+        if (certs.size() != 2) {
+            throw new IllegalStateException(
+                    String.format("Received duplicated SSL certificate PEM when requesting versions [%d, %d] for cloud platform \"%s\"",
+                            maxVersion - 1, maxVersion, cloudPlatform));
+        }
     }
 
     private Json getTags(DBStack dbStack, String clusterCrn, DetailedEnvironmentResponse environment) {

@@ -22,6 +22,12 @@ public class SslConfigV4Response implements Serializable {
     @ApiModelProperty(DatabaseServer.SSL_MODE)
     private SslMode sslMode = SslMode.DISABLED;
 
+    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_ACTIVE_VERSION)
+    private int sslCertificateActiveVersion;
+
+    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
+    private int sslCertificateHighestAvailableVersion;
+
     public Set<String> getSslCertificates() {
         return sslCertificates;
     }
@@ -44,6 +50,22 @@ public class SslConfigV4Response implements Serializable {
 
     public void setSslMode(SslMode sslMode) {
         this.sslMode = sslMode;
+    }
+
+    public int getSslCertificateActiveVersion() {
+        return sslCertificateActiveVersion;
+    }
+
+    public void setSslCertificateActiveVersion(int sslCertificateActiveVersion) {
+        this.sslCertificateActiveVersion = sslCertificateActiveVersion;
+    }
+
+    public int getSslCertificateHighestAvailableVersion() {
+        return sslCertificateHighestAvailableVersion;
+    }
+
+    public void setSslCertificateHighestAvailableVersion(int sslCertificateHighestAvailableVersion) {
+        this.sslCertificateHighestAvailableVersion = sslCertificateHighestAvailableVersion;
     }
 
 }

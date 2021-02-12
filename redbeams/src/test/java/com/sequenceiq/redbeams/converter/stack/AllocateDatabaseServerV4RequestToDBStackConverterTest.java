@@ -1,8 +1,8 @@
 package com.sequenceiq.redbeams.converter.stack;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -11,22 +11,27 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
+import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -62,8 +67,10 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.SecurityGroupV4StackReques
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
-import com.sequenceiq.redbeams.configuration.DatabaseServerSSlCertificateConfig;
+import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
+import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.stack.SslConfig;
 import com.sequenceiq.redbeams.service.AccountTagService;
 import com.sequenceiq.redbeams.service.EnvironmentService;
 import com.sequenceiq.redbeams.service.PasswordGeneratorService;
@@ -75,7 +82,9 @@ import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
-public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final String OWNER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:external/bob@cloudera.com";
 
@@ -84,8 +93,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private static final String CLUSTER_CRN = "crn:cdp:datahub:us-west-1:cloudera:stack:id";
 
     private static final String ENVIRONMENT_NAME = "myenv-amazing-env";
-
-    private static final String VERSION = "1.2.3.4";
 
     private static final Instant NOW = Instant.now();
 
@@ -107,8 +114,31 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final CloudPlatform AWS_CLOUD_PLATFORM = CloudPlatform.AWS;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    private static final CloudPlatform AZURE_CLOUD_PLATFORM = CloudPlatform.AZURE;
+
+    private static final String CERT_PEM_V2 = "super-cert-2";
+
+    private static final String CERT_PEM_V3 = "super-cert-3";
+
+    private static final String REGION = "myRegion";
+
+    private static final String DATABASE_VENDOR = "postgres";
+
+    private static final String FIELD_SSL_ENABLED = "sslEnabled";
+
+    private static final int MAX_VERSION = 3;
+
+    private static final int VERSION_2 = 2;
+
+    private static final int VERSION_3 = 3;
+
+    private static final int NO_CERTS = 0;
+
+    private static final int SINGLE_CERT = 1;
+
+    private static final int TWO_CERTS = 2;
+
+    private static final int THREE_CERTS = 3;
 
     @Mock
     private EnvironmentService environmentService;
@@ -159,7 +189,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private DistroXV1Endpoint distroXV1Endpoint;
 
     @Mock
-    private DatabaseServerSSlCertificateConfig databaseServerSSlCertificateConfig;
+    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
+
+    @Mock
+    private X509Certificate x509Certificate;
 
     @InjectMocks
     private AllocateDatabaseServerV4RequestToDBStackConverter underTest;
@@ -172,12 +205,14 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private SecurityGroupV4StackRequest securityGroupRequest;
 
-    @Before
+    private SslCertificateEntry sslCertificateEntryV2;
+
+    private SslCertificateEntry sslCertificateEntryV3;
+
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-        ReflectionTestUtils.setField(underTest, "version", VERSION);
         ReflectionTestUtils.setField(underTest, "dbServiceSupportedPlatforms", Set.of("AWS", "AZURE"));
-        ReflectionTestUtils.setField(underTest, "sslEnabled", true);
+        ReflectionTestUtils.setField(underTest, FIELD_SSL_ENABLED, true);
 
         allocateRequest = new AllocateDatabaseServerV4Request();
 
@@ -190,11 +225,15 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         securityGroupRequest = new SecurityGroupV4StackRequest();
         databaseServerRequest.setSecurityGroup(securityGroupRequest);
 
+        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
         when(accountTagService.list()).thenReturn(new HashMap<>());
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
-        when(databaseServerSSlCertificateConfig.getCertsByPlatform(any())).thenReturn(Set.of("super-cert"));
+
+        sslCertificateEntryV2 = new SslCertificateEntry(VERSION_2, CERT_PEM_V2, x509Certificate);
+        sslCertificateEntryV3 = new SslCertificateEntry(VERSION_3, CERT_PEM_V3, x509Certificate);
+        when(databaseServerSslCertificateConfig.getMaxVersionByPlatform(anyString())).thenReturn(MAX_VERSION);
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
         when(crnService.createCrn(any(DBStack.class))).thenReturn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
@@ -204,19 +243,21 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     }
 
     @Test
-    public void testConversionWhenOptionalElementsAreProvided() throws IOException {
+    void conversionTestWhenOptionalElementsAreProvided() throws IOException {
         setupAllocateRequest(true);
         setupTagsResponse();
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(sslCertificateEntryV3);
 
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
                 .withCrn(ENVIRONMENT_CRN)
-                .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
+                .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
                 .withName(ENVIRONMENT_NAME)
                 .withTag(new TagResponse())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
         assertEquals(allocateRequest.getName(), dbStack.getName());
@@ -247,10 +288,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
-        assertEquals(dbStack.getSslConfig().getSslCertificates(), Set.of("super-cert"));
-        assertEquals(dbStack.getSslConfig().getSslCertificateType(), SslCertificateType.CLOUD_PROVIDER_OWNED);
 
-        verify(databaseServerSSlCertificateConfig).getCertsByPlatform(any());
+        verifySsl(dbStack, Set.of(CERT_PEM_V3));
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator).get(networkRequest);
         verify(subnetListerService, never()).listSubnets(any(), any());
@@ -273,9 +314,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     }
 
     @Test
-    public void testConversionWhenOptionalElementsGenerated() throws IOException {
+    void conversionTestWhenOptionalElementsGenerated() throws IOException {
         setupAllocateRequest(false);
         setupTagsResponse();
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(sslCertificateEntryV3);
 
         List<CloudSubnet> cloudSubnets = List.of(
                 new CloudSubnet("subnet-1", "", "az-a", ""),
@@ -286,7 +330,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withName(ENVIRONMENT_NAME)
                 .withCrn(ENVIRONMENT_CRN)
                 .withTag(new TagResponse())
-                .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName("myRegion").build())
+                .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
                 .withSecurityAccess(SecurityAccessResponse.builder().withDefaultSecurityGroupId(DEFAULT_SECURITY_GROUP_ID).build())
                 .withNetwork(EnvironmentNetworkResponse.EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                         .withSubnetMetas(
@@ -297,7 +341,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                         )
                         .build())
                 .build();
-        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(subnetListerService.listSubnets(any(), any())).thenReturn(cloudSubnets);
         when(subnetChooserService.chooseSubnets(any(), any(), any())).thenReturn(cloudSubnets);
@@ -313,13 +356,13 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals("n-uuid", dbStack.getNetwork().getName());
         assertEquals(1, dbStack.getNetwork().getAttributes().getMap().size());
         assertEquals("netvalue", dbStack.getNetwork().getAttributes().getMap().get("netkey"));
-        assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds(), hasSize(1));
+        assertThat(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds()).hasSize(1);
         assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
-        assertEquals(dbStack.getSslConfig().getSslCertificates(), Set.of("super-cert"));
-        assertEquals(dbStack.getSslConfig().getSslCertificateType(), SslCertificateType.CLOUD_PROVIDER_OWNED);
 
-        verify(databaseServerSSlCertificateConfig).getCertsByPlatform(any());
+        verifySsl(dbStack, Set.of(CERT_PEM_V3));
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+
         verify(providerParameterCalculator).get(allocateRequest);
         verify(providerParameterCalculator, never()).get(networkRequest);
         verify(subnetListerService).listSubnets(any(), any());
@@ -330,37 +373,234 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     }
 
     @Test
-    public void testConversionWhenRequestAndEnvironmentCloudplatformsDiffer() {
-        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
+    void conversionTestWhenRequestAndEnvironmentCloudPlatformsDiffer() {
         allocateRequest.setCloudPlatform(AWS_CLOUD_PLATFORM);
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(UNKNOWN_CLOUD_PLATFORM)
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cloud platform of the request AWS and the environment " + UNKNOWN_CLOUD_PLATFORM + " do not match.");
 
-        underTest.convert(allocateRequest, OWNER_CRN);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+
+        assertThat(badRequestException).hasMessage("Cloud platform of the request AWS and the environment " + UNKNOWN_CLOUD_PLATFORM + " do not match.");
     }
 
     @Test
-    public void testConversionWhenUnsupportedCloudplatform() {
-        when(crnUserDetailsService.loadUserByUsername(OWNER_CRN)).thenReturn(getCrnUser());
+    void conversionTestWhenUnsupportedCloudPlatform() {
         allocateRequest.setCloudPlatform(CloudPlatform.YARN);
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(CloudPlatform.YARN.name())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cloud platform YARN not supported yet.");
 
-        underTest.convert(allocateRequest, OWNER_CRN);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+
+        assertThat(badRequestException).hasMessage("Cloud platform YARN not supported yet.");
+    }
+
+    static Object[][] conversionTestWhenSslDisabledDataProvider() {
+        return new Object[][]{
+                // testCaseName fieldSslEnabled sslConfigV4Request
+                {"false, null", false, null},
+                {"true, null", true, null},
+                {"false, request with sslMode=null", false, new SslConfigV4Request()},
+                {"true, request with sslMode=null", true, new SslConfigV4Request()},
+                {"false, request with sslMode=DISABLED", false, createSslConfigV4Request(SslMode.DISABLED)},
+                {"true, request with sslMode=DISABLED", true, createSslConfigV4Request(SslMode.DISABLED)},
+                {"false, request with sslMode=ENABLED", false, createSslConfigV4Request(SslMode.ENABLED)},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("conversionTestWhenSslDisabledDataProvider")
+    void conversionTestWhenSslDisabled(String testCaseName, boolean fieldSslEnabled, SslConfigV4Request sslConfigV4Request) {
+        setupMinimalValid(sslConfigV4Request, AWS_CLOUD_PLATFORM);
+        ReflectionTestUtils.setField(underTest, FIELD_SSL_ENABLED, fieldSslEnabled);
+
+        DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
+
+        SslConfig sslConfig = dbStack.getSslConfig();
+        assertThat(sslConfig).isNotNull();
+        Set<String> sslCertificates = sslConfig.getSslCertificates();
+        assertThat(sslCertificates).isNotNull();
+        assertThat(sslCertificates).isEmpty();
+        assertThat(sslConfig.getSslCertificateType()).isEqualTo(SslCertificateType.NONE);
+    }
+
+    private void setupMinimalValid(SslConfigV4Request sslConfigV4Request, CloudPlatform cloudPlatform) {
+        setupTagsResponse();
+
+        allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
+        allocateRequest.setClusterCrn(CLUSTER_CRN);
+        allocateRequest.setSslConfig(sslConfigV4Request);
+
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+                .withCloudPlatform(cloudPlatform.name())
+                .withCrn(ENVIRONMENT_CRN)
+                .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
+                .withName(ENVIRONMENT_NAME)
+                .withTag(new TagResponse())
+                .build();
+        when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
+
+        databaseServerRequest.setDatabaseVendor(DATABASE_VENDOR);
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndNoCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(NO_CERTS);
+
+        DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
+
+        verifySsl(dbStack, Set.of());
+
+        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndSingleCert() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        conversionTestWhenSslEnabledAndSingleCertReturnedInternal(AWS_CLOUD_PLATFORM.name(), SINGLE_CERT);
+    }
+
+    private void conversionTestWhenSslEnabledAndSingleCertReturnedInternal(String cloudPlatform, int numOfCerts) {
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(cloudPlatform)).thenReturn(numOfCerts);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(cloudPlatform, VERSION_3)).thenReturn(sslCertificateEntryV3);
+
+        DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
+
+        verifySsl(dbStack, Set.of(CERT_PEM_V3));
+
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndSingleCertErrorNullCert() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(null);
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException).hasMessage("Could not find SSL certificate version 3 for cloud platform \"AWS\"");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAzureAndSingleCert() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        conversionTestWhenSslEnabledAndSingleCertReturnedInternal(AZURE_CLOUD_PLATFORM.name(), SINGLE_CERT);
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndTwoCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        conversionTestWhenSslEnabledAndSingleCertReturnedInternal(AWS_CLOUD_PLATFORM.name(), TWO_CERTS);
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndThreeCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        conversionTestWhenSslEnabledAndSingleCertReturnedInternal(AWS_CLOUD_PLATFORM.name(), THREE_CERTS);
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAzureAndTwoCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        conversionTestWhenSslEnabledAndTwoCertsReturnedInternal(AZURE_CLOUD_PLATFORM.name(), TWO_CERTS);
+    }
+
+    private void conversionTestWhenSslEnabledAndTwoCertsReturnedInternal(String cloudPlatform, int numOfCerts) {
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(cloudPlatform)).thenReturn(numOfCerts);
+        when(databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(cloudPlatform, VERSION_2, VERSION_3))
+                .thenReturn(Set.of(sslCertificateEntryV2, sslCertificateEntryV3));
+
+        DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
+
+        verifySsl(dbStack, Set.of(CERT_PEM_V2, CERT_PEM_V3));
+
+        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorNullCert() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AZURE_CLOUD_PLATFORM.name())).thenReturn(TWO_CERTS);
+
+        Set<SslCertificateEntry> certs = new HashSet<>();
+        certs.add(sslCertificateEntryV3);
+        certs.add(null);
+        when(databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(AZURE_CLOUD_PLATFORM.name(), VERSION_2, VERSION_3)).thenReturn(certs);
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException)
+                .hasMessage("Could not find SSL certificate(s) when requesting versions [2, 3] for cloud platform \"AZURE\": expected 2 certificates, got 1");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorFewerCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AZURE_CLOUD_PLATFORM.name())).thenReturn(TWO_CERTS);
+        when(databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(AZURE_CLOUD_PLATFORM.name(), VERSION_2, VERSION_3))
+                .thenReturn(Set.of(sslCertificateEntryV3));
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException)
+                .hasMessage("Could not find SSL certificate(s) when requesting versions [2, 3] for cloud platform \"AZURE\": expected 2 certificates, got 1");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorDuplicatedCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        SslCertificateEntry sslCertificateEntryV2DuplicateOfV3 = new SslCertificateEntry(VERSION_2, CERT_PEM_V3, x509Certificate);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AZURE_CLOUD_PLATFORM.name())).thenReturn(TWO_CERTS);
+        when(databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(AZURE_CLOUD_PLATFORM.name(), VERSION_2, VERSION_3))
+                .thenReturn(Set.of(sslCertificateEntryV2DuplicateOfV3, sslCertificateEntryV3));
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException)
+                .hasMessage("Received duplicated SSL certificate PEM when requesting versions [2, 3] for cloud platform \"AZURE\"");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAzureAndThreeCerts() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        conversionTestWhenSslEnabledAndTwoCertsReturnedInternal(AZURE_CLOUD_PLATFORM.name(), THREE_CERTS);
+    }
+
+    private void verifySsl(DBStack dbStack, Set<String> sslCertificatesExpected) {
+        SslConfig sslConfig = dbStack.getSslConfig();
+        assertThat(sslConfig).isNotNull();
+        Set<String> sslCertificates = sslConfig.getSslCertificates();
+        assertThat(sslCertificates).isNotNull();
+        assertThat(sslCertificates).isEqualTo(sslCertificatesExpected);
+        assertThat(sslConfig.getSslCertificateType()).isEqualTo(SslCertificateType.CLOUD_PROVIDER_OWNED);
+        assertThat(sslConfig.getSslCertificateActiveVersion()).isEqualTo(MAX_VERSION);
     }
 
     private void setupAllocateRequest(boolean provideOptionalFields) {
-
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         allocateRequest.setClusterCrn(CLUSTER_CRN);
         if (provideOptionalFields) {
@@ -373,12 +613,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
             allocateRequest.setNetwork(null);
             allocateRequest.getDatabaseServer().setSecurityGroup(null);
         }
-        SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
-        sslConfigV4Request.setSslMode(SslMode.ENABLED);
-        allocateRequest.setSslConfig(sslConfigV4Request);
+        allocateRequest.setSslConfig(createSslConfigV4Request(SslMode.ENABLED));
 
         databaseServerRequest.setInstanceType("db.m3.medium");
-        databaseServerRequest.setDatabaseVendor("postgres");
+        databaseServerRequest.setDatabaseVendor(DATABASE_VENDOR);
         databaseServerRequest.setConnectionDriver("org.postgresql.Driver");
         databaseServerRequest.setStorageSize(50L);
         if (provideOptionalFields) {
@@ -389,6 +627,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         setupProviderCalculatorResponse(databaseServerRequest, DATABASE_SERVER_REQUEST_PARAMETERS);
 
         securityGroupRequest.setSecurityGroupIds(Set.of("sg-1234"));
+    }
+
+    private static SslConfigV4Request createSslConfigV4Request(SslMode sslMode) {
+        SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();
+        sslConfigV4Request.setSslMode(sslMode);
+        return sslConfigV4Request;
     }
 
     private void setupProviderCalculatorResponse(ProviderParametersBase request, Map<String, Object> response) {

@@ -4,6 +4,10 @@ import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.Ss
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode.ENABLED;
 import static com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType.NONE;
 
+import java.util.Optional;
+
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -11,6 +15,7 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfigV4Response;
 import com.sequenceiq.redbeams.api.model.common.Status;
+import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.SslConfig;
@@ -18,6 +23,9 @@ import com.sequenceiq.redbeams.domain.stack.SslConfig;
 @Component
 public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
         extends AbstractConversionServiceAwareConverter<DatabaseServerConfig, DatabaseServerV4Response> {
+
+    @Inject
+    private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
     @Override
     public DatabaseServerV4Response convert(DatabaseServerConfig source) {
@@ -49,6 +57,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
                 sslConfigV4Response.setSslCertificates(sslConfig.getSslCertificates());
                 sslConfigV4Response.setSslCertificateType(sslConfig.getSslCertificateType());
                 sslConfigV4Response.setSslMode(NONE.equals(sslConfig.getSslCertificateType()) ? DISABLED : ENABLED);
+                String cloudPlatform = dbStack.getCloudPlatform();
+                // TODO Add SslConfig.sslCertificateMaxVersion that is kept up-to-date (mostly for GCP), use getMaxVersionByPlatform() as fallback
+                sslConfigV4Response.setSslCertificateHighestAvailableVersion(databaseServerSslCertificateConfig.getMaxVersionByPlatform(cloudPlatform));
+                sslConfigV4Response.setSslCertificateActiveVersion(Optional.ofNullable(sslConfig.getSslCertificateActiveVersion())
+                        .orElse(databaseServerSslCertificateConfig.getLegacyMaxVersionByPlatform(cloudPlatform)));
                 response.setSslConfig(sslConfigV4Response);
             }
         } else if (source.getHost() != null && source.getPort() != null) {

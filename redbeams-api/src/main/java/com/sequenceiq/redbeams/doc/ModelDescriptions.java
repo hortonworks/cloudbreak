@@ -66,10 +66,13 @@ public final class ModelDescriptions {
         public static final String RESOURCE_STATUS = "Ownership status of the database server";
         public static final String STATUS = "Status of the database server stack";
         public static final String STATUS_REASON = "Additional status information about the database server stack";
-        public static final String SSL_CERTIFICATES = "Set of SSL certificates for the actual database server";
+        public static final String SSL_CERTIFICATES = "Set of relevant SSL certificates for the database server, including the active one";
         public static final String SSL_CERTIFICATE_TYPE = "SSL certificate type";
-        public static final String SSL_MODE = "SSL enforcement mode for the actual database server";
+        public static final String SSL_MODE = "SSL enforcement mode for the database server";
         public static final String SSL_CONFIG = "SSL config of the database server";
+        public static final String SSL_CERTIFICATE_ACTIVE_VERSION = "Version number of the SSL certificate currently active for the database server";
+        public static final String SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION =
+                "Highest version number of the SSL certificate available for the database server; does not necessarily equal the active version";
     }
 
     public static class DatabaseServerTest {
