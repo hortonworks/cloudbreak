@@ -23,7 +23,7 @@ import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
-import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.TimeAlertEvaluator;
 
 @Component("CronTimeEvaluator")
 @Scope("prototype")
@@ -40,7 +40,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private ClusterService clusterService;
 
     @Inject
-    private DateService dateService;
+    private TimeAlertEvaluator timeAlertEvaluator;
 
     @Inject
     private EventPublisher eventPublisher;
@@ -64,11 +64,11 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     }
 
     private boolean isTrigger(TimeAlert alert) {
-        return dateService.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS);
+        return timeAlertEvaluator.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS);
     }
 
     private boolean isTrigger(TimeAlert alert, ZonedDateTime zdt) {
-        return dateService.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS, zdt);
+        return timeAlertEvaluator.isTrigger(alert, MonitorUpdateRate.CRON_UPDATE_RATE_IN_MILLIS, zdt);
     }
 
     private boolean isPolicyAttached(BaseAlert alert) {
