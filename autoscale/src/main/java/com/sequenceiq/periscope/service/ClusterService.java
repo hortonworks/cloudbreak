@@ -169,6 +169,7 @@ public class ClusterService {
 
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
+        cleanupTimeAlerts(cluster);
         List<FailedNode> failedNodes = failedNodeRepository.findByClusterId(clusterId);
         failedNodeRepository.deleteAll(failedNodes);
         clusterRepository.delete(cluster);
@@ -244,6 +245,11 @@ public class ClusterService {
         if (clusterForTheSameStackAndAmbari) {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
         }
+    }
+
+    private void cleanupTimeAlerts(Cluster cluster) {
+        cluster.getTimeAlerts()
+                .forEach(timeAlert -> alertService.cleanupTimeAlert(timeAlert.getId()));
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {
