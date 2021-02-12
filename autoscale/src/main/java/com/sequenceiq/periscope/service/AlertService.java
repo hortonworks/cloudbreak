@@ -72,7 +72,7 @@ public class AlertService {
     private AmbariRequestLogging ambariRequestLogging;
 
     @Inject
-    private DateService dateService;
+    private TimeAlertEvaluator timeAlertEvaluator;
 
     public MetricAlert createMetricAlert(Long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);
@@ -153,7 +153,7 @@ public class AlertService {
     }
 
     public void cleanupTimeAlert(Long alertId) {
-        dateService.cleanupAlert(alertId);
+        timeAlertEvaluator.cleanupAlert(alertId);
     }
 
     public PrometheusAlert createPrometheusAlert(Long clusterId, PrometheusAlert alert) {

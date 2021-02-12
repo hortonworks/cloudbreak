@@ -17,13 +17,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DateServiceTest {
+public class TimeAlertEvaluatorTest {
 
     @Mock
     private DateTimeService dateTimeService;
 
     @InjectMocks
-    private DateService underTest;
+    private TimeAlertEvaluator underTest;
 
     @Before
     public void setUp() {

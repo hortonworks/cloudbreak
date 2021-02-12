@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.springframework.scheduling.support.CronSequenceGenerator;
 
 import com.sequenceiq.periscope.service.DateTimeService;
-import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.TimeAlertEvaluator;
 
 @RunWith(Parameterized.class)
 public class CronTest {
@@ -29,7 +29,7 @@ public class CronTest {
     private DateTimeService dateTimeService;
 
     @InjectMocks
-    private final DateService underTest = new DateService();
+    private final TimeAlertEvaluator underTest = new TimeAlertEvaluator();
 
     private final String input;
 
