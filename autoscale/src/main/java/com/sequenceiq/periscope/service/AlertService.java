@@ -71,6 +71,9 @@ public class AlertService {
     @Inject
     private AmbariRequestLogging ambariRequestLogging;
 
+    @Inject
+    private DateService dateService;
+
     public MetricAlert createMetricAlert(Long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);
         validateNewAlert(cluster, alert);
@@ -146,6 +149,11 @@ public class AlertService {
         Cluster cluster = clusterService.findById(clusterId);
         cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
         clusterService.save(cluster);
+        cleanupTimeAlert(alertId);
+    }
+
+    public void cleanupTimeAlert(Long alertId) {
+        dateService.cleanupAlert(alertId);
     }
 
     public PrometheusAlert createPrometheusAlert(Long clusterId, PrometheusAlert alert) {
