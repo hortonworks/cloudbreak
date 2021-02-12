@@ -178,7 +178,7 @@ public class StackV4RequestToStackConverter extends AbstractConversionServiceAwa
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
-        stack.setLoadBalancers(loadBalancerConfigService.createLoadBalancers(stack, environment));
+        stack.setLoadBalancers(loadBalancerConfigService.createLoadBalancers(stack, environment, source.isEnableLoadBalancer()));
         return stack;
     }
 

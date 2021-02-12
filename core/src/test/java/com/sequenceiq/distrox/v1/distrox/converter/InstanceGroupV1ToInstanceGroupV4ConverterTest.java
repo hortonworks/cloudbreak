@@ -1,14 +1,12 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +21,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.AwsInstanceGroupV1Parameters;
@@ -61,24 +58,6 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     @InjectMocks
     private InstanceGroupV1ToInstanceGroupV4Converter underTest;
-
-    @Test
-    void gatewayIGMustContain1Node() {
-        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
-        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
-        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.GATEWAY);
-
-        instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(2));
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.convertTo(instanceGroups, null));
-        assertEquals("Instance group with GATEWAY type must contain 1 node!", exception.getMessage());
-
-        instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(0));
-        exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.convertTo(instanceGroups, null));
-        assertEquals("Instance group with GATEWAY type must contain 1 node!", exception.getMessage());
-
-        instanceGroups.stream().findFirst().ifPresent(instanceGroup -> instanceGroup.setNodeCount(1));
-        underTest.convertTo(instanceGroups, null);
-    }
 
     @Test
     void convertToAwsWithoutSecurityGroupsHappyPathTest() {
