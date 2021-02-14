@@ -28,4 +28,6 @@ public interface TelemetryOrchestrator {
 
     void cleanupCollectedDiagnostics(List<GatewayConfig> gatewayConfigs, Set<Node> allNodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
+
+    Set<Node> collectUnresponsiveNodes(List<GatewayConfig> gatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 }

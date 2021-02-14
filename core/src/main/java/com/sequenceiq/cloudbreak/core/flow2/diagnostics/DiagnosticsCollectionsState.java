@@ -4,6 +4,7 @@ import com.sequenceiq.flow.core.FlowState;
 
 public enum DiagnosticsCollectionsState implements FlowState {
     INIT_STATE,
+    DIAGNOSTICS_SALT_VALIDATION_STATE,
     DIAGNOSTICS_INIT_STATE,
     DIAGNOSTICS_ENSURE_MACHINE_USER_STATE,
     DIAGNOSTICS_COLLECTION_STATE,

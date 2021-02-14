@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
 import com.sequenceiq.flow.core.FlowEvent;
 
 public enum DiagnosticsCollectionHandlerSelectors implements FlowEvent {
+    SALT_VALIDATION_DIAGNOSTICS_EVENT,
     INIT_DIAGNOSTICS_EVENT,
     ENSURE_MACHINE_USER_EVENT,
     COLLECT_DIAGNOSTICS_EVENT,

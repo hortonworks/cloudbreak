@@ -131,3 +131,19 @@ check_support_dbus_connection:
        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
        - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
 {% endif %}
+
+{% if not filecollector.skipWorkspaceCleanupOnStartup %}
+filecollector_clean_dirs_at_startup:
+  cmd.run:
+    - names:
+{% if filecollector.destination == "LOCAL" %}
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p tmp/**
+{% elif filecollector.destination == "ENG" %}
+        - cdp-telemetry utils clean -d /var/lib/filecollector/
+{% else %}
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p tmp/**
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p *.gz
+{% if filecollector.mode == "CLOUDERA_MANAGER" %}
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p *.zip{% endif %}
+{% endif %}
+{% endif %}

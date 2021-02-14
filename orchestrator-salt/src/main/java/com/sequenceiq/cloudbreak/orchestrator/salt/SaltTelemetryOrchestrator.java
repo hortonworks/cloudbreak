@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -112,6 +113,25 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_CLEANUP,
                 "Error occurred during diagnostics filecollector cleanup.", maxDiagnosticsCollectionRetry, false);
+    }
+
+    @Override
+    public Set<Node> collectUnresponsiveNodes(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException  {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            List<String> missingNodeNames = SaltStates.ping(sc)
+                    .getResultByMinionId().entrySet().stream()
+                    .filter(entry -> !entry.getValue())
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+            return nodes.stream()
+                    .filter(n -> missingNodeNames.contains(n.getHostname()))
+                    .collect(Collectors.toSet());
+        } catch (Exception e) {
+            LOGGER.info("Cannot collect unresponsive salt minions", e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
     }
 
     //CHECKSTYLE:OFF

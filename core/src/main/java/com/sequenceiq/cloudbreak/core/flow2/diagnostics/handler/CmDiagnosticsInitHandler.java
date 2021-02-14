@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionHandlerSelectors.INIT_CM_DIAGNOSTICS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_COLLECTION_EVENT;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -54,7 +55,7 @@ public class CmDiagnosticsInitHandler extends EventSenderAwareHandler<CmDiagnost
             if (DiagnosticsDestination.SUPPORT.equals(parameters.getDestination())) {
                 LOGGER.debug("CM based diagnostics uses SUPPORT destination, no support specific init step yet.");
             } else {
-                diagnosticsFlowService.init(resourceId, parameterMap);
+                diagnosticsFlowService.init(resourceId, parameterMap, new HashSet<>());
             }
             CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)

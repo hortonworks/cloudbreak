@@ -48,7 +48,8 @@ public class DiagnosticsUploadHandler extends EventSenderAwareHandler<Diagnostic
             LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
             Set<String> hosts = data.getHosts();
             Set<String> hostGroups = data.getHostGroups();
-            diagnosticsFlowService.upload(resourceId, parameterMap, hosts, hostGroups);
+            Set<String> excludeHosts = data.getExcludedHosts();
+            diagnosticsFlowService.upload(resourceId, parameterMap, hosts, hostGroups, excludeHosts);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
