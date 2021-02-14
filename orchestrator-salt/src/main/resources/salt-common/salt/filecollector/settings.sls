@@ -60,6 +60,11 @@
     {% set skip_validation = True %}
 {% endif %}
 
+{% set skip_workspace_cleanup_on_startup = False %}
+{% if salt['pillar.get']('filecollector:skipWorkspaceCleanupOnStartup') %}
+    {% set skip_workspace_cleanup_on_startup = True %}
+{% endif %}
+
 {% set proxy_full_url = None %}
 {% set proxy_protocol = None %}
 {% if salt['pillar.get']('proxy:host') %}
@@ -122,6 +127,7 @@
     "includeSaltLogs": include_salt_logs,
     "updatePackage": update_package,
     "skipValidation": skip_validation,
+    "skipWorkspaceCleanupOnStartup": skip_workspace_cleanup_on_startup,
     "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
     "mode": mode,

@@ -27,6 +27,25 @@ public class DiagnosticsCollectionActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsCollectionActions.class);
 
+    @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
+    public Action<?, ?> diagnosticsSaltValidateAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_VALIDATION_STATE. resourceCrn: '{}'", resourceCrn);
+                InMemoryStateStore.putStack(payload.getResourceId(), PollGroup.POLLABLE);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(payload.getResourceId())
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_VALIDATION_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
     @Bean(name = "DIAGNOSTICS_INIT_STATE")
     public Action<?, ?> diagnosticsInitAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
@@ -34,7 +53,7 @@ public class DiagnosticsCollectionActions {
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
-                InMemoryStateStore.putStack(payload.getResourceId(), PollGroup.POLLABLE);
+                //InMemoryStateStore.putStack(payload.getResourceId(), PollGroup.POLLABLE);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(payload.getResourceId())
                         .withResourceCrn(resourceCrn)
@@ -52,7 +71,7 @@ public class DiagnosticsCollectionActions {
             @Override
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
-                LOGGER.debug("Flow entered into DIAGNOSTICS_CREATE_MACHINE_USER_STATE. resourceCrn: '{}'", resourceCrn);
+                LOGGER.debug("Flow entered into ENSURE_MACHINE_USER_EVENT. resourceCrn: '{}'", resourceCrn);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(payload.getResourceId())
                         .withResourceCrn(payload.getResourceCrn())

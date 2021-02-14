@@ -78,9 +78,12 @@ public class DiagnosticsDataToParameterConverter {
         builder.withEndTime(request.getEndTime());
         builder.withHostGroups(request.getHostGroups());
         builder.withHosts(request.getHosts());
+        builder.withExcludeHosts(request.getExcludeHosts());
         builder.withIncludeSaltLogs(request.getIncludeSaltLogs());
         builder.withUpdatePackage(request.getUpdatePackage());
         builder.withSkipValidation(request.getSkipValidation());
+        builder.withSkipWorkspaceCleanupOnStartup(request.getSkipWorkspaceCleanupOnStartup());
+        builder.withSkipUnresponsiveHosts(request.getSkipUnresponsiveHosts());
         builder.withAdditionalLogs(request.getAdditionalLogs());
         if (supportBundleConfiguration.isEnabled()) {
             builder.withDbusUrl(databusEndpoint);

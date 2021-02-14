@@ -43,72 +43,104 @@ public class DiagnosticsFlowService {
     @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
 
-    public void init(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public Set<String> collectUnresponsiveNodes(Long stackId, Set<String> initialExcludeHosts) throws CloudbreakOrchestratorFailedException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, new HashSet<>(), new HashSet<>());
+        ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
+        Set<Node> unresponsiveNodes = telemetryOrchestrator.collectUnresponsiveNodes(gatewayConfigs, allNodes, exitModel);
+        return unresponsiveNodes.stream()
+                .filter(n -> CollectionUtils.isEmpty(initialExcludeHosts) || !nodeHostFilterMatches(n, initialExcludeHosts))
+                .map(Node::getHostname).collect(Collectors.toSet());
+    }
+
+    public boolean init(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Diagnostics init will be called only on the primary gateway address");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        init(stackId, parameters, hosts, new HashSet<>());
+        return init(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
     }
 
-    public void init(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
+    public boolean init(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics init. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
+            executed = true;
+        }
+        return executed;
     }
 
-    public void collect(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
+    public boolean collect(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics collection. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
+            executed = true;
+        }
+        return executed;
     }
 
-    public void upload(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public boolean upload(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Diagnostics upload will be called only on the primary gateway address");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        upload(stackId, parameters, hosts, new HashSet<>());
+        return upload(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
     }
 
-    public void upload(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
+    public boolean upload(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
+            executed = true;
+        }
+        return executed;
     }
 
-    public void cleanup(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public boolean cleanup(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Diagnostics cleanup will be called only on the primary gateway address");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        cleanup(stackId, parameters, hosts, new HashSet<>());
+        return cleanup(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
     }
 
-    public void cleanup(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups)
+    public boolean cleanup(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics cleanup. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        telemetryOrchestrator.cleanupCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.cleanupCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
+            executed = true;
+        }
+        return executed;
     }
 
     private Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet, Set<String> hosts, Set<String> hostGroups) {
@@ -116,21 +148,28 @@ public class DiagnosticsFlowService {
                 .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                         im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                 .filter(
-                        n -> filterNodes(n, hosts, hostGroups)
+                        n -> filterNodes(n, hosts, hostGroups, hostGroups)
                 )
                 .collect(Collectors.toSet());
     }
 
     @VisibleForTesting
-    boolean filterNodes(Node node, Set<String> hosts, Set<String> hostGroups) {
+    boolean filterNodes(Node node, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
         boolean result = true;
-        if (CollectionUtils.isNotEmpty(hosts)) {
-            result = hosts.contains(node.getHostname()) || hosts.contains(node.getPrivateIp()) || hosts.contains(node.getPublicIp());
+        if (CollectionUtils.isNotEmpty(excludeHosts)) {
+            result = !nodeHostFilterMatches(node, excludeHosts);
+        }
+        if (result && CollectionUtils.isNotEmpty(hosts)) {
+            result = nodeHostFilterMatches(node, hosts);
         }
         if (result && CollectionUtils.isNotEmpty(hostGroups)) {
             result = hostGroups.contains(node.getHostGroup());
         }
         return result;
+    }
+
+    private boolean nodeHostFilterMatches(Node node, Set<String> hosts) {
+        return hosts.contains(node.getHostname()) || hosts.contains(node.getPrivateIp()) || hosts.contains(node.getPublicIp());
     }
 
 }

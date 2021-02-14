@@ -48,7 +48,8 @@ public class DiagnosticsCollectionHandler extends EventSenderAwareHandler<Diagno
             LOGGER.debug("Diagnostics collection started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
             Set<String> hosts = data.getHosts();
             Set<String> hostGroups = data.getHostGroups();
-            diagnosticsService.collect(resourceId, parameterMap, hosts, hostGroups);
+            Set<String> excludeHosts = data.getExcludedHosts();
+            diagnosticsService.collect(resourceId, parameterMap, hosts, hostGroups, excludeHosts);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)

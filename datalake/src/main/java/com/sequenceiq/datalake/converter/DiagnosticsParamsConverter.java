@@ -34,6 +34,8 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_HOST_GROUPS = "hostGroups";
 
+    private static final String PARAMS_EXCLUDE_HOSTs = "excludeHosts";
+
     private static final String PARAMS_LABELS = "labels";
 
     private static final String PARAMS_ROLES = "roles";
@@ -52,6 +54,10 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_SKIP_VALIDATION = "skipValidation";
 
+    private static final String PARAMS_SKIP_WORKSPACE_CLEANUP_ON_STARTUP = "skipWorkspaceCleanupOnStartup";
+
+    private static final String PARAMS_SKIP_UNRESPONSIVE_HOSTS = "skipUnresponsiveHosts";
+
     private static final String PARAMS_ENABLE_MONITOR_METRICS_COLLECTION = "enableMonitorMetricsCollection";
 
     private static final String PARAMS_BUNDLE_SIZE_BYTES = "bundleSizeBytes";
@@ -62,6 +68,7 @@ public class DiagnosticsParamsConverter {
         props.put(PARAM_DESTINATION, request.getDestination());
         props.put(PARAM_DESCRIPTION, request.getDescription());
         props.put(PARAM_HOSTS, request.getHosts());
+        props.put(PARAMS_EXCLUDE_HOSTs, request.getExcludeHosts());
         props.put(PARAMS_HOST_GROUPS, request.getHostGroups());
         props.put(PARAMS_ISSUE, request.getIssue());
         props.put(PARAMS_LABELS, request.getLabels());
@@ -71,6 +78,8 @@ public class DiagnosticsParamsConverter {
         props.put(PARAMS_INCLUDE_SALT_LOGS, request.getIncludeSaltLogs());
         props.put(PARAMS_UPDATE_PACKAGE, request.getUpdatePackage());
         props.put(PARAMS_SKIP_VALIDATION, request.getSkipValidation());
+        props.put(PARAMS_SKIP_WORKSPACE_CLEANUP_ON_STARTUP, request.getSkipWorkspaceCleanupOnStartup());
+        props.put(PARAMS_SKIP_UNRESPONSIVE_HOSTS, request.getSkipUnresponsiveHosts());
         return props;
     }
 
@@ -80,6 +89,7 @@ public class DiagnosticsParamsConverter {
                 .map(v -> DiagnosticsDestination.valueOf(v.toString())).orElse(null));
         request.setStackCrn(Optional.ofNullable(props.get(PARAMS_STACK_CRN)).map(Object::toString).orElse(null));
         request.setHosts((Set<String>) Optional.ofNullable(props.get(PARAM_HOSTS)).orElse(null));
+        request.setExcludeHosts((Set<String>) Optional.ofNullable(props.get(PARAMS_EXCLUDE_HOSTs)).orElse(null));
         request.setHostGroups((Set<String>) Optional.ofNullable(props.get(PARAMS_HOST_GROUPS)).orElse(null));
         request.setLabels((List<String>) Optional.ofNullable(props.get(PARAMS_LABELS)).orElse(null));
         request.setAdditionalLogs((List<VmLog>) Optional.ofNullable(props.get(PARAMS_ADDITIONAL_LOGS)).orElse(null));

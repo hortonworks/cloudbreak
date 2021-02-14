@@ -7,6 +7,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollect
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_ENSURE_MACHINE_USER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_UPLOAD_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.DIAGNOSTICS_SALT_VALIDATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.DiagnosticsCollectionsState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.FAILED_DIAGNOSTICS_COLLECTION_EVENT;
@@ -18,6 +19,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsC
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_UPLOAD_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_VALIDATION_EVENT;
 
 import java.util.List;
 
@@ -36,7 +38,12 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
             = new Transition.Builder<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>()
             .defaultFailureEvent(FAILED_DIAGNOSTICS_COLLECTION_EVENT)
 
-            .from(INIT_STATE).to(DIAGNOSTICS_INIT_STATE)
+            .from(INIT_STATE).to(DIAGNOSTICS_SALT_VALIDATION_STATE)
+            .event(START_DIAGNOSTICS_SALT_VALIDATION_EVENT)
+            .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(DIAGNOSTICS_SALT_VALIDATION_STATE).to(DIAGNOSTICS_INIT_STATE)
             .event(START_DIAGNOSTICS_INIT_EVENT)
             .failureState(DIAGNOSTICS_COLLECTION_FAILED_STATE)
             .defaultFailureEvent()
@@ -98,7 +105,7 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
     @Override
     public DiagnosticsCollectionStateSelectors[] getInitEvents() {
         return new DiagnosticsCollectionStateSelectors[] {
-                START_DIAGNOSTICS_INIT_EVENT
+                START_DIAGNOSTICS_SALT_VALIDATION_EVENT
         };
     }
 

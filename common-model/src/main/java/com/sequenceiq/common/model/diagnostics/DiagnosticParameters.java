@@ -31,6 +31,8 @@ public class DiagnosticParameters {
 
     private Set<String> hosts = new HashSet<>();
 
+    private Set<String> excludeHosts = new HashSet<>();
+
     private List<VmLog> additionalLogs = List.of();
 
     private Boolean includeSaltLogs = Boolean.FALSE;
@@ -38,6 +40,10 @@ public class DiagnosticParameters {
     private Boolean updatePackage = Boolean.FALSE;
 
     private Boolean skipValidation = Boolean.FALSE;
+
+    private Boolean skipUnresponsiveHosts = Boolean.FALSE;
+
+    private Boolean skipWorkspaceCleanupOnStartup = Boolean.FALSE;
 
     private String uuid;
 
@@ -71,9 +77,12 @@ public class DiagnosticParameters {
                 .map(Date::getTime).orElse(null));
         parameters.put("hostGroups", Optional.ofNullable(hostGroups).orElse(null));
         parameters.put("hosts", Optional.ofNullable(hosts).orElse(null));
+        parameters.put("excludeHosts", Optional.ofNullable(hosts).orElse(null));
         parameters.put("includeSaltLogs", Optional.ofNullable(includeSaltLogs).orElse(false));
         parameters.put("updatePackage", Optional.ofNullable(updatePackage).orElse(false));
         parameters.put("skipValidation", Optional.ofNullable(skipValidation).orElse(false));
+        parameters.put("skipUnresponsiveHosts", Optional.ofNullable(skipUnresponsiveHosts).orElse(false));
+        parameters.put("skipWorkspaceCleanupOnStartup", Optional.ofNullable(skipWorkspaceCleanupOnStartup).orElse(false));
         parameters.put("additionalLogs", additionalLogs);
         parameters.put("uuid", uuid);
         parameters.put("accountId", accountId);
@@ -127,6 +136,10 @@ public class DiagnosticParameters {
         this.hosts = hosts;
     }
 
+    public void setExcludeHosts(Set<String> excludeHosts) {
+        this.excludeHosts = excludeHosts;
+    }
+
     public void setAdditionalLogs(List<VmLog> additionalLogs) {
         this.additionalLogs = additionalLogs;
     }
@@ -141,6 +154,14 @@ public class DiagnosticParameters {
 
     public void setSkipValidation(Boolean skipValidation) {
         this.skipValidation = skipValidation;
+    }
+
+    public void setSkipUnresponsiveHosts(Boolean skipUnresponsiveHosts) {
+        this.skipUnresponsiveHosts = skipUnresponsiveHosts;
+    }
+
+    public void setSkipWorkspaceCleanupOnStartup(Boolean skipWorkspaceCleanupOnStartup) {
+        this.skipWorkspaceCleanupOnStartup = skipWorkspaceCleanupOnStartup;
     }
 
     public void setUuid(String uuid) {
@@ -215,6 +236,10 @@ public class DiagnosticParameters {
         return hosts;
     }
 
+    public Set<String> getExcludeHosts() {
+        return excludeHosts;
+    }
+
     public List<VmLog> getAdditionalLogs() {
         return additionalLogs;
     }
@@ -229,6 +254,14 @@ public class DiagnosticParameters {
 
     public Boolean getSkipValidation() {
         return skipValidation;
+    }
+
+    public Boolean getSkipUnresponsiveHosts() {
+        return skipUnresponsiveHosts;
+    }
+
+    public Boolean getSkipWorkspaceCleanupOnStartup() {
+        return skipWorkspaceCleanupOnStartup;
     }
 
     public String getUuid() {
@@ -346,6 +379,11 @@ public class DiagnosticParameters {
             return this;
         }
 
+        public DiagnosticParametersBuilder withExcludeHosts(Set<String> excludeHosts) {
+            diagnosticParameters.setExcludeHosts(excludeHosts);
+            return this;
+        }
+
         public DiagnosticParametersBuilder withAdditionalLogs(List<VmLog> additionalLogs) {
             diagnosticParameters.setAdditionalLogs(additionalLogs);
             return this;
@@ -363,6 +401,16 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withSkipValidation(Boolean skipValidation) {
             diagnosticParameters.setSkipValidation(skipValidation);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withSkipWorkspaceCleanupOnStartup(Boolean skipWorkspaceCleanupOnStartup) {
+            diagnosticParameters.setSkipWorkspaceCleanupOnStartup(skipWorkspaceCleanupOnStartup);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withSkipUnresponsiveHosts(Boolean skipUnresponsiveHosts) {
+            diagnosticParameters.setSkipUnresponsiveHosts(skipUnresponsiveHosts);
             return this;
         }
 

@@ -45,7 +45,7 @@ public class DiagnosticsCollectionHandler extends EventSenderAwareHandler<Diagno
         Map<String, Object> parameterMap = parameters.toMap();
         try {
             LOGGER.debug("Diagnostics collection started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            diagnosticsService.collect(resourceId, parameterMap);
+            diagnosticsService.collect(resourceId, parameterMap, parameters.getExcludeHosts());
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)

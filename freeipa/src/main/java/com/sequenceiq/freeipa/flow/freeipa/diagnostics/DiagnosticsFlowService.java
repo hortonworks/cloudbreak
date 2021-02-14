@@ -3,9 +3,11 @@ package com.sequenceiq.freeipa.flow.freeipa.diagnostics;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -42,39 +44,81 @@ public class DiagnosticsFlowService {
     @Inject
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
-    public void init(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public Set<String> collectUnresponsiveNodes(Long stackId, Set<String> initialExcludeHosts) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
+        Set<Node> unresponsiveNodes = telemetryOrchestrator.collectUnresponsiveNodes(gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
+        return unresponsiveNodes.stream()
+                .filter(n -> shouldUnrensponsiveNodeBeIncluded(n, initialExcludeHosts))
+                .map(Node::getHostname).collect(Collectors.toSet());
+    }
+
+    public boolean init(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
+        Stack stack = stackService.getStackById(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
+        Set<Node> allNodes = filterNodesByExcludeHosts(excludeHosts, instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics init. resourceCrn: '{}'", stack.getResourceCrn());
-        telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+            executed = true;
+        }
+        return executed;
     }
 
-    public void collect(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public boolean collect(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
+        Set<Node> allNodes = filterNodesByExcludeHosts(excludeHosts, instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics collection. resourceCrn: '{}'", stack.getResourceCrn());
-        telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+            executed = true;
+        }
+        return executed;
     }
 
-    public void upload(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public boolean upload(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
+        Set<Node> allNodes = filterNodesByExcludeHosts(excludeHosts, instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
-        telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+            executed = true;
+        }
+        return executed;
     }
 
-    public void cleanup(Long stackId, Map<String, Object> parameters) throws CloudbreakOrchestratorFailedException {
+    public boolean cleanup(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+        boolean executed = false;
         Stack stack = stackService.getStackById(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getNotDeletedGatewayConfigs(stack);
-        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
+        Set<Node> allNodes = filterNodesByExcludeHosts(excludeHosts, instanceMetaDataSet);
         LOGGER.debug("Starting diagnostics cleanup. resourceCrn: '{}'", stack.getResourceCrn());
-        telemetryOrchestrator.cleanupCollectedDiagnostics(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+        if (!allNodes.isEmpty()) {
+            telemetryOrchestrator.cleanupCollectedDiagnostics(gatewayConfigs, allNodes, parameters, new StackBasedExitCriteriaModel(stackId));
+            executed = true;
+        }
+        return executed;
+    }
+
+    private Set<Node> filterNodesByExcludeHosts(Set<String> excludeHosts, Set<InstanceMetaData> instanceMetaDataSet) {
+        return freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet).stream().filter(
+                n -> excludeHosts.isEmpty() || !excludeHosts.contains(n.getHostname())).collect(Collectors.toSet());
+    }
+
+    private boolean shouldUnrensponsiveNodeBeIncluded(Node node, Set<String> initialExcludeHosts) {
+        return CollectionUtils.isEmpty(initialExcludeHosts) || !(initialExcludeHosts.contains(node.getHostname())
+                || initialExcludeHosts.contains(node.getPublicIp())
+                || initialExcludeHosts.contains(node.getPrivateIp()));
     }
 }

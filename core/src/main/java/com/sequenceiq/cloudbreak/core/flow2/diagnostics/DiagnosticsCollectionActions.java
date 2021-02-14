@@ -49,6 +49,32 @@ public class DiagnosticsCollectionActions {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
+    @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
+    public Action<?, ?> diagnosticsSaltValidationAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_VALIDATION_STATE. resourceCrn: '{}'", resourceCrn);
+                InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
+                String excludedHosts = CollectionUtils.isEmpty(payload.getHosts())
+                        ? "[NONE]" : String.format("[%s]", String.join(",", payload.getExcludedHosts()));
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING, List.of(excludedHosts));
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(resourceId)
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_VALIDATION_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .withHosts(payload.getHosts())
+                        .withHostGroups(payload.getHostGroups())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
     @Bean(name = "DIAGNOSTICS_INIT_STATE")
     public Action<?, ?> diagnosticsInitAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
@@ -60,10 +86,12 @@ public class DiagnosticsCollectionActions {
                 InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
                 String hosts = CollectionUtils.isEmpty(payload.getHosts())
                         ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHosts()));
+                String excludedHosts = CollectionUtils.isEmpty(payload.getHosts())
+                        ? "[NONE]" : String.format("[%s]", String.join(",", payload.getExcludedHosts()));
                 String hostGroups = CollectionUtils.isEmpty(payload.getHostGroups())
                         ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHostGroups()));
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
-                        ResourceEvent.STACK_DIAGNOSTICS_INIT_RUNNING, List.of(hosts, hostGroups));
+                        ResourceEvent.STACK_DIAGNOSTICS_INIT_RUNNING, List.of(hosts, excludedHosts, hostGroups));
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
                         .withResourceCrn(resourceCrn)

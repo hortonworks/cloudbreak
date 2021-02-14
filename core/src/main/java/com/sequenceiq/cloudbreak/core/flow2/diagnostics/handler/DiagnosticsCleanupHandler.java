@@ -48,7 +48,8 @@ public class DiagnosticsCleanupHandler extends EventSenderAwareHandler<Diagnosti
             LOGGER.debug("Diagnostics cleanup started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
             Set<String> hosts = data.getHosts();
             Set<String> hostGroups = data.getHostGroups();
-            diagnosticsFlowService.cleanup(resourceId, parameterMap, hosts, hostGroups);
+            Set<String> excludeHosts = data.getExcludedHosts();
+            diagnosticsFlowService.cleanup(resourceId, parameterMap, hosts, hostGroups, excludeHosts);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionHandlerSelectors.UPLOAD_CM_DIAGNOSTICS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_CLEANUP_EVENT;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -54,7 +55,7 @@ public class CmDiagnosticsUploadHandler extends EventSenderAwareHandler<CmDiagno
             if (DiagnosticsDestination.SUPPORT.equals(parameters.getDestination())) {
                 LOGGER.debug("CM based diagnostics uses SUPPORT destination, no support specific upload step yet.");
             } else {
-                diagnosticsFlowService.upload(resourceId, parameterMap);
+                diagnosticsFlowService.upload(resourceId, parameterMap, new HashSet<>());
             }
             CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)

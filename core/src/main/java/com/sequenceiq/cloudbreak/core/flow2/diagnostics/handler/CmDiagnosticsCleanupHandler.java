@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionHandlerSelectors.CLEANUP_CM_DIAGNOSTICS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.FINISH_CM_DIAGNOSTICS_COLLECTION_EVENT;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -54,7 +55,7 @@ public class CmDiagnosticsCleanupHandler extends EventSenderAwareHandler<CmDiagn
             if (DiagnosticsDestination.SUPPORT.equals(parameters.getDestination())) {
                 LOGGER.debug("CM based diagnostics uses SUPPORT destination, no support specific cleanup step yet.");
             } else {
-                diagnosticsFlowService.cleanup(resourceId, parameterMap);
+                diagnosticsFlowService.cleanup(resourceId, parameterMap, new HashSet<>());
             }
             CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)

@@ -44,6 +44,9 @@ public class BaseDiagnosticsCollectionRequest {
     @ApiModelProperty(DiagnosticsModelDescription.HOSTS)
     private Set<String> hosts = new HashSet<>();
 
+    @ApiModelProperty(DiagnosticsModelDescription.EXCLUDE_HOSTS)
+    private Set<String> excludeHosts = new HashSet<>();
+
     @ApiModelProperty(DiagnosticsModelDescription.ADDITIONAL_LOGS)
     private List<VmLog> additionalLogs = List.of();
 
@@ -55,6 +58,12 @@ public class BaseDiagnosticsCollectionRequest {
 
     @ApiModelProperty(DiagnosticsModelDescription.SKIP_VALIDATION)
     private Boolean skipValidation = Boolean.FALSE;
+
+    @ApiModelProperty(DiagnosticsModelDescription.SKIP_WORKSPACE_CLEANUp)
+    private Boolean skipWorkspaceCleanupOnStartup = Boolean.FALSE;
+
+    @ApiModelProperty(DiagnosticsModelDescription.SKIP_UNRESPONSIVE_HOSTS)
+    private Boolean skipUnresponsiveHosts = Boolean.FALSE;
 
     public List<String> getLabels() {
         return labels;
@@ -150,5 +159,29 @@ public class BaseDiagnosticsCollectionRequest {
 
     public void setSkipValidation(Boolean skipValidation) {
         this.skipValidation = skipValidation;
+    }
+
+    public Boolean getSkipWorkspaceCleanupOnStartup() {
+        return skipWorkspaceCleanupOnStartup;
+    }
+
+    public void setSkipWorkspaceCleanupOnStartup(Boolean skipWorkspaceCleanupOnStartup) {
+        this.skipWorkspaceCleanupOnStartup = skipWorkspaceCleanupOnStartup;
+    }
+
+    public Boolean getSkipUnresponsiveHosts() {
+        return skipUnresponsiveHosts;
+    }
+
+    public void setSkipUnresponsiveHosts(Boolean skipUnresponsiveHosts) {
+        this.skipUnresponsiveHosts = skipUnresponsiveHosts;
+    }
+
+    public Set<String> getExcludeHosts() {
+        return excludeHosts;
+    }
+
+    public void setExcludeHosts(Set<String> excludeHosts) {
+        this.excludeHosts = excludeHosts;
     }
 }

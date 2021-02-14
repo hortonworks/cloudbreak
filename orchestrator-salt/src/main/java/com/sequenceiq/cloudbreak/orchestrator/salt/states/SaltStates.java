@@ -206,6 +206,10 @@ public class SaltStates {
         return measure(() -> sc.run(target, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
 
+    public static PingResponse ping(SaltConnector sc) {
+        return measure(() -> sc.run(Glob.ALL, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
+    }
+
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
         for (Entry<String, String> entry : privateIPsByFQDN.entrySet()) {

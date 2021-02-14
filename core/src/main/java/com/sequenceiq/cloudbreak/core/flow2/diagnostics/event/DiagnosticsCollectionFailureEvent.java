@@ -10,7 +10,7 @@ public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEven
     private final Exception exception;
 
     public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, DiagnosticParameters parameters) {
-        super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters, null, null);
+        super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters, null, null, null);
         this.exception = exception;
     }
 
