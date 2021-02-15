@@ -55,92 +55,88 @@ public class DiagnosticsFlowService {
                 .map(Node::getHostname).collect(Collectors.toSet());
     }
 
-    public boolean init(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+    public void init(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Diagnostics init will be called only on the primary gateway address");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        return init(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
+        init(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
     }
 
-    public boolean init(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
+    public void init(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
-        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics init. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        if (!allNodes.isEmpty()) {
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics initialization has been skipped. (no target minions)");
+        } else {
             telemetryOrchestrator.initDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
-            executed = true;
         }
-        return executed;
     }
 
-    public boolean collect(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
+    public void collect(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
-        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics collection. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        if (!allNodes.isEmpty()) {
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics collect has been skipped. (no target minions)");
+        } else {
             telemetryOrchestrator.executeDiagnosticCollection(gatewayConfigs, allNodes, parameters, exitModel);
-            executed = true;
         }
-        return executed;
     }
 
-    public boolean upload(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+    public void upload(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Diagnostics upload will be called only on the primary gateway address");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        return upload(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
+        upload(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
     }
 
-    public boolean upload(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
+    public void upload(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
-        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        if (!allNodes.isEmpty()) {
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics upload has been skipped. (no target minions)");
+        } else {
             telemetryOrchestrator.uploadCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
-            executed = true;
         }
-        return executed;
     }
 
-    public boolean cleanup(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
+    public void cleanup(Long stackId, Map<String, Object> parameters, Set<String> excludeHosts) throws CloudbreakOrchestratorFailedException {
         LOGGER.debug("Diagnostics cleanup will be called only on the primary gateway address");
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        return cleanup(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
+        cleanup(stackId, parameters, hosts, new HashSet<>(), excludeHosts);
     }
 
-    public boolean cleanup(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
+    public void cleanup(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
-        boolean executed = false;
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
         LOGGER.debug("Starting diagnostics cleanup. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
-        if (!allNodes.isEmpty()) {
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Diagnostics cleanup has been skipped. (no target minions)");
+        } else {
             telemetryOrchestrator.cleanupCollectedDiagnostics(gatewayConfigs, allNodes, parameters, exitModel);
-            executed = true;
         }
-        return executed;
     }
 
     private Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet, Set<String> hosts, Set<String> hostGroups) {

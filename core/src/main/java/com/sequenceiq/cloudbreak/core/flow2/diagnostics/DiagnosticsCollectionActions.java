@@ -83,7 +83,6 @@ public class DiagnosticsCollectionActions {
                 Long resourceId = payload.getResourceId();
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
-                InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
                 String hosts = CollectionUtils.isEmpty(payload.getHosts())
                         ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHosts()));
                 String excludedHosts = CollectionUtils.isEmpty(payload.getHosts())
