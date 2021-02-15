@@ -191,12 +191,18 @@ for service in $Services; do
 done
 set -e
 IFS=$Field_Separator
-$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up swagger-diff | tee swagger-diff.out
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans swagger-diff | tee swagger-diff.out
 grep "swagger diff finished succesfully" swagger-diff.out
 swaggerdiffresult=$?
 
-$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up swagger-validation | tee swagger-validation-result.out
+echo -e "\n\033[1;96m--- Kill running Swagger Diff containers\033[0m\n"
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility down --remove-orphans
+
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans swagger-validation | tee swagger-validation-result.out
 grep "swagger validation finished succesfully" swagger-validation-result.out
 swaggervalidationresult=$?
+
+echo -e "\n\033[1;96m--- Kill running Swagger Validation containers\033[0m\n"
+$INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility down --remove-orphans
 
 exit $swaggerdiffresult && $swaggervalidationresult
