@@ -1,0 +1,56 @@
+{
+  "cdhVersion": "7.2.8",
+  "displayName": "Cluster 2",
+  "services": [
+    {
+      "refName": "nifiregistry",
+      "serviceType": "NIFIREGISTRY",
+      "roleConfigGroups": [
+        {
+          "refName": "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
+          "roleType": "NIFI_REGISTRY_SERVER",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "nifi",
+      "serviceType": "NIFI",
+      "serviceConfigs": [
+        {
+          "name": "zookeeper_service",
+          "ref": "zookeeper"
+        }
+      ],
+      "roleConfigGroups": [
+        {
+          "refName": "nifi-NIFI_NODE-BASE",
+          "roleType": "NIFI_NODE",
+          "base": true
+        }
+      ]
+    },
+    {
+      "refName": "zookeeper",
+      "serviceType": "ZOOKEEPER",
+      "roleConfigGroups": [
+        {
+          "refName": "zookeeper-SERVER-BASE",
+          "roleType": "SERVER",
+          "base": true
+        }
+      ]
+    }
+  ],
+  "hostTemplates": [
+    {
+      "refName": "master",
+      "cardinality": 1,
+      "roleConfigGroupsRefNames": [
+        "nifi-NIFI_NODE-BASE",
+        "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
+        "zookeeper-SERVER-BASE"
+      ]
+    }
+  ]
+}

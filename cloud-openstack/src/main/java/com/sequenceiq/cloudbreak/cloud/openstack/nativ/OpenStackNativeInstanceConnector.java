@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Server;
 import org.slf4j.Logger;
@@ -30,7 +31,7 @@ public class OpenStackNativeInstanceConnector extends AbstractInstanceConnector 
     private OpenStackClient openStackClient;
 
     @Override
-    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         throw new CloudOperationNotSupportedException("Reboot instances operation is not supported on OpenStack");
     }
 

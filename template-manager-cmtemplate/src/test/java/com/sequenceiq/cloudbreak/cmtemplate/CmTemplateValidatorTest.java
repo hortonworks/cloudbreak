@@ -154,6 +154,58 @@ public class CmTemplateValidatorTest {
     }
 
     @Test
+    public void testValidationIfNifi728PresentedAndUpScaleThenValidationShouldNotThrowBecauseTheBPVersionIsHigher() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_8.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+    }
+
+    @Test
+    public void testValidationIfNifi727PresentedAndUpScaleThenValidationShouldThrowBecauseTheBPVersionIsLower() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_7.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+    }
+
+    @Test
+    public void testValidationIfNifi726PresentedAndUpScaleThenValidationShouldNotThrowBecauseTheBPVersionIsHigher() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_6.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+    }
+
+    @Test
+    public void testValidationIfNifi728PresentedAndDownScaleThenValidationShouldThrowException() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_8.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("master");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
+
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+    }
+
+    @Test
     public void testValidationIfNifiPresentedAndDownScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));

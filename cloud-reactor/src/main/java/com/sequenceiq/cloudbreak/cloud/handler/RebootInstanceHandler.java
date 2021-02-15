@@ -45,7 +45,8 @@ public class RebootInstanceHandler implements CloudPlatformEventHandler<RebootIn
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances().reboot(authenticatedContext, request.getCloudInstances());
+            List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances()
+                    .reboot(authenticatedContext,  request.getCloudResources(), request.getCloudInstances());
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
             RebootInstancesResult result = new RebootInstancesResult(request.getResourceId(), statusResult);
             request.getResult().onNext(result);

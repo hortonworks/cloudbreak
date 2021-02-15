@@ -50,7 +50,7 @@ public class MockInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         LOGGER.info("reboot instance statuses to mock spi");
         mockUrlFactory.get(authenticatedContext, "/spi/reboot_instances").post(null, String.class);
         return Collections.emptyList();

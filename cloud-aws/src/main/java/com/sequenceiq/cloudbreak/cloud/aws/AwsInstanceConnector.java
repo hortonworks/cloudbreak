@@ -126,7 +126,7 @@ public class AwsInstanceConnector implements InstanceConnector {
             backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
     @Override
-    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
 
         try {

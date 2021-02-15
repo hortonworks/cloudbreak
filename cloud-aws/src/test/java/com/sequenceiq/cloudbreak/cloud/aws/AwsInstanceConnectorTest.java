@@ -254,7 +254,7 @@ public class AwsInstanceConnectorTest {
         mockDescribeInstancesAllisRebooted(POLLING_LIMIT - 2);
         ArgumentCaptor<StopInstancesRequest> stopCaptor = ArgumentCaptor.forClass(StopInstancesRequest.class);
         ArgumentCaptor<StartInstancesRequest> startCaptor = ArgumentCaptor.forClass(StartInstancesRequest.class);
-        List<CloudVmInstanceStatus> result = underTest.reboot(authenticatedContext, inputList);
+        List<CloudVmInstanceStatus> result = underTest.reboot(authenticatedContext, new ArrayList<>(), inputList);
 
         verify(amazonEC2Client, times(2)).stopInstances(stopCaptor.capture());
         verify(amazonEC2Client, times(2)).startInstances(startCaptor.capture());
