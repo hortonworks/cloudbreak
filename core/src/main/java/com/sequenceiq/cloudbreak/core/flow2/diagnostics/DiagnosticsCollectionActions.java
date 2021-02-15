@@ -58,10 +58,15 @@ public class DiagnosticsCollectionActions {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_VALIDATION_STATE. resourceCrn: '{}'", resourceCrn);
                 InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
-                String excludedHosts = CollectionUtils.isEmpty(payload.getHosts())
-                        ? "[NONE]" : String.format("[%s]", String.join(",", payload.getExcludedHosts()));
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
-                        ResourceEvent.STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING, List.of(excludedHosts));
+                String excludedHosts = CollectionUtils.isEmpty(payload.getParameters().getExcludeHosts())
+                        ? "[NONE]" : String.format("[%s]", String.join(",", payload.getParameters().getExcludeHosts()));
+                if (payload.getParameters().getSkipUnresponsiveHosts()) {
+                    cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                            ResourceEvent.STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING_SKIP_UNRESPONSIVE, List.of(excludedHosts));
+                } else {
+                    cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                            ResourceEvent.STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING, List.of(excludedHosts));
+                }
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(resourceId)
                         .withResourceCrn(resourceCrn)
@@ -69,6 +74,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -85,8 +91,8 @@ public class DiagnosticsCollectionActions {
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
                 String hosts = CollectionUtils.isEmpty(payload.getHosts())
                         ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHosts()));
-                String excludedHosts = CollectionUtils.isEmpty(payload.getHosts())
-                        ? "[NONE]" : String.format("[%s]", String.join(",", payload.getExcludedHosts()));
+                String excludedHosts = CollectionUtils.isEmpty(payload.getExcludeHosts())
+                        ? "[NONE]" : String.format("[%s]", String.join(",", payload.getExcludeHosts()));
                 String hostGroups = CollectionUtils.isEmpty(payload.getHostGroups())
                         ? "[ALL]" : String.format("[%s]", String.join(",", payload.getHostGroups()));
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
@@ -98,6 +104,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -121,6 +128,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -144,6 +152,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -166,6 +175,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -235,6 +245,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -258,6 +269,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
@@ -282,6 +294,7 @@ public class DiagnosticsCollectionActions {
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
                         .build();
                 sendEvent(context, event);
             }
