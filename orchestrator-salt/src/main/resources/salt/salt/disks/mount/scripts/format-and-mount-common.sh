@@ -83,6 +83,8 @@ get_root_disk() {
     root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
     if [[ $root_partition =~ "nvme" ]]; then
         echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
+    elif [[ $CLOUD_PLATFORM -eq AZURE ]]
+        echo "/dev/$(ls -l /dev/disk/azure/ | awk '{print $9"\t"$11}' | grep -E '(root\s)' | cut -f2 | cut -f3 -d'/')"
     else
         echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
     fi
@@ -113,16 +115,18 @@ lsblk_command() {
 
 are_all_attached_volume_names_present() {
   local log_file=$1
-    log $log_file searching for devices: $ATTACHED_VOLUME_NAME_LIST
+  local device_list=$2
+
+    log $log_file searching for devices: $device_list
     local existing_device_count=0
-    for device in $ATTACHED_VOLUME_NAME_LIST; do
+    for device in $device_list; do
         if [[ -e $device ]]; then
             ((existing_device_count++))
         else
            log $LOG_FILE device $device was not found
         fi
     done
-    local device_name_array=($ATTACHED_VOLUME_NAME_LIST)
+    local device_name_array=($device_list)
     return $([[ $existing_device_count -eq ${#device_name_array[@]} ]])
 }
 
@@ -166,9 +170,32 @@ get_nvme_device_names() {
     return $((return_value))
 }
 
+get_data_disk_list() {
+    local log_file=$1
+    local return_value=0
+
+    local data_disk_list=""
+    for logical_unit_number in $ATTACHED_VOLUME_NAME_LIST; do
+        data_disk_list+=" /dev/$(ls -lR /dev/disk/azure/ | awk '{print $9"\t"$11}' | grep $logical_unit_number | cut -f2 | cut -f4 -d'/')"
+    done
+
+    log log_file "Found data disks: $data_disk_list"
+    echo $data_disk_list
+    return $return_value
+}
+
 get_device_names() {
     local log_file=$1
-    if $(are_all_attached_volume_names_present $log_file) ; then
+    if [[ $CLOUD_PLATFORM -eq AZURE ]]; then
+        data_disk_list=$(get_data_disk_list $log_file)
+        local return_value=$?
+        echo $data_disk_list
+        if $(are_all_attached_volume_names_present $log_file $data_disk_list) ; then
+          return $((return_value))
+        else
+          return -1
+        fi
+    elif $(are_all_attached_volume_names_present $log_file $ATTACHED_VOLUME_NAME_LIST) ; then
         echo $ATTACHED_VOLUME_NAME_LIST
         return 0
     else

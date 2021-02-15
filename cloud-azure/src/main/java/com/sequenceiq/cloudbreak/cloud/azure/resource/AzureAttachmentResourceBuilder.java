@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,10 +77,39 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                         LOGGER.debug("Managed disk {} is already attached to VM {}", disk, vm);
                     }
                 });
-        volumeSet.setInstanceId(instance.getInstanceId());
-        volumeSet.setStatus(CommonStatus.CREATED);
-        LOGGER.debug("Volume set {} attached successfully", volumeSet.toString());
-        return List.of(volumeSet);
+
+        VolumeSetAttributes lunFilledAttibutes = fillLogicalUnitNumbersToVolumeAttributes(instance, resourceGroupName, client, volumeSetAttributes);
+
+        CloudResource result = new CloudResource.Builder()
+                .persistent(volumeSet.isPersistent())
+                .type(volumeSet.getType())
+                .name(volumeSet.getName())
+                .group(volumeSet.getGroup())
+                .instanceId(instance.getInstanceId())
+                .status(CommonStatus.CREATED)
+                .params(Map.of(CloudResource.ATTRIBUTES, lunFilledAttibutes))
+                .build();
+        LOGGER.debug("Volume set {} attached successfully", result);
+        return List.of(result);
+    }
+
+    private VolumeSetAttributes fillLogicalUnitNumbersToVolumeAttributes(CloudResource instance, String resourceGroupName, AzureClient client,
+            VolumeSetAttributes volumeSetAttributes) {
+        VirtualMachine vm = client.getVirtualMachineByResourceGroup(resourceGroupName, instance.getName());
+        List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes().stream()
+                .map(volume -> {
+                    String id = volume.getId();
+                    String lun = vm.dataDisks().values().stream()
+                            .filter(disk -> disk.id().equals(id))
+                            .map(disk -> "lun" + disk.lun())
+                            .findFirst()
+                            .orElseThrow(() -> new AzureResourceException("Cannot determine LUN of disk " + id));
+                    LOGGER.debug("Logical Unit Number of disk [{}] is [{}].", id, lun);
+                    return new VolumeSetAttributes.Volume(volume.getId(), lun, volume.getSize(), volume.getType(), volume.getCloudVolumeUsageType());
+                })
+                .collect(Collectors.toList());
+        volumeSetAttributes.setVolumes(volumes);
+        return volumeSetAttributes;
     }
 
     @Override
