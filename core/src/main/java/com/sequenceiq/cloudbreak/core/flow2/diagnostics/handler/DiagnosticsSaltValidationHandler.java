@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionHandlerSelectors.INIT_DIAGNOSTICS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionHandlerSelectors.SALT_VALIDATION_DIAGNOSTICS_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT;
 
 import java.util.Map;
 import java.util.Set;
@@ -66,7 +66,7 @@ public class DiagnosticsSaltValidationHandler extends EventSenderAwareHandler<Di
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
-                    .withSelector(INIT_DIAGNOSTICS_EVENT.selector())
+                    .withSelector(START_DIAGNOSTICS_INIT_EVENT.selector())
                     .withParameters(parameters)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
