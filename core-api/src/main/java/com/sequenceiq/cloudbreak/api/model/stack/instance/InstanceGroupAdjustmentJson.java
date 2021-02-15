@@ -35,4 +35,12 @@ public class InstanceGroupAdjustmentJson implements JsonEntity {
     public void setScalingAdjustment(Integer scalingAdjustment) {
         this.scalingAdjustment = scalingAdjustment;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceGroupAdjustmentJson{"
+                + "instanceGroup='" + instanceGroup + '\''
+                + ", scalingAdjustment=" + scalingAdjustment
+                + '}';
+    }
 }
