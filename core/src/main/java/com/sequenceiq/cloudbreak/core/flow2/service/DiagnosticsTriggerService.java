@@ -91,7 +91,7 @@ public class DiagnosticsTriggerService {
                 .withAccepted(new Promise<>())
                 .withResourceId(stack.getId())
                 .withResourceCrn(stack.getResourceCrn())
-                .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_INIT_EVENT.selector())
+                .withSelector(DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_SALT_VALIDATION_EVENT.selector())
                 .withParameters(parameters)
                 .withHosts(parameters.getHosts())
                 .withHostGroups(parameters.getHostGroups())

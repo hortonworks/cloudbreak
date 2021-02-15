@@ -53,7 +53,6 @@ public class DiagnosticsCollectionActions {
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_INIT_STATE. resourceCrn: '{}'", resourceCrn);
-                //InMemoryStateStore.putStack(payload.getResourceId(), PollGroup.POLLABLE);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(payload.getResourceId())
                         .withResourceCrn(resourceCrn)
