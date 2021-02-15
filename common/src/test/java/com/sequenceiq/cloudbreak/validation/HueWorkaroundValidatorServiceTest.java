@@ -32,8 +32,8 @@ public class HueWorkaroundValidatorServiceTest {
     public void validateBlueprintRequestWhenHueIsPresentedAndHueHostgroupIsTooLongMustThrowException() {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateForBlueprintRequest(Set.of("master123456")));
-        Assert.assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 6 characters. "
-                        + "Please retry creating the template by shortening the hostgroup name: master123456  under 6 characters.",
+        Assert.assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 7 characters. "
+                        + "Please retry creating the template by shortening the hostgroup name: master123456  under 7 characters.",
                 badRequestException.getMessage());
     }
 
@@ -53,9 +53,16 @@ public class HueWorkaroundValidatorServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateForStackRequest(Set.of("master123456"), stackName));
-        Assert.assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 6 characters. "
-                        + "Please retry creating the template by shortening the hostgroup name: master123456  under 6 characters.",
+        Assert.assertEquals("Hue does not support CDP Data Hubs where hostgroup name is longer than 7 characters. "
+                        + "Please retry creating the template by shortening the hostgroup name: master123456  under 7 characters.",
                 badRequestException.getMessage());
+    }
+
+    @Test
+    public void validateStackRequestWhenHueIsPresentedAndHueHostgroupIsGateWayMustTNothrowException() {
+        String stackName = "thisisfine";
+
+        assertDoesNotThrow(() -> underTest.validateForStackRequest(Set.of("gateway"), stackName));
     }
 
     @Test
@@ -68,7 +75,7 @@ public class HueWorkaroundValidatorServiceTest {
                         + "VM is longer than 63 characters. Generated hostname: "
                         + "thisisfine.thisisfinethisisfinethisisfinethisisfinethisisfinethisisfinethisisfinethisisfine. "
                         + "Please retry creating Data Hub using a Data Hub name that is shorter than 20 characters and a"
-                        + " hostgroup name that is shorter than 6 characters.",
+                        + " hostgroup name that is shorter than 7 characters.",
                 badRequestException.getMessage());
     }
 
