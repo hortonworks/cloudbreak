@@ -33,10 +33,10 @@ public class AppConfig implements AsyncConfigurer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
-    @Value("${periscope.threadpool.core.size:50}")
+    @Value("${periscope.threadpool.core.size:500}")
     private int corePoolSize;
 
-    @Value("${periscope.threadpool.max.size:500}")
+    @Value("${periscope.threadpool.max.size:1000}")
     private int maxPoolSize;
 
     @Value("${periscope.threadpool.queue.size:1000}")
