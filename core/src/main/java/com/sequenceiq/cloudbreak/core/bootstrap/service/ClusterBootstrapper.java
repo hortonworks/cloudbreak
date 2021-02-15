@@ -27,7 +27,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -58,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -116,6 +119,9 @@ public class ClusterBootstrapper {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private StackInstanceStatusChecker stackInstanceStatusChecker;
+
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         bootstrapOnHost(stack);
@@ -145,8 +151,26 @@ public class ClusterBootstrapper {
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
             saveOrchestrator(stack, primaryGateway);
             checkIfAllNodesAvailable(stack, nodes, primaryGateway);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            checkIfAnyInstanceIsNotInStartedState(stack, e);
+            throw new CloudbreakException(e);
         } catch (Exception e) {
             throw new CloudbreakException(e);
+        }
+    }
+
+    private void checkIfAnyInstanceIsNotInStartedState(Stack stack, CloudbreakOrchestratorFailedException e) throws CloudbreakException {
+        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, runningInstances);
+        List<CloudVmInstanceStatus> notStartedInstances = instanceStatuses.stream()
+                .filter(instance -> !InstanceStatus.STARTED.equals(instance.getStatus()))
+                .collect(Collectors.toList());
+        if (!notStartedInstances.isEmpty()) {
+            String notStartedInstanceIdsAndStatuses = notStartedInstances.stream()
+                    .map(instance -> instance.getCloudInstance().getInstanceId() + ": " + instance.getStatus())
+                    .collect(Collectors.joining(", "));
+            throw new CloudbreakException("Nodes were deleted or went missing during cluster install:  " + notStartedInstanceIdsAndStatuses
+                    + " Please check " + stack.getCloudPlatform() + " logs. Original message: " + e.getMessage());
         }
     }
 
