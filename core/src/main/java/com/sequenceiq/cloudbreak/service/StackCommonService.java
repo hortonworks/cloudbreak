@@ -288,6 +288,8 @@ public class StackCommonService implements StackEndpoint {
             validateHardLimits(scalingAdjustment);
             stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
         }
+        LOGGER.info("Stack update has been initiated name: '{}' with status: '{}' and adjustment: '{}'", stack.getName(), updateRequest.getStatus(),
+                updateRequest.getInstanceGroupAdjustment());
         return Response.status(Status.NO_CONTENT).build();
     }
 
