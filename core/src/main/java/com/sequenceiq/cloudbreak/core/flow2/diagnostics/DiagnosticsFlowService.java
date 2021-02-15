@@ -43,15 +43,18 @@ public class DiagnosticsFlowService {
     @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
 
-    public Set<String> collectUnresponsiveNodes(Long stackId, Set<String> initialExcludeHosts) throws CloudbreakOrchestratorFailedException {
+    public Set<String> collectUnresponsiveNodes(Long stackId, Set<String> hosts, Set<String> hostGroups, Set<String> initialExcludeHosts)
+            throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet, new HashSet<>(), new HashSet<>());
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, new HashSet<>(), new HashSet<>(), new HashSet<>());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         Set<Node> unresponsiveNodes = telemetryOrchestrator.collectUnresponsiveNodes(gatewayConfigs, allNodes, exitModel);
         return unresponsiveNodes.stream()
-                .filter(n -> CollectionUtils.isEmpty(initialExcludeHosts) || !nodeHostFilterMatches(n, initialExcludeHosts))
+                .filter(
+                        n -> filterNodes(n, hosts, hostGroups, initialExcludeHosts)
+                )
                 .map(Node::getHostname).collect(Collectors.toSet());
     }
 
@@ -68,7 +71,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics init. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         if (allNodes.isEmpty()) {
@@ -83,7 +86,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics collection. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         if (allNodes.isEmpty()) {
@@ -106,7 +109,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         if (allNodes.isEmpty()) {
@@ -129,7 +132,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics cleanup. resourceCrn: '{}'", stack.getResourceCrn());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
         if (allNodes.isEmpty()) {
@@ -139,12 +142,12 @@ public class DiagnosticsFlowService {
         }
     }
 
-    private Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet, Set<String> hosts, Set<String> hostGroups) {
+    private Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
         return instanceMetaDataSet.stream()
                 .map(im -> new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
                         im.getInstanceGroup().getTemplate().getInstanceType(), im.getDiscoveryFQDN(), im.getInstanceGroup().getGroupName()))
                 .filter(
-                        n -> filterNodes(n, hosts, hostGroups, hostGroups)
+                        n -> filterNodes(n, hosts, hostGroups, excludeHosts)
                 )
                 .collect(Collectors.toSet());
     }

@@ -16,24 +16,24 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
     private final Set<String> hostGroups;
 
-    private final Set<String> excludedHosts;
+    private final Set<String> excludeHosts;
 
     DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, DiagnosticParameters parameters,
-            Set<String> hosts, Set<String> hostGroups, Set<String> excludedHosts) {
+            Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
         super(selector, resourceId, resourceCrn);
         this.parameters = parameters;
         this.hosts = hosts;
         this.hostGroups = hostGroups;
-        this.excludedHosts = excludedHosts;
+        this.excludeHosts = excludeHosts;
     }
 
     DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
-            DiagnosticParameters parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludedHosts) {
+            DiagnosticParameters parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
         this.hosts = hosts;
         this.hostGroups = hostGroups;
-        this.excludedHosts = excludedHosts;
+        this.excludeHosts = excludeHosts;
     }
 
     public static DiagnosticsCollectionEventBuilder builder() {
@@ -52,8 +52,8 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         return hostGroups;
     }
 
-    public Set<String> getExcludedHosts() {
-        return excludedHosts;
+    public Set<String> getExcludeHosts() {
+        return excludeHosts;
     }
 
     public static final class DiagnosticsCollectionEventBuilder {
@@ -72,7 +72,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
         private Set<String> hostGroups;
 
-        private Set<String> excludedHosts;
+        private Set<String> excludeHosts;
 
         private DiagnosticsCollectionEventBuilder() {
         }
@@ -112,14 +112,14 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
             return this;
         }
 
-        public DiagnosticsCollectionEventBuilder withExcludedHosts(Set<String> excludedHosts) {
-            this.excludedHosts = excludedHosts;
+        public DiagnosticsCollectionEventBuilder withExcludeHosts(Set<String> excludeHosts) {
+            this.excludeHosts = excludeHosts;
             return this;
         }
 
         public DiagnosticsCollectionEvent build() {
             return new DiagnosticsCollectionEvent(selector, resourceId, resourceCrn, accepted,
-                    parameters, hosts, hostGroups, excludedHosts);
+                    parameters, hosts, hostGroups, excludeHosts);
         }
     }
 }

@@ -52,9 +52,9 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
         Map<String, Object> parameterMap = parameters.toMap();
         try {
             LOGGER.debug("Diagnostics collection initialization started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            Set<String> hosts = data.getHosts();
-            Set<String> hostGroups = data.getHostGroups();
-            Set<String> excludedHosts = data.getExcludedHosts();
+            Set<String> hosts = parameters.getHosts();
+            Set<String> hostGroups = parameters.getHostGroups();
+            Set<String> excludedHosts = parameters.getExcludeHosts();
             diagnosticsFlowService.init(resourceId, parameterMap, hosts, hostGroups, excludedHosts);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
@@ -63,6 +63,7 @@ public class DiagnosticsInitHandler extends EventSenderAwareHandler<DiagnosticsC
                     .withParameters(parameters)
                     .withHosts(hosts)
                     .withHostGroups(hostGroups)
+                    .withExcludeHosts(excludedHosts)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {

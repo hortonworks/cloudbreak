@@ -48,8 +48,8 @@ public class DiagnosticsUploadHandler extends EventSenderAwareHandler<Diagnostic
             LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
             Set<String> hosts = data.getHosts();
             Set<String> hostGroups = data.getHostGroups();
-            Set<String> excludeHosts = data.getExcludedHosts();
-            diagnosticsFlowService.upload(resourceId, parameterMap, hosts, hostGroups, excludeHosts);
+            Set<String> excludedHosts = data.getExcludeHosts();
+            diagnosticsFlowService.upload(resourceId, parameterMap, hosts, hostGroups, excludedHosts);
             DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
@@ -57,6 +57,7 @@ public class DiagnosticsUploadHandler extends EventSenderAwareHandler<Diagnostic
                     .withParameters(parameters)
                     .withHosts(hosts)
                     .withHostGroups(hostGroups)
+                    .withExcludeHosts(excludedHosts)
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {

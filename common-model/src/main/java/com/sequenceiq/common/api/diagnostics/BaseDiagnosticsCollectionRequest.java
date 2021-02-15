@@ -59,7 +59,7 @@ public class BaseDiagnosticsCollectionRequest {
     @ApiModelProperty(DiagnosticsModelDescription.SKIP_VALIDATION)
     private Boolean skipValidation = Boolean.FALSE;
 
-    @ApiModelProperty(DiagnosticsModelDescription.SKIP_WORKSPACE_CLEANUp)
+    @ApiModelProperty(DiagnosticsModelDescription.SKIP_WORKSPACE_CLEANUP)
     private Boolean skipWorkspaceCleanupOnStartup = Boolean.FALSE;
 
     @ApiModelProperty(DiagnosticsModelDescription.SKIP_UNRESPONSIVE_HOSTS)

@@ -48,7 +48,8 @@ public class DiagnosticsSaltValidationHandler extends EventSenderAwareHandler<Di
         DiagnosticParameters parameters = data.getParameters();
         Map<String, Object> parameterMap = parameters.toMap();
         try {
-            Set<String> unresponsiveHosts = diagnosticsFlowService.collectUnresponsiveNodes(resourceId, parameters.getExcludeHosts());
+            Set<String> unresponsiveHosts = diagnosticsFlowService.collectUnresponsiveNodes(resourceId,
+                    parameters.getHosts(), parameters.getHostGroups(), parameters.getExcludeHosts());
             LOGGER.debug("Diagnostics collection salt validation operation has been started. resourceCrn: '{}', parameters: '{}'",
                     resourceCrn, parameterMap);
             if (CollectionUtils.isNotEmpty(unresponsiveHosts)) {
@@ -68,6 +69,9 @@ public class DiagnosticsSaltValidationHandler extends EventSenderAwareHandler<Di
                     .withResourceId(resourceId)
                     .withSelector(START_DIAGNOSTICS_INIT_EVENT.selector())
                     .withParameters(parameters)
+                    .withHosts(parameters.getHosts())
+                    .withHostGroups(parameters.getHostGroups())
+                    .withExcludeHosts(parameters.getExcludeHosts())
                     .build();
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {

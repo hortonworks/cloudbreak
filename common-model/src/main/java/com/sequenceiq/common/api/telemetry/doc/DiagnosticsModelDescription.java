@@ -18,7 +18,7 @@ public class DiagnosticsModelDescription {
     public static final String UPDATE_PACKAGE = "Upgrade or install required telemetry cli tool on the nodes (works only with network)";
     public static final String SKIP_VALIDATION = "Skip cloud storage write operation testing or databus connection " +
             "check (depends on the destination) during init stage.";
-    public static final String SKIP_WORKSPACE_CLEANUp = "Skip workspace cleanup on the VM nodes at the start of the diagnostic ";
+    public static final String SKIP_WORKSPACE_CLEANUP = "Skip workspace cleanup on the VM nodes at the start of the diagnostic ";
     public static final String SKIP_UNRESPONSIVE_HOSTS = "Skip unresponsive VM hosts from diagnostics";
     public static final String ROLES = "List of roles for which to get logs and metrics. If set, this restricts the roles for log and metrics collection " +
             "to the list specified. If empty, the default is to get logs for all roles.";

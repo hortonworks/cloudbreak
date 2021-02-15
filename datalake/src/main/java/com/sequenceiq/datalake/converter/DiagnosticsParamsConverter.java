@@ -34,7 +34,7 @@ public class DiagnosticsParamsConverter {
 
     private static final String PARAMS_HOST_GROUPS = "hostGroups";
 
-    private static final String PARAMS_EXCLUDE_HOSTs = "excludeHosts";
+    private static final String PARAMS_EXCLUDE_HOSTS = "excludeHosts";
 
     private static final String PARAMS_LABELS = "labels";
 
@@ -68,7 +68,7 @@ public class DiagnosticsParamsConverter {
         props.put(PARAM_DESTINATION, request.getDestination());
         props.put(PARAM_DESCRIPTION, request.getDescription());
         props.put(PARAM_HOSTS, request.getHosts());
-        props.put(PARAMS_EXCLUDE_HOSTs, request.getExcludeHosts());
+        props.put(PARAMS_EXCLUDE_HOSTS, request.getExcludeHosts());
         props.put(PARAMS_HOST_GROUPS, request.getHostGroups());
         props.put(PARAMS_ISSUE, request.getIssue());
         props.put(PARAMS_LABELS, request.getLabels());
@@ -89,7 +89,7 @@ public class DiagnosticsParamsConverter {
                 .map(v -> DiagnosticsDestination.valueOf(v.toString())).orElse(null));
         request.setStackCrn(Optional.ofNullable(props.get(PARAMS_STACK_CRN)).map(Object::toString).orElse(null));
         request.setHosts((Set<String>) Optional.ofNullable(props.get(PARAM_HOSTS)).orElse(null));
-        request.setExcludeHosts((Set<String>) Optional.ofNullable(props.get(PARAMS_EXCLUDE_HOSTs)).orElse(null));
+        request.setExcludeHosts((Set<String>) Optional.ofNullable(props.get(PARAMS_EXCLUDE_HOSTS)).orElse(null));
         request.setHostGroups((Set<String>) Optional.ofNullable(props.get(PARAMS_HOST_GROUPS)).orElse(null));
         request.setLabels((List<String>) Optional.ofNullable(props.get(PARAMS_LABELS)).orElse(null));
         request.setAdditionalLogs((List<VmLog>) Optional.ofNullable(props.get(PARAMS_ADDITIONAL_LOGS)).orElse(null));
@@ -100,6 +100,8 @@ public class DiagnosticsParamsConverter {
         request.setIncludeSaltLogs((Boolean) Optional.ofNullable(props.get(PARAMS_INCLUDE_SALT_LOGS)).orElse(false));
         request.setUpdatePackage((Boolean) Optional.ofNullable(props.get(PARAMS_UPDATE_PACKAGE)).orElse(false));
         request.setSkipValidation((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_VALIDATION)).orElse(false));
+        request.setSkipUnresponsiveHosts((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_UNRESPONSIVE_HOSTS)).orElse(false));
+        request.setSkipWorkspaceCleanupOnStartup((Boolean) Optional.ofNullable(props.get(PARAMS_SKIP_WORKSPACE_CLEANUP_ON_STARTUP)).orElse(false));
         request.setUuid(Optional.ofNullable(props.get(PARAMS_UUID)).map(Object::toString).orElse(null));
         return request;
     }

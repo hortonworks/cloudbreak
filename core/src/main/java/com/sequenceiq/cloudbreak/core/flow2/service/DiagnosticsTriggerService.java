@@ -95,6 +95,7 @@ public class DiagnosticsTriggerService {
                 .withParameters(parameters)
                 .withHosts(parameters.getHosts())
                 .withHostGroups(parameters.getHostGroups())
+                .withExcludeHosts(parameters.getExcludeHosts())
                 .build();
         return reactorNotifier.notify(diagnosticsCollectionEvent, getFlowHeaders(userCrn));
     }
