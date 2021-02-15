@@ -206,8 +206,16 @@ public class AwsTerminateServiceIntegrationTest {
 
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        CloudContext cloudContext = new CloudContext(5L, "name", "crn", "platform", "variant",
-                location, USER_ID, WORKSPACE_ID);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(5L)
+                .withName("name")
+                .withCrn("crn")
+                .withPlatform("platform")
+                .withVariant("variant")
+                .withLocation(location)
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         CloudCredential credential = new CloudCredential("crn", null);
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, credential);
         ac.putParameter(AmazonEc2Client.class, ec2Client);

@@ -197,8 +197,15 @@ public class AwsTaggingServiceTest {
     }
 
     private AuthenticatedContext authenticatedContext() {
-        CloudContext cloudContext = new CloudContext(1L, "testname", "crn", "AWS", USER_ID, WORKSPACE_ID);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("testname")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         CloudCredential cloudCredential = new CloudCredential("crn", "credentialname");
-        return new AuthenticatedContext(cloudContext, cloudCredential);
+        return new AuthenticatedContext(context, cloudCredential);
     }
 }

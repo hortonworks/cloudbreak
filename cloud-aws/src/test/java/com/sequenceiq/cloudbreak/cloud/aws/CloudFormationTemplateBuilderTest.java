@@ -1558,10 +1558,18 @@ public class CloudFormationTemplateBuilderTest {
 
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        CloudContext cloudContext = new CloudContext(5L, "name", "crn", "platform", "variant",
-                location, USER_ID, WORKSPACE_ID);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(5L)
+                .withName("name")
+                .withCrn("crn")
+                .withPlatform("platform")
+                .withVariant("variant")
+                .withLocation(location)
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         CloudCredential credential = new CloudCredential("crn", null);
-        return new AuthenticatedContext(cloudContext, credential);
+        return new AuthenticatedContext(context, credential);
     }
 
     private CloudStack createDefaultCloudStack(Collection<Group> groups, Map<String, String> parameters, Map<String, String> tags) {

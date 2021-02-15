@@ -88,13 +88,21 @@ class AwsDownscaleServiceTest {
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-                Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
-                new CloudCredential());
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(amazonEC2Client);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
         AmazonEC2Waiters amazonEC2Waiters = mock(AmazonEC2Waiters.class);
         when(amazonEC2Client.waiters()).thenReturn(amazonEC2Waiters);
         Waiter waiter = mock(Waiter.class);
@@ -136,9 +144,17 @@ class AwsDownscaleServiceTest {
         cloudInstances.add(workerInstance1);
         cloudInstances.add(workerInstance2);
         cloudInstances.add(workerInstance3);
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-                Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
-                new CloudCredential());
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);
@@ -180,9 +196,17 @@ class AwsDownscaleServiceTest {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance workerInstance1 = new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication);
         cloudInstances.add(workerInstance1);
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-                Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
-                new CloudCredential());
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
 
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
@@ -222,10 +246,17 @@ class AwsDownscaleServiceTest {
         List<CloudInstance> cloudInstances = List.of(new CloudInstance("i-worker1", mock(InstanceTemplate.class), instanceAuthentication));
         CloudLoadBalancer privateLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
         CloudLoadBalancer publicLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
-
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-            Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"),
-            new CloudCredential());
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, new CloudCredential());
         AmazonAutoScalingClient amazonAutoScalingClient = mock(AmazonAutoScalingClient.class);
         when(awsClient.createAutoScalingClient(any(), anyString())).thenReturn(amazonAutoScalingClient);
         AmazonEc2Client amazonEC2Client = mock(AmazonEc2Client.class);

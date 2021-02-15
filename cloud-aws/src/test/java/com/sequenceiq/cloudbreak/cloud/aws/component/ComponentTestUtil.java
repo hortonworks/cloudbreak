@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.aws.TestConstants.LATEST_AWS_CLOUD
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static java.util.Collections.emptyList;
 
 import java.io.IOException;
@@ -77,9 +76,18 @@ public class ComponentTestUtil {
 
     public AuthenticatedContext getAuthenticatedContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
-        CloudContext cloudContext = new CloudContext(1L, "cloudContextName", "crn", AWS, "variant", location, "owner@company.com", 5L);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("cloudContext")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("variant")
+                .withLocation(location)
+                .withUserId("owner@company.com")
+                .withAccountId("5")
+                .build();
         CloudCredential cloudCredential = new CloudCredential("crn", "credentialName");
-        return new AuthenticatedContext(cloudContext, cloudCredential);
+        return new AuthenticatedContext(context, cloudCredential);
     }
 
     public CloudStack getStack(InstanceStatus workerStatuses, InstanceStatus masterStatus) throws IOException {

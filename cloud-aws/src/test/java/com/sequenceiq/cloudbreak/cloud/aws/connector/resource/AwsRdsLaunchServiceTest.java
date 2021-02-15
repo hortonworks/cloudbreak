@@ -148,8 +148,16 @@ class AwsRdsLaunchServiceTest {
     void setUp() {
         Region region = Region.region(REGION);
         AvailabilityZone availabilityZone = AvailabilityZone.availabilityZone(AVAILABILITY_ZONE);
-        Location location = Location.location(region, availabilityZone);
-        CloudContext cloudContext = new CloudContext(STACK_ID, STACK_NAME, STACK_CRN, PLATFORM, VARIANT, location, USER_ID, ACCOUNT_ID);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(STACK_ID)
+                .withName(STACK_NAME)
+                .withCrn(STACK_CRN)
+                .withPlatform(PLATFORM)
+                .withVariant(VARIANT)
+                .withLocation(Location.location(region, availabilityZone))
+                .withUserId(USER_ID)
+                .withAccountId(ACCOUNT_ID)
+                .build();
 
         CloudCredential cloudCredential = new CloudCredential();
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);

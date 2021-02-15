@@ -210,7 +210,11 @@ public class GcpMetadataCollectorTest {
 
     private CloudContext createCloudContext() {
         Location location = Location.location(null, AvailabilityZone.availabilityZone(AZ));
-        return new CloudContext(null, "test-cluster", null, null, null, location, null, null, "");
+        return CloudContext.Builder.builder()
+                .withName("test-cluster")
+                .withLocation(location)
+                .withUserName("")
+                .build();
     }
 
     private List<CloudResource> createCloudResources() {

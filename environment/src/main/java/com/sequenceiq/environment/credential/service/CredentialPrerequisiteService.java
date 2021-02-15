@@ -46,7 +46,11 @@ public class CredentialPrerequisiteService {
     private UserPreferencesService userPreferencesService;
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, CredentialType type) {
-        CloudContext cloudContext = new CloudContext(null, null, null, cloudPlatform, TEMP_USER_ID, TEMP_WORKSPACE_ID);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(cloudPlatform)
+                .withUserId(TEMP_USER_ID)
+                .withWorkspaceId(TEMP_WORKSPACE_ID)
+                .build();
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext,
                 userPreferencesService.getExternalIdForCurrentUser(), deploymentAddress, type);
         LOGGER.debug("Triggering event: {}", request);

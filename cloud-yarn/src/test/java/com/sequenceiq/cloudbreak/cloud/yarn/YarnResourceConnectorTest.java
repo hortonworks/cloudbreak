@@ -239,7 +239,15 @@ public class YarnResourceConnectorTest {
 
     private void setUpHappyPath(ArgumentCaptor<CreateApplicationRequest> createRequestCaptor, ArgumentCaptor<ApplicationDetailRequest> requestCaptor)
             throws MalformedURLException {
-        when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "crn", "platform", null, null, null, USER_NAME, WORKSPACE_ID));
+        when(authenticatedContextMock.getCloudContext()).thenReturn(
+                CloudContext.Builder.builder()
+                        .withId(1L)
+                        .withName("name")
+                        .withCrn("crn")
+                        .withPlatform("platform")
+                        .withUserName(USER_NAME)
+                        .withWorkspaceId(WORKSPACE_ID)
+                        .build());
         when(stackMock.getImage()).thenReturn(imageMock);
         when(imageMock.getImageName()).thenReturn(IMAGE_NAME);
         List<Group> groupList = Collections.emptyList();
@@ -270,7 +278,15 @@ public class YarnResourceConnectorTest {
 
     @Test
     public void testLaunchApplicationAlreadyCreated() throws Exception {
-        when(authenticatedContextMock.getCloudContext()).thenReturn(new CloudContext(1L, "name", "crn", "platform", null, null, null, USER_NAME, WORKSPACE_ID));
+        when(authenticatedContextMock.getCloudContext()).thenReturn(
+                CloudContext.Builder.builder()
+                        .withId(1L)
+                        .withName("name")
+                        .withCrn("crn")
+                        .withPlatform("platform")
+                        .withUserName(USER_NAME)
+                        .withWorkspaceId(WORKSPACE_ID)
+                        .build());
 
         when(yarnClientUtilMock.createYarnClient(authenticatedContextMock)).thenReturn(yarnClientMock);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);

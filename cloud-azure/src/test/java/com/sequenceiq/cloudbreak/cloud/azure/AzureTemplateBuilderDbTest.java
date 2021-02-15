@@ -89,7 +89,16 @@ public class AzureTemplateBuilderDbTest {
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
 
-        cloudContext = new CloudContext(STACK_ID, STACK_NAME, STACK_CRN, PLATFORM, VARIANT, Location.location(Region.region(REGION)), USER_ID, ACCOUNT_ID);
+        cloudContext = CloudContext.Builder.builder()
+                .withId(STACK_ID)
+                .withName(STACK_NAME)
+                .withCrn(STACK_CRN)
+                .withPlatform(PLATFORM)
+                .withVariant(VARIANT)
+                .withLocation(Location.location(Region.region(REGION)))
+                .withUserId(USER_ID)
+                .withAccountId(ACCOUNT_ID)
+                .build();
     }
 
     @ParameterizedTest(name = "{0}")

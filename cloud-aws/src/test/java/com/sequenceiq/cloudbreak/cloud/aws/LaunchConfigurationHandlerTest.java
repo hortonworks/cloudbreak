@@ -71,8 +71,14 @@ public class LaunchConfigurationHandlerTest {
         String lName = "lName";
         when(launchConfigurationMapper.mapExistingLaunchConfigToRequest(any(LaunchConfiguration.class)))
                 .thenReturn(new CreateLaunchConfigurationRequest().withLaunchConfigurationName(lName));
-
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "crn", "AWS", USER_ID, WORKSPACE_ID);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("cloudContext")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         String imageName = "imageName";
         String launchConfigurationName = underTest.createNewLaunchConfiguration(imageName, autoScalingClient,
                 new LaunchConfiguration().withLaunchConfigurationName(lName), cloudContext);
@@ -86,12 +92,19 @@ public class LaunchConfigurationHandlerTest {
 
     @Test
     public void removeOldLaunchConfiguration() {
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "crn", "AWS", USER_ID, WORKSPACE_ID);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("cloudContext")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         String launchConfigurationName = "old";
-        underTest.removeOldLaunchConfiguration(new LaunchConfiguration().withLaunchConfigurationName(launchConfigurationName), autoScalingClient, cloudContext);
+        underTest.removeOldLaunchConfiguration(new LaunchConfiguration().withLaunchConfigurationName(launchConfigurationName), autoScalingClient, context);
         ArgumentCaptor<DeleteLaunchConfigurationRequest> captor = ArgumentCaptor.forClass(DeleteLaunchConfigurationRequest.class);
         verify(autoScalingClient, times(1)).deleteLaunchConfiguration(captor.capture());
         assertEquals(launchConfigurationName, captor.getValue().getLaunchConfigurationName());
-        verify(resourceNotifier, times(1)).notifyDeletion(any(CloudResource.class), eq(cloudContext));
+        verify(resourceNotifier, times(1)).notifyDeletion(any(CloudResource.class), eq(context));
     }
 }

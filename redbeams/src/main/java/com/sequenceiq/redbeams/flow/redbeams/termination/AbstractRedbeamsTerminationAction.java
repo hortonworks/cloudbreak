@@ -87,8 +87,18 @@ public abstract class AbstractRedbeamsTerminationAction<P extends RedbeamsEvent>
             Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
             String userName = dbStack.getOwnerCrn().getUserId();
             String accountId = dbStack.getOwnerCrn().getAccountId();
-            cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),
-                    dbStack.getPlatformVariant(), location, userName, accountId);
+            cloudContext = CloudContext.Builder.builder()
+                    .withId(dbStack.getId())
+                    .withName(dbStack.getName())
+                    .withCrn(dbStack.getResourceCrn().toString())
+                    .withPlatform(dbStack.getCloudPlatform())
+                    .withVariant(dbStack.getPlatformVariant())
+                    .withUserName(userName)
+                    .withUserId(userName)
+                    .withLocation(location)
+                    .withAccountId(accountId)
+                    .withAccountUUID(accountId)
+                    .build();
             try {
                 Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
                 cloudCredential = credentialConverter.convert(credential);

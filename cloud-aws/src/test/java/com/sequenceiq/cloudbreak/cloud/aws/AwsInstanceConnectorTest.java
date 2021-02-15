@@ -120,8 +120,16 @@ public class AwsInstanceConnectorTest {
         doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class), anyString());
         doReturn(instanceProfileCredentialsProvider).when(awsClient).getInstanceProfileProvider();
 
-        CloudContext context = new CloudContext(1L, "context", "crn", "AWS", "AWS",
-                Location.location(Region.region("region")), "user", "account");
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("context")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("region")))
+                .withUserId("user")
+                .withAccountId("account")
+                .build();
         CloudCredential credential = new CloudCredential("id", "alma",
                 Map.of("accessKey", "ac", "secretKey", "secret"), false);
         authenticatedContext = awsAuthenticator.authenticate(context, credential);

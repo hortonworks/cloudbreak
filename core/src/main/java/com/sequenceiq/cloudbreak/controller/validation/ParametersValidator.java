@@ -34,7 +34,11 @@ public class ParametersValidator {
             return null;
         }
         LOGGER.info("Validate the parameters: {}", parameters);
-        CloudContext cloudContext = new CloudContext(null, null, null, platform, userId, workspaceId);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(platform)
+                .withUserId(userId)
+                .withWorkspaceId(workspaceId)
+                .build();
         ParametersValidationRequest request = new ParametersValidationRequest(cloudCredential, cloudContext, parameters);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         return request;

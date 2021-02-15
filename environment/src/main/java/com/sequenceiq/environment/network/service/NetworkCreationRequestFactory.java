@@ -148,14 +148,15 @@ public class NetworkCreationRequestFactory {
     }
 
     private CloudContext getCloudContext(EnvironmentDto environment) {
-        return new CloudContext(
-                environment.getId(),
-                environment.getName(),
-                environment.getResourceCrn(),
-                environment.getCloudPlatform(),
-                environment.getCloudPlatform(),
-                location(Region.region(environment.getLocation().getName())),
-                environment.getCreator(),
-                environment.getAccountId());
+        return CloudContext.Builder.builder()
+                .withId(environment.getId())
+                .withName(environment.getName())
+                .withCrn(environment.getResourceCrn())
+                .withPlatform(environment.getCloudPlatform())
+                .withVariant(environment.getCloudPlatform())
+                .withLocation(location(Region.region(environment.getLocation().getName())))
+                .withUserName(environment.getCreator())
+                .withAccountId(environment.getAccountId())
+                .build();
     }
 }

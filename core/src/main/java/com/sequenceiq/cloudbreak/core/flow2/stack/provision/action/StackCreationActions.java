@@ -265,7 +265,11 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, GetTlsInfoResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.saveTlsInfo(context, payload.getTlsInfo());
-                StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(), context.getCloudCredential(),
+                StackContext newContext = new StackContext(
+                        context.getFlowParameters(),
+                        stack,
+                        context.getCloudContext(),
+                        context.getCloudCredential(),
                         context.getCloudStack());
                 sendEvent(newContext);
             }

@@ -75,10 +75,18 @@ public class AwsLaunchTemplateImageUpdateServiceTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         Location location = Location.location(Region.region("region"));
-        CloudContext cloudContext = new CloudContext(1L, "cloudContext", "crn", "AWS", "variant",
-                location, USER_ID, WORKSPACE_ID);
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("cloudContext")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("variant")
+                .withLocation(location)
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
         CloudCredential cc = new CloudCredential("crn", "cc");
-        ac = new AuthenticatedContext(cloudContext, cc);
+        ac = new AuthenticatedContext(context, cc);
         Group group = mock(Group.class);
         when(group.getName()).thenReturn("GroupName");
         when(stack.getGroups()).thenReturn(List.of(group));

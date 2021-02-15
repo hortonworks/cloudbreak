@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.poller;
 
+
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -37,9 +38,15 @@ public class PollerUtilTest {
     public void testWaitForWhenNoInstances() {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(STACK_ID)
+                .withName("")
+                .withCrn("")
+                .withPlatform("")
+                .withVariant("")
+                .build();
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
 
         List<CloudVmInstanceStatus> actual = underTest.waitFor(ac, Collections.emptyList(), Collections.emptySet());
 
@@ -50,9 +57,15 @@ public class PollerUtilTest {
     public void testWaitForWhenHasInstancesAndCompleted() {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(STACK_ID)
+                .withName("")
+                .withCrn("")
+                .withPlatform("")
+                .withVariant("")
+                .build();
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
         List<CloudInstance> instances = List.of(cloudInstance);
 
@@ -71,9 +84,15 @@ public class PollerUtilTest {
     public void testWaitForWhenHasInstancesAndNotCompleted() {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 2);
-        CloudContext cloudContext = new CloudContext(STACK_ID, "", "", "", "", "");
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(STACK_ID)
+                .withName("")
+                .withCrn("")
+                .withPlatform("")
+                .withVariant("")
+                .build();
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
-        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
+        AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null);
         List<CloudInstance> instances = List.of(cloudInstance);
 

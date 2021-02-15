@@ -53,8 +53,16 @@ public class ParameterGenerator {
 
     public CloudContext createCloudContext() {
         Location location = location(region("region"), availabilityZone("availabilityZone"));
-        return new CloudContext(STACK_ID, "teststack", "testCrn", "TESTCONNECTOR", "TESTVARIANT",
-                location, USER_ID, WORKSPACE_ID);
+        return CloudContext.Builder.builder()
+                .withWorkspaceId(WORKSPACE_ID)
+                .withName("teststack")
+                .withId(STACK_ID)
+                .withLocation(location)
+                .withPlatform("TESTCONNECTOR")
+                .withVariant("TESTVARIANT")
+                .withCrn("testCrn")
+                .withUserId(USER_ID)
+                .build();
     }
 
     public CloudCredential createCloudCredential() {

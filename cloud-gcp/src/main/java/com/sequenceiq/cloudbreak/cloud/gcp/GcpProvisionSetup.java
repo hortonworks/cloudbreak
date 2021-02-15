@@ -63,7 +63,7 @@ public class GcpProvisionSetup implements Setup {
             ImageList list = compute.images().list(projectId).execute();
             if (!containsSpecificImage(list, imageName)) {
                 Storage storage = buildStorage(credential, cloudContext.getName());
-                String accountId = authenticatedContext.getCloudContext().getAccountId();
+                String accountId = authenticatedContext.getCloudContext().getAccountUUID();
                 Bucket bucket = new Bucket();
                 String bucketName = GcpLabelUtil.transformLabelKeyOrValue(String.format("%s-%s", accountId, projectId));
                 bucket.setName(bucketName);

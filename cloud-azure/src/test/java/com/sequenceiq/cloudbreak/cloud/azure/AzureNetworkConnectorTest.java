@@ -438,8 +438,14 @@ public class AzureNetworkConnectorTest {
     }
 
     private CloudContext createCloudContext() {
-        Location location = Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1"));
-        return new CloudContext(null, STACK_NAME, null, null, null, location, null, null, "");
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withName(STACK_NAME)
+                .withCrn("")
+                .withPlatform("")
+                .withLocation(Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1")))
+                .withUserId("")
+                .build();
+        return cloudContext;
     }
 
     public SubnetRequest publicSubnetRequest(String cidr, int index) {

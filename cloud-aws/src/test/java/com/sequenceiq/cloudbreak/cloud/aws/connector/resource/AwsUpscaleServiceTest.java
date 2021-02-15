@@ -138,8 +138,17 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("master")))
                 .thenReturn("masterASG");
 
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-                Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, new CloudCredential());
 
         ArrayList<CloudResource> allInstances = new ArrayList<>();
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
@@ -236,8 +245,17 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("master")))
                 .thenReturn("masterASG");
 
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-                Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, new CloudCredential());
 
         List<CloudResource> allInstances = new ArrayList<>();
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
@@ -349,8 +367,17 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("master")))
                 .thenReturn("masterASG");
 
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-                Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, new CloudCredential());
 
         List<CloudResource> allInstances = new ArrayList<>();
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
@@ -453,8 +480,17 @@ class AwsUpscaleServiceTest {
         when(cfStackUtil.getAutoscalingGroupName(any(AuthenticatedContext.class), any(AmazonCloudFormationClient.class), eq("master")))
             .thenReturn("masterASG");
 
-        AuthenticatedContext authenticatedContext = new AuthenticatedContext(new CloudContext(1L, "teststack", "crn", "AWS", "AWS",
-            Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")), "1", "1"), new CloudCredential());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("teststack")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("eu-west-1"), AvailabilityZone.availabilityZone("eu-west-1a")))
+                .withUserId("1")
+                .withAccountId("1")
+                .build();
+        AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, new CloudCredential());
 
         ArrayList<CloudResource> allInstances = new ArrayList<>();
         allInstances.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
