@@ -192,6 +192,18 @@ cb:
   azure:
     host.name.prefix.length: 255
     database.template.batchSize: 1
+    image.copy.parallel:
+      concurrency: 50
+      prefetch: 200
+      timeout.minutes: 30
+      lease:
+        duration.seconds: 60
+        renew.interval.seconds: 45
+      retry:
+        count: 10
+        backoff:
+          min.seconds: 1
+          max.seconds: 10
 
   os:
     enable.autoimport: true

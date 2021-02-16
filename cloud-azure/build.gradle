@@ -1,4 +1,23 @@
+plugins {
+  id 'com.github.johnrengelman.shadow' version '6.1.0'
+  id 'java'
+}
+
 apply plugin: 'java'
+
+shadowJar {
+//  version('6.1.+')
+//  minimize()
+//  configurations = [project.configurations.shadow]
+//  project.configurations.implementation.canBeResolved = true
+//  project.configurations.compile.canBeResolved = true
+//  project.configurations.runtime.canBeResolved = true
+  archiveBaseName.set('cloud-azure')
+  archiveClassifier.set('')
+//  dependencies {
+//    'com.azure:azure-storage-blob:azureBlobStorageSdkVersion'
+//  }
+}
 
 repositories {
   mavenLocal()
@@ -12,29 +31,51 @@ jar {
   archiveName = 'cloud-azure.jar'
 }
 
+tasks.withType(AbstractCompile) {
+  // Add the shadow dependencies to the classpath for compilation so they can be used
+  classpath += configurations.shadow
+}
+
 dependencies {
 
-  compile project(':cloud-api')
-  compile project(':cloud-reactor')
-  compile project(':cloud-template')
+  shadow project(':cloud-api')
+  shadow project(':cloud-reactor')
+  shadow project(':cloud-template')
 
-  compile (group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion)
+  shadow (group: 'com.squareup.okhttp3',               name: 'okhttp',                     version: okhttpVersion)
 
-  compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
+  shadow (group: 'com.microsoft.azure',         name: 'azure-client-authentication') {
     exclude group: 'org.slf4j'
   }
-  compile (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) {
+  shadow (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) {
     exclude group: 'org.slf4j'
   }
-  compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: '1.22.0') { exclude group: 'org.slf4j' }
-  compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
-  compile (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
-  compile group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
-  compile group: 'org.apache.commons',                 name: 'commons-collections4', version: commonsCollections4Version
-  compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
+  shadow (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: '1.22.0') { exclude group: 'org.slf4j' }
+  shadow (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
+  shadow (group: 'com.microsoft.azure.privatedns.v2018_09_01',         name: 'azure-mgmt-privatedns',             version: '1.0.0-beta') { exclude group: 'org.slf4j' }
+  shadow group: 'com.microsoft.azure',         name: 'azure-storage',              version: azureStorageSdkVersion
+  compile (group: 'com.azure',         name: 'azure-storage-blob',              version: azureBlobStorageSdkVersion) {
+    exclude group: 'org.slf4j'
+    exclude group: 'org.codehaus.woodstox'
+    exclude group: 'com.google.code.findbugs'
+    exclude group: 'com.dyngr'
+    exclude group: 'com.fasterxml.jackson.core'
+    exclude group: 'com.fasterxml.jackson.dataformat'
+    exclude group: 'com.fasterxml.jackson.datatype'
+    exclude group: 'com.fasterxml.jackson.module'
+    exclude group: 'javax.xml.bind'
+    exclude group: 'javax.activation'
+  }
+  compile group: 'com.azure', name: 'azure-core-http-netty', version: '1.8.0'
+
+//  compile (group: 'com.azure', name: 'azure-core', version: '1.4.0') {
+//    exclude group: 'org.slf4j'
+//  }
+  shadow group: 'org.apache.commons',                 name: 'commons-collections4', version: commonsCollections4Version
+  shadow (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
   }
-  compile group: 'commons-net',                   name: 'commons-net',                      version: '3.6'
+  shadow group: 'commons-net',                   name: 'commons-net',                      version: '3.6'
 
   testCompile project(path: ':core-model', configuration: 'tests')
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
@@ -46,6 +87,6 @@ dependencies {
   testCompile (group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion)
   testCompile project(path: ':cloud-common', configuration: 'tests')
 
-  compile (group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2')
+  shadow (group: 'org.apache.commons',                 name: 'commons-collections4',        version: '4.2')
 
 }

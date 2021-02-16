@@ -39,4 +39,15 @@ public class AzureImageInfo {
     public String getResourceGroup() {
         return resourceGroup;
     }
+
+    @Override
+    public String toString() {
+        return "AzureImageInfo{" +
+                "imageNameWithRegion='" + imageNameWithRegion + '\'' +
+                ", imageName='" + imageName + '\'' +
+                ", imageId='" + imageId + '\'' +
+                ", region='" + region + '\'' +
+                ", resourceGroup='" + resourceGroup + '\'' +
+                '}';
+    }
 }

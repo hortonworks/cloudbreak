@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
+import static com.azure.core.util.Configuration.PROPERTY_AZURE_LOG_LEVEL;
 import static com.microsoft.azure.management.privatedns.v2018_09_01.ProvisioningState.SUCCEEDED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.Collections.emptyMap;
@@ -23,6 +24,13 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.azure.core.http.policy.HttpLogDetailLevel;
+import com.azure.core.http.policy.HttpLogOptions;
+import com.azure.core.util.Configuration;
+import com.azure.storage.blob.BlobServiceClientBuilder;
+import com.azure.storage.blob.specialized.BlobLeaseAsyncClient;
+import com.azure.storage.blob.specialized.BlobLeaseClientBuilder;
+import com.azure.storage.blob.specialized.PageBlobAsyncClient;
 import com.google.common.base.Strings;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
@@ -77,11 +85,11 @@ import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.CloudPageBlob;
-import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.image.copy.ImageCopyProgressReport;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -402,7 +410,7 @@ public class AzureClient {
         }
     }
 
-    public CopyState getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlobName) {
+    public ImageCopyProgressReport getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlobName) {
         LOGGER.debug("get image copy status: RG={}, storageName={}, containerName={}, sourceBlob={}",
                 resourceGroup, storageName, containerName, sourceBlobName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
@@ -412,7 +420,7 @@ public class AzureClient {
             container.downloadAttributes();
             LOGGER.debug("Downloading {} cloudPageBlob attributes.", cloudPageBlob.getName());
             cloudPageBlob.downloadAttributes();
-            return cloudPageBlob.getCopyState();
+            return new ImageCopyProgressReport(cloudPageBlob);
         } catch (URISyntaxException e) {
             throw new CloudConnectorException("can't get copy status, URI is not valid", e);
         } catch (StorageException e) {
@@ -445,10 +453,31 @@ public class AzureClient {
         return targetCollection;
     }
 
+    public PageBlobAsyncClient getPageBlobAsyncClient(String resourceGroup, String storageName, String containerName, String destinationFilename) {
+        String storageConnectionString = getStorageAccountConnectionString(resourceGroup, storageName);
+        return new BlobServiceClientBuilder()
+                .connectionString(storageConnectionString)
+                .httpLogOptions(new HttpLogOptions().setLogLevel(HttpLogDetailLevel.BODY_AND_HEADERS).setPrettyPrintBody(true))
+                .configuration(new Configuration().put(PROPERTY_AZURE_LOG_LEVEL, "DEBUG"))
+                .buildAsyncClient()
+                .getBlobContainerAsyncClient(containerName)
+                .getBlobAsyncClient(destinationFilename)
+                .getPageBlobAsyncClient();
+    }
+
+    public BlobLeaseAsyncClient getBlobLeaseAsyncClient(PageBlobAsyncClient pageBlobAsyncClient) {
+        return new BlobLeaseClientBuilder().blobAsyncClient(pageBlobAsyncClient).buildAsyncClient();
+    }
+
+    private String getStorageAccountConnectionString(String resourceGroup, String storageName) {
+        LOGGER.debug("get storage account connection string: RG={}, storageName={}", resourceGroup, storageName);
+        List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName);
+        return String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
+    }
+
     public CloudBlobContainer getBlobContainer(String resourceGroup, String storageName, String containerName) {
         LOGGER.debug("get blob container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
-        List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName);
-        String storageConnectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
+        String storageConnectionString = getStorageAccountConnectionString(resourceGroup, storageName);
         try {
             CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();

@@ -20,6 +20,9 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.image.copy.ImageCopyProgressReport;
+import com.sequenceiq.cloudbreak.cloud.azure.image.copy.ImageCopyService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.copy.parallel.ParallelCopyProgressInfo;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -56,6 +59,9 @@ public class AzureImageSetupService {
     @Inject
     private CustomVMImageNameProvider customVMImageNameProvider;
 
+    @Inject
+    private ImageCopyService imageCopyService;
+
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         CloudContext cloudContext = ac.getCloudContext();
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
@@ -71,35 +77,53 @@ public class AzureImageSetupService {
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, cloudContext, stack);
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, azureImageInfo.getImageName());
-            boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName());
-            if (copyState == null && storageContainsImage) {
-                LOGGER.debug("The copy has been finished because the storage account already contains the image.");
-                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-            } else if (copyState == null && !storageContainsImage) {
-                throw new CloudConnectorException(
-                        "Image copy failed because the copy state is not available and the storage account does not contains the image.");
-            }
-            if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
-                if (!storageContainsImage) {
-                    LOGGER.error("The image has not been found in the storage account.");
-                    return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
-                }
-                LOGGER.info("The image copy has been finished.");
-                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-            } else if (isCopyStatusFailed(copyState)) {
-                LOGGER.error("The image copy has failed with status: {}", copyState.getStatus());
-                return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
-            } else {
-                int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
-                return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
-            }
+            ImageCopyProgressReport imageCopyProgressInfo
+                    = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, azureImageInfo.getImageName());
+            return imageCopyProgressInfo.getParallelCopyState().isPresent()
+                    ? checkParallelCopyState(imageCopyProgressInfo.getParallelCopyState().get())
+                    : checkSequentialCopyState(imageResourceGroupName, client, azureImageInfo, imageStorageName, imageCopyProgressInfo.getSequentialCopyState());
         } catch (RuntimeException ex) {
             String msg = String.format("Failed to check the status of the image in resource group '%s', image storage name '%s'",
                     imageResourceGroupName, imageStorageName);
             LOGGER.error(msg, ex);
             return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.INIT);
+        }
+    }
+
+    private ImageStatusResult checkParallelCopyState(ParallelCopyProgressInfo parallelCopyProgressInfo) {
+        switch(parallelCopyProgressInfo.getStatus()) {
+            case FINISHED:
+                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, parallelCopyProgressInfo.getProgress());
+            case FAILED:
+                return new ImageStatusResult(ImageStatus.CREATE_FAILED, parallelCopyProgressInfo.getProgress());
+            default:
+                return new ImageStatusResult(ImageStatus.IN_PROGRESS, parallelCopyProgressInfo.getProgress());
+        }
+    }
+
+    private ImageStatusResult checkSequentialCopyState(String imageResourceGroupName, AzureClient client, AzureImageInfo azureImageInfo, String imageStorageName, CopyState copyState) {
+        boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName());
+        if (copyState == null && storageContainsImage) {
+            LOGGER.debug("The copy has been finished because the storage account already contains the image.");
+            return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+        } else if (copyState == null && !storageContainsImage) {
+            throw new CloudConnectorException(
+                    "Image copy failed because the copy state is not available and the storage account does not contains the image.");
+        }
+        if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
+            if (!storageContainsImage) {
+                LOGGER.error("The image has not been found in the storage account.");
+                return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
+            }
+            LOGGER.info("The image copy has been finished.");
+            return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+        } else if (isCopyStatusFailed(copyState)) {
+            LOGGER.error("The image copy has failed with status: {}", copyState.getStatus());
+            return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+        } else {
+            int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
+            LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
+            return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
         }
     }
 
@@ -127,9 +151,7 @@ public class AzureImageSetupService {
         azureStorageAccountService.createContainerInStorage(client, imageResourceGroupName, imageStorageName);
         if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName())) {
             try {
-                LOGGER.info("Starting to copy image: {}, into storage account: {}", image.getImageName(), imageStorageName);
-                client.copyImageBlobInStorageContainer(
-                        imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), azureImageInfo.getImageName());
+                imageCopyService.copyImage(image, client, imageStorageName, imageResourceGroupName, azureImageInfo);
             } catch (CloudConnectorException e) {
                 LOGGER.warn("Something happened during start image copy.", e);
             }

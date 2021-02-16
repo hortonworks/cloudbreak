@@ -124,7 +124,8 @@ dependencies {
   runtime project(':cloud-gcp')
   runtime project(':cloud-aws')
   runtime project(':cloud-mock')
-  runtime project(':cloud-azure')
+  runtime project(path: ':cloud-azure', configuration: 'shadow')
+//  runtime project(':cloud-azure')
 }
 
 bootRun {
