@@ -21,9 +21,9 @@ public class EnvironmentChangeSecurityAccessAction implements Action<Environment
         SecurityAccessRequest securityAccess = testDto.getRequest().getSecurityAccess();
         SecurityAccessRequest clone = cloneSecurityAccessRequest(securityAccess);
         request.setSecurityAccess(clone);
-        environmentClient.getEnvironmentClient()
+        testDto.setResponse(environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
-                .editByCrn(testDto.getResponse().getCrn(), request);
+                .editByCrn(testDto.getResponse().getCrn(), request));
         Log.when(LOGGER, "Environment edit authentication action posted");
         return testDto;
     }

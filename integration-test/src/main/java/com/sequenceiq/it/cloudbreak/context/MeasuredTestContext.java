@@ -42,9 +42,13 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
-    public TestContext as(CloudbreakUser actor) {
-        wrappedTestContext.as(actor);
-        return this;
+    public TestContext as() {
+        return wrappedTestContext.as();
+    }
+
+    @Override
+    public TestContext as(CloudbreakUser cloudbreakUser) {
+        return wrappedTestContext.as(cloudbreakUser);
     }
 
     @Override
@@ -70,6 +74,21 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public void setShutdown(boolean shutdown) {
         wrappedTestContext.setShutdown(shutdown);
+    }
+
+    @Override
+    public void useUmsUserCache(boolean useUmsStore) {
+        wrappedTestContext.useUmsUserCache(useUmsStore);
+    }
+
+    @Override
+    public boolean umsUserCacheInUse() {
+        return wrappedTestContext.umsUserCacheInUse();
+    }
+
+    @Override
+    public boolean realUmsUserCacheReadyToUse() {
+        return wrappedTestContext.realUmsUserCacheReadyToUse();
     }
 
     @Override

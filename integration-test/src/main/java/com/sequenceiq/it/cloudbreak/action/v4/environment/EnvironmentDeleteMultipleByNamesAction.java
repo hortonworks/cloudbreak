@@ -21,6 +21,7 @@ public class EnvironmentDeleteMultipleByNamesAction extends AbstractEnvironmentA
         SimpleEnvironmentResponses delete = client.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteMultipleByNames(envNames, true, false);
+        testDto.setResponseSimpleEnvSet(delete.getResponses());
         Log.whenJson("Environments delete response: ", delete);
         return testDto;
     }

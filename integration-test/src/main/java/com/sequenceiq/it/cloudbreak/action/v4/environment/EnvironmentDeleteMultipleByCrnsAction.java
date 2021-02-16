@@ -21,6 +21,7 @@ public class EnvironmentDeleteMultipleByCrnsAction extends AbstractEnvironmentAc
         SimpleEnvironmentResponses delete = client.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteMultipleByCrns(crns, true, false);
+        testDto.setResponseSimpleEnvSet(delete.getResponses());
         Log.whenJson("Environments delete response: ", delete);
         return testDto;
     }

@@ -20,7 +20,6 @@ public abstract class AbstractEnvironmentAction implements Action<EnvironmentTes
             try {
                 return environmentAction(testContext, testDto, client);
             } catch (Exception e) {
-                LOGGER.info("Exception during executing Environment action: ", e);
                 if (e.getMessage().contains("flow under operation")) {
                     waitTillFlowInOperation(testDto.getFlowUtil());
                     retries++;

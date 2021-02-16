@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 
@@ -37,17 +36,12 @@ public class RunningParameter {
     private boolean waitForFlow = true;
 
     @Inject
-    private CloudbreakActor cloudbreakActor;
+    private TestContext testContext;
 
     public CloudbreakUser getWho() {
         if (doAsAdmin) {
-            try {
-                if (cloudbreakActor.isInitialized()) {
-                    return cloudbreakActor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN);
-                }
-            } catch (Exception ignored) {
-                LOGGER.warn("Even the 'doAsAdmin' is 'true' in {}, the UMS users have not been initialized, falling back to the already defined user!",
-                        getClass().getSimpleName());
+            if (testContext.realUmsUserCacheReadyToUse()) {
+                return testContext.getRealUmsUserByKey(AuthUserKeys.ACCOUNT_ADMIN);
             }
         }
         return who;

@@ -85,30 +85,39 @@ public class CloudbreakUserCache {
         this.usersByAccount = users;
     }
 
-    public CloudbreakUser getByDisplayName(String name) {
+    public CloudbreakUser getUserByDisplayName(String name) {
         if (MapUtils.isEmpty(usersByAccount)) {
             initRealUmsUserCache();
         }
-        CloudbreakUser user = usersByAccount.values().stream().flatMap(Collection::stream)
-                .filter(u -> u.getDisplayName().equals(name)).findFirst()
-                .orElseThrow(() -> new TestFailException(String.format("There is no real UMS user with::%n name: %s%n deployment::account: %s::%s", name,
-                        realUmsUserDeployment, realUmsUserAccount)));
-        LOGGER.info(" Real UMS user has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
-                user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
-        return user;
+        if (isInitialized()) {
+            CloudbreakUser user = usersByAccount.values().stream().flatMap(Collection::stream)
+                    .filter(u -> u.getDisplayName().equals(name)).findFirst()
+                    .orElseThrow(() -> new TestFailException(String.format("There is no real UMS user with::%n name: %s%n deployment: %s%n account: %s%n",
+                            name, realUmsUserDeployment, realUmsUserAccount)));
+            LOGGER.info(" Real UMS user has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
+                    user.getDisplayName(), user.getCrn(), user.getAccessKey(), user.getSecretKey(), user.getAdmin());
+            return user;
+        } else {
+            throw new TestFailException("Cannot get real UMS user by name, because of 'ums-users/api-credentials.json' is not available.");
+        }
     }
 
     public CloudbreakUser getAdminByAccountId(String accountId) {
-        LOGGER.info("Getting the requested real UMS admin by account Id: {}", accountId);
-        try {
-            CloudbreakUser adminUser = usersByAccount.values().stream().flatMap(Collection::stream)
-                    .filter(CloudbreakUser::getAdmin).findFirst()
-                    .orElseThrow(() -> new TestFailException(String.format("There is no real UMS admin in account: %s", accountId)));
-            LOGGER.info(" Real UMS account admin has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
-                    adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin());
-            return adminUser;
-        } catch (Exception e) {
-            throw new TestFailException(String.format("Cannot get the real UMS admin in account: %s, because of: %s", accountId, e.getMessage()), e);
+        if (!usersByAccount.containsKey(accountId)) {
+            throw new TestFailException("Real UMS '" + accountId + "' account ID is missing from 'ums-users/api-credentials.json' file." +
+                    " Please revise your account ID.");
+        } else {
+            LOGGER.info("Getting the requested real UMS admin by account Id: {}", accountId);
+            try {
+                CloudbreakUser adminUser = usersByAccount.values().stream().flatMap(Collection::stream)
+                        .filter(CloudbreakUser::getAdmin).findFirst()
+                        .orElseThrow(() -> new TestFailException(String.format("There is no real UMS admin in account: %s", accountId)));
+                LOGGER.info(" Real UMS account admin has been found:: \nDisplay name: {} \nCrn: {} \nAccess key: {} \nSecret key: {} \nAdmin: {} ",
+                        adminUser.getDisplayName(), adminUser.getCrn(), adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getAdmin());
+                return adminUser;
+            } catch (Exception e) {
+                throw new TestFailException(String.format("Cannot get the real UMS admin in account: %s, because of: %s", accountId, e.getMessage()), e);
+            }
         }
     }
 

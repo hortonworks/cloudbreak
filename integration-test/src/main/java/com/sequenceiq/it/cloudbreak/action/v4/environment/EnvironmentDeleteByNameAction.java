@@ -23,6 +23,7 @@ public class EnvironmentDeleteByNameAction extends AbstractEnvironmentAction {
         SimpleEnvironmentResponse delete = client.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteByName(testDto.getName(), cascading, false);
+        testDto.setResponseSimpleEnv(delete);
         Log.whenJson("Environment delete response: ", delete);
         return testDto;
     }
