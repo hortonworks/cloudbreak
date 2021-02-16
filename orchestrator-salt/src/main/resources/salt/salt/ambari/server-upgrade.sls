@@ -22,7 +22,7 @@ create_upgrade_history:
     - unless: ls -1 /var/ambari-upgrade.history
 
 upgrade-ambari-server:
-  pkg.installed:
+  pkg.latest:
     - name: ambari-server
     - require:
       - sls: ambari.repo

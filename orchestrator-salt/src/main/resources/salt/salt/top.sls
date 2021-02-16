@@ -21,12 +21,9 @@ base:
   'G@roles:ambari_upgrade and G@roles:ambari_agent':
     - match: compound
     - ambari.agent-upgrade
-    - smartsense.agent-upgrade
 
   'G@roles:ambari_upgrade and G@roles:ambari_server':
     - match: compound
-    # smartsense needs to run before the Ambari server upgrade, because it needs a running server
-    - smartsense.server-upgrade
     - ambari.server-upgrade
 
   'G@roles:ambari_upgrade and G@roles:ambari_server_standby':
