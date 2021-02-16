@@ -61323,6 +61323,24 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getFlowStateBytes();
+
+    /**
+     * <pre>
+     * Correlation ID to correlate events written together
+     * </pre>
+     *
+     * <code>string correlationId = 10;</code>
+     */
+    java.lang.String getCorrelationId();
+    /**
+     * <pre>
+     * Correlation ID to correlate events written together
+     * </pre>
+     *
+     * <code>string correlationId = 10;</code>
+     */
+    com.google.protobuf.ByteString
+        getCorrelationIdBytes();
   }
   /**
    * Protobuf type {@code usage.CDPOperationDetails}
@@ -61346,6 +61364,7 @@ public final class UsageProto {
       flowId_ = "";
       flowChainId_ = "";
       flowState_ = "";
+      correlationId_ = "";
     }
 
     @java.lang.Override
@@ -61424,6 +61443,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               flowState_ = s;
+              break;
+            }
+            case 82: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              correlationId_ = s;
               break;
             }
             default: {
@@ -61819,6 +61844,48 @@ public final class UsageProto {
       }
     }
 
+    public static final int CORRELATIONID_FIELD_NUMBER = 10;
+    private volatile java.lang.Object correlationId_;
+    /**
+     * <pre>
+     * Correlation ID to correlate events written together
+     * </pre>
+     *
+     * <code>string correlationId = 10;</code>
+     */
+    public java.lang.String getCorrelationId() {
+      java.lang.Object ref = correlationId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        correlationId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Correlation ID to correlate events written together
+     * </pre>
+     *
+     * <code>string correlationId = 10;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCorrelationIdBytes() {
+      java.lang.Object ref = correlationId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        correlationId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -61860,6 +61927,9 @@ public final class UsageProto {
       if (!getFlowStateBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, flowState_);
       }
+      if (!getCorrelationIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 10, correlationId_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -61897,6 +61967,9 @@ public final class UsageProto {
       if (!getFlowStateBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, flowState_);
       }
+      if (!getCorrelationIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, correlationId_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -61930,6 +62003,8 @@ public final class UsageProto {
           .equals(other.getFlowChainId());
       result = result && getFlowState()
           .equals(other.getFlowState());
+      result = result && getCorrelationId()
+          .equals(other.getCorrelationId());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -61959,6 +62034,8 @@ public final class UsageProto {
       hash = (53 * hash) + getFlowChainId().hashCode();
       hash = (37 * hash) + FLOWSTATE_FIELD_NUMBER;
       hash = (53 * hash) + getFlowState().hashCode();
+      hash = (37 * hash) + CORRELATIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getCorrelationId().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -62110,6 +62187,8 @@ public final class UsageProto {
 
         flowState_ = "";
 
+        correlationId_ = "";
+
         return this;
       }
 
@@ -62145,6 +62224,7 @@ public final class UsageProto {
         result.flowId_ = flowId_;
         result.flowChainId_ = flowChainId_;
         result.flowState_ = flowState_;
+        result.correlationId_ = correlationId_;
         onBuilt();
         return result;
       }
@@ -62226,6 +62306,10 @@ public final class UsageProto {
         }
         if (!other.getFlowState().isEmpty()) {
           flowState_ = other.flowState_;
+          onChanged();
+        }
+        if (!other.getCorrelationId().isEmpty()) {
+          correlationId_ = other.correlationId_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -63030,6 +63114,95 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         flowState_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object correlationId_ = "";
+      /**
+       * <pre>
+       * Correlation ID to correlate events written together
+       * </pre>
+       *
+       * <code>string correlationId = 10;</code>
+       */
+      public java.lang.String getCorrelationId() {
+        java.lang.Object ref = correlationId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          correlationId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Correlation ID to correlate events written together
+       * </pre>
+       *
+       * <code>string correlationId = 10;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCorrelationIdBytes() {
+        java.lang.Object ref = correlationId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          correlationId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Correlation ID to correlate events written together
+       * </pre>
+       *
+       * <code>string correlationId = 10;</code>
+       */
+      public Builder setCorrelationId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        correlationId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Correlation ID to correlate events written together
+       * </pre>
+       *
+       * <code>string correlationId = 10;</code>
+       */
+      public Builder clearCorrelationId() {
+        
+        correlationId_ = getDefaultInstance().getCorrelationId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Correlation ID to correlate events written together
+       * </pre>
+       *
+       * <code>string correlationId = 10;</code>
+       */
+      public Builder setCorrelationIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        correlationId_ = value;
         onChanged();
         return this;
       }
@@ -81359,82 +81532,82 @@ public final class UsageProto {
       "ED\020\032\022\034\n\030RENEW_PUBLIC_CERT_FAILED\020\033\022\'\n#RE" +
       "NEW_CLUSTER_INTERNAL_CERT_STARTED\020\034\022(\n$R" +
       "ENEW_CLUSTER_INTERNAL_CERT_FINISHED\020\035\022&\n" +
-      "\"RENEW_CLUSTER_INTERNAL_CERT_FAILED\020\036\"\206\002" +
+      "\"RENEW_CLUSTER_INTERNAL_CERT_FAILED\020\036\"\235\002" +
       "\n\023CDPOperationDetails\022\021\n\taccountId\030\001 \001(\t" +
       "\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014resourceName\030\003 " +
       "\001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022\032\n\022application" +
       "Version\030\005 \001(\t\022G\n\030cdpRequestProcessingSte" +
       "p\030\006 \001(\0162%.usage.CDPRequestProcessingStep" +
       ".Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013flowChainId\030\010 " +
-      "\001(\t\022\021\n\tflowState\030\t \001(\t\"\362\002\n\025CDPEnvironmen" +
-      "tDetails\022D\n\017environmentType\030\001 \001(\0162+.usag" +
-      "e.CDPEnvironmentsEnvironmentType.Value\022\016" +
-      "\n\006region\030\002 \001(\t\022!\n\031numberOfAvailabilityZo" +
-      "nes\030\003 \001(\005\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016" +
-      "networkDetails\030\005 \001(\0132\030.usage.CDPNetworkD" +
-      "etails\0225\n\nawsDetails\030\006 \001(\0132\037.usage.CDPEn" +
-      "vironmentAwsDetailsH\000\0229\n\014azureDetails\030\007 " +
-      "\001(\0132!.usage.CDPEnvironmentAzureDetailsH\000" +
-      "B!\n\037environmentCloudProviderDetails\"0\n\021C" +
-      "DPFreeIPADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030" +
-      "\002 \001(\010\"9\n\032CDPEnvironmentAzureDetails\022\033\n\023s" +
-      "ingleResourceGroup\030\001 \001(\010\"\032\n\030CDPEnvironme" +
-      "ntAwsDetails\"a\n%CDPEnvironmentTelemetryF" +
-      "eatureDetails\022\031\n\021workloadAnalytics\030\001 \001(\t" +
-      "\022\035\n\025clusterLogsCollection\030\002 \001(\t\" \n\017CDPPr" +
-      "oxyDetails\022\r\n\005proxy\030\001 \001(\010\"\355\001\n\021CDPNetwork" +
-      "Details\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connecti" +
-      "vity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022" +
-      "\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027service" +
-      "EndpointCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006" +
-      " \001(\0132\026.usage.CDPProxyDetails\022#\n\033publicEn" +
-      "dpointAccessGateway\030\007 \001(\t\"\265\002\n\027CDPEnviron" +
-      "mentRequested\0224\n\020operationDetails\030\001 \001(\0132" +
-      "\032.usage.CDPOperationDetails\0228\n\022environme" +
-      "ntDetails\030\002 \001(\0132\034.usage.CDPEnvironmentDe" +
-      "tails\0220\n\016networkDetails\030\003 \001(\0132\030.usage.CD" +
-      "PNetworkDetails\022M\n\027telemetryFeatureDetai" +
-      "ls\030\004 \001(\0132,.usage.CDPEnvironmentTelemetry" +
-      "FeatureDetails\022)\n\007freeIPA\030\005 \001(\0132\030.usage." +
-      "CDPFreeIPADetails\"\326\001\n\033CDPEnvironmentStat" +
-      "usChanged\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
-      "age.CDPOperationDetails\0224\n\toldStatus\030\002 \001" +
-      "(\0162!.usage.CDPEnvironmentStatus.Value\0224\n" +
-      "\tnewStatus\030\003 \001(\0162!.usage.CDPEnvironmentS" +
-      "tatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"8\n\017CD" +
-      "PImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014imageC" +
-      "atalog\030\002 \001(\t\"t\n\017CDPClusterShape\022\033\n\023clust" +
-      "erTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022h" +
-      "ostGroupNodeCount\030\003 \001(\t\022\031\n\021definitionDet" +
-      "ails\030\004 \001(\t\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVe" +
-      "rsion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVe" +
-      "rsion\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPa" +
-      "tchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClust" +
-      "erDetails\022,\n\014clusterShape\030\001 \001(\0132\026.usage." +
-      "CDPClusterShape\0220\n\016versionDetails\030\002 \001(\0132" +
-      "\030.usage.CDPVersionDetails\022,\n\014imageDetail" +
-      "s\030\003 \001(\0132\026.usage.CDPImageDetails\"\226\001\n\024CDPD" +
-      "atalakeRequested\0224\n\020operationDetails\030\001 \001" +
-      "(\0132\032.usage.CDPOperationDetails\022\026\n\016enviro" +
-      "nmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030" +
-      ".usage.CDPClusterDetails\"\313\001\n\030CDPDatalake" +
-      "StatusChanged\0224\n\020operationDetails\030\001 \001(\0132" +
-      "\032.usage.CDPOperationDetails\0220\n\toldStatus" +
-      "\030\002 \001(\0162\035.usage.CDPClusterStatus.Value\0220\n" +
-      "\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterStatu" +
-      "s.Value\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDa" +
-      "tahubRequested\0224\n\020operationDetails\030\001 \001(\013" +
-      "2\032.usage.CDPOperationDetails\022\026\n\016environm" +
-      "entCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.u" +
-      "sage.CDPClusterDetails\"\312\001\n\027CDPDatahubSta" +
-      "tusChanged\0224\n\020operationDetails\030\001 \001(\0132\032.u" +
-      "sage.CDPOperationDetails\0220\n\toldStatus\030\002 " +
-      "\001(\0162\035.usage.CDPClusterStatus.Value\0220\n\tne" +
-      "wStatus\030\003 \001(\0162\035.usage.CDPClusterStatus.V" +
-      "alue\022\025\n\rfailureReason\030\004 \001(\tBV\n-com.cloud" +
-      "era.thunderhead.service.common.usageB\nUs" +
-      "ageProtoZ\031com/cloudera/cdp/protobufb\006pro" +
-      "to3"
+      "\001(\t\022\021\n\tflowState\030\t \001(\t\022\025\n\rcorrelationId\030" +
+      "\n \001(\t\"\362\002\n\025CDPEnvironmentDetails\022D\n\017envir" +
+      "onmentType\030\001 \001(\0162+.usage.CDPEnvironments" +
+      "EnvironmentType.Value\022\016\n\006region\030\002 \001(\t\022!\n" +
+      "\031numberOfAvailabilityZones\030\003 \001(\005\022\031\n\021avai" +
+      "labilityZones\030\004 \001(\t\0220\n\016networkDetails\030\005 " +
+      "\001(\0132\030.usage.CDPNetworkDetails\0225\n\nawsDeta" +
+      "ils\030\006 \001(\0132\037.usage.CDPEnvironmentAwsDetai" +
+      "lsH\000\0229\n\014azureDetails\030\007 \001(\0132!.usage.CDPEn" +
+      "vironmentAzureDetailsH\000B!\n\037environmentCl" +
+      "oudProviderDetails\"0\n\021CDPFreeIPADetails\022" +
+      "\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030\002 \001(\010\"9\n\032CDPEnvir" +
+      "onmentAzureDetails\022\033\n\023singleResourceGrou" +
+      "p\030\001 \001(\010\"\032\n\030CDPEnvironmentAwsDetails\"a\n%C" +
+      "DPEnvironmentTelemetryFeatureDetails\022\031\n\021" +
+      "workloadAnalytics\030\001 \001(\t\022\035\n\025clusterLogsCo" +
+      "llection\030\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005pro" +
+      "xy\030\001 \001(\010\"\355\001\n\021CDPNetworkDetails\022\023\n\013networ" +
+      "kType\030\001 \001(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023num" +
+      "berPublicSubnets\030\003 \001(\005\022\034\n\024numberPrivateS" +
+      "ubnets\030\004 \001(\005\022\037\n\027serviceEndpointCreation\030" +
+      "\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132\026.usage.CDPP" +
+      "roxyDetails\022#\n\033publicEndpointAccessGatew" +
+      "ay\030\007 \001(\t\"\265\002\n\027CDPEnvironmentRequested\0224\n\020" +
+      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
+      "ionDetails\0228\n\022environmentDetails\030\002 \001(\0132\034" +
+      ".usage.CDPEnvironmentDetails\0220\n\016networkD" +
+      "etails\030\003 \001(\0132\030.usage.CDPNetworkDetails\022M" +
+      "\n\027telemetryFeatureDetails\030\004 \001(\0132,.usage." +
+      "CDPEnvironmentTelemetryFeatureDetails\022)\n" +
+      "\007freeIPA\030\005 \001(\0132\030.usage.CDPFreeIPADetails" +
+      "\"\326\001\n\033CDPEnvironmentStatusChanged\0224\n\020oper" +
+      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
+      "etails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnv" +
+      "ironmentStatus.Value\0224\n\tnewStatus\030\003 \001(\0162" +
+      "!.usage.CDPEnvironmentStatus.Value\022\025\n\rfa" +
+      "ilureReason\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007" +
+      "imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017C" +
+      "DPClusterShape\022\033\n\023clusterTemplateName\030\001 " +
+      "\001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022hostGroupNodeCount" +
+      "\030\003 \001(\t\022\031\n\021definitionDetails\030\004 \001(\t\"\206\001\n\021CD" +
+      "PVersionDetails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcm" +
+      "Version\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013sa" +
+      "ltVersion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n" +
+      "\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDetails\022,\n\014clus" +
+      "terShape\030\001 \001(\0132\026.usage.CDPClusterShape\0220" +
+      "\n\016versionDetails\030\002 \001(\0132\030.usage.CDPVersio" +
+      "nDetails\022,\n\014imageDetails\030\003 \001(\0132\026.usage.C" +
+      "DPImageDetails\"\226\001\n\024CDPDatalakeRequested\022" +
+      "4\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOpe" +
+      "rationDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n" +
+      "\016clusterDetails\030\003 \001(\0132\030.usage.CDPCluster" +
+      "Details\"\313\001\n\030CDPDatalakeStatusChanged\0224\n\020" +
+      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
+      "ionDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage.CD" +
+      "PClusterStatus.Value\0220\n\tnewStatus\030\003 \001(\0162" +
+      "\035.usage.CDPClusterStatus.Value\022\025\n\rfailur" +
+      "eReason\030\004 \001(\t\"\225\001\n\023CDPDatahubRequested\0224\n" +
+      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
+      "tionDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016c" +
+      "lusterDetails\030\003 \001(\0132\030.usage.CDPClusterDe" +
+      "tails\"\312\001\n\027CDPDatahubStatusChanged\0224\n\020ope" +
+      "rationDetails\030\001 \001(\0132\032.usage.CDPOperation" +
+      "Details\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPCl" +
+      "usterStatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.u" +
+      "sage.CDPClusterStatus.Value\022\025\n\rfailureRe" +
+      "ason\030\004 \001(\tBV\n-com.cloudera.thunderhead.s" +
+      "ervice.common.usageB\nUsageProtoZ\031com/clo" +
+      "udera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -81759,7 +81932,7 @@ public final class UsageProto {
     internal_static_usage_CDPOperationDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPOperationDetails_descriptor,
-        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", "FlowState", });
+        new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", "FlowState", "CorrelationId", });
     internal_static_usage_CDPEnvironmentDetails_descriptor =
       getDescriptor().getMessageTypes().get(52);
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new

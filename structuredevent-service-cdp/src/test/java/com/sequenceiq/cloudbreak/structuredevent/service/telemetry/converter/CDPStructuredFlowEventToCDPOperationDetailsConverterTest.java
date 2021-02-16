@@ -7,6 +7,7 @@ import org.powermock.reflect.Whitebox;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 
@@ -36,6 +37,7 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals("", details.getResourceCrn());
         Assert.assertEquals("", details.getResourceName());
         Assert.assertEquals("", details.getInitiatorCrn());
+        Assert.assertEquals("", details.getCorrelationId());
 
         Assert.assertEquals("version-1234", details.getApplicationVersion());
     }
@@ -88,11 +90,16 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         flowDetails.setNextFlowState("FINAL_STATE");
         cdpStructuredFlowEvent.setFlow(flowDetails);
 
+        CDPOperationDetails operationDetails = new CDPOperationDetails();
+        operationDetails.setUuid("correlationId");
+        cdpStructuredFlowEvent.setOperation(operationDetails);
+
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent);
 
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
         Assert.assertEquals("flowId", details.getFlowId());
         Assert.assertEquals("flowChainId", details.getFlowChainId());
+        Assert.assertEquals("correlationId", details.getCorrelationId());
     }
 
     @Test
