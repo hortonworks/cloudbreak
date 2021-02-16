@@ -59,7 +59,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
         return mpack;
     }
 
-    private String getMpackUrl(String url) {
+    public String getMpackUrl(String url) {
         return paywallCredentialService.paywallCredentialAvailable()
                 ? paywallCredentialService.addCredentialForUrl(url)
                 : url;
