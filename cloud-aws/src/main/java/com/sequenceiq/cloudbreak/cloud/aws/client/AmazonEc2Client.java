@@ -19,6 +19,10 @@ import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsResult;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
@@ -180,5 +184,13 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeImagesResult describeImages(DescribeImagesRequest describeImagesRequest) {
         return client.describeImages(describeImagesRequest);
+    }
+
+    public DescribeInstanceTypeOfferingsResult describeInstanceTypeOfferings(DescribeInstanceTypeOfferingsRequest request) {
+        return client.describeInstanceTypeOfferings(request);
+    }
+
+    public DescribeInstanceTypesResult describeInstanceTypes(DescribeInstanceTypesRequest request) {
+        return client.describeInstanceTypes(request);
     }
 }

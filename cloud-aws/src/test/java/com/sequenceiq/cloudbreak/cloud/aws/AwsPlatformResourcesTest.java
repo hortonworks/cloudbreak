@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,13 +36,25 @@ import com.amazonaws.services.dynamodbv2.model.ListTablesRequest;
 import com.amazonaws.services.dynamodbv2.model.ListTablesResult;
 import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypeOfferingsResult;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesRequest;
+import com.amazonaws.services.ec2.model.DescribeInstanceTypesResult;
 import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.amazonaws.services.ec2.model.DescribeRegionsResult;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsResult;
+import com.amazonaws.services.ec2.model.DiskInfo;
+import com.amazonaws.services.ec2.model.EbsEncryptionSupport;
+import com.amazonaws.services.ec2.model.EbsInfo;
+import com.amazonaws.services.ec2.model.InstanceStorageInfo;
+import com.amazonaws.services.ec2.model.InstanceTypeInfo;
+import com.amazonaws.services.ec2.model.InstanceTypeOffering;
+import com.amazonaws.services.ec2.model.MemoryInfo;
 import com.amazonaws.services.ec2.model.Region;
 import com.amazonaws.services.ec2.model.Subnet;
+import com.amazonaws.services.ec2.model.VCpuInfo;
 import com.amazonaws.services.ec2.model.Vpc;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.ListInstanceProfilesRequest;
@@ -114,7 +127,17 @@ public class AwsPlatformResourcesTest {
     @Mock
     private DescribeAvailabilityZonesResult describeAvailabilityZonesResult;
 
+    @Mock
+    private DescribeInstanceTypesResult describeInstanceTypesResult;
+
+    @Mock
+    private DescribeInstanceTypeOfferingsResult describeInstanceTypeOfferingsResult;
+
     private final Region region = new Region();
+
+    private final InstanceTypeOffering instanceTypeOffering = new InstanceTypeOffering();
+
+    private final List<InstanceTypeInfo> instanceTypeInfos = new ArrayList<>();
 
     private final AvailabilityZone availabilityZone = new AvailabilityZone();
 
@@ -125,6 +148,10 @@ public class AwsPlatformResourcesTest {
     public void setUp() {
         availabilityZone.setZoneName(AZ_NAME);
         region.setRegionName(REGION_NAME);
+        instanceTypeOffering.setInstanceType("m5.2xlarge");
+
+        instanceTypeInfos.add(getInstanceTypeInfo("m5.2xlarge"));
+        describeInstanceTypesResult.setInstanceTypes(instanceTypeInfos);
 
         Mockito.reset(awsClient);
 
@@ -135,12 +162,34 @@ public class AwsPlatformResourcesTest {
         when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
         when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any()))
                 .thenReturn(List.of(availabilityZone));
+        when(amazonEC2Client.describeInstanceTypeOfferings(any(DescribeInstanceTypeOfferingsRequest.class)))
+                .thenReturn(describeInstanceTypeOfferingsResult);
+        when(amazonEC2Client.describeInstanceTypes(any(DescribeInstanceTypesRequest.class)))
+                .thenReturn(describeInstanceTypesResult);
+        when(describeInstanceTypesResult.getInstanceTypes()).thenReturn(instanceTypeInfos);
+        when(describeInstanceTypeOfferingsResult.getInstanceTypeOfferings())
+                .thenReturn(Collections.singletonList(instanceTypeOffering));
 
-        ReflectionTestUtils.setField(underTest, "vmTypes",
-                Collections.singletonMap(region(REGION_NAME), Collections.singleton(vmType("m5.2xlarge"))));
         ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
         ReflectionTestUtils.setField(underTest, "enabledRegions", Set.of(region(REGION_NAME)));
         ReflectionTestUtils.setField(underTest, "enabledAvailabilityZones", Set.of(availabilityZone(AZ_NAME)));
+    }
+
+    private InstanceTypeInfo getInstanceTypeInfo(String name) {
+        return new InstanceTypeInfo()
+                .withInstanceType(name)
+                .withInstanceStorageSupported(true)
+                .withBareMetal(false)
+                .withInstanceStorageInfo(new InstanceStorageInfo()
+                        .withDisks(new DiskInfo()
+                                .withCount(2)
+                                .withSizeInGB(600L)))
+                .withEbsInfo(new EbsInfo()
+                        .withEncryptionSupport(EbsEncryptionSupport.Supported))
+                .withVCpuInfo(new VCpuInfo()
+                        .withDefaultCores(6))
+                .withMemoryInfo(new MemoryInfo()
+                        .withSizeInMiB(1024L));
     }
 
     @Test
@@ -371,9 +420,13 @@ public class AwsPlatformResourcesTest {
     @Test
     public void virtualMachinesShouldBeFilteredByEnabledAvailabilityZones() {
         setUpRegions();
-        ReflectionTestUtils.setField(underTest, "vmTypes", Map.of(
-                region(REGION_NAME), Set.of(vmType("vm1")),
-                region(NOT_ENABLED_REGION_NAME), Set.of(vmType("vm2"))));
+        instanceTypeInfos.add(getInstanceTypeInfo("vm1"));
+        instanceTypeInfos.add(getInstanceTypeInfo("vm2"));
+        describeInstanceTypesResult.setInstanceTypes(instanceTypeInfos);
+        when(amazonEC2Client.describeInstanceTypes(any(DescribeInstanceTypesRequest.class)))
+                .thenReturn(describeInstanceTypesResult);
+        when(describeInstanceTypesResult.getInstanceTypes()).thenReturn(instanceTypeInfos);
+
         ReflectionTestUtils.setField(underTest, "defaultVmTypes", Map.of(
                 region(REGION_NAME), vmType("vm1"),
                 region(NOT_ENABLED_REGION_NAME), vmType("vm2")));
