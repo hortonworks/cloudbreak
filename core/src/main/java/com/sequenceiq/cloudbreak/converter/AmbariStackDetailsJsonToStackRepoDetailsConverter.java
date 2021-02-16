@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
@@ -27,7 +26,7 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
     private static final String UBUNTU_16 = "ubuntu16";
 
     @Inject
-    private ConversionService conversionService;
+    private ManagementPackDetailsToManagementPackComponentConverter mpackConverter;
 
     @Override
     public StackRepoDetails convert(AmbariStackDetailsJson source) {
@@ -73,12 +72,13 @@ public class AmbariStackDetailsJsonToStackRepoDetailsConverter extends AbstractC
         }
 
         if (!source.getMpacks().isEmpty()) {
-            repo.setMpacks(source.getMpacks().stream().map(rmpack -> conversionService.convert(rmpack, ManagementPackComponent.class))
+            repo.setMpacks(source.getMpacks().stream()
+                    .map(rmpack -> mpackConverter.convert(rmpack))
                     .collect(Collectors.toList()));
         }
         if (!StringUtils.isEmpty(source.getMpackUrl())) {
             ManagementPackComponent mpack = new ManagementPackComponent();
-            mpack.setMpackUrl(source.getMpackUrl());
+            mpack.setMpackUrl(mpackConverter.getMpackUrl(source.getMpackUrl()));
             mpack.setStackDefault(true);
             mpack.setPreInstalled(false);
             repo.getMpacks().add(mpack);
