@@ -258,7 +258,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void useRealUmsUser(TestContext testContext, String key) {
-        testContext.as(cloudbreakActor.useRealUmsUser(key));
+        testContext
+                .as(cloudbreakActor.useRealUmsUser(key))
+                .useUmsUserCache(true);
     }
 
     protected void initializeDefaultBlueprints(TestContext testContext) {

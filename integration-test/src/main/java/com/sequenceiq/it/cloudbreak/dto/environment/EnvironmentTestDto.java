@@ -65,7 +65,7 @@ public class EnvironmentTestDto
     @Inject
     private AwsProperties awsProperties;
 
-    private Collection<SimpleEnvironmentResponse> response;
+    private Collection<SimpleEnvironmentResponse> simpleResponses;
 
     private SimpleEnvironmentResponse simpleResponse;
 
@@ -264,11 +264,11 @@ public class EnvironmentTestDto
     }
 
     public Collection<SimpleEnvironmentResponse> getResponseSimpleEnvSet() {
-        return response;
+        return simpleResponses;
     }
 
-    public void setResponseSimpleEnvSet(Collection<SimpleEnvironmentResponse> response) {
-        this.response = response;
+    public void setResponseSimpleEnvSet(Collection<SimpleEnvironmentResponse> simpleResponses) {
+        this.simpleResponses = simpleResponses;
     }
 
     public SimpleEnvironmentResponse getResponseSimpleEnv() {

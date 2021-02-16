@@ -85,6 +85,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private boolean shutdown;
 
+    private boolean useUmsUserCache;
+
     private final Map<String, String> statuses = new HashMap<>();
 
     private final Map<String, Object> selections = new HashMap<>();
@@ -161,6 +163,50 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public void setShutdown(boolean shutdown) {
         this.shutdown = shutdown;
+    }
+
+    /**
+     * We need to explicitly define the usage of real UMS users (automated via
+     * 'useRealUmsUser' at 'AbstractIntegrationTest'). So on this way we can avoid
+     * accidental usage:
+     *  - The initialization of the real UMS user store is happening automatically.
+     *  - If the 'api-credentials.json' is mistakenly present at 'ums-users' folder.
+     *    When a microservice client or an action is intended to use admin user then
+     *    a real UMS admin is going to be provided from the initialized user store.
+     * By setting 'useUmsUserCache' to 'true' we can define the usage of real UMS user
+     * store. Then and only then tests are running with 'useRealUmsUser' the real UMS
+     * users are going to be provided from the initialized user store.
+     *
+     * So we can rest assured MOCK or E2E Cloudbreak tests are going to be run with
+     * mock and default test users even the 'ums-users/api-credentials.json' is present
+     * and real UMS user store is initialized.
+     *
+     * @param useUmsUserCache   'true' if user store has been selected for providing
+     *                          users for tests
+     */
+    public void useUmsUserCache(boolean useUmsUserCache) {
+        this.useUmsUserCache = useUmsUserCache;
+    }
+
+    /**
+     * Returning 'true' if tests are running with real UMS users.
+     *
+     * @return                  'true' if real UMS users are used for tests.
+     */
+    public boolean umsUserCacheInUse() {
+        return useUmsUserCache;
+    }
+
+    /**
+     * Returning 'true' if real UMS users can be used for testing:
+     *  - user store has been initialized successfully
+     *  - user store has been selected for providing users by 'useUmsUserCache=true'
+     *
+     * @return                  'true' if real UMS user store has been initialized and
+     *                          selected for use.
+     */
+    public boolean realUmsUserCacheReadyToUse() {
+        return cloudbreakActor.isInitialized() && umsUserCacheInUse();
     }
 
     public ApplicationContext getApplicationContext() {
@@ -810,7 +856,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <U extends MicroserviceClient> U getAdminMicroserviceClient(Class<? extends CloudbreakTestDto> testDtoClass, String accountId) {
         String accessKey;
-        if (Optional.ofNullable(cloudbreakActor.isInitialized()).orElse(false)) {
+        if (realUmsUserCacheReadyToUse()) {
             accessKey = cloudbreakActor.getAdminByAccountId(accountId).getAccessKey();
             if (clients.get(accessKey) == null || clients.get(accessKey).isEmpty()) {
                 initMicroserviceClientsForUMSAccountAdmin(cloudbreakActor.getAdminByAccountId(accountId));
@@ -1106,7 +1152,8 @@ public abstract class TestContext implements ApplicationContextAware {
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                testDto.cleanUp(this, getAdminMicroserviceClient(testDto.getClass(), Crn.fromString(testDto.getCrn()).getAccountId()));
+                testDto.cleanUp(this, getAdminMicroserviceClient(testDto.getClass(), Objects.requireNonNull(Crn.fromString(testDto.getCrn())).
+                        getAccountId()));
             } catch (Exception e) {
                 LOGGER.info("Cleaning up of tests context with {} resource is failing, because of: {}", testDto.getName(), e.getMessage());
             }

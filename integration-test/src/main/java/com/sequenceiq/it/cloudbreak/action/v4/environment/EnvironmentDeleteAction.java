@@ -14,6 +14,7 @@ public class EnvironmentDeleteAction implements Action<EnvironmentTestDto, Envir
         SimpleEnvironmentResponse delete = environmentClient.getEnvironmentClient()
                 .environmentV1Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), true, false);
+        testDto.setResponseSimpleEnv(delete);
         Log.whenJson("Environment delete response: ", delete);
         return testDto;
     }
