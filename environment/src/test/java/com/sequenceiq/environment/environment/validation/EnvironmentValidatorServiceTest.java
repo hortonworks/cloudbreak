@@ -41,6 +41,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
+import com.sequenceiq.environment.environment.validation.validators.TagValidator;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 
 @ExtendWith(MockitoExtension.class)
@@ -65,6 +66,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private PublicKeyValidator publicKeyValidator;
 
+    @Mock
+    private TagValidator tagValidator;
+
     @InjectMocks
     private EnvironmentValidatorService underTest;
 
@@ -77,8 +81,8 @@ class EnvironmentValidatorServiceTest {
                 credentialService,
                 publicKeyValidator,
                 singleton(CloudPlatform.AWS.name()),
-                singleton(CloudPlatform.YARN.name())
-        );
+                singleton(CloudPlatform.YARN.name()),
+                tagValidator);
     }
 
     @Test

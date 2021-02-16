@@ -101,6 +101,7 @@ class EnvironmentCreationServiceTest {
     @BeforeEach
     void setup() {
         when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
+        when(validatorService.validateTags(any())).thenReturn(ValidationResult.empty());
     }
 
     @Test

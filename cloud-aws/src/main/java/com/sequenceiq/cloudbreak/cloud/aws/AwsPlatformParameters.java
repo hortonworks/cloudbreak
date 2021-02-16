@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.TagValidator;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -58,6 +59,9 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Qualifier("AwsTagSpecification")
     private TagSpecification tagSpecification;
 
+    @Inject
+    private AwsTagValidator awsTagValidator;
+
     private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     private Region defaultRegion;
@@ -75,6 +79,11 @@ public class AwsPlatformParameters implements PlatformParameters {
         vmRecommendations = initVmRecommendations();
         credentialPoliciesJson = initCBPolicyJson();
         auditPoliciesJson = initAuditPolicyJson();
+    }
+
+    @Override
+    public TagValidator tagValidator() {
+        return awsTagValidator;
     }
 
     @Override
