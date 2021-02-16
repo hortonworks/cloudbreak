@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.diagnostics;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -12,11 +13,16 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
+import com.sequenceiq.freeipa.converter.diagnostics.FlowLogsToListDiagnosticsCollectionResponseConverter;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.diagnostics.config.DiagnosticsCollectionFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -26,9 +32,9 @@ import reactor.bus.Event;
 import reactor.rx.Promise;
 
 @Service
-public class DiagnosticsTriggerService {
+public class DiagnosticsService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsTriggerService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsService.class);
 
     private static final String FREEIPA_CLUSTER_TYPE = "FREEIPA";
 
@@ -49,6 +55,17 @@ public class DiagnosticsTriggerService {
 
     @Inject
     private DataBusEndpointProvider dataBusEndpointProvider;
+
+    @Inject
+    private FlowLogDBService flowLogDBService;
+
+    @Inject
+    private FlowLogsToListDiagnosticsCollectionResponseConverter flowLogsToListDiagnosticsCollectionResponseConverter;
+
+    public ListDiagnosticsCollectionResponse getDiagnosticsCollections(String environmentCrn) {
+        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(environmentCrn, DiagnosticsCollectionFlowConfig.class);
+        return flowLogsToListDiagnosticsCollectionResponseConverter.convert(flowLogs);
+    }
 
     public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);

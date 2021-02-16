@@ -287,6 +287,11 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllFlowByType(resourceId, clazz);
     }
 
+    public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
+        Long resourceId = getResourceIdByCrnOrName(resourceCrn);
+        return flowLogRepository.findLastFlowLogsByTypeAndResourceId(resourceId, clazz);
+    }
+
     public Predicate<FlowLog> pendingFlowLogPredicate() {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
     }

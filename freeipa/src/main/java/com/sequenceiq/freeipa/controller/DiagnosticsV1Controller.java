@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.controller;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
@@ -11,15 +12,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.diagnostics.DiagnosticsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.freeipa.service.diagnostics.DiagnosticsTriggerService;
+import com.sequenceiq.freeipa.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -31,7 +35,7 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
     private CrnService crnService;
 
     @Inject
-    private DiagnosticsTriggerService diagnosticsTriggerService;
+    private DiagnosticsService diagnosticsService;
 
     @Inject
     private VmLogsService vmLogsService;
@@ -44,13 +48,18 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
     public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionRequest request) {
         String accountId = crnService.getCurrentAccountId();
         LOGGER.debug("collectDiagnostics called with accountId '{}'", accountId);
-        return diagnosticsTriggerService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());
+        return diagnosticsService.startDiagnosticsCollection(request, accountId, crnService.getUserCrn());
     }
 
     @Override
     @DisableCheckPermissions
     public VmLogsResponse getVmLogs() {
-        LOGGER.debug("collectDiagnostics called");
         return vmlogsConverter.convert(vmLogsService.getVmLogs());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public ListDiagnosticsCollectionResponse listDiagnosticsCollections(@ResourceCrn String environmentCrn) {
+        return diagnosticsService.getDiagnosticsCollections(environmentCrn);
     }
 }

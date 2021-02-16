@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnostics
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -75,5 +76,9 @@ public class DiagnosticsService {
 
     public List<String> getCmRoles(String stackCrn) {
         return diagnosticsV4Endpoint.getCmRoles(stackCrn);
+    }
+
+    public ListDiagnosticsCollectionResponse getDiagnosticsCollections(String crn) {
+        return diagnosticsV4Endpoint.listCollections(crn);
     }
 }

@@ -1,0 +1,40 @@
+{
+  "@type": "com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent",
+  "parameters": {
+    "issue": "mycase",
+    "description": null,
+    "labels": {
+      "@type": "java.util.ArrayList"
+    },
+    "startTime": 1297859465863,
+    "endTime": 1929011465863,
+    "destination": {
+      "name": "CLOUD_STORAGE"
+    },
+    "hostGroups": null,
+    "hosts": null,
+    "additionalLogs": null,
+    "includeSaltLogs": false,
+    "updatePackage": false,
+    "skipValidation": false,
+    "uuid": "eecb0472-e39b-4383-b383-d487d60955df",
+    "accountId": "cloudera",
+    "clusterType": "FREEIPA",
+    "clusterVersion": "2.39.0-b33-2-g2ff4bf6",
+    "dbusUrl": "https://dbusapi.sigma-dev.cloudera.com",
+    "supportBundleDbusAccessKey": null,
+    "supportBundleDbusPrivateKey": null,
+    "supportBundleDbusAppName": "",
+    "supportBundleDbusStreamName": "UnifiedDiagnostics",
+    "cloudStorageDiagnosticsParameters": {
+      "@type": "com.sequenceiq.common.model.diagnostics.AwsDiagnosticParameters",
+      "s3Bucket": "cb-group",
+      "s3Region": "eu-central-1",
+      "s3Location": "oszabo/logs/cluster-logs/freeipa/my/diagnostics"
+    }
+  },
+  "selector": "FINALIZE_DIAGNOSTICS_COLLECTION_EVENT",
+  "resourceId": 4,
+  "resourceCrn": "crn:cdp:freeipa:us-west-1:cloudera:freeipa:4428e540-a878-42b1-a1d4-91747322d8b6",
+  "accepted": null
+}
