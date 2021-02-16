@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -55,8 +56,10 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public void create(StructuredEvent structuredEvent) {
-        StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
-        create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
+        if (!(structuredEvent instanceof StructuredSyncEvent)) {
+            StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
+            create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
+        }
     }
 
     @Override
