@@ -84,7 +84,6 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
                 LOGGER.info("'{}' the polled resource entered into creation failed state. Exit waiting!", name);
                 return true;
             }
-            return waitObject.isFailed();
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get cluster due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
