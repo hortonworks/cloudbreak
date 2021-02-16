@@ -232,6 +232,9 @@ public class MockUserManagementServiceTest {
 
                 {"publicEndpointAccessGatewayEnabled false", "publicEndpointAccessGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", false},
                 {"publicEndpointAccessGatewayEnabled true", "publicEndpointAccessGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY", true},
+
+                {"enableAzureDiskSSEWithCMK false", "enableAzureDiskSSEWithCMK", false, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", false},
+                {"enableAzureDiskSSEWithCMK true", "enableAzureDiskSSEWithCMK", true, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", true},
         };
     }
 

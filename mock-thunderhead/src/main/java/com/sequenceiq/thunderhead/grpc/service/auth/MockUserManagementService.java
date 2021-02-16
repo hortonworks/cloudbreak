@@ -33,6 +33,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_FLO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -319,6 +320,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     private WorkloadPasswordPolicy workloadPasswordPolicy;
 
     private Optional<SshPublicKey> sshPublicKey;
+
+    @Value("${auth.mock.azure.disk.SSEWithCMK.enable}")
+    private boolean enableAzureDiskSSEWithCMK;
 
     @PostConstruct
     public void init() {
@@ -613,6 +617,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (cmSyncCommandPollerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));
+        }
+        if (enableAzureDiskSSEWithCMK) {
+            builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
