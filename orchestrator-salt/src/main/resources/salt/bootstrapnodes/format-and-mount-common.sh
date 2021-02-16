@@ -83,8 +83,6 @@ get_root_disk() {
     root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
     if [[ $root_partition =~ "nvme" ]]; then
         echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
-    elif [[ $CLOUD_PLATFORM -eq AZURE ]]
-        echo "/dev/$(ls -l /dev/disk/azure/ | awk '{print $9"\t"$11}' | grep -E '(root\s)' | cut -f2 | cut -f3 -d'/')"
     else
         echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
     fi
