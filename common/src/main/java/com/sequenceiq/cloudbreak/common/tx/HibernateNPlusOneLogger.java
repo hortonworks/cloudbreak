@@ -9,7 +9,7 @@ public class HibernateNPlusOneLogger extends HibernateStatementStatistics {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HibernateNPlusOneLogger.class);
 
-    private static final int DEFAULT_SESSION_MAX_STATEMENT_WARNING = 500;
+    private static final int DEFAULT_SESSION_MAX_STATEMENT_WARNING = 100;
 
     private final int maxStatementWarning;
 
