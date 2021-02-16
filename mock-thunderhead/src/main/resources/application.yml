@@ -35,3 +35,6 @@ auth:
     environment.experience.deletion.enable: true
     endpointgateway.enable: false
     cm.sync.command.poller.enable: true
+    azure:
+      disk:
+        SSEWithCMK.enable: true

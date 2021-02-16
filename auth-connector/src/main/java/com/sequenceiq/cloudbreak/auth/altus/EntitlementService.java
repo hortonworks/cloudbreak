@@ -33,6 +33,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -190,6 +191,10 @@ public class EntitlementService {
 
     public boolean isExperienceDeletionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT);
+    }
+
+    public boolean isAzureDiskSSEWithCMKEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_AZURE_DISK_SSE_WITH_CMK);
     }
 
     public List<String> getEntitlements(String accountId) {
