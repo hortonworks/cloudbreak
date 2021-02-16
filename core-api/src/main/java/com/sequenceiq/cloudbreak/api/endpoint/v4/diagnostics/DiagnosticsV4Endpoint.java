@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.docs.DiagnosticsOpe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -40,6 +41,13 @@ public interface DiagnosticsV4Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
             nickname = "getStackCmVmLogs")
     VmLogsResponse getVmLogs();
+
+    @GET
+    @Path("{crn}/collections")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
+            nickname = "listStackDiagnosticsCollections")
+    ListDiagnosticsCollectionResponse listCollections(@PathParam("crn") String crn);
 
     @POST
     @Path("cm")

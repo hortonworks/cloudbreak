@@ -25,6 +25,7 @@ public class DiagnosticsModelDescription {
     public static final String BUNDLE_SIZE_BYTES = "The maximum approximate bundle size of the output file for CM based diagnostics collection.";
     public static final String COMMENTS = "Comments to include with this CM based data collection.";
     public static final String ENABLE_MONITOR_METRICS_COLLECTION = "Flag to enable collection of metrics for chart display in CM based diagnostics collection.";
+    public static final String STACK_CRN = "Crn identifier of the stack for listing diagnostics collections.";
 
     private DiagnosticsModelDescription() {
     }

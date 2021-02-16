@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
@@ -341,6 +342,13 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_VM_LOG_PATHS, produces = MediaType.APPLICATION_JSON,
             nickname = "getDistroxCmVmLogsV4")
     VmLogsResponse getVmLogs();
+
+    @GET
+    @Path("diagnostics/{crn}/collections")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
+            nickname = "listDistroxDiagnosticsCollectionsV1")
+    ListDiagnosticsCollectionResponse listCollections(@PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/cm")

@@ -2,8 +2,11 @@ package com.sequenceiq.flow.core.config;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -48,14 +51,20 @@ import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.StateConverterAdapter;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
-public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
+public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E>, OrderedFlowConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
+
+    private static final int MIN_PERCENT = 0;
+
+    private static final int MAX_PERCENT = 100;
 
     private StateMachineFactory<S, E> stateMachineFactory;
 
     private final Class<S> stateType;
 
     private final Class<E> eventType;
+
+    private final Map<String, Integer> progressPercentageMap = new HashMap<>();
 
     @Inject
     private ApplicationContext applicationContext;
@@ -76,6 +85,9 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         configure(config.stateBuilder, config.transitionBuilder, getEdgeConfig(), getTransitions());
         stateMachineFactory = new ObjectStateMachineFactory<>(config.configurationBuilder.build(), config.transitionBuilder.build(),
                 config.stateBuilder.build());
+        if (isFlowOrdered()) {
+            fillProgressMap();
+        }
     }
 
     @Override
@@ -184,6 +196,32 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         return defaultRestartAction;
     }
 
+    private void fillProgressMap() {
+        FlowEdgeConfig<S, E> edgeConfig = getEdgeConfig();
+        progressPercentageMap.put(edgeConfig.getInitState().name(), MIN_PERCENT);
+        progressPercentageMap.put(edgeConfig.getFinalState().name(), MAX_PERCENT);
+        progressPercentageMap.put(edgeConfig.getDefaultFailureState().name(), MAX_PERCENT);
+        List<Transition<S, E>> transitions = getTransitions();
+        int numberOfTransitions = transitions.size() + 1;
+        Iterator<Transition<S, E>> it = transitions.iterator();
+        for (int index = 0; it.hasNext(); index++) {
+            Transition<S, E> transition = it.next();
+            double progress = calculatePercentage(index + 1, numberOfTransitions);
+            String sourceState = transition.getSource().name();
+            if (!progressPercentageMap.containsKey(sourceState)) {
+                progressPercentageMap.put(sourceState, (int) progress);
+            }
+        }
+    }
+
+    public int getProgressPercentageForState(String state) {
+        return progressPercentageMap.getOrDefault(state, -1);
+    }
+
+    private double calculatePercentage(double obtained, double total) {
+        return obtained * MAX_PERCENT / total;
+    }
+
     static class MachineConfiguration<S, E> {
         private final StateMachineConfigurationBuilder<S, E> configurationBuilder;
 
@@ -222,6 +260,14 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             this.event = event;
             this.failureState = failureState;
             this.failureEvent = failureEvent;
+        }
+
+        public S getSource() {
+            return source;
+        }
+
+        public S getTarget() {
+            return target;
         }
 
         private S getFailureState() {
@@ -354,6 +400,22 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             this.finalState = finalState;
             this.defaultFailureState = defaultFailureState;
             this.failureHandled = failureHandled;
+        }
+
+        public S getInitState() {
+            return initState;
+        }
+
+        public S getFinalState() {
+            return finalState;
+        }
+
+        public S getDefaultFailureState() {
+            return defaultFailureState;
+        }
+
+        public E getFailureHandled() {
+            return failureHandled;
         }
     }
 }

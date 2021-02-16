@@ -7,6 +7,7 @@ public final class DiagnosticsOperationDescriptions {
     public static final String GET_VM_LOG_PATHS = "Returns a list of log paths on the hosts of the stack.";
     public static final String GET_CM_ROLES = "Returns a list of CM Roles that can be used for filtering the diagnostics results. " +
             "Roles are immutable based on the deployment details";
+    public static final String LIST_COLLECTIONS = "Returns a list of the recent diagnostics collections.";
 
     private DiagnosticsOperationDescriptions() {
     }

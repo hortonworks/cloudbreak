@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.cloudbreak.core.flow2.service.DiagnosticsTriggerService;
+import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -112,7 +113,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private CloudbreakRestRequestThreadLocalService crnService;
 
     @Inject
-    private DiagnosticsTriggerService diagnosticsTriggerService;
+    private DiagnosticsService diagnosticsService;
 
     @Inject
     private VmLogsService vmLogsService;
@@ -461,14 +462,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier collectDiagnostics(@RequestObject @Valid DiagnosticsCollectionV1Request request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
-        return diagnosticsTriggerService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
+        return diagnosticsService.startDiagnosticsCollection(request, request.getStackCrn(), userCrn);
     }
 
     @Override
     @DisableCheckPermissions
     public VmLogsResponse getVmLogs() {
-        LOGGER.debug("collectDiagnostics called");
         return vmlogsConverter.convert(vmLogsService.getVmLogs());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public ListDiagnosticsCollectionResponse listCollections(@ResourceCrn String crn) {
+        return diagnosticsService.getDiagnosticsCollections(crn);
     }
 
     @Override
@@ -476,7 +482,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionV1Request request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();
         LOGGER.debug("collectCmDiagnostics called with userCrn '{}' for stack '{}'", userCrn, request.getStackCrn());
-        return diagnosticsTriggerService.startCmDiagnostics(request, request.getStackCrn(), userCrn);
+        return diagnosticsService.startCmDiagnostics(request, request.getStackCrn(), userCrn);
     }
 
     @Override

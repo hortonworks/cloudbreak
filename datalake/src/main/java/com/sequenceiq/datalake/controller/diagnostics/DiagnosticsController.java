@@ -11,10 +11,13 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
+import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -36,6 +39,12 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     @DisableCheckPermissions
     public VmLogsResponse getVmLogs() {
         return diagnosticsService.getVmLogs();
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public ListDiagnosticsCollectionResponse listCollections(@ResourceCrn String crn) {
+        return diagnosticsService.getDiagnosticsCollections(crn);
     }
 
     @Override

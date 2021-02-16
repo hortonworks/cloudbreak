@@ -13,9 +13,17 @@ import com.sequenceiq.freeipa.converter.freeipa.FreeIpaServerRequestToFreeIpaCon
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.FreeIpaRepository;
+import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class FreeIpaService implements ResourceIdProvider {
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private CrnService crnService;
 
     @Inject
     private FreeIpaRepository repository;
@@ -43,5 +51,10 @@ public class FreeIpaService implements ResourceIdProvider {
 
     public List<FreeIpa> getAllByAccountId(String accountId) {
         return repository.findByAccountId(accountId);
+    }
+
+    @Override
+    public Long getResourceIdByResourceCrn(String environmentCrn) {
+        return stackService.getByEnvironmentCrnAndAccountId(environmentCrn, crnService.getCurrentAccountId()).getId();
     }
 }
