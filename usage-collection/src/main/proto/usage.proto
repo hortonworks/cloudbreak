@@ -1071,11 +1071,10 @@ message CDPEnvironmentDetails {
     string availabilityZones = 4;
     // Network metadata
     CDPNetworkDetails networkDetails = 5;
-    // Cloud provider specific details of the environment.
-    oneof environmentCloudProviderDetails {
-      CDPEnvironmentAwsDetails awsDetails = 6;
-      CDPEnvironmentAzureDetails azureDetails = 7;
-    }
+    // AWS specific details of the environment
+    CDPEnvironmentAwsDetails awsDetails = 6;
+    // Azure specific details of the environment
+    CDPEnvironmentAzureDetails azureDetails = 7;
 }
 
 message CDPFreeIPADetails {
@@ -1085,12 +1084,12 @@ message CDPFreeIPADetails {
     bool spot = 2;
 }
 
-// Azure specific environment details.
+// Azure specific environment details
 message CDPEnvironmentAzureDetails {
     bool singleResourceGroup = 1;
 }
 
-// AWS specific environment details.
+// AWS specific environment details
 message CDPEnvironmentAwsDetails {
 }
 
@@ -1129,12 +1128,10 @@ message CDPEnvironmentRequested {
     CDPOperationDetails operationDetails = 1;
     // Environment metadata
     CDPEnvironmentDetails environmentDetails = 2;
-    // Network metadata
-    CDPNetworkDetails networkDetails = 3;
     // Data collection metadata
-    CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 4;
+    CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 3;
     // FreeIPA metadata
-    CDPFreeIPADetails freeIPA = 5;
+    CDPFreeIPADetails freeIPA = 4;
 }
 
 // Generated when Environment status has changed
