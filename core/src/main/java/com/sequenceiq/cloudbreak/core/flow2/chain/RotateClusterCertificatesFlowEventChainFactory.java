@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class RotateClusterCertificatesFlowEventChainFactory implements FlowEventChainFactory<ClusterCertificatesRotationTriggerEvent> {
@@ -20,11 +21,11 @@ public class RotateClusterCertificatesFlowEventChainFactory implements FlowEvent
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(ClusterCertificatesRotationTriggerEvent event) {
-        Queue<Selectable> chain = new ConcurrentLinkedQueue<>();
-        chain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
-        chain.add(new ClusterCertificatesRotationTriggerEvent(ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event(), event.getResourceId(),
-                event.accepted(), event.getCertificateRotationType()));
-        return chain;
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterCertificatesRotationTriggerEvent event) {
+        Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
+        flowEventChain.add(new ClusterCertificatesRotationTriggerEvent(ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event(),
+                event.getResourceId(), event.accepted(), event.getCertificateRotationType()));
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

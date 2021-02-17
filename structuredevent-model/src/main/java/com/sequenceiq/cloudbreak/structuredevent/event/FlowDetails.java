@@ -102,4 +102,18 @@ public class FlowDetails implements Serializable {
     public void setDuration(Long duration) {
         this.duration = duration;
     }
+
+    @Override
+    public String toString() {
+        return "FlowDetails{" +
+                "flowChainType='" + flowChainType + '\'' +
+                ", flowType='" + flowType + '\'' +
+                ", flowChainId='" + flowChainId + '\'' +
+                ", flowId='" + flowId + '\'' +
+                ", flowState='" + flowState + '\'' +
+                ", nextFlowState='" + nextFlowState + '\'' +
+                ", flowEvent='" + flowEvent + '\'' +
+                ", duration=" + duration +
+                '}';
+    }
 }

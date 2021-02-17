@@ -55,6 +55,7 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import io.opentracing.Scope;
@@ -82,6 +83,9 @@ public class Flow2HandlerTest {
 
     @Mock
     private FlowLogService flowLogService;
+
+    @Mock
+    private FlowChainLogService flowChainLogService;
 
     @Mock
     private Map<String, FlowConfiguration<?>> flowConfigurationMap;
@@ -187,7 +191,7 @@ public class Flow2HandlerTest {
     @Test
     public void testNewFlow() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
-        given(flowConfig.createFlow(anyString(), any(), anyLong())).willReturn(flow);
+        given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(flowState);
@@ -204,7 +208,7 @@ public class Flow2HandlerTest {
     @Test
     public void testFlowCanNotBeSaved() {
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
-        given(flowConfig.createFlow(anyString(), any(), anyLong())).willReturn(flow);
+        given(flowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(flowState);
@@ -227,7 +231,7 @@ public class Flow2HandlerTest {
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(new DefaultFlowTriggerCondition());
 
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(helloWorldFlowConfig);
-        given(helloWorldFlowConfig.createFlow(anyString(), any(), anyLong())).willReturn(flow);
+        given(helloWorldFlowConfig.createFlow(anyString(), any(), anyLong(), any())).willReturn(flow);
         given(helloWorldFlowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
         given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(true);
         given(flow.getCurrentState()).willReturn(flowState);

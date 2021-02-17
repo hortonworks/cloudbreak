@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackD
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventChainFactory<MultiHostgroupClusterAndStackDownscaleTriggerEvent> {
@@ -28,7 +29,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(MultiHostgroupClusterAndStackDownscaleTriggerEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(MultiHostgroupClusterAndStackDownscaleTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         for (Entry<String, Set<Long>> entry : event.getInstanceIdsByHostgroupMap().entrySet()) {
             ClusterScaleTriggerEvent cste;
@@ -41,6 +42,6 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
                 flowEventChain.add(sste);
             }
         }
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

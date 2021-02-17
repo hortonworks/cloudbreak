@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent> {
@@ -40,14 +41,14 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
         StackView stackView = stackService.getViewByIdWithoutAuth(event.getResourceId());
         ClusterView clusterView = stackView.getClusterView();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         addStackSyncTriggerEvent(event, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 
     private void addStackSyncTriggerEvent(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain) {

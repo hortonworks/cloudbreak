@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<ClusterAndStackDownscaleTriggerEvent> {
@@ -40,7 +41,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(ClusterAndStackDownscaleTriggerEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterAndStackDownscaleTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         ClusterScaleTriggerEvent cste;
         cste = event.getPrivateIds() == null
@@ -60,6 +61,6 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
                     : new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getPrivateIds());
             flowEventChain.add(sste);
         }
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

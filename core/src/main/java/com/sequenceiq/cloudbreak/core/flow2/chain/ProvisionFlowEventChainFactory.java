@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
@@ -23,7 +24,7 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(StackEvent event) {
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(VALIDATE_CLOUD_CONFIG_EVENT.event(), event.getResourceId(), event.accepted()));
@@ -31,6 +32,6 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Sta
         flowEventChain.add(new StackEvent(START_EXTERNAL_DATABASE_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(START_CREATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(CLUSTER_CREATION_EVENT.event(), event.getResourceId()));
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

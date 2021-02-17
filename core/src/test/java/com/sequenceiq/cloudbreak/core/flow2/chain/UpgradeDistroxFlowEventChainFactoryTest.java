@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -33,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeDistroxFlowEventChainFactoryTest {
@@ -56,8 +56,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     public void testChainQueueForNonReplaceVms() {
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false);
-        Queue<Selectable> flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(3, flowChainQueue.size());
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(3, flowChainQueue.getQueue().size());
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
@@ -71,16 +71,16 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, true);
-        Queue<Selectable> flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(4, flowChainQueue.size());
+        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
+        assertEquals(4, flowChainQueue.getQueue().size());
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue);
     }
 
-    private void assertImageUpdateEvent(Queue<Selectable> flowChainQueue) {
-        Selectable imageUpdateEvent = flowChainQueue.remove();
+    private void assertImageUpdateEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable imageUpdateEvent = flowChainQueue.getQueue().remove();
         assertEquals(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageUpdateEvent.selector());
         assertEquals(STACK_ID, imageUpdateEvent.getResourceId());
         assertTrue(imageUpdateEvent instanceof StackImageUpdateTriggerEvent);
@@ -90,23 +90,23 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(imageChangeDto.getImageCatalogUrl(), event.getImageCatalogUrl());
     }
 
-    private void assertUpgradeEvent(Queue<Selectable> flowChainQueue) {
-        Selectable upgradeEvent = flowChainQueue.remove();
+    private void assertUpgradeEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable upgradeEvent = flowChainQueue.getQueue().remove();
         assertEquals(CLUSTER_UPGRADE_INIT_EVENT.event(), upgradeEvent.selector());
         assertEquals(STACK_ID, upgradeEvent.getResourceId());
         assertTrue(upgradeEvent instanceof ClusterUpgradeTriggerEvent);
         assertEquals(imageChangeDto.getImageId(), ((ClusterUpgradeTriggerEvent) upgradeEvent).getImageId());
     }
 
-    private void assertSaltUpdateEvent(Queue<Selectable> flowChainQueue) {
-        Selectable saltUpdateEvent = flowChainQueue.remove();
+    private void assertSaltUpdateEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable saltUpdateEvent = flowChainQueue.getQueue().remove();
         assertEquals(SALT_UPDATE_EVENT.event(), saltUpdateEvent.selector());
         assertEquals(STACK_ID, saltUpdateEvent.getResourceId());
         assertTrue(saltUpdateEvent instanceof StackEvent);
     }
 
-    private void assertRepairEvent(Queue<Selectable> flowChainQueue) {
-        Selectable repairEvent = flowChainQueue.remove();
+    private void assertRepairEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable repairEvent = flowChainQueue.getQueue().remove();
         assertEquals(CLUSTER_REPAIR_TRIGGER_EVENT, repairEvent.selector());
         assertEquals(STACK_ID, repairEvent.getResourceId());
         assertTrue(repairEvent instanceof ClusterRepairTriggerEvent);

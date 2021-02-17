@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class StopFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
@@ -21,11 +22,11 @@ public class StopFlowEventChainFactory implements FlowEventChainFactory<StackEve
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(CLUSTER_STOP_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StackEvent(EXTERNAL_DATABASE_COMMENCE_STOP_EVENT.event(), event.getResourceId()));
         flowEventChain.add(new StackEvent(STACK_STOP_EVENT.event(), event.getResourceId()));
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

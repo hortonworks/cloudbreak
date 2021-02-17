@@ -75,7 +75,7 @@ public class AbstractFlowConfigurationTest {
         edgeConfig = new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
         Mockito.verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
-        flow = underTest.createFlow("flowId", "flowChainId", 0L);
+        flow = underTest.createFlow("flowId", "flowChainId", 0L, "flowChainType");
         flow.initialize(Map.of());
     }
 

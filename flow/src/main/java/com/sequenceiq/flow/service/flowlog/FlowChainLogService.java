@@ -32,7 +32,15 @@ public class FlowChainLogService {
     private FlowChainLogRepository repository;
 
     public Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedDesc(String flowChainId) {
+        if (flowChainId == null) {
+            return Optional.empty();
+        }
         return repository.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+    }
+
+    public String getFlowChainType(String flowChainId) {
+        Optional<FlowChainLog> flowChainLog = findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+        return flowChainLog.map(FlowChainLog::getFlowChainType).orElse(null);
     }
 
     public List<FlowChainLog> findByFlowChainIdOrderByCreatedDesc(String flowChainId) {

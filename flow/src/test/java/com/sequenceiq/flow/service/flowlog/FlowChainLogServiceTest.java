@@ -2,7 +2,9 @@ package com.sequenceiq.flow.service.flowlog;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -100,6 +102,33 @@ public class FlowChainLogServiceTest {
                 flowChainLog("2", true, 2L)
         );
         assertTrue(underTest.hasEventInFlowChainQueue(flowChains));
+    }
+
+    @Test
+    public void testFlowTypeEmpty() {
+        String flowChainType = underTest.getFlowChainType(null);
+        assertNull("For null input the flowChainType must be null", flowChainType);
+    }
+
+    @Test
+    public void testFlowChainLogWhichIsEmpty() {
+        // This is mainly for flows launched before 2.39
+        FlowChainLog flowChainLog = new FlowChainLog();
+        when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(any()))
+                .thenReturn(Optional.of(flowChainLog));
+        String flowChainType = underTest.getFlowChainType("chainId");
+        assertNull("For empty flowChainLog the reurn must be null", flowChainType);
+    }
+
+    @Test
+    public void testFlowChainLogWithFlowChainType() {
+        // This is mainly for flows launched before 2.39
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setFlowChainType("flowChainType");
+        when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc(any()))
+                .thenReturn(Optional.of(flowChainLog));
+        String flowChainType = underTest.getFlowChainType("chainId");
+        assertEquals("flowChainType", flowChainType);
     }
 
     private FlowChainLog flowChainLog(String flowChainId, String parentFlowChainId, long created) {
