@@ -36,7 +36,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
         ClusterDownscaleDetails details = new ClusterDownscaleDetails();
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent("selector", 1L,
                 instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
-        Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event);
+        Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event).getQueue();
         assertEquals(4L, queue.size());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
         assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
@@ -10,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<EphemeralClustersUpgradeTriggerEvent> {
@@ -34,7 +33,7 @@ public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<Eph
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(EphemeralClustersUpgradeTriggerEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(EphemeralClustersUpgradeTriggerEvent event) {
         Set<StackIdView> ephemeralStacks = stackService.findClustersConnectedToDatalake(event.getResourceId());
         for (StackIdView stack : ephemeralStacks) {
             try {
@@ -43,6 +42,6 @@ public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<Eph
                 LOGGER.debug("Cannot trigger ephemeral cluster update for stack: " + stack.getName(), e);
             }
         }
-        return new ConcurrentLinkedDeque<>();
+        return new FlowTriggerEventQueue(getName(), new ConcurrentLinkedDeque<>());
     }
 }

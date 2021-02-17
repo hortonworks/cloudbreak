@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 public class ClusterRepairFlowEventChainFactoryTest {
 
@@ -89,9 +89,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(true);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
@@ -103,9 +103,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(true);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT",
@@ -123,10 +123,10 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(hostGroupService.findHostGroupInClusterByName(anyLong(), eq("hostGroup-core"))).thenReturn(Optional.of(coreHostGroup));
         setupPrimaryGateway();
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(
                 new TriggerEventBuilder(stack).withFailedPrimaryGateway().withFailedCore().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
@@ -141,9 +141,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(true);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of(
                 "CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
@@ -157,9 +157,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(true);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of(
                 "CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT",
                 "FULL_DOWNSCALE_TRIGGER_EVENT",
@@ -174,9 +174,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(false);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);
@@ -188,9 +188,9 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(false);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
+        FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
-        List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
+        List<String> triggeredOperations = eventQueues.getQueue().stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT"), triggeredOperations);

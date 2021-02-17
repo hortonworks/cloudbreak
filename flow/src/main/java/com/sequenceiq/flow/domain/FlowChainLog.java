@@ -19,6 +19,8 @@ public class FlowChainLog {
 
     private Long created = new Date().getTime();
 
+    private String flowChainType;
+
     @Column(nullable = false)
     private String flowChainId;
 
@@ -33,7 +35,8 @@ public class FlowChainLog {
 
     }
 
-    public FlowChainLog(String flowChainId, String parentFlowChainId, String chain, String flowTriggerUserCrn) {
+    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chain, String flowTriggerUserCrn) {
+        this.flowChainType = flowChainType;
         this.flowChainId = flowChainId;
         this.parentFlowChainId = parentFlowChainId;
         this.chain = chain;
@@ -86,5 +89,13 @@ public class FlowChainLog {
 
     public void setFlowTriggerUserCrn(String flowTriggerUserCrn) {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
+    }
+
+    public String getFlowChainType() {
+        return flowChainType;
+    }
+
+    public void setFlowChainType(String flowChainType) {
+        this.flowChainType = flowChainType;
     }
 }

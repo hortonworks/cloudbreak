@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
@@ -27,7 +28,7 @@ public class RepairFlowEventChainFactory implements FlowEventChainFactory<Repair
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(RepairEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(RepairEvent event) {
         Set<String> terminatedOrRemovedInstanceIdsSet = new HashSet<>(event.getRepairInstanceIds());
         terminatedOrRemovedInstanceIdsSet.addAll(event.getAdditionalTerminatedInstanceIds());
         List<String> terminatedOrRemovedInstanceIds = terminatedOrRemovedInstanceIdsSet.stream().collect(Collectors.toList());
@@ -42,6 +43,6 @@ public class RepairFlowEventChainFactory implements FlowEventChainFactory<Repair
                 event.getResourceId(), event.getInstanceCountByGroup(), Boolean.TRUE, event.getOperationId()));
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),
                 terminatedOrRemovedInstanceIds, Boolean.TRUE, event.getOperationId()));
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

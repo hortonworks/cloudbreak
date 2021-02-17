@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory<ClusterRepairTriggerEvent> {
@@ -65,9 +66,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
         RepairConfig repairConfig = createRepairConfig(event);
-        return createFlowTriggers(event, repairConfig);
+        return new FlowTriggerEventQueue(getName(), createFlowTriggers(event, repairConfig));
     }
 
     private RepairConfig createRepairConfig(ClusterRepairTriggerEvent event) {
@@ -152,7 +153,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames,
-                                                                boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
+            boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
         Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
         boolean singleNodeCluster = clusterService.isSingleNode(stack);
         ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;

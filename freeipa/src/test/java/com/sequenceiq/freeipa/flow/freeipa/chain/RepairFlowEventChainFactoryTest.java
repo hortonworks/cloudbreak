@@ -40,7 +40,7 @@ public class RepairFlowEventChainFactoryTest {
         RepairEvent event = new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, STACK_ID,
                 OPERATION_ID, INSTANCE_COUNT_BY_GROUP, INSTANCE_IDS_TO_REPAIR, TERMINATED_INSTANCE_IDS);
 
-        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(event);
+        Queue<Selectable> eventQueues = underTest.createFlowTriggerEventQueue(event).getQueue();
 
         List<String> triggeredOperations = eventQueues.stream().map(Selectable::selector).collect(Collectors.toList());
         assertEquals(List.of("CHANGE_PRIMARY_GATEWAY_EVENT", "DOWNSCALE_EVENT", "UPSCALE_EVENT", "CHANGE_PRIMARY_GATEWAY_EVENT"), triggeredOperations);

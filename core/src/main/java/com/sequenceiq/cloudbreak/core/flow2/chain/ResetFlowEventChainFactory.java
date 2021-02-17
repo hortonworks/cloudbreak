@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEvent> {
@@ -21,10 +22,10 @@ public class ResetFlowEventChainFactory implements FlowEventChainFactory<StackEv
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(StackEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(StackEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(CLUSTER_RESET_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new StartClusterSuccess(CLUSTER_INSTALL_EVENT.event(), event.getResourceId()));
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

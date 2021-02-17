@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,7 +21,6 @@ import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -33,6 +31,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -117,9 +116,10 @@ public class FlowLogDBService implements FlowLogService {
         });
     }
 
-    public void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain, String flowTriggerUserCrn) {
-        String chainJson = JsonWriter.objectToJson(chain);
-        FlowChainLog chainLog = new FlowChainLog(flowChainId, parentFlowChainId, chainJson, flowTriggerUserCrn);
+    public void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn) {
+        String chainType = chain.getFlowChainName();
+        String chainJson = JsonWriter.objectToJson(chain.getQueue());
+        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, chainJson, flowTriggerUserCrn);
         flowChainLogService.save(chainLog);
     }
 

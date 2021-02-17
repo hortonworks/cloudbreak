@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEv
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class TerminationFlowEventChainFactory implements FlowEventChainFactory<TerminationEvent> {
@@ -22,11 +23,11 @@ public class TerminationFlowEventChainFactory implements FlowEventChainFactory<T
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(TerminationEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(TerminationEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackEvent(ClusterTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new TerminationEvent(START_EXTERNAL_DATABASE_TERMINATION_EVENT.event(), event.getResourceId(), event.getForced(), event.accepted()));
         flowEventChain.add(new TerminationEvent(StackTerminationEvent.TERMINATION_EVENT.event(), event.getResourceId(), event.getForced(), event.accepted()));
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

@@ -25,6 +25,7 @@ public class ClusterUseCaseMapper {
         } else if (clusterRequestProcessingStepMapper.isLastStep(flow)) {
             useCase = lastStepToUseCaseMapping(flow.getFlowState());
         }
+        LOGGER.debug("FlowDetails: {}, Usecase: {}", flow, useCase);
         return useCase;
     }
 

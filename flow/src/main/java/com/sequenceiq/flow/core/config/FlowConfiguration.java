@@ -7,7 +7,7 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public interface FlowConfiguration<E extends FlowEvent> {
 
-    Flow createFlow(String flowId, String flowChainId, Long stackId);
+    Flow createFlow(String flowId, String flowChainId, Long stackId, String flowChainType);
 
     FlowTriggerCondition getFlowTriggerCondition();
 

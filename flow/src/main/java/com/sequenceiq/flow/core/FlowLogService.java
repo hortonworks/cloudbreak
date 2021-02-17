@@ -3,12 +3,11 @@ package com.sequenceiq.flow.core;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 
@@ -24,7 +23,7 @@ public interface FlowLogService {
 
     FlowLog terminate(Long stackId, String flowId) throws TransactionService.TransactionExecutionException;
 
-    void saveChain(String flowChainId, String parentFlowChainId, Queue<Selectable> chain, String flowTriggerUserCrn);
+    void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn);
 
     void updateLastFlowLogStatus(FlowLog lastFlowLog, boolean failureEvent);
 

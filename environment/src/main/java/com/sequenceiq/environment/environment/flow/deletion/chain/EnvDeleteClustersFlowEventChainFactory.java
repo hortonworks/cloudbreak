@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 import reactor.rx.Promise;
 
@@ -33,7 +34,7 @@ public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFac
     }
 
     @Override
-    public Queue<Selectable> createFlowTriggerEventQueue(EnvDeleteEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(EnvDeleteEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
         List<Environment> childEnvironments =
@@ -45,7 +46,7 @@ public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFac
 
         flowEventChain.addAll(getFlowEventsForParentEnvironment(event));
 
-        return flowEventChain;
+        return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 
     private List<Selectable> getFlowEventsForParentEnvironment(EnvDeleteEvent event) {

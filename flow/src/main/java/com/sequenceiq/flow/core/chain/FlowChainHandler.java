@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 
 import reactor.bus.Event;
@@ -47,7 +48,9 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     public void restoreFlowChain(String flowChainId) {
         Optional<FlowChainLog> chainLog = flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
         if (chainLog.isPresent()) {
-            Queue<Selectable> chain = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.get().getChain());
+            String flowChainType = chainLog.get().getFlowChainType();
+            Queue<Selectable> queue = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.get().getChain());
+            FlowTriggerEventQueue chain = new FlowTriggerEventQueue(flowChainType, queue);
             flowChains.putFlowChain(flowChainId, chainLog.get().getParentFlowChainId(), chain);
             if (chainLog.get().getParentFlowChainId() != null) {
                 restoreFlowChain(chainLog.get().getParentFlowChainId());
