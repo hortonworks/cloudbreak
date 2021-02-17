@@ -20,14 +20,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
 import java.util.stream.Collectors;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -70,9 +70,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -480,7 +480,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenSecurityGroupIsNotNullAndSecurityRuleRepositoryCanFindRulesButThereIsNoPortDefinitionThenEmptyPortDefinitionShouldBeStored() {
-        List<SecurityRule> securityRules = new ArrayList<>(1);
+        Set<SecurityRule> securityRules = new HashSet<>(1);
         SecurityRule securityRule = mock(SecurityRule.class);
         securityRules.add(securityRule);
         when(securityRule.getPorts()).thenReturn(EMPTY_STRING);
@@ -490,12 +490,12 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
+        securityGroup.setSecurityRules(securityRules);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
         when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
-        when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(securityRules);
 
         CloudStack result = underTest.convert(stack);
 
@@ -506,7 +506,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenThereArePortDefinitionsInSecurityRulesAndSegmentsLengthIsGreaterThanOneThenExpectedPartsShouldBeStored() {
-        List<SecurityRule> securityRules = new ArrayList<>(1);
+        Set<SecurityRule> securityRules = new HashSet<>(1);
         SecurityRule securityRule = mock(SecurityRule.class);
         securityRules.add(securityRule);
         String[] ports = new String[1];
@@ -518,12 +518,12 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
+        securityGroup.setSecurityRules(securityRules);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
         when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
-        when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(securityRules);
 
         CloudStack result = underTest.convert(stack);
 
@@ -536,7 +536,7 @@ public class StackToCloudStackConverterTest {
 
     @Test
     public void testConvertWhenThereArePortDefinitionsInSecurityRulesButSegmentsLengthIsOneThanOneThenExpectedPartsShouldBeStored() {
-        List<SecurityRule> securityRules = new ArrayList<>(1);
+        Set<SecurityRule> securityRules = new HashSet<>(1);
         SecurityRule securityRule = mock(SecurityRule.class);
         securityRules.add(securityRule);
         String[] ports = new String[1];
@@ -548,12 +548,12 @@ public class StackToCloudStackConverterTest {
         Template template = mock(Template.class);
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setId(1L);
+        securityGroup.setSecurityRules(securityRules);
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(Collections.emptySet());
         when(instanceGroup.getSecurityGroup()).thenReturn(securityGroup);
         when(instanceGroup.getStack()).thenReturn(stack);
         when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
-        when(securityRuleService.findAllBySecurityGroupId(securityGroup.getId())).thenReturn(securityRules);
 
         CloudStack result = underTest.convert(stack);
 

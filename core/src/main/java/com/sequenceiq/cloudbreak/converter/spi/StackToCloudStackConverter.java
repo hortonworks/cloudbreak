@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
@@ -67,7 +68,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -82,9 +82,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class StackToCloudStackConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToCloudStackConverter.class);
-
-    @Inject
-    private SecurityRuleService securityRuleService;
 
     @Inject
     private ImageService imageService;
@@ -175,9 +172,7 @@ public class StackToCloudStackConverter {
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
         String name = instanceGroup.getGroupName();
         Stack stack = instanceGroup.getStack();
-        Template template = instanceGroup.getTemplate();
-
-        InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status, instanceImageId);
+        InstanceTemplate instanceTemplate = buildInstanceTemplate(instanceGroup.getTemplate(), name, privateId, status, instanceImageId);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
 
         Map<String, Object> parameters = buildCloudInstanceParameters(
@@ -322,8 +317,8 @@ public class StackToCloudStackConverter {
         if (ig.getSecurityGroup() == null) {
             return new Security(rules, Collections.emptyList());
         }
-        Long id = ig.getSecurityGroup().getId();
-        List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleService.findAllBySecurityGroupId(id);
+        SecurityGroup securityGroup = ig.getSecurityGroup();
+        Set<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityGroup.getSecurityRules();
         for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
             List<PortDefinition> portDefinitions = new ArrayList<>();
             for (String actualPort : securityRule.getPorts()) {
@@ -338,7 +333,7 @@ public class StackToCloudStackConverter {
             rules.add(new SecurityRule(securityRule.getCidr(), portDefinitions.toArray(new PortDefinition[portDefinitions.size()]),
                     securityRule.getProtocol()));
         }
-        return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
+        return new Security(rules, securityGroup.getSecurityGroupIds(), true);
     }
 
     private CloudInstance buildCloudInstanceSkeleton(StackAuthentication stackAuthentication, InstanceGroup instanceGroup) {
@@ -356,9 +351,10 @@ public class StackToCloudStackConverter {
     }
 
     private Integer getRootVolumeSize(InstanceGroup instanceGroup) {
-        Integer rootVolumeSize = instanceGroup.getTemplate().getRootVolumeSize();
+        Template template = instanceGroup.getTemplate();
+        Integer rootVolumeSize = template.getRootVolumeSize();
         if (Objects.isNull(rootVolumeSize)) {
-            rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(instanceGroup.getTemplate().cloudPlatform());
+            rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform());
         }
         return rootVolumeSize;
     }

@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -112,6 +113,9 @@ public class StackStatusCheckerJobTest {
 
     @Mock
     private InstanceMetaData instanceMetaData;
+
+    @Mock
+    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
 
     @Before
     public void init() {

@@ -73,8 +73,10 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackSyncContext context) {
-                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData());
-                cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));
+                Stack stack = context.getStack();
+                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData(), stack.getEnvironmentCrn(),
+                        stack.getStackAuthentication());
+                cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
                 return new GetInstancesStateRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
             }
         };

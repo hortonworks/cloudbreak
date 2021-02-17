@@ -10,12 +10,17 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 
 @Service
 public class StackViewService {
 
     @Inject
     private StackViewRepository stackViewRepository;
+
+    public StackView getById(Long id) {
+        return stackViewRepository.findById(id).orElseThrow(() -> new CloudbreakRuntimeException("Can not find stackview by stack id: " + id));
+    }
 
     public Optional<StackView> findById(Long id) {
         return stackViewRepository.findById(id);

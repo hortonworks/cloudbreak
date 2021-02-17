@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsVi
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
@@ -239,6 +241,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Mock
     private GatewayConfigService gatewayConfigService;
 
+    @Mock
+    private TransactionService transactionService;
+
     @Spy
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
     private IdBrokerConverterUtil idBrokerConverterUtil = new IdBrokerConverterUtil();
@@ -250,8 +255,12 @@ public class StackToTemplatePreparationObjectConverterTest {
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @BeforeEach
-    public void setUp() throws IOException {
+    public void setUp() throws IOException, TransactionService.TransactionExecutionException {
         MockitoAnnotations.initMocks(this);
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
         User user = new User();
         user.setUserName("applebob@apple.com");
         user.setUserCrn("user-crn");

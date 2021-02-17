@@ -13,6 +13,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedEntityGraphs;
+import javax.persistence.NamedSubgraph;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
@@ -29,7 +30,10 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @NamedEntityGraphs({
         @NamedEntityGraph(name = "InstanceMetaData.instanceGroup",
                 attributeNodes = {
-                        @NamedAttributeNode(value = "instanceGroup")
+                        @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceGroup")
+                },
+                subgraphs = {
+                    @NamedSubgraph(name = "instanceGroup", attributeNodes = @NamedAttributeNode("template"))
                 }
         ),
 })

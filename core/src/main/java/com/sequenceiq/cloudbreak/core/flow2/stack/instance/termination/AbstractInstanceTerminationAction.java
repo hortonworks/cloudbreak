@@ -92,7 +92,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         for (String instanceId : instanceIds) {
             InstanceMetaData instanceMetaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                     .orElseThrow(NotFoundException.notFound("instanceMetadata", instanceId));
-            CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData);
+            CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
             instanceMetaDataList.add(instanceMetaData);
             cloudInstances.add(cloudInstance);
         }

@@ -5,6 +5,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -51,6 +53,9 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 
 @Configuration
 public class ClusterCreationActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationActions.class);
+
     @Inject
     private ClusterCreationService clusterCreationService;
 
@@ -286,6 +291,7 @@ public class ClusterCreationActions {
         return new AbstractStackFailureAction<ClusterCreationState, ClusterCreationEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.error("Cluster creation failed with exception", payload.getException());
                 clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);

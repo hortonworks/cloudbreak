@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.assertj.core.api.Assertions;
@@ -19,12 +20,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
@@ -59,12 +60,13 @@ class StackInstanceStatusCheckerTest {
 
     private Stack stack;
 
-    private Collection<InstanceMetaData> instanceMetaData;
+    private List<CloudInstance> instanceMetaData;
 
     @BeforeEach
     void setUp() {
         stack = TestUtil.stack();
-        instanceMetaData = new HashSet<>();
+        stack.setParameters(new HashMap<>());
+        instanceMetaData = new ArrayList<>();
     }
 
     private void setUpCredentials() {
@@ -83,7 +85,7 @@ class StackInstanceStatusCheckerTest {
     @Test
     void shouldQueryWhenInstancesArePresent() {
         setUpCredentials();
-        instanceMetaData.add(new InstanceMetaData());
+        instanceMetaData.add(mock(CloudInstance.class));
 
         underTest.queryInstanceStatuses(stack, instanceMetaData);
 
@@ -94,7 +96,7 @@ class StackInstanceStatusCheckerTest {
     @Test
     void shouldReportUnknownStatusWhenStatusQueryFails() {
         setUpCredentials();
-        instanceMetaData.add(new InstanceMetaData());
+        instanceMetaData.add(mock(CloudInstance.class));
         when(instanceStateQuery.getCloudVmInstanceStatusesWithoutRetry(any(), any(), any())).thenThrow(RuntimeException.class);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = underTest.queryInstanceStatuses(stack, instanceMetaData);

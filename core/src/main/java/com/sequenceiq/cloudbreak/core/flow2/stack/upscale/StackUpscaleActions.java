@@ -218,7 +218,7 @@ public class StackUpscaleActions {
                     if (null == gatewayMetaData && isRepair(variables)) {
                         throw new CloudbreakServiceException("Could not get gateway instance metadata from the cloud provider.");
                     }
-                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
+                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
                     Selectable sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);
