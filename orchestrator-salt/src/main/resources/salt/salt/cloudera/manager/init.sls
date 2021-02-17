@@ -129,6 +129,15 @@ copy_autotls_setup_to_cm_settings:
       - cmd: run_autotls_setup
     - unless: grep "# Auto-tls related configurations" /etc/cloudera-scm-server/cm.settings
 
+disable_phone_home:
+  file.blockreplace:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - marker_start: "# BLOCK TOP : salt managed zone : please do not edit"
+    - marker_end: "# BLOCK BOTTOM : end of salt managed zone --"
+    - content: "setsettings PHONE_HOME false"
+    - show_changes: True
+    - append_if_not_found: True
+
 /opt/salt/scripts/cm_generate_agent_tokens.sh:
   file.managed:
     - makedirs: True
