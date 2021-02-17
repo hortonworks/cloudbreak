@@ -34,6 +34,12 @@ collector:
       skipAnonymization: true
       folderPrefix: conf{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
       compress: true{% endif %}
+    - path: /var/lib/cdp-nodestatus/report/salt_report.json
+      label: nodestatus_salt_report
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+      mandatory: true
     - path: /etc/nginx/nginx.conf
       label: nginx_conf
       skipAnonymization: true
