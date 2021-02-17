@@ -8,13 +8,12 @@ listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.GatekeeperBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
-  - name: "openstack base image datascience gatekeeper"
+  - name: "openstack HDP315 base image datascience gatekeeper"
     preserveOrder: true
     parameters:
       clusterName: os-base-datasci
       provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
-      image: base
+      blueprintName: "HDP 3.1.5 - Data Science: Apache Spark 2, Apache Zeppelin"
       instancegroupName: worker
       isGatekeeper: true
     classes:
@@ -25,13 +24,12 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack cluster with knox gateway"
+  - name: "openstack HDP315 cluster with knox gateway"
     preserveOrder: true
     parameters:
       clusterName: os-base-datasci-knox-gw
       provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
-      image: base
+      blueprintName: "HDP 3.1.5 - Data Science: Apache Spark 2, Apache Zeppelin"
       instancegroupName: worker
       isGatekeeper: true
     classes:
@@ -42,14 +40,13 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack base image EDW-Analytics"
+  - name: "openstack HDP315 base image EDW-Analytics"
     preserveOrder: true
     parameters:
       clusterName: os-base-edwan
       provider: openstack
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
+      blueprintName: "HDP 3.1.5 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
       workerInstanceCount: 3
-      image: base
       instancegroupName: worker
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
@@ -65,7 +62,6 @@ tests:
       clusterName: os-base-flowmgmt
       provider: openstack
       blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
-      image: base
       instancegroupName: NiFi
       enableKerberos: true
     classes:
@@ -75,118 +71,3 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "openstack base image edwetl"
-    preserveOrder: true
-    parameters:
-      clusterName: os-base-edwetl
-      provider: openstack
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: base
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack prewarm image datascience"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-datasci
-      provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack prewarm image EDW-Analytics"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-edwan
-      provider: openstack
-      blueprintName: "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
-      workerInstanceCount: 3
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack prewarm hdf flow magamenet"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-flowmgmt
-      provider: openstack
-      blueprintName: "Flow Management: Apache NiFi, Apache NiFi Registry"
-      image: hdf
-      instancegroupName: NiFi
-      enableKerberos: true
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewHdfCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack prewarm image edwetl"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-edwetl
-      provider: openstack
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testScaleCluster
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack change image"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-datasci-changeimage
-      provider: openstack
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
-      image: hdp
-      instancegroupName: worker
-    classes:
-      - name: com.sequenceiq.it.cloudbreak.ClusterTests
-        includedMethods:
-          - testCreateNewRegularCluster
-          - testModifyImage
-          - testScaleCluster
-          - testStackImagesDifferent
-          - testStopCluster
-          - testStartCluster
-          - testTerminateCluster
-  - name: "openstack prewarm image hdp3"
-    preserveOrder: true
-    parameters:
-      clusterName: os-prewarm-hdp3
-      provider: openstack
-      blueprintName: "HDP 3.0 - Data Science: Apache Spark 2, Apache Zeppelin"
-      image: hdp
-      instancegroupName: worker
-    classes:
-    - name: com.sequenceiq.it.cloudbreak.ClusterTests
-      includedMethods:
-      - testCreateNewRegularCluster
-      - testScaleCluster
-      - testStopCluster
-      - testStartCluster
-      - testTerminateCluster
