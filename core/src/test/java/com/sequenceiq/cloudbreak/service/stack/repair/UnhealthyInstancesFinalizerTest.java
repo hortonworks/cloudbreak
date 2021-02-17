@@ -63,7 +63,7 @@ public class UnhealthyInstancesFinalizerTest {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance cloudInstance1 = setupCloudInstance(instanceId1, cloudInstances);
         CloudInstance cloudInstance2 = setupCloudInstance(instanceId2, cloudInstances);
-        when(cloudInstanceConverter.convert(candidateUnhealthyInstances)).thenReturn(cloudInstances);
+        when(cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(), stack.getStackAuthentication())).thenReturn(cloudInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatusList = new ArrayList<>();
         setupCloudVmInstanceStatus(cloudInstance1, InstanceStatus.STOPPED, cloudVmInstanceStatusList);
@@ -93,7 +93,7 @@ public class UnhealthyInstancesFinalizerTest {
 
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance cloudInstance1 = setupCloudInstance(instanceId1, cloudInstances);
-        when(cloudInstanceConverter.convert(candidateUnhealthyInstances)).thenReturn(cloudInstances);
+        when(cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(), stack.getStackAuthentication())).thenReturn(cloudInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatusList = new ArrayList<>();
         setupCloudVmInstanceStatus(cloudInstance1, InstanceStatus.TERMINATED, cloudVmInstanceStatusList);

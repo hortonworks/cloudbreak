@@ -47,11 +47,10 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
         params.put(CloudInstance.SUBNET_ID, SUBNET_ID);
         params.put(CloudInstance.INSTANCE_NAME, INSTANCE_NAME);
         when(stackToCloudStackConverter.buildCloudInstanceParameters(any(), any(), any())).thenReturn(params);
-        CloudInstance cloudInstance = underTest.convert(source);
+        CloudInstance cloudInstance = underTest.convert(source, "envCrn", new StackAuthentication());
 
         assertEquals(2, cloudInstance.getParameters().size());
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());
-
     }
 
     @Override

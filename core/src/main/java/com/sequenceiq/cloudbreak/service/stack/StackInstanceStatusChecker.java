@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static java.util.stream.Collectors.toList;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -21,17 +20,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 
 @Service
 public class StackInstanceStatusChecker {
-
-    @Inject
-    private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
 
     @Inject
     private InstanceStateQuery instanceStateQuery;
@@ -45,10 +39,9 @@ public class StackInstanceStatusChecker {
     @Inject
     private CredentialToCloudCredentialConverter cloudCredentialConverter;
 
-    public List<CloudVmInstanceStatus> queryInstanceStatuses(Stack stack, Collection<InstanceMetaData> instanceMetaData) {
+    public List<CloudVmInstanceStatus> queryInstanceStatuses(Stack stack, List<CloudInstance> cloudInstances) {
         List<CloudVmInstanceStatus> result = Collections.emptyList();
-        if (!instanceMetaData.isEmpty()) {
-            List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData);
+        if (!cloudInstances.isEmpty()) {
             cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = CloudContext.Builder.builder()

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -12,16 +14,14 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Component
-public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversionServiceAwareConverter<InstanceMetaData, CloudInstance> {
+public class InstanceMetaDataToCloudInstanceConverter  {
 
     @Inject
     private StackToCloudStackConverter stackToCloudStackConverter;
@@ -29,12 +29,17 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     @Inject
     private InstanceMetadataToImageIdConverter instanceMetadataToImageIdConverter;
 
-    @Override
-    public CloudInstance convert(InstanceMetaData metaDataEntity) {
+    public List<CloudInstance> convert(Iterable<InstanceMetaData> metaDataEntities, String envCrn, StackAuthentication stackAuthentication) {
+        List<CloudInstance> cloudInstances = new ArrayList<>();
+        for (InstanceMetaData metaDataEntity : metaDataEntities) {
+            cloudInstances.add(convert(metaDataEntity, envCrn, stackAuthentication));
+        }
+        return cloudInstances;
+    }
+
+    public CloudInstance convert(InstanceMetaData metaDataEntity, String envCrn, StackAuthentication stackAuthentication) {
         InstanceGroup group = metaDataEntity.getInstanceGroup();
         Template template = group.getTemplate();
-        Stack stack = group.getStack();
-        StackAuthentication stackAuthentication = stack.getStackAuthentication();
         InstanceStatus status = getInstanceStatus(metaDataEntity);
         String imageId = instanceMetadataToImageIdConverter.convert(metaDataEntity);
         InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(template, group.getGroupName(), metaDataEntity.getPrivateId(),
@@ -48,9 +53,9 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
         params.put(CloudInstance.INSTANCE_NAME, metaDataEntity.getInstanceName());
 
         Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(
-                stack.getEnvironmentCrn(),
+                envCrn,
                 metaDataEntity,
-                CloudPlatform.valueOf(stack.getCloudPlatform()));
+                CloudPlatform.valueOf(template.cloudPlatform()));
         params.putAll(cloudInstanceParameters);
 
         return new CloudInstance(metaDataEntity.getInstanceId(), instanceTemplate, instanceAuthentication, params);

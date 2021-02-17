@@ -53,7 +53,8 @@ public class UnhealthyInstancesFinalizer {
                 .withAccountId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances);
+        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(),
+                stack.getStackAuthentication());
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(
                 cloudCredential, cloudContext, cloudInstances);

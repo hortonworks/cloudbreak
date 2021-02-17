@@ -31,8 +31,8 @@ import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
 
@@ -50,10 +50,10 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @SequenceGenerator(name = "instancegroup_generator", sequenceName = "instancegroup_id_seq", allocationSize = 1)
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private Template template;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     private SecurityGroup securityGroup;
 
     private String groupName;
@@ -61,7 +61,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @Convert(converter = InstanceGroupTypeConverter.class)
     private InstanceGroupType instanceGroupType = InstanceGroupType.CORE;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     private Stack stack;
 
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)

@@ -98,7 +98,7 @@ public class ServiceProviderConnectorAdapter {
         InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
-                CloudInstance cloudInstance = metadataConverter.convert(metaData);
+                CloudInstance cloudInstance = metadataConverter.convert(metaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
                 instances.add(cloudInstance);
             }
         }

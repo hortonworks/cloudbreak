@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvide
 import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -177,6 +178,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
+    @Inject
+    private TransactionService transactionService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -218,7 +222,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withRdsSslCertificateFilePath(dbCertificateProvider.getSslCertsFilePath())
-                    .withHostgroups(hostGroupService.getByCluster(cluster.getId()))
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
                     .withIdBroker(idbroker)
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
@@ -235,6 +238,10 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
 
+            transactionService.required(() -> {
+                builder.withHostgroups(hostGroupService.getByCluster(cluster.getId()));
+            });
+
             decorateBuilderWithPlacement(source, builder);
             decorateBuilderWithAccountMapping(source, environment, credential, builder, virtualGroupRequest);
             decorateBuilderWithServicePrincipals(source, builder, servicePrincipalCloudIdentities);
@@ -243,7 +250,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             return builder.build();
         } catch (AccountTagValidationFailed aTVF) {
             throw new CloudbreakServiceException(aTVF);
-        } catch (BlueprintProcessingException | IOException e) {
+        } catch (BlueprintProcessingException | IOException | TransactionService.TransactionExecutionException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

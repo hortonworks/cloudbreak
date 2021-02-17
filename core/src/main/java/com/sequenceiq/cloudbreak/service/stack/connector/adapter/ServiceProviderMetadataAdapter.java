@@ -65,7 +65,7 @@ public class ServiceProviderMetadataAdapter {
         CloudInstance instance = null;
         for (InstanceMetaData metaData : ig.getAllInstanceMetaData()) {
             if (instanceId.equalsIgnoreCase(metaData.getInstanceId())) {
-                instance = metadataConverter.convert(metaData);
+                instance = metadataConverter.convert(metaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
                 break;
             }
         }

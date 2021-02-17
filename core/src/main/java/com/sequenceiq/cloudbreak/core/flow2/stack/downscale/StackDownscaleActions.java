@@ -74,7 +74,7 @@ public class StackDownscaleActions {
                         .collect(Collectors.toSet());
 
                 candidatesInstanceMetadata.forEach(metaData -> {
-                    CloudInstance cloudInstance = metadataConverter.convert(metaData);
+                    CloudInstance cloudInstance = metadataConverter.convert(metaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
                     instances.add(cloudInstance);
                 });
                 variables.put(INSTANCES, instances);

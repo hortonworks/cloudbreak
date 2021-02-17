@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -54,6 +55,9 @@ public class StackStopActions {
     private ConverterUtil converterUtil;
 
     @Inject
+    private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
+
+    @Inject
     private StackStartStopService stackStartStopService;
 
     @Bean(name = "STOP_STATE")
@@ -67,9 +71,11 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                List<CloudInstance> cloudInstances = converterUtil.convertAll(context.getInstanceMetaData(), CloudInstance.class);
-                List<CloudResource> cloudResources = converterUtil.convertAll(context.getStack().getResources(), CloudResource.class);
-                cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));
+                Stack stack = context.getStack();
+                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(context.getInstanceMetaData(),
+                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                List<CloudResource> cloudResources = converterUtil.convertAll(stack.getResources(), CloudResource.class);
+                cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
                 return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
         };

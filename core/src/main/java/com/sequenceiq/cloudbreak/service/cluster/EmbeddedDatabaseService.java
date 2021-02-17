@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -41,6 +42,6 @@ public class EmbeddedDatabaseService {
         Template template = gatewayGroup.map(InstanceGroup::getTemplate).orElse(null);
         return template == null ? 0 : template.getVolumeTemplates().stream()
                 .filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.DATABASE)
-                .mapToInt(volume -> volume.getVolumeCount()).sum();
+                .mapToInt(VolumeTemplate::getVolumeCount).sum();
     }
 }

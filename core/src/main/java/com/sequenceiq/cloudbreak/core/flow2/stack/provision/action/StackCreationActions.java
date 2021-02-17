@@ -276,8 +276,9 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                InstanceMetaData gatewayMetaData = context.getStack().getPrimaryGatewayInstance();
-                CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
+                Stack stack = context.getStack();
+                InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
+                CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
                 return new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(), context.getCloudCredential(), gatewayInstance);
             }
         };

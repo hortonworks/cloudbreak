@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -58,6 +59,9 @@ public class StackStartActions {
     private StackStartStopService stackStartStopService;
 
     @Inject
+    private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
+
+    @Inject
     private ConverterUtil converterUtil;
 
     @Bean(name = "START_STATE")
@@ -73,7 +77,8 @@ public class StackStartActions {
             protected Selectable createRequest(StackStartStopContext context) {
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling start request for stack: {}", stack);
-                List<CloudInstance> cloudInstances = converterUtil.convertAll(stack.getNotDeletedInstanceMetaDataList(), CloudInstance.class);
+                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stack.getNotDeletedInstanceMetaDataList(),
+                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
                 List<CloudResource> resources = converterUtil.convertAll(stack.getResources(), CloudResource.class);
                 cloudInstances.forEach(instance -> context.getStack().getParameters().forEach(instance::putParameter));
                 return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), resources, cloudInstances);
