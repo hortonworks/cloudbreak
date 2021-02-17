@@ -96,7 +96,7 @@ collector:
         customer:
             accountId: {{ filecollector.accountId }}
             licenseId:{% if filecollector.issue %}
-        Case_number: {{ filecollector.issue }}{% endif %}
+        Case_number: "{{ filecollector.issue }}"{% endif %}
 {% if destination == "ENG" and fluent.dbusClusterLogsCollection %}
     compress: false
     deleteProcessedTempFilesOneByOne: true
