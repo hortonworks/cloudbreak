@@ -16,10 +16,10 @@ public class JpaPropertiesFacory {
     private JpaPropertiesFacory() {
     }
 
-    public static Properties create(String hbm2ddlPropertyName, String hbm2ddlStrategy,
+    public static Properties create(String hbm2ddlStrategy,
             boolean debug, String dbSchemaName, CircuitBreakerType circuitBreakerType) {
         Properties properties = new Properties();
-        properties.setProperty(hbm2ddlPropertyName, hbm2ddlStrategy);
+        properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
         properties.setProperty("hibernate.show_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.format_sql", Boolean.toString(debug));
         properties.setProperty("hibernate.use_sql_comments", Boolean.toString(debug));

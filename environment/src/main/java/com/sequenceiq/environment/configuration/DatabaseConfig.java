@@ -128,8 +128,7 @@ public class DatabaseConfig {
         entityManagerFactory.setDataSource(dataSource());
 
         entityManagerFactory.setJpaVendorAdapter(jpaVendorAdapter());
-        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create("hibernate.hbm2denvironment.auto", hbm2ddlStrategy,
-                debug, dbSchemaName, circuitBreakerType));
+        entityManagerFactory.setJpaProperties(JpaPropertiesFacory.create(hbm2ddlStrategy, debug, dbSchemaName, circuitBreakerType));
         entityManagerFactory.afterPropertiesSet();
         return entityManagerFactory.getObject();
     }
