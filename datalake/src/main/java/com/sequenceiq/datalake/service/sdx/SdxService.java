@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -18,6 +18,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -438,6 +440,7 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         if (cloudStorage != null) {
             ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
             validationBuilder.ifError(() -> cloudStorage.getFileSystemType() == null, "'fileSystemType' must be set in 'cloudStorage'!");
+            validationBuilder.merge(validateBaseLocation(cloudStorage.getBaseLocation()));
 
             if (StringUtils.isEmpty(cloudStorage.getBaseLocation())) {
                 validationBuilder.error("'baseLocation' must be set in 'cloudStorage'!");
@@ -476,6 +479,20 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }
         }
+    }
+
+    private ValidationResult validateBaseLocation(String baseLocation) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        if (baseLocation != null) {
+            Pattern pattern = Pattern.compile(".*\\s.*");
+            Matcher matcher = pattern.matcher(baseLocation.trim());
+            if (matcher.find()) {
+                resultBuilder.error("You have added some whitespace to the base location: " + baseLocation);
+            }
+        } else {
+            LOGGER.debug("Cannot validate the base location, because it's null");
+        }
+        return resultBuilder.build();
     }
 
     private void validateRazEnablement(SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {

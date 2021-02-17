@@ -92,7 +92,9 @@ public class ValidationResult {
         }
 
         public ValidationResultBuilder merge(ValidationResult other) {
-            other.getErrors().forEach(this::error);
+            if (other != null) {
+                other.getErrors().forEach(this::error);
+            }
             return this;
         }
 
