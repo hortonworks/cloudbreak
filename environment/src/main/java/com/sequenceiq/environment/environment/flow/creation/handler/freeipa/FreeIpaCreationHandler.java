@@ -130,7 +130,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             EventBus eventBus,
             EntitlementService entitlementService,
             MultiAzValidator multiAzValidator,
-            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
+            @Value("${cdp.platforms.supportedFeature.childPlatforms}") Set<String> enabledChildPlatforms) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;

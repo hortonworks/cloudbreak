@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.datalake.configuration.PlatformConfig;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
 import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -85,7 +85,7 @@ public class DatabaseService {
     private Map<CloudPlatform, DatabaseServerParameterSetter> databaseServerParameterSetterMap;
 
     @Inject
-    private PlatformConfig platformConfig;
+    private ExternalDatabasePlatformConfig externalDatabasePlatformConfig;
 
     @Inject
     private DatabaseServerV4Endpoint databaseServerV4Endpoint;
@@ -177,7 +177,7 @@ public class DatabaseService {
         req.setClusterCrn(sdxCluster.getCrn());
 
         String runtime = sdxCluster.getRuntime();
-        if (platformConfig.isExternalDatabaseSslEnforcementSupportedFor(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
+        if (externalDatabasePlatformConfig.isSslEnforcementSupportedForForExternalDatabase(cloudPlatform) && isSslEnforcementSupportedForRuntime(runtime)
                 && entitlementService.databaseWireEncryptionEnabled(Crn.safeFromString(environmentCrn).getAccountId())) {
             LOGGER.info("Applying external DB SSL enforcement for cloud platform {} and runtime version {}", cloudPlatform, runtime);
             SslConfigV4Request sslConfigV4Request = new SslConfigV4Request();

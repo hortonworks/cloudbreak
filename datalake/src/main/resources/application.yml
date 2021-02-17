@@ -83,6 +83,17 @@ altus:
     enabled: false
     endpoint: localhost:8989
 
+cdp:
+  platforms:
+    supportedPlatforms: AWS,AZURE,GCP
+    experimentalPlatforms: YARN,MOCK,OPENSTACK
+    enabledParentChildRelations: AWS:YARN,MOCK:MOCK
+    supportedFeature:
+      externalDatabase: AWS,AZURE,GCP,MOCK
+      freeIpaProvision: AWS,AZURE,GCP
+      stopDatabase: AWS,GCP
+      sslEnforcement: AWS,AZURE
+
 datalake:
   cert.dir: /certs/
   client.id: datalake

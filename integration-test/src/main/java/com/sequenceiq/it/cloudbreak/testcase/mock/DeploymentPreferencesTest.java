@@ -10,6 +10,7 @@ import com.sequenceiq.it.cloudbreak.assertion.util.DeploymentPreferencesTestAsse
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.util.DeploymentPreferencesTestDto;
 
 public class DeploymentPreferencesTest extends AbstractMockTest {
@@ -20,6 +21,10 @@ public class DeploymentPreferencesTest extends AbstractMockTest {
     @BeforeMethod
     public void beforeMethod(Object[] data) {
         createDefaultUser((MockedTestContext) data[0]);
+    }
+
+    protected void setupTest(TestContext testContext) {
+
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

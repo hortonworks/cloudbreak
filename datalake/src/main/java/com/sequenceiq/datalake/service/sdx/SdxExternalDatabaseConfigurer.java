@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.datalake.configuration.PlatformConfig;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -30,7 +30,7 @@ public class SdxExternalDatabaseConfigurer {
     private SdxDatabaseAvailabilityType defaultDatabaseAvailability;
 
     @Inject
-    private PlatformConfig platformConfig;
+    private ExternalDatabasePlatformConfig externalDatabasePlatformConfig;
 
     private final Comparator<Versioned> versionComparator;
 
@@ -46,7 +46,7 @@ public class SdxExternalDatabaseConfigurer {
 
     private SdxDatabaseAvailabilityType getDatabaseAvailabilityType(SdxDatabaseRequest dbRequest, CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
         if (dbRequest == null || (dbRequest.getCreate() == null && dbRequest.getAvailabilityType() == null)) {
-            if (platformConfig.isExternalDatabaseSupportedFor(cloudPlatform) && isCMExternalDbSupported(cloudPlatform, sdxCluster)) {
+            if (externalDatabasePlatformConfig.isExternalDatabaseSupportedFor(cloudPlatform) && isCMExternalDbSupported(cloudPlatform, sdxCluster)) {
                 return defaultDatabaseAvailability;
             } else {
                 return SdxDatabaseAvailabilityType.NONE;
@@ -84,10 +84,9 @@ public class SdxExternalDatabaseConfigurer {
     }
 
     private void validate(CloudPlatform cloudPlatform, SdxCluster sdxCluster) {
-        if (sdxCluster.hasExternalDatabase()
-                && !platformConfig.isExternalDatabaseSupportedOrExperimental(cloudPlatform)) {
+        if (sdxCluster.hasExternalDatabase() && !externalDatabasePlatformConfig.isExternalDatabaseSupportedFor(cloudPlatform)) {
             String message = String.format("Cannot create external database for sdx: %s, for now only %s is/are supported", sdxCluster.getClusterName(),
-                    platformConfig.getSupportedExternalDatabasePlatforms());
+                    externalDatabasePlatformConfig.getSupportedExternalDatabasePlatforms());
             LOGGER.debug(message);
             throw new BadRequestException(message);
         }

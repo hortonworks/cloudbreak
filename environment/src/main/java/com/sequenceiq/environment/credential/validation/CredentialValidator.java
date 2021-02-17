@@ -40,7 +40,7 @@ public class CredentialValidator {
 
     private final EntitlementService entitlementService;
 
-    public CredentialValidator(@Value("${environment.enabledplatforms}") Set<String> enabledPlatforms,
+    public CredentialValidator(@Value("${cdp.platforms.supportedPlatforms}") Set<String> enabledPlatforms,
             CredentialDefinitionService credentialDefinitionService,
             List<ProviderCredentialValidator> providerCredentialValidators,
             EntitlementService entitlementService) {

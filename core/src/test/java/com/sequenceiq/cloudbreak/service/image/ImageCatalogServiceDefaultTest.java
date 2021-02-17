@@ -29,10 +29,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
-import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageProvider;
@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageCatalogS
 import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -48,7 +49,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 @RunWith(Parameterized.class)
 public class ImageCatalogServiceDefaultTest {
 
-    private static final String[] PROVIDERS = { "aws", "azure", "gcp" };
+    private static final CloudPlatform[] PROVIDERS = {CloudPlatform.AWS, CloudPlatform.AZURE, CloudPlatform.GCP};
 
     private static final String DEFAULT_CDH_IMAGE_CATALOG = "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json";
 
@@ -149,7 +150,7 @@ public class ImageCatalogServiceDefaultTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalogProvider.getImageCatalogV3(catalogFile)).thenReturn(catalog);
-        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
+        when(preferencesService.getAllPossiblePlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
 
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());
         when(userProfileService.getOrCreate(user)).thenReturn(new UserProfile());

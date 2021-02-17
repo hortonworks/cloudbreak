@@ -108,7 +108,7 @@ public class CDPConfigService {
                     }
                 }
             }
-            LOGGER.info("Cdp configs for datalakes: {}", cdpStackRequests);
+            LOGGER.info("Cdp configs for datalakes: {}", cdpStackRequests.keySet());
         } catch (IOException e) {
             LOGGER.error("Can't read CDP template files", e);
             throw new IllegalStateException("Can't read CDP template files", e);

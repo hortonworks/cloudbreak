@@ -18,11 +18,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.conf.ExternalDatabaseConfig;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseResult;
@@ -48,7 +48,7 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private ExternalDatabaseConfig externalDatabaseConfig;
+    private ExternalDatabasePlatformConfig externalDatabasePlatformConfig;
 
     @Override
     public String selector() {
@@ -81,7 +81,7 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
                 LOGGER.info("External database for stack {} is not requested. Start is not possible.", stack.getName());
                 result = new StartExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STARTED_EVENT.event(),
                         stack.getName(), null);
-            } else if (!externalDatabaseConfig.isExternalDatabasePauseSupportedFor(CloudPlatform.valueOf(environment.getCloudPlatform()))) {
+            } else if (!externalDatabasePlatformConfig.isPauseSupportedForExternalDatabase(CloudPlatform.valueOf(environment.getCloudPlatform()))) {
                 LOGGER.debug("External database pause is not supported for '{}' cloud platform.", environment.getCloudPlatform());
                 result = new StartExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STARTED_EVENT.event(),
                         stack.getName(), null);
