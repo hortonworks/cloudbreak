@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpResponse;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Images.Get;
 import com.google.api.services.compute.Compute.Images.Insert;
@@ -70,6 +71,7 @@ public class GcpProvisionSetup implements Setup {
                 bucket.setLocation(authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
                 bucket.setStorageClass("STANDARD");
                 try {
+                    LOGGER.debug("Creating bucket '{}' in project '{}'", bucketName, projectId);
                     Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
                     ins.execute();
                 } catch (GoogleJsonResponseException ex) {
@@ -82,13 +84,21 @@ public class GcpProvisionSetup implements Setup {
                     }
                 }
                 String tarName = getTarName(imageName);
-                rewriteUntilDone(getBucket(imageName), tarName, bucket.getName(), tarName, storage);
+
+                if (!objectExistsInStorage(bucketName, tarName, storage)) {
+                    String sourceBucket = getBucket(imageName);
+                    LOGGER.debug("Copying file '{}' from source bucket '{}' to target bucket '{}' in project '{}'",
+                            tarName, sourceBucket, bucketName, projectId);
+                    rewriteUntilDone(sourceBucket, tarName, bucketName, tarName, storage);
+                } else {
+                    LOGGER.info("File '{}' is already present in bucket '{}' in project '{}'", tarName, bucketName, projectId);
+                }
 
                 Image gcpApiImage = new Image();
                 String finalImageName = getImageName(imageName);
                 gcpApiImage.setName(finalImageName);
                 RawDisk rawDisk = new RawDisk();
-                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucket.getName(), tarName));
+                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucketName, tarName));
                 gcpApiImage.setRawDisk(rawDisk);
                 GuestOsFeature uefiCompatible = new GuestOsFeature().setType("UEFI_COMPATIBLE");
                 GuestOsFeature multiIpSubnet = new GuestOsFeature().setType("MULTI_IP_SUBNET");
@@ -96,6 +106,7 @@ public class GcpProvisionSetup implements Setup {
                 try {
                     Insert ins = compute.images().insert(projectId, gcpApiImage);
                     ins.execute();
+                    LOGGER.debug("Image '{}' created in project '{}'", finalImageName, projectId);
                 } catch (GoogleJsonResponseException ex) {
                     if (ex.getStatusCode() != HttpStatus.SC_CONFLICT) {
                         String detailedMessage = ex.getDetails().getMessage();
@@ -103,9 +114,12 @@ public class GcpProvisionSetup implements Setup {
                         LOGGER.warn(msg, ex);
                         throw ex;
                     } else {
-                        LOGGER.info("No need to create image as it exists already with name '{}' in project '{}':", finalImageName, projectId);
+                        String msg = String.format("No need to create image as it exists already with name '%s' in project '%s':", finalImageName, projectId);
+                        LOGGER.info(msg, ex);
                     }
                 }
+            } else {
+                LOGGER.debug("Image '{}' is already present in project '{}'", imageName, projectId);
             }
         } catch (Exception e) {
             Long stackId = cloudContext.getId();
@@ -115,13 +129,26 @@ public class GcpProvisionSetup implements Setup {
         }
     }
 
-    private void rewriteUntilDone(final String sourceBucket, final String sourceKey, final String destBucket,
-        final String destKey, Storage storage) throws IOException {
+    private boolean objectExistsInStorage(String bucketName, String objectName, Storage storage) throws IOException {
+        try {
+            Storage.Objects.Get getCall = storage.objects().get(bucketName, objectName);
+            HttpResponse httpResponse = getCall.executeUsingHead();
+            return httpResponse.getStatusCode() == 200;
+        } catch (GoogleJsonResponseException ex) {
+            if (ex.getStatusCode() == HttpStatus.SC_NOT_FOUND) {
+                return false;
+            }
+            throw ex;
+        }
+    }
+
+    private void rewriteUntilDone(String sourceBucket, String sourceKey, String destBucket, String destKey, Storage storage) throws IOException {
         rewriteUntilDone(sourceBucket, sourceKey, destBucket, destKey, null, storage, 1);
     }
 
-    private void rewriteUntilDone(final String sourceBucket, final String sourceKey, final String destBucket,
-        final String destKey, final String rewriteToken, Storage storage, int recursionNumber) throws IOException {
+    private void rewriteUntilDone(String sourceBucket, String sourceKey, String destBucket,
+            String destKey, String rewriteToken, Storage storage, int recursionNumber) throws IOException {
+
         Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
         if (rewriteToken != null) {
             rewrite.setRewriteToken(rewriteToken);
@@ -139,10 +166,11 @@ public class GcpProvisionSetup implements Setup {
         if (!rewriteResponse.getDone()) {
             String rewriteToken2 = rewriteResponse.getRewriteToken();
             Long totalBytesRewritten = rewriteResponse.getTotalBytesRewritten();
-            LOGGER.debug("Rewriting not finished, bytes completed: {}. Calling rewrite again with token {}. Recursion reached the {}/100 attempt.",
+            LOGGER.debug("Rewriting not finished, bytes completed: {}. Calling rewrite again with token {}. Recursion reached the {}/{} attempt.",
                     totalBytesRewritten,
                     rewriteToken2,
-                    recursionNumber);
+                    recursionNumber,
+                    MAX_RECURSION_NUMBER);
             rewriteUntilDone(sourceBucket, sourceKey, destBucket, destKey, rewriteToken2, storage, ++recursionNumber);
         }
     }
@@ -165,8 +193,21 @@ public class GcpProvisionSetup implements Setup {
         } catch (TokenResponseException e) {
             getMissingServiceAccountKeyError(e, projectId);
         } catch (IOException e) {
-            LOGGER.info("Failed to retrieve image copy status", e);
-            return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+            CloudContext cloudContext = authenticatedContext.getCloudContext();
+            Storage storage = buildStorage(credential, cloudContext.getName());
+            String accountId = authenticatedContext.getCloudContext().getAccountId();
+            String tarName = getTarName(imageName);
+            String bucketName = GcpLabelUtil.transformLabelKeyOrValue(String.format("%s-%s", accountId, projectId));
+            try {
+                if (objectExistsInStorage(bucketName, tarName, storage)) {
+                    return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
+                } else {
+                    LOGGER.info("Failed to retrieve image copy status", e);
+                    return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+                }
+            } catch (IOException ioe) {
+                return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+            }
         }
         return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
     }
