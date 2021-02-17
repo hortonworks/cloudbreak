@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.BaseServiceEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.HostEndpoint;
 import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.TagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -189,6 +190,11 @@ public class UserDataBuilderTest {
 
         @Override
         public VmRecommendations recommendedVms() {
+            return null;
+        }
+
+        @Override
+        public TagValidator tagValidator() {
             return null;
         }
 

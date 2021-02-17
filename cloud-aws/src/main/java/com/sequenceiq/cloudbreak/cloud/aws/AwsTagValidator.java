@@ -8,8 +8,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CommonTagValidator;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @Component
 public class AwsTagValidator extends CommonTagValidator {
@@ -28,8 +27,8 @@ public class AwsTagValidator extends CommonTagValidator {
     }
 
     @Override
-    public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
-        validate(platformParameters.tagSpecification(), cloudStack.getTags());
+    public TagSpecification getTagSpecification() {
+        return platformParameters.tagSpecification();
     }
 
     @Override
