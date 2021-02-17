@@ -27,6 +27,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -152,6 +153,10 @@ public class EnvironmentCreationService {
         validationBuilder.merge(validatorService.validateTags(creationDto));
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
+        EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();
+        if (environmentTelemetry != null && environmentTelemetry.getLogging() != null && environmentTelemetry.getLogging().getStorageLocation() != null) {
+            validationBuilder.merge(validatorService.validateStorageLocation(environmentTelemetry.getLogging().getStorageLocation(), "logging"));
+        }
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
                 "Provisioning in " + creationDto.getCloudPlatform() + " is not enabled for this account.");
         ValidationResult freeIpaCreationValidation = validatorService.validateFreeIpaCreation(creationDto.getFreeIpaCreation());

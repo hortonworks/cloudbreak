@@ -344,6 +344,20 @@ class EnvironmentValidatorServiceTest {
         assertEquals("1. 'GCP' platform is not supported for child environment.", validationResult.getFormattedErrors());
     }
 
+    @ParameterizedTest
+    @MethodSource("storageValidationArguments")
+    void testStorageLocation(String storageLocation, boolean valid) {
+        ValidationResult actual = underTest.validateStorageLocation(storageLocation, "any");
+        assertEquals(!valid, actual.hasError());
+    }
+
+    @Test
+    void testStorageLocationWhenNull() {
+        ValidationResult validationResult = underTest.validateStorageLocation(null, "any");
+        assertEquals(1, validationResult.getErrors().size());
+        assertEquals("You don't add a(n) any storage location, please provide a valid storage location.", validationResult.getErrors().get(0));
+    }
+
     private Environment aValidEnvirontmentWithParent() {
         Environment parentEnvironment = new Environment();
         parentEnvironment.setCloudPlatform(CloudPlatform.AWS.name());
@@ -381,6 +395,23 @@ class EnvironmentValidatorServiceTest {
                 Arguments.of(2, 0, true),
                 Arguments.of(2, 100, true),
                 Arguments.of(2, 50, true)
+        );
+    }
+
+    private static Stream<Arguments> storageValidationArguments() {
+        return Stream.of(
+                Arguments.of("location with whitespace", false),
+                Arguments.of("   /path", true),
+                Arguments.of("/path    ", true),
+                Arguments.of("    /path/path   ", true),
+                Arguments.of("/path  /  path", false),
+                Arguments.of("/pa th/", false),
+                Arguments.of("\t/path/path", true),
+                Arguments.of("/path/path\t", true),
+                Arguments.of("/path/\tpath", false),
+                Arguments.of("\n/path/path", true),
+                Arguments.of("/path/path\n", true),
+                Arguments.of("/path/\npath", false)
         );
     }
 

@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.ws.rs.BadRequestException;
 
@@ -228,5 +230,20 @@ public class EnvironmentValidatorService {
                 .map(FreeIpaCreationAwsSpotParametersDto::getPercentage)
                 .map(spotPercentage -> spotPercentage == ALL_ON_DEMAND_PERCENTAGE || spotPercentage == ALL_SPOT_PERCENTAGE)
                 .orElse(true);
+    }
+
+    public ValidationResult validateStorageLocation(String storageLocation, String storageType) {
+        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
+        if (storageLocation != null) {
+            Pattern pattern = Pattern.compile(".*\\s.*");
+            Matcher matcher = pattern.matcher(storageLocation.trim());
+            if (matcher.find()) {
+                resultBuilder.error("You have added some whitespace to the storage location: " + storageLocation);
+            }
+        } else {
+            String message = "You don't add a(n) %s storage location, please provide a valid storage location.";
+            resultBuilder.error(String.format(message, storageType));
+        }
+        return resultBuilder.build();
     }
 }
