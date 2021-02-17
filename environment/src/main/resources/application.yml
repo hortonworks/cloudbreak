@@ -176,7 +176,7 @@ cb:
       gateway:
         services: s3,dynamodb
       interface:
-        services: autoscaling,cloudformation,ec2,ecr.api,ecr.dkr,elasticfilesystem,elasticloadbalancing,sts
+        services: autoscaling,cloudformation,ec2,ecr.api,ecr.dkr,elasticfilesystem,elasticloadbalancing,sts,rds
     credential.cache.ttl: 60
   arm:
     network:
