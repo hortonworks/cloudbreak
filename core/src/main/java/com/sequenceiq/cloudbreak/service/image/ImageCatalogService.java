@@ -492,7 +492,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private void validateRequestPlatforms(Set<String> platforms) throws CloudbreakImageCatalogException {
         Set<String> collect = platforms.stream()
-                .filter(requestedPlatform -> preferencesService.enabledPlatforms().stream()
+                .filter(requestedPlatform -> preferencesService.getAllPossiblePlatforms().stream()
                         .filter(enabledPlatform -> enabledPlatform.equalsIgnoreCase(requestedPlatform))
                         .collect(Collectors.toSet()).isEmpty())
                 .collect(Collectors.toSet());
@@ -504,7 +504,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages) {
         if (BooleanUtils.isTrue(withImages)) {
-            Set<String> platforms = preferencesService.enabledPlatforms();
+            Set<String> platforms = preferencesService.getAllPossiblePlatformsAsString();
             try {
                 return getImages(workspaceId, name, platforms).getImages();
             } catch (CloudbreakImageCatalogException e) {

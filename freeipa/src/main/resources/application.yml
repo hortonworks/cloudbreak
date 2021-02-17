@@ -292,3 +292,15 @@ clusterProxy:
     healthyStatusCode: 200
     timeoutInSec: 5
     intervalInSec: 5
+
+cdp:
+  platforms:
+    supportedPlatforms: AWS,AZURE,GCP
+    experimentalPlatforms: YARN,MOCK,OPENSTACK
+    supportedFeature:
+      externalDatabase: AWS,AZURE,GCP,MOCK
+      freeIpaProvision: AWS,AZURE,GCP
+      stopDatabase: AWS,GCP
+      sslEnforcement: AWS,AZURE
+      parentPlatforms: AWS,MOCK
+      childPlatforms: YARN,MOCK

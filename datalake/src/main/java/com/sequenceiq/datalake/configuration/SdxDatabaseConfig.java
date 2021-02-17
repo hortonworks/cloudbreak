@@ -1,24 +1,22 @@
 package com.sequenceiq.datalake.configuration;
 
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseConfig;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseConfigKey;
@@ -26,64 +24,22 @@ import com.sequenceiq.datalake.service.sdx.database.DatabaseServerParameterSette
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Configuration
-public class PlatformConfig {
+public class SdxDatabaseConfig {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PlatformConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxDatabaseConfig.class);
 
-    @Value("${datalake.supported.externaldb.platform:AWS,AZURE,GCP}")
-    private Set<CloudPlatform> dbServiceSupportedPlatforms;
-
-    @Value("${datalake.experimental.externaldb.platform:MOCK}")
-    private Set<CloudPlatform> dbServiceExperimentalPlatforms;
-
-    @Value("${datalake.supported.externaldb.pause.platform:AWS,GCP}")
-    private Set<CloudPlatform> dbServicePauseSupportedPlatforms;
-
-    @Value("${datalake.supported.externaldb.sslenforcement.platform:AWS,AZURE}")
-    private Set<CloudPlatform> dbServiceSslEnforcementSupportedPlatforms;
+    @Inject
+    private ExternalDatabasePlatformConfig platformConfig;
 
     @Inject
     private Set<DatabaseServerParameterSetter> databaseServerParameterSetters;
 
-    private Set<CloudPlatform> allPossibleExternalDbPlatforms;
-
-    public boolean isExternalDatabaseSupportedFor(CloudPlatform cloudPlatform) {
-        return dbServiceSupportedPlatforms.contains(cloudPlatform);
-    }
-
-    public boolean isExternalDatabasePauseSupportedFor(CloudPlatform cloudPlatform) {
-        return dbServicePauseSupportedPlatforms.contains(cloudPlatform);
-    }
-
-    public boolean isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform cloudPlatform) {
-        return dbServiceSslEnforcementSupportedPlatforms.contains(cloudPlatform);
-    }
-
-    public Set<CloudPlatform> getSupportedExternalDatabasePlatforms() {
-        return dbServiceSupportedPlatforms;
-    }
-
-    public Set<CloudPlatform> getAllPossibleExternalDbPlatforms() {
-        return allPossibleExternalDbPlatforms;
-    }
-
-    public boolean isExternalDatabaseSupportedOrExperimental(CloudPlatform cloudPlatform) {
-        return allPossibleExternalDbPlatforms.contains(cloudPlatform);
-    }
-
-    @PostConstruct
-    public void createAllPossibleDatabasePlatform() {
-        allPossibleExternalDbPlatforms = new HashSet<>();
-        allPossibleExternalDbPlatforms.addAll(dbServiceSupportedPlatforms);
-        allPossibleExternalDbPlatforms.addAll(dbServiceExperimentalPlatforms);
-    }
-
     @Bean
-    public Map<CloudPlatform, DatabaseServerParameterSetter> databaseParameterSetters() throws IOException {
+    public Map<CloudPlatform, DatabaseServerParameterSetter> databaseParameterSetters() {
         ImmutableMap.Builder<CloudPlatform, DatabaseServerParameterSetter> builder = new ImmutableMap.Builder<>();
 
         for (DatabaseServerParameterSetter databaseServerParameterSetter : databaseServerParameterSetters) {
-                    builder.put(databaseServerParameterSetter.getCloudPlatform(), databaseServerParameterSetter);
+            builder.put(databaseServerParameterSetter.getCloudPlatform(), databaseServerParameterSetter);
         }
         return builder.build();
     }
@@ -92,7 +48,7 @@ public class PlatformConfig {
     public Map<DatabaseConfigKey, DatabaseConfig> databaseConfigs() throws IOException {
         ImmutableMap.Builder<DatabaseConfigKey, DatabaseConfig> builder = new ImmutableMap.Builder<>();
 
-        for (CloudPlatform cloudPlatform : allPossibleExternalDbPlatforms) {
+        for (CloudPlatform cloudPlatform : platformConfig.getSupportedExternalDatabasePlatforms()) {
             for (SdxClusterShape sdxClusterShape : SdxClusterShape.values()) {
                 Optional<DatabaseConfig> dbConfig = readDbConfig(cloudPlatform, sdxClusterShape);
                 if (dbConfig.isPresent()) {

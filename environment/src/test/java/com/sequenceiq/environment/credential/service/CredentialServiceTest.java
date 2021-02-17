@@ -61,7 +61,7 @@ import com.sequenceiq.environment.credential.verification.CredentialVerification
 import com.sequenceiq.notification.NotificationSender;
 
 @SpringBootTest
-@TestPropertySource(properties = "environment.enabledplatforms=AWS, AZURE, BLAH, BAZ")
+@TestPropertySource(properties = "cdp.platforms.supportedPlatforms=AWS, AZURE, BLAH, BAZ")
 class CredentialServiceTest {
 
     private static final Credential CREDENTIAL = new Credential();

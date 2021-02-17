@@ -33,6 +33,18 @@ management:
       percentiles:
         "[http.server.requests]": "0.5, 0.95"
 
+cdp:
+  platforms:
+    supportedPlatforms: AWS,AZURE,GCP
+    experimentalPlatforms: YARN,MOCK,OPENSTACK
+    supportedFeature:
+      externalDatabase: AWS,AZURE,GCP,MOCK
+      freeIpaProvision: AWS,AZURE,GCP
+      stopDatabase: AWS,GCP
+      sslEnforcement: AWS,AZURE
+      parentPlatforms: AWS,MOCK
+      childPlatforms: YARN,MOCK
+
 redbeams:
   schema.migration.auto: true
   cloudbreak.url: http://localhost:9091

@@ -18,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
@@ -34,7 +35,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceDefaultNotFoundTest {
 
-    private static final String[] PROVIDERS = {"aws", "azure", "openstack", "gcp"};
+    private static final CloudPlatform[] PROVIDERS = {CloudPlatform.AWS, CloudPlatform.AZURE, CloudPlatform.OPENSTACK, CloudPlatform.GCP};
 
     private static final String DEFAULT_CDH_IMAGE_CATALOG = "com/sequenceiq/cloudbreak/service/image/default-cdh-imagecatalog.json";
 
@@ -92,7 +93,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(imageCatalogServiceProxy, "versionBasedImageCatalogService", versionBasedImageCatalogService);
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
 
-        when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
+        when(preferencesService.getAllPossiblePlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)

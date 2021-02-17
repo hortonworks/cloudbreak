@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.datalake.configuration.PlatformConfig;
+import com.sequenceiq.cloudbreak.platform.ExternalDatabasePlatformConfig;
 import com.sequenceiq.datalake.converter.DatabaseServerConverter;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -99,7 +99,7 @@ public class DatabaseServiceTest {
     private Map<CloudPlatform, DatabaseServerParameterSetter> databaseParameterSetterMap;
 
     @Mock
-    private PlatformConfig platformConfig;
+    private ExternalDatabasePlatformConfig externalDatabasePlatformConfig;
 
     @Mock
     private EntitlementService entitlementService;
@@ -143,7 +143,7 @@ public class DatabaseServiceTest {
         DatabaseConfigKey dbConfigKey = new DatabaseConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY);
         when(dbConfigs.get(dbConfigKey)).thenReturn(databaseConfig);
         when(databaseParameterSetterMap.get(CloudPlatform.AWS)).thenReturn(getDatabaseParameterSetter());
-        when(platformConfig.isExternalDatabaseSslEnforcementSupportedFor(CloudPlatform.AWS)).thenReturn(supportedPlatform);
+        when(externalDatabasePlatformConfig.isSslEnforcementSupportedForForExternalDatabase(CloudPlatform.AWS)).thenReturn(supportedPlatform);
         if (entitled != null) {
             when(entitlementService.databaseWireEncryptionEnabled(ACCOUNT_ID)).thenReturn(entitled);
         }

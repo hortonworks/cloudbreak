@@ -65,9 +65,22 @@ vault:
       service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
       mount.path: "dps-dev"
       login.role: "cloudbreak.default"
-cdp.structuredevent:
-  rest:
-    contentlogging: true
+
+cdp:
+  platforms:
+    supportedPlatforms: AWS,AZURE,GCP
+    experimentalPlatforms: YARN,MOCK,OPENSTACK
+    supportedFeature:
+      externalDatabase: AWS,AZURE,GCP,MOCK
+      freeIpaProvision: AWS,AZURE,GCP
+      stopDatabase: AWS,GCP
+      sslEnforcement: AWS,AZURE
+      parentPlatforms: AWS,MOCK
+      childPlatforms: YARN,MOCK
+  structuredevent:
+    rest:
+      contentlogging: true
+
 environment:
   cert.dir: /certs/
   structuredevent:
@@ -79,12 +92,10 @@ environment:
   redbeams:
     url: http://localhost:8087
     contextPath: /redbeams
-    supportedPlatforms: AWS,AZURE
   freeipa:
     url: http://localhost:8090
     contextPath: /freeipa
     synchronizeOnStart: true
-    supportedPlatforms: AWS,AZURE,GCP
   sdx:
     url: http://localhost:8086
     contextPath: /dl
@@ -98,9 +109,6 @@ environment:
       schema: public
       cert.file: database.crt
       ssl: false
-  enabledplatforms: AWS,AZURE,YARN,GCP
-  enabledParentPlatforms: AWS,MOCK
-  enabledChildPlatforms: YARN,MOCK
   existing:
     ssh:
       key:

@@ -94,7 +94,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
     private TransactionService transactionService;
 
     protected CredentialService(NotificationSender notificationSender, CloudbreakMessagesService messagesService,
-            @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
+            @Value("${cdp.platforms.supportedPlatforms}") Set<String> enabledPlatforms) {
         super(notificationSender, messagesService, enabledPlatforms);
     }
 
