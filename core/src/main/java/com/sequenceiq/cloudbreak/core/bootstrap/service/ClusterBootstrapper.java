@@ -169,7 +169,7 @@ public class ClusterBootstrapper {
             String notStartedInstanceIdsAndStatuses = notStartedInstances.stream()
                     .map(instance -> instance.getCloudInstance().getInstanceId() + ": " + instance.getStatus())
                     .collect(Collectors.joining(", "));
-            throw new CloudbreakException("Nodes were deleted or went missing during cluster install:  " + notStartedInstanceIdsAndStatuses
+            throw new CloudbreakException("Nodes were not in started state during cluster install:  " + notStartedInstanceIdsAndStatuses
                     + " Please check " + stack.getCloudPlatform() + " logs. Original message: " + e.getMessage());
         }
     }
