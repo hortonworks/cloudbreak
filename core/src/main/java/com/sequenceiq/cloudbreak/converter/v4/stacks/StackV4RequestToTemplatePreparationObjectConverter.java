@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
@@ -35,7 +34,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -134,9 +132,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
 
     @Inject
     private SdxClientService sdxClientService;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Override
     public TemplatePreparationObject convert(StackV4Request source) {
@@ -310,26 +305,25 @@ public class StackV4RequestToTemplatePreparationObjectConverter extends Abstract
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK) {
                 Map<String, String> groupMappings;
                 Map<String, String> userMappings;
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
                 switch (source.getCloudPlatform()) {
                     case AWS:
-                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(), cloudCredential,
+                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(), credential,
                                 environment.getAdminGroupName());
-                        userMappings = awsMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(), cloudCredential);
+                        userMappings = awsMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(), credential);
                         break;
                     case AZURE:
                         groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential,
+                                credential,
                                 environment.getAdminGroupName());
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential);
+                                credential);
                         break;
                     case GCP:
                         groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getPlacement().getRegion(),
-                                cloudCredential,
+                                credential,
                                 environment.getAdminGroupName());
                         userMappings = gcpMockAccountMappingService.getUserMappings(source.getPlacement().getRegion(),
-                                cloudCredential);
+                                credential);
                         break;
                     default:
                         return;

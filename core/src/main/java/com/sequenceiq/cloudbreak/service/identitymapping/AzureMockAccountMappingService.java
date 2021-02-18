@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 
 @Component
 public class AzureMockAccountMappingService {
@@ -23,8 +23,8 @@ public class AzureMockAccountMappingService {
             .map(user -> Map.entry(user, FIXED_MANAGED_IDENTITY))
             .collect(Collectors.toUnmodifiableMap(Entry::getKey, Entry::getValue));
 
-    public Map<String, String> getGroupMappings(String resourceGroup, CloudCredential credential, String adminGroupName) {
-        String subscriptionId = getSubscriptionId(credential);
+    public Map<String, String> getGroupMappings(String resourceGroup, Credential credential, String adminGroupName) {
+        String subscriptionId = credential.getAzure().getSubscriptionId();
         if (StringUtils.isNotEmpty(adminGroupName)) {
             return replacePlaceholders(getGroupMappings(adminGroupName), resourceGroup, subscriptionId);
         } else {
@@ -32,15 +32,8 @@ public class AzureMockAccountMappingService {
         }
     }
 
-    private String getSubscriptionId(CloudCredential credential) {
-        String subscriptionId = (String) credential
-                .getParameter("azure", Map.class)
-                .get("subscriptionId");
-        return subscriptionId;
-    }
-
-    public Map<String, String> getUserMappings(String resourceGroup, CloudCredential credential) {
-        String subscriptionId = getSubscriptionId(credential);
+    public Map<String, String> getUserMappings(String resourceGroup, Credential credential) {
+        String subscriptionId = credential.getAzure().getSubscriptionId();
         return replacePlaceholders(MOCK_IDBROKER_USER_MAPPINGS, resourceGroup, subscriptionId);
     }
 
