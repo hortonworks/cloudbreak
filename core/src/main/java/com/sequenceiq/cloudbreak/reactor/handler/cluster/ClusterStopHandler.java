@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -17,6 +19,9 @@ import reactor.bus.EventBus;
 
 @Component
 public class ClusterStopHandler implements EventHandler<ClusterStopRequest> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStopHandler.class);
+
     @Inject
     private StackService stackService;
 
@@ -37,7 +42,12 @@ public class ClusterStopHandler implements EventHandler<ClusterStopRequest> {
         ClusterStopResult result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            apiConnectors.getConnector(stack).stopCluster(false);
+            boolean clusterManagerRunning = apiConnectors.getConnector(stack).clusterStatusService().isClusterManagerRunning();
+            if (clusterManagerRunning) {
+                apiConnectors.getConnector(stack).stopCluster(false);
+            } else {
+                LOGGER.info("Cluster manager isn't running, cannot stop it.");
+            }
             result = new ClusterStopResult(request);
         } catch (Exception e) {
             result = new ClusterStopResult(e.getMessage(), e, request);
