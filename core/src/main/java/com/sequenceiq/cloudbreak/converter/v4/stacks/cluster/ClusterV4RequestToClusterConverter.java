@@ -29,10 +29,11 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
-import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -41,11 +42,8 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -72,9 +70,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
     private CloudStorageConverter cloudStorageConverter;
 
     @Inject
-    private IdBrokerConverterUtil idBrokerConverterUtil;
-
-    @Inject
     private EntitlementService entitlementService;
 
     @Override
@@ -87,8 +82,6 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         convertGateway(source, cluster);
-        IdBroker idBroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster, workspace);
-        cluster.setIdBroker(idBroker);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCloudStorage());
             cluster.setFileSystem(fileSystem);
