@@ -46,4 +46,11 @@ public interface DiagnosticsV1Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_DIAGNOSTICS_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "listDiagnosticsCollectionsV1")
     ListDiagnosticsCollectionResponse listDiagnosticsCollections(@PathParam("environmentCrn") String environmentCrn);
+
+    @POST
+    @Path("{environmentCrn}/collections/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_DIAGNOSTICS_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
+            notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "cancelDiagnosticsCollectionsV1")
+    void cancelCollections(@PathParam("environmentCrn") String environmentCrn);
 }

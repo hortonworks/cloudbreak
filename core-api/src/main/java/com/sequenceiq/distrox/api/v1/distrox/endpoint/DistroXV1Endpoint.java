@@ -351,6 +351,13 @@ public interface DistroXV1Endpoint {
     ListDiagnosticsCollectionResponse listCollections(@PathParam("crn") String crn);
 
     @POST
+    @Path("diagnostics/{crn}/collections/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
+            nickname = "cancelDistroxDiagnosticsCollectionsV1")
+    void cancelCollections(@PathParam("crn") String crn);
+
+    @POST
     @Path("diagnostics/cm")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS, produces = MediaType.APPLICATION_JSON,

@@ -478,6 +478,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public void cancelCollections(@ResourceCrn String crn) {
+        diagnosticsService.cancelDiagnosticsCollections(crn);
+    }
+
+    @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATAHUB)
     public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionV1Request request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();

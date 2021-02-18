@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.telemetry.converter;
 
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -76,9 +78,9 @@ public class DiagnosticsDataToParameterConverter {
         builder.withLabels(request.getLabels());
         builder.withStartTime(request.getStartTime());
         builder.withEndTime(request.getEndTime());
-        builder.withHostGroups(request.getHostGroups());
-        builder.withHosts(request.getHosts());
-        builder.withExcludeHosts(request.getExcludeHosts());
+        builder.withHostGroups(Optional.ofNullable(request.getHostGroups()).orElse(new HashSet<>()));
+        builder.withHosts(Optional.ofNullable(request.getHosts()).orElse(new HashSet<>()));
+        builder.withExcludeHosts(Optional.ofNullable(request.getExcludeHosts()).orElse(new HashSet<>()));
         builder.withIncludeSaltLogs(request.getIncludeSaltLogs());
         builder.withUpdatePackage(request.getUpdatePackage());
         builder.withSkipValidation(request.getSkipValidation());

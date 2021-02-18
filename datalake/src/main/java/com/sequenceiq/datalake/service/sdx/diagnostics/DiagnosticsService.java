@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx.diagnostics;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -15,16 +16,22 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnostics
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsFlowConfig;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.Flow2Handler;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 @Service
 public class DiagnosticsService {
@@ -46,6 +53,12 @@ public class DiagnosticsService {
     @Inject
     private SdxReactorFlowManager sdxReactorFlowManager;
 
+    @Inject
+    private FlowLogDBService flowLogDBService;
+
+    @Inject
+    private Flow2Handler flow2Handler;
+
     public FlowIdentifier collectDiagnostics(DiagnosticsCollectionRequest request) {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster cluster = sdxService.getByCrn(userId, request.getStackCrn());
@@ -56,6 +69,27 @@ public class DiagnosticsService {
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDiagnosticsCollection(event);
         LOGGER.debug("Start diagnostics collection with flow pollable identifier: {}", flowIdentifier.getPollableId());
         return flowIdentifier;
+    }
+
+    public void cancelDiagnosticsCollection(String stackCrn) {
+        diagnosticsV4Endpoint.cancelCollections(stackCrn);
+        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, SdxDiagnosticsFlowConfig.class);
+        flowLogs.stream()
+                .filter(f -> !f.getFinalized())
+                .forEach(cancelFlow());
+    }
+
+    private Consumer<FlowLog> cancelFlow() {
+        return f -> {
+            try {
+                flow2Handler.cancelFlow(f.getResourceId(), f.getFlowId());
+            } catch (TransactionService.TransactionExecutionException e) {
+                String errorMessage = String.format("Transaction error during cancelling diagnostics flow [stack_id: %s] [flow_id: %s]",
+                        f.getResourceId(), f.getFlowId());
+                LOGGER.debug(errorMessage, e);
+                throw new CloudbreakServiceException(errorMessage);
+            }
+        };
     }
 
     public FlowIdentifier collectCmDiagnostics(CmDiagnosticsCollectionRequest request) {
