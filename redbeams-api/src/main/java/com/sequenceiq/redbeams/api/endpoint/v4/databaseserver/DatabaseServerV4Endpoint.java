@@ -87,6 +87,13 @@ public interface DatabaseServerV4Endpoint {
     );
 
     @POST
+    @Path("helloworld")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.CREATE, notes = DatabaseServerNotes.CREATE,
+            consumes = MediaType.APPLICATION_JSON, nickname = "createDatabaseServer")
+    String helloworld();
+
+    @POST
     @Path("internal/managed")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE_INTERNAL, notes = DatabaseServerNotes.CREATE,

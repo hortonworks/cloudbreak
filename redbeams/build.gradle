@@ -66,9 +66,9 @@ dependencies {
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-jersey'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-data-jpa'
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-quartz',           version: springBootVersion
-  implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
-  implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
-  implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
+//  implementation     group: 'io.projectreactor',         name: 'reactor-core',                         version: eventBusVersion
+//  implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
+//  implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
 
   runtime            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
   runtime            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'

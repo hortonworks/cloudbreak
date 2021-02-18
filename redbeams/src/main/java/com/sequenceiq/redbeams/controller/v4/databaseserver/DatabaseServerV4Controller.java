@@ -3,6 +3,8 @@ package com.sequenceiq.redbeams.controller.v4.databaseserver;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.CREATE_DATABASE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -11,6 +13,7 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -32,6 +35,9 @@ import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFlowTrigger;
+import com.sequenceiq.flow.reactor.LoggingErrorHandler;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -50,6 +56,9 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
+
+import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -106,6 +115,33 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
         return converterUtil.convert(savedDBStack, DatabaseServerStatusV4Response.class);
+    }
+
+    @Inject
+    private EventBus reactor;
+
+    @Inject
+    private LoggingErrorHandler errorHandler;
+
+    @Override
+    public String helloworld() {
+        Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
+        HelloWorldFlowTrigger helloWorldFlowTrigger = new HelloWorldFlowTrigger(13L);
+        Map<String, Object> extendedHeaders = new HashMap<>(headerWithUserCrn);
+        extendedHeaders.put(MDCBuilder.MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
+        Event event = new Event<>(new Event.Headers(extendedHeaders), helloWorldFlowTrigger, errorHandler);
+        reactor.notify(helloWorldFlowTrigger.selector(), event);
+        return "Started";
+    }
+
+    private Map<String, Object> getHeaderWithUserCrn(Map<String, Object> headers) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        Map<String, Object> decoratedHeader;
+        decoratedHeader = headers != null ? new HashMap<>(headers) : new HashMap<>();
+        if (StringUtils.isNotBlank(userCrn)) {
+            decoratedHeader.put(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
+        }
+        return decoratedHeader;
     }
 
     @Override

@@ -87,6 +87,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Inject
     private InMemoryCleanup inMemoryCleanup;
 
+
+    public void receiveMessage() {
+
+    }
+
     @Override
     public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
