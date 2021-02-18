@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
@@ -34,6 +35,12 @@ public class StructuredFlowEventToCDPOperationDetailsConverter {
             cdpOperationDetails.setResourceName(defaultIfEmpty(structuredOperationDetails.getResourceName(), ""));
             cdpOperationDetails.setInitiatorCrn(defaultIfEmpty(structuredOperationDetails.getUserCrn(), ""));
             cdpOperationDetails.setCorrelationId(defaultIfEmpty(structuredOperationDetails.getUuid(), ""));
+        }
+
+        StackDetails stackDetails = structuredFlowEvent.getStack();
+        if (stackDetails != null && stackDetails.getCloudPlatform() != null) {
+            cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
+                    .Value.valueOf(stackDetails.getCloudPlatform()));
         }
 
         FlowDetails flowDetails = structuredFlowEvent.getFlow();

@@ -11,6 +11,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 
 @Component
@@ -34,6 +35,12 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
             cdpOperationDetails.setResourceName(defaultIfEmpty(structuredOperationDetails.getResourceName(), ""));
             cdpOperationDetails.setInitiatorCrn(defaultIfEmpty(structuredOperationDetails.getUserCrn(), ""));
             cdpOperationDetails.setCorrelationId(defaultIfEmpty(structuredOperationDetails.getUuid(), ""));
+        }
+
+        EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();
+        if (environmentDetails != null && environmentDetails.getCloudPlatform() != null) {
+            cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
+                    .Value.valueOf(environmentDetails.getCloudPlatform()));
         }
 
         FlowDetails flowDetails = cdpStructuredFlowEvent.getFlow();
