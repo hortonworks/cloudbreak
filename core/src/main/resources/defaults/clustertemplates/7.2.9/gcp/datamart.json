@@ -19,10 +19,7 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -38,10 +35,7 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -57,10 +51,7 @@
               "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-16",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 2,
         "type": "CORE",

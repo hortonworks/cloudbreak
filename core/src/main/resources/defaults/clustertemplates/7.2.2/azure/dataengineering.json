@@ -25,10 +25,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "Standard_D8_v3"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -51,10 +48,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "Standard_D8_v3"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -77,10 +71,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "Standard_D8_v3"
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -103,10 +94,7 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "Standard_D8_v3"
         },
         "nodeCount": 0,
         "type": "CORE",

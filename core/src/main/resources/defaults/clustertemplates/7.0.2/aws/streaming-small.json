@@ -19,10 +19,7 @@
               "size": 100,
               "type": "standard"
             }
-          ],
-          "rootVolume": {
-            "size": 100
-          }
+          ]
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -38,10 +35,7 @@
               "size": 500,
               "type": "st1"
             }
-          ],
-          "rootVolume": {
-            "size": 50
-          }
+          ]
         },
         "nodeCount": 3,
         "type": "CORE",

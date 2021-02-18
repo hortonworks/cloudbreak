@@ -21,10 +21,7 @@
               "size": 100,
               "type": "standard"
             }
-          ],
-          "rootVolume": {
-            "size": 100
-          }
+          ]
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -45,10 +42,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "m5.2xlarge"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -69,10 +63,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "m5.2xlarge"
         },
         "nodeCount": 1,
         "type": "CORE",
@@ -88,10 +79,7 @@
               "size": 1000,
               "type": "gp2"
             }
-          ],
-          "rootVolume": {
-            "size": 50
-          }
+          ]
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -113,10 +101,7 @@
               "type": "NONE"
             }
           },
-          "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "m5.2xlarge"
         },
         "nodeCount": 0,
         "type": "CORE",

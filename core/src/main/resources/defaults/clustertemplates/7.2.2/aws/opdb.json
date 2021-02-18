@@ -27,9 +27,6 @@
             }
           },
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -52,9 +49,6 @@
             }
           },
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AWS"
         },
         "type": "GATEWAY"
@@ -77,9 +71,6 @@
             }
           },
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AWS"
         },
         "type": "CORE"
@@ -102,9 +93,6 @@
             }
           },
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AWS"
         },
         "type": "CORE"

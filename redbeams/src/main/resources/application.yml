@@ -175,9 +175,9 @@ cb:
   uaa.startup.timeout.sec: 300
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
   platform.default.rootVolumeSize:
-    AWS: 50
-    AZURE: 30
-    GCP: 50
+    AWS: 100
+    AZURE: 100
+    GCP: 100
   enabled.linux.types: redhat6,redhat7,centos6,centos7,amazonlinux,amazonlinux2
   publicip:
   etc.config.dir: /etc/redbeams

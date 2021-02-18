@@ -14,9 +14,6 @@
         "type": "GATEWAY",
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192
@@ -29,9 +26,6 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192

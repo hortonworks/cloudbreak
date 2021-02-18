@@ -19,10 +19,7 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -38,10 +35,7 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -57,10 +51,7 @@
               "type": "pd-standard"
             }
           ],
-          "instanceType": "e2-standard-8",
-          "rootVolume": {
-            "size": 50
-          }
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 3,
         "type": "CORE",

@@ -28,9 +28,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AZURE"
         },
         "type": "CORE"
@@ -55,9 +52,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AZURE"
         },
         "type": "GATEWAY"
@@ -82,9 +76,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AZURE"
         },
         "type": "CORE"
@@ -109,9 +100,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "cloudPlatform": "AZURE"
         },
         "type": "CORE"

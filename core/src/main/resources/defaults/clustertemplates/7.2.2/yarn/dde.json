@@ -14,9 +14,6 @@
         "nodeCount": 2,
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 32768
@@ -29,9 +26,6 @@
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192
@@ -44,9 +38,6 @@
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192
@@ -59,9 +50,6 @@
         "nodeCount": 3,
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192
@@ -74,9 +62,6 @@
         "nodeCount": 1,
         "recoveryMode": "MANUAL",
         "template": {
-          "rootVolume": {
-            "size": 50
-          },
           "yarn": {
             "cpus": 4,
             "memory": 8192

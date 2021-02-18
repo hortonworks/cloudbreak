@@ -100,9 +100,9 @@ altus:
 cb:
   enabledplatforms: AZURE,AWS,GCP,OPENSTACK
   platform.default.rootVolumeSize:
-    AWS: 50
-    AZURE: 50
-    GCP: 50
+    AWS: 100
+    AZURE: 100
+    GCP: 100
   enabled.linux.types: redhat6,redhat7,centos6,centos7
   default.gateway.cidr: 0.0.0.0/0
   publicip:
