@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.converter.ManagementPackDetailsToManagementPackComponentConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -74,6 +75,9 @@ public class ImageService {
 
     @Inject
     private StackMatrixService stackMatrixService;
+
+    @Inject
+    private ManagementPackDetailsToManagementPackComponentConverter mpackConverter;
 
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProvider.getImage(stackId);
@@ -226,7 +230,7 @@ public class ImageService {
         repo.setUtil(stack.getRepo().getUtil());
         repo.setMpacks(stack.getMpackList().stream().map(icmpack -> {
             ManagementPackComponent mpack = new ManagementPackComponent();
-            mpack.setMpackUrl(icmpack.getMpackUrl());
+            mpack.setMpackUrl(mpackConverter.getMpackUrl(icmpack.getMpackUrl()));
             mpack.setStackDefault(true);
             mpack.setPreInstalled(true);
             return mpack;

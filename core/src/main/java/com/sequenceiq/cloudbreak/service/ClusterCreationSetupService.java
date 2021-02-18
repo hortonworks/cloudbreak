@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemVali
 import com.sequenceiq.cloudbreak.controller.validation.mpack.ManagementPackValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
 import com.sequenceiq.cloudbreak.converter.AmbariStackDetailsJsonToStackRepoDetailsConverter;
+import com.sequenceiq.cloudbreak.converter.ManagementPackDetailsToManagementPackComponentConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -121,6 +122,9 @@ public class ClusterCreationSetupService {
 
     @Inject
     private RepositoryValidator repositoryValidator;
+
+    @Inject
+    private ManagementPackDetailsToManagementPackComponentConverter mpackConverter;
 
     public void validate(ClusterRequest request, Stack stack, User user, Workspace workspace) {
         validate(request, null, stack, user, workspace);
@@ -278,7 +282,11 @@ public class ClusterCreationSetupService {
         repo.setVerify(stackRepoDetails.isVerify());
         List<ManagementPackComponent> mpacks = stackRepoDetails.getMpacks().get(osType);
         if (mpacks != null) {
-            repo.setMpacks(mpacks);
+            repo.setMpacks(mpacks.stream().map(mp -> {
+                ManagementPackComponent mpack = SerializationUtils.clone(mp);
+                mpack.setMpackUrl(mpackConverter.getMpackUrl(mpack.getMpackUrl()));
+                return mpack;
+            }).collect(Collectors.toList()));
         }
         return repo;
     }
