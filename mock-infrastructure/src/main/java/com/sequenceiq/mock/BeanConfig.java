@@ -15,6 +15,7 @@ public class BeanConfig {
     @Bean
     public Gson gson(GsonBuilder gsonBuilder) {
         return gsonBuilder
+                .disableHtmlEscaping()
                 .registerTypeHierarchyAdapter(JsonNode.class,
                         (JsonSerializer<JsonNode>) (src, typeOfSrc, context) -> new JsonParser().parse(src.toString()))
                 .create();

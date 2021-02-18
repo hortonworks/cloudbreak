@@ -13,3 +13,9 @@ spring:
       preferred-json-mapper: gson
   resources:
       add-mappings: false
+mock:
+  experiences:
+    liftie:
+      createDummyCluster: false
+    dwx:
+      createDummyCluster: false
