@@ -170,7 +170,7 @@ public class StackCommonService {
         return put(stack, updateStackJson);
     }
 
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
+    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return stackOperationService.removeInstances(stack, workspaceId, instanceIds, forced, user);

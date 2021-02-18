@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -244,7 +245,8 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier deleteMultipleInstances(Long workspaceId, String name, @NotEmpty List<String> instanceIds, boolean forced,
             @AccountId String accountId) {
-        return stackOperations.deleteInstances(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), instanceIds, forced);
+        return stackOperations.deleteInstances(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                new HashSet<>(instanceIds), forced);
     }
 
     @Override
