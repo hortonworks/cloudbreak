@@ -14,6 +14,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_DISABLED = "autoscale.disabled";
 
+    public static final String AUTOSCALING_SUSPENDED = "autoscale.suspended";
+
     public static final String AUTOSCALING_ENTITLEMENT_NOT_ENABLED = "autoscale.entitlement.not.enabled";
 
     public static final String AUTOSCALING_ACTIVITY_NOT_REQUIRED = "autoscale.activity.not.required";

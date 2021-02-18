@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_SUSPENDED;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,20 +14,28 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 
 @Component
 public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateFailedHandler.class);
 
-    private static final int RETRY_THRESHOLD = 5;
+    private static final int RETRY_THRESHOLD = 15;
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private HistoryService historyService;
+
+    @Inject
+    private CloudbreakMessagesService messagesService;
 
     private final Map<Long, Integer> updateFailures = new ConcurrentHashMap<>();
 
@@ -42,17 +52,12 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                 .orElse(1);
         if (failed < RETRY_THRESHOLD) {
             updateFailures.put(autoscaleClusterId, failed);
-            LOGGER.debug("Increased failed count '{}' for cluster '{}'", failed, cluster.getStackCrn());
+            LOGGER.info("Increased Autoscaling failure count '{}' for cluster '{}'", failed, cluster.getStackCrn());
         } else {
-            suspendCluster(cluster);
+            clusterService.setAutoscaleState(cluster.getId(), false);
             updateFailures.remove(autoscaleClusterId);
-            LOGGER.debug("Suspended cluster monitoring for cluster '{}' due to failing update attempts", cluster.getStackCrn());
-        }
-    }
-
-    private void suspendCluster(Cluster cluster) {
-        if (!cluster.getState().equals(ClusterState.SUSPENDED)) {
-            clusterService.setState(cluster.getId(), ClusterState.SUSPENDED);
+            historyService.createEntry(ScalingStatus.DISABLED, messagesService.getMessage(AUTOSCALING_SUSPENDED), cluster);
+            LOGGER.info("Suspended Autoscaling for cluster '{}' due to repeated failure of scaling attempts", cluster.getStackCrn());
         }
     }
 }

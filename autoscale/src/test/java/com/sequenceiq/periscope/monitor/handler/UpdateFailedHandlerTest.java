@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_SUSPENDED;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -14,10 +15,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 public class UpdateFailedHandlerTest {
@@ -28,6 +32,12 @@ public class UpdateFailedHandlerTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private HistoryService historyService;
+
+    @Mock
+    private CloudbreakMessagesService messagesService;
 
     @Mock
     private CloudbreakCommunicator cloudbreakCommunicator;
@@ -65,14 +75,16 @@ public class UpdateFailedHandlerTest {
     }
 
     @Test
-    public void testOnApplicationEventWhenFailsFiveTimes() {
+    public void testOnApplicationEventWhenFailsBeyondThreshold() {
         Cluster cluster = getARunningCluster();
         when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(messagesService.getMessage(AUTOSCALING_SUSPENDED)).thenReturn("suspended");
 
-        IntStream.range(0, 5).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID)));
+        IntStream.range(0, 15).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID)));
 
-        verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
-        verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
+        verify(clusterService, times(15)).findById(AUTOSCALE_CLUSTER_ID);
+        verify(historyService).createEntry(ScalingStatus.DISABLED, "suspended", cluster);
+        verify(clusterService).setAutoscaleState(AUTOSCALE_CLUSTER_ID, false);
     }
 
     private Cluster getARunningCluster() {
