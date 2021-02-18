@@ -34,10 +34,7 @@
             "size": 100,
             "type": "magnetic"
           }
-        ],
-        "rootVolume": {
-          "size": 50
-        }
+        ]
       },
       "nodeCount": 1,
       "type": "CORE",
@@ -65,10 +62,7 @@
             "size": 100,
             "type": "magnetic"
           }
-        ],
-        "rootVolume": {
-          "size": 50
-        }
+        ]
       },
       "nodeCount": 1,
       "type": "GATEWAY",

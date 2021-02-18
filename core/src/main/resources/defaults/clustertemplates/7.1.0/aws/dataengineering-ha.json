@@ -19,9 +19,6 @@
       "template": {
         "aws": {},
         "instanceType": "m5.2xlarge",
-        "rootVolume": {
-          "size": 50
-        },
         "attachedVolumes": [{
           "size": 100,
           "count": 1,
@@ -39,9 +36,6 @@
         "template": {
           "aws": {},
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [{
             "size": 100,
             "count": 1,
@@ -59,9 +53,6 @@
         "template": {
           "aws": {},
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [{
             "size": 100,
             "count": 1,
@@ -79,9 +70,6 @@
         "template": {
           "aws": {},
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [{
             "size": 100,
             "count": 1,
@@ -99,9 +87,6 @@
         "template": {
           "aws": {},
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [{
             "size": 100,
             "count": 1,

@@ -30,7 +30,7 @@ public class DefaultRootVolumeSizeProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRootVolumeSizeProvider.class);
 
-    private static final Integer DEFAULT_ROOT_VOLUME_SIZE = 50;
+    private static final Integer DEFAULT_ROOT_VOLUME_SIZE = 100;
 
     private static final String ROOT_VOLUME_SIZE_PROPERTY_PREFIX = "cb.platform.default.rootVolumeSize.";
 

@@ -18,10 +18,7 @@
             "size": 250,
             "type": "standard"
           }
-        ],
-        "rootVolume": {
-          "size": 100
-        }
+        ]
       },
       "nodeCount": 2,
       "type": "CORE",
@@ -38,10 +35,7 @@
             "size": 250,
             "type": "standard"
           }
-        ],
-        "rootVolume": {
-          "size": 100
-        }
+        ]
       },
       "nodeCount": 2,
       "type": "GATEWAY",
@@ -58,10 +52,7 @@
             "size": 250,
             "type": "standard"
           }
-        ],
-        "rootVolume": {
-          "size": 100
-        }
+        ]
       },
       "nodeCount": 3,
       "type": "CORE",
@@ -78,10 +69,7 @@
             "size": 250,
             "type": "standard"
           }
-        ],
-        "rootVolume": {
-          "size": 100
-        }
+        ]
       },
       "nodeCount": 1,
       "type": "CORE",
@@ -97,10 +85,7 @@
             "count": 0,
             "type": "standard"
           }
-        ],
-        "rootVolume": {
-          "size": 50
-        }
+        ]
       },
       "nodeCount": 2,
       "type": "CORE",

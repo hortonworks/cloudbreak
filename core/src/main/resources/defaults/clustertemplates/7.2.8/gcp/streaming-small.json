@@ -22,10 +22,7 @@
               "size": 100,
               "type": "pd-standard"
             }
-          ],
-          "rootVolume": {
-            "size": 100
-          }
+          ]
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -41,10 +38,7 @@
               "size": 1000,
               "type": "pd-standard"
             }
-          ],
-          "rootVolume": {
-            "size": 50
-          }
+          ]
         },
         "nodeCount": 3,
         "type": "CORE",

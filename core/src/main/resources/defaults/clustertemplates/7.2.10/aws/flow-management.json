@@ -18,9 +18,6 @@
         "recoveryMode": "MANUAL",
         "template": {
           "instanceType": "m5.2xlarge",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [
             {
               "size": 100,

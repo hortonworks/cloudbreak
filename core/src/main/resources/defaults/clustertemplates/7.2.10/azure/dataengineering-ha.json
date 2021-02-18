@@ -26,9 +26,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [
             {
               "size": 100,
@@ -55,9 +52,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [
             {
               "size": 100,
@@ -84,9 +78,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [
             {
               "size": 100,
@@ -113,9 +104,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [
             {
               "size": 100,
@@ -141,9 +129,6 @@
             }
           },
           "instanceType": "Standard_D8_v3",
-          "rootVolume": {
-            "size": 50
-          },
           "attachedVolumes": [
             {
               "size": 100,

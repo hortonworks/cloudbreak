@@ -23,9 +23,6 @@
       "name": "idbroker",
       "template": {
         "instanceType": "large",
-        "rootVolume": {
-          "size": 50
-        },
         "attachedVolumes": [
           {
             "count": 0,
@@ -42,9 +39,6 @@
       "name": "master",
       "template": {
         "instanceType": "large",
-        "rootVolume": {
-          "size": 50
-        },
         "attachedVolumes": [
           {
             "size": 100,

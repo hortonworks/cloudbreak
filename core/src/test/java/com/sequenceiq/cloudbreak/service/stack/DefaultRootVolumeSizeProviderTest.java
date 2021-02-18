@@ -44,7 +44,7 @@ public class DefaultRootVolumeSizeProviderTest {
     public void testNoPropertySetForKnownPlatform() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getForPlatform("AWS");
-        assertEquals(50L, rootVolumeSize);
+        assertEquals(100L, rootVolumeSize);
     }
 
     @Test
@@ -59,6 +59,6 @@ public class DefaultRootVolumeSizeProviderTest {
     public void testWithUnknownPlatform() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getForPlatform("UNKNOWN_PLATFORM");
-        assertEquals(50L, rootVolumeSize);
+        assertEquals(100L, rootVolumeSize);
     }
 }
