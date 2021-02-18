@@ -94,11 +94,20 @@ public class AwsValidatorsTest {
 
     @BeforeEach
     public void prepare() {
-        CloudContext cloudContext = new CloudContext(1L, "stackName", "crn", "AWS", "AWS", Location.location(Region.region("region")), "user", "account");
+        CloudContext context = CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("stackName")
+                .withCrn("crn")
+                .withPlatform("AWS")
+                .withVariant("AWS")
+                .withLocation(Location.location(Region.region("region")))
+                .withUserId("user")
+                .withAccountId("account")
+                .build();
         CloudCredential cloudCredential = null;
-        authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(any(), anyString(), anyString()))
                 .thenAnswer(invocation -> invocation.getArgument(2));
+        authenticatedContext = new AuthenticatedContext(context, cloudCredential);
     }
 
     @Test

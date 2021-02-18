@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.context;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -30,42 +31,19 @@ public class CloudContext {
 
     private final String crn;
 
-    public CloudContext(Long id, String name, String crn, String platform, String userId, String accountId) {
-        this.id = id;
-        this.name = name;
-        this.crn = crn;
-        this.platform = Platform.platform(platform);
-        this.userId = userId;
-        this.accountId = accountId;
-        variant = null;
-        location = null;
-        userName = null;
-    }
+    private final String accountUUID;
 
-    public CloudContext(Long id, String name, String crn, String platform, String userId, Long workspaceId) {
-        this(id, name, crn, platform, userId, workspaceId.toString());
-    }
-
-    public CloudContext(Long id, String name, String crn, String platform, String variant,
-            Location location, String userId, String accountId) {
-        this.id = id;
-        this.name = name;
-        this.crn = crn;
-        this.platform = Platform.platform(platform);
-        this.variant = Variant.variant(variant);
-        this.location = location;
-        this.userId = userId;
-        this.accountId = accountId;
-        userName = null;
-    }
-
-    public CloudContext(Long id, String name, String crn, String platform, String variant,
-                        Location location, String userId, Long workspaceId) {
-        this(id, name, crn, platform, variant, location, userId, workspaceId.toString());
-    }
-
-    public CloudContext(Long id, String name, String crn, String platform, String variant,
-            Location location, String userId, String userName, String accountId) {
+    private CloudContext(
+            Long id,
+            String name,
+            String crn,
+            String platform,
+            String variant,
+            Location location,
+            String userId,
+            String accountId,
+            String userName,
+            String accountUUID) {
         this.id = id;
         this.name = name;
         this.crn = crn;
@@ -75,11 +53,7 @@ public class CloudContext {
         this.userId = userId;
         this.accountId = accountId;
         this.userName = userName;
-    }
-
-    public CloudContext(Long id, String name, String crn, String platform, String variant,
-                        Location location, String userId, String userName, Long workspaceId) {
-        this(id, name, crn, platform, variant, location, userId, userName, workspaceId.toString());
+        this.accountUUID = Strings.isNullOrEmpty(accountUUID) ? accountId : accountUUID;
     }
 
     public Long getId() {
@@ -110,6 +84,10 @@ public class CloudContext {
         return userId;
     }
 
+    public String getAccountUUID() {
+        return accountUUID;
+    }
+
     public String getAccountId() {
         return accountId;
     }
@@ -124,14 +102,117 @@ public class CloudContext {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("CloudContext{")
-        .append("id=").append(id)
-        .append(", name='").append(name).append('\'')
-        .append(", platform='").append(platform).append('\'')
-        .append(", userId='").append(userId).append('\'')
-        .append(", workspaceId='").append(accountId).append('\'')
-        .append(", location='").append(location).append('\'')
-        .append('}');
-        return sb.toString();
+        return "CloudContext{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", platform=" + platform +
+                ", variant=" + variant +
+                ", location=" + location +
+                ", userId='" + userId + '\'' +
+                ", userName='" + userName + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", crn='" + crn + '\'' +
+                '}';
+    }
+
+    public static class Builder {
+        private Long id;
+
+        private String name;
+
+        private String platform;
+
+        private String variant;
+
+        private Location location;
+
+        private String userId;
+
+        private String userName;
+
+        private String accountId;
+
+        private String accountUUID;
+
+        private String crn;
+
+        public Builder withId(Long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withPlatform(String platform) {
+            this.platform = platform;
+            return this;
+        }
+
+        public Builder withVariant(String variant) {
+            this.variant = variant;
+            return this;
+        }
+
+        public Builder withLocation(Location location) {
+            this.location = location;
+            return this;
+        }
+
+        public Builder withUserId(String userId) {
+            this.userId = userId;
+            return this;
+        }
+
+        public Builder withUserName(String userName) {
+            this.userName = userName;
+            return this;
+        }
+
+        public Builder withAccountId(String accountId) {
+            this.accountId = accountId;
+            return this;
+        }
+
+        public Builder withAccountId(Long accountId) {
+            this.accountId = accountId == null ? null : accountId.toString();
+            return this;
+        }
+
+        public Builder withWorkspaceId(Long workspaceId) {
+            this.accountId = workspaceId.toString();
+            return this;
+        }
+
+        public Builder withAccountUUID(String accountUUID) {
+            this.accountUUID = accountUUID;
+            return this;
+        }
+
+        public Builder withCrn(String crn) {
+            this.crn = crn;
+            return this;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public CloudContext build() {
+            return new CloudContext(
+                    id,
+                    name,
+                    crn,
+                    platform,
+                    variant,
+                    location,
+                    userId,
+                    accountId,
+                    userName,
+                    accountUUID
+            );
+        }
     }
 }

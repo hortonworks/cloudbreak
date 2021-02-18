@@ -65,8 +65,18 @@ public abstract class AbstractRedbeamsProvisionAction<P extends Payload>
         MDCBuilder.buildMdcContext(dbStack);
         Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
         String accountId = dbStack.getOwnerCrn().getAccountId();
-        CloudContext cloudContext = new CloudContext(dbStack.getId(), dbStack.getName(), dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform(),
-                dbStack.getPlatformVariant(), location, dbStack.getOwnerCrn().getUserId(), dbStack.getUserName(), accountId);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(dbStack.getId())
+                .withName(dbStack.getName())
+                .withCrn(dbStack.getResourceCrn().toString())
+                .withPlatform(dbStack.getCloudPlatform())
+                .withVariant(dbStack.getPlatformVariant())
+                .withLocation(location)
+                .withUserId(dbStack.getOwnerCrn().getUserId())
+                .withUserName(dbStack.getUserName())
+                .withAccountId(accountId)
+                .withAccountUUID(accountId)
+                .build();
         Credential credential = credentialService.getCredentialByEnvCrn(dbStack.getEnvironmentId());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);

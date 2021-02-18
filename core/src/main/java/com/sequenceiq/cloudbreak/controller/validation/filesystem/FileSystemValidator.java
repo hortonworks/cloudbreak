@@ -45,7 +45,11 @@ public class FileSystemValidator {
             return;
         }
         LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
-        CloudContext cloudContext = new CloudContext(null, null, null, platform, userId, workspaceId);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(platform)
+                .withUserId(userId)
+                .withWorkspaceId(workspaceId)
+                .build();
         SpiFileSystem spiFileSystem = cloudStorageConverter.requestToSpiFileSystem(cloudStorageRequest);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
@@ -69,7 +73,11 @@ public class FileSystemValidator {
             return;
         }
         LOGGER.info("Sending fileSystemRequest to {} to validate the file system", platform);
-        CloudContext cloudContext = new CloudContext(null, null, null, platform, userId, workspaceId);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(platform)
+                .withUserId(userId)
+                .withWorkspaceId(workspaceId)
+                .build();
         SpiFileSystem spiFileSystem = converterUtil.convert(fileSystemValidationV4Request, SpiFileSystem.class);
         FileSystemValidationRequest request = new FileSystemValidationRequest(spiFileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));

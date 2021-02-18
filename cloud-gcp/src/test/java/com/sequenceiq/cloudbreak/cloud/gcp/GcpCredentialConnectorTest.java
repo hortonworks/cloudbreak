@@ -215,7 +215,14 @@ public class GcpCredentialConnectorTest {
     }
 
     private CloudContext createCloudContext() {
-        return new CloudContext(1L, "name", "crn", "platform", USER_ID, WORKSPACE_ID);
+        return CloudContext.Builder.builder()
+                .withId(1L)
+                .withName("name")
+                .withCrn("crn")
+                .withPlatform("platform")
+                .withUserId(USER_ID)
+                .withWorkspaceId(WORKSPACE_ID)
+                .build();
     }
 
     private CloudCredential createCloudCredential() {

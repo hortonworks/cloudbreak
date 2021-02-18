@@ -40,8 +40,15 @@ public class StackParameterService {
         LOGGER.debug("Get stack params");
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         if (credential != null) {
-            CloudContext cloudContext = new CloudContext(null, name, credential.getCrn(), credential.cloudPlatform(),
-                    stack.getCreator().getUserId(), stack.getWorkspace().getId());
+            CloudContext cloudContext = CloudContext.Builder.builder()
+                    .withName(name)
+                    .withCrn(credential.getCrn())
+                    .withPlatform(credential.cloudPlatform())
+                    .withUserId(stack.getCreator().getUserId())
+                    .withWorkspaceId(stack.getWorkspace().getId())
+                    .withAccountUUID(stack.getTenant().getName())
+                    .withAccountId(stack.getTenant().getId())
+                    .build();
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
             eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));

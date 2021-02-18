@@ -46,8 +46,18 @@ public class PlatformParameterService {
         MDCBuilder.addRequestId(requestId.orElse(UUID.randomUUID().toString()));
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
-                location, stack.getOwner(), stack.getAccountId());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getCloudPlatform())
+                .withLocation(location)
+                .withUserId(stack.getOwner())
+                .withUserName(stack.getOwner())
+                .withAccountId(stack.getAccountId())
+                .withAccountUUID(stack.getAccountId())
+                .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
         freeIpaFlowManager.notify(parameterRequest);

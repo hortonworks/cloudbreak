@@ -79,8 +79,18 @@ public class ServiceProviderConnectorAdapter {
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformVariant())
+                .withUserId(stack.getCreator().getUserId())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountUUID(stack.getTenant().getName())
+                .withAccountId(stack.getTenant().getId())
+                .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
@@ -114,8 +124,18 @@ public class ServiceProviderConnectorAdapter {
     public void deleteStack(Stack stack) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformVariant())
+                .withUserId(stack.getCreator().getUserId())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountUUID(stack.getTenant().getName())
+                .withAccountId(stack.getTenant().getId())
+                .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         List<CloudResource> resources = cloudResourceConverter.convert(stack.getResources());
@@ -150,8 +170,18 @@ public class ServiceProviderConnectorAdapter {
 
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformVariant())
+                .withUserId(stack.getCreator().getUserId())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountUUID(stack.getTenant().getName())
+                .withAccountId(stack.getTenant().getId())
+                .build();
         Credential credential = ThreadBasedUserCrnProvider
                 .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudCredential cloudCredential = credentialConverter.convert(credential);
@@ -171,8 +201,18 @@ public class ServiceProviderConnectorAdapter {
             return res.getTemplate();
         } catch (InterruptedException e) {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(),
-                    stack.getPlatformVariant(), location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
+            CloudContext cloudContext = CloudContext.Builder.builder()
+                    .withId(stack.getId())
+                    .withName(stack.getName())
+                    .withCrn(stack.getResourceCrn())
+                    .withPlatform(stack.getCloudPlatform())
+                    .withVariant(stack.getPlatformVariant())
+                    .withUserId(stack.getCreator().getUserId())
+                    .withLocation(location)
+                    .withWorkspaceId(stack.getWorkspace().getId())
+                    .withAccountUUID(stack.getTenant().getName())
+                    .withAccountId(stack.getTenant().getId())
+                    .build();
             LOGGER.error("Error while getting template: " + cloudContext, e);
             throw new OperationException(e);
         }
@@ -185,8 +225,18 @@ public class ServiceProviderConnectorAdapter {
     public PlatformParameters getPlatformParameters(Stack stack) {
         LOGGER.debug("Get platform parameters for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformVariant())
+                .withUserId(stack.getCreator().getUserId())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountUUID(stack.getTenant().getName())
+                .withAccountId(stack.getTenant().getId())
+                .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
@@ -208,8 +258,18 @@ public class ServiceProviderConnectorAdapter {
     public Variant checkAndGetPlatformVariant(Stack stack) {
         LOGGER.debug("Get platform variant for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.cloudPlatform(), stack.getPlatformVariant(),
-                location, stack.getCreator().getUserId(), stack.getWorkspace().getId().toString());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getPlatformVariant())
+                .withUserId(stack.getCreator().getUserId())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountUUID(stack.getTenant().getName())
+                .withAccountId(stack.getTenant().getId())
+                .build();
         Credential credential = ThreadBasedUserCrnProvider
                 .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudCredential cloudCredential = credentialConverter.convert(credential);

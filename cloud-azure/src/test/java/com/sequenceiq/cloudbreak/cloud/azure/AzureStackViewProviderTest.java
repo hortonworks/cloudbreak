@@ -96,7 +96,11 @@ public class AzureStackViewProviderTest {
 
     private CloudContext createCloudContext() {
         Location location = Location.location(Region.region("us-west-1"), AvailabilityZone.availabilityZone("us-west-1"));
-        return new CloudContext(null, STACK_NAME, null, null, null, location, null, null, "");
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withName(STACK_NAME)
+                .withLocation(location)
+                .build();
+        return cloudContext;
     }
 
     private List<Group> createScaledGroups() {

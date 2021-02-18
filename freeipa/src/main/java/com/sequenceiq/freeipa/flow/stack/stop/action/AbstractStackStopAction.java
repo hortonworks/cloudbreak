@@ -57,8 +57,18 @@ public abstract class AbstractStackStopAction<P extends Payload>
         MDCBuilder.buildMdcContext(stack);
         List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.getResourceCrn(), stack.getCloudPlatform(), stack.getCloudPlatform(),
-                location, stack.getOwner(), stack.getAccountId());
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getCloudPlatform())
+                .withLocation(location)
+                .withUserId(stack.getOwner())
+                .withUserName(stack.getOwner())
+                .withAccountId(stack.getAccountId())
+                .withAccountUUID(stack.getAccountId())
+                .build();
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         return new StackStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);

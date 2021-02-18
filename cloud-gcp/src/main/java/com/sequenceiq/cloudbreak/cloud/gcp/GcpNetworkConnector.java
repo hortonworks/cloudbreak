@@ -189,27 +189,27 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
     }
 
     private CloudContext getCloudContext(NetworkCreationRequest networkRequest) {
-        return new CloudContext(
-                networkRequest.getEnvId(),
-                networkRequest.getEnvName(),
-                null,
-                CloudPlatform.GCP.name(),
-                CloudPlatform.GCP.name(),
-                location(networkRequest.getRegion()),
-                networkRequest.getCreatorCrn(),
-                networkRequest.getAccountId());
+        return CloudContext.Builder.builder()
+                .withId(networkRequest.getEnvId())
+                .withName(networkRequest.getEnvName())
+                .withPlatform(CloudPlatform.GCP.name())
+                .withVariant(CloudPlatform.GCP.name())
+                .withLocation(location(networkRequest.getRegion()))
+                .withUserId(networkRequest.getCreatorCrn())
+                .withAccountId(networkRequest.getAccountId())
+                .build();
     }
 
     private CloudContext getCloudContext(NetworkDeletionRequest networkRequest) {
-        return new CloudContext(
-                networkRequest.getEnvId(),
-                networkRequest.getEnvName(),
-                null,
-                CloudPlatform.GCP.name(),
-                CloudPlatform.GCP.name(),
-                location(region(networkRequest.getRegion())),
-                networkRequest.getUserId(),
-                networkRequest.getAccountId());
+        return CloudContext.Builder.builder()
+                .withId(networkRequest.getEnvId())
+                .withName(networkRequest.getEnvName())
+                .withPlatform(CloudPlatform.GCP.name())
+                .withVariant(CloudPlatform.GCP.name())
+                .withLocation(location(region(networkRequest.getRegion())))
+                .withUserId(networkRequest.getUserId())
+                .withAccountId(networkRequest.getAccountId())
+                .build();
     }
 
     private Network buildNetworkForCreation(NetworkCreationRequest networkRequest) {
