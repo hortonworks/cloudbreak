@@ -66,6 +66,8 @@ public class FlowPayloadToDiagnosticDetailsConverter {
             } else if (failedState.equals(currentState)
                     || failedHandledEvent.equals(nextEvent)) {
                 status = DiagnosticsCollectionStatus.FAILED;
+            } else {
+                status = DiagnosticsCollectionStatus.CANCELLED;
             }
         }
         return status;

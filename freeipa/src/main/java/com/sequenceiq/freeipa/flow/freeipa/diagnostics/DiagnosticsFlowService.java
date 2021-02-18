@@ -110,7 +110,7 @@ public class DiagnosticsFlowService {
 
     private Set<Node> filterNodesByExcludeHosts(Set<String> excludeHosts, Set<InstanceMetaData> instanceMetaDataSet) {
         return freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet).stream().filter(
-                n -> excludeHosts.isEmpty() || !excludeHosts.contains(n.getHostname())).collect(Collectors.toSet());
+                n -> CollectionUtils.isEmpty(excludeHosts) || !excludeHosts.contains(n.getHostname())).collect(Collectors.toSet());
     }
 
     private boolean shouldUnrensponsiveNodeBeIncluded(Node node, Set<String> initialExcludeHosts) {

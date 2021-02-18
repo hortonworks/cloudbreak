@@ -50,6 +50,13 @@ public interface DiagnosticsEndpoint {
     ListDiagnosticsCollectionResponse listCollections(@PathParam("crn") String crn);
 
     @POST
+    @Path("{crn}/collections/cancel")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
+            nickname = "cancelSdxDiagnosticsCollections")
+    void cancelCollections(@PathParam("crn") String crn);
+
+    @POST
     @Path("cm")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.COLLECT_CM_DIAGNOSTICS,

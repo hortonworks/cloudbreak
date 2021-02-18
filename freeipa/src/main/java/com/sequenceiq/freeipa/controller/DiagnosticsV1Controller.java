@@ -62,4 +62,10 @@ public class DiagnosticsV1Controller implements DiagnosticsV1Endpoint {
     public ListDiagnosticsCollectionResponse listDiagnosticsCollections(@ResourceCrn String environmentCrn) {
         return diagnosticsService.getDiagnosticsCollections(environmentCrn);
     }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    public void cancelCollections(@ResourceCrn String environmentCrn) {
+        diagnosticsService.cancelDiagnosticsCollections(environmentCrn);
+    }
 }

@@ -70,6 +70,12 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public void cancelCollections(@ResourceCrn String crn) {
+        diagnosticsService.cancelDiagnosticsCollections(crn);
+    }
+
+    @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
     public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionRequest request) {
         String userCrn = crnService.getCloudbreakUser().getUserCrn();

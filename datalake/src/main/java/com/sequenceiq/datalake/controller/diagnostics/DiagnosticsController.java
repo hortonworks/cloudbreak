@@ -48,6 +48,12 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public void cancelCollections(@ResourceCrn String crn) {
+        diagnosticsService.cancelDiagnosticsCollection(crn);
+    }
+
+    @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
     public FlowIdentifier collectCmDiagnostics(@RequestObject @Valid CmDiagnosticsCollectionRequest request) {
         return diagnosticsService.collectCmDiagnostics(request);
