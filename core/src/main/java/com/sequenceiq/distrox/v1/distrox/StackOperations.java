@@ -248,7 +248,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
-        Boolean replacevms = determineReplaceVmsParameter(stack, request.getReplaceVms());
+        boolean replacevms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replacevms);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
@@ -264,9 +264,9 @@ public class StackOperations implements ResourceBasedCrnProvider {
         }
     }
 
-    private Boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
+    private boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
         if (stack.isDatalake() || replaceVms != null) {
-            return replaceVms;
+            return Optional.ofNullable(replaceVms).orElse(Boolean.TRUE);
         } else {
             return clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster());
         }

@@ -1,7 +1,5 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -64,14 +62,14 @@ public class DistroXUpgradeService {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
         validateUpgradeCandidates(cluster, upgradeV4Response);
         verifyPaywallAccess(userCrn, request);
-        return initUpgrade(request, upgradeV4Response.getUpgradeCandidates(), cluster, workspaceId);
+        return initUpgrade(request, upgradeV4Response, cluster, workspaceId);
     }
 
-    private UpgradeV4Response initUpgrade(UpgradeV4Request request, List<ImageInfoV4Response> upgradeCandidates, NameOrCrn cluster, Long workspaceId) {
-        ImageInfoV4Response image = imageSelector.determineImageId(request, upgradeCandidates);
+    private UpgradeV4Response initUpgrade(UpgradeV4Request request, UpgradeV4Response upgradeV4Response, NameOrCrn cluster, Long workspaceId) {
+        ImageInfoV4Response image = imageSelector.determineImageId(request, upgradeV4Response.getUpgradeCandidates());
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, image);
         Long stackId = stackService.getIdByNameOrCrnInWorkspace(cluster, workspaceId);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stackId, imageChangeDto, request.getReplaceVms());
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stackId, imageChangeDto, upgradeV4Response.isReplaceVms());
         return new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
     }
 
