@@ -72,8 +72,9 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private ImageFilterParamsFactory imageFilterParamsFactory;
 
-    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, Boolean replaceVms) {
+    public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms) {
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
+        upgradeOptions.setReplaceVms(replaceVms);
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             if (!stack.getStatus().isAvailable()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));

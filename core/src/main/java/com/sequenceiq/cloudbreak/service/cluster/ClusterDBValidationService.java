@@ -19,7 +19,7 @@ public class ClusterDBValidationService {
     @Inject
     private RdsConfigService rdsConfigService;
 
-    public Boolean isGatewayRepairEnabled(Cluster cluster) {
+    public boolean isGatewayRepairEnabled(Cluster cluster) {
         return cluster.getEmbeddedDatabaseOnAttachedDisk() || isGatewayDatabaseAvailable(cluster);
     }
 

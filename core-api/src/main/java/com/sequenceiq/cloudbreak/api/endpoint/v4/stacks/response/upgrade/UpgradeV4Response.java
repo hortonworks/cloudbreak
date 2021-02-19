@@ -17,6 +17,8 @@ public class UpgradeV4Response {
 
     private FlowIdentifier flowIdentifier;
 
+    private boolean replaceVms;
+
     public UpgradeV4Response() {
     }
 
@@ -72,12 +74,21 @@ public class UpgradeV4Response {
         this.flowIdentifier = flowIdentifier;
     }
 
+    public boolean isReplaceVms() {
+        return replaceVms;
+    }
+
+    public void setReplaceVms(boolean replaceVms) {
+        this.replaceVms = replaceVms;
+    }
+
     @Override
     public String toString() {
         return "UpgradeOptionsV4Response{" +
                 "current=" + current +
                 ", upgradeCandidates=" + upgradeCandidates +
                 ", reason='" + reason + '\'' +
+                ", replaceVms='" + replaceVms + '\'' +
                 '}';
     }
 }
