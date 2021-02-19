@@ -185,7 +185,7 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return stackCommonService.deleteInstanceInWorkspace(nameOrCrn, workspaceId, instanceId, forced);
     }
 
-    public FlowIdentifier deleteInstances(NameOrCrn nameOrCrn, Long workspaceId, List<String> instanceIds, boolean forced) {
+    public FlowIdentifier deleteInstances(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
         return stackCommonService.deleteMultipleInstancesInWorkspace(nameOrCrn, workspaceId, instanceIds, forced);
     }
 

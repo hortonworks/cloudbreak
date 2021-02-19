@@ -11,13 +11,13 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -54,8 +54,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -70,6 +70,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
@@ -390,22 +391,35 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstancesByName(@ResourceName String name, @NotEmpty List<String> instances, boolean forced) {
+    public void deleteInstancesByName(@ResourceName String name, List<String> instances,
+            MultipleInstanceDeleteRequest request, boolean forced) {
         stackOperations.deleteInstances(
                 NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
-                instances,
+                getInstances(instances, request),
                 forced);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstancesByCrn(@ResourceCrn String crn, @NotEmpty List<String> instances, boolean forced) {
+    public void deleteInstancesByCrn(@ResourceCrn String crn, List<String> instances,
+            MultipleInstanceDeleteRequest request, boolean forced) {
         stackOperations.deleteInstances(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
-                instances,
+                getInstances(instances, request),
                 forced);
+    }
+
+    private Set<String> getInstances(List<String> instances, MultipleInstanceDeleteRequest request) {
+        Set<String> ids = new HashSet<>();
+        if (instances != null) {
+            ids.addAll(instances);
+        }
+        if (request != null && request.getInstances() != null) {
+            ids.addAll(request.getInstances());
+        }
+        return ids;
     }
 
     @Override

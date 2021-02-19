@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -69,6 +68,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.MultipleInstanceDeleteRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.docs.DiagnosticsOperationDescriptions;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
@@ -278,7 +278,8 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstancesDistroXV1ByName")
     void deleteInstancesByName(@PathParam("name") String name,
-            @QueryParam("id") @NotEmpty List<String> instances,
+            @QueryParam("id") List<String> instances,
+            MultipleInstanceDeleteRequest request,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @DELETE
@@ -286,7 +287,8 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstancesDistroXV1ByCrn")
     void deleteInstancesByCrn(@PathParam("crn") String crn,
-            @QueryParam("id") @NotEmpty List<String> instances,
+            @QueryParam("id") List<String> instances,
+            MultipleInstanceDeleteRequest request,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @PUT

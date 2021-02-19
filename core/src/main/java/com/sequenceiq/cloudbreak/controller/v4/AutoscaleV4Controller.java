@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -90,7 +91,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     public void decommissionInstancesForClusterCrn(String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
         stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), workspaceId,
-                instanceIds, forced);
+                new HashSet(instanceIds), forced);
     }
 
     @Override

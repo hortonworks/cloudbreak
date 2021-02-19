@@ -476,6 +476,7 @@ public class ModelDescriptions {
 
     public static class InstanceGroupModelDescription {
         public static final String INSTANCE_GROUP_NAME = "name of the instance group";
+        public static final String MULTI_INSTANCE = "multiple instance which should be deleted";
         public static final String INSTANCE_GROUP_TYPE = "type of the instance group, default value is CORE";
         public static final String TEMPLATE = "instancegroup related template";
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
