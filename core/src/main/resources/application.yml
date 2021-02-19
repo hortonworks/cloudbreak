@@ -301,6 +301,7 @@ cb:
         Standard_D8as_v4,
         Standard_D16as_v4,
         Standard_D32as_v4,
+        Standard_E4a_v4,
         Standard_E8a_v4,
         Standard_E16a_v4,
         Standard_E32a_v4,
