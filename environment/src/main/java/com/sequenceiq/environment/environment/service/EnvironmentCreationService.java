@@ -149,7 +149,6 @@ public class EnvironmentCreationService {
         LOGGER.info("Validating environment creation. CreationDto: '{}', Environment: '{}'.", creationDto, environment);
         ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
-        validationBuilder.merge(validatorService.validateTags(creationDto));
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         validationBuilder.ifError(() -> isCloudPlatformInvalid(creationDto.getCreator(), creationDto.getCloudPlatform()),
