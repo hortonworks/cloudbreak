@@ -23,9 +23,10 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
     private static final List<Transition<SdxStopState, SdxStopEvent>> TRANSITIONS = new Transition.Builder<SdxStopState, SdxStopEvent>()
             .defaultFailureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
 
-            .from(INIT_STATE).to(SDX_STOP_SYNC_STATE)
+            .from(INIT_STATE).to(SDX_STOP_START_STATE)
             .event(SdxStopEvent.SDX_STOP_EVENT).noFailureEvent()
 
+            // deprecated, should be removed in the next release
             .from(SDX_STOP_SYNC_STATE).to(SDX_STOP_START_STATE)
             .event(SdxStopEvent.SDX_SYNC_STOP_FINISHED_EVENT).noFailureEvent()
 
