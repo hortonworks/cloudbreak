@@ -4,9 +4,11 @@ package clusterconnectivitymanagementv2;
 
 option java_package = "com.cloudera.thunderhead.service.clusterconnectivitymanagementv2";
 option java_outer_classname = "ClusterConnectivityManagementV2Proto";
+option go_package = "com/cloudera/cdp/protobuf";
 
 import "version.proto";
 import "options.proto";
+import "paging.proto";
 
 // ClusterConnectivityManagementV2 service for provisioning and managing inverting-proxy.
 service ClusterConnectivityManagementV2 {
@@ -32,6 +34,13 @@ service ClusterConnectivityManagementV2 {
   rpc UnregisterAgent(UnregisterAgentRequest)
     returns (UnregisterAgentResponse) {}
 
+  // Lists all registered agents matching a supplied query
+  rpc ListAgents(ListAgentsRequest)
+    returns (ListAgentsResponse) {}
+
+  // GetAllAgentsCertificates for getting certificates of all the agents for an account.
+  rpc GetAllAgentsCertificates(GetAllAgentsCertificatesRequest)
+    returns (GetAllAgentsCertificatesResponse) {}
 }
 
 message CreateOrGetInvertingProxyRequest {
@@ -60,16 +69,33 @@ message RegisterAgentRequest {
   // Key ID to identify the cluster uniquely.
   // This will be used to encipher private key.
   string keyId = 3;
+  // CRN of the environment this agent is going to be deployed in. Passing the environmentCrn as
+  // part of registration implies that the provisioning service consents to the use this agent to
+  // target backend services outside the host it is deployed on.
+  // As part of future work, we intend to bring a dedicated pool of agents which would be shared
+  // across the environment. Fos suce agents, we expect that environmentCrn would always be
+  // supplied during registration.
+  string environmentCrn = 4;
 }
 
 message RegisterAgentResponse {
-  //Inverting proxy agent with required fields.
+  // Inverting proxy agent with required fields.
   InvertingProxyAgent invertingProxyAgent = 1;
 }
 
 message UnregisterAgentRequest {
   // Unique identifier for each agent
   string agentCrn = 1;
+}
+
+message GetAllAgentsCertificatesRequest {
+  // Account ID for which the certificates need to retrieved.
+  string accountId = 1;
+}
+
+message GetAllAgentsCertificatesResponse {
+  // Certificates of all the agents.
+  repeated string certificates = 1 [(options.FieldExtension.skipLogging) = true];
 }
 
 message UnregisterAgentResponse {}
@@ -94,7 +120,10 @@ message InvertingProxy {
   // This is not sent if the inverting proxy is created and is ready to accept requests
   string causeOfFailure = 3;
   // Certificate of inverting-proxy that needs to be passed to agent.
-  string certificate = 4 [(options.FieldExtension.skipLogging) = true];
+  // We intend to depracate this field in favor of 'caCertificate'.
+  string certificate = 4 [(options.FieldExtension.skipLogging) = true, (options.FieldExtension.deprecated) = true];
+  // CA Certificate used to sign certificate of inverting-proxy server. It needs to be passed to agent.
+  string caCertificate = 5 [(options.FieldExtension.skipLogging) = true];
 }
 
 message InvertingProxyAgent {
@@ -103,5 +132,33 @@ message InvertingProxyAgent {
   // Enciphered Generated key for the agent
   string encipheredPrivateKey = 2 [(options.FieldExtension.skipLogging) = true];
   // Generated cert for the agent
-  string certificate = 3 [(options.FieldExtension.skipLogging) = true];
+  // We intend to deprecate this field in favor of 'certificates'.
+  // This is required to support CA signed certificates for agents.
+  string certificate = 3 [(options.FieldExtension.skipLogging) = true, (options.FieldExtension.deprecated) = true];
+  // CRN of the environment this agent is going to be deployed in. Having the environmentCrn set here
+  // implies that the provisioning service has consented to the use of this agent to target backend services
+  // outside the host it is deployed on.
+  string environmentCrn = 4;
+  // Generated certificate and the trust chain for agent
+  repeated string certificates = 5 [(options.FieldExtension.skipLogging) = true];
+}
+
+message ListAgentsRequest {
+  int32 pageSize = 1;
+  paging.PageToken pageToken = 2;
+
+  // Optional filter to narrow results. If not supplied, all agents would be returned.
+  oneof filter_oneof {
+    // If an accountId is passed-in, all agents belonging to this accountId would be returned.
+    string accountId = 3;
+    // If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
+    string envirinmentCrn = 4;
+  }
+}
+
+message ListAgentsResponse {
+  paging.PageToken nextPageToken = 1;
+
+  // List of all agents (matching the optional filter if supplied)
+  repeated InvertingProxyAgent agents = 2;
 }

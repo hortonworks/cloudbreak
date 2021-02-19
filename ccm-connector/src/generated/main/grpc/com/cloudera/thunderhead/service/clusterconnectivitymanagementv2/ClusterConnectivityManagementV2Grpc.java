@@ -215,6 +215,80 @@ public final class ClusterConnectivityManagementV2Grpc {
      }
      return getUnregisterAgentMethod;
   }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getListAgentsMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> METHOD_LIST_AGENTS = getListAgentsMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> getListAgentsMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> getListAgentsMethod() {
+    return getListAgentsMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> getListAgentsMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> getListAgentsMethod;
+    if ((getListAgentsMethod = ClusterConnectivityManagementV2Grpc.getListAgentsMethod) == null) {
+      synchronized (ClusterConnectivityManagementV2Grpc.class) {
+        if ((getListAgentsMethod = ClusterConnectivityManagementV2Grpc.getListAgentsMethod) == null) {
+          ClusterConnectivityManagementV2Grpc.getListAgentsMethod = getListAgentsMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "clusterconnectivitymanagementv2.ClusterConnectivityManagementV2", "ListAgents"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new ClusterConnectivityManagementV2MethodDescriptorSupplier("ListAgents"))
+                  .build();
+          }
+        }
+     }
+     return getListAgentsMethod;
+  }
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @java.lang.Deprecated // Use {@link #getGetAllAgentsCertificatesMethod()} instead. 
+  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> METHOD_GET_ALL_AGENTS_CERTIFICATES = getGetAllAgentsCertificatesMethodHelper();
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> getGetAllAgentsCertificatesMethod;
+
+  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> getGetAllAgentsCertificatesMethod() {
+    return getGetAllAgentsCertificatesMethodHelper();
+  }
+
+  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
+      com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> getGetAllAgentsCertificatesMethodHelper() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> getGetAllAgentsCertificatesMethod;
+    if ((getGetAllAgentsCertificatesMethod = ClusterConnectivityManagementV2Grpc.getGetAllAgentsCertificatesMethod) == null) {
+      synchronized (ClusterConnectivityManagementV2Grpc.class) {
+        if ((getGetAllAgentsCertificatesMethod = ClusterConnectivityManagementV2Grpc.getGetAllAgentsCertificatesMethod) == null) {
+          ClusterConnectivityManagementV2Grpc.getGetAllAgentsCertificatesMethod = getGetAllAgentsCertificatesMethod = 
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(
+                  "clusterconnectivitymanagementv2.ClusterConnectivityManagementV2", "GetAllAgentsCertificates"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse.getDefaultInstance()))
+                  .setSchemaDescriptor(new ClusterConnectivityManagementV2MethodDescriptorSupplier("GetAllAgentsCertificates"))
+                  .build();
+          }
+        }
+     }
+     return getGetAllAgentsCertificatesMethod;
+  }
 
   /**
    * Creates a new async stub that supports all call types for the service
@@ -298,6 +372,26 @@ public final class ClusterConnectivityManagementV2Grpc {
       asyncUnimplementedUnaryCall(getUnregisterAgentMethodHelper(), responseObserver);
     }
 
+    /**
+     * <pre>
+     * Lists all registered agents matching a supplied query
+     * </pre>
+     */
+    public void listAgents(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getListAgentsMethodHelper(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * GetAllAgentsCertificates for getting certificates of all the agents for an account.
+     * </pre>
+     */
+    public void getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> responseObserver) {
+      asyncUnimplementedUnaryCall(getGetAllAgentsCertificatesMethodHelper(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -335,6 +429,20 @@ public final class ClusterConnectivityManagementV2Grpc {
                 com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest,
                 com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse>(
                   this, METHODID_UNREGISTER_AGENT)))
+          .addMethod(
+            getListAgentsMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest,
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse>(
+                  this, METHODID_LIST_AGENTS)))
+          .addMethod(
+            getGetAllAgentsCertificatesMethodHelper(),
+            asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest,
+                com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>(
+                  this, METHODID_GET_ALL_AGENTS_CERTIFICATES)))
           .build();
     }
   }
@@ -416,6 +524,28 @@ public final class ClusterConnectivityManagementV2Grpc {
       asyncUnaryCall(
           getChannel().newCall(getUnregisterAgentMethodHelper(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     * Lists all registered agents matching a supplied query
+     * </pre>
+     */
+    public void listAgents(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getListAgentsMethodHelper(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * GetAllAgentsCertificates for getting certificates of all the agents for an account.
+     * </pre>
+     */
+    public void getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> responseObserver) {
+      asyncUnaryCall(
+          getChannel().newCall(getGetAllAgentsCertificatesMethodHelper(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -489,6 +619,26 @@ public final class ClusterConnectivityManagementV2Grpc {
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse unregisterAgent(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest request) {
       return blockingUnaryCall(
           getChannel(), getUnregisterAgentMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists all registered agents matching a supplied query
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse listAgents(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getListAgentsMethodHelper(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * GetAllAgentsCertificates for getting certificates of all the agents for an account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse getAllAgentsCertificates(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request) {
+      return blockingUnaryCall(
+          getChannel(), getGetAllAgentsCertificatesMethodHelper(), getCallOptions(), request);
     }
   }
 
@@ -569,6 +719,28 @@ public final class ClusterConnectivityManagementV2Grpc {
       return futureUnaryCall(
           getChannel().newCall(getUnregisterAgentMethodHelper(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Lists all registered agents matching a supplied query
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse> listAgents(
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getListAgentsMethodHelper(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * GetAllAgentsCertificates for getting certificates of all the agents for an account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse> getAllAgentsCertificates(
+        com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest request) {
+      return futureUnaryCall(
+          getChannel().newCall(getGetAllAgentsCertificatesMethodHelper(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_VERSION = 0;
@@ -576,6 +748,8 @@ public final class ClusterConnectivityManagementV2Grpc {
   private static final int METHODID_REMOVE_INVERTING_PROXY = 2;
   private static final int METHODID_REGISTER_AGENT = 3;
   private static final int METHODID_UNREGISTER_AGENT = 4;
+  private static final int METHODID_LIST_AGENTS = 5;
+  private static final int METHODID_GET_ALL_AGENTS_CERTIFICATES = 6;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -613,6 +787,14 @@ public final class ClusterConnectivityManagementV2Grpc {
         case METHODID_UNREGISTER_AGENT:
           serviceImpl.unregisterAgent((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse>) responseObserver);
+          break;
+        case METHODID_LIST_AGENTS:
+          serviceImpl.listAgents((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse>) responseObserver);
+          break;
+        case METHODID_GET_ALL_AGENTS_CERTIFICATES:
+          serviceImpl.getAllAgentsCertificates((com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -680,6 +862,8 @@ public final class ClusterConnectivityManagementV2Grpc {
               .addMethod(getRemoveInvertingProxyMethodHelper())
               .addMethod(getRegisterAgentMethodHelper())
               .addMethod(getUnregisterAgentMethodHelper())
+              .addMethod(getListAgentsMethodHelper())
+              .addMethod(getGetAllAgentsCertificatesMethodHelper())
               .build();
         }
       }
