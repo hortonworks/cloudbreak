@@ -18,7 +18,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
-import com.sequenceiq.cloudbreak.cloud.TagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
@@ -71,11 +70,6 @@ public class YarnPlatformParameters implements PlatformParameters {
 
     @Override
     public TagSpecification tagSpecification() {
-        return null;
-    }
-
-    @Override
-    public TagValidator tagValidator() {
         return null;
     }
 
