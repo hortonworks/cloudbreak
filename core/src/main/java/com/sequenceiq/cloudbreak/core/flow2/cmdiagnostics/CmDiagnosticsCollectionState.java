@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
+package com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics;
 
 import com.sequenceiq.flow.core.FlowState;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
+package com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;

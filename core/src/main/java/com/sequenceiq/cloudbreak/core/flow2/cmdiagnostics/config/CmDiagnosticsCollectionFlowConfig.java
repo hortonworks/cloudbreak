@@ -1,28 +1,28 @@
-package com.sequenceiq.cloudbreak.core.flow2.diagnostics.config;
+package com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.config;
 
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_CLEANUP_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_COLLECTION_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_COLLECTION_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_COLLECTION_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_UPLOAD_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.FINAL_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState.INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.FAILED_CM_DIAGNOSTICS_COLLECTION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.FINALIZE_CM_DIAGNOSTICS_COLLECTION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.FINISH_CM_DIAGNOSTICS_COLLECTION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.HANDLED_FAILED_CM_DIAGNOSTICS_COLLECTION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_CLEANUP_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_COLLECTION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_INIT_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_UPLOAD_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_CLEANUP_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_COLLECTION_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_COLLECTION_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_COLLECTION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.CM_DIAGNOSTICS_UPLOAD_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.FINAL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.FAILED_CM_DIAGNOSTICS_COLLECTION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.FINALIZE_CM_DIAGNOSTICS_COLLECTION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.FINISH_CM_DIAGNOSTICS_COLLECTION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.HANDLED_FAILED_CM_DIAGNOSTICS_COLLECTION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_CLEANUP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_COLLECTION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors.START_CM_DIAGNOSTICS_UPLOAD_EVENT;
 
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.CmDiagnosticsCollectionState;
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.CmDiagnosticsCollectionStateSelectors;
+import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState;
+import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
