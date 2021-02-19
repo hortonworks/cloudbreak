@@ -1,7 +1,5 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,10 +21,6 @@ public class TagValidator {
     }
 
     public ValidationResult validateTags(String cloudPlatform, Map<String, String> tags) {
-        //TODO gcp ignored due to special tag handling in gcp. remove this when cb factory tags (like Owner) sanitized in the env request
-        if (GCP.name().equalsIgnoreCase(cloudPlatform)) {
-            return ValidationResult.empty();
-        }
         Optional<com.sequenceiq.cloudbreak.cloud.TagValidator> tagValidatorConnector = getTagValidatorConnector(cloudPlatform);
         if (tagValidatorConnector.isEmpty()) {
             return ValidationResult.empty();
