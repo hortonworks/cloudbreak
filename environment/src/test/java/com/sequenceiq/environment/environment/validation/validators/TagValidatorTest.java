@@ -35,9 +35,11 @@ class TagValidatorTest {
 
     public static final String BAD_KEY = "azureprefix";
 
-    public static final String GOOD_VALUE = "azure@cloudera.com prx:pfx:<>&^%";
+    public static final String GOOD_VALUE = "azure";
 
     public static final String GOOD_KEY = "azprefix";
+
+    public static final String BAD_VALUE = ".";
 
     @Inject
     private TagValidator tagValidatorUnderTest;
@@ -49,8 +51,8 @@ class TagValidatorTest {
                         () -> testNegative(BAD_KEY, GOOD_VALUE, "tag names are not well")),
                 DynamicTest.dynamicTest("tag key is invalid, regular expression is printed",
                         () -> testNegative(BAD_KEY, GOOD_VALUE, "regular expression")),
-                DynamicTest.dynamicTest("tag value is valid ",
-                        () -> testPositive(GOOD_KEY, GOOD_VALUE)));
+                DynamicTest.dynamicTest("tag value is invalid ",
+                        () -> testNegative(GOOD_KEY, BAD_VALUE, "tag values are not well")));
     }
 
     public void testNegative(String tag, String value, String messagePortion) {
@@ -58,11 +60,6 @@ class TagValidatorTest {
         Assertions.assertTrue(result.hasError(), "tag validation should fail");
         Assertions.assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
         Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
-    }
-
-    public void testPositive(String tag, String value) {
-        ValidationResult result = tagValidatorUnderTest.validateTags(AZURE, Map.of(tag, value));
-        Assertions.assertFalse(result.hasError(), "tag validation should pass");
     }
 
     @Configuration
