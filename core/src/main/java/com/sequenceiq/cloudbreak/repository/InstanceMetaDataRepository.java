@@ -7,7 +7,9 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
+import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -25,7 +27,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 @Transactional(TxType.REQUIRED)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId " +
             "AND i.instanceStatus <> 'TERMINATED' " +
@@ -40,15 +42,15 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "AND i.instanceStatus <> 'DELETED_BY_PROVIDER'")
     Set<InstanceMetaData> findNotTerminatedForStackWithoutInstanceGroups(@Param("stackId") Long stackId);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceMetaData> findByStackIdAndInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceMetaData> findHostInStack(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
@@ -60,39 +62,43 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceMetaData> findHostInStackWithoutInstanceGroup(@Param("stackId") Long stackId, @Param("hostName") String hostName);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id= :instanceGroupId AND i.instanceStatus in ('CREATED')")
     Set<InstanceMetaData> findUnusedHostsInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.groupName= :instanceGroupName "
             + "AND i.instanceStatus in ('CREATED') AND i.instanceGroup.stack.id= :stackId")
     Set<InstanceMetaData> findUnusedHostsInInstanceGroup(@Param("stackId") Long stackId, @Param("instanceGroupName") String instanceGroupName);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.id = :instanceGroupId AND i.instanceStatus <> 'TERMINATED'")
     List<InstanceMetaData> findAliveInstancesInInstanceGroup(@Param("instanceGroupId") Long instanceGroupId);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceGroup.groupName= :groupName "
             + "AND i.instanceStatus in ('CREATED', 'SERVICES_RUNNING', 'DECOMMISSIONED', 'FAILED', 'STOPPED')")
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.privateIp= :privateAddress AND i.instanceStatus <> 'TERMINATED'")
     Optional<InstanceMetaData> findNotTerminatedByPrivateAddress(@Param("stackId") Long stackId, @Param("privateAddress") String privateAddress);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup, InstanceStatus status);
 
     @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY' "
             + "AND i.instanceStatus <> 'TERMINATED'")
     Optional<String> getServerCertByStackId(@Param("stackId") Long stackId);
 
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraph.EntityGraphType.LOAD)
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
             + "AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceMetaData> getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus = 'TERMINATED' "
+            + "AND i.instanceGroup.stack.id= :stackId ORDER BY i.terminationDate DESC")
+    List<InstanceMetaData> geTerminatedPrimaryGatewayInstanceMetadataOrdered(@Param("stackId") Long stackId, Pageable pageable);
 
     @Query("SELECT i.discoveryFQDN FROM InstanceMetaData i WHERE i.instanceGroup.id = :instanceGroupId AND i.instanceMetadataType = 'GATEWAY_PRIMARY' AND"
             + " i.instanceStatus <> 'TERMINATED' AND i.instanceGroup.stack.id= :stackId")

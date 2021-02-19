@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -122,6 +123,16 @@ public class InstanceMetaDataService {
             return repository.getPrimaryGatewayInstanceMetadata(stackId);
         } catch (AccessDeniedException ignore) {
             LOGGER.debug("No primary gateway for stack [{}]", stackId);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<InstanceMetaData> getLastTerminatedPrimaryGatewayInstanceMetadata(long stackId) {
+        try {
+            List<InstanceMetaData> result = repository.geTerminatedPrimaryGatewayInstanceMetadataOrdered(stackId, PageRequest.of(0, 1));
+            return result.isEmpty() ? Optional.empty() : Optional.of(result.get(0));
+        } catch (AccessDeniedException ignore) {
+            LOGGER.debug("Cannot fetch the terminated primary gateways for stack [{}]", stackId);
             return Optional.empty();
         }
     }

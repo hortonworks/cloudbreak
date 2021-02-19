@@ -159,9 +159,9 @@ public class InstanceMetaData implements ProvisionEntity {
         this.ambariServer = ambariServer;
     }
 
-    public void setServer(Boolean ambariServer) {
-        this.ambariServer = ambariServer;
-        clusterManagerServer = ambariServer;
+    public void setServer(Boolean server) {
+        ambariServer = server;
+        clusterManagerServer = server;
     }
 
     public void setClusterManagerServer(Boolean clusterManagerServer) {
@@ -339,8 +339,9 @@ public class InstanceMetaData implements ProvisionEntity {
                 .add("publicIp='" + publicIp + "'")
                 .add("instanceId='" + instanceId + "'")
                 .add("discoveryFQDN='" + discoveryFQDN + "'")
+                .add("instanceStatus=" + instanceStatus)
+                .add("instanceMetadataType=" + instanceMetadataType)
                 .add("instanceName='" + instanceName + "'")
-                .add("instanceStatus='" + instanceStatus + "'")
                 .add("statusReason='" + statusReason + "'")
                 .toString();
     }
