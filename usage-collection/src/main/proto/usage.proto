@@ -1058,6 +1058,8 @@ message CDPOperationDetails {
     string flowState = 9;
     // Correlation ID to correlate events written together
     string correlationId = 10;
+    // Cloud provider identifier
+    CDPEnvironmentsEnvironmentType.Value environmentType = 11;
 }
 
 message CDPEnvironmentDetails {

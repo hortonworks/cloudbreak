@@ -38,6 +38,11 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals("", details.getResourceName());
         Assert.assertEquals("", details.getInitiatorCrn());
         Assert.assertEquals("", details.getCorrelationId());
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowId());
+        Assert.assertEquals("", details.getFlowChainId());
+        Assert.assertEquals("", details.getFlowState());
+        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
 
         Assert.assertEquals("version-1234", details.getApplicationVersion());
     }
