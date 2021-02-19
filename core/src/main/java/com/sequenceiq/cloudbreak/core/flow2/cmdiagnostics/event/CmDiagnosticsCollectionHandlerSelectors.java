@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
+package com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event;
 
 import com.sequenceiq.flow.core.FlowEvent;
 
