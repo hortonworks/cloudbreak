@@ -1122,6 +1122,8 @@ message CDPNetworkDetails {
     CDPProxyDetails proxyDetails = 6;
     // Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
     string publicEndpointAccessGateway = 7;
+    // Whether the security groups are created by CDP CP or by the customer
+    string securityAccessType = 8;
 }
 
 // Generated when Environment creation has been requested or finished

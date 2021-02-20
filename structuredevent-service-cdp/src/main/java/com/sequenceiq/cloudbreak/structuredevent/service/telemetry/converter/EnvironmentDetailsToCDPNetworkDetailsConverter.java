@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -51,6 +53,8 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
             cdpNetworkDetails.setPublicEndpointAccessGateway(network.getPublicEndpointAccessGateway() != null ?
                     network.getPublicEndpointAccessGateway().name() : PublicEndpointAccessGateway.DISABLED.name());
         }
+
+        cdpNetworkDetails.setSecurityAccessType(defaultIfEmpty(environmentDetails.getSecurityAccessType(), ""));
 
         UsageProto.CDPProxyDetails.Builder cdpProxyDetails = UsageProto.CDPProxyDetails.newBuilder();
         cdpProxyDetails.setProxy(environmentDetails.getProxyConfigConfigured());

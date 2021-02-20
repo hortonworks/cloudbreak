@@ -65,6 +65,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 .build();
 
         when(environmentDetails.getNetwork()).thenReturn(networkDto);
+        when(environmentDetails.getSecurityAccessType()).thenReturn("CIDR_WIDE_OPEN");
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
@@ -80,6 +81,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 networkDetails.getNumberPublicSubnets());
         Assert.assertEquals("DISABLED",
                 networkDetails.getPublicEndpointAccessGateway());
+        Assert.assertEquals("CIDR_WIDE_OPEN",
+                networkDetails.getSecurityAccessType());
     }
 
     @Test

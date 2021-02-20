@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.dto;
 
+import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.validation.SubnetValidator;
+
 public class SecurityAccessDto {
 
     private String securityGroupIdForKnox;
@@ -7,6 +11,8 @@ public class SecurityAccessDto {
     private String defaultSecurityGroupId;
 
     private String cidr;
+
+    private String securityAccessType;
 
     private SecurityAccessDto() {
     }
@@ -23,13 +29,18 @@ public class SecurityAccessDto {
         return cidr;
     }
 
+    public String getSecurityAccessType() {
+        return securityAccessType;
+    }
+
     @Override
     public String toString() {
         return "SecurityAccessDto{" +
-            "securityGroupIdForKnox='" + securityGroupIdForKnox + '\'' +
-            ", defaultSecurityGroupId='" + defaultSecurityGroupId + '\'' +
-            ", cidr='" + cidr + '\'' +
-            '}';
+                "securityGroupIdForKnox='" + securityGroupIdForKnox + '\'' +
+                ", defaultSecurityGroupId='" + defaultSecurityGroupId + '\'' +
+                ", cidr='" + cidr + '\'' +
+                ", securityAccessType='" + securityAccessType + '\'' +
+                '}';
     }
 
     public static Builder builder() {
@@ -43,6 +54,8 @@ public class SecurityAccessDto {
         private String defaultSecurityGroupId;
 
         private String cidr;
+
+        private String securityAccessType;
 
         private Builder() {
         }
@@ -63,11 +76,31 @@ public class SecurityAccessDto {
         }
 
         public SecurityAccessDto build() {
+            determineAccessType();
+
             SecurityAccessDto response = new SecurityAccessDto();
             response.cidr = cidr;
             response.securityGroupIdForKnox = securityGroupIdForKnox;
             response.defaultSecurityGroupId = defaultSecurityGroupId;
+            response.securityAccessType = securityAccessType;
             return response;
+        }
+
+        private void determineAccessType() {
+            if (StringUtils.isNoneEmpty(cidr)) {
+                if (cidr.contains("0.0.0.0/0")) {
+                    securityAccessType = "CIDR_WIDE_OPEN";
+                } else {
+                    SubnetValidator subnetValidator = new SubnetValidator();
+                    if (subnetValidator.isValid(cidr, null)) {
+                        securityAccessType = "CIDR_PRIVATE";
+                    } else {
+                        securityAccessType = "CIDR_PUBLIC";
+                    }
+                }
+            } else if (StringUtils.isNoneEmpty(defaultSecurityGroupId) && StringUtils.isNoneEmpty(securityGroupIdForKnox)) {
+                securityAccessType = "EXISTING_SECURITY_GROUP";
+            }
         }
     }
 }
