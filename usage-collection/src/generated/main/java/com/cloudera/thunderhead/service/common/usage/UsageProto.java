@@ -67982,6 +67982,24 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getPublicEndpointAccessGatewayBytes();
+
+    /**
+     * <pre>
+     * Whether the security groups are created by CDP CP or by the customer
+     * </pre>
+     *
+     * <code>string securityAccessType = 8;</code>
+     */
+    java.lang.String getSecurityAccessType();
+    /**
+     * <pre>
+     * Whether the security groups are created by CDP CP or by the customer
+     * </pre>
+     *
+     * <code>string securityAccessType = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getSecurityAccessTypeBytes();
   }
   /**
    * Protobuf type {@code usage.CDPNetworkDetails}
@@ -68002,6 +68020,7 @@ public final class UsageProto {
       numberPrivateSubnets_ = 0;
       serviceEndpointCreation_ = "";
       publicEndpointAccessGateway_ = "";
+      securityAccessType_ = "";
     }
 
     @java.lang.Override
@@ -68073,6 +68092,12 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               publicEndpointAccessGateway_ = s;
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              securityAccessType_ = s;
               break;
             }
             default: {
@@ -68334,6 +68359,48 @@ public final class UsageProto {
       }
     }
 
+    public static final int SECURITYACCESSTYPE_FIELD_NUMBER = 8;
+    private volatile java.lang.Object securityAccessType_;
+    /**
+     * <pre>
+     * Whether the security groups are created by CDP CP or by the customer
+     * </pre>
+     *
+     * <code>string securityAccessType = 8;</code>
+     */
+    public java.lang.String getSecurityAccessType() {
+      java.lang.Object ref = securityAccessType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        securityAccessType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Whether the security groups are created by CDP CP or by the customer
+     * </pre>
+     *
+     * <code>string securityAccessType = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getSecurityAccessTypeBytes() {
+      java.lang.Object ref = securityAccessType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        securityAccessType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -68369,6 +68436,9 @@ public final class UsageProto {
       if (!getPublicEndpointAccessGatewayBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, publicEndpointAccessGateway_);
       }
+      if (!getSecurityAccessTypeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, securityAccessType_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -68401,6 +68471,9 @@ public final class UsageProto {
       }
       if (!getPublicEndpointAccessGatewayBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, publicEndpointAccessGateway_);
+      }
+      if (!getSecurityAccessTypeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, securityAccessType_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -68435,6 +68508,8 @@ public final class UsageProto {
       }
       result = result && getPublicEndpointAccessGateway()
           .equals(other.getPublicEndpointAccessGateway());
+      result = result && getSecurityAccessType()
+          .equals(other.getSecurityAccessType());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -68462,6 +68537,8 @@ public final class UsageProto {
       }
       hash = (37 * hash) + PUBLICENDPOINTACCESSGATEWAY_FIELD_NUMBER;
       hash = (53 * hash) + getPublicEndpointAccessGateway().hashCode();
+      hash = (37 * hash) + SECURITYACCESSTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getSecurityAccessType().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -68613,6 +68690,8 @@ public final class UsageProto {
         }
         publicEndpointAccessGateway_ = "";
 
+        securityAccessType_ = "";
+
         return this;
       }
 
@@ -68650,6 +68729,7 @@ public final class UsageProto {
           result.proxyDetails_ = proxyDetailsBuilder_.build();
         }
         result.publicEndpointAccessGateway_ = publicEndpointAccessGateway_;
+        result.securityAccessType_ = securityAccessType_;
         onBuilt();
         return result;
       }
@@ -68721,6 +68801,10 @@ public final class UsageProto {
         }
         if (!other.getPublicEndpointAccessGateway().isEmpty()) {
           publicEndpointAccessGateway_ = other.publicEndpointAccessGateway_;
+          onChanged();
+        }
+        if (!other.getSecurityAccessType().isEmpty()) {
+          securityAccessType_ = other.securityAccessType_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -69333,6 +69417,95 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         publicEndpointAccessGateway_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object securityAccessType_ = "";
+      /**
+       * <pre>
+       * Whether the security groups are created by CDP CP or by the customer
+       * </pre>
+       *
+       * <code>string securityAccessType = 8;</code>
+       */
+      public java.lang.String getSecurityAccessType() {
+        java.lang.Object ref = securityAccessType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          securityAccessType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Whether the security groups are created by CDP CP or by the customer
+       * </pre>
+       *
+       * <code>string securityAccessType = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getSecurityAccessTypeBytes() {
+        java.lang.Object ref = securityAccessType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          securityAccessType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Whether the security groups are created by CDP CP or by the customer
+       * </pre>
+       *
+       * <code>string securityAccessType = 8;</code>
+       */
+      public Builder setSecurityAccessType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        securityAccessType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether the security groups are created by CDP CP or by the customer
+       * </pre>
+       *
+       * <code>string securityAccessType = 8;</code>
+       */
+      public Builder clearSecurityAccessType() {
+        
+        securityAccessType_ = getDefaultInstance().getSecurityAccessType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether the security groups are created by CDP CP or by the customer
+       * </pre>
+       *
+       * <code>string securityAccessType = 8;</code>
+       */
+      public Builder setSecurityAccessTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        securityAccessType_ = value;
         onChanged();
         return this;
       }
@@ -81437,57 +81610,57 @@ public final class UsageProto {
       "mentTelemetryFeatureDetails\022\031\n\021workloadA" +
       "nalytics\030\001 \001(\t\022\035\n\025clusterLogsCollection\030" +
       "\002 \001(\t\" \n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\"" +
-      "\355\001\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001" +
+      "\211\002\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001" +
       "(\t\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPublic" +
       "Subnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 " +
       "\001(\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022,\n\014" +
       "proxyDetails\030\006 \001(\0132\026.usage.CDPProxyDetai" +
-      "ls\022#\n\033publicEndpointAccessGateway\030\007 \001(\t\"" +
-      "\203\002\n\027CDPEnvironmentRequested\0224\n\020operation" +
-      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
-      "s\0228\n\022environmentDetails\030\002 \001(\0132\034.usage.CD" +
-      "PEnvironmentDetails\022M\n\027telemetryFeatureD" +
-      "etails\030\003 \001(\0132,.usage.CDPEnvironmentTelem" +
-      "etryFeatureDetails\022)\n\007freeIPA\030\004 \001(\0132\030.us" +
-      "age.CDPFreeIPADetails\"\326\001\n\033CDPEnvironment" +
-      "StatusChanged\0224\n\020operationDetails\030\001 \001(\0132" +
-      "\032.usage.CDPOperationDetails\0224\n\toldStatus" +
-      "\030\002 \001(\0162!.usage.CDPEnvironmentStatus.Valu" +
-      "e\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDPEnvironm" +
-      "entStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"8" +
-      "\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014im" +
-      "ageCatalog\030\002 \001(\t\"t\n\017CDPClusterShape\022\033\n\023c" +
-      "lusterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022" +
-      "\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021definitio" +
-      "nDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDetails\022\021\n\t" +
-      "crVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cd" +
-      "pdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014" +
-      "osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPC" +
-      "lusterDetails\022,\n\014clusterShape\030\001 \001(\0132\026.us" +
-      "age.CDPClusterShape\0220\n\016versionDetails\030\002 " +
-      "\001(\0132\030.usage.CDPVersionDetails\022,\n\014imageDe" +
-      "tails\030\003 \001(\0132\026.usage.CDPImageDetails\"\226\001\n\024" +
-      "CDPDatalakeRequested\0224\n\020operationDetails" +
-      "\030\001 \001(\0132\032.usage.CDPOperationDetails\022\026\n\016en" +
-      "vironmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001" +
-      "(\0132\030.usage.CDPClusterDetails\"\313\001\n\030CDPData" +
-      "lakeStatusChanged\0224\n\020operationDetails\030\001 " +
-      "\001(\0132\032.usage.CDPOperationDetails\0220\n\toldSt" +
-      "atus\030\002 \001(\0162\035.usage.CDPClusterStatus.Valu" +
-      "e\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterS" +
-      "tatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023C" +
-      "DPDatahubRequested\0224\n\020operationDetails\030\001" +
-      " \001(\0132\032.usage.CDPOperationDetails\022\026\n\016envi" +
-      "ronmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\013" +
-      "2\030.usage.CDPClusterDetails\"\312\001\n\027CDPDatahu" +
-      "bStatusChanged\0224\n\020operationDetails\030\001 \001(\013" +
-      "2\032.usage.CDPOperationDetails\0220\n\toldStatu" +
-      "s\030\002 \001(\0162\035.usage.CDPClusterStatus.Value\0220" +
-      "\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterStat" +
-      "us.Value\022\025\n\rfailureReason\030\004 \001(\tBV\n-com.c" +
-      "loudera.thunderhead.service.common.usage" +
-      "B\nUsageProtoZ\031com/cloudera/cdp/protobufb" +
-      "\006proto3"
+      "ls\022#\n\033publicEndpointAccessGateway\030\007 \001(\t\022" +
+      "\032\n\022securityAccessType\030\010 \001(\t\"\203\002\n\027CDPEnvir" +
+      "onmentRequested\0224\n\020operationDetails\030\001 \001(" +
+      "\0132\032.usage.CDPOperationDetails\0228\n\022environ" +
+      "mentDetails\030\002 \001(\0132\034.usage.CDPEnvironment" +
+      "Details\022M\n\027telemetryFeatureDetails\030\003 \001(\013" +
+      "2,.usage.CDPEnvironmentTelemetryFeatureD" +
+      "etails\022)\n\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeI" +
+      "PADetails\"\326\001\n\033CDPEnvironmentStatusChange" +
+      "d\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPO" +
+      "perationDetails\0224\n\toldStatus\030\002 \001(\0162!.usa" +
+      "ge.CDPEnvironmentStatus.Value\0224\n\tnewStat" +
+      "us\030\003 \001(\0162!.usage.CDPEnvironmentStatus.Va" +
+      "lue\022\025\n\rfailureReason\030\004 \001(\t\"8\n\017CDPImageDe" +
+      "tails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002" +
+      " \001(\t\"t\n\017CDPClusterShape\022\033\n\023clusterTempla" +
+      "teName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022hostGroup" +
+      "NodeCount\030\003 \001(\t\022\031\n\021definitionDetails\030\004 \001" +
+      "(\t\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion\030\001 " +
+      "\001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 " +
+      "\001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel" +
+      "\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDetail" +
+      "s\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPClust" +
+      "erShape\0220\n\016versionDetails\030\002 \001(\0132\030.usage." +
+      "CDPVersionDetails\022,\n\014imageDetails\030\003 \001(\0132" +
+      "\026.usage.CDPImageDetails\"\226\001\n\024CDPDatalakeR" +
+      "equested\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
+      "ge.CDPOperationDetails\022\026\n\016environmentCrn" +
+      "\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.C" +
+      "DPClusterDetails\"\313\001\n\030CDPDatalakeStatusCh" +
+      "anged\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
+      "CDPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035" +
+      ".usage.CDPClusterStatus.Value\0220\n\tnewStat" +
+      "us\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
+      "\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDatahubReq" +
+      "uested\0224\n\020operationDetails\030\001 \001(\0132\032.usage" +
+      ".CDPOperationDetails\022\026\n\016environmentCrn\030\002" +
+      " \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDP" +
+      "ClusterDetails\"\312\001\n\027CDPDatahubStatusChang" +
+      "ed\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDP" +
+      "OperationDetails\0220\n\toldStatus\030\002 \001(\0162\035.us" +
+      "age.CDPClusterStatus.Value\0220\n\tnewStatus\030" +
+      "\003 \001(\0162\035.usage.CDPClusterStatus.Value\022\025\n\r" +
+      "failureReason\030\004 \001(\tBV\n-com.cloudera.thun" +
+      "derhead.service.common.usageB\nUsageProto" +
+      "Z\031com/cloudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -81854,7 +82027,7 @@ public final class UsageProto {
     internal_static_usage_CDPNetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPNetworkDetails_descriptor,
-        new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", "PublicEndpointAccessGateway", });
+        new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", "PublicEndpointAccessGateway", "SecurityAccessType", });
     internal_static_usage_CDPEnvironmentRequested_descriptor =
       getDescriptor().getMessageTypes().get(59);
     internal_static_usage_CDPEnvironmentRequested_fieldAccessorTable = new

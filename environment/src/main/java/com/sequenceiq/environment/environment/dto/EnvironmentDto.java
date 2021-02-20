@@ -289,6 +289,14 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.securityAccess = securityAccess;
     }
 
+    @Override
+    public String getSecurityAccessType() {
+        if (securityAccess == null) {
+            return null;
+        }
+        return securityAccess.getSecurityAccessType();
+    }
+
     public String getAdminGroupName() {
         return adminGroupName;
     }

@@ -30,4 +30,6 @@ public interface EnvironmentDetails {
     EnvironmentFeatures getEnvironmentTelemetryFeatures();
 
     FreeIpaCreationDto getFreeIpaCreation();
+
+    String getSecurityAccessType();
 }
