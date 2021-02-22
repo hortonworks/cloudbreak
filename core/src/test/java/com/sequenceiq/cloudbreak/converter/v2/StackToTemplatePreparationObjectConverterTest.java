@@ -298,8 +298,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(clusterService.getById(anyLong())).thenReturn(cluster);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
         when(resourceService.getAllByStackId(anyLong())).thenReturn(Collections.EMPTY_LIST);
-        IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster, cluster.getWorkspace());
-        cluster.setIdBroker(idbroker);
+        IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster);
         when(idBrokerService.getByCluster(any(Cluster.class))).thenReturn(idbroker);
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
         when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString(), anyString(), any(Optional.class))).thenReturn(Collections.EMPTY_LIST);

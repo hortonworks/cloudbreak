@@ -5,9 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-
 import static java.util.Collections.singletonMap;
-
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -101,6 +99,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
@@ -221,6 +220,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private IdBrokerService idBrokerService;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
@@ -633,10 +635,11 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveIdBrokerPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        IdBroker clusterIdBroker = cluster.getIdBroker();
+        IdBroker clusterIdBroker = idBrokerService.getByCluster(cluster);
         Map<String, Object> idbroker = new HashMap<>();
 
         if (clusterIdBroker != null) {
+            LOGGER.info("Put idbroker keys/secrets to salt pillar for cluster: " + cluster.getName());
             idbroker.put("signpub", clusterIdBroker.getSignPub());
             idbroker.put("signcert", clusterIdBroker.getSignCert());
             idbroker.put("signkey", clusterIdBroker.getSignKey());

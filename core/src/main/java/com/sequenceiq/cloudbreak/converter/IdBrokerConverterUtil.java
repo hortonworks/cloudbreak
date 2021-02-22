@@ -9,12 +9,11 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
 public class IdBrokerConverterUtil {
 
-    public IdBroker generateIdBrokerSignKeys(Cluster cluster, Workspace workspace) {
+    public IdBroker generateIdBrokerSignKeys(Cluster cluster) {
         IdBroker idBroker = new IdBroker();
 
         KeyPair identityKey = PkiUtil.generateKeypair();
@@ -27,7 +26,7 @@ public class IdBrokerConverterUtil {
         idBroker.setMasterSecret(PasswordUtil.generatePassword());
 
         idBroker.setCluster(cluster);
-        idBroker.setWorkspace(workspace);
+        idBroker.setWorkspace(cluster.getWorkspace());
         return idBroker;
     }
 

@@ -202,10 +202,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             }
             IdBroker idbroker =  idBrokerService.getByCluster(cluster);
             if (idbroker == null) {
-                idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster, cluster.getWorkspace());
+                idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster);
                 idBrokerService.save(idbroker);
             }
-            cluster.setIdBroker(idbroker);
             String envCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
             String accountId = source.getCreator().getTenant().getName();
