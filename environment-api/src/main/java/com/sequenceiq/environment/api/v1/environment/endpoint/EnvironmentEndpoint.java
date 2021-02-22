@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.endpoint;
 
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -34,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.flow.api.model.FlowProgressResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -243,4 +245,18 @@ public interface EnvironmentEndpoint {
         nickname = "updateEnvironmentLoadBalancersByCrnV1")
     void updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @NotNull EnvironmentLoadBalancerUpdateRequest request);
+
+    @GET
+    @Path("/progress/resource/crn/{resourceCrn}/last")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = ENVIRONMENT_NOTES,
+            nickname = "getEnvironmentXLastFlowLogProgressByResourceName")
+    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+
+    @GET
+    @Path("/progress/resource/crn/{resourceCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.LIST_FLOW_PROGRESS, produces = "application/json", notes = ENVIRONMENT_NOTES,
+            nickname = "getEnvironmentFlowLogsProgressByResourceName")
+    List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 }

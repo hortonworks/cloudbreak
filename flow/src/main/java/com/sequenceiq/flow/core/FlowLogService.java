@@ -51,6 +51,8 @@ public interface FlowLogService {
 
     Set<FlowLog> findAllByCloudbreakNodeId(String cloudbreakNodeId);
 
+    List<FlowLog> findAllForLastFlowIdByResourceIdOrderByCreatedDesc(Long id);
+
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id);
 
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);

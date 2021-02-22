@@ -115,11 +115,6 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
     }
 
     @Override
-    public boolean isFlowOrdered() {
-        return true;
-    }
-
-    @Override
     public DiagnosticsCollectionStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT;
     }

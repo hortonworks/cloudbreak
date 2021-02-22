@@ -15,11 +15,13 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DEL
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_WITH_KERBEROS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_LAST_FLOW_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STACK_REQUEST_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST_FLOW_PROGRESS;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POST_STACK_FOR_BLUEPRINT;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
@@ -74,6 +76,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.docs.DiagnosticsO
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.CmDiagnosticsCollectionV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.diagnostics.model.DiagnosticsCollectionV1Request;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowProgressResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -372,6 +375,20 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
             nickname = "getDistroxCmRoles")
     List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
+
+    @GET
+    @Path("progress/resource/crn/{resourceCrn}/last")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
+            nickname = "getDistroXLastFlowLogProgressByResourceName")
+    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+
+    @GET
+    @Path("progress/resource/crn/{resourceCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
+            nickname = "getDistroXFlowLogsProgressByResourceName")
+    List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @POST
     @Path("crn/{crn}/renew_certificate")

@@ -17,6 +17,7 @@ import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
 import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
+import com.sequenceiq.datalake.controller.progress.ProgressController;
 import com.sequenceiq.datalake.controller.sdx.DatabaseConfigController;
 import com.sequenceiq.datalake.controller.sdx.DatabaseServerController;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
@@ -47,6 +48,7 @@ public class EndpointConfig extends ResourceConfig {
             FlowPublicController.class,
             AuthorizationInfoController.class,
             DiagnosticsController.class,
+            ProgressController.class,
             AuthorizationUtilEndpoint.class,
             DatabaseServerController.class);
 

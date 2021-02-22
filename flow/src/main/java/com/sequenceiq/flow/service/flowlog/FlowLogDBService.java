@@ -221,11 +221,17 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeId);
     }
 
-    public List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id) {
+    @Override
+    public List<FlowLog> findAllForLastFlowIdByResourceIdOrderByCreatedDesc(Long id) {
         return flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(id)
                 .map(FlowLog::getFlowId)
                 .map(flowLogRepository::findAllByFlowIdOrderByCreatedDesc)
                 .orElse(List.of());
+    }
+
+    @Override
+    public List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id) {
+        return flowLogRepository.findAllByResourceIdOrderByCreatedDesc(id);
     }
 
     public List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id) {
@@ -250,7 +256,7 @@ public class FlowLogDBService implements FlowLogService {
 
     public FlowLog getLastFlowLogByResourceCrnOrName(String resource) {
         Long resourceId = getResourceIdByCrnOrName(resource);
-        Iterator<FlowLog> iterator = findAllByResourceIdOrderByCreatedDesc(resourceId).iterator();
+        Iterator<FlowLog> iterator = findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId).iterator();
         if (iterator.hasNext()) {
             return iterator.next();
         }
@@ -258,6 +264,11 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     public List<FlowLog> getFlowLogsByResourceCrnOrName(String resource) {
+        Long resourceId = getResourceIdByCrnOrName(resource);
+        return findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId);
+    }
+
+    public List<FlowLog> getAllFlowLogsByResourceCrnOrName(String resource) {
         Long resourceId = getResourceIdByCrnOrName(resource);
         return findAllByResourceIdOrderByCreatedDesc(resourceId);
     }

@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.controller.v4.DiagnosticsV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.EventV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.FileSystemV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ImageCatalogV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.ProgressV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.RecipesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.StackV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.UserProfileV4Controller;
@@ -77,6 +78,7 @@ public class EndpointConfig extends ResourceConfig {
             DistroXInternalV1Controller.class,
             DatalakeV4Controller.class,
             DiagnosticsV4Controller.class,
+            ProgressV4Controller.class,
             CloudProviderServicesV4Controller.class,
             FlowController.class,
             FlowPublicController.class,

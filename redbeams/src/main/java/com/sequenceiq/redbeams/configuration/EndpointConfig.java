@@ -18,6 +18,7 @@ import com.sequenceiq.redbeams.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.redbeams.controller.mapper.WebApplicationExceptionMapper;
 import com.sequenceiq.redbeams.controller.v4.database.DatabaseV4Controller;
 import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Controller;
+import com.sequenceiq.redbeams.controller.v4.progress.ProgressV4Controller;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
@@ -29,6 +30,7 @@ public class EndpointConfig extends ResourceConfig {
     private static final List<Class<?>> CONTROLLERS = List.of(
             DatabaseV4Controller.class,
             DatabaseServerV4Controller.class,
+            ProgressV4Controller.class,
             FlowController.class,
             FlowPublicController.class,
             AuthorizationInfoController.class

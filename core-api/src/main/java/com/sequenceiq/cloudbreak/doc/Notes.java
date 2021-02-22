@@ -88,6 +88,7 @@ public class Notes {
     public static final String INFO_CONFIG_NOTES = "Info config operations";
     public static final String LIST_RETRYABLE_NOTES = "List all, currently retryable operations for the stack";
     public static final String RENEW_CERTIFICATE_NOTES = "Trigger a certificate renewal on the specified cluster.";
+    public static final String FLOW_OPERATION_PROGRESS_NOTES = "Flow operation progress";
 
     private Notes() {
     }
