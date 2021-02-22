@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.client;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 
 public class FreeIpaClientExceptionUtil {
@@ -103,6 +105,12 @@ public class FreeIpaClientExceptionUtil {
                 .anyMatch(c -> isFreeIpaErrorCodeInSet(errorCodes, c));
     }
 
+    @VisibleForTesting
+    static boolean isExceptionWithIOExceptionCause(FreeIpaClientException e) {
+        return Stream.of(getAncestorCauseBeforeFreeIpaClientExceptions(e))
+                .anyMatch(IOException.class::isInstance);
+    }
+
     private static boolean isFreeIpaErrorCodeInSet(Set<FreeIpaErrorCodes> errorCodes, FreeIpaErrorCodes c) {
         return errorCodes.contains(c);
     }
@@ -150,7 +158,7 @@ public class FreeIpaClientExceptionUtil {
     }
 
     private static boolean isRetryable(FreeIpaClientException e) {
-        return isExceptionWithErrorCode(e, RETRYABLE_ERROR_CODES) || isExceptionWithHttpCode(retryableHttpCodes, e);
+        return isExceptionWithErrorCode(e, RETRYABLE_ERROR_CODES) || isExceptionWithHttpCode(retryableHttpCodes, e) || isExceptionWithIOExceptionCause(e);
     }
 
     private static boolean isExceptionWithHttpCode(Set<Integer> codes, FreeIpaClientException e) {

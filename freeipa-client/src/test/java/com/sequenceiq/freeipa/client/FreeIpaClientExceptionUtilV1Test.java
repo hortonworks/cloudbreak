@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.client;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -92,6 +93,12 @@ public class FreeIpaClientExceptionUtilV1Test {
         Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, HttpStatus.OK.value()))
                 instanceof RetryableFreeIpaClientException);
+        assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+                new FreeIpaClientException(MESSAGE, new IOException()))
+                instanceof RetryableFreeIpaClientException);
+        Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+                new FreeIpaClientException(MESSAGE, new IllegalStateException()))
+                instanceof RetryableFreeIpaClientException);
     }
 
     @Test
@@ -106,6 +113,16 @@ public class FreeIpaClientExceptionUtilV1Test {
         Assertions.assertEquals(ancestor,
                 FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(
                         new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, ancestor)))));
+    }
+
+    @Test
+    public void testIsExceptionWithIOExceptionCause() {
+        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(new FreeIpaClientException(MESSAGE, new IOException())));
+        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(new FreeIpaClientException(MESSAGE, new IllegalStateException())));
+        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
+                new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new IOException()))));
+        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
+                new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new IllegalStateException()))));
     }
 
     @Test
