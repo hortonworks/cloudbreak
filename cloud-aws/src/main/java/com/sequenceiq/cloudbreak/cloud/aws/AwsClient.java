@@ -161,13 +161,6 @@ public class AwsClient {
     }
 
     public AmazonSecurityTokenServiceClient createCdpSecurityTokenServiceClient(AwsCredentialView awsCredential) {
-        if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
-                || !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential)) {
-            LOGGER.debug("AWSSecurityTokenServiceClient will use aws metadata because environment variables are undefined");
-        } else {
-            LOGGER.debug("AWSSecurityTokenServiceClient will use environment variables");
-        }
-
         String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
