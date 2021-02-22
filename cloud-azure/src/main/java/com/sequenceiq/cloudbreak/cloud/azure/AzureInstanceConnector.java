@@ -65,7 +65,12 @@ public class AzureInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         LOGGER.info("Stopping vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        return azureUtils.deallocateInstances(ac, vms);
+        try {
+            return azureUtils.deallocateInstances(ac, vms);
+        } catch (BatchInstanceActionFailedException e) {
+            LOGGER.error("Stoppings vms on Azure failed: {}", e.getFailedInstanceStatusReasons());
+            return e.getInstanceStatuses();
+        }
     }
 
     @Override

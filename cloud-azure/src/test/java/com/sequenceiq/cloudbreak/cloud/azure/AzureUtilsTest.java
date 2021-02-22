@@ -1,10 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -13,12 +23,23 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.microsoft.azure.management.compute.VirtualMachine;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
+
+import rx.Completable;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AzureUtilsTest {
@@ -34,6 +55,12 @@ public class AzureUtilsTest {
 
     @Mock
     private AzurePremiumValidatorService azurePremiumValidatorService;
+
+    @Mock
+    private AzureVirtualMachineService azureVirtualMachineService;
+
+    @Mock
+    private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
     @InjectMocks
     private AzureUtils underTest;
@@ -109,4 +136,94 @@ public class AzureUtilsTest {
         verify(azurePremiumValidatorService, times(1)).premiumDiskTypeConfigured(azureDiskType);
     }
 
+    @Test
+    public void deallocateInstancesShouldSuccess() throws BatchInstanceActionFailedException {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(DynamicModel.class))).thenReturn("resourceGroup");
+        when(azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(any(), anyList(), anyList()))
+                .thenAnswer((Answer<Map<String, VirtualMachine>>) invocation -> {
+                    List<CloudVmInstanceStatus> statuses = invocation.getArgument(2, List.class);
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED));
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.STARTED));
+                    return new HashMap<>();
+                });
+        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
+        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Completable.complete());
+
+        List<CloudVmInstanceStatus> statusesAfterDeallocate = underTest.deallocateInstances(ac,
+                List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
+
+        verify(azureClient, times(2)).deallocateVirtualMachineAsync(anyString(), anyString());
+        assertEquals(2, statusesAfterDeallocate.size());
+        statusesAfterDeallocate.forEach(status -> assertEquals(InstanceStatus.STOPPED, status.getStatus()));
+    }
+
+    @Test
+    public void deallocateStoppedInstanceShouldSkippedFromDeallocation() throws BatchInstanceActionFailedException {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(DynamicModel.class))).thenReturn("resourceGroup");
+        when(azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(any(), anyList(), anyList()))
+                .thenAnswer((Answer<Map<String, VirtualMachine>>) invocation -> {
+                    List<CloudVmInstanceStatus> statuses = invocation.getArgument(2, List.class);
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED));
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.STOPPED));
+                    return new HashMap<>();
+                });
+        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
+        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), anyString())).thenReturn(Completable.complete());
+
+        List<CloudVmInstanceStatus> statusesAfterDeallocate = underTest.deallocateInstances(ac,
+                List.of(createCloudInstance("instance1"), createCloudInstance("instance2")));
+
+        verify(azureClient, times(1)).deallocateVirtualMachineAsync(anyString(), anyString());
+        assertEquals(2, statusesAfterDeallocate.size());
+        statusesAfterDeallocate.forEach(status -> assertEquals(InstanceStatus.STOPPED, status.getStatus()));
+    }
+
+    @Test
+    public void deallocateInstancesShouldHandleAzureErrorsAndThrowBatchInstanceActionFailedExceptionAfterAllRequestFinished()
+            throws BatchInstanceActionFailedException {
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(any(), any(DynamicModel.class))).thenReturn("resourceGroup");
+        when(azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(any(), anyList(), anyList()))
+                .thenAnswer((Answer<Map<String, VirtualMachine>>) invocation -> {
+                    List<CloudVmInstanceStatus> statuses = invocation.getArgument(2, List.class);
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance1"), InstanceStatus.STARTED));
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance2"), InstanceStatus.IN_PROGRESS));
+                    statuses.add(new CloudVmInstanceStatus(createCloudInstance("instance3"), InstanceStatus.DELETE_REQUESTED));
+                    return new HashMap<>();
+                });
+        AuthenticatedContext ac = Mockito.mock(AuthenticatedContext.class);
+        AzureClient azureClient = Mockito.mock(AzureClient.class);
+        when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance1"))).thenReturn(Completable.complete());
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance2"))).thenReturn(Completable.error(new RuntimeException("failed1")));
+        when(azureClient.deallocateVirtualMachineAsync(anyString(), eq("instance3"))).thenReturn(Completable.error(new RuntimeException("failed2")));
+
+        BatchInstanceActionFailedException thrown = assertThrows(
+                BatchInstanceActionFailedException.class,
+                () -> underTest.deallocateInstances(ac,
+                        List.of(createCloudInstance("instance1"), createCloudInstance("instance2"), createCloudInstance("instance3"))));
+
+        List<CloudVmInstanceStatus> statusesAfterDeallocate = thrown.getInstanceStatuses();
+        verify(azureClient, times(3)).deallocateVirtualMachineAsync(anyString(), anyString());
+        assertEquals(3, statusesAfterDeallocate.size());
+
+        for (CloudVmInstanceStatus cloudVmInstanceStatus : statusesAfterDeallocate) {
+            String instanceId = cloudVmInstanceStatus.getCloudInstance().getInstanceId();
+            if ("instance1".equals(instanceId)) {
+                assertEquals(InstanceStatus.STOPPED, cloudVmInstanceStatus.getStatus());
+            } else if ("instance2".equals(instanceId)) {
+                assertEquals(InstanceStatus.FAILED, cloudVmInstanceStatus.getStatus());
+            } else if ("instance3".equals(instanceId)) {
+                assertEquals(InstanceStatus.FAILED, cloudVmInstanceStatus.getStatus());
+            }
+        }
+    }
+
+    @NotNull
+    private CloudInstance createCloudInstance(String instanceId) {
+        return new CloudInstance(instanceId, null, null);
+    }
 }
