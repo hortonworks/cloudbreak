@@ -71,6 +71,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.service.FlowService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -105,6 +107,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentLoadBalancerService environmentLoadBalancerService;
 
+    private final FlowService flowService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -118,7 +122,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             CredentialToCredentialV1ResponseConverter credentialConverter,
             EnvironmentStackConfigUpdateService stackConfigUpdateService,
             EntitlementService entitlementService,
-            EnvironmentLoadBalancerService environmentLoadBalancerService) {
+            EnvironmentLoadBalancerService environmentLoadBalancerService,
+            FlowService flowService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -132,6 +137,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.stackConfigUpdateService = stackConfigUpdateService;
         this.entitlementService = entitlementService;
         this.environmentLoadBalancerService = environmentLoadBalancerService;
+        this.flowService = flowService;
     }
 
     @Override
@@ -374,6 +380,18 @@ public class EnvironmentController implements EnvironmentEndpoint {
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         EnvironmentLoadBalancerDto environmentLoadBalancerDto = environmentApiConverter.initLoadBalancerDto(request);
         environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ResourceCrn String resourceCrn) {
+        return flowService.getLastFlowProgressByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
+        return flowService.getFlowProgressListByResourceCrn(resourceCrn);
     }
 
     private void checkEndpointGatewayEntitlement(EnvironmentRequest request) {

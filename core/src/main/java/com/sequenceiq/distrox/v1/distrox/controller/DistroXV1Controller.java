@@ -82,6 +82,8 @@ import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4Requ
 import com.sequenceiq.distrox.v1.distrox.converter.cli.DelegatingRequestToCliRequestConverter;
 import com.sequenceiq.distrox.v1.distrox.service.DistroXService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.service.FlowService;
 
 @Controller
 public class DistroXV1Controller implements DistroXV1Endpoint {
@@ -115,6 +117,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DiagnosticsService diagnosticsService;
+
+    @Inject
+    private FlowService flowService;
 
     @Inject
     private VmLogsService vmLogsService;
@@ -509,6 +514,18 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @DisableCheckPermissions
     public List<String> getCmRoles(String stackCrn) {
         return clusterDiagnosticsService.getClusterComponents(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ResourceCrn String resourceCrn) {
+        return flowService.getLastFlowProgressByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
+        return flowService.getFlowProgressListByResourceCrn(resourceCrn);
     }
 
     @Override

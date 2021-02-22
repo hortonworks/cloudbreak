@@ -34,5 +34,4 @@ public interface FlowPublicEndpoint {
     @ApiOperation(value = "Check if there is a running flow for flow id and resourceId", produces = "application/json", notes = "Flow log operations",
             nickname = "hasFlowRunningByFlowIdAndResourceCrn")
     FlowCheckResponse hasFlowRunningByFlowId(@PathParam("flowId") String flowId, @QueryParam("resourceCrn") String resourceCrn);
-
 }

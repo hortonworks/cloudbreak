@@ -22,8 +22,11 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.FlowProgressResponse;
+import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.domain.FlowChainLog;
@@ -51,6 +54,9 @@ public class FlowService {
     @Inject
     @Named("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private FlowProgressResponseConverter flowProgressResponseConverter;
 
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
@@ -196,5 +202,23 @@ public class FlowService {
 
     private boolean isPending(FlowLog flowLog) {
         return !Boolean.TRUE.equals(flowLog.getFinalized()) || StateStatus.PENDING.equals(flowLog.getStateStatus());
+    }
+
+    public FlowProgressResponse getLastFlowProgressByResourceCrn(String resourceCrn) {
+        checkState(Crn.isCrn(resourceCrn));
+        LOGGER.info("Getting flow logs (progress) by resource crn {}", resourceCrn);
+        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceCrn);
+        FlowProgressResponse response = flowProgressResponseConverter.convert(flowLogs);
+        if (StringUtils.isBlank(response.getFlowId())) {
+            throw new NotFoundException(String.format("Not found any historical flow data for requested resource (crn: %s)", resourceCrn));
+        }
+        return flowProgressResponseConverter.convert(flowLogs);
+    }
+
+    public List<FlowProgressResponse> getFlowProgressListByResourceCrn(String resourceCrn) {
+        checkState(Crn.isCrn(resourceCrn));
+        LOGGER.info("Getting flow logs (progress) for all recent flows by resource crn {}", resourceCrn);
+        List<FlowLog> flowLogs = flowLogDBService.getAllFlowLogsByResourceCrnOrName(resourceCrn);
+        return flowProgressResponseConverter.convertList(flowLogs);
     }
 }

@@ -40,7 +40,7 @@ public class SdxRetryService {
     private StackV4Endpoint stackV4Endpoint;
 
     public FlowIdentifier retrySdx(SdxCluster sdxCluster) {
-        List<FlowLog> flowLogs = flowLogService.findAllByResourceIdOrderByCreatedDesc(sdxCluster.getId());
+        List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(sdxCluster.getId());
         if (FlowRetryUtil.isFlowPending(flowLogs)) {
             LOGGER.info("Retry cannot be performed, because there is already an active flow. Sdx name: {}", sdxCluster.getClusterName());
             throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");

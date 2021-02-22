@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.telemetry.converter.FlowPayloadToDiagnosticDeta
 import com.sequenceiq.common.api.diagnostics.DiagnosticsCollection;
 import com.sequenceiq.common.api.diagnostics.DiagnosticsCollectionStatus;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
+import com.sequenceiq.flow.core.config.FlowProgressHolder;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.config.DiagnosticsCollectionFlowConfig;
@@ -26,7 +27,7 @@ public class FlowLogsToListDiagnosticsCollectionResponseConverter {
     private FlowPayloadToDiagnosticDetailsConverter flowPayloadToDiagnosticDetailsConverter;
 
     @Inject
-    private DiagnosticsCollectionFlowConfig diagnosticsCollectionFlowConfig;
+    private FlowProgressHolder flowProgressHolder;
 
     public ListDiagnosticsCollectionResponse convert(List<FlowLog> flowLogs) {
         ListDiagnosticsCollectionResponse response = new ListDiagnosticsCollectionResponse();
@@ -50,7 +51,7 @@ public class FlowLogsToListDiagnosticsCollectionResponseConverter {
     private int calculateProgressPercentage(FlowLog flowLog) {
         return flowPayloadToDiagnosticDetailsConverter.calculateProgressPercentage(flowLog.getFinalized(),
                 StateStatus.FAILED.equals(flowLog.getStateStatus()),
-                () -> diagnosticsCollectionFlowConfig.getProgressPercentageForState(flowLog.getCurrentState()));
+                () -> flowProgressHolder.getProgressPercentageForState(DiagnosticsCollectionFlowConfig.class, flowLog.getCurrentState()));
     }
 
     private DiagnosticsCollectionStatus calculateStatus(FlowLog flowLog) {

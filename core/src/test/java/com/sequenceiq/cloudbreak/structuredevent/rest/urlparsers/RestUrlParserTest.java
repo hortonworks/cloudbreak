@@ -84,7 +84,8 @@ public class RestUrlParserTest {
     @Autowired
     private List<LegacyRestUrlParser> restUrlParsers;
 
-    private String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale", "cluster_templates", "/v4/events", "/v4/diagnostics"};
+    private String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale",
+            "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress"};
 
     @Test
     public void testEventUrlParser() {

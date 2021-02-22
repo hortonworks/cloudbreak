@@ -60,7 +60,7 @@ public class SdxRetryServiceTest {
         FlowLog pendingFlowLog = new FlowLog();
         pendingFlowLog.setStateStatus(StateStatus.PENDING);
         flowLogs.add(pendingFlowLog);
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
+        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
         Assertions.assertThrows(BadRequestException.class,
                 () -> sdxRetryService.retrySdx(sdxCluster),
                 "Retry cannot be performed, because there is already an active flow.");
@@ -75,7 +75,7 @@ public class SdxRetryServiceTest {
         FlowLog successfulFlowLog = new FlowLog();
         successfulFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
         flowLogs.add(successfulFlowLog);
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
+        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
         Assertions.assertThrows(BadRequestException.class,
                 () -> sdxRetryService.retrySdx(sdxCluster),
                 "Retry cannot be performed, because the last action was successful");
@@ -104,7 +104,7 @@ public class SdxRetryServiceTest {
         failedFlowLog.setCreated(2L);
         flowLogs.add(failedFlowLog);
 
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
+        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
 
         FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
 
@@ -133,7 +133,7 @@ public class SdxRetryServiceTest {
         failedFlowLog.setCreated(2L);
         flowLogs.add(failedFlowLog);
 
-        when(flowLogService.findAllByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
+        when(flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(1L)).thenReturn(flowLogs);
 
         FlowIdentifier flowIdentifier = sdxRetryService.retrySdx(sdxCluster);
 
