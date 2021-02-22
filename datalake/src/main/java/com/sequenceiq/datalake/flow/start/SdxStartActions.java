@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow.start;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_SYNC_FINISHED_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,15 +22,13 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.SdxFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.RdsStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.RdsWaitingToStartRequest;
-import com.sequenceiq.datalake.flow.SdxFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartFailedEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartSuccessEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartWaitRequest;
-import com.sequenceiq.datalake.flow.sync.event.SdxSyncSuccessEvent;
-import com.sequenceiq.datalake.flow.sync.event.SdxSyncWaitRequest;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -92,13 +91,8 @@ public class SdxStartActions {
 
             @Override
             protected void doExecute(SdxContext context, RdsStartSuccessEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Execute sync flow for SDX: {}", payload.getResourceId());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(SdxContext context) {
-                return SdxSyncWaitRequest.from(context);
+                LOGGER.debug("Skipping sync flow for SDX: {}", payload.getResourceId());
+                sendEvent(context, SDX_SYNC_FINISHED_EVENT.event(), payload);
             }
 
             @Override
@@ -110,22 +104,23 @@ public class SdxStartActions {
 
     @Bean(name = "SDX_START_START_STATE")
     public Action<?, ?> sdxStart() {
-        return new AbstractSdxAction<>(SdxSyncSuccessEvent.class) {
+        return new AbstractSdxAction<>(RdsStartSuccessEvent.class) {
 
             @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxSyncSuccessEvent payload) {
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    RdsStartSuccessEvent payload) {
                 return SdxContext.from(flowParameters, payload);
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxSyncSuccessEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, RdsStartSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Execute start flow for SDX: {}", payload.getResourceId());
                 startService.start(payload.getResourceId());
                 sendEvent(context, SDX_START_IN_PROGRESS_EVENT.event(), payload);
             }
 
             @Override
-            protected Object getFailurePayload(SdxSyncSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(RdsStartSuccessEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return SdxStartFailedEvent.from(payload, ex);
             }
         };
