@@ -41,8 +41,6 @@ public class StatusCheckerJobService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusCheckerJobService.class);
 
-    private static final int RANDOM_DELAY = 120;
-
     private static final Random RANDOM = new SecureRandom();
 
     @Inject
@@ -56,7 +54,7 @@ public class StatusCheckerJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
-        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(RANDOM_DELAY));
+        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(properties.getIntervalInSeconds()));
         schedule(jobDetail, trigger, resource.getLocalId());
     }
 
