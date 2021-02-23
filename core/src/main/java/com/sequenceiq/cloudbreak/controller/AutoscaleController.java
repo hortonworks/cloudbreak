@@ -80,6 +80,8 @@ public class AutoscaleController implements AutoscaleEndpoint {
 
     @Override
     public Response putCluster(Long stackId, String owner, @Valid UpdateClusterJson updateRequest) {
+        LOGGER.info("Autoscale requested cluster update for stack id '{}', with status request '{}' and adjustment: '{}'", stackId, updateRequest.getStatus(),
+                updateRequest.getHostGroupAdjustment());
         setupIdentityForAutoscale(stackId, owner);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
