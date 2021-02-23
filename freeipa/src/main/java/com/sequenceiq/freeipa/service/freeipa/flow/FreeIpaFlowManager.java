@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -77,7 +78,7 @@ public class FreeIpaFlowManager {
                 case RUNNING_IN_FLOW_CHAIN:
                     return new FlowIdentifier(FlowType.FLOW_CHAIN, accepted.getAsFlowChainId());
                 case ALREADY_EXISTING_FLOW:
-                    throw new RuntimeException("Flow is under operation, request not allowed.");
+                    throw new FlowsAlreadyRunningException("Flow is under operation, request not allowed.");
                 default:
                     throw new IllegalStateException("Illegal resultType: " + accepted.getResultType());
             }
