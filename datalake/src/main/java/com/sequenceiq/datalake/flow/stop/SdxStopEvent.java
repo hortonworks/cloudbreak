@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.flow.stop;
 
-import com.sequenceiq.datalake.flow.sync.event.SdxSyncSuccessEvent;
 import com.sequenceiq.datalake.flow.stop.event.RdsStopSuccessEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopFailedEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStopSuccessEvent;
@@ -9,8 +8,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 public enum SdxStopEvent implements FlowEvent {
 
     SDX_STOP_EVENT(),
-    SDX_SYNC_STOP_EVENT(),
-    SDX_SYNC_STOP_FINISHED_EVENT(SdxSyncSuccessEvent.class),
     SDX_STOP_IN_PROGRESS_EVENT(),
     SDX_STOP_ALL_DATAHUB_EVENT(),
     SDX_STOP_RDS_EVENT(),

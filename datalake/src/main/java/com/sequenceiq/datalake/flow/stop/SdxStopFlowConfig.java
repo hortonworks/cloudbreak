@@ -8,7 +8,6 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_FINISHED_S
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_RDS_STOP_STATE;
 import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_START_STATE;
-import static com.sequenceiq.datalake.flow.stop.SdxStopState.SDX_STOP_SYNC_STATE;
 
 import java.util.List;
 
@@ -25,10 +24,6 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
 
             .from(INIT_STATE).to(SDX_STOP_START_STATE)
             .event(SdxStopEvent.SDX_STOP_EVENT).noFailureEvent()
-
-            // deprecated, should be removed in the next release
-            .from(SDX_STOP_SYNC_STATE).to(SDX_STOP_START_STATE)
-            .event(SdxStopEvent.SDX_SYNC_STOP_FINISHED_EVENT).noFailureEvent()
 
             .from(SDX_STOP_START_STATE).to(SDX_STOP_ALL_DATAHUBS_STATE)
             .event(SdxStopEvent.SDX_STOP_ALL_DATAHUB_EVENT).failureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)

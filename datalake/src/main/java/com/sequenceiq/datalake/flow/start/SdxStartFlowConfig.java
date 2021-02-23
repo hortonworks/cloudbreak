@@ -7,7 +7,6 @@ import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_FINISHE
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_RDS_START_STATE;
 import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_START_STATE;
-import static com.sequenceiq.datalake.flow.start.SdxStartState.SDX_START_SYNC_STATE;
 
 import java.util.List;
 
@@ -27,10 +26,6 @@ public class SdxStartFlowConfig extends AbstractFlowConfiguration<SdxStartState,
 
             .from(SDX_START_RDS_START_STATE).to(SDX_START_START_STATE)
             .event(SdxStartEvent.SDX_START_RDS_FINISHED_EVENT).defaultFailureEvent()
-
-            // deprecated, should be removed in the next release
-            .from(SDX_START_SYNC_STATE).to(SDX_START_START_STATE)
-            .event(SdxStartEvent.SDX_SYNC_FINISHED_EVENT).noFailureEvent()
 
             .from(SDX_START_START_STATE).to(SDX_START_IN_PROGRESS_STATE)
             .event(SdxStartEvent.SDX_START_IN_PROGRESS_EVENT).defaultFailureEvent()
