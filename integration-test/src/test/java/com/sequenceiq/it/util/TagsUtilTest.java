@@ -4,17 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
@@ -23,36 +26,36 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
-class TagsUtilTest {
+public class TagsUtilTest {
 
     private static final String TEST_NAME = "testname";
 
+    private static final String ACTING_USER_NAME = "whoever";
+
+    private static final String OWNER_TAG_KEY = "owner";
+
+    private static final String ACTING_USER_CRN = "crn:cdp:iam:us-west-1:qe-gcp:user:cloudbreak-qe@hortonworks.com";
+
+    private static final String CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY = "Cloudera-Creator-Resource-Name";
+
     private static final Map<String, String> DEFAULT_TAGS = Map.of(
-            "owner", "whoever",
+            OWNER_TAG_KEY, ACTING_USER_NAME,
             "Cloudera-Environment-Resource-Name", "whatever",
-            "Cloudera-Creator-Resource-Name", "whoever",
+            CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY, ACTING_USER_CRN,
             "Cloudera-Resource-Name", "whatever"
     );
 
     private TagsUtil underTest;
 
-    private ITestResult testResult;
-
     private MockedTestContext testContext;
 
     @BeforeMethod
     public void setUp() {
-        testResult = Mockito.mock(ITestResult.class);
         underTest = new TagsUtil();
-        Object[] parameters = testResult.getParameters();
-        if (parameters == null || parameters.length == 0) {
-            return;
-        }
-        try {
-            testContext = (MockedTestContext) parameters[0];
-        } catch (ClassCastException e) {
-            return;
-        }
+        testContext = Mockito.mock(MockedTestContext.class);
+        when(testContext.getTestMethodName()).thenReturn(Optional.of(TEST_NAME));
+        when(testContext.getActingUserName()).thenReturn(ACTING_USER_NAME);
+        when(testContext.getActingUserCrn()).thenReturn(Crn.fromString(ACTING_USER_CRN));
     }
 
     @Test
@@ -125,10 +128,28 @@ class TagsUtilTest {
         response.setTags(tags);
         testDto.setResponse(response);
 
+        String expectedMsg = String.format(TagsUtil.ACTING_USER_NAME_VALUE_FAILURE_PATTERN, OWNER_TAG_KEY, "null", ACTING_USER_NAME);
         assertThatThrownBy(() -> underTest.verifyTags(testDto, testContext))
-                .hasMessageContaining(String.format(TagsUtil.MISSING_DEFAULT_TAG, "owner"))
+                .hasMessageContaining(expectedMsg)
                 .matches(e -> !e.getMessage().contains(TagsUtil.MISSING_TEST_NAME_TAG_MESSAGE))
                 .matches(e -> defaultTags.keySet().stream().noneMatch(tag -> e.getMessage().contains(tag)));
+    }
+
+    @Test
+    void verifyTagsShouldFailWhenTestContextHasNullAsActingCrn() {
+        DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
+        StackV4Response response = new StackV4Response();
+        TagsV4Response tags = new TagsV4Response();
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        tags.setDefaults(DEFAULT_TAGS);
+        response.setTags(tags);
+        testDto.setResponse(response);
+        when(testContext.getActingUserCrn()).thenReturn(null);
+
+        String expectedMsg = String.format(TagsUtil.ACTING_USER_CRN_VALUE_FAILURE_PATTERN, CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY, ACTING_USER_CRN, "null");
+        assertThatThrownBy(() -> underTest.verifyTags(testDto, testContext))
+                .hasMessageContaining(expectedMsg)
+                .matches(e -> !e.getMessage().contains(TagsUtil.MISSING_TEST_NAME_TAG_MESSAGE));
     }
 
     @Test
@@ -136,11 +157,55 @@ class TagsUtilTest {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         testDto.setResponse(new StackV4Response());
 
+        String expectedMessage = String.format(TagsUtil.TEST_NAME_TAG_VALUE_FAILURE_PATTERN, TagsUtil.TEST_NAME_TAG, "null", TEST_NAME);
         assertThatThrownBy(() -> underTest.verifyTags(testDto, testContext))
-                .hasMessageContaining(TagsUtil.MISSING_TEST_NAME_TAG_MESSAGE)
-                .satisfies(e ->
-                        TagsUtil.DEFAULT_TAGS.forEach(tag ->
-                                assertThat(e).hasMessageContaining(String.format(TagsUtil.MISSING_DEFAULT_TAG, tag))));
+                .hasMessageContaining(expectedMessage);
     }
 
+    @Test
+    void verifyTagsShouldVerifyTagWithTaggedResponseWhenTagsResponseContainCreatorWithAltusPartitionedCrnButTestContextHasCdpPartitionedCrn() {
+        DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
+        StackV4Response response = new StackV4Response();
+        TagsV4Response tags = new TagsV4Response();
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        Map<String, String> defaultTags = new HashMap<>(DEFAULT_TAGS);
+        defaultTags.put(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY, "crn:altus:iam:us-west-1:qe-gcp:user:cloudbreak-qe@hortonworks.com");
+        tags.setDefaults(defaultTags);
+        response.setTags(tags);
+        testDto.setResponse(response);
+
+        assertThatCode(() -> underTest.verifyTags(testDto, testContext))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void verifyTagsShouldVerifyTagWithTaggedResponseWhenTagsResponseContainCreatorWithCdpPartitionedCrnButTestContextHasAltusPartitionedCrn() {
+        DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
+        StackV4Response response = new StackV4Response();
+        TagsV4Response tags = new TagsV4Response();
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        tags.setDefaults(DEFAULT_TAGS);
+        response.setTags(tags);
+        testDto.setResponse(response);
+        when(testContext.getActingUserCrn()).thenReturn(Crn.fromString("crn:altus:iam:us-west-1:qe-gcp:user:cloudbreak-qe@hortonworks.com"));
+
+        assertThatCode(() -> underTest.verifyTags(testDto, testContext))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void verifyTagsShouldVerifyTagWithTaggedResponseWhenTagsResponseContainsCreatorAsGcpLabelTransformedValue() {
+        DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
+        StackV4Response response = new StackV4Response();
+        TagsV4Response tags = new TagsV4Response();
+        tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
+        Map<String, String> defaultTags = new HashMap<>(DEFAULT_TAGS);
+        defaultTags.put(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY, GcpLabelUtil.transformLabelKeyOrValue(ACTING_USER_CRN));
+        tags.setDefaults(defaultTags);
+        response.setTags(tags);
+        testDto.setResponse(response);
+
+        assertThatCode(() -> underTest.verifyTags(testDto, testContext))
+                .doesNotThrowAnyException();
+    }
 }

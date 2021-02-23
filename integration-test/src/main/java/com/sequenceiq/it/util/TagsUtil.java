@@ -4,13 +4,14 @@ import static java.lang.String.format;
 
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 import org.testng.asserts.SoftAssert;
 
+import com.google.common.base.Objects;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
@@ -33,6 +34,12 @@ public class TagsUtil {
 
     static final List<String> DEFAULT_TAGS = List.of("owner", "Cloudera-Environment-Resource-Name", "Cloudera-Creator-Resource-Name",
             "Cloudera-Resource-Name");
+
+    static final String ACTING_USER_CRN_VALUE_FAILURE_PATTERN = "Default tag: [%s] value is: [%s] NOT equals [%s] acting user CRN!";
+
+    static final String ACTING_USER_NAME_VALUE_FAILURE_PATTERN = "Default tag: [%s] value is: [%s] NOT equals [%s] acting user name! ";
+
+    static final String TEST_NAME_TAG_VALUE_FAILURE_PATTERN = "Test name tag: [%s] value is: [%s] NOT equals [%s] test method name!";
 
     private static final int GCP_TAG_MAX_LENGTH = 63;
 
@@ -104,18 +111,19 @@ public class TagsUtil {
     }
 
     private void validateOwnerTag(TaggedResponse response, String tag, TestContext testContext) {
-        if (response.getTagValue(tag).equals(testContext.getActingUserName())
-                || response.getTagValue(tag).equals(sanitize(testContext.getActingUserName()))) {
-            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, response.getTagValue(tag),
-                    testContext.getActingUserName()));
-        } else if (gcpLabelTransformedValue(response.getTagValue(tag), testContext.getActingUserName())) {
-            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user name transformed to a GCP label value! ", tag,
-                    response.getTagValue(tag), testContext.getActingUserName()));
+        String tagValue = response.getTagValue(tag);
+        if (StringUtils.isNotEmpty(tagValue)) {
+            if (tagValue.equals(testContext.getActingUserName()) || tagValue.equals(sanitize(testContext.getActingUserName()))) {
+                Log.log(LOGGER, format("Default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, tagValue,
+                        testContext.getActingUserName()));
+            } else if (gcpLabelTransformedValue(tagValue, testContext.getActingUserName())) {
+                Log.log(LOGGER, format("Default tag: [%s] value is: [%s] equals [%s] acting user name transformed to a GCP label value! ", tag,
+                        tagValue, testContext.getActingUserName()));
+            }
         } else {
-            LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user name!", tag, response.getTagValue(tag),
-                    testContext.getActingUserName());
-            throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user name! ",
-                    tag, response.getTagValue(tag), testContext.getActingUserName()));
+            String message = format(ACTING_USER_NAME_VALUE_FAILURE_PATTERN, tag, tagValue, testContext.getActingUserName());
+            LOGGER.error(message);
+            throw new TestFailException(message);
         }
     }
 
@@ -134,31 +142,39 @@ public class TagsUtil {
         if (StringUtils.isEmpty(tagValue)) {
             tagValue = response.getTagValue(tag.toLowerCase());
         }
-        if (gcpLabelTransformedValue(tagValue, actingUserCrn.toString())) {
+        if (actingUserCrn != null && gcpLabelTransformedValue(tagValue, actingUserCrn.toString())) {
             Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN transformed to a GCP label value! ", tag, tagValue,
                     actingUserCrn));
         } else {
-            Crn clouderaCreatorResourceName = Crn.fromString(tagValue);
+            Crn creatorResourceNameTag = Crn.fromString(tagValue);
 
-            if (clouderaCreatorResourceName != null && clouderaCreatorResourceName.equals(actingUserCrn)) {
-                Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, clouderaCreatorResourceName, actingUserCrn));
+            if (actingUserCrn != null && creatorResourceNameTag != null && crnEqualsWithoutConsideringPartition(actingUserCrn, creatorResourceNameTag)) {
+                Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, creatorResourceNameTag, actingUserCrn));
             } else {
-                LOGGER.error("Default tag: [{}] value is: [{}] NOT equals [{}] acting user CRN!", tag, clouderaCreatorResourceName, actingUserCrn);
-                throw new TestFailException(String.format(" Default tag: [%s] value is: [%s] NOT equals [%s] acting user CRN! ", tag,
-                        clouderaCreatorResourceName, actingUserCrn));
+                String message = format(ACTING_USER_CRN_VALUE_FAILURE_PATTERN, tag, creatorResourceNameTag, actingUserCrn);
+                LOGGER.error(message);
+                throw new TestFailException(message);
             }
         }
     }
 
     private void validateTestNameTag(TaggedResponse response, TestContext testContext) {
-        if (response.getTagValue(TEST_NAME_TAG).toLowerCase().equals(testContext.getTestMethodName().get().toLowerCase())) {
-            Log.log(LOGGER, format(" Test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG),
+        String testNameTagValue = response.getTagValue(TEST_NAME_TAG);
+        if (StringUtils.isNotEmpty(testNameTagValue) && testNameTagValue.toLowerCase().equals(testContext.getTestMethodName().get().toLowerCase())) {
+            Log.log(LOGGER, format("Test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG, testNameTagValue,
                     testContext.getTestMethodName().get()));
         } else {
-            LOGGER.error("Test name tag: [{}] value is: [{}] NOT equals [{}] test method name!", TEST_NAME_TAG, response.getTagValue(TEST_NAME_TAG),
-                    testContext.getTestMethodName().get());
-            throw new TestFailException(String.format(" Test name tag: [%s] value is: [%s] NOT equals [%s] test method name! ", TEST_NAME_TAG,
-                    response.getTagValue(TEST_NAME_TAG), testContext.getTestMethodName().get()));
+            String message = format(TEST_NAME_TAG_VALUE_FAILURE_PATTERN, TEST_NAME_TAG, testNameTagValue, testContext.getTestMethodName().get());
+            LOGGER.error(message);
+            throw new TestFailException(message);
         }
+    }
+
+    private boolean crnEqualsWithoutConsideringPartition(Crn actingUserCrn, Crn creatorResourceNameTag) {
+        return Objects.equal(actingUserCrn.getService(), creatorResourceNameTag.getService())
+                && Objects.equal(actingUserCrn.getRegion(), creatorResourceNameTag.getRegion())
+                && Objects.equal(actingUserCrn.getAccountId(), creatorResourceNameTag.getAccountId())
+                && Objects.equal(actingUserCrn.getResourceType(), creatorResourceNameTag.getResourceType())
+                && Objects.equal(actingUserCrn.getResource(), creatorResourceNameTag.getResource());
     }
 }
