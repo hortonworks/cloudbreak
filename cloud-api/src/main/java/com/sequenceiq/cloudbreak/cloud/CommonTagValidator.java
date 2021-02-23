@@ -16,6 +16,10 @@ public abstract class CommonTagValidator implements Validator, TagValidator {
 
     public abstract TagSpecification getTagSpecification();
 
+    protected String transform(String tag) {
+        return tag;
+    }
+
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         ValidationResult validationResult = validateTags(getTagSpecification(), cloudStack.getTags());
@@ -52,7 +56,7 @@ public abstract class CommonTagValidator implements Validator, TagValidator {
     private void validateTagsAreWellFormatted(String keyValidator, Collection<String> strings, Pattern keyValidator2, String s,
             ValidationResultBuilder validationResultBuilder) {
         if (!keyValidator.isEmpty()) {
-            Set<String> invalidKeys = strings.stream().filter(k -> !keyValidator2.matcher(k).matches()).collect(Collectors.toSet());
+            Set<String> invalidKeys = strings.stream().filter(k -> !keyValidator2.matcher(transform(k)).matches()).collect(Collectors.toSet());
             if (!invalidKeys.isEmpty()) {
                 validationResultBuilder.error(String.format(s, invalidKeys, keyValidator2.pattern()));
             }

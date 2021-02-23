@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CommonTagValidator;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @Component
@@ -40,5 +41,10 @@ public class GcpTagValidator extends CommonTagValidator implements TagValidator 
     @Override
     protected Pattern getValueValidator() {
         return valueValidator;
+    }
+
+    @Override
+    protected String transform(String tag) {
+        return GcpLabelUtil.transformLabelKeyOrValue(tag);
     }
 }
