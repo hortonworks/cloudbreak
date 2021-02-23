@@ -22,7 +22,7 @@ public class StructuredSynchronizerJobInitializer implements JobInitializer {
     public void initJobs() {
         stackService.getAllAlive().stream()
                 .map(this::convertToStack)
-                .forEach(s -> jobService.schedule(new StructuredSynchronizerJobAdapter(s)));
+                .forEach(s -> jobService.scheduleWithDelay(new StructuredSynchronizerJobAdapter(s)));
     }
 
     private Stack convertToStack(StackTtlView view) {
