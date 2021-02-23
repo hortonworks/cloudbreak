@@ -2,6 +2,11 @@ package com.sequenceiq.cloudbreak.structuredevent.job;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.ZonedDateTime;
+import java.util.Date;
+import java.util.Random;
 
 import javax.inject.Inject;
 
@@ -35,6 +40,10 @@ public class StructuredSynchronizerJobService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredSynchronizerJobService.class);
 
+    private static final Random RANDOM = new SecureRandom();
+
+    private static final int SECONDS_IN_HOUR = 3600;
+
     @Inject
     private StructuredSynchronizerConfig structuredSynchronizerConfig;
 
@@ -44,26 +53,34 @@ public class StructuredSynchronizerJobService {
     @Inject
     private ApplicationContext applicationContext;
 
-    public <T> void schedule(JobResourceAdapter<T> resource) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
-        Trigger trigger = buildJobTrigger(jobDetail);
-        try {
-            if (scheduler.getJobDetail(JobKey.jobKey(resource.getLocalId(), JOB_GROUP)) != null) {
-                unschedule(resource.getLocalId());
-            }
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", resource.getLocalId()), e);
-        }
-    }
-
     public void schedule(Long id, Class<? extends JobResourceAdapter> resource) {
         try {
             Constructor<? extends JobResourceAdapter> c = resource.getConstructor(Long.class, ApplicationContext.class);
             JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
-            schedule(resourceAdapter);
+            JobDetail jobDetail = buildJobDetail(resourceAdapter.getLocalId(), resourceAdapter.getRemoteResourceId(), resourceAdapter.getJobClassForResource());
+            Trigger trigger = buildJobTrigger(jobDetail);
+            schedule(resourceAdapter.getLocalId(), jobDetail, trigger);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+        }
+    }
+
+    public <T> void scheduleWithDelay(JobResourceAdapter<T> resource) {
+        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        Trigger trigger = buildJobTriggerWithDelay(jobDetail);
+        schedule(resource.getLocalId(), jobDetail, trigger);
+    }
+
+    public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
+        if (structuredSynchronizerConfig.isStructuredSyncEnabled()) {
+            try {
+                if (scheduler.getJobDetail(JobKey.jobKey(id, JOB_GROUP)) != null) {
+                    unschedule(id);
+                }
+                scheduler.scheduleJob(jobDetail, trigger);
+            } catch (SchedulerException e) {
+                LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
+            }
         }
     }
 
@@ -99,5 +116,23 @@ public class StructuredSynchronizerJobService {
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithRemainingCount())
                 .build();
+    }
+
+    protected Trigger buildJobTriggerWithDelay(JobDetail jobDetail) {
+        return TriggerBuilder.newTrigger()
+                .forJob(jobDetail)
+                .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
+                .withDescription("Checking datalake status Trigger")
+                .startAt(delayedStart())
+                .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                        .withIntervalInHours(structuredSynchronizerConfig.getIntervalInHours())
+                        .repeatForever()
+                        .withMisfireHandlingInstructionNextWithRemainingCount())
+                .build();
+    }
+
+    private Date delayedStart() {
+        return Date.from(ZonedDateTime.now().toInstant().plus(
+                Duration.ofSeconds(RANDOM.nextInt(structuredSynchronizerConfig.getIntervalInHours() * SECONDS_IN_HOUR))));
     }
 }
