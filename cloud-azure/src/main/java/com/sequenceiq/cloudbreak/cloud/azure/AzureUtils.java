@@ -57,6 +57,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 import rx.Completable;
 import rx.Observable;
+import rx.exceptions.CompositeException;
 import rx.schedulers.Schedulers;
 
 @Component
@@ -93,6 +94,9 @@ public class AzureUtils {
 
     @Inject
     private SyncPollingScheduler syncPollingScheduler;
+
+    @Inject
+    private AzureVirtualMachineService azureVirtualMachineService;
 
     public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
@@ -243,23 +247,54 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public List<CloudVmInstanceStatus> deallocateInstances(AuthenticatedContext ac, List<CloudInstance> vms) {
+    public List<CloudVmInstanceStatus> deallocateInstances(AuthenticatedContext ac, List<CloudInstance> vms) throws BatchInstanceActionFailedException {
         LOGGER.info("Deallocate VMs: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        List<Completable> deallocateCompletables = new ArrayList<>();
-        for (CloudInstance vm : vms) {
-            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
-            AzureClient azureClient = ac.getParameter(AzureClient.class);
-            deallocateCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happend on azure instance stop: {}", vm, throwable);
-                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
-                    })
-                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED)))
-                    .subscribeOn(Schedulers.io()));
+        List<CloudVmInstanceStatus> actualVmStatuses = new ArrayList<>();
+        azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(ac, vms, actualVmStatuses);
+        List<CloudVmInstanceStatus> statusesAfterDeallocate = new ArrayList<>();
+        List<CloudInstance> vmsNotStopped = new ArrayList<>();
+        actualVmStatuses.stream().forEach(instance -> {
+            if (InstanceStatus.STOPPED.equals(instance.getStatus())) {
+                statusesAfterDeallocate.add(instance);
+            } else {
+                vmsNotStopped.add(instance.getCloudInstance());
+            }
+        });
+        LOGGER.info("Deallocate not stopped VMs: {}", vmsNotStopped.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        deallocateInstancesAndFillStatuses(ac, statusesAfterDeallocate, vmsNotStopped);
+
+        return statusesAfterDeallocate;
+    }
+
+    private void deallocateInstancesAndFillStatuses(AuthenticatedContext ac, List<CloudVmInstanceStatus> statusesAfterDeallocate,
+            List<CloudInstance> vmsNotStopped) throws BatchInstanceActionFailedException {
+        try {
+            List<Completable> deallocateCompletables = new ArrayList<>();
+            for (CloudInstance vm : vmsNotStopped) {
+                deallocateInstance(ac, statusesAfterDeallocate, deallocateCompletables, vm);
+            }
+            Completable.mergeDelayError(deallocateCompletables).await();
+        } catch (CompositeException e) {
+            LOGGER.error("Error(s) occured while waiting for vm deallocation: [{}]",
+                    e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining()));
+            throw new BatchInstanceActionFailedException(statusesAfterDeallocate, e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for vm deallocation: {}", e.getMessage(), e);
+            throw new BatchInstanceActionFailedException(statusesAfterDeallocate, e);
         }
-        Completable.merge(deallocateCompletables).await();
-        return statuses;
+    }
+
+    private void deallocateInstance(AuthenticatedContext ac, List<CloudVmInstanceStatus> statusesAfterDeallocate,
+            List<Completable> deallocateCompletables, CloudInstance vm) {
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        deallocateCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
+                .doOnError(throwable -> {
+                    LOGGER.error("Error happend on azure instance stop: {}", vm, throwable);
+                    statusesAfterDeallocate.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                })
+                .doOnCompleted(() -> statusesAfterDeallocate.add(new CloudVmInstanceStatus(vm, InstanceStatus.STOPPED)))
+                .subscribeOn(Schedulers.io()));
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
