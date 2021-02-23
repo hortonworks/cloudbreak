@@ -272,6 +272,28 @@
         ],
         "displayName": null,
         "roles": []
+      },
+      {
+        "refName": "queuemanager",
+        "serviceType": "QUEUEMANAGER",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enabled",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+            "roleType": "QUEUEMANAGER_STORE",
+            "base": true
+          }
+        ]
       }
     ],
     "hostTemplates": [
@@ -282,6 +304,8 @@
           "hbase-GATEWAY-BASE",
           "hdfs-GATEWAY-BASE",
           "knox-KNOX-GATEWAY-BASE",
+          "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE",
           "yarn-GATEWAY-BASE",
           "hue-HUE_SERVER-BASE",
           "hue-HUE_LOAD_BALANCER-BASE"
