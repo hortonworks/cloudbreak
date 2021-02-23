@@ -23,6 +23,7 @@ import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.ClustersResourceApi;
+import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostTemplatesResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
@@ -44,6 +45,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
@@ -54,6 +56,8 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 
 @Component
@@ -84,6 +88,9 @@ public class ClouderaManagerDecomissioner {
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private FlowMessageService flowMessageService;
 
     public void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances, ApiClient client) {
         try {
@@ -197,14 +204,25 @@ public class ClouderaManagerDecomissioner {
                     .collect(Collectors.toList());
 
             LOGGER.debug("Decommissioning nodes: [{}]", stillAvailableRemovableHosts);
+            boolean onlyLostNodesAffected = hostsToRemove.values().stream().allMatch(InstanceMetaData::isDeletedOnProvider);
+            String hostGroupName = hostsToRemove.values().stream().map(instanceMetaData ->
+                    instanceMetaData.getInstanceGroup().getGroupName()).findFirst().get();
             ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ApiHostNameList body = new ApiHostNameList().items(stillAvailableRemovableHosts);
             ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostDecommissioning(stack, client, apiCommand.getId());
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider
+                    .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), onlyLostNodesAffected, stillAvailableRemovableHosts.size());
             if (isExited(pollingResult)) {
                 throw new CancellationException("Cluster was terminated while waiting for host decommission");
             } else if (isTimeout(pollingResult)) {
-                throw new CloudbreakServiceException("Timeout while Cloudera Manager decommissioned host.");
+                if (onlyLostNodesAffected) {
+                    String warningMessage = "Cloudera Manager decommission host command {} polling timed out, " +
+                            "thus we are aborting the decommission and we are retrying it for lost nodes once again.";
+                    abortDecommissionWithWarningMessage(apiCommand, client, warningMessage);
+                    retryDecommissionNodes(apiInstance, body, stack, client, stillAvailableRemovableHosts, hostGroupName);
+                } else {
+                    throw new CloudbreakServiceException("Timeout while Cloudera Manager decommissioned host.");
+                }
             }
 
             return stillAvailableRemovableHosts.stream()
@@ -215,6 +233,28 @@ public class ClouderaManagerDecomissioner {
             LOGGER.error("Failed to decommission hosts: {}", hostsToRemove.keySet(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    private void retryDecommissionNodes(ClouderaManagerResourceApi apiInstance, ApiHostNameList body, Stack stack, ApiClient client,
+            List<String> removableHosts, String hostGroupName) throws ApiException {
+        ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider
+            .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), true, removableHosts.size());
+        if (isExited(pollingResult)) {
+            throw new CancellationException("Cluster was terminated while waiting for host decommission");
+        } else if (isTimeout(pollingResult)) {
+            String warningMessage = "Cloudera Manager retried decommission host command {} polling timed out again, thus we are aborting decommission " +
+                    "and we are skipping it, since these lost nodes clearly cannot be decommissioned, data loss expected in this case.";
+            abortDecommissionWithWarningMessage(apiCommand, client, warningMessage);
+            flowMessageService.fireInstanceGroupEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
+                    ResourceEvent.CLUSTER_LOST_NODE_DECOMMISSION_ABORTED_TWICE, String.join(",", removableHosts));
+        }
+    }
+
+    private void abortDecommissionWithWarningMessage(ApiCommand apiCommand, ApiClient client, String warningMessage) throws ApiException {
+        LOGGER.warn(warningMessage, apiCommand.getId());
+        CommandsResourceApi commandsResourceApi = clouderaManagerApiFactory.getCommandsResourceApi(client);
+        commandsResourceApi.abortCommand(apiCommand.getId());
     }
 
     private int getReplicationFactor(ApiClient client, String clusterName) {
