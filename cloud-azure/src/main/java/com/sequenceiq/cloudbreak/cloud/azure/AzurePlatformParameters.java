@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.TagValidator;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -71,6 +73,9 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Qualifier("AzureTagSpecification")
     private TagSpecification tagSpecification;
 
+    @Inject
+    private AzureTagValidator azureTagValidator;
+
     private VmRecommendations vmRecommendations;
 
     private String roleDefJson;
@@ -87,6 +92,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public ScriptParams scriptParams() {
         return SCRIPT_PARAMS;
+    }
+
+    @Override
+    public TagValidator tagValidator() {
+        return azureTagValidator;
     }
 
     @Override
