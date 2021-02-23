@@ -17,6 +17,7 @@ import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
@@ -33,11 +34,14 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
     @Inject
     private DatabasePollerService databasePollerService;
 
+    @Inject
+    private GcpSQLAdminFactory gcpSQLAdminFactory;
+
     @Override
     public List<CloudResource> terminate(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
-        SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
         String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = List.of(
                 new CloudResource.Builder()

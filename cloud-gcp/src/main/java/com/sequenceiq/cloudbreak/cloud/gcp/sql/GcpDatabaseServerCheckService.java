@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingSe
 import java.io.IOException;
 import java.util.Optional;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
@@ -13,6 +15,7 @@ import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -22,11 +25,14 @@ import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerCheckerSer
 @Service
 public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService implements DatabaseServerCheckerService {
 
+    @Inject
+    private GcpSQLAdminFactory gcpSQLAdminFactory;
+
     @Override
     public ExternalDatabaseStatus check(AuthenticatedContext ac, DatabaseStack stack) {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
-        SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
         String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
 
         try {

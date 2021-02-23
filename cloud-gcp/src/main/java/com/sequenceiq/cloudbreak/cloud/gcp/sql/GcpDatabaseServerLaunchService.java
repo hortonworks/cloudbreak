@@ -26,6 +26,8 @@ import com.google.api.services.sqladmin.model.User;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -49,11 +51,17 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     @Inject
     private DatabasePollerService databasePollerService;
 
+    @Inject
+    private GcpComputeFactory gcpComputeFactory;
+
+    @Inject
+    private GcpSQLAdminFactory gcpSQLAdminFactory;
+
     public List<CloudResource> launch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
-        SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
-        Compute compute = GcpStackUtil.buildCompute(ac.getCloudCredential());
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
+        Compute compute = gcpComputeFactory.buildCompute(ac.getCloudCredential());
 
         String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = new ArrayList<>();

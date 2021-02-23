@@ -32,6 +32,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.network.GcpNetworkResourceBuilder;
@@ -91,6 +92,9 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
     @Inject
     private GcpSubnetSelectorService gcpSubnetSelectorService;
 
+    @Inject
+    private GcpComputeFactory gcpComputeFactory;
+
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkCreationRequest) {
         CloudContext cloudContext = getCloudContext(networkCreationRequest);
@@ -141,7 +145,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         String region = network.getStringParameter(GcpStackUtil.REGION);
         String sharedProjectId = network.getStringParameter(GcpStackUtil.SHARED_PROJECT_ID);
         LOGGER.debug("Getting network cidrs for subnet {} in region {}", subnetId, region);
-        Compute compute = GcpStackUtil.buildCompute(credential);
+        Compute compute = gcpComputeFactory.buildCompute(credential);
         String projectId = GcpStackUtil.getProjectId(credential);
         Subnetwork subnet = null;
         try {

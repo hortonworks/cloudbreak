@@ -17,9 +17,9 @@ import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCredentialFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
@@ -41,10 +41,13 @@ public class GcpCredentialConnector implements CredentialConnector {
     @Inject
     private GcpPlatformParameters gcpPlatformParameters;
 
+    @Inject
+    private GcpCredentialFactory gcpCredentialFactory;
+
     @Override
     public CloudCredentialStatus verify(@Nonnull AuthenticatedContext authenticatedContext, CredentialVerificationContext credentialVerificationContext) {
         LOGGER.debug("Verify credential: {}", authenticatedContext.getCloudCredential());
-        GcpStackUtil.prepareCredential(authenticatedContext.getCloudCredential());
+        gcpCredentialFactory.prepareCredential(authenticatedContext.getCloudCredential());
         GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, null, false);
         try {
             gcpCredentialVerifier.checkGcpContextValidity(gcpContext);

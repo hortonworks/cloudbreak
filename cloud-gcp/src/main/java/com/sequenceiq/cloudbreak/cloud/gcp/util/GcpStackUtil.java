@@ -3,46 +3,24 @@ package com.sequenceiq.cloudbreak.cloud.gcp.util;
 import static org.apache.commons.lang3.StringUtils.isAnyEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.security.PrivateKey;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.auth.oauth2.TokenResponseException;
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestInitializer;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
-import com.google.api.client.util.SecurityUtils;
-import com.google.api.services.cloudkms.v1.CloudKMS;
-import com.google.api.services.cloudkms.v1.CloudKMSScopes;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.RegionOperations.Get;
 import com.google.api.services.compute.Compute.ZoneOperations;
-import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Operation.Error.Errors;
-import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.OperationError;
-import com.google.api.services.storage.Storage;
-import com.google.api.services.storage.Storage.Builder;
-import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -52,15 +30,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 
 public final class GcpStackUtil {
-
-    public static final String GCP = "gcp";
-
-    public static final String JSON = "json";
 
     public static final String NETWORK_ID = "networkId";
 
@@ -74,10 +47,6 @@ public final class GcpStackUtil {
 
     public static final String PROJECT_ID = "projectId";
 
-    public static final String PRIVATE_KEY = "serviceAccountPrivateKey";
-
-    public static final String CREDENTIAL_JSON = "credentialJson";
-
     public static final String NO_PUBLIC_IP = "noPublicIp";
 
     public static final String NO_FIREWALL_RULES = "noFirewallRules";
@@ -89,10 +58,6 @@ public final class GcpStackUtil {
     public static final String AUTHORIZATION_ERROR = "We could not authorize the credential on google side: %s";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
-
-    private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-
-    private static final List<String> SCOPES = Arrays.asList(ComputeScopes.COMPUTE, StorageScopes.DEVSTORAGE_FULL_CONTROL, CloudKMSScopes.CLOUD_PLATFORM);
 
     private static final String GCP_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/%s";
 
@@ -117,65 +82,6 @@ public final class GcpStackUtil {
     private GcpStackUtil() {
     }
 
-    public static Iam buildIam(CloudCredential gcpCredential) {
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new Iam.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(gcpCredential.getName())
-                    .setHttpRequestInitializer(credential)
-                    .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Compute access.", e);
-            throw new CredentialVerificationException("Error occurred while building Google Compute access.", e);
-        }
-    }
-
-    public static Compute buildCompute(CloudCredential gcpCredential) {
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new Compute.Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(gcpCredential.getName())
-                    .setHttpRequestInitializer(credential)
-                    .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Compute access.", e);
-            throw new CredentialVerificationException("Error occurred while building Google Compute access.", e);
-        }
-    }
-
-    public static GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
-        String credentialJson = getServiceAccountCredentialJson(gcpCredential);
-        if (isNotEmpty(credentialJson)) {
-            return GoogleCredential.fromStream(new ByteArrayInputStream(Base64.decodeBase64(credentialJson)), httpTransport, JSON_FACTORY)
-                    .createScoped(SCOPES);
-        } else {
-            try {
-                PrivateKey pk = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
-                        new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
-                return new GoogleCredential.Builder().setTransport(httpTransport)
-                        .setJsonFactory(JSON_FACTORY)
-                        .setServiceAccountId(getServiceAccountId(gcpCredential))
-                        .setServiceAccountScopes(SCOPES)
-                        .setServiceAccountPrivateKey(pk)
-                        .build();
-            } catch (IOException e) {
-                throw new CredentialVerificationException("Can not read private key", e);
-            }
-        }
-    }
-
-    public static String getServiceAccountPrivateKey(CloudCredential credential) {
-        return credential.getParameter(PRIVATE_KEY, String.class);
-    }
-
-    public static String getServiceAccountCredentialJson(CloudCredential credential) {
-        Map<String, Object> gcp = (Map<String, Object>) credential.getParameters().get(GCP);
-        Map<String, Object> json = (Map<String, Object>) gcp.get(JSON);
-        return json.get(CREDENTIAL_JSON).toString();
-    }
-
     public static String getServiceAccountId(CloudCredential credential) {
         return credential.getParameter(SERVICE_ACCOUNT, String.class);
     }
@@ -186,31 +92,6 @@ public final class GcpStackUtil {
             throw new CredentialVerificationException("Missing Project Id from GCP Credential");
         }
         return projectId.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
-    }
-
-    public static CloudCredential prepareCredential(CloudCredential credential) {
-        try {
-            String credentialJson = getServiceAccountCredentialJson(credential);
-            if (isNotEmpty(credentialJson)) {
-                JsonNode credNode = JsonUtil.readTree(new String(Base64.decodeBase64(credentialJson)));
-                JsonNode projectId = credNode.get("project_id");
-                if (projectId != null) {
-                    credential.putParameter(PROJECT_ID, projectId.asText());
-                } else {
-                    throw new CredentialVerificationException("project_id is missing from json");
-                }
-                JsonNode clientEmail = credNode.get("client_email");
-                if (clientEmail != null) {
-                    credential.putParameter(SERVICE_ACCOUNT, clientEmail.asText());
-                } else {
-                    throw new CredentialVerificationException("client_email is missing from json");
-                }
-                credential.putParameter(PRIVATE_KEY, "");
-            }
-            return credential;
-        } catch (IOException iox) {
-            throw new CredentialVerificationException("Invalid credential json!", iox);
-        }
     }
 
     public static boolean isOperationFinished(Operation operation) throws Exception {
@@ -293,44 +174,12 @@ public final class GcpStackUtil {
         return compute.regionOperations().get(projectId, region.value(), operationName);
     }
 
-    public static Storage buildStorage(CloudCredential gcpCredential, String name) {
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new Builder(
-                    httpTransport, JSON_FACTORY, setHttpTimeout(credential)).setApplicationName(name)
-                    .setHttpRequestInitializer(setHttpTimeout(credential))
-                    .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Storage access.", e);
-        }
-        return null;
-    }
-
-    private static HttpRequestInitializer setHttpTimeout(final HttpRequestInitializer requestInitializer) {
-        return new HttpRequestInitializer() {
-            @Override
-            public void initialize(HttpRequest httpRequest) throws IOException {
-                requestInitializer.initialize(httpRequest);
-                httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
-                httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
-            }
+    public static HttpRequestInitializer setHttpTimeout(HttpRequestInitializer requestInitializer) {
+        return httpRequest -> {
+            requestInitializer.initialize(httpRequest);
+            httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
+            httpRequest.setReadTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
         };
-    }
-
-    public static SQLAdmin buildSQLAdmin(CloudCredential gcpCredential, String name) {
-        try {
-            HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-            GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new SQLAdmin.Builder(
-                    httpTransport, JSON_FACTORY, null)
-                    .setApplicationName(name)
-                    .setHttpRequestInitializer(credential)
-                    .build();
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred while building Google Storage access.", e);
-        }
-        return null;
     }
 
     public static String getBucket(String image) {
@@ -494,15 +343,4 @@ public final class GcpStackUtil {
         return splittable.split("/");
     }
 
-    public static CloudKMS buildCloudKMS(CloudCredential cloudCredential) throws GeneralSecurityException, IOException {
-        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
-        GoogleCredential credential = buildCredential(cloudCredential, httpTransport);
-        if (credential.createScopedRequired()) {
-            credential = credential.createScoped(CloudKMSScopes.all());
-        }
-
-        return new CloudKMS.Builder(httpTransport, JSON_FACTORY, credential)
-                .setApplicationName(cloudCredential.getName())
-                .build();
-    }
 }

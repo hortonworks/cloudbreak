@@ -28,6 +28,7 @@ import com.google.api.client.testing.json.MockJsonFactory;
 import com.google.api.services.compute.Compute;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCredentialFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.InvalidGcpContextException;
@@ -77,6 +78,9 @@ public class GcpCredentialConnectorTest {
 
     @Mock
     private GcpCredentialVerifier gcpCredentialVerifier;
+
+    @Mock
+    private GcpCredentialFactory gcpCredentialFactory;
 
     @Before
     public void setUp() {

@@ -6,12 +6,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpIamFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -26,11 +29,14 @@ public class GcpServiceAccountObjectStorageValidator {
 
     private static final int DEFAULT_PAGE_SIZE = 50;
 
+    @Inject
+    private GcpIamFactory gcpIamFactory;
+
     public ValidationResultBuilder validateObjectStorage(CloudCredential cloudCredential,
             SpiFileSystem spiFileSystem,
             ValidationResultBuilder resultBuilder) throws IOException {
         LOGGER.info("Validating Gcp identities...");
-        Iam iam = GcpStackUtil.buildIam(cloudCredential);
+        Iam iam = gcpIamFactory.buildIam(cloudCredential);
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
             String projectId = GcpStackUtil.getProjectId(cloudCredential);
