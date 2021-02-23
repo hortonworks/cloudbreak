@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.services.storage.Storage;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpStorageFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.validator.GcpServiceAccountObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -29,9 +30,12 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
     @Inject
     private GcpServiceAccountObjectStorageValidator gcpServiceAccountObjectStorageValidator;
 
+    @Inject
+    private GcpStorageFactory gcpStorageFactory;
+
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
-        Storage storage = GcpStackUtil.buildStorage(request.getCredential(), request.getCredential().getName());
+        Storage storage = gcpStorageFactory.buildStorage(request.getCredential(), request.getCredential().getName());
         try {
             storage.buckets().get(GcpStackUtil.getBucketName(request.getObjectStoragePath())).execute();
             return ObjectStorageMetadataResponse.builder()
@@ -47,7 +51,7 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public ObjectStorageValidateResponse validateObjectStorage(ObjectStorageValidateRequest request) {
-        Storage storage = GcpStackUtil.buildStorage(request.getCredential(), request.getCredential().getName());
+        Storage storage = gcpStorageFactory.buildStorage(request.getCredential(), request.getCredential().getName());
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
         for (StorageLocationBase location : request.getCloudStorageRequest().getLocations()) {

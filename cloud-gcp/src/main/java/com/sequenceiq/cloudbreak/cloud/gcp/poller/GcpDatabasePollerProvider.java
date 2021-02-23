@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -17,6 +19,7 @@ import com.google.api.services.sqladmin.SQLAdmin;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.GcpDatabaseResourceChecker;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -33,6 +36,9 @@ public class GcpDatabasePollerProvider {
     private final DatabaseServerCheckerService checker;
 
     private final GcpDatabaseResourceChecker gcpResourceChecker;
+
+    @Inject
+    private GcpSQLAdminFactory gcpSQLAdminFactory;
 
     public GcpDatabasePollerProvider(DatabaseServerCheckerService checker, GcpDatabaseResourceChecker gcpResourceChecker) {
         this.checker = checker;
@@ -56,7 +62,7 @@ public class GcpDatabasePollerProvider {
     }
 
     private AttemptResult<Void> fetchOperationResults(AuthenticatedContext ac, List<CloudResource> resources, ResourceStatus expectedStatus) {
-        SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(
                 ResourceType.GCP_DATABASE,
                 sqlAdmin,

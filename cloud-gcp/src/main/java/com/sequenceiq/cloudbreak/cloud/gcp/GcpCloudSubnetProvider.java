@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.RegionList;
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
@@ -17,8 +20,11 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 @Component
 public class GcpCloudSubnetProvider {
 
+    @Inject
+    private GcpComputeFactory gcpComputeFactory;
+
     public List<CreatedSubnet> provide(NetworkCreationRequest request, List<String> subnetCidrs) throws IOException {
-        Compute compute = GcpStackUtil.buildCompute(request.getCloudCredential());
+        Compute compute = gcpComputeFactory.buildCompute(request.getCloudCredential());
         String projectId = GcpStackUtil.getProjectId(request.getCloudCredential());
 
         List<String> az = getAvailabilityZones(compute, projectId, request.getRegion());

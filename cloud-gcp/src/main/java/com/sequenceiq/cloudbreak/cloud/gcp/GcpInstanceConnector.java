@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -19,6 +21,7 @@ import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -34,6 +37,9 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
 
     @Value("${cb.gcp.hostkey.verify:}")
     private boolean verifyHostKey;
+
+    @Inject
+    private GcpComputeFactory computeClient;
 
     @Override
     public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
@@ -112,7 +118,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         CloudCredential credential = ac.getCloudCredential();
         CloudContext cloudContext = ac.getCloudContext();
-        Compute compute = GcpStackUtil.buildCompute(credential);
+        Compute compute = computeClient.buildCompute(credential);
         for (CloudInstance instance : vms) {
             InstanceStatus status = InstanceStatus.UNKNOWN;
             try {
@@ -143,7 +149,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         }
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
-            GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()
+            GetSerialPortOutput instanceGet = computeClient.buildCompute(credential).instances()
                     .getSerialPortOutput(GcpStackUtil.getProjectId(credential),
                             authenticatedContext.getCloudContext().getLocation().getAvailabilityZone().value(), vm.getInstanceId());
             return instanceGet.execute().getContents();

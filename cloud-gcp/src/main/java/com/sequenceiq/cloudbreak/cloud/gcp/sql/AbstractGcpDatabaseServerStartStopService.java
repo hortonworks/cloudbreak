@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import org.jetbrains.annotations.NotNull;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +17,7 @@ import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.poller.DatabasePollerService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.view.GcpDatabaseServerView;
@@ -26,11 +28,14 @@ import com.sequenceiq.common.api.type.ResourceType;
 public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatabaseServerBaseService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpDatabaseServerStartStopService.class);
 
+    @Inject
+    private GcpSQLAdminFactory gcpSQLAdminFactory;
+
     protected void startStop(AuthenticatedContext ac, DatabaseStack stack, DatabasePollerService databasePollerService, String policy)
             throws IOException {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
-        SQLAdmin sqlAdmin = GcpStackUtil.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
 
         String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> gcpDatabase = getGcpDatabase(stack);
@@ -64,7 +69,6 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
         }
     }
 
-    @NotNull
     protected DatabaseInstance getDatabaseInstance(String policy) {
         return new DatabaseInstance().setSettings(new Settings().setActivationPolicy(policy));
     }

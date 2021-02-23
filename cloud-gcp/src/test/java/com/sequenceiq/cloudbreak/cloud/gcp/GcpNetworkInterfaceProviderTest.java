@@ -26,7 +26,7 @@ import com.google.api.services.compute.model.InstanceList;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpApiFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -53,7 +53,7 @@ public class GcpNetworkInterfaceProviderTest {
     private GcpNetworkInterfaceProvider underTest;
 
     @Mock
-    private GcpApiFactory gcpApiFactory;
+    private GcpComputeFactory gcpComputeFactory;
 
     @Mock
     private Compute compute;
@@ -75,7 +75,7 @@ public class GcpNetworkInterfaceProviderTest {
         when(compute.instances()).thenReturn(instancesMock);
         when(instancesMock.list(any(), eq(AZ))).thenReturn(computeInstancesMock);
         when(computeInstancesMock.setFilter(anyString())).thenReturn(computeInstancesMock);
-        when(gcpApiFactory.getComputeApi(authenticatedContext.getCloudCredential())).thenReturn(compute);
+        when(gcpComputeFactory.buildCompute(authenticatedContext.getCloudCredential())).thenReturn(compute);
     }
 
     @Test

@@ -21,7 +21,7 @@ import com.google.api.services.compute.model.InstanceList;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpApiFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -34,7 +34,7 @@ public class GcpNetworkInterfaceProvider {
     private static final String DELIMITER = "-";
 
     @Inject
-    private GcpApiFactory gcpApiFactory;
+    private GcpComputeFactory gcpComputeFactory;
 
     Map<String, Optional<NetworkInterface>> provide(AuthenticatedContext authenticatedContext, List<CloudResource> instances) {
         String instanceNamePrefix = getInstanceNamePrefix(instances);
@@ -84,7 +84,7 @@ public class GcpNetworkInterfaceProvider {
 
     private Compute.Instances.List getRequest(AuthenticatedContext authenticatedContext, String instanceNamePrefix) throws IOException {
         CloudCredential credential = authenticatedContext.getCloudCredential();
-        Compute compute = gcpApiFactory.getComputeApi(credential);
+        Compute compute = gcpComputeFactory.buildCompute(credential);
         return compute.instances()
                 .list(GcpStackUtil.getProjectId(credential), authenticatedContext.getCloudContext().getLocation()
                         .getAvailabilityZone()

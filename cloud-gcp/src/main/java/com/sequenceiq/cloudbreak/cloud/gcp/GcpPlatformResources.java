@@ -54,6 +54,9 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCloudKMSFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpIamFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
@@ -107,6 +110,15 @@ public class GcpPlatformResources implements PlatformResources {
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
+    @Inject
+    private GcpComputeFactory gcpComputeFactory;
+
+    @Inject
+    private GcpIamFactory gcpIamFactory;
+
+    @Inject
+    private GcpCloudKMSFactory gcpCloudKMSFactory;
+
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
@@ -143,7 +155,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
-        Compute compute = GcpStackUtil.buildCompute(cloudCredential);
+        Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
@@ -268,7 +280,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
-        Compute compute = GcpStackUtil.buildCompute(cloudCredential);
+        Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
@@ -312,7 +324,7 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception {
-        Compute compute = GcpStackUtil.buildCompute(cloudCredential);
+        Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
@@ -397,7 +409,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     @NotNull
     public CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Compute compute = GcpStackUtil.buildCompute(cloudCredential);
+        Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
@@ -453,7 +465,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        Iam iam = GcpStackUtil.buildIam(cloudCredential);
+        Iam iam = gcpIamFactory.buildIam(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
         Set<CloudAccessConfig> collect = new HashSet<>();
         try {
@@ -478,7 +490,7 @@ public class GcpPlatformResources implements PlatformResources {
     public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudKMS cloudKMS;
         try {
-            cloudKMS = GcpStackUtil.buildCloudKMS(cloudCredential);
+            cloudKMS = gcpCloudKMSFactory.buildCloudKMS(cloudCredential);
         } catch (Exception e) {
             LOGGER.warn("Failed to build CloudKMS client.", e);
             return new CloudEncryptionKeys(new HashSet<>());

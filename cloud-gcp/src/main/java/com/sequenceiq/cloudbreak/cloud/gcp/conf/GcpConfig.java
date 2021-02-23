@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
 
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 
 @Configuration
@@ -36,4 +38,10 @@ public class GcpConfig {
     public TagSpecification getTagSpecification() {
         return new TagSpecification(maxAmount, minKeyLength, maxKeyLength, keyValidator, minValueLength, maxValueLength, valueValidator);
     }
+
+    @Bean
+    public JsonFactory jsonFactory() {
+        return JacksonFactory.getDefaultInstance();
+    }
+
 }

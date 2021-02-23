@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.buildCompute;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.buildStorage;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getBucket;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getImageName;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
@@ -11,6 +9,8 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpStorageFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -52,6 +54,12 @@ public class GcpProvisionSetup implements Setup {
 
     private static final int MAX_RECURSION_NUMBER = 100;
 
+    @Inject
+    private GcpComputeFactory gcpComputeFactory;
+
+    @Inject
+    private GcpStorageFactory gcpStorageFactory;
+
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
@@ -59,10 +67,10 @@ public class GcpProvisionSetup implements Setup {
         try {
             String projectId = getProjectId(credential);
             String imageName = image.getImageName();
-            Compute compute = buildCompute(credential);
+            Compute compute = gcpComputeFactory.buildCompute(credential);
             ImageList list = compute.images().list(projectId).execute();
             if (!containsSpecificImage(list, imageName)) {
-                Storage storage = buildStorage(credential, cloudContext.getName());
+                Storage storage = gcpStorageFactory.buildStorage(credential, cloudContext.getName());
                 String accountId = authenticatedContext.getCloudContext().getAccountUUID();
                 Bucket bucket = new Bucket();
                 String bucketName = GcpLabelUtil.transformLabelKeyOrValue(String.format("%s-%s", accountId, projectId));
@@ -155,7 +163,7 @@ public class GcpProvisionSetup implements Setup {
         try {
             Image gcpApiImage = new Image();
             gcpApiImage.setName(getImageName(imageName));
-            Compute compute = buildCompute(credential);
+            Compute compute = gcpComputeFactory.buildCompute(credential);
             Get getImages = compute.images().get(projectId, gcpApiImage.getName());
             String status = getImages.execute().getStatus();
             LOGGER.debug("Status of image {} copy: {}", gcpApiImage.getName(), status);
