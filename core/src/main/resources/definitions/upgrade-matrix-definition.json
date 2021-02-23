@@ -67,19 +67,6 @@
           "version": "7.2.[0,1,2,6,7,8]"
         }
       ]
-    },
-    {
-      "target_runtime": {
-        "version": "7.2.10"
-      },
-      "source_runtime": [
-        {
-          "version": "7.1.0"
-        },
-        {
-          "version": "7.2.[0,1,2,6,7,8,9]"
-        }
-      ]
     }
   ]
 }
