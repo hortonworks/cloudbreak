@@ -9,7 +9,6 @@ public enum SdxStartState implements FlowState {
 
     INIT_STATE,
     SDX_START_RDS_START_STATE,
-    SDX_START_SYNC_STATE,
     SDX_START_START_STATE,
     SDX_START_IN_PROGRESS_STATE,
     SDX_START_FAILED_STATE,

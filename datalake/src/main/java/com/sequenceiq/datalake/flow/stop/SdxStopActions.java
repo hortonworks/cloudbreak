@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.flow.stop;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_ALL_DATAHUB_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_FINALIZED_EVENT;
-import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_SYNC_STOP_FINISHED_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -46,28 +45,6 @@ public class SdxStopActions {
 
     @Inject
     private SdxStopService stopService;
-
-    @Bean(name = "SDX_STOP_SYNC_STATE")
-    public Action<?, ?> sdxSync() {
-        return new AbstractSdxAction<>(SdxStartStopEvent.class) {
-
-            @Override
-            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext, SdxStartStopEvent payload) {
-                return SdxContext.from(flowParameters, payload);
-            }
-
-            @Override
-            protected void doExecute(SdxContext context, SdxStartStopEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Skipping sync flow for SDX: {}", payload.getResourceId());
-                sendEvent(context, SDX_SYNC_STOP_FINISHED_EVENT.event(), payload);
-            }
-
-            @Override
-            protected Object getFailurePayload(SdxStartStopEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return SdxStopFailedEvent.from(payload, ex);
-            }
-        };
-    }
 
     @Bean(name = "SDX_STOP_START_STATE")
     public Action<?, ?> sdxStop() {
