@@ -249,6 +249,18 @@
       ]
     },
     {
+      "Sid": "ECRAccessRead",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:GetRegistryPolicy",
+        "ecr:DescribeRegistry",
+        "ecr:GetAuthorizationToken"
+      ],
+      "Resource": [
+        "*"
+      ]
+    },
+    {
       "Sid": "DecodeAuthorizationMessage",
       "Action": [
         "sts:DecodeAuthorizationMessage"
