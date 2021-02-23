@@ -106,6 +106,10 @@ public class FlowLogDBService implements FlowLogService {
         return finalize(stackId, flowId, FlowConstants.TERMINATED_STATE);
     }
 
+    public void finalize(String flowId) {
+        flowLogRepository.finalizeByFlowId(flowId);
+    }
+
     private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
