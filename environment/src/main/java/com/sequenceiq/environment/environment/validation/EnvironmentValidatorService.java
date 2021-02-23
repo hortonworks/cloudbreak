@@ -32,6 +32,7 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -40,6 +41,7 @@ import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
+import com.sequenceiq.environment.environment.validation.validators.TagValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -67,13 +69,16 @@ public class EnvironmentValidatorService {
 
     private final Set<String> enabledChildPlatforms;
 
+    private final TagValidator tagValidator;
+
     public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
             CredentialService credentialService,
             PublicKeyValidator publicKeyValidator,
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
-            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms) {
+            @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms,
+            TagValidator tagValidator) {
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -81,10 +86,15 @@ public class EnvironmentValidatorService {
         this.publicKeyValidator = publicKeyValidator;
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
+        this.tagValidator = tagValidator;
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
         return networkCreationValidator.validateNetworkCreation(environment, network);
+    }
+
+    public ValidationResult validateTags(EnvironmentCreationDto environmentCreationDto) {
+        return tagValidator.validateTags(environmentCreationDto.getCloudPlatform(), environmentCreationDto.getTags());
     }
 
     public ValidationResult validateParentChildRelation(Environment environment, String parentEnvironmentName) {
