@@ -35,11 +35,11 @@ public abstract class CommonTagValidator implements Validator, TagValidator {
         validateTagsAreTooShort(tags.keySet(), ts.getMinKeyLength(), "Following tag names are too short: %s", validationResultBuilder);
         validateTagAreTooLong(tags.keySet(), ts.getMaxKeyLength(), "Following tag names are too long: %s", validationResultBuilder);
         validateTagsAreWellFormatted(ts.getKeyValidator(), tags.keySet(), getKeyValidator(),
-                "Following tag names are not well formatted: %s. Key of a that tag should match for %s regular expression", validationResultBuilder);
+                "Following tag names are not well formatted: %s. Key of the tag should match for %s regular expression", validationResultBuilder);
         validateTagsAreTooShort(tags.values(), ts.getMinValueLength(), "Following tag values are too short: %s", validationResultBuilder);
         validateTagAreTooLong(tags.values(), ts.getMaxValueLength(), "Following tag values are too long: %s", validationResultBuilder);
         validateTagsAreWellFormatted(ts.getValueValidator(), tags.values(), getValueValidator(),
-                "Following tag values are not well formatted: %s. Value of a that tag should match for %s regular expression", validationResultBuilder);
+                "Following tag values are not well formatted: %s. Value of the tag should match for %s regular expression", validationResultBuilder);
         return validationResultBuilder.build();
     }
 
