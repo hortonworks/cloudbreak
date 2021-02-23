@@ -130,17 +130,6 @@
         ]
       },
       {
-        "refName": "knox",
-        "serviceType": "KNOX",
-        "roleConfigGroups": [
-          {
-            "base": true,
-            "refName": "knox-KNOX-GATEWAY-BASE",
-            "roleType": "KNOX_GATEWAY"
-          }
-        ]
-      },
-      {
         "refName": "yarn",
         "serviceType": "YARN",
         "roleConfigGroups": [
@@ -217,7 +206,6 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-GATEWAY-BASE",
-          "knox-KNOX-GATEWAY-BASE",
           "yarn-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE"
         ]
