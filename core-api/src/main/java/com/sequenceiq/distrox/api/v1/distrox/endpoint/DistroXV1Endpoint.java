@@ -380,14 +380,14 @@ public interface DistroXV1Endpoint {
     @Path("progress/resource/crn/{resourceCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
-            nickname = "getDistroXLastFlowLogProgressByResourceName")
+            nickname = "getDistroXLastFlowLogProgressByResourceCrn")
     FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
-            nickname = "getDistroXFlowLogsProgressByResourceName")
+            nickname = "getDistroXFlowLogsProgressByResourceCrn")
     List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @POST
