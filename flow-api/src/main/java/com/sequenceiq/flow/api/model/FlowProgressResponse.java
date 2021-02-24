@@ -12,7 +12,7 @@ public class FlowProgressResponse implements Serializable {
 
     private String flowChainId;
 
-    private Long resourceId;
+    private String resourceCrn;
 
     private Long created;
 
@@ -72,19 +72,19 @@ public class FlowProgressResponse implements Serializable {
         this.flowChainId = flowChainId;
     }
 
-    public Long getResourceId() {
-        return resourceId;
-    }
-
-    public void setResourceId(Long resourceId) {
-        this.resourceId = resourceId;
-    }
-
     public Long getCreated() {
         return created;
     }
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
     }
 }
