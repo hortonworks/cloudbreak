@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -54,6 +56,14 @@ public class EnvironmentClientService implements ResourceBasedCrnProvider {
             String message = String.format("Failed to GET Environment by crn: %s, due to: '%s' ", crn, e.getMessage());
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public Optional<String> getCloudPlatformByCrn(String crn) {
+        try {
+            return Optional.ofNullable(getByCrn(crn).getCloudPlatform());
+        } catch (CloudbreakServiceException e) {
+            return Optional.empty();
         }
     }
 
