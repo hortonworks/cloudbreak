@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience.liftie;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,10 +23,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.config.LiftieWorkloadsConfig;
-import com.sequenceiq.environment.experience.liftie.responses.ClusterView;
+import com.sequenceiq.environment.experience.liftie.responses.LiftieClusterView;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 import com.sequenceiq.environment.experience.liftie.responses.PageStats;
 import com.sequenceiq.environment.experience.liftie.responses.StatusMessage;
@@ -46,6 +48,8 @@ class ExperiencesByLiftieTest {
     private static final String TEST_ENV_NAME = "someEnv";
 
     private static final String TEST_ENV_CRN = "someCrn";
+
+    private static final String LIFTIE = "LIFTIE";
 
     private static final int TWICE = 2;
 
@@ -69,14 +73,14 @@ class ExperiencesByLiftieTest {
     }
 
     @Test
-    void testGetConnectedClusterCountForEnvironmentWhenLiftieApiListClustersReturnsEmptyThenZeroShouldReturn() {
+    void testGetConnectedClusterCountForEnvironmentWhenLiftieApiListClustersReturnsEmptyThenEmptySetShouldReturn() {
         ListClustersResponse emptyResult = createEmptyListClustersResponse();
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(emptyResult);
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(emptyResult)).thenReturn(true);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
-        assertEquals(0, result);
+        assertThat(clusters).isEmpty();
 
         verify(mockLiftieApi, times(ONCE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -87,7 +91,7 @@ class ExperiencesByLiftieTest {
     @Test
     void testGetConnectedClusterCountForEnvironmentWhenInputDtoIsNullThenIllegalArgumentExceptionShouldCome() {
         IllegalArgumentException expectedException = assertThrows(
-                IllegalArgumentException.class, () -> underTest.getConnectedClusterCountForEnvironment(null));
+                IllegalArgumentException.class, () -> underTest.getConnectedClustersForEnvironment(null));
 
         assertNotNull(expectedException);
         assertEquals(DTO_ARG_NULL_EXCEPTION_MESSAGE, expectedException.getMessage());
@@ -95,16 +99,16 @@ class ExperiencesByLiftieTest {
     }
 
     @Test
-    void testGetConnectedClusterCountForEnvironmentWhenOnlyOneElementReturnsButThatIsDeletedThenZeroShouldReturn() {
+    void testGetConnectedClusterCountForEnvironmentWhenOnlyOneElementReturnsButThatIsDeletedThenEmptySetShouldReturn() {
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView cluster = createClusterViewWithStatus("TestCluster1", DELETED_STATUS);
+        LiftieClusterView cluster = createClusterViewWithStatus("TestCluster1", DELETED_STATUS);
         first.setClusters(Map.of(cluster.getName(), cluster));
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(first)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(first);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
-        assertEquals(0, result);
+        assertThat(clusters).isEmpty();
 
         verify(mockLiftieApi, times(ONCE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -113,16 +117,21 @@ class ExperiencesByLiftieTest {
     }
 
     @Test
-    void testGetConnectedClusterCountForEnvironmentWhenOnlyOneElementReturnsAndThatIsNotDeletedThenOneShouldReturn() {
+    void testGetConnectedClusterCountForEnvironmentWhenOnlyOneElementReturnsAndThatIsNotDeletedThenOneItemReturns() {
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView cluster = createClusterViewWithStatus("TestCluster1", AVAILABLE_STATUS);
+        LiftieClusterView cluster = createClusterViewWithStatus("TestCluster1", AVAILABLE_STATUS);
         first.setClusters(Map.of(cluster.getName(), cluster));
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(first)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(first);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
-        assertEquals(1, result);
+        ExperienceCluster expected = ExperienceCluster.builder()
+                .withExperienceName(LIFTIE)
+                .withName("TestCluster1")
+                .withStatus(AVAILABLE_STATUS)
+                .build();
+        assertThat(clusters).containsOnly(expected);
 
         verify(mockLiftieApi, times(ONCE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -132,19 +141,23 @@ class ExperiencesByLiftieTest {
 
     @Test
     void testGetConnectedClusterCountForEnvironmentWhenMoreThanOneElementReturnsAndOneOfThemIsDeletedThenOneLessShouldReturn() {
-        int availableClusterQuantity = 1;
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
-        ClusterView deletedCluster = createClusterViewWithStatus("deletedCluster1", DELETED_STATUS);
+        LiftieClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
+        LiftieClusterView deletedCluster = createClusterViewWithStatus("deletedCluster1", DELETED_STATUS);
         first.setClusters(Map.of(
                 availableCluster.getName(), availableCluster,
                 deletedCluster.getName(), deletedCluster));
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(first)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(first);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
-        assertEquals(availableClusterQuantity, result);
+        ExperienceCluster expected = ExperienceCluster.builder()
+                .withExperienceName(LIFTIE)
+                .withName("availableCluster1")
+                .withStatus(AVAILABLE_STATUS)
+                .build();
+        assertThat(clusters).containsOnly(expected);
 
         verify(mockLiftieApi, times(ONCE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -153,20 +166,30 @@ class ExperiencesByLiftieTest {
     }
 
     @Test
-    void testGetConnectedClusterCountForEnvironmentWhenMoreThanOneElementReturnsAndAllOfThemIsAvailableThenTotalNumberShouldReturn() {
+    void testGetConnectedClusterCountForEnvironmentWhenMoreThanOneElementReturnsAndAllOfThemIsAvailableThenAllShouldReturn() {
         int availableClusterQuantity = 2;
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
-        ClusterView anotherAvailableCluster = createClusterViewWithStatus("availableCluster2", AVAILABLE_STATUS);
+        LiftieClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
+        LiftieClusterView anotherAvailableCluster = createClusterViewWithStatus("availableCluster2", AVAILABLE_STATUS);
         first.setClusters(Map.of(
                 availableCluster.getName(), availableCluster,
                 anotherAvailableCluster.getName(), anotherAvailableCluster));
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(first)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(first);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
-        assertEquals(availableClusterQuantity, result);
+        ExperienceCluster expected1 = ExperienceCluster.builder()
+                .withExperienceName(LIFTIE)
+                .withName("availableCluster1")
+                .withStatus(AVAILABLE_STATUS)
+                .build();
+        ExperienceCluster expected2 = ExperienceCluster.builder()
+                .withExperienceName(LIFTIE)
+                .withName("availableCluster2")
+                .withStatus(AVAILABLE_STATUS)
+                .build();
+        assertThat(clusters).containsOnly(expected1, expected2);
 
         verify(mockLiftieApi, times(ONCE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -175,20 +198,19 @@ class ExperiencesByLiftieTest {
     }
 
     @Test
-    void testGetConnectedClusterCountForEnvironmentWhenMoreThanOneElementReturnsAndAllOfThemIsDeletedThenZeroShouldReturn() {
-        int availableClusterQuantity = 0;
+    void testGetConnectedClusterCountForEnvironmentWhenMoreThanOneElementReturnsAndAllOfThemIsDeletedThenEmptySetShouldReturn() {
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView deletedCluster = createClusterViewWithStatus("deletedCluster1", DELETED_STATUS);
-        ClusterView anotherDeletedCluster = createClusterViewWithStatus("deletedCluster2", DELETED_STATUS);
+        LiftieClusterView deletedCluster = createClusterViewWithStatus("deletedCluster1", DELETED_STATUS);
+        LiftieClusterView anotherDeletedCluster = createClusterViewWithStatus("deletedCluster2", DELETED_STATUS);
         first.setClusters(Map.of(
                 deletedCluster.getName(), deletedCluster,
                 anotherDeletedCluster.getName(), anotherDeletedCluster));
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(first)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(first);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
-        assertEquals(availableClusterQuantity, result);
+        assertThat(clusters).isEmpty();
 
         verify(mockLiftieApi, times(ONCE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -204,18 +226,18 @@ class ExperiencesByLiftieTest {
         ps.setNumber(1);
         ListClustersResponse firstResponse = createEmptyListClustersResponse();
         firstResponse.setPage(ps);
-        ClusterView availableCluster = createClusterViewWithStatus("availableClusterOnPage1", AVAILABLE_STATUS);
+        LiftieClusterView availableCluster = createClusterViewWithStatus("availableClusterOnPage1", AVAILABLE_STATUS);
         firstResponse.setClusters(Map.of(availableCluster.getName(), availableCluster));
 
         ListClustersResponse secondResponse = createEmptyListClustersResponse();
-        ClusterView availableClusterOnPage2 = createClusterViewWithStatus("availableClusterOnPage2", AVAILABLE_STATUS);
+        LiftieClusterView availableClusterOnPage2 = createClusterViewWithStatus("availableClusterOnPage2", AVAILABLE_STATUS);
         firstResponse.setClusters(Map.of(availableClusterOnPage2.getName(), availableClusterOnPage2));
 
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(firstResponse)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(firstResponse);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), 2)).thenReturn(secondResponse);
 
-        underTest.getConnectedClusterCountForEnvironment(createEnvironmentExperienceDto());
+        underTest.getConnectedClustersForEnvironment(createEnvironmentExperienceDto());
 
         verify(mockLiftieApi, times(TWICE)).listClusters(any(), any(), any(), any());
         verify(mockLiftieApi, times(ONCE)).listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null);
@@ -238,7 +260,7 @@ class ExperiencesByLiftieTest {
     @Test
     void testDeleteConnectedExperiencesWhenOneClusterIsAvailableTheOneDeletionShouldHappen() {
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView cluster = createClusterViewWithStatus("TestCluster1", AVAILABLE_STATUS);
+        LiftieClusterView cluster = createClusterViewWithStatus("TestCluster1", AVAILABLE_STATUS);
         first.setClusters(Map.of(cluster.getName(), cluster));
         when(mockListClustersResponseValidator.isListClustersResponseEmpty(first)).thenReturn(false);
         when(mockLiftieApi.listClusters(TEST_ENV_NAME, TEST_TENANT, TEST_WORKLOAD.getName(), null)).thenReturn(first);
@@ -252,8 +274,8 @@ class ExperiencesByLiftieTest {
     @Test
     void testDeleteConnectedExperiencesWhenMoreClusterIsAvailableTheThatExactAmountDeletionShouldHappen() {
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
-        ClusterView anotherAvailableCluster = createClusterViewWithStatus("availableCluster2", AVAILABLE_STATUS);
+        LiftieClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
+        LiftieClusterView anotherAvailableCluster = createClusterViewWithStatus("availableCluster2", AVAILABLE_STATUS);
         first.setClusters(Map.of(
                 availableCluster.getName(), availableCluster,
                 anotherAvailableCluster.getName(), anotherAvailableCluster));
@@ -270,8 +292,8 @@ class ExperiencesByLiftieTest {
     @Test
     void testDeleteConnectedExperiencesWhenMoreClusterIsComesBackFromListingButOnlyOneIsAvailableThatOneDeletionShouldHappen() {
         ListClustersResponse first = createEmptyListClustersResponse();
-        ClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
-        ClusterView notAvailableCluster = createClusterViewWithStatus("notAvailableCluster2", DELETED_STATUS);
+        LiftieClusterView availableCluster = createClusterViewWithStatus("availableCluster1", AVAILABLE_STATUS);
+        LiftieClusterView notAvailableCluster = createClusterViewWithStatus("notAvailableCluster2", DELETED_STATUS);
         first.setClusters(Map.of(
                 availableCluster.getName(), availableCluster,
                 notAvailableCluster.getName(), notAvailableCluster));
@@ -308,8 +330,8 @@ class ExperiencesByLiftieTest {
                 .build();
     }
 
-    private ClusterView createClusterViewWithStatus(String name, String status) {
-        ClusterView cv = new ClusterView();
+    private LiftieClusterView createClusterViewWithStatus(String name, String status) {
+        LiftieClusterView cv = new LiftieClusterView();
         cv.setClusterId(name + "-clusterId-" + new Date().getTime());
         cv.setName(name);
         cv.setClusterStatus(createStatusMessage(status));

@@ -2,7 +2,10 @@ package com.sequenceiq.environment.experience;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,16 +29,21 @@ public class ExperienceConnectorService {
     }
 
     public int getConnectedExperienceCount(EnvironmentExperienceDto dto) {
-        checkEnvironmentExperienceDto(dto);
-        if (entitlementService.isExperienceDeletionEnabled(dto.getAccountId()) && !experiences.isEmpty()) {
-            LOGGER.debug("Collecting connected experiences for environment: {}", dto.getName());
-            return experiences
-                    .stream()
-                    .map(experience -> experience.getConnectedClusterCountForEnvironment(dto))
-                    .reduce(0, Integer::sum);
+        return getConnectedExperiences(dto).size();
+    }
+
+    public Set<ExperienceCluster> getConnectedExperiences(EnvironmentExperienceDto environmentExperienceDto) {
+        checkEnvironmentExperienceDto(environmentExperienceDto);
+        if (entitlementService.isExperienceDeletionEnabled(environmentExperienceDto.getAccountId()) && !experiences.isEmpty()) {
+            LOGGER.debug("Collecting connected experiences for environment: {}", environmentExperienceDto.getName());
+
+            return experiences.stream()
+                    .map(experience -> experience.getConnectedClustersForEnvironment(environmentExperienceDto))
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
         }
         LOGGER.info("Scanning experience(s) has disabled, which means the returning amount of connected experiences may not represent the reality!");
-        return 0;
+        return Set.of();
     }
 
     public void deleteConnectedExperiences(EnvironmentExperienceDto dto) {

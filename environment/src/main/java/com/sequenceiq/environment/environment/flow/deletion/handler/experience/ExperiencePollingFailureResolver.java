@@ -22,7 +22,7 @@ public class ExperiencePollingFailureResolver {
             case TIMEOUT:
                 return Optional.of("Timed out.");
             default:
-                return Optional.empty();
+                return Optional.of("Other polling result: " + pollingResult);
         }
     }
 

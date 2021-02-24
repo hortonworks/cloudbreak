@@ -1,11 +1,13 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 
 public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<ExperiencePollerObject> {
@@ -15,6 +17,8 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
     public static final int EXPERIENCE_RETRYING_COUNT = 900;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceDeletionRetrievalTask.class);
+
+    private static final String DELETE_FAILED_STATUS = "DELETE_FAILED";
 
     private final ExperienceConnectorService experienceConnectorService;
 
@@ -38,7 +42,12 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
 
     @Override
     public void handleTimeout(ExperiencePollerObject experiencePollerObject) {
-        throw new CloudbreakServiceException("Checking Experience operation has timed out!");
+        LOGGER.debug("Timeout handler passthrough, {}", experiencePollerObject);
+    }
+
+    @Override
+    public void handleException(Exception e) {
+        LOGGER.debug("Exception handler passthrough", e);
     }
 
     @Override
@@ -48,6 +57,13 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
 
     @Override
     public boolean exitPolling(ExperiencePollerObject experiencePollerObject) {
+        EnvironmentExperienceDto dto = buildDto(experiencePollerObject);
+        Set<ExperienceCluster> connectedExperiences = experienceConnectorService.getConnectedExperiences(dto);
+        return connectedExperiences.stream().anyMatch(c -> DELETE_FAILED_STATUS.equals(c.getStatus()));
+    }
+
+    @Override
+    public boolean initialExitCheck(ExperiencePollerObject experiencePollerObject) {
         return false;
     }
 

@@ -45,6 +45,7 @@ public class EnvironmentExperienceDeletionAction {
      * @throws ExperienceOperationFailedException if some not successful result happens
      */
     public void execute(Environment environment, boolean forceDelete) {
+        LOGGER.debug("Experience deletion executing for environment {} with force delete={}", environment.getName(), forceDelete);
         EnvironmentExperienceDto environmentExperienceDto = createEnvironmentExperienceDto(environment);
         if (isDeleteCallWasSuccessful(environmentExperienceDto, forceDelete)) {
             waitForResult(environment, forceDelete);
@@ -59,10 +60,10 @@ public class EnvironmentExperienceDeletionAction {
             LOGGER.debug("Rethrow IllegalArgumentException during experienceConnectorService.deleteConnectedExperiences", e);
             throw e;
         } catch (IllegalStateException ise) {
+            LOGGER.debug(IllegalStateException.class.getSimpleName() + " has occurred as the result of calling " +
+                    "experienceConnectorService.deleteConnectedExperiences!", ise);
             if (!forceDelete) {
-                LOGGER.debug(IllegalStateException.class.getSimpleName() + " has occurred as the result of calling " +
-                        "experienceConnectorService.deleteConnectedExperiences!", ise);
-                throw new IllegalStateException("Unable to delete connected experience(s)!");
+                throw new ExperienceOperationFailedException("Unable to delete connected experience(s)!", ise);
             }
             return false;
         } catch (RuntimeException e) {
@@ -70,7 +71,7 @@ public class EnvironmentExperienceDeletionAction {
                 LOGGER.debug("Rethrow exception during experienceConnectorService.deleteConnectedExperiences", e);
                 throw e;
             }
-            LOGGER.debug("Forced environment delete causes skipping of experience deletion failure.");
+            LOGGER.debug("Forced environment delete causes skipping of experience deletion failure.", e);
             return false;
         }
     }
@@ -107,7 +108,7 @@ public class EnvironmentExperienceDeletionAction {
     private void processFailure(Pair<PollingResult, Exception> result) {
         String rootMsg = "Failed to delete Experience!";
         if (result.getRight() == null) {
-            LOGGER.debug("Experience deletion has failed but no exception has come from the polling result!");
+            LOGGER.debug("Experience deletion has failed but no exception has come from the polling result: {}", result.getLeft());
             throw new ExperienceOperationFailedException(rootMsg);
         }
         throw new ExperienceOperationFailedException(String.format("%s %s", rootMsg, experiencePollingFailureResolver.getMessageForFailure(result)),

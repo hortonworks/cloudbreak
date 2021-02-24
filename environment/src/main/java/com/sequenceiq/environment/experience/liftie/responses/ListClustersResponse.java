@@ -1,25 +1,23 @@
 package com.sequenceiq.environment.experience.liftie.responses;
 
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModel;
-
-import java.util.Map;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "ListClustersResponse")
 public class ListClustersResponse {
 
-    private Map<String, ClusterView> clusters;
+    private Map<String, LiftieClusterView> clusters;
 
     private PageStats page;
 
-    public Map<String, ClusterView> getClusters() {
+    public Map<String, LiftieClusterView> getClusters() {
         return clusters;
     }
 
-    public void setClusters(Map<String, ClusterView> clusters) {
+    public void setClusters(Map<String, LiftieClusterView> clusters) {
         this.clusters = clusters;
     }
 

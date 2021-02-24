@@ -147,7 +147,7 @@ class EnvironmentExperienceDeletionActionTest {
         doThrow(new IllegalStateException()).when(mockExperienceConnectorService).deleteConnectedExperiences(any());
 
         assertThatThrownBy(() -> underTest.execute(new Environment(), NO_FORCE_DELETE))
-                .isExactlyInstanceOf(IllegalStateException.class);
+                .isExactlyInstanceOf(ExperienceOperationFailedException.class);
 
         verify(mockExperiencePollingFailureResolver, never()).getMessageForFailure(any());
     }

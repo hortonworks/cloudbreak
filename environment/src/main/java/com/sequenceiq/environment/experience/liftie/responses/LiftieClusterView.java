@@ -6,12 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.swagger.annotations.ApiModel;
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "ClusterView")
-public class ClusterView {
+public class LiftieClusterView {
 
     private String name;
 
@@ -80,7 +77,7 @@ public class ClusterView {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ClusterView.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", LiftieClusterView.class.getSimpleName() + "[", "]")
                 .add("name='" + name + "'")
                 .add("clusterId='" + clusterId + "'")
                 .add("environmentCrn='" + environmentCrn + "'")

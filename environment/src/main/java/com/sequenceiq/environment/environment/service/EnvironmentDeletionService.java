@@ -21,6 +21,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 
 @Service
 public class EnvironmentDeletionService {
@@ -112,17 +113,6 @@ public class EnvironmentDeletionService {
     void checkIsEnvironmentDeletable(Environment env) {
         LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
 
-        Set<String> datalakes = environmentResourceDeletionService.getAttachedSdxClusterCrns(env);
-        // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
-        // so we need to check against legacy DL API from Core service
-        if (datalakes.isEmpty()) {
-            datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
-        }
-        if (!datalakes.isEmpty()) {
-            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
-                    String.join(", ", datalakes)));
-        }
-
         Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
         if (!distroXClusterNames.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before Environment deletion [%s]",
@@ -132,18 +122,27 @@ public class EnvironmentDeletionService {
         int amountOfConnectedExperiences = 0;
         try {
             amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
-        } catch (IllegalStateException re) {
+        } catch (IllegalStateException | IllegalArgumentException | ExperienceOperationFailedException re) {
             LOGGER.info("Something has occurred during checking the connected experiences!", re);
             throw new IllegalStateException("Unable to access all experience to check whether the environment have any connected one(s)!");
         }
-        if (amountOfConnectedExperiences > 0) {
-            if (amountOfConnectedExperiences == 1) {
-                throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
-                        "This must be terminated before Environment deletion.");
-            } else {
-                throw new BadRequestException("The given environment [" + env.getName() + "] has " + amountOfConnectedExperiences +
-                        " connected experiences. " + "These must be terminated before Environment deletion.");
-            }
+        if (amountOfConnectedExperiences == 1) {
+            throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
+                    "This must be terminated before Environment deletion.");
+        } else if (amountOfConnectedExperiences > 1) {
+            throw new BadRequestException("The given environment [" + env.getName() + "] has " + amountOfConnectedExperiences +
+                    " connected experiences. " + "These must be terminated before Environment deletion.");
+        }
+
+        Set<String> datalakes = environmentResourceDeletionService.getAttachedSdxClusterCrns(env);
+        // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
+        // so we need to check against legacy DL API from Core service
+        if (datalakes.isEmpty()) {
+            datalakes = environmentResourceDeletionService.getDatalakeClusterNames(env);
+        }
+        if (!datalakes.isEmpty()) {
+            throw new BadRequestException(String.format("The following Data Lake cluster(s) must be terminated before Environment deletion [%s]",
+                    String.join(", ", datalakes)));
         }
     }
 

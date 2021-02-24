@@ -11,4 +11,8 @@ public interface StatusCheckerTask<T> {
     boolean exitPolling(T t);
 
     void handleException(Exception e);
+
+    default boolean initialExitCheck(T t) {
+        return true;
+    }
 }

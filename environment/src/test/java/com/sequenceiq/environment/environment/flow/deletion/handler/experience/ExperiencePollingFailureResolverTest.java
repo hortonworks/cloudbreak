@@ -2,9 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,7 +45,7 @@ class ExperiencePollingFailureResolverTest {
         String result = underTest.getMessageForFailure(pollingResultPair);
 
         assertNotNull(result);
-        assertTrue(StringUtils.isEmpty(result));
+        assertEquals("Other polling result: " + pollingResult, result);
     }
 
     @Test

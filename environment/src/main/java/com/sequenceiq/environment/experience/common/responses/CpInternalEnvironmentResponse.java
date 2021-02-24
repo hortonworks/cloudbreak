@@ -1,14 +1,12 @@
 package com.sequenceiq.environment.experience.common.responses;
 
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import io.swagger.annotations.ApiModel;
-
-import java.util.Set;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ApiModel(value = "CpInternalEnvironmentResponse")
 public class CpInternalEnvironmentResponse {
 
     private Set<CpInternalCluster> results;

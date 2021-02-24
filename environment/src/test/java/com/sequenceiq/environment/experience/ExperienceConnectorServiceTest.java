@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,7 @@ class ExperienceConnectorServiceTest {
         int result = underTest.getConnectedExperienceCount(dto);
 
         assertEquals(0, result);
-        mockExperiences.forEach(experience -> verify(experience, never()).getConnectedClusterCountForEnvironment(any(EnvironmentExperienceDto.class)));
+        mockExperiences.forEach(experience -> verify(experience, never()).getConnectedClustersForEnvironment(any(EnvironmentExperienceDto.class)));
     }
 
     @Test
@@ -71,14 +72,22 @@ class ExperienceConnectorServiceTest {
         int result = underTest.getConnectedExperienceCount(dto);
 
         assertEquals(0, result);
-        mockExperiences.forEach(xp -> verify(xp, never()).getConnectedClusterCountForEnvironment(any(EnvironmentExperienceDto.class)));
+        mockExperiences.forEach(xp -> verify(xp, never()).getConnectedClustersForEnvironment(any(EnvironmentExperienceDto.class)));
     }
 
     @Test
-    void testWhenExperienceCheckingIsEnabledAndEachExperienceHasClusterForTheGivenEnvThenItsSumShouldReturn() {
+    void testWhenExperienceCheckingIsEnabledAndEachExperienceHasClusterForTheGivenEnvThenUnifiedSetShouldReturn() {
         int connectedClusterQuantity = 1;
         EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
-        mockExperiences.forEach(xp -> when(xp.getConnectedClusterCountForEnvironment(dto)).thenReturn(connectedClusterQuantity));
+
+        mockExperiences.forEach(xp -> {
+            Set<ExperienceCluster> cluster = Set.of(ExperienceCluster.builder()
+                    .withExperienceName(xp.getSource().name())
+                    .withName("Workload")
+                    .withStatus("AVAILABLE")
+                    .build());
+            when(xp.getConnectedClustersForEnvironment(dto)).thenReturn(cluster);
+        });
 
         when(entitlementServiceMock.isExperienceDeletionEnabled(dto.getAccountId())).thenReturn(true);
 

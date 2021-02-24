@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 
 class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTestBase {
@@ -46,7 +47,7 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
     void testWhenCallExecutionReturnsNullThenNoResponseReadingHappens() {
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(null);
 
-        Assertions.assertThrows(IllegalStateException.class, () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
+        Assertions.assertThrows(ExperienceOperationFailedException.class, () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
         verify(getMockRetryableWebTarget(), times(ONCE)).delete(any());
         verify(getMockRetryableWebTarget(), times(ONCE)).delete(getMockInvocationBuilder());
@@ -57,8 +58,8 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
     void testWhenCallExecutionReturnsNullThenThenIllegalStateExceptionShouldInvoke() {
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(null);
 
-        IllegalStateException expectedException = Assertions.assertThrows(
-                IllegalStateException.class,
+        ExperienceOperationFailedException expectedException = Assertions.assertThrows(
+                ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
         assertEquals(LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG, expectedException.getMessage());
@@ -69,8 +70,8 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
         doThrow(RuntimeException.class).when(getMockResponseReader()).read(any(), any(), any());
 
-        IllegalStateException expectedException = Assertions.assertThrows(
-                IllegalStateException.class,
+        ExperienceOperationFailedException expectedException = Assertions.assertThrows(
+                ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
         assertEquals(LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG, expectedException.getMessage());
@@ -81,8 +82,8 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), DeleteClusterResponse.class)).thenReturn(Optional.empty());
 
-        IllegalStateException expectedException = Assertions.assertThrows(
-                IllegalStateException.class,
+        ExperienceOperationFailedException expectedException = Assertions.assertThrows(
+                ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
         assertEquals(LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG, expectedException.getMessage());
