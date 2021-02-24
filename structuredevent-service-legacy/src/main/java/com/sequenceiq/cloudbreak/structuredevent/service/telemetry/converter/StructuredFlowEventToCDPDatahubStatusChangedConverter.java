@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.model.CombinedStatus;
 
 @Component
 public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
@@ -20,7 +18,7 @@ public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
     private StructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredFlowEventToCombinedStatusConverter combinedStatusConverter;
+    private StructuredFlowEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatahubStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
         if (structuredFlowEvent == null) {
@@ -31,8 +29,7 @@ public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
 
         cdpDatahubStatusChanged.setNewStatus(status);
 
-        CombinedStatus combinedStatus = combinedStatusConverter.convert(structuredFlowEvent);
-        cdpDatahubStatusChanged.setFailureReason(JsonUtil.writeValueAsStringSilentSafe(combinedStatus));
+        cdpDatahubStatusChanged.setStatusDetails(statusDetailsConverter.convert(structuredFlowEvent));
 
         UsageProto.CDPDatahubStatusChanged ret = cdpDatahubStatusChanged.build();
         LOGGER.debug("Converted CDPDatahubStatusChanged telemetry event: {}", ret);
