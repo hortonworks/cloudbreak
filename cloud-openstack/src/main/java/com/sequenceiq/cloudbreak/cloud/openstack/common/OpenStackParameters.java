@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.TagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -55,9 +54,6 @@ public class OpenStackParameters implements PlatformParameters {
     @Qualifier("OpenStackTagSpecification")
     private TagSpecification tagSpecification;
 
-    @Inject
-    private OpenStackTagValidator openStackTagValidator;
-
     private VmRecommendations vmRecommendations;
 
     @PostConstruct
@@ -73,11 +69,6 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public DiskTypes diskTypes() {
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), getDisplayName());
-    }
-
-    @Override
-    public TagValidator tagValidator() {
-        return openStackTagValidator;
     }
 
     private Collection<DiskType> getDiskTypes() {

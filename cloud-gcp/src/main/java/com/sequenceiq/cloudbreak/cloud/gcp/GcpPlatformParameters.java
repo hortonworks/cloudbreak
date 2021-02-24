@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.TagValidator;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -56,9 +55,6 @@ public class GcpPlatformParameters implements PlatformParameters {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     @Inject
-    private GcpTagValidator gcpTagValidator;
-
-    @Inject
     @Qualifier("GcpTagSpecification")
     private TagSpecification tagSpecification;
 
@@ -73,11 +69,6 @@ public class GcpPlatformParameters implements PlatformParameters {
         vmRecommendations = initVmRecommendations();
         prerequisitesCreationCommand = resourceDefinition("prerequisites-creation-command");
         prerequisitesAuditCreationCommand = resourceDefinition("audit-prerequisites-creation-command");
-    }
-
-    @Override
-    public TagValidator tagValidator() {
-        return gcpTagValidator;
     }
 
     @Override

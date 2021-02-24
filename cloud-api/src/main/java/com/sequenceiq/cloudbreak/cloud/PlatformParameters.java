@@ -76,13 +76,6 @@ public interface PlatformParameters {
     TagSpecification tagSpecification();
 
     /**
-     * Return the platform specific tag specification
-     *
-     * @return the {@link TagValidator} of a platform
-     */
-    TagValidator tagValidator();
-
-    /**
      * The recommended virtual machine types for the platform
      *
      * @return the {@link VmRecommendations} of a platform

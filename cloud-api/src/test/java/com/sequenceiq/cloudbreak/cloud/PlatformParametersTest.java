@@ -87,11 +87,6 @@ public class PlatformParametersTest {
         }
 
         @Override
-        public TagValidator tagValidator() {
-            return null;
-        }
-
-        @Override
         public String platforName() {
             return "test";
         }
