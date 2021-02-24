@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.ResponseReader;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
@@ -56,7 +57,8 @@ public class LiftieConnectorService implements LiftieApi {
     @NotNull
     @Override
     public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable String workload, @Nullable Integer page) {
-        LOGGER.debug("About to connect Liftie API to list clusters");
+        LOGGER.debug("About to connect Liftie API to list clusters for environment '{}' account '{}' workload '{}', page '{}'",
+                env, tenant, workload, page == null ? Integer.valueOf(0) : page);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClustersEndpoint());
         Map<String, String> queryParams = new LinkedHashMap<>();
         putIfPresent(queryParams, "env", env);
@@ -67,10 +69,10 @@ public class LiftieConnectorService implements LiftieApi {
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, ListClustersResponse.class)
-                    .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {
             LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
-            throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
         }
     }
 
@@ -81,10 +83,10 @@ public class LiftieConnectorService implements LiftieApi {
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
-                    .orElseThrow(() -> new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {
             LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
-            throw new IllegalStateException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
         }
     }
 
@@ -94,7 +96,7 @@ public class LiftieConnectorService implements LiftieApi {
             return toCall.call();
         } catch (Exception re) {
             LOGGER.warn("Liftie http call execution has failed due to:", re);
-            throw new IllegalStateException(re);
+            throw new ExperienceOperationFailedException(re);
         }
     }
 

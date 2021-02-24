@@ -18,6 +18,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 
 class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestBase {
@@ -89,7 +90,7 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
         doThrow(RuntimeException.class).when(getMockResponseReader()).read(any(), any(), any());
 
         assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
-                .isExactlyInstanceOf(IllegalStateException.class)
+                .isExactlyInstanceOf(ExperienceOperationFailedException.class)
                 .hasCauseExactlyInstanceOf(RuntimeException.class);
     }
 
@@ -99,8 +100,8 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
-                .isExactlyInstanceOf(IllegalStateException.class)
-                .hasCauseExactlyInstanceOf(IllegalStateException.class);
+                .isExactlyInstanceOf(ExperienceOperationFailedException.class)
+                .hasCauseExactlyInstanceOf(ExperienceOperationFailedException.class);
     }
 
     @Test

@@ -8,14 +8,14 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.mock.experience.response.liftie.ClusterView;
+import com.sequenceiq.mock.experience.response.liftie.LiftieClusterView;
 import com.sequenceiq.mock.experience.response.liftie.ListClustersResponse;
 import com.sequenceiq.mock.experience.response.liftie.PageStats;
 import com.sequenceiq.mock.experience.response.liftie.StatusMessage;
 
 @Service
 public class LiftieExperienceStoreService {
-    private final Map<String, ClusterView> store = new ConcurrentHashMap<>();
+    private final Map<String, LiftieClusterView> store = new ConcurrentHashMap<>();
 
     private final AtomicLong idCounter = new AtomicLong();
 
@@ -28,7 +28,7 @@ public class LiftieExperienceStoreService {
         StatusMessage clusterStatus = new StatusMessage();
         clusterStatus.setMessage("");
         clusterStatus.setStatus("RUNNING");
-        store.put(id, new ClusterView(id, id, env, tenant, "X", clusterStatus));
+        store.put(id, new LiftieClusterView(id, id, env, tenant, "X", clusterStatus));
     }
 
     public void createIfNotExist(String env, String tenant) {
@@ -41,8 +41,8 @@ public class LiftieExperienceStoreService {
         setStatusById(id, "DELETED");
     }
 
-    public ClusterView setStatusById(String id, String status) {
-        ClusterView cluster = store.get(id);
+    public LiftieClusterView setStatusById(String id, String status) {
+        LiftieClusterView cluster = store.get(id);
         if (cluster != null) {
             cluster.getClusterStatus().setStatus(status);
         }
@@ -50,13 +50,13 @@ public class LiftieExperienceStoreService {
     }
 
     public ListClustersResponse get(String env) {
-        Map<String, ClusterView> clusters = store.values().stream()
+        Map<String, LiftieClusterView> clusters = store.values().stream()
                 .filter(cluster -> env.equals(cluster.getEnv()))
-                .collect(Collectors.toMap(ClusterView::getClusterId, Function.identity()));
+                .collect(Collectors.toMap(LiftieClusterView::getClusterId, Function.identity()));
         return create(clusters);
     }
 
-    private ListClustersResponse create(Map<String, ClusterView> clusters) {
+    private ListClustersResponse create(Map<String, LiftieClusterView> clusters) {
         ListClustersResponse listClustersResponse = new ListClustersResponse();
         listClustersResponse.setClusters(clusters);
         PageStats pageStat = new PageStats();
@@ -68,14 +68,14 @@ public class LiftieExperienceStoreService {
         return listClustersResponse;
     }
 
-    public ClusterView getById(String id) {
+    public LiftieClusterView getById(String id) {
         return store.get(id);
     }
 
-    public ClusterView changeById(String id, ClusterView clusterView) {
-        clusterView.setClusterId(id);
-        clusterView.setName(id);
-        store.put(id, clusterView);
-        return clusterView;
+    public LiftieClusterView changeById(String id, LiftieClusterView liftieClusterView) {
+        liftieClusterView.setClusterId(id);
+        liftieClusterView.setName(id);
+        store.put(id, liftieClusterView);
+        return liftieClusterView;
     }
 }

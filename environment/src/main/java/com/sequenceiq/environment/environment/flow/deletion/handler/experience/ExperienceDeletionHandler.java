@@ -57,6 +57,8 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
                 if (entitlementService.isExperienceDeletionEnabled(envDto.getAccountId())) {
                     environmentService.findEnvironmentById(envDto.getId())
                             .ifPresent(environment -> environmentExperienceDeletionAction.execute(environment, environmentDeletionDto.isForceDelete()));
+                } else {
+                    LOGGER.debug("Experience deletion is disabled by entitlement.");
                 }
             } else {
                 LOGGER.debug("Experience deletion is disabled by Spring config.");
@@ -64,6 +66,7 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
             EnvDeleteEvent envDeleteEvent = getEnvDeleteEvent(environmentDeletionDto);
             eventSender().sendEvent(envDeleteEvent, environmentDeletionDtoEvent.getHeaders());
         } catch (Exception e) {
+            LOGGER.debug("Experience deletion failed with exception", e);
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
                     .withEnvironmentID(envDto.getId())
                     .withException(e)

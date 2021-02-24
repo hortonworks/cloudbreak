@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.experience;
 
+import java.util.Set;
+
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
@@ -7,15 +9,15 @@ import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 public interface Experience {
 
     /**
-     * Operation that counts and returns the number of clusters/workspaces that
+     * Operation that returns the clusters/workspaces that
      * is connected to the given environment.
      *
      * @param environment the {@link EnvironmentExperienceDto} DTO class that contains the
      *                    necessary data for the deletion.
      *                    This object cannot be null since its content is can be crucial.
-     * @return number of connected clusters
+     * @return connected clusters
      */
-    int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment);
+    Set<ExperienceCluster> getConnectedClustersForEnvironment(EnvironmentExperienceDto environment);
 
     /**
      * Operation that invokes deletion on the implemented/designated experience.

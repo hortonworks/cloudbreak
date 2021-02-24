@@ -9,7 +9,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.environment.experience.liftie.responses.ClusterView;
+import com.sequenceiq.environment.experience.liftie.responses.LiftieClusterView;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 import com.sequenceiq.environment.experience.liftie.responses.PageStats;
 
@@ -74,7 +74,7 @@ class ListClustersResponseValidatorTest {
 
     private ListClustersResponse createValidListClustersResponse() {
         ListClustersResponse response = new ListClustersResponse();
-        response.setClusters(Map.of("someCluster", new ClusterView()));
+        response.setClusters(Map.of("someCluster", new LiftieClusterView()));
         PageStats ps = new PageStats();
         ps.setTotalPages(Integer.MAX_VALUE);
         response.setPage(ps);

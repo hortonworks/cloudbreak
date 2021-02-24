@@ -3,10 +3,11 @@ package com.sequenceiq.environment.experience.common;
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 
@@ -17,7 +18,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.Experience;
+import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceSource;
+import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
 @Service
@@ -42,15 +45,14 @@ public class CommonExperienceService implements Experience {
     }
 
     @Override
-    public int getConnectedClusterCountForEnvironment(EnvironmentExperienceDto environment) {
+    public Set<ExperienceCluster> getConnectedClustersForEnvironment(EnvironmentExperienceDto environment) {
         LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
-        Set<String> activeExperienceNames = environmentHasActiveExperience(environment.getCrn());
-        if (!activeExperienceNames.isEmpty()) {
-            String combinedNames = String.join(",", activeExperienceNames);
+        Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
+        if (!activeExperiences.isEmpty()) {
+            String combinedNames = activeExperiences.stream().map(ExperienceCluster::getName).collect(Collectors.joining(","));
             LOGGER.info("The following experiences has connected to this env: [env: {}, experience(s): {}]", environment.getName(), combinedNames);
-            return activeExperienceNames.size();
         }
-        return 0;
+        return activeExperiences;
     }
 
     @Override
@@ -61,47 +63,48 @@ public class CommonExperienceService implements Experience {
     @Override
     public void deleteConnectedExperiences(EnvironmentExperienceDto environment) {
         throwIfTrue(environment == null, () -> new IllegalArgumentException(EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!"));
-        Set<String> activeExperiences = environmentHasActiveExperience(environment.getCrn());
+        Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
         configuredExperiences
                 .stream()
-                .filter(commonExperience -> activeExperiences.contains(commonExperience.getName()))
+                .filter(commonExperience ->  activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
                 .forEach(commonExperience -> experienceConnectorService
                         .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
     }
 
     /**
-     * Checks all the configured experiences for any existing workspace which has a connection with the given environment.
-     * If so, it will return the set of the names of the given experience.
+     * Collects info about all the configured experiences for any existing workspace which has a connection with the given environment.
+     * If so, it will return the set of clusters of the given experience.
      *
      * @param environmentCrn the resource crn of the environment. It must not be null or empty.
-     * @return the name of the experiences which has an active workspace for the given environment.
+     * @return set of the experiences which has an active workspace for the given environment, from all configured common experiences.
      * @throws IllegalArgumentException if environmentCrn is null or empty
      */
-    private Set<String> environmentHasActiveExperience(@NotNull String environmentCrn) {
+    private Set<ExperienceCluster> getActiveExperiences(@NotNull String environmentCrn) {
         throwIfTrue(StringUtils.isEmpty(environmentCrn), () -> new IllegalArgumentException("Unable to check environment - experience relation, since the " +
                 "given environment crn is null or empty!"));
         return configuredExperiences
                 .stream()
-                .map(xp -> isExperienceActiveForEnvironment(xp.getName(), xp, environmentCrn))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
+                .map(xp -> getExperiencesForEnvironment(xp.getName(), xp, environmentCrn))
+                .flatMap(Collection::stream)
                 .collect(toSet());
     }
 
-    private Optional<String> isExperienceActiveForEnvironment(String experienceName, CommonExperience xp, String environmentCrn) {
+    private Set<ExperienceCluster> getExperiencesForEnvironment(String experienceName, CommonExperience xp, String environmentCrn) {
         LOGGER.debug("Checking whether the environment (crn: {}) has an active experience (name: {}) or not.", environmentCrn, experienceName);
-        Set<String> entries = collectExperienceEntryNamesWhenItHasActiveWorkspaceForEnv(xp, environmentCrn);
-        if (!entries.isEmpty()) {
-            String entryNames = String.join(",", entries);
+        Set<CpInternalCluster> experienceClusters =
+                experienceConnectorService.getExperienceClustersConnectedToEnv(commonExperiencePathCreator.createPathToExperience(xp), environmentCrn);
+        if (!experienceClusters.isEmpty()) {
             LOGGER.info("The following experience ({}) has an active entry for the given environment! [entries: {}, environmentCrn: {}]",
-                    experienceName, entryNames, environmentCrn);
-            return Optional.of(experienceName);
+                    experienceName, experienceClusters, environmentCrn);
+            return experienceClusters.stream()
+                    .map(cp -> ExperienceCluster.builder()
+                            .withName(cp.getName())
+                            .withExperienceName(xp.getName())
+                            .withStatus(cp.getStatus())
+                            .build())
+                    .collect(toSet());
         }
-        return Optional.empty();
-    }
-
-    private Set<String> collectExperienceEntryNamesWhenItHasActiveWorkspaceForEnv(CommonExperience xp, String envCrn) {
-        return experienceConnectorService.getWorkspaceNamesConnectedToEnv(commonExperiencePathCreator.createPathToExperience(xp), envCrn);
+        return Set.of();
     }
 
     private Set<CommonExperience> identifyConfiguredExperiences(ExperienceServicesConfig config) {

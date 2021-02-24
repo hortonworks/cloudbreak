@@ -22,15 +22,20 @@ import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
 import com.sequenceiq.environment.experience.common.responses.DeleteCommonExperienceWorkspaceResponse;
 
+@ExtendWith(MockitoExtension.class)
 class CommonExperienceConnectorServiceTest {
 
     private static final String COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve the experience's response!";
@@ -68,7 +73,6 @@ class CommonExperienceConnectorServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         underTest = new CommonExperienceConnectorService(mockRetryableWebTarget, mockCommonExperienceResponseReader, mockCommonExperienceWebTargetProvider,
                 mockInvocationBuilderProvider);
 
@@ -83,7 +87,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
-        underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(any(), any());
         verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN);
@@ -97,13 +101,10 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(response));
 
-        Set<String> result = underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        Set<CpInternalCluster> result = underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         assertEquals(response.getResults().size(), result.size());
-        response.getResults()
-                .stream()
-                .map(cluster -> cluster.getName())
-                .forEach(clusterName -> assertTrue(result.contains(clusterName)));
+        response.getResults().forEach(cluster -> assertTrue(result.contains(cluster)));
     }
 
     @Test
@@ -114,7 +115,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
-        underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilder(any());
         verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilder(mockWebTarget);
@@ -128,7 +129,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
-        underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockRetryableWebTarget, times(ONCE)).get(any());
         verify(mockRetryableWebTarget, times(ONCE)).get(mockInvocationBuilder);
@@ -140,8 +141,8 @@ class CommonExperienceConnectorServiceTest {
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(null);
 
-        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
-                () -> underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
     }
@@ -153,7 +154,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
-        underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockCommonExperienceResponseReader, times(ONCE)).read(any(), any(), any());
         verify(mockCommonExperienceResponseReader, times(ONCE)).read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class);
@@ -166,8 +167,8 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class)).thenReturn(Optional.empty());
 
-        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
-                () -> underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
     }
@@ -181,7 +182,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class))
                 .thenReturn(Optional.of(mockCpInternalEnvironmentResponse));
 
-        underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
         verify(mockCpInternalEnvironmentResponse, times(ONCE)).getResults();
     }
@@ -192,8 +193,8 @@ class CommonExperienceConnectorServiceTest {
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenThrow(new RuntimeException());
 
-        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
-                () -> underTest.getWorkspaceNamesConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
         verify(mockCommonExperienceResponseReader, never()).read(any(), any(), any());
@@ -243,7 +244,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(null);
 
-        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
         assertNotNull(expectedException);
@@ -264,13 +265,14 @@ class CommonExperienceConnectorServiceTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void testDeleteWorkspaceForEnvironmentWhenResponseReaderUnableToResolveResponseThenIllegalStateExceptionShouldCome() {
         when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class)).thenReturn(Optional.empty());
 
-        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
         assertNotNull(expectedException);
@@ -295,7 +297,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenThrow(new RuntimeException());
 
-        IllegalStateException expectedException = assertThrows(IllegalStateException.class,
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
 
         assertNotNull(expectedException);

@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.mock.experience.response.liftie.ClusterView;
+import com.sequenceiq.mock.experience.response.liftie.LiftieClusterView;
 import com.sequenceiq.mock.experience.response.liftie.DeleteClusterResponse;
 import com.sequenceiq.mock.experience.response.liftie.ListClustersResponse;
 
@@ -60,12 +60,12 @@ public class LiftieController {
     }
 
     @PutMapping(value = "mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON)
-    public ClusterView putClusterId(@PathVariable("id") String id, @RequestBody ClusterView clusterView) throws Exception {
+    public LiftieClusterView putClusterId(@PathVariable("id") String id, @RequestBody LiftieClusterView clusterView) throws Exception {
         return liftieExperienceStoreService.changeById(id, clusterView);
     }
 
     @PostMapping(value = "mocksupport/experience/{id}", produces = MediaType.APPLICATION_JSON, consumes = MediaType.TEXT_PLAIN)
-    public ClusterView putClusterId(@PathVariable("id") String id, @RequestBody String status) throws Exception {
+    public LiftieClusterView putClusterId(@PathVariable("id") String id, @RequestBody String status) throws Exception {
         return liftieExperienceStoreService.setStatusById(id, status);
     }
 }

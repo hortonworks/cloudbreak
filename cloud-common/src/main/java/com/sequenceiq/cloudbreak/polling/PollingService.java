@@ -38,7 +38,10 @@ public class PollingService<T> {
         int attempts = 0;
         int consecutiveFailures = 0;
         Exception actual = null;
-        boolean exit = statusCheckerTask.exitPolling(t);
+        boolean exit = false;
+        if (statusCheckerTask.initialExitCheck(t)) {
+            exit = statusCheckerTask.exitPolling(t);
+        }
         while (!timeout && !exit) {
             LOGGER.debug("Polling attempt {}.", attempts);
             try {

@@ -2,7 +2,7 @@ package com.sequenceiq.mock.experience.response.liftie;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ClusterView {
+public class LiftieClusterView {
 
     private String name;
 
@@ -19,7 +19,7 @@ public class ClusterView {
     @SerializedName("cluster_status")
     private StatusMessage clusterStatus;
 
-    public ClusterView(String name, String clusterId, String environmentCrn, String accountId, String clusterType, StatusMessage clusterStatus) {
+    public LiftieClusterView(String name, String clusterId, String environmentCrn, String accountId, String clusterType, StatusMessage clusterStatus) {
         this.name = name;
         this.clusterId = clusterId;
         this.env = environmentCrn;

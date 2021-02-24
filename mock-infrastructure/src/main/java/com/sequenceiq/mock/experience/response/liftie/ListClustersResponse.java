@@ -4,15 +4,15 @@ import java.util.Map;
 
 public class ListClustersResponse {
 
-    private Map<String, ClusterView> clusters;
+    private Map<String, LiftieClusterView> clusters;
 
     private PageStats page;
 
-    public Map<String, ClusterView> getClusters() {
+    public Map<String, LiftieClusterView> getClusters() {
         return clusters;
     }
 
-    public void setClusters(Map<String, ClusterView> clusters) {
+    public void setClusters(Map<String, LiftieClusterView> clusters) {
         this.clusters = clusters;
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience.common;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,7 +23,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceSource;
+import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,7 +81,7 @@ class CommonExperienceServiceTest {
                 mockCommonExperiencePathCreator);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> underTest.getConnectedClusterCountForEnvironment(mockEnvironment));
+                () -> underTest.getConnectedClustersForEnvironment(mockEnvironment));
 
         assertNotNull(exception);
         assertEquals("Unable to check environment - experience relation, since the " +
@@ -93,7 +96,7 @@ class CommonExperienceServiceTest {
                 mockCommonExperiencePathCreator);
 
         IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
-                () -> underTest.getConnectedClusterCountForEnvironment(mockEnvironment));
+                () -> underTest.getConnectedClustersForEnvironment(mockEnvironment));
 
         assertNotNull(exception);
         assertEquals("Unable to check environment - experience relation, since the " +
@@ -107,21 +110,21 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        verify(mockExperienceConnectorService, never()).getWorkspaceNamesConnectedToEnv(any(), any());
+        verify(mockExperienceConnectorService, never()).getExperienceClustersConnectedToEnv(any(), any());
     }
 
     @Test
-    void testHasExistingClusterForEnvironmentWhenNoConfiguredExperienceExistsThenZeroReturns() {
+    void testHasExistingClusterForEnvironmentWhenNoConfiguredExperienceExistsThenEmptySetReturns() {
         when(mockExperienceServicesConfig.getConfigs()).thenReturn(Collections.emptyList());
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        assertEquals(0, result);
+        assertThat(clusters).isEmpty();
     }
 
     @Test
@@ -132,22 +135,22 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        verify(mockExperienceConnectorService, never()).getWorkspaceNamesConnectedToEnv(any(), any());
+        verify(mockExperienceConnectorService, never()).getExperienceClustersConnectedToEnv(any(), any());
     }
 
     @Test
-    void testHasExistingClusterForEnvironmentWhenHaveConfiguredExperienceButItsNotProperlyFilledThenZeroReturns() {
+    void testHasExistingClusterForEnvironmentWhenHaveConfiguredExperienceButItsNotProperlyFilledThenEmptySetReturns() {
         when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(false);
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        assertEquals(0, result);
+        assertThat(clusters).isEmpty();
     }
 
     @Test
@@ -160,42 +163,52 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        verify(mockExperienceConnectorService, times(ONCE)).getWorkspaceNamesConnectedToEnv(any(), any());
-        verify(mockExperienceConnectorService, times(ONCE)).getWorkspaceNamesConnectedToEnv(expectedPath, ENV_CRN);
+        verify(mockExperienceConnectorService, times(ONCE)).getExperienceClustersConnectedToEnv(any(), any());
+        verify(mockExperienceConnectorService, times(ONCE)).getExperienceClustersConnectedToEnv(expectedPath, ENV_CRN);
         verify(mockCommonExperiencePathCreator, times(ONCE)).createPathToExperience(any());
         verify(mockCommonExperiencePathCreator, times(ONCE)).createPathToExperience(mockCommonExperience);
     }
 
     @Test
-    void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredButHasNoActiveWorkspaceForEnvThenZeroReturns() {
+    void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredButHasNoActiveWorkspaceForEnvThenEmptySetReturns() {
         when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
-        when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Collections.emptySet());
+        when(mockExperienceConnectorService.getExperienceClustersConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Collections.emptySet());
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        assertEquals(0, result);
+        assertThat(clusters).isEmpty();
     }
 
     @Test
-    void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredAndHasActiveWorkspaceForEnvThenCountReturns() {
+    void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredAndHasActiveWorkspaceForEnvThenItemReturns() {
         when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
 
-        when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of("SomeConnectedXP"));
+        CpInternalCluster cluster = new CpInternalCluster();
+        cluster.setName("Workload1");
+        cluster.setCrn("crn1");
+        cluster.setStatus("AVAILABLE");
+        when(mockExperienceConnectorService.getExperienceClustersConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of(cluster));
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        int result = underTest.getConnectedClusterCountForEnvironment(mockEnvironment);
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(mockEnvironment);
 
-        assertEquals(1, result);
+        ExperienceCluster expected = ExperienceCluster.builder()
+                .withExperienceName(TEST_XP_NAME)
+                .withName("Workload1")
+                .withStatus("AVAILABLE")
+                .build();
+
+        assertThat(clusters).containsOnly(expected);
     }
 
     @Test
@@ -204,7 +217,12 @@ class CommonExperienceServiceTest {
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
         when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
         when(mockCommonExperiencePathCreator.createPathToExperience(mockCommonExperience)).thenReturn(xpPath);
-        when(mockExperienceConnectorService.getWorkspaceNamesConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of(TEST_XP_NAME));
+
+        CpInternalCluster cluster = new CpInternalCluster();
+        cluster.setName("Workload1");
+        cluster.setCrn("crn1");
+        cluster.setStatus("AVAILABLE");
+        when(mockExperienceConnectorService.getExperienceClustersConnectedToEnv(any(), eq(ENV_CRN))).thenReturn(Set.of(cluster));
 
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
