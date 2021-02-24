@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -86,7 +88,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .filter(resource -> ResourceType.AZURE_VOLUMESET.equals(resource.getType()))
                 .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()) || vm.getInstanceId().equals(cloudResource.getInstanceId()))
                 .findFirst();
-        LOGGER.debug("Reattachable volume set {}",
+        LOGGER.info("Reattachable volume set {}",
                 reattachableVolumeSet.map(cloudResource -> "is present with name:" + cloudResource.getName())
                         .orElse("is not present"));
 
@@ -119,7 +121,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                                                     resourceNameService.resourceName(ResourceType.AZURE_DISK, stackName, groupName, privateId,
                                                             template.getVolumes().indexOf(volume), stackCrn),
                                                     null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
-                                            .collect(Collectors.toList()))
+                                            .collect(toList()))
                             .build()))
                     .build();
         };
@@ -150,7 +152,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         List<Future<?>> futures = new ArrayList<>();
         List<CloudResource> requestedResources = buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
-                .collect(Collectors.toList());
+                .collect(toList());
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         String region = cloudContext.getLocation().getRegion().getRegionName();
@@ -166,13 +168,13 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                                     volume.getId(), volume.getSize(), AzureDiskType.getByValue(
                                             volume.getType()), region, resourceGroupName, cloudStack.getTags());
                         } else {
-                            LOGGER.debug("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
+                            LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
                         String volumeId = result.id();
                         volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, generator.next(), volume.getSize(), volume.getType(),
                                 volume.getCloudVolumeUsageType()));
                     }))
-                    .collect(Collectors.toList()));
+                    .collect(toList()));
         }
 
         for (Future<?> future : futures) {
@@ -187,7 +189,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                     }
                 })
                 .map(copyResourceWithNewStatus(CommonStatus.CREATED))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private Function<CloudResource, CloudResource> copyResourceWithNewStatus(CommonStatus status) {
@@ -216,13 +218,15 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .stream()
                 .filter(cloudResourceStatus -> ResourceStatus.CREATED.equals(cloudResourceStatus.getStatus()) ||
                         (ResourceStatus.ATTACHED.equals(cloudResourceStatus.getStatus()) && volumeSetAttributes.getDeleteOnTermination()))
-                .collect(Collectors.toList());
+                .collect(toList());
 
         deleteVolumes(client, removableDisks);
         return null;
     }
 
     private void deleteVolumes(AzureClient client, List<CloudResourceStatus> removableDisks) {
+        LOGGER.info("The following volumes are going to be deleted: [{}]",
+                removableDisks.stream().map(CloudResourceStatus::toString).collect(Collectors.joining(",")));
         for (CloudResourceStatus cloudResourceStatus : removableDisks) {
             CloudResource cloudResource = cloudResourceStatus.getCloudResource();
             List<String> volumeIds = getVolumeIds(cloudResource);
@@ -230,6 +234,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             for (String volumeId : volumeIds) {
                 detachVolume(client, cloudResource, volumeId);
             }
+            LOGGER.info("Going to attempt to delete the following managed disks (based on the following IDs) on Azure: {}",
+                    String.join(",", volumeIds));
             azureUtils.deleteManagedDisks(client, volumeIds);
         }
     }
@@ -237,7 +243,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     private List<String> getVolumeIds(CloudResource cloudResource) {
         return getVolumeSetAttributes(cloudResource).getVolumes().stream()
                 .map(VolumeSetAttributes.Volume::getId)
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private void detachVolume(AzureClient client, CloudResource cloudResource, String volumeId) {
@@ -252,7 +258,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 LOGGER.info("No need to detach disk(VolumeId:'{}') as it is not attached to any VM", volumeId);
             }
         } catch (RuntimeException e) {
-            LOGGER.info("Can not detach " + volumeId + " from " + instanceName, e);
+            LOGGER.warn("Can not detach " + volumeId + " from " + instanceName, e);
         }
     }
 
@@ -264,6 +270,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
             resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
+            LOGGER.debug("The following volume will be preserved: {}", resource);
             throw new PreserveResourceException("Resource will be preserved for later reattachment." + resource.getName());
         }
     }
@@ -278,7 +285,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         AzureClient client = getAzureClient(auth);
         List<CloudResource> volumeResources = StreamSupport.stream(resources.spliterator(), false)
                 .filter(r -> r.getType().equals(resourceType()))
-                .collect(Collectors.toList());
+                .collect(toList());
         CloudResource resourceGroup = context.getNetworkResources().stream()
                 .filter(r -> r.getType().equals(ResourceType.AZURE_RESOURCE_GROUP))
                 .findFirst()
@@ -289,27 +296,26 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         ResourceStatus volumeSetStatus = getResourceStatus(existingDisks, volumeResources);
         return volumeResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, volumeSetStatus))
-                .collect(Collectors.toList());
+                .collect(toList());
     }
 
     private ResourceStatus getResourceStatus(PagedList<Disk> existingDisks, List<CloudResource> volumeResources) {
-
         List<String> expectedIdList = volumeResources.stream()
                 .map(this::getVolumeSetAttributes)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
                 .map(VolumeSetAttributes.Volume::getId)
-                .collect(Collectors.toList());
+                .collect(toList());
         List<String> actualIdList = existingDisks.stream()
                 .map(Disk::id)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (!actualIdList.containsAll(expectedIdList)) {
             LOGGER.debug("Resource status is DELETED, as actual id list {} does not contain all the expected ids {}", actualIdList, expectedIdList);
             return ResourceStatus.DELETED;
         }
         List<String> actualAttachedIdList = existingDisks.stream().
                 filter(Disk::isAttachedToVirtualMachine).map(Disk::id)
-                .collect(Collectors.toList());
+                .collect(toList());
         if (actualAttachedIdList.containsAll(expectedIdList)) {
             LOGGER.debug("Resource status is ATTACHED, as attached id list {} contains all the expected ids {}", actualAttachedIdList, expectedIdList);
             return ResourceStatus.ATTACHED;

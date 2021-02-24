@@ -14,6 +14,8 @@ import org.openstack4j.api.exceptions.OS4JException;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.storage.block.Volume;
 import org.openstack4j.model.storage.block.Volume.Status;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -35,6 +37,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackComputeResourceBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackAttachedDiskResourceBuilder.class);
+
     private static final String VOLUME_VIEW = "volumeView";
 
     @Inject
@@ -94,6 +99,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
             OSClient<?> osClient = createOSClient(auth);
+            LOGGER.info("About to delete volume: [{}]", resource);
             ActionResponse response = osClient.blockStorage().volumes().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Volume deletion failed");
         } catch (OS4JException ex) {
