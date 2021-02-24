@@ -26,16 +26,16 @@ import io.swagger.annotations.ApiOperation;
 public interface ProgressV1Endpoint {
 
     @GET
-    @Path("/resource/crn/{resourceCrn}/last")
+    @Path("/resource/crn/{environmentCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = NOTES,
-            nickname = "getFreeIpaLastFlowLogProgressByResourceCrn")
-    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+            nickname = "getFreeIpaLastFlowLogProgressByEnvironmentCrn")
+    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("environmentCrn") String environmentCrn);
 
     @GET
-    @Path("/resource/crn/{resourceCrn}")
+    @Path("/resource/crn/{environmentCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = NOTES,
-            nickname = "getFreeIpaFlowLogsProgressByResourceCrn")
-    List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+            nickname = "getFreeIpaFlowLogsProgressByEnvironmentCrn")
+    List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("environmentCrn") String environmentCrn);
 }

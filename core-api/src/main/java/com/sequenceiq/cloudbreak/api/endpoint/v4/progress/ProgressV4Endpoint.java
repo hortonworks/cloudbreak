@@ -29,13 +29,13 @@ public interface ProgressV4Endpoint {
     @Path("/resource/crn/{resourceCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = NOTES,
-            nickname = "getLastFlowLogProgressByResourceName")
+            nickname = "getLastFlowLogProgressByResourceCrn")
     FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = NOTES,
-            nickname = "getFlowLogsProgressByResourceName")
+            nickname = "getFlowLogsProgressByResourceCrn")
     List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 }
