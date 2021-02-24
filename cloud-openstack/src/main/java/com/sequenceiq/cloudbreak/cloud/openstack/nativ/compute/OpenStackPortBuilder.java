@@ -8,6 +8,8 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.network.Port;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -21,6 +23,9 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackPortBuilder.class);
+
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) {
@@ -45,6 +50,7 @@ public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilde
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
             OSClient<?> osClient = createOSClient(auth);
+            LOGGER.debug("About to delete port: [{}]", resource.toString());
             ActionResponse response = osClient.networking().port().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Port deletion failed");
         } catch (OS4JException ex) {

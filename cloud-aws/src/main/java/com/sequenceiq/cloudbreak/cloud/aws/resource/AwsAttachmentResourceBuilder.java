@@ -5,7 +5,6 @@ import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
 
@@ -14,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
@@ -47,6 +47,9 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Inject
     private AwsClient awsClient;
+
+    @Inject
+    private VolumeResourceCollector volumeResourceCollector;
 
     @Override
     public List<CloudResource> create(AwsContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -111,29 +114,22 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     protected List<CloudResourceStatus> checkResources(ResourceType type, AwsContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
-
         AmazonEc2Client client = getAmazonEc2Client(auth);
-        List<CloudResource> volumeResources = StreamSupport.stream(resources.spliterator(), false)
-                .filter(r -> r.getType().equals(resourceType()))
-                .collect(Collectors.toList());
-        List<String> volumeIds = volumeResources.stream()
-                .map(volumeSetAttributes())
-                .map(VolumeSetAttributes::getVolumes)
-                .flatMap(List::stream)
-                .map(VolumeSetAttributes.Volume::getId)
-                .collect(Collectors.toList());
 
-        if (volumeIds.isEmpty()) {
-            return collectCloudResourceStatuses(volumeResources, ResourceStatus.CREATED);
+        Pair<List<String>, List<CloudResource>> volumes = volumeResourceCollector.getVolumeIdsByVolumeResources(resources, resourceType(),
+                volumeSetAttributes());
+
+        if (volumes.getFirst().isEmpty()) {
+            return collectCloudResourceStatuses(volumes.getSecond(), ResourceStatus.CREATED);
         }
 
-        DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumeIds);
+        DescribeVolumesRequest describeVolumesRequest = new DescribeVolumesRequest(volumes.getFirst());
         DescribeVolumesResult result = client.describeVolumes(describeVolumesRequest);
         ResourceStatus volumeSetStatus = result.getVolumes().stream()
                 .map(com.amazonaws.services.ec2.model.Volume::getState)
                 .allMatch("in-use"::equals) ? ResourceStatus.CREATED : ResourceStatus.IN_PROGRESS;
-        LOGGER.debug("[{}] volume set status is {}", String.join(",", volumeIds), volumeSetStatus);
-        return collectCloudResourceStatuses(volumeResources, volumeSetStatus);
+        LOGGER.debug("[{}] volume set status is {}", String.join(",", volumes.getFirst()), volumeSetStatus);
+        return collectCloudResourceStatuses(volumes.getSecond(), volumeSetStatus);
     }
 
     private List<CloudResourceStatus> collectCloudResourceStatuses(List<CloudResource> volumeResources, ResourceStatus status) {

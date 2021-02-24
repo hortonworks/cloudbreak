@@ -289,6 +289,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String resourceName = resource.getName();
         try {
+            LOGGER.info("Creating operation to delete disk [name: {}] in project [id: {}] in the following availability zone: {}", resourceName,
+                    context.getProjectId(), context.getLocation().getAvailabilityZone().value());
             Operation operation = context.getCompute().instances()
                     .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
             return createOperationAwareCloudResource(resource, operation);
@@ -321,7 +323,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                     }
                     result.add(new CloudVmInstanceStatus(instance, status));
                 } else {
-                    LOGGER.debug("Instance {} cannot be found", instance.getInstanceId());
+                    LOGGER.warn("Instance {} cannot be found", instance.getInstanceId());
                     result.add(new CloudVmInstanceStatus(instance, InstanceStatus.TERMINATED));
                 }
             }
