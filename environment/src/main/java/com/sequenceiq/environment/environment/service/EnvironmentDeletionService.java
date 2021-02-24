@@ -136,14 +136,12 @@ public class EnvironmentDeletionService {
             LOGGER.info("Something has occurred during checking the connected experiences!", re);
             throw new IllegalStateException("Unable to access all experience to check whether the environment have any connected one(s)!");
         }
-        if (amountOfConnectedExperiences > 0) {
-            if (amountOfConnectedExperiences == 1) {
-                throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
-                        "This must be terminated before Environment deletion.");
-            } else {
-                throw new BadRequestException("The given environment [" + env.getName() + "] has " + amountOfConnectedExperiences +
-                        " connected experiences. " + "These must be terminated before Environment deletion.");
-            }
+        if (amountOfConnectedExperiences == 1) {
+            throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +
+                    "This must be terminated before Environment deletion.");
+        } else if (amountOfConnectedExperiences > 1){
+            throw new BadRequestException("The given environment [" + env.getName() + "] has " + amountOfConnectedExperiences +
+                    " connected experiences. " + "These must be terminated before Environment deletion.");
         }
     }
 
