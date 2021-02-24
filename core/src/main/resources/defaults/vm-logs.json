@@ -293,5 +293,9 @@
     "path": "/var/run/cloudera-scm-agent/process/*/logs/stdout.log",
     "label": "CM_COMMAND.OUT",
     "type": "cm_command"
+  },
+  {
+    "path": "/var/log/cm_generate_agent_tokens.log",
+    "label": "generate_agent_token"
   }
 ]
