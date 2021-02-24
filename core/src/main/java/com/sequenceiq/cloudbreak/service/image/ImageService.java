@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static com.sequenceiq.cloudbreak.service.image.ImageCatalogService.CDP_DEFAULT_CATALOG_NAME;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -107,7 +108,11 @@ public class ImageService {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
 
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
-            LOGGER.debug("Image id is specified for the stack.");
+            LOGGER.debug("Image id {} is specified for the stack.", imageSettings.getId());
+
+            if (imageSettings.getCatalog() == null) {
+                imageSettings.setCatalog(CDP_DEFAULT_CATALOG_NAME);
+            }
             StatedImage image = imageCatalogService.getImageByCatalogName(workspaceId, imageSettings.getId(), imageSettings.getCatalog());
             return checkIfBasePermitted(image, baseImageEnabled);
         } else if (useBaseImage && !baseImageEnabled) {

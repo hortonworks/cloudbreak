@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.metric;
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
 
 public enum MetricType implements Metric {
+    CUSTOM_SDX_REQUESTED("custom.sdx.requested"),
     INTERNAL_SDX_REQUESTED("internal.sdx.requested"),
     EXTERNAL_SDX_REQUESTED("external.sdx.requested"),
     SDX_CREATION_FINISHED("sdx.creation.finished"),
