@@ -64,14 +64,14 @@ public abstract class CommonTagValidator implements Validator, TagValidator {
     }
 
     private void validateTagAreTooLong(Collection<String> strings, Integer maxKeyLength, String s, ValidationResultBuilder validationResultBuilder) {
-        Set<String> longKeys = strings.stream().filter(k -> k.length() > maxKeyLength).collect(Collectors.toSet());
+        Set<String> longKeys = strings.stream().filter(k -> transform(k).length() > maxKeyLength).collect(Collectors.toSet());
         if (!longKeys.isEmpty()) {
             validationResultBuilder.error(String.format(s, longKeys));
         }
     }
 
     private void validateTagsAreTooShort(Collection<String> strings, Integer minKeyLength, String s, ValidationResultBuilder validationResultBuilder) {
-        Set<String> shortKeys = strings.stream().filter(k -> k.length() < minKeyLength).collect(Collectors.toSet());
+        Set<String> shortKeys = strings.stream().filter(k -> transform(k).length() < minKeyLength).collect(Collectors.toSet());
         if (!shortKeys.isEmpty()) {
             validationResultBuilder.error(String.format(s, shortKeys));
         }
