@@ -1,10 +1,11 @@
 package com.sequenceiq.environment.experience.common;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+
 import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Invocation;
@@ -48,15 +49,19 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     @NotNull
     @Override
-    public Set<String> getWorkspaceNamesConnectedToEnv(String experienceBasePath, String environmentCrn) {
+    public Set<CpInternalCluster> getExperienceClustersConnectedToEnv(String experienceBasePath, String environmentCrn) {
         WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
-            Optional<CpInternalEnvironmentResponse> response = responseReader
-                    .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
-            return response.map(CommonExperienceConnectorService::getExperienceNamesFromListResponse)
-                    .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+            if (result.get().getStatus() != NOT_FOUND.getStatusCode()) {
+                Optional<CpInternalEnvironmentResponse> response = responseReader
+                        .read(webTarget.getUri().toString(), result.get(), CpInternalEnvironmentResponse.class);
+                return response.map(CpInternalEnvironmentResponse::getResults)
+                        .orElseThrow(() -> new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+            } else {
+                return Set.of();
+            }
         }
         throw new IllegalStateException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
     }
@@ -82,10 +87,6 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
             LOGGER.warn("Something happened while the experience connection attempted!", re);
         }
         return Optional.empty();
-    }
-
-    private static Set<String> getExperienceNamesFromListResponse(CpInternalEnvironmentResponse experienceCallResponse) {
-        return experienceCallResponse.getResults().stream().map(CpInternalCluster::getName).collect(Collectors.toSet());
     }
 
 }
