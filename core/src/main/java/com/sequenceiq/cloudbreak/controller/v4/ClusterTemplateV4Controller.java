@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -40,10 +43,13 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -70,6 +76,12 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Inject
     private ClusterTemplateViewService clusterTemplateViewService;
 
+    @Inject
+    private SdxClientService sdxClientService;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
@@ -93,7 +105,14 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @DisableCheckPermissions
     public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, String environmentCrn) {
-        Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService.findAllByEnvironmentCrn(environmentCrn);
+        List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
+        Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
+        Optional<String> runtimeVersion = sdxClusters.stream()
+                .map(SdxClusterResponse::getRuntime)
+                .filter(e -> !Strings.isNullOrEmpty(e))
+                .findFirst();
+        Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService
+                .findAllUserManagedAndDefaultByEnvironmentCrn(environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null));
         Set<ClusterTemplateViewV4Response> result = converterUtil.convertAllAsSet(clusterTemplateViews, ClusterTemplateViewV4Response.class);
         return new ClusterTemplateViewV4Responses(result);
     }
@@ -151,9 +170,16 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
         } else {
+            List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
+            Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
+            Optional<String> runtimeVersion = sdxClusters.stream()
+                    .map(SdxClusterResponse::getRuntime)
+                    .filter(e -> !Strings.isNullOrEmpty(e))
+                    .findFirst();
             Set<String> namesByEnv = clusterTemplateService
-                    .findAllByEnvironment(environmentCrn)
+                    .findAllByEnvironment(environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null))
                     .stream()
+                    .filter(e -> !ResourceStatus.DEFAULT.equals(e.getStatus()))
                     .map(ClusterTemplateView::getName)
                     .collect(toSet());
             clusterTemplates = clusterTemplateService.deleteMultiple(namesByEnv, workspaceId);

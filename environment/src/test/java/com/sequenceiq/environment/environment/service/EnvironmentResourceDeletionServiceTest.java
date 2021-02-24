@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -109,9 +111,13 @@ class EnvironmentResourceDeletionServiceTest {
     @Test
     void testWhenDeleteClusterDefinitionsOnCloudbreakThrowsWebApplicationExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
         WebApplicationException exception = Mockito.mock(WebApplicationException.class);
-        ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
-        templateViewV4Response.setName("name");
-        when(clusterTemplateViewV4Responses.getResponses()).thenReturn(Set.of(templateViewV4Response));
+
+        ClusterTemplateViewV4Response templateViewV4ResponseUserManaged = new ClusterTemplateViewV4Response();
+        templateViewV4ResponseUserManaged.setName("name");
+        templateViewV4ResponseUserManaged.setStatus(ResourceStatus.USER_MANAGED);
+
+        when(clusterTemplateViewV4Responses.getResponses())
+                .thenReturn(Set.of(templateViewV4ResponseUserManaged));
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
         doThrow(exception).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
         Response response = Mockito.mock(Response.class);
@@ -126,18 +132,39 @@ class EnvironmentResourceDeletionServiceTest {
     }
 
     @Test
+    void testWhenDeleteClusterDefinitionsOnCloudbreakNotThrowsWebApplicationExceptionReturnWithDefaultsThenMultipleDeleteShouldNOTBeCalled() {
+        WebApplicationException exception = Mockito.mock(WebApplicationException.class);
+
+        ClusterTemplateViewV4Response templateViewV4ResponseDefault = new ClusterTemplateViewV4Response();
+        templateViewV4ResponseDefault.setName("name");
+        templateViewV4ResponseDefault.setStatus(ResourceStatus.DEFAULT);
+
+        when(clusterTemplateViewV4Responses.getResponses())
+                .thenReturn(Set.of(templateViewV4ResponseDefault));
+        when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
+        Response response = Mockito.mock(Response.class);
+        when(exception.getResponse()).thenReturn(response);
+
+        environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN);
+
+        verify(clusterTemplateV4Endpoint, times(0)).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint, times(0)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+    }
+
+    @Test
     void testWhenDeleteClusterDefinitionsOnCloudbreakThrowsProcessingExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
         doThrow(ProcessingException.class).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
         ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
         templateViewV4Response.setName("name");
+        templateViewV4Response.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateViewV4Responses.getResponses()).thenReturn(Set.of(templateViewV4Response));
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
 
         Assertions.assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 
-        verify(clusterTemplateV4Endpoint).deleteMultiple(anyLong(), any(), any(), anyString());
-        verify(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
+        verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
     }
 
     @Test
@@ -146,6 +173,7 @@ class EnvironmentResourceDeletionServiceTest {
                 eq(ENVIRONMENT_CRN));
         ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
         templateViewV4Response.setName("name");
+        templateViewV4Response.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateViewV4Responses.getResponses()).thenReturn(Set.of(templateViewV4Response));
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
 
