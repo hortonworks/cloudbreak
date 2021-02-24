@@ -362,18 +362,18 @@
           }
         ],
         "roleConfigGroups": [
-            {
-              "refName": "tez-GATEWAY-BASE",
-              "roleType": "GATEWAY",
-              "base": true,
-              "configs": [
-                {
-                  "name": "tez-conf/tez-site.xml_client_config_safety_valve",
-                  "value": "<property><name>tez.runtime.pipelined.sorter.lazy-allocate.memory</name><value>true</value></property>"
-                }
-              ]
-            }
-         ]
+         {
+          "refName": "tez-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true,
+          "configs": [
+           {
+            "name": "tez-conf/tez-site.xml_client_config_safety_valve",
+            "value": "<property><name>tez.runtime.pipelined.sorter.lazy-allocate.memory</name><value>true</value></property>"
+           }
+          ]
+         }
+        ]
        },
       {
         "refName": "das",
