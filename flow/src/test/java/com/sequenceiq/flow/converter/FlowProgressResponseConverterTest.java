@@ -23,6 +23,8 @@ import com.sequenceiq.flow.domain.StateStatus;
 @ExtendWith(MockitoExtension.class)
 public class FlowProgressResponseConverterTest {
 
+    private static final String DUMMY_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
+
     private FlowProgressResponseConverter underTest;
 
     @Mock
@@ -38,7 +40,7 @@ public class FlowProgressResponseConverterTest {
         // GIVEN
         given(flowProgressHolder.getProgressPercentageForState(TestFlowConfig.class.getCanonicalName(), "FINISHED")).willReturn(100);
         // WHEN
-        FlowProgressResponse response = underTest.convert(createFlowLogs(false));
+        FlowProgressResponse response = underTest.convert(createFlowLogs(false), DUMMY_CRN);
         // THEN
         assertEquals("flow1", response.getFlowId());
         assertEquals(2, response.getTransitions().size());
@@ -52,7 +54,7 @@ public class FlowProgressResponseConverterTest {
         given(flowProgressHolder.getProgressPercentageForState(TestFlowConfig.class.getCanonicalName(), "FINISHED")).willReturn(100);
         given(flowProgressHolder.getProgressPercentageForState(TestFlowConfig.class.getCanonicalName(), "CANCELLED")).willReturn(100);
         // WHEN
-        List<FlowProgressResponse> responses = underTest.convertList(createFlowLogs(true));
+        List<FlowProgressResponse> responses = underTest.convertList(createFlowLogs(true), DUMMY_CRN);
         FlowProgressResponse latestResponse = responses.get(0);
         FlowProgressResponse firstResponse = responses.get(1);
         // THEN
@@ -71,7 +73,7 @@ public class FlowProgressResponseConverterTest {
     public void testConvertWithEmptyList() {
         // GIVEN
         // WHEN
-        FlowProgressResponse response = underTest.convert(new ArrayList<>());
+        FlowProgressResponse response = underTest.convert(new ArrayList<>(), DUMMY_CRN);
         // THEN
         assertNull(response.getFlowId());
     }
@@ -80,7 +82,7 @@ public class FlowProgressResponseConverterTest {
     public void testConvertWithNull() {
         // GIVEN
         // WHEN
-        FlowProgressResponse response = underTest.convert(null);
+        FlowProgressResponse response = underTest.convert(null, DUMMY_CRN);
         // THEN
         assertNull(response.getFlowId());
     }
@@ -89,7 +91,7 @@ public class FlowProgressResponseConverterTest {
     public void testConvertListWithEmptyList() {
         // GIVEN
         // WHEN
-        List<FlowProgressResponse> responses = underTest.convertList(new ArrayList<>());
+        List<FlowProgressResponse> responses = underTest.convertList(new ArrayList<>(), DUMMY_CRN);
         // THEN
         assertTrue(responses.isEmpty());
 
@@ -99,7 +101,7 @@ public class FlowProgressResponseConverterTest {
     public void testConvertListWithNull() {
         // GIVEN
         // WHEN
-        List<FlowProgressResponse> responses = underTest.convertList(null);
+        List<FlowProgressResponse> responses = underTest.convertList(null, DUMMY_CRN);
         // THEN
         assertTrue(responses.isEmpty());
     }
