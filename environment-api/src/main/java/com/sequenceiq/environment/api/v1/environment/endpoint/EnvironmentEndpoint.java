@@ -250,7 +250,7 @@ public interface EnvironmentEndpoint {
     @Path("/progress/resource/crn/{resourceCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = ENVIRONMENT_NOTES,
-            nickname = "getEnvironmentXLastFlowLogProgressByResourceName")
+            nickname = "getEnvironmentLastFlowLogProgressByResourceName")
     FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
 
     @GET

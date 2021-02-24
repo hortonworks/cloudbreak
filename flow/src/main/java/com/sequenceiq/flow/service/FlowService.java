@@ -208,17 +208,17 @@ public class FlowService {
         checkState(Crn.isCrn(resourceCrn));
         LOGGER.info("Getting flow logs (progress) by resource crn {}", resourceCrn);
         List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByResourceCrnOrName(resourceCrn);
-        FlowProgressResponse response = flowProgressResponseConverter.convert(flowLogs);
+        FlowProgressResponse response = flowProgressResponseConverter.convert(flowLogs, resourceCrn);
         if (StringUtils.isBlank(response.getFlowId())) {
             throw new NotFoundException(String.format("Not found any historical flow data for requested resource (crn: %s)", resourceCrn));
         }
-        return flowProgressResponseConverter.convert(flowLogs);
+        return flowProgressResponseConverter.convert(flowLogs, resourceCrn);
     }
 
     public List<FlowProgressResponse> getFlowProgressListByResourceCrn(String resourceCrn) {
         checkState(Crn.isCrn(resourceCrn));
         LOGGER.info("Getting flow logs (progress) for all recent flows by resource crn {}", resourceCrn);
         List<FlowLog> flowLogs = flowLogDBService.getAllFlowLogsByResourceCrnOrName(resourceCrn);
-        return flowProgressResponseConverter.convertList(flowLogs);
+        return flowProgressResponseConverter.convertList(flowLogs, resourceCrn);
     }
 }

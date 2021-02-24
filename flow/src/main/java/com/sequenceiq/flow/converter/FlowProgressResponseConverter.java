@@ -29,16 +29,16 @@ public class FlowProgressResponseConverter {
         this.flowProgressHolder = flowProgressHolder;
     }
 
-    public List<FlowProgressResponse> convertList(List<FlowLog> flowLogs) {
+    public List<FlowProgressResponse> convertList(List<FlowLog> flowLogs, String resourceCrn) {
         return Optional.ofNullable(flowLogs).orElse(new ArrayList<>())
                 .stream().filter(fl -> fl.getFlowId() != null)
                 .collect(Collectors.groupingBy(FlowLog::getFlowId))
-                .values().stream().map(this::convert)
+                .values().stream().map(fls -> convert(fls, resourceCrn))
                 .sorted(Comparator.comparingLong(FlowProgressResponse::getCreated).reversed())
                 .collect(Collectors.toList());
     }
 
-    public FlowProgressResponse convert(List<FlowLog> flowLogs) {
+    public FlowProgressResponse convert(List<FlowLog> flowLogs, String resourceCrn) {
         FlowProgressResponse response = new FlowProgressResponse();
         if (CollectionUtils.isNotEmpty(flowLogs)) {
             FlowLog lastFlowLog = flowLogs.get(0);
@@ -55,7 +55,6 @@ public class FlowProgressResponseConverter {
                     sorted(Comparator.comparingLong(FlowLog::getCreated))
                     .collect(Collectors.toList());
             response.setTransitions(createFlowStateTransitions(reversedFlowLogs, firstFlowLog.getCreated()));
-            response.setResourceId(lastFlowLog.getResourceId());
             response.setFinalized(lastFlowLog.getFinalized());
             response.setCreated(firstFlowLog.getCreated());
             if (lastFlowLog.getFinalized()) {
@@ -63,6 +62,7 @@ public class FlowProgressResponseConverter {
             } else {
                 response.setElapsedTimeInSeconds(getRoundedTimeInSeconds(firstFlowLog.getCreated(), new Date().getTime()));
             }
+            response.setResourceCrn(resourceCrn);
         }
         return response;
     }
