@@ -21,7 +21,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -64,9 +63,6 @@ public class ComputeResourceService {
     private AsyncTaskExecutor resourceBuilderExecutor;
 
     @Inject
-    private ApplicationContext applicationContext;
-
-    @Inject
     private ResourceBuilders resourceBuilders;
 
     @Inject
@@ -80,6 +76,9 @@ public class ComputeResourceService {
 
     @Inject
     private ResourcePollTaskFactory resourcePollTaskFactory;
+
+    @Inject
+    private ResourceActionFactory resourceActionFactory;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
             AdjustmentType adjustmentType, Long threshold) {
@@ -105,11 +104,13 @@ public class ComputeResourceService {
         List<ComputeResourceBuilder<ResourceBuilderContext>> builders = resourceBuilders.compute(platform);
         int numberOfBuilders = builders.size();
         for (int i = numberOfBuilders - 1; i >= 0; i--) {
-            ComputeResourceBuilder<?> builder = builders.get(i);
+            ComputeResourceBuilder<ResourceBuilderContext> builder = builders.get(i);
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             for (CloudResource cloudResource : resourceList) {
-                ResourceDeleteThread thread = createThread(ResourceDeleteThread.NAME, context, auth, cloudResource, builder, cancellable);
-                Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
+                ResourceDeletionCallablePayload deletionCallablePayload
+                        = new ResourceDeletionCallablePayload(context, auth, cloudResource, builder, cancellable);
+                ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(deletionCallablePayload);
+                Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(deletionCallable);
                 futures.add(future);
                 if (isRequestFull(futures.size(), context)) {
                     results.addAll(flatList(waitForRequests(futures).get(FutureResult.SUCCESS)));
@@ -140,7 +141,7 @@ public class ComputeResourceService {
             Collections.reverse(builders);
         }
 
-        for (ComputeResourceBuilder<?> builder : builders) {
+        for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             List<CloudInstance> allInstances = getCloudInstances(resourceList, instances);
 
@@ -153,8 +154,9 @@ public class ComputeResourceService {
                 Collection<Future<ResourceRequestResult<List<CloudVmInstanceStatus>>>> futures = new ArrayList<>();
                 for (List<CloudInstance> instancesChunk : instancesChunks) {
                     LOGGER.debug("Submit stop/start operation thread with {} instances", instancesChunk.size());
-                    ResourceStopStartThread thread = createThread(ResourceStopStartThread.NAME, context, auth, instancesChunk, builder);
-                    Future<ResourceRequestResult<List<CloudVmInstanceStatus>>> future = resourceBuilderExecutor.submit(thread);
+                    ResourceStopStartCallablePayload stopStartCallablePayload = new ResourceStopStartCallablePayload(context, auth, instancesChunk, builder);
+                    ResourceStopStartCallable stopStartCallable = resourceActionFactory.buildStopStartCallable(stopStartCallablePayload);
+                    Future<ResourceRequestResult<List<CloudVmInstanceStatus>>> future = resourceBuilderExecutor.submit(stopStartCallable);
                     futures.add(future);
                 }
 
@@ -223,10 +225,6 @@ public class ComputeResourceService {
         return selected;
     }
 
-    private <T> T createThread(String name, Object... args) {
-        return (T) applicationContext.getBean(name, args);
-    }
-
     private List<CloudInstance> getCloudInstances(List<CloudResource> cloudResource, List<CloudInstance> instances) {
         List<CloudInstance> result = new ArrayList<>();
         for (CloudResource resource : cloudResource) {
@@ -280,8 +278,9 @@ public class ComputeResourceService {
 
                 for (List<CloudInstance> instancesChunk : instancesChunks) {
                     LOGGER.debug("Submit the create operation thread with {} instances", instancesChunk.size());
-                    ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instancesChunk, group, ctx, auth, cloudStack);
-                    Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
+                    ResourceCreationCallablePayload creationCallablePayload = new ResourceCreationCallablePayload(instancesChunk, group, ctx, auth, cloudStack);
+                    ResourceCreationCallable creationCallable = resourceActionFactory.buildCreationCallable(creationCallablePayload);
+                    Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(creationCallable);
                     futures.add(future);
                 }
 

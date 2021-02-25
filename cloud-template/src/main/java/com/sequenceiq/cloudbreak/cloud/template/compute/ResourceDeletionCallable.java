@@ -4,12 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -22,22 +18,15 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
-@Component(ResourceDeleteThread.NAME)
-@Scope("prototype")
-public class ResourceDeleteThread implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
+public class ResourceDeletionCallable implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
 
-    public static final String NAME = "resourceDeleteThread";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceDeletionCallable.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceDeleteThread.class);
+    private final SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
 
-    @Inject
-    private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
+    private final ResourcePollTaskFactory resourcePollTaskFactory;
 
-    @Inject
-    private ResourcePollTaskFactory resourcePollTaskFactory;
-
-    @Inject
-    private PersistenceNotifier resourceNotifier;
+    private final PersistenceNotifier persistenceNotifier;
 
     private final ResourceBuilderContext context;
 
@@ -49,13 +38,16 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
 
     private final boolean cancellable;
 
-    public ResourceDeleteThread(ResourceBuilderContext context, AuthenticatedContext auth,
-            CloudResource resource, ComputeResourceBuilder<ResourceBuilderContext> builder, boolean cancellable) {
-        this.context = context;
-        this.auth = auth;
-        this.resource = resource;
-        this.builder = builder;
-        this.cancellable = cancellable;
+    public ResourceDeletionCallable(ResourceDeletionCallablePayload payload, SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler,
+            ResourcePollTaskFactory resourcePollTaskFactory, PersistenceNotifier persistenceNotifier) {
+        this.syncPollingScheduler = syncPollingScheduler;
+        this.resourcePollTaskFactory = resourcePollTaskFactory;
+        this.persistenceNotifier = persistenceNotifier;
+        this.context = payload.getContext();
+        this.auth = payload.getAuth();
+        this.resource = payload.getResource();
+        this.builder = payload.getBuilder();
+        this.cancellable = payload.isCancellable();
     }
 
     @Override
@@ -84,7 +76,7 @@ public class ResourceDeleteThread implements Callable<ResourceRequestResult<List
     }
 
     private void deleteResource() {
-        resourceNotifier.notifyDeletion(resource, auth.getCloudContext());
+        persistenceNotifier.notifyDeletion(resource, auth.getCloudContext());
     }
 
 }

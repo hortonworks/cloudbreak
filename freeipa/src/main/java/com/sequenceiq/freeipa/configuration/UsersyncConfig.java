@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.configuration;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,8 +11,10 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.concurrent.CompositeTaskDecorator;
-import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
 import com.sequenceiq.cloudbreak.concurrent.ActorCrnTaskDecorator;
+
+import io.opentracing.Tracer;
 
 @Configuration
 public class UsersyncConfig {
@@ -23,6 +27,9 @@ public class UsersyncConfig {
     @Value("${freeipa.usersync.threadpool.capacity.size}")
     private int usersyncQueueCapacity;
 
+    @Inject
+    private Tracer tracer;
+
     @Bean(name = USERSYNC_TASK_EXECUTOR)
     public AsyncTaskExecutor usersyncTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -31,7 +38,7 @@ public class UsersyncConfig {
         executor.setThreadNamePrefix("usersyncExecutor-");
         executor.setTaskDecorator(
                 new CompositeTaskDecorator(
-                        List.of(new MDCCleanerTaskDecorator(), new ActorCrnTaskDecorator())));
+                        List.of(new TracingAndMdcCopyingTaskDecorator(tracer), new ActorCrnTaskDecorator())));
         executor.initialize();
         return executor;
     }

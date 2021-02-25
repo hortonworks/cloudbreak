@@ -8,12 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-import javax.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -35,30 +31,22 @@ import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@Component(ResourceCreateThread.NAME)
-@Scope("prototype")
-public class ResourceCreateThread implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
+public class ResourceCreationCallable implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
 
-    public static final String NAME = "resourceCreateThread";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCreateThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCreationCallable.class);
 
     private static final List<ResourceType> VOLUME_SET_RESOURCE_TYPES = List.of(ResourceType.AWS_VOLUMESET, ResourceType.AZURE_VOLUMESET);
 
     // half an hour with 1 sec delays
     private static final int VOLUME_SET_POLLING_ATTEMPTS = 1800;
 
-    @Inject
-    private ResourceBuilders resourceBuilders;
+    private final ResourceBuilders resourceBuilders;
 
-    @Inject
-    private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
+    private final SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
 
-    @Inject
-    private ResourcePollTaskFactory resourcePollTaskFactory;
+    private final ResourcePollTaskFactory resourcePollTaskFactory;
 
-    @Inject
-    private PersistenceNotifier resourceNotifier;
+    private final PersistenceNotifier persistenceNotifier;
 
     private final List<CloudInstance> instances;
 
@@ -70,18 +58,23 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
 
     private final CloudStack cloudStack;
 
-    public ResourceCreateThread(List<CloudInstance> instances, Group group, ResourceBuilderContext context, AuthenticatedContext auth, CloudStack cloudStack) {
-        this.instances = instances;
-        this.group = group;
-        this.context = context;
-        this.auth = auth;
-        this.cloudStack = cloudStack;
+    public ResourceCreationCallable(ResourceCreationCallablePayload payload, ResourceBuilders resourceBuilders,
+            SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler, ResourcePollTaskFactory resourcePollTaskFactory,
+            PersistenceNotifier persistenceNotifier) {
+        this.resourceBuilders = resourceBuilders;
+        this.syncPollingScheduler = syncPollingScheduler;
+        this.resourcePollTaskFactory = resourcePollTaskFactory;
+        this.persistenceNotifier = persistenceNotifier;
+        this.instances = payload.getInstances();
+        this.group = payload.getGroup();
+        this.context = payload.getContext();
+        this.auth = payload.getAuth();
+        this.cloudStack = payload.getCloudStack();
     }
 
     @Override
     public ResourceRequestResult<List<CloudResourceStatus>> call() {
         List<CloudResourceStatus> results = new ArrayList<>();
-
         String stackName = auth.getCloudContext().getName();
         for (CloudInstance instance : instances) {
             LOGGER.debug("Create all compute resources for instance: '{}' stack: '{}'", instance, stackName);
@@ -153,7 +146,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     private void persistResources(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
-                resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
+                persistenceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
             }
         }
     }
@@ -165,7 +158,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     private void updateResource(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
-                resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());
+                persistenceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());
             }
         }
     }

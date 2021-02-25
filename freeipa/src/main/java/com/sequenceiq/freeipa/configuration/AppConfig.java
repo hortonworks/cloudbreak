@@ -16,10 +16,12 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteria;
 import com.sequenceiq.freeipa.service.filter.NetworkFilterProvider;
+
+import io.opentracing.Tracer;
 
 @Configuration
 @EnableRetry
@@ -35,6 +37,9 @@ public class AppConfig {
     @Inject
     private List<NetworkFilterProvider> networkFilterProviders;
 
+    @Inject
+    private Tracer tracer;
+
     @Bean
     @Primary
     public AsyncTaskExecutor intermediateBuilderExecutor() {
@@ -42,7 +47,7 @@ public class AppConfig {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
         executor.initialize();
         return executor;
     }

@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
@@ -19,6 +20,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+
+import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = UsersyncConfig.class)
@@ -35,6 +38,9 @@ class UsersyncConfigTest {
     @Inject
     @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
     AsyncTaskExecutor usersyncTaskExecutor;
+
+    @MockBean
+    Tracer tracer;
 
     @Test
     void testAsyncTaskExecutorDecoration() throws Exception {
