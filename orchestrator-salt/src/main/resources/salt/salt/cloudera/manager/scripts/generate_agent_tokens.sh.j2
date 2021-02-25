@@ -2,6 +2,8 @@
 
 set -ex
 
+date '+%Y-%m-%d %H:%M:%S'
+
 CERTMANAGER_DIR="/etc/cloudera-scm-server/certs"
 declare -A AGENT_FQDN_TOKENDIR_MAP=( {%- for ip, args in pillar.get('hosts', {}).items() %}["{{ args['fqdn'] }}"]="{{ args['fqdn'] }}-{{ args['instance_id'] }}" {% endfor %})
 TOKEN_DIR="/srv/salt/agent-tls-tokens"
@@ -25,12 +27,15 @@ for fqdn in "${!AGENT_FQDN_TOKENDIR_MAP[@]}"
 do
   tokendir=$TOKEN_DIR/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}
   if [[ ! -e ${tokendir}/agent_token_copied_to_client ]]; then
+    set +e
     # This can be fairly slow, for large clusters
     COPY_RESULT=$(salt ${fqdn} cp.get_file salt://agent-tls-tokens/${AGENT_FQDN_TOKENDIR_MAP[${fqdn}]}/cmagent.token /etc/cloudera-scm-agent/cmagent.token)
-    if [[ "$COPY_RESULT" != *"False"* ]]; then
+    SALT_CP_RET=$?
+    set -e
+    if [[ "$COPY_RESULT" != *"False"* ]] && [[ "$SALT_CP_RET" -eq 0 ]] ; then
       echo $(date +%Y-%m-%d:%H:%M:%S) >> ${tokendir}/agent_token_copied_to_client
     else
-      echo "Could not copy the token to agent: $fqdn"
+      echo "Could not copy the token to agent: $fqdn Salt copy returned with: $SALT_CP_RET Copy result is: $COPY_RESULT"
     fi
   else
     echo "CM agent token copy to ${fqdn} will be skipped as it was already copied to the agent instance."
