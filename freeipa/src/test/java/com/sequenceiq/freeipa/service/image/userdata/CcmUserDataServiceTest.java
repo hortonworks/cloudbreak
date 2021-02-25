@@ -41,6 +41,10 @@ public class CcmUserDataServiceTest {
 
     private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
+    private static final String TEST_ENVIRONMENT_ID = "aa8997d3-527d-4e7f-af8a-7f7cd10eb8f6";
+
+    private static final String TEST_ENVIRONMENT_CRN = String.format("crn:cdp:iam:us-west-1:%s:environment:%s", TEST_ACCOUNT_ID, TEST_ENVIRONMENT_ID);
+
     private static final String TEST_RESOURCE_ID = "aa8997d3-527d-4e7f-af8a-7f7cd10eb8f7";
 
     private static final String TEST_CLUSTER_CRN = String.format("crn:cdp:datahub:us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd:cluster:%s", TEST_RESOURCE_ID);
@@ -105,14 +109,14 @@ public class CcmUserDataServiceTest {
         when(stackService.getStackById(stack.getId())).thenReturn(stack);
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(freeIpa.getDomain()).thenReturn("cldr.work.site");
-        when(ccmV2ParameterSupplier.getCcmV2Parameters(anyString(), anyString(), anyString())).thenReturn(defaultCcmV2Parameters);
+        when(ccmV2ParameterSupplier.getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString())).thenReturn(defaultCcmV2Parameters);
         when(defaultCcmV2Parameters.getAgentCrn()).thenReturn("testAgentCrn");
         when(hostDiscoveryService.determineGatewayFqdn(any(), any())).thenReturn("datahub.master0.cldr.work.site");
 
         CcmConnectivityParameters ccmParameters = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.fetchAndSaveCcmParameters(stack));
         assertEquals(CcmConnectivityMode.CCMV2, ccmParameters.getConnectivityMode(), "CCM V2 should be enabled.");
         assertEquals(defaultCcmV2Parameters, ccmParameters.getCcmV2Parameters(), "CCM V2 Parameters should match.");
-        verify(ccmV2ParameterSupplier, times(1)).getCcmV2Parameters(anyString(), anyString(), anyString());
+        verify(ccmV2ParameterSupplier, times(1)).getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString());
         verifyNoInteractions(ccmParameterSupplier);
 
         assertEquals("testAgentCrn", stack.getCcmV2AgentCrn(), "Ccm V2 Config should be initialized");
@@ -124,6 +128,7 @@ public class CcmUserDataServiceTest {
         aStack.setId(100L);
         aStack.setAccountId(TEST_ACCOUNT_ID);
         aStack.setResourceCrn(TEST_CLUSTER_CRN);
+        aStack.setEnvironmentCrn(TEST_ENVIRONMENT_CRN);
         return aStack;
     }
 }

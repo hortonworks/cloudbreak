@@ -96,14 +96,14 @@ public class CcmUserDataServiceTest {
         stack.setTunnel(Tunnel.CCMV2);
         DefaultCcmV2Parameters defaultCcmV2Parameters = mock(DefaultCcmV2Parameters.class);
 
-        when(ccmV2ParameterSupplier.getCcmV2Parameters(anyString(), anyString(), anyString())).thenReturn(defaultCcmV2Parameters);
+        when(ccmV2ParameterSupplier.getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString())).thenReturn(defaultCcmV2Parameters);
         when(defaultCcmV2Parameters.getAgentCrn()).thenReturn("testAgentCrn");
         when(hostDiscoveryService.determineGatewayFqdn(any(), any())).thenReturn("datahub.master0.cldr.work.site");
 
         CcmConnectivityParameters ccmParameters = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.fetchAndSaveCcmParameters(stack));
         assertEquals(CcmConnectivityMode.CCMV2, ccmParameters.getConnectivityMode(), "CCM V2 should be enabled.");
         assertEquals(defaultCcmV2Parameters, ccmParameters.getCcmV2Parameters(), "CCM V2 Parameters should match.");
-        verify(ccmV2ParameterSupplier, times(1)).getCcmV2Parameters(anyString(), anyString(), anyString());
+        verify(ccmV2ParameterSupplier, times(1)).getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString());
         verifyNoInteractions(ccmParameterSupplier);
         verify(stackService, times(1)).setCcmV2AgentCrnByStackId(100L, "testAgentCrn");
         verify(stackService, never()).setMinaSshdServiceIdByStackId(any(), any());

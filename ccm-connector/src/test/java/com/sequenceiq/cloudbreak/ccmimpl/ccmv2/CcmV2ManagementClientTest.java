@@ -18,12 +18,16 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.config.GrpcCcmV2Config;
 
+import java.util.Optional;
+
 @RunWith(MockitoJUnitRunner.class)
 public class CcmV2ManagementClientTest {
 
     private static final String TEST_ACCOUNT_ID = "us-west-1:e7b1345f-4ae1-4594-9113-fc91f22ef8bd";
 
     private static final String TEST_REQUEST_ID = "requestId";
+
+    private static final String TEST_ENVIRONMENT_CRN = "environmentCrn";
 
     private static final String TEST_USER_CRN = "testUserCrn";
 
@@ -77,8 +81,10 @@ public class CcmV2ManagementClientTest {
         String keyId = "keyId";
 
         InvertingProxyAgent mockAgent = InvertingProxyAgent.newBuilder().setAgentCrn("testAgentCrn").build();
-        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, domain, keyId, TEST_USER_CRN)).thenReturn(mockAgent);
-        InvertingProxyAgent registeredAgent = underTest.registerInvertingProxyAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, domain, keyId);
+        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId, TEST_USER_CRN))
+                .thenReturn(mockAgent);
+        InvertingProxyAgent registeredAgent =
+                underTest.registerInvertingProxyAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId);
         assertEquals(TEST_AGENT_CRN, registeredAgent.getAgentCrn(), "InvertingProxyAgent agentCrn  should match.");
     }
 
@@ -87,8 +93,9 @@ public class CcmV2ManagementClientTest {
         String domain = "test.domain";
         String keyId = "keyId";
 
-        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, domain, keyId, TEST_USER_CRN)).thenThrow(new RuntimeException());
-        underTest.registerInvertingProxyAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, domain, keyId);
+        when(grpcCcmV2Client.registerAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId, TEST_USER_CRN))
+                .thenThrow(new RuntimeException());
+        underTest.registerInvertingProxyAgent(TEST_REQUEST_ID, TEST_ACCOUNT_ID, Optional.of(TEST_ENVIRONMENT_CRN), domain, keyId);
     }
 
     @Test

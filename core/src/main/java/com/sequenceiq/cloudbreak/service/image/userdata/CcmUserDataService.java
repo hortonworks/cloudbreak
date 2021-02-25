@@ -74,7 +74,7 @@ public class CcmUserDataService {
             String generatedGatewayFqdn = hostDiscoveryService.determineGatewayFqdn(gatewayHostName, stackDomain);
 
             CcmV2Parameters ccmV2Parameters = ccmV2ParameterSupplier.getCcmV2Parameters(ThreadBasedUserCrnProvider.getAccountId(),
-                    generatedGatewayFqdn, CcmResourceUtil.getKeyId(stack.getResourceCrn()));
+                    Optional.empty(), generatedGatewayFqdn, CcmResourceUtil.getKeyId(stack.getResourceCrn()));
             ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
 
             saveCcmV2Config(stack.getId(), ccmV2Parameters);

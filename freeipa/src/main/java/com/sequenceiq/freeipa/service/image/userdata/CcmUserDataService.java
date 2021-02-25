@@ -70,7 +70,8 @@ public class CcmUserDataService {
             String gatewayHostName = hostDiscoveryService.generateHostname(freeIpa.getHostname(), null, 0, false);
             String generatedClusterDomain = hostDiscoveryService.determineGatewayFqdn(gatewayHostName, freeIpa.getDomain());
 
-            CcmV2Parameters ccmV2Parameters = ccmV2ParameterSupplier.getCcmV2Parameters(stack.getAccountId(), generatedClusterDomain, keyId);
+            CcmV2Parameters ccmV2Parameters = ccmV2ParameterSupplier.getCcmV2Parameters(stack.getAccountId(), Optional.of(stack.getEnvironmentCrn()),
+                    generatedClusterDomain, keyId);
             ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2Parameters);
             saveCcmV2Config(stack.getId(), ccmV2Parameters);
         } else {
