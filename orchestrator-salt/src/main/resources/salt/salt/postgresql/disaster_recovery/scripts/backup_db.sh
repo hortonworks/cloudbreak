@@ -68,6 +68,7 @@ run_kinit() {
   HDFS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*hdfs*" | head -n 1)
   HBASE_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -a \( -path "*hbase-REGIONSERVER*" -o -path "*hbase-MASTER*" \) -a -type f | head -n 1)
   SOLR_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*solr-SOLR_SERVER*" | head -n 1)
+  ATLAS_KEYTAB=$(find /run/cloudera-scm-agent/process/ -name "*.keytab" -path "*atlas-ATLAS_SERVER*" | head -n 1)
 
   if kinit_as hdfs "$HDFS_KEYTAB"; then
     doLog "Successful kinit using hdfs principal"
@@ -75,6 +76,8 @@ run_kinit() {
     doLog "Successful kinit using hbase principal"
   elif kinit_as solr "$SOLR_KEYTAB"; then
     doLog "Successful kinit using solr principal"
+  elif kinit_as atlas "$ATLAS_KEYTAB"; then
+    doLog "Successful kinit using atlas principal"
   else
     errorExit "Couldn't get kerberos ticket to access cloud storage."
   fi
