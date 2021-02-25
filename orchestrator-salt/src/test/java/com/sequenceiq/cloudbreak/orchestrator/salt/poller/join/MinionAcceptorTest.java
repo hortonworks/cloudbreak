@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -26,6 +27,31 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionKeysOnMasterResp
 class MinionAcceptorTest {
 
     private SaltConnector sc = mock(SaltConnector.class);
+
+    @Test
+    public void handleIfAMinionInUnacceptedAndDeniedAtTheSameTime() {
+        MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        Minion m2 = new Minion();
+        m2.setHostName("m2");
+        m2.setDomain("d");
+        Minion m3 = new Minion();
+        m3.setHostName("m3");
+        m3.setDomain("d");
+
+        when(response.getAllMinions()).thenReturn(List.of("m1.d", "m2.d", "m3.d"));
+        when(response.getDeniedMinions()).thenReturn(List.of("m2.d", "m3.d"));
+        when(response.getUnacceptedMinions()).thenReturn(List.of("m2.d", "m3.d"));
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
+
+        MinionAcceptor underTest = new MinionAcceptor(sc, List.of(m1, m2, m3), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        assertEquals("There were minions in denied and unaccepted state at the same time: [m2.d, m3.d]", exception.getMessage());
+    }
 
     @Test
     public void fetchUnacceptedMinionsFromMasterMissingMinions() {
