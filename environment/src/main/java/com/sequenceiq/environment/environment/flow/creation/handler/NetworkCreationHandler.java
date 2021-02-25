@@ -41,8 +41,6 @@ public class NetworkCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkCreationHandler.class);
 
-    private static final String UNMATCHED_AZ = "Please provide public subnets in each of the following availability zones: %s";
-
     private final EnvironmentService environmentService;
 
     private final NetworkService networkService;

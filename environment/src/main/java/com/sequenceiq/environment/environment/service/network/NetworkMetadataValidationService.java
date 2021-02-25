@@ -59,7 +59,7 @@ public class NetworkMetadataValidationService {
             return Map.of();
         }
         return endpointGatewaySubnetMetas.entrySet().stream()
-            .filter(entry -> !entry.getValue().isPrivateSubnet())
+            .filter(entry -> !entry.getValue().isPrivateSubnet() || entry.getValue().isRoutableToInternet())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

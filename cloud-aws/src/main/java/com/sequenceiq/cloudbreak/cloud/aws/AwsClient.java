@@ -35,6 +35,8 @@ import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagementClientBuilder;
 import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.AWSKMSClientBuilder;
+import com.amazonaws.services.networkfirewall.AWSNetworkFirewall;
+import com.amazonaws.services.networkfirewall.AWSNetworkFirewallClient;
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.AmazonRDSClientBuilder;
 import com.amazonaws.services.s3.AmazonS3;
@@ -52,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonElasticLoadBalancingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
@@ -213,6 +216,15 @@ public class AwsClient {
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .build(), awsCredential, regionName);
         return new AmazonElasticLoadBalancingClient(client);
+    }
+
+    public AmazonNetworkFirewallClient createNetworkFirewallClient(AwsCredentialView awsCredential, String regionName) {
+        AWSNetworkFirewall client = AWSNetworkFirewallClient.builder()
+            .withCredentials(getCredentialProvider(awsCredential))
+            .withClientConfiguration(getDefaultClientConfiguration())
+            .withRegion(regionName)
+            .build();
+        return new AmazonNetworkFirewallClient(client, retry);
     }
 
     public AmazonEfsClient createElasticFileSystemClient(AwsCredentialView awsCredential, String regionName) {
