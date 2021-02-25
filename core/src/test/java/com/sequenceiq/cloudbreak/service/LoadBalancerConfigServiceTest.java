@@ -1,5 +1,14 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +21,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -33,12 +43,6 @@ import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 public class LoadBalancerConfigServiceTest extends SubnetTest {
 
@@ -66,6 +70,9 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        Field supportedPlatformsField = ReflectionUtils.findField(LoadBalancerConfigService.class, "supportedPlatforms");
+        ReflectionUtils.makeAccessible(supportedPlatformsField);
+        ReflectionUtils.setField(supportedPlatformsField, underTest, "AWS,AZURE");
     }
 
     @Test
@@ -395,6 +402,21 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         assertNull(fqdn);
     }
 
+    @Test
+    public void testCreateLoadBalancerUnsupportedPlatform() {
+        Stack stack = createStack(StackType.DATALAKE, PRIVATE_ID_1);
+        stack.setCloudPlatform(GCP);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment);
+            assertEquals(0, loadBalancers.size());
+        });
+    }
+
     private String getBlueprintText(String path) {
         return FileReaderUtils.readFileFromClasspathQuietly(path);
     }
@@ -429,6 +451,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         stack.setType(type);
         stack.setCluster(cluster);
         stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setCloudPlatform(AWS);
         Network network = new Network();
         if (StringUtils.isNotEmpty(subnetId)) {
             Map<String, Object> attributes = Map.of("subnetId", subnetId);

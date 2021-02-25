@@ -644,6 +644,9 @@ cb:
         prewarmed: true
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 
+  loadBalancer:
+    supportedPlatforms: AWS
+
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
   enabled: true
