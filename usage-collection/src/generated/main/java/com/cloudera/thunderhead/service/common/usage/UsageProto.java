@@ -49614,6 +49614,1284 @@ public final class UsageProto {
 
   }
 
+  public interface CDPStatusDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPStatusDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string stackStatus = 1;</code>
+     */
+    java.lang.String getStackStatus();
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string stackStatus = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getStackStatusBytes();
+
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string stackDetailedStatus = 2;</code>
+     */
+    java.lang.String getStackDetailedStatus();
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string stackDetailedStatus = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getStackDetailedStatusBytes();
+
+    /**
+     * <pre>
+     * Status reason of the stack
+     * </pre>
+     *
+     * <code>string stackStatusReason = 3;</code>
+     */
+    java.lang.String getStackStatusReason();
+    /**
+     * <pre>
+     * Status reason of the stack
+     * </pre>
+     *
+     * <code>string stackStatusReason = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getStackStatusReasonBytes();
+
+    /**
+     * <pre>
+     * Status of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatus = 4;</code>
+     */
+    java.lang.String getClusterStatus();
+    /**
+     * <pre>
+     * Status of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatus = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterStatusBytes();
+
+    /**
+     * <pre>
+     * Status reason of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatusReason = 5;</code>
+     */
+    java.lang.String getClusterStatusReason();
+    /**
+     * <pre>
+     * Status reason of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatusReason = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getClusterStatusReasonBytes();
+  }
+  /**
+   * Protobuf type {@code usage.CDPStatusDetails}
+   */
+  public  static final class CDPStatusDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPStatusDetails)
+      CDPStatusDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPStatusDetails.newBuilder() to construct.
+    private CDPStatusDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPStatusDetails() {
+      stackStatus_ = "";
+      stackDetailedStatus_ = "";
+      stackStatusReason_ = "";
+      clusterStatus_ = "";
+      clusterStatusReason_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPStatusDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              stackStatus_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              stackDetailedStatus_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              stackStatusReason_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterStatus_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterStatusReason_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPStatusDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPStatusDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder.class);
+    }
+
+    public static final int STACKSTATUS_FIELD_NUMBER = 1;
+    private volatile java.lang.Object stackStatus_;
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string stackStatus = 1;</code>
+     */
+    public java.lang.String getStackStatus() {
+      java.lang.Object ref = stackStatus_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        stackStatus_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string stackStatus = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getStackStatusBytes() {
+      java.lang.Object ref = stackStatus_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        stackStatus_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STACKDETAILEDSTATUS_FIELD_NUMBER = 2;
+    private volatile java.lang.Object stackDetailedStatus_;
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string stackDetailedStatus = 2;</code>
+     */
+    public java.lang.String getStackDetailedStatus() {
+      java.lang.Object ref = stackDetailedStatus_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        stackDetailedStatus_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string stackDetailedStatus = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getStackDetailedStatusBytes() {
+      java.lang.Object ref = stackDetailedStatus_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        stackDetailedStatus_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STACKSTATUSREASON_FIELD_NUMBER = 3;
+    private volatile java.lang.Object stackStatusReason_;
+    /**
+     * <pre>
+     * Status reason of the stack
+     * </pre>
+     *
+     * <code>string stackStatusReason = 3;</code>
+     */
+    public java.lang.String getStackStatusReason() {
+      java.lang.Object ref = stackStatusReason_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        stackStatusReason_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status reason of the stack
+     * </pre>
+     *
+     * <code>string stackStatusReason = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getStackStatusReasonBytes() {
+      java.lang.Object ref = stackStatusReason_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        stackStatusReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERSTATUS_FIELD_NUMBER = 4;
+    private volatile java.lang.Object clusterStatus_;
+    /**
+     * <pre>
+     * Status of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatus = 4;</code>
+     */
+    public java.lang.String getClusterStatus() {
+      java.lang.Object ref = clusterStatus_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterStatus_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatus = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterStatusBytes() {
+      java.lang.Object ref = clusterStatus_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterStatus_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERSTATUSREASON_FIELD_NUMBER = 5;
+    private volatile java.lang.Object clusterStatusReason_;
+    /**
+     * <pre>
+     * Status reason of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatusReason = 5;</code>
+     */
+    public java.lang.String getClusterStatusReason() {
+      java.lang.Object ref = clusterStatusReason_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterStatusReason_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status reason of the cluster
+     * </pre>
+     *
+     * <code>string clusterStatusReason = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getClusterStatusReasonBytes() {
+      java.lang.Object ref = clusterStatusReason_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterStatusReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getStackStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, stackStatus_);
+      }
+      if (!getStackDetailedStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, stackDetailedStatus_);
+      }
+      if (!getStackStatusReasonBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, stackStatusReason_);
+      }
+      if (!getClusterStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, clusterStatus_);
+      }
+      if (!getClusterStatusReasonBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, clusterStatusReason_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getStackStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, stackStatus_);
+      }
+      if (!getStackDetailedStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, stackDetailedStatus_);
+      }
+      if (!getStackStatusReasonBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, stackStatusReason_);
+      }
+      if (!getClusterStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, clusterStatus_);
+      }
+      if (!getClusterStatusReasonBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, clusterStatusReason_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails) obj;
+
+      boolean result = true;
+      result = result && getStackStatus()
+          .equals(other.getStackStatus());
+      result = result && getStackDetailedStatus()
+          .equals(other.getStackDetailedStatus());
+      result = result && getStackStatusReason()
+          .equals(other.getStackStatusReason());
+      result = result && getClusterStatus()
+          .equals(other.getClusterStatus());
+      result = result && getClusterStatusReason()
+          .equals(other.getClusterStatusReason());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STACKSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStackStatus().hashCode();
+      hash = (37 * hash) + STACKDETAILEDSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStackDetailedStatus().hashCode();
+      hash = (37 * hash) + STACKSTATUSREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getStackStatusReason().hashCode();
+      hash = (37 * hash) + CLUSTERSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterStatus().hashCode();
+      hash = (37 * hash) + CLUSTERSTATUSREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterStatusReason().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code usage.CDPStatusDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPStatusDetails)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPStatusDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPStatusDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        stackStatus_ = "";
+
+        stackDetailedStatus_ = "";
+
+        stackStatusReason_ = "";
+
+        clusterStatus_ = "";
+
+        clusterStatusReason_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPStatusDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails(this);
+        result.stackStatus_ = stackStatus_;
+        result.stackDetailedStatus_ = stackDetailedStatus_;
+        result.stackStatusReason_ = stackStatusReason_;
+        result.clusterStatus_ = clusterStatus_;
+        result.clusterStatusReason_ = clusterStatusReason_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance()) return this;
+        if (!other.getStackStatus().isEmpty()) {
+          stackStatus_ = other.stackStatus_;
+          onChanged();
+        }
+        if (!other.getStackDetailedStatus().isEmpty()) {
+          stackDetailedStatus_ = other.stackDetailedStatus_;
+          onChanged();
+        }
+        if (!other.getStackStatusReason().isEmpty()) {
+          stackStatusReason_ = other.stackStatusReason_;
+          onChanged();
+        }
+        if (!other.getClusterStatus().isEmpty()) {
+          clusterStatus_ = other.clusterStatus_;
+          onChanged();
+        }
+        if (!other.getClusterStatusReason().isEmpty()) {
+          clusterStatusReason_ = other.clusterStatusReason_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object stackStatus_ = "";
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string stackStatus = 1;</code>
+       */
+      public java.lang.String getStackStatus() {
+        java.lang.Object ref = stackStatus_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          stackStatus_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string stackStatus = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getStackStatusBytes() {
+        java.lang.Object ref = stackStatus_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          stackStatus_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string stackStatus = 1;</code>
+       */
+      public Builder setStackStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        stackStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string stackStatus = 1;</code>
+       */
+      public Builder clearStackStatus() {
+        
+        stackStatus_ = getDefaultInstance().getStackStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string stackStatus = 1;</code>
+       */
+      public Builder setStackStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        stackStatus_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object stackDetailedStatus_ = "";
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string stackDetailedStatus = 2;</code>
+       */
+      public java.lang.String getStackDetailedStatus() {
+        java.lang.Object ref = stackDetailedStatus_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          stackDetailedStatus_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string stackDetailedStatus = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getStackDetailedStatusBytes() {
+        java.lang.Object ref = stackDetailedStatus_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          stackDetailedStatus_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string stackDetailedStatus = 2;</code>
+       */
+      public Builder setStackDetailedStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        stackDetailedStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string stackDetailedStatus = 2;</code>
+       */
+      public Builder clearStackDetailedStatus() {
+        
+        stackDetailedStatus_ = getDefaultInstance().getStackDetailedStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string stackDetailedStatus = 2;</code>
+       */
+      public Builder setStackDetailedStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        stackDetailedStatus_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object stackStatusReason_ = "";
+      /**
+       * <pre>
+       * Status reason of the stack
+       * </pre>
+       *
+       * <code>string stackStatusReason = 3;</code>
+       */
+      public java.lang.String getStackStatusReason() {
+        java.lang.Object ref = stackStatusReason_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          stackStatusReason_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the stack
+       * </pre>
+       *
+       * <code>string stackStatusReason = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getStackStatusReasonBytes() {
+        java.lang.Object ref = stackStatusReason_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          stackStatusReason_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the stack
+       * </pre>
+       *
+       * <code>string stackStatusReason = 3;</code>
+       */
+      public Builder setStackStatusReason(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        stackStatusReason_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the stack
+       * </pre>
+       *
+       * <code>string stackStatusReason = 3;</code>
+       */
+      public Builder clearStackStatusReason() {
+        
+        stackStatusReason_ = getDefaultInstance().getStackStatusReason();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the stack
+       * </pre>
+       *
+       * <code>string stackStatusReason = 3;</code>
+       */
+      public Builder setStackStatusReasonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        stackStatusReason_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterStatus_ = "";
+      /**
+       * <pre>
+       * Status of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatus = 4;</code>
+       */
+      public java.lang.String getClusterStatus() {
+        java.lang.Object ref = clusterStatus_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterStatus_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatus = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterStatusBytes() {
+        java.lang.Object ref = clusterStatus_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterStatus_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatus = 4;</code>
+       */
+      public Builder setClusterStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatus = 4;</code>
+       */
+      public Builder clearClusterStatus() {
+        
+        clusterStatus_ = getDefaultInstance().getClusterStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatus = 4;</code>
+       */
+      public Builder setClusterStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterStatus_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterStatusReason_ = "";
+      /**
+       * <pre>
+       * Status reason of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatusReason = 5;</code>
+       */
+      public java.lang.String getClusterStatusReason() {
+        java.lang.Object ref = clusterStatusReason_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterStatusReason_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatusReason = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getClusterStatusReasonBytes() {
+        java.lang.Object ref = clusterStatusReason_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterStatusReason_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status reason of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatusReason = 5;</code>
+       */
+      public Builder setClusterStatusReason(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterStatusReason_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatusReason = 5;</code>
+       */
+      public Builder clearClusterStatusReason() {
+        
+        clusterStatusReason_ = getDefaultInstance().getClusterStatusReason();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status reason of the cluster
+       * </pre>
+       *
+       * <code>string clusterStatusReason = 5;</code>
+       */
+      public Builder setClusterStatusReasonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterStatusReason_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPStatusDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPStatusDetails)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPStatusDetails>
+        PARSER = new com.google.protobuf.AbstractParser<CDPStatusDetails>() {
+      @java.lang.Override
+      public CDPStatusDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPStatusDetails(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPStatusDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPStatusDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CDPDatalakeRequestedOrBuilder extends
       // @@protoc_insertion_point(interface_extends:usage.CDPDatalakeRequested)
       com.google.protobuf.MessageOrBuilder {
@@ -50781,21 +52059,28 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datalake
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    java.lang.String getFailureReason();
+    boolean hasStatusDetails();
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datalake
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    com.google.protobuf.ByteString
-        getFailureReasonBytes();
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getStatusDetails();
+    /**
+     * <pre>
+     * Describes the detailed status of the stack and the cluster of the datalake
+     * </pre>
+     *
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder();
   }
   /**
    * <pre>
@@ -50816,7 +52101,6 @@ public final class UsageProto {
     private CDPDatalakeStatusChanged() {
       oldStatus_ = 0;
       newStatus_ = 0;
-      failureReason_ = "";
     }
 
     @java.lang.Override
@@ -50869,9 +52153,16 @@ public final class UsageProto {
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder subBuilder = null;
+              if (statusDetails_ != null) {
+                subBuilder = statusDetails_.toBuilder();
+              }
+              statusDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(statusDetails_);
+                statusDetails_ = subBuilder.buildPartial();
+              }
 
-              failureReason_ = s;
               break;
             }
             default: {
@@ -50989,46 +52280,37 @@ public final class UsageProto {
       return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNRECOGNIZED : result;
     }
 
-    public static final int FAILUREREASON_FIELD_NUMBER = 4;
-    private volatile java.lang.Object failureReason_;
+    public static final int STATUSDETAILS_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails statusDetails_;
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datalake
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    public java.lang.String getFailureReason() {
-      java.lang.Object ref = failureReason_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        failureReason_ = s;
-        return s;
-      }
+    public boolean hasStatusDetails() {
+      return statusDetails_ != null;
     }
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datalake
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    public com.google.protobuf.ByteString
-        getFailureReasonBytes() {
-      java.lang.Object ref = failureReason_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        failureReason_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getStatusDetails() {
+      return statusDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance() : statusDetails_;
+    }
+    /**
+     * <pre>
+     * Describes the detailed status of the stack and the cluster of the datalake
+     * </pre>
+     *
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder() {
+      return getStatusDetails();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -51054,8 +52336,8 @@ public final class UsageProto {
       if (newStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET.getNumber()) {
         output.writeEnum(3, newStatus_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, failureReason_);
+      if (statusDetails_ != null) {
+        output.writeMessage(4, getStatusDetails());
       }
       unknownFields.writeTo(output);
     }
@@ -51078,8 +52360,9 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, newStatus_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, failureReason_);
+      if (statusDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getStatusDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -51104,8 +52387,11 @@ public final class UsageProto {
       }
       result = result && oldStatus_ == other.oldStatus_;
       result = result && newStatus_ == other.newStatus_;
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
+      result = result && (hasStatusDetails() == other.hasStatusDetails());
+      if (hasStatusDetails()) {
+        result = result && getStatusDetails()
+            .equals(other.getStatusDetails());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -51125,8 +52411,10 @@ public final class UsageProto {
       hash = (53 * hash) + oldStatus_;
       hash = (37 * hash) + NEWSTATUS_FIELD_NUMBER;
       hash = (53 * hash) + newStatus_;
-      hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
-      hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasStatusDetails()) {
+        hash = (37 * hash) + STATUSDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getStatusDetails().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -51274,8 +52562,12 @@ public final class UsageProto {
 
         newStatus_ = 0;
 
-        failureReason_ = "";
-
+        if (statusDetailsBuilder_ == null) {
+          statusDetails_ = null;
+        } else {
+          statusDetails_ = null;
+          statusDetailsBuilder_ = null;
+        }
         return this;
       }
 
@@ -51309,7 +52601,11 @@ public final class UsageProto {
         }
         result.oldStatus_ = oldStatus_;
         result.newStatus_ = newStatus_;
-        result.failureReason_ = failureReason_;
+        if (statusDetailsBuilder_ == null) {
+          result.statusDetails_ = statusDetails_;
+        } else {
+          result.statusDetails_ = statusDetailsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -51367,9 +52663,8 @@ public final class UsageProto {
         if (other.newStatus_ != 0) {
           setNewStatusValue(other.getNewStatusValue());
         }
-        if (!other.getFailureReason().isEmpty()) {
-          failureReason_ = other.failureReason_;
-          onChanged();
+        if (other.hasStatusDetails()) {
+          mergeStatusDetails(other.getStatusDetails());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -51683,93 +52978,157 @@ public final class UsageProto {
         return this;
       }
 
-      private java.lang.Object failureReason_ = "";
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails statusDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder> statusDetailsBuilder_;
       /**
        * <pre>
-       * Describe the reason of the failure if any
+       * Describes the detailed status of the stack and the cluster of the datalake
        * </pre>
        *
-       * <code>string failureReason = 4;</code>
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
        */
-      public java.lang.String getFailureReason() {
-        java.lang.Object ref = failureReason_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          failureReason_ = s;
-          return s;
+      public boolean hasStatusDetails() {
+        return statusDetailsBuilder_ != null || statusDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datalake
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getStatusDetails() {
+        if (statusDetailsBuilder_ == null) {
+          return statusDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance() : statusDetails_;
         } else {
-          return (java.lang.String) ref;
+          return statusDetailsBuilder_.getMessage();
         }
       }
       /**
        * <pre>
-       * Describe the reason of the failure if any
+       * Describes the detailed status of the stack and the cluster of the datalake
        * </pre>
        *
-       * <code>string failureReason = 4;</code>
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
        */
-      public com.google.protobuf.ByteString
-          getFailureReasonBytes() {
-        java.lang.Object ref = failureReason_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          failureReason_ = b;
-          return b;
+      public Builder setStatusDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails value) {
+        if (statusDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          statusDetails_ = value;
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          statusDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datalake
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public Builder setStatusDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder builderForValue) {
+        if (statusDetailsBuilder_ == null) {
+          statusDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          statusDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datalake
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public Builder mergeStatusDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails value) {
+        if (statusDetailsBuilder_ == null) {
+          if (statusDetails_ != null) {
+            statusDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.newBuilder(statusDetails_).mergeFrom(value).buildPartial();
+          } else {
+            statusDetails_ = value;
+          }
+          onChanged();
+        } else {
+          statusDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datalake
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public Builder clearStatusDetails() {
+        if (statusDetailsBuilder_ == null) {
+          statusDetails_ = null;
+          onChanged();
+        } else {
+          statusDetails_ = null;
+          statusDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datalake
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder getStatusDetailsBuilder() {
+        
+        onChanged();
+        return getStatusDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datalake
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder() {
+        if (statusDetailsBuilder_ != null) {
+          return statusDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return statusDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance() : statusDetails_;
         }
       }
       /**
        * <pre>
-       * Describe the reason of the failure if any
+       * Describes the detailed status of the stack and the cluster of the datalake
        * </pre>
        *
-       * <code>string failureReason = 4;</code>
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
        */
-      public Builder setFailureReason(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        failureReason_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Describe the reason of the failure if any
-       * </pre>
-       *
-       * <code>string failureReason = 4;</code>
-       */
-      public Builder clearFailureReason() {
-        
-        failureReason_ = getDefaultInstance().getFailureReason();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Describe the reason of the failure if any
-       * </pre>
-       *
-       * <code>string failureReason = 4;</code>
-       */
-      public Builder setFailureReasonBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        failureReason_ = value;
-        onChanged();
-        return this;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder> 
+          getStatusDetailsFieldBuilder() {
+        if (statusDetailsBuilder_ == null) {
+          statusDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder>(
+                  getStatusDetails(),
+                  getParentForChildren(),
+                  isClean());
+          statusDetails_ = null;
+        }
+        return statusDetailsBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -51873,7 +53232,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Details for DataHub
+     * Details for datahub
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -51881,7 +53240,7 @@ public final class UsageProto {
     boolean hasClusterDetails();
     /**
      * <pre>
-     * Details for DataHub
+     * Details for datahub
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -51889,7 +53248,7 @@ public final class UsageProto {
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails();
     /**
      * <pre>
-     * Details for DataHub
+     * Details for datahub
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -51898,7 +53257,7 @@ public final class UsageProto {
   }
   /**
    * <pre>
-   * Generated when Datalake creation has been requested or finished
+   * Generated when Datahub creation has been requested or finished
    * </pre>
    *
    * Protobuf type {@code usage.CDPDatahubRequested}
@@ -52083,7 +53442,7 @@ public final class UsageProto {
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails clusterDetails_;
     /**
      * <pre>
-     * Details for DataHub
+     * Details for datahub
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52093,7 +53452,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Details for DataHub
+     * Details for datahub
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52103,7 +53462,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Details for DataHub
+     * Details for datahub
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52301,7 +53660,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Generated when Datalake creation has been requested or finished
+     * Generated when Datahub creation has been requested or finished
      * </pre>
      *
      * Protobuf type {@code usage.CDPDatahubRequested}
@@ -52726,7 +54085,7 @@ public final class UsageProto {
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52736,7 +54095,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52750,7 +54109,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52770,7 +54129,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52788,7 +54147,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52810,7 +54169,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52828,7 +54187,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52840,7 +54199,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52855,7 +54214,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for DataHub
+       * Details for datahub
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -52957,7 +54316,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * The datalake's status before the change.
+     * The datahub's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -52965,7 +54324,7 @@ public final class UsageProto {
     int getOldStatusValue();
     /**
      * <pre>
-     * The datalake's status before the change.
+     * The datahub's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -52974,7 +54333,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * The datalake's status after the change.
+     * The datahub's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -52982,7 +54341,7 @@ public final class UsageProto {
     int getNewStatusValue();
     /**
      * <pre>
-     * The datalake's status after the change.
+     * The datahub's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -52991,25 +54350,32 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datahub
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    java.lang.String getFailureReason();
+    boolean hasStatusDetails();
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datahub
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    com.google.protobuf.ByteString
-        getFailureReasonBytes();
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getStatusDetails();
+    /**
+     * <pre>
+     * Describes the detailed status of the stack and the cluster of the datahub
+     * </pre>
+     *
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder();
   }
   /**
    * <pre>
-   * Generated when Datalake status has changed
+   * Generated when Datahub status has changed
    * </pre>
    *
    * Protobuf type {@code usage.CDPDatahubStatusChanged}
@@ -53026,7 +54392,6 @@ public final class UsageProto {
     private CDPDatahubStatusChanged() {
       oldStatus_ = 0;
       newStatus_ = 0;
-      failureReason_ = "";
     }
 
     @java.lang.Override
@@ -53079,9 +54444,16 @@ public final class UsageProto {
               break;
             }
             case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder subBuilder = null;
+              if (statusDetails_ != null) {
+                subBuilder = statusDetails_.toBuilder();
+              }
+              statusDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(statusDetails_);
+                statusDetails_ = subBuilder.buildPartial();
+              }
 
-              failureReason_ = s;
               break;
             }
             default: {
@@ -53153,7 +54525,7 @@ public final class UsageProto {
     private int oldStatus_;
     /**
      * <pre>
-     * The datalake's status before the change.
+     * The datahub's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53163,7 +54535,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The datalake's status before the change.
+     * The datahub's status before the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53178,7 +54550,7 @@ public final class UsageProto {
     private int newStatus_;
     /**
      * <pre>
-     * The datalake's status after the change.
+     * The datahub's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53188,7 +54560,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * The datalake's status after the change.
+     * The datahub's status after the change.
      * </pre>
      *
      * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53199,46 +54571,37 @@ public final class UsageProto {
       return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNRECOGNIZED : result;
     }
 
-    public static final int FAILUREREASON_FIELD_NUMBER = 4;
-    private volatile java.lang.Object failureReason_;
+    public static final int STATUSDETAILS_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails statusDetails_;
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datahub
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    public java.lang.String getFailureReason() {
-      java.lang.Object ref = failureReason_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        failureReason_ = s;
-        return s;
-      }
+    public boolean hasStatusDetails() {
+      return statusDetails_ != null;
     }
     /**
      * <pre>
-     * Describe the reason of the failure if any
+     * Describes the detailed status of the stack and the cluster of the datahub
      * </pre>
      *
-     * <code>string failureReason = 4;</code>
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
-    public com.google.protobuf.ByteString
-        getFailureReasonBytes() {
-      java.lang.Object ref = failureReason_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        failureReason_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getStatusDetails() {
+      return statusDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance() : statusDetails_;
+    }
+    /**
+     * <pre>
+     * Describes the detailed status of the stack and the cluster of the datahub
+     * </pre>
+     *
+     * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder() {
+      return getStatusDetails();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -53264,8 +54627,8 @@ public final class UsageProto {
       if (newStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET.getNumber()) {
         output.writeEnum(3, newStatus_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, failureReason_);
+      if (statusDetails_ != null) {
+        output.writeMessage(4, getStatusDetails());
       }
       unknownFields.writeTo(output);
     }
@@ -53288,8 +54651,9 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, newStatus_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, failureReason_);
+      if (statusDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getStatusDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -53314,8 +54678,11 @@ public final class UsageProto {
       }
       result = result && oldStatus_ == other.oldStatus_;
       result = result && newStatus_ == other.newStatus_;
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
+      result = result && (hasStatusDetails() == other.hasStatusDetails());
+      if (hasStatusDetails()) {
+        result = result && getStatusDetails()
+            .equals(other.getStatusDetails());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -53335,8 +54702,10 @@ public final class UsageProto {
       hash = (53 * hash) + oldStatus_;
       hash = (37 * hash) + NEWSTATUS_FIELD_NUMBER;
       hash = (53 * hash) + newStatus_;
-      hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
-      hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasStatusDetails()) {
+        hash = (37 * hash) + STATUSDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getStatusDetails().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -53434,7 +54803,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Generated when Datalake status has changed
+     * Generated when Datahub status has changed
      * </pre>
      *
      * Protobuf type {@code usage.CDPDatahubStatusChanged}
@@ -53484,8 +54853,12 @@ public final class UsageProto {
 
         newStatus_ = 0;
 
-        failureReason_ = "";
-
+        if (statusDetailsBuilder_ == null) {
+          statusDetails_ = null;
+        } else {
+          statusDetails_ = null;
+          statusDetailsBuilder_ = null;
+        }
         return this;
       }
 
@@ -53519,7 +54892,11 @@ public final class UsageProto {
         }
         result.oldStatus_ = oldStatus_;
         result.newStatus_ = newStatus_;
-        result.failureReason_ = failureReason_;
+        if (statusDetailsBuilder_ == null) {
+          result.statusDetails_ = statusDetails_;
+        } else {
+          result.statusDetails_ = statusDetailsBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -53577,9 +54954,8 @@ public final class UsageProto {
         if (other.newStatus_ != 0) {
           setNewStatusValue(other.getNewStatusValue());
         }
-        if (!other.getFailureReason().isEmpty()) {
-          failureReason_ = other.failureReason_;
-          onChanged();
+        if (other.hasStatusDetails()) {
+          mergeStatusDetails(other.getStatusDetails());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -53766,7 +55142,7 @@ public final class UsageProto {
       private int oldStatus_ = 0;
       /**
        * <pre>
-       * The datalake's status before the change.
+       * The datahub's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53776,7 +55152,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status before the change.
+       * The datahub's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53788,7 +55164,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status before the change.
+       * The datahub's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53800,7 +55176,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status before the change.
+       * The datahub's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53816,7 +55192,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status before the change.
+       * The datahub's status before the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value oldStatus = 2;</code>
@@ -53831,7 +55207,7 @@ public final class UsageProto {
       private int newStatus_ = 0;
       /**
        * <pre>
-       * The datalake's status after the change.
+       * The datahub's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53841,7 +55217,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status after the change.
+       * The datahub's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53853,7 +55229,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status after the change.
+       * The datahub's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53865,7 +55241,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status after the change.
+       * The datahub's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53881,7 +55257,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * The datalake's status after the change.
+       * The datahub's status after the change.
        * </pre>
        *
        * <code>.usage.CDPClusterStatus.Value newStatus = 3;</code>
@@ -53893,93 +55269,157 @@ public final class UsageProto {
         return this;
       }
 
-      private java.lang.Object failureReason_ = "";
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails statusDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder> statusDetailsBuilder_;
       /**
        * <pre>
-       * Describe the reason of the failure if any
+       * Describes the detailed status of the stack and the cluster of the datahub
        * </pre>
        *
-       * <code>string failureReason = 4;</code>
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
        */
-      public java.lang.String getFailureReason() {
-        java.lang.Object ref = failureReason_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          failureReason_ = s;
-          return s;
+      public boolean hasStatusDetails() {
+        return statusDetailsBuilder_ != null || statusDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datahub
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails getStatusDetails() {
+        if (statusDetailsBuilder_ == null) {
+          return statusDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance() : statusDetails_;
         } else {
-          return (java.lang.String) ref;
+          return statusDetailsBuilder_.getMessage();
         }
       }
       /**
        * <pre>
-       * Describe the reason of the failure if any
+       * Describes the detailed status of the stack and the cluster of the datahub
        * </pre>
        *
-       * <code>string failureReason = 4;</code>
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
        */
-      public com.google.protobuf.ByteString
-          getFailureReasonBytes() {
-        java.lang.Object ref = failureReason_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          failureReason_ = b;
-          return b;
+      public Builder setStatusDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails value) {
+        if (statusDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          statusDetails_ = value;
+          onChanged();
         } else {
-          return (com.google.protobuf.ByteString) ref;
+          statusDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datahub
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public Builder setStatusDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder builderForValue) {
+        if (statusDetailsBuilder_ == null) {
+          statusDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          statusDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datahub
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public Builder mergeStatusDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails value) {
+        if (statusDetailsBuilder_ == null) {
+          if (statusDetails_ != null) {
+            statusDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.newBuilder(statusDetails_).mergeFrom(value).buildPartial();
+          } else {
+            statusDetails_ = value;
+          }
+          onChanged();
+        } else {
+          statusDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datahub
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public Builder clearStatusDetails() {
+        if (statusDetailsBuilder_ == null) {
+          statusDetails_ = null;
+          onChanged();
+        } else {
+          statusDetails_ = null;
+          statusDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datahub
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder getStatusDetailsBuilder() {
+        
+        onChanged();
+        return getStatusDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Describes the detailed status of the stack and the cluster of the datahub
+       * </pre>
+       *
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder() {
+        if (statusDetailsBuilder_ != null) {
+          return statusDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return statusDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.getDefaultInstance() : statusDetails_;
         }
       }
       /**
        * <pre>
-       * Describe the reason of the failure if any
+       * Describes the detailed status of the stack and the cluster of the datahub
        * </pre>
        *
-       * <code>string failureReason = 4;</code>
+       * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
        */
-      public Builder setFailureReason(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        failureReason_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Describe the reason of the failure if any
-       * </pre>
-       *
-       * <code>string failureReason = 4;</code>
-       */
-      public Builder clearFailureReason() {
-        
-        failureReason_ = getDefaultInstance().getFailureReason();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Describe the reason of the failure if any
-       * </pre>
-       *
-       * <code>string failureReason = 4;</code>
-       */
-      public Builder setFailureReasonBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        failureReason_ = value;
-        onChanged();
-        return this;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder> 
+          getStatusDetailsFieldBuilder() {
+        if (statusDetailsBuilder_ == null) {
+          statusDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder>(
+                  getStatusDetails(),
+                  getParentForChildren(),
+                  isClean());
+          statusDetails_ = null;
+        }
+        return statusDetailsBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -57025,6 +58465,11 @@ public final class UsageProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_CDPClusterDetails_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPStatusDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPStatusDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_CDPDatalakeRequested_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -57298,25 +58743,30 @@ public final class UsageProto {
       "ils\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDPClu" +
       "sterShape\0220\n\016versionDetails\030\002 \001(\0132\030.usag" +
       "e.CDPVersionDetails\022,\n\014imageDetails\030\003 \001(" +
-      "\0132\026.usage.CDPImageDetails\"\226\001\n\024CDPDatalak" +
-      "eRequested\0224\n\020operationDetails\030\001 \001(\0132\032.u" +
-      "sage.CDPOperationDetails\022\026\n\016environmentC" +
-      "rn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage" +
-      ".CDPClusterDetails\"\313\001\n\030CDPDatalakeStatus" +
-      "Changed\0224\n\020operationDetails\030\001 \001(\0132\032.usag" +
-      "e.CDPOperationDetails\0220\n\toldStatus\030\002 \001(\016" +
-      "2\035.usage.CDPClusterStatus.Value\0220\n\tnewSt" +
-      "atus\030\003 \001(\0162\035.usage.CDPClusterStatus.Valu" +
-      "e\022\025\n\rfailureReason\030\004 \001(\t\"\225\001\n\023CDPDatahubR" +
-      "equested\0224\n\020operationDetails\030\001 \001(\0132\032.usa" +
-      "ge.CDPOperationDetails\022\026\n\016environmentCrn" +
-      "\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.C" +
-      "DPClusterDetails\"\312\001\n\027CDPDatahubStatusCha" +
-      "nged\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
-      "DPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035." +
-      "usage.CDPClusterStatus.Value\0220\n\tnewStatu" +
-      "s\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022\025" +
-      "\n\rfailureReason\030\004 \001(\t\"y\n\016CDPSyncDetails\022" +
+      "\0132\026.usage.CDPImageDetails\"\223\001\n\020CDPStatusD" +
+      "etails\022\023\n\013stackStatus\030\001 \001(\t\022\033\n\023stackDeta" +
+      "iledStatus\030\002 \001(\t\022\031\n\021stackStatusReason\030\003 " +
+      "\001(\t\022\025\n\rclusterStatus\030\004 \001(\t\022\033\n\023clusterSta" +
+      "tusReason\030\005 \001(\t\"\226\001\n\024CDPDatalakeRequested" +
+      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
+      "erationDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220" +
+      "\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPCluste" +
+      "rDetails\"\344\001\n\030CDPDatalakeStatusChanged\0224\n" +
+      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
+      "tionDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage.C" +
+      "DPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(\016" +
+      "2\035.usage.CDPClusterStatus.Value\022.\n\rstatu" +
+      "sDetails\030\004 \001(\0132\027.usage.CDPStatusDetails\"" +
+      "\225\001\n\023CDPDatahubRequested\0224\n\020operationDeta" +
+      "ils\030\001 \001(\0132\032.usage.CDPOperationDetails\022\026\n" +
+      "\016environmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030" +
+      "\003 \001(\0132\030.usage.CDPClusterDetails\"\343\001\n\027CDPD" +
+      "atahubStatusChanged\0224\n\020operationDetails\030" +
+      "\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\told" +
+      "Status\030\002 \001(\0162\035.usage.CDPClusterStatus.Va" +
+      "lue\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPCluste" +
+      "rStatus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.u" +
+      "sage.CDPStatusDetails\"y\n\016CDPSyncDetails\022" +
       "\016\n\006status\030\001 \001(\t\022\026\n\016detailedStatus\030\002 \001(\t\022" +
       "\036\n\026clusterCreationStarted\030\003 \001(\004\022\037\n\027clust" +
       "erCreationFinished\030\004 \001(\004\"s\n\017CDPDatalakeS" +
@@ -57587,44 +59037,50 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterDetails_descriptor,
         new java.lang.String[] { "ClusterShape", "VersionDetails", "ImageDetails", });
-    internal_static_usage_CDPDatalakeRequested_descriptor =
+    internal_static_usage_CDPStatusDetails_descriptor =
       getDescriptor().getMessageTypes().get(41);
+    internal_static_usage_CDPStatusDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPStatusDetails_descriptor,
+        new java.lang.String[] { "StackStatus", "StackDetailedStatus", "StackStatusReason", "ClusterStatus", "ClusterStatusReason", });
+    internal_static_usage_CDPDatalakeRequested_descriptor =
+      getDescriptor().getMessageTypes().get(42);
     internal_static_usage_CDPDatalakeRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", });
     internal_static_usage_CDPDatalakeStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(42);
+      getDescriptor().getMessageTypes().get(43);
     internal_static_usage_CDPDatalakeStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeStatusChanged_descriptor,
-        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "FailureReason", });
+        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
     internal_static_usage_CDPDatahubRequested_descriptor =
-      getDescriptor().getMessageTypes().get(43);
+      getDescriptor().getMessageTypes().get(44);
     internal_static_usage_CDPDatahubRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", });
     internal_static_usage_CDPDatahubStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(44);
+      getDescriptor().getMessageTypes().get(45);
     internal_static_usage_CDPDatahubStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubStatusChanged_descriptor,
-        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "FailureReason", });
+        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
     internal_static_usage_CDPSyncDetails_descriptor =
-      getDescriptor().getMessageTypes().get(45);
+      getDescriptor().getMessageTypes().get(46);
     internal_static_usage_CDPSyncDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPSyncDetails_descriptor,
         new java.lang.String[] { "Status", "DetailedStatus", "ClusterCreationStarted", "ClusterCreationFinished", });
     internal_static_usage_CDPDatalakeSync_descriptor =
-      getDescriptor().getMessageTypes().get(46);
+      getDescriptor().getMessageTypes().get(47);
     internal_static_usage_CDPDatalakeSync_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeSync_descriptor,
         new java.lang.String[] { "OperationDetails", "SyncDetails", });
     internal_static_usage_CDPDatahubSync_descriptor =
-      getDescriptor().getMessageTypes().get(47);
+      getDescriptor().getMessageTypes().get(48);
     internal_static_usage_CDPDatahubSync_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubSync_descriptor,
