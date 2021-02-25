@@ -14,6 +14,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
@@ -283,6 +284,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.efs.enable}")
     private boolean enableDataLakeEfs;
+
+    @Value("${auth.mock.datalake.customimage.enable}")
+    private boolean enableDataLakeCustomImage;
 
     @Value("${auth.mock.differentdatahubversionthandatalake.enabled}")
     private boolean enableDifferentDataHubVersionThanDataLake;
@@ -599,6 +603,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDataLakeEfs) {
             builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_AWS_EFS));
+        }
+        if (enableDataLakeCustomImage) {
+            builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_CUSTOM_IMAGE));
         }
         if (enableDifferentDataHubVersionThanDataLake) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE));
