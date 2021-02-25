@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.config.GrpcCcmV2Config;
 
+import java.util.Optional;
+
 @Component
 public class CcmV2ManagementClient {
 
@@ -45,13 +47,16 @@ public class CcmV2ManagementClient {
                 });
     }
 
-    public InvertingProxyAgent registerInvertingProxyAgent(String requestId, String accountId, String domainName, String keyId) {
+    public InvertingProxyAgent registerInvertingProxyAgent(String requestId, String accountId, Optional<String> environmentCrnOpt,
+        String domainName, String keyId) {
         return getRetryTemplate().execute(
                 retryContext -> {
-                    LOGGER.debug("Registering Agent for accountId '{}', domainName '{}'", accountId, domainName);
-                    InvertingProxyAgent invertingProxyAgent = grpcCcmV2Client.registerAgent(requestId, accountId, domainName, keyId,
-                            ThreadBasedUserCrnProvider.getUserCrn());
-                    LOGGER.debug("Registered Agent for accountId '{}', domainName '{}', invertingProxyAgent '{}'", accountId, domainName, invertingProxyAgent);
+                    LOGGER.debug("Registering Agent for accountId '{}', environmentCrnOpt: '{}', domainName '{}'",
+                            accountId, environmentCrnOpt, domainName);
+                    InvertingProxyAgent invertingProxyAgent = grpcCcmV2Client.registerAgent(requestId, accountId, environmentCrnOpt,
+                            domainName, keyId, ThreadBasedUserCrnProvider.getUserCrn());
+                    LOGGER.debug("Registered Agent for accountId '{}', environmentCrnOpt: '{}', domainName '{}', invertingProxyAgent '{}'",
+                            accountId, environmentCrnOpt, domainName, invertingProxyAgent);
                     return invertingProxyAgent;
                 },
                 retryExhausted -> {

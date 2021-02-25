@@ -27,6 +27,8 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.opentracing.Tracer;
 
+import java.util.Optional;
+
 @Component
 public class GrpcCcmV2Client {
 
@@ -51,17 +53,18 @@ public class GrpcCcmV2Client {
         }
     }
 
-    public InvertingProxyAgent registerAgent(String requestId, String accountId, String domainName, String keyId, String actorCrn) {
+    public InvertingProxyAgent registerAgent(String requestId, String accountId, Optional<String> environmentCrnOpt, String domainName,
+        String keyId, String actorCrn) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ClusterConnectivityManagementV2BlockingStub client = makeClient(channelWrapper.getChannel(), requestId, actorCrn);
-            RegisterAgentRequest registerAgentRequest =  RegisterAgentRequest.newBuilder()
-                    .setDomainName(domainName)
+            RegisterAgentRequest.Builder registerAgentRequestBuilder =  RegisterAgentRequest.newBuilder()
                     .setAccountId(accountId)
-                    .setKeyId(keyId)
-                    .build();
-
-            LOGGER.debug("Calling registerAgent with params accountId: '{}', domainName: '{}', keyId:'{}' ",
-                    accountId, domainName, keyId);
+                    .setDomainName(domainName)
+                    .setKeyId(keyId);
+            environmentCrnOpt.ifPresent(environmentCrn -> registerAgentRequestBuilder.setEnvironmentCrn(environmentCrn));
+            RegisterAgentRequest registerAgentRequest = registerAgentRequestBuilder.build();
+            LOGGER.debug("Calling registerAgent with params accountId: '{}', environmentCrnOpt: '{}', domainName: '{}', keyId:'{}' ",
+                    accountId, environmentCrnOpt, domainName, keyId);
             RegisterAgentResponse registerAgentResponse = client.registerAgent(registerAgentRequest);
             return registerAgentResponse.getInvertingProxyAgent();
         }

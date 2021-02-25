@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
+import java.util.Optional;
+
 @Component
 public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
 
@@ -26,18 +28,20 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
     @Inject
     private CcmV2ManagementClient ccmV2Client;
 
-    public CcmV2Parameters getCcmV2Parameters(@Nonnull String accountId, @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
+    public CcmV2Parameters getCcmV2Parameters(@Nonnull String accountId, @Nonnull Optional<String> environmentCrnOpt,
+        @Nonnull String clusterGatewayDomain, @Nonnull String agentKeyId) {
         String requestId = MDCBuilder.getOrGenerateRequestId();
 
         InvertingProxy invertingProxy = ccmV2Client.awaitReadyInvertingProxyForAccount(requestId, accountId);
-        InvertingProxyAgent invertingProxyAgent = ccmV2Client.registerInvertingProxyAgent(requestId, accountId, clusterGatewayDomain, agentKeyId);
+        InvertingProxyAgent invertingProxyAgent = ccmV2Client.registerInvertingProxyAgent(requestId, accountId, environmentCrnOpt,
+                clusterGatewayDomain, agentKeyId);
         validateCcmV2ConfigResponse(invertingProxy, invertingProxyAgent);
 
-        LOGGER.debug("CcmV2Config successfully retrieved InvertingProxyHost : '{}', InvertingProxyStatus : '{}' InvertingProxyAgentCrn '{}'",
-                invertingProxy.getHostname(), invertingProxy.getStatus(), invertingProxyAgent.getAgentCrn());
+        LOGGER.debug("CcmV2Config successfully retrieved InvertingProxyHost: '{}', InvertingProxyStatus: '{}', InvertingProxyAgentCrn: '{}', " +
+                        "EnvironmentCrnOpt: '{}'", invertingProxy.getHostname(), invertingProxy.getStatus(),
+                invertingProxyAgent.getAgentCrn(), Optional.of(invertingProxyAgent.getEnvironmentCrn()));
 
-        return new DefaultCcmV2Parameters(invertingProxy.getHostname(), invertingProxy.getCertificate(),
-                invertingProxyAgent.getAgentCrn(), agentKeyId,
+        return new DefaultCcmV2Parameters(invertingProxy.getHostname(), invertingProxy.getCertificate(), invertingProxyAgent.getAgentCrn(), agentKeyId,
                 invertingProxyAgent.getEncipheredPrivateKey(), invertingProxyAgent.getCertificate());
     }
 
