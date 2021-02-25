@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
@@ -65,6 +66,8 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
+import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
+import com.sequenceiq.common.api.node.status.response.SaltStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -140,6 +143,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Inject
     private DataHubFiltering dataHubFiltering;
+
+    @Inject
+    private NodeStatusService nodeStatusService;
 
     @Override
     @FilterListBasedOnPermissions(action = DESCRIBE_DATAHUB, filter = DataHubFiltering.class)
@@ -560,5 +566,29 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     private Object getCreateAWSClusterRequest(StackV4Request stackV4Request) {
         return delegatingRequestToCliRequestConverter.convertStack(stackV4Request);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public NodeStatusResponse getMeteringReport(@ResourceCrn String stackCrn) {
+        return nodeStatusService.getMeteringReport(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public NodeStatusResponse getNetworkReport(@ResourceCrn String stackCrn) {
+        return nodeStatusService.getNetworkReport(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public NodeStatusResponse getServicesReport(@ResourceCrn String stackCrn) {
+        return nodeStatusService.getServicesReport(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public SaltStatusResponse getSaltReport(@ResourceCrn String stackCrn) {
+        return nodeStatusService.getSaltReport(stackCrn);
     }
 }
