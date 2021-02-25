@@ -167,7 +167,7 @@ public class LoadBalancerConfigService {
         }
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if (getSupportedPlatforms().contains(stack.getCloudPlatform()) && (loadBalancerFlagEnabled || isLoadBalancerEnabled(stack.getType(), environment))) {
+        if ((loadBalancerFlagEnabled || isLoadBalancerEnabled(stack.getType(), environment)) && getSupportedPlatforms().contains(stack.getCloudPlatform())) {
             if (!loadBalancerFlagEnabled) {
                 LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
             } else {
