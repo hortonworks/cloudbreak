@@ -825,4 +825,22 @@ class GatewayPublicEndpointManagementServiceTest {
                 .deleteDnsEntryWithIp(eq(USER_CRN), eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(ip)));
     }
+
+    @Test
+    void testSkipLoadBalancersWithMissingEndpoints() {
+        String validEndpoint = "valid-endpoint";
+        LoadBalancer nullEndpointLb = new LoadBalancer();
+        LoadBalancer emptyEndpointLb = new LoadBalancer();
+        emptyEndpointLb.setEndpoint("");
+        LoadBalancer validEndpointLb = new LoadBalancer();
+        emptyEndpointLb.setEndpoint(validEndpoint);
+        Stack stack = new Stack();
+        stack.setId(1L);
+
+        when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(nullEndpointLb, emptyEndpointLb, validEndpointLb));
+
+        Set<String> loadBalancerEndpoints = underTest.getLoadBalancerNamesForStack(stack);
+
+        Assertions.assertEquals(Set.of(validEndpoint), loadBalancerEndpoints);
+    }
 }
