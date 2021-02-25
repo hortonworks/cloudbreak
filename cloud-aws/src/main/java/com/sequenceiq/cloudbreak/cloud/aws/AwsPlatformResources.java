@@ -341,8 +341,10 @@ public class AwsPlatformResources implements PlatformResources {
 
         DescribeRegionsResult describeRegionsResult = describeRegionsResult(ec2Client);
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
-
-        for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
+        List<com.amazonaws.services.ec2.model.Region> awsRegions = describeRegionsResult.getRegions().stream()
+                .filter(awsEc2Region -> RegionUtils.getRegion(awsEc2Region.getRegionName()) != null)
+                .collect(Collectors.toList());
+        for (com.amazonaws.services.ec2.model.Region awsRegion : awsRegions) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
                 DescribeAvailabilityZonesResult describeAvailabilityZonesResult = describeAvailabilityZonesResult(ec2Client, awsRegion);
 
