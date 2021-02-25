@@ -61,6 +61,7 @@ public class LaunchConfigurationMapperImpl implements LaunchConfigurationMapper 
         createLaunchConfigurationRequest.setEbsOptimized( launchConfiguration.getEbsOptimized() );
         createLaunchConfigurationRequest.setAssociatePublicIpAddress( launchConfiguration.getAssociatePublicIpAddress() );
         createLaunchConfigurationRequest.setPlacementTenancy( emptyToNullStringMapper.map( launchConfiguration.getPlacementTenancy() ) );
+        createLaunchConfigurationRequest.setMetadataOptions( launchConfiguration.getMetadataOptions() );
 
         return createLaunchConfigurationRequest;
     }
