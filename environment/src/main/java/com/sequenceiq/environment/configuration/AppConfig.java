@@ -17,12 +17,14 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
+
+import io.opentracing.Tracer;
 
 @Configuration
 @EnableRetry
@@ -39,6 +41,9 @@ public class AppConfig {
 
     @Inject
     private List<EnvironmentParametersConverter> environmentParametersConverters;
+
+    @Inject
+    private Tracer tracer;
 
     @Value("${rest.debug:false}")
     private boolean restDebug;
@@ -100,7 +105,7 @@ public class AppConfig {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
         executor.initialize();
         return executor;
     }

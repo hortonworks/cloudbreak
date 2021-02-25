@@ -44,7 +44,7 @@ import org.springframework.web.filter.GenericFilterBean;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.TracingAndMdcCopyingTaskDecorator;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -55,6 +55,8 @@ import com.sequenceiq.environment.client.internal.EnvironmentApiClientParams;
 import com.sequenceiq.freeipa.api.client.internal.FreeIpaApiClientParams;
 import com.sequenceiq.redbeams.client.internal.RedbeamsApiClientParams;
 import com.sequenceiq.sdx.client.internal.SdxApiClientParams;
+
+import io.opentracing.Tracer;
 
 @Configuration
 @EnableRetry
@@ -114,6 +116,9 @@ public class AppConfig implements ResourceLoaderAware {
     @Inject
     @Named("sdxServerUrl")
     private String sdxServerUrl;
+
+    @Inject
+    private Tracer tracer;
 
     @Inject
     private List<EnvironmentNetworkConverter> environmentNetworkConverters;
@@ -179,7 +184,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
         executor.initialize();
@@ -192,7 +197,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
-        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
+        executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
         executor.initialize();

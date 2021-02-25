@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +40,7 @@ public class CloudFailureHandler {
     private AsyncTaskExecutor resourceBuilderExecutor;
 
     @Inject
-    private ApplicationContext applicationContext;
+    private ResourceActionFactory resourceActionFactory;
 
     public void rollbackIfNecessary(CloudFailureContext cloudFailureContext, List<CloudResourceStatus> failuresList, List<CloudResourceStatus> resourceStatuses,
             Group group, ResourceBuilders resourceBuilders, Integer fullNodeCount) {
@@ -137,9 +136,10 @@ public class CloudFailureHandler {
                 for (CloudResourceStatus cloudResourceStatus : statuses) {
                     try {
                         if (compute.get(i).resourceType().equals(cloudResourceStatus.getCloudResource().getType())) {
-                            ResourceDeleteThread thread =
-                                    createThread(ResourceDeleteThread.NAME, ctx, auth, cloudResourceStatus.getCloudResource(), compute.get(i), false);
-                            Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
+                            ResourceDeletionCallablePayload payload = new ResourceDeletionCallablePayload(
+                                    ctx, auth, cloudResourceStatus.getCloudResource(), compute.get(i), false);
+                            ResourceDeletionCallable deletionCallable = resourceActionFactory.buildDeletionCallable(payload);
+                            Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(deletionCallable);
                             futures.add(future);
                             for (Future<ResourceRequestResult<List<CloudResourceStatus>>> future1 : futures) {
                                 future1.get();
@@ -163,10 +163,6 @@ public class CloudFailureHandler {
             }
         }
         return instanceTemplates;
-    }
-
-    private <T> T createThread(String name, Object... args) {
-        return (T) applicationContext.getBean(name, args);
     }
 
     private void throwRolledbackException(List<CloudResourceStatus> statuses) {

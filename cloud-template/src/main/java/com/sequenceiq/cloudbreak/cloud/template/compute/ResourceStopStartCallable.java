@@ -8,8 +8,6 @@ import java.util.concurrent.Callable;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -19,13 +17,9 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
-@Component(ResourceStopStartThread.NAME)
-@Scope("prototype")
-public class ResourceStopStartThread implements Callable<ResourceRequestResult<List<CloudVmInstanceStatus>>> {
+public class ResourceStopStartCallable implements Callable<ResourceRequestResult<List<CloudVmInstanceStatus>>> {
 
-    public static final String NAME = "resourceStopStartThread";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceStopStartThread.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceStopStartCallable.class);
 
     private final ResourceBuilderContext context;
 
@@ -35,12 +29,11 @@ public class ResourceStopStartThread implements Callable<ResourceRequestResult<L
 
     private final ComputeResourceBuilder<ResourceBuilderContext> builder;
 
-    public ResourceStopStartThread(ResourceBuilderContext context, AuthenticatedContext auth,
-            List<CloudInstance> instances, ComputeResourceBuilder<ResourceBuilderContext> builder) {
-        this.context = context;
-        this.auth = auth;
-        this.instances = instances;
-        this.builder = builder;
+    public ResourceStopStartCallable(ResourceStopStartCallablePayload payload) {
+        this.context = payload.getContext();
+        this.auth = payload.getAuth();
+        this.instances = payload.getInstances();
+        this.builder = payload.getBuilder();
     }
 
     @Override
