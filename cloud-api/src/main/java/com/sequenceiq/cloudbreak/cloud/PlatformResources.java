@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 
@@ -24,6 +25,7 @@ public interface PlatformResources {
 
     /**
      * Return the networks in the defined region
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement (vpcId = will query only that vpdId)
      * @return the {@link CloudNetworks} contains every vpc per region
@@ -32,6 +34,7 @@ public interface PlatformResources {
 
     /**
      * Return the sshkeys in the defined region
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudSshKeys} contains every sshkey per region
@@ -40,6 +43,7 @@ public interface PlatformResources {
 
     /**
      * Return the securitygroup in the defined region
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudSecurityGroups} contains every securitygroup per region
@@ -48,6 +52,7 @@ public interface PlatformResources {
 
     /**
      * Return the regions
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region specific region (if null then the method will query every region)
      * @param filters the filter statement
      * @param availabilityZonesNeeded Specify whether fetching availability zones is necessary for the caller.
@@ -58,6 +63,7 @@ public interface PlatformResources {
 
     /**
      * Return the virtual machines in the defined region
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
@@ -66,6 +72,7 @@ public interface PlatformResources {
 
     /**
      * Return the virtual machines in the defined region
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
@@ -76,6 +83,7 @@ public interface PlatformResources {
 
     /**
      * Return the gateways
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region specific region (if null then the method will query every gateway)
      * @param filters the filter statement
      * @return the {@link CloudGateWays} contains every gateway per region
@@ -84,6 +92,7 @@ public interface PlatformResources {
 
     /**
      * Return the ip pool
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region specific region (if null then the method will query ip pool)
      * @param filters the filter statement
      * @return the {@link CloudIpPools} contains every ip pool per region
@@ -92,6 +101,7 @@ public interface PlatformResources {
 
     /**
      * Return the accessConfigs
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudAccessConfigs} contains every accessrole
@@ -100,6 +110,7 @@ public interface PlatformResources {
 
     /**
      * Return the encryptionKeys
+     * @param cloudCredential credentials to connect to the cloud provider
      * @param region region of the resources (if null then the method will query every region)
      * @param filters the filter statement
      * @return the {@link CloudEncryptionKeys} contains every encryption key
@@ -124,4 +135,17 @@ public interface PlatformResources {
     default boolean regionMatch(String actualRegion, Region expectedRegion) {
         return expectedRegion == null || Strings.isNullOrEmpty(expectedRegion.value()) || actualRegion.equals(expectedRegion.value());
     }
+
+    /**
+     * Queries the general (i.e. not server-specific) SSL root certificates for database servers available in the requested region.
+     * @param cloudCredential credentials to connect to the cloud provider; must not be {@code null}
+     * @param region region of the resources; must not be {@code null}
+     * @return the {@link CloudDatabaseServerSslCertificates} instance containing every SSL certificate for the specified region; never {@code null};
+     *         the set returned by {@link CloudDatabaseServerSslCertificates#getSslCertificates()} may be empty
+     * @throws NullPointerException if either argument is {@code null}
+     */
+    default CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
 }

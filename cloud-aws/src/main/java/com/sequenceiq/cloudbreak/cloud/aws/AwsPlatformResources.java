@@ -14,6 +14,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.cloud.service.CloudParameterService.ACCESS_CONFIG_TYPE;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -87,6 +88,8 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.amazonaws.services.rds.model.Certificate;
+import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
@@ -95,11 +98,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
-import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -130,6 +133,9 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
@@ -138,6 +144,7 @@ import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSshKeyFilterVi
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceVpcFilterView;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 
@@ -891,7 +898,7 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         List<CloudNoSqlTable> noSqlTables = new ArrayList<>();
-        AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDB(cloudCredential, region);
+        AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDBClient(cloudCredential, region);
         ListTablesRequest listTablesRequest = new ListTablesRequest();
         ListTablesResult listTablesResult = null;
         boolean first = true;
@@ -911,13 +918,31 @@ public class AwsPlatformResources implements PlatformResources {
         return new CloudResourceGroups();
     }
 
+    @Override
+    public CloudDatabaseServerSslCertificates databaseServerGeneralSslRootCertificates(CloudCredential cloudCredential, Region region) {
+        requireNonNull(cloudCredential);
+        requireNonNull(region);
+        AmazonRdsClient rdsClient = getAmazonRdsClient(cloudCredential, region);
+        List<Certificate> certificates = rdsClient.describeCertificates(new DescribeCertificatesRequest());
+        Set<CloudDatabaseServerSslCertificate> sslCertificates = certificates.stream()
+                .map(Certificate::getCertificateIdentifier)
+                .map(id -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, id))
+                .collect(Collectors.toSet());
+        return new CloudDatabaseServerSslCertificates(sslCertificates);
+    }
+
     Set<Region> getEnabledRegions() {
         return enabledRegions;
     }
 
-    private AmazonDynamoDBClient getAmazonDynamoDB(CloudCredential cloudCredential, Region region) {
+    private AmazonDynamoDBClient getAmazonDynamoDBClient(CloudCredential cloudCredential, Region region) {
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         return awsClient.createDynamoDbClient(awsCredentialView, region.value());
+    }
+
+    private AmazonRdsClient getAmazonRdsClient(CloudCredential cloudCredential, Region region) {
+        AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+        return awsClient.createRdsClient(awsCredentialView, region.value());
     }
 
     private Set<CloudAccessConfig> getAccessConfigByInstanceProfile(AmazonIdentityManagementClient client) {

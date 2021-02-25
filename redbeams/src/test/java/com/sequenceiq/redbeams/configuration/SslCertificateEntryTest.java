@@ -12,6 +12,8 @@ import org.mockito.Mockito;
 
 class SslCertificateEntryTest {
 
+    private static final String CLOUD_PROVIDER_IDENTIFIER = "certID";
+
     private static final String CERT_PEM = "foo";
 
     private static final String CERT_PEM_2 = "bar";
@@ -26,21 +28,22 @@ class SslCertificateEntryTest {
 
     static Object[][] constructorTestWhenNPEDataProvider() {
         return new Object[][]{
-                // testCaseName version certPem x509Cert
-                {"0, null, x509Cert", VERSION_0, null, X_509_CERT},
-                {"0, certPem, null", VERSION_0, CERT_PEM, null},
+                // testCaseName version cloudProviderIdentifier certPem x509Cert
+                {"0, null, certPem, x509Cert", VERSION_0, null, CERT_PEM, X_509_CERT},
+                {"0, cloudProviderIdentifier, null, x509Cert", VERSION_0, CLOUD_PROVIDER_IDENTIFIER, null, X_509_CERT},
+                {"0, cloudProviderIdentifier, certPem, null", VERSION_0, CLOUD_PROVIDER_IDENTIFIER, CERT_PEM, null},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("constructorTestWhenNPEDataProvider")
-    void constructorTestWhenNPE(String testCaseName, int version, String certPem, X509Certificate x509Cert) {
-        assertThrows(NullPointerException.class, () -> new SslCertificateEntry(version, certPem, x509Cert));
+    void constructorTestWhenNPE(String testCaseName, int version, String cloudProviderIdentifier, String certPem, X509Certificate x509Cert) {
+        assertThrows(NullPointerException.class, () -> new SslCertificateEntry(version, cloudProviderIdentifier, certPem, x509Cert));
     }
 
     @Test
     void constructorTestWhenSuccess() {
-        SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(VERSION_123, CERT_PEM, X_509_CERT);
+        SslCertificateEntry sslCertificateEntry = new SslCertificateEntry(VERSION_123, CLOUD_PROVIDER_IDENTIFIER, CERT_PEM, X_509_CERT);
 
         assertThat(sslCertificateEntry.getVersion()).isEqualTo(VERSION_123);
         assertThat(sslCertificateEntry.getCertPem()).isEqualTo(CERT_PEM);
@@ -52,7 +55,7 @@ class SslCertificateEntryTest {
     }
 
     private static SslCertificateEntry createSslCertificateEntry(int version, String certPem) {
-        return new SslCertificateEntry(version, certPem, X_509_CERT);
+        return new SslCertificateEntry(version, CLOUD_PROVIDER_IDENTIFIER, certPem, X_509_CERT);
     }
 
     static Object[][] equalsDataProvider() {

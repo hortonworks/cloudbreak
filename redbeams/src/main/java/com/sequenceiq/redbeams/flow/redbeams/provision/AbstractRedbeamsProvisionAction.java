@@ -49,6 +49,7 @@ public abstract class AbstractRedbeamsProvisionAction<P extends Payload>
     }
 
     @PostConstruct
+    @Override
     public void init() {
         super.init();
     }
@@ -87,4 +88,5 @@ public abstract class AbstractRedbeamsProvisionAction<P extends Payload>
     protected Object getFailurePayload(P payload, Optional<RedbeamsContext> flowContext, Exception ex) {
         return new RedbeamsFailureEvent(payload.getResourceId(), ex);
     }
+
 }

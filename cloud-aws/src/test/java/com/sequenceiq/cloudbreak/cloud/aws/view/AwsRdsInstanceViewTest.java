@@ -4,45 +4,44 @@ import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.BACKUP
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.ENGINE_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.MULTI_AZ;
 import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView.STORAGE_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Answers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Answers;
-import org.mockito.Mock;
-
+@ExtendWith(MockitoExtension.class)
 public class AwsRdsInstanceViewTest {
+
+    private static final String SSL_CERTIFICATE_IDENTIFIER = "mycert";
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private DatabaseServer server;
 
+    @InjectMocks
     private AwsRdsInstanceView underTest;
-
-    @Before
-    public void setUp() {
-        initMocks(this);
-
-        underTest = new AwsRdsInstanceView(server);
-    }
 
     @Test
     public void testAllocatedStorage() {
         when(server.getStorageSize()).thenReturn(50L);
-        assertEquals(50L, underTest.getAllocatedStorage().longValue());
+        assertEquals(50L, underTest.getAllocatedStorage());
     }
 
     @Test
     public void testBackupRetentionPeriod() {
         when(server.getParameter(BACKUP_RETENTION_PERIOD, Integer.class)).thenReturn(Integer.valueOf("3"));
-        assertEquals(3, underTest.getBackupRetentionPeriod().intValue());
+        assertEquals(3, underTest.getBackupRetentionPeriod());
     }
 
     @Test
@@ -158,4 +157,47 @@ public class AwsRdsInstanceViewTest {
         when(server.getSecurity().getCloudSecurityIds()).thenReturn(null);
         assertNull(underTest.getVPCSecurityGroups());
     }
+
+    @Test
+    void isSslCertificateIdentifierDefinedTestWhenAbsent() {
+        when(server.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn(null);
+
+        assertThat(underTest.isSslCertificateIdentifierDefined()).isFalse();
+    }
+
+    @Test
+    void isSslCertificateIdentifierDefinedTestWhenEmpty() {
+        when(server.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn("");
+
+        assertThat(underTest.isSslCertificateIdentifierDefined()).isFalse();
+    }
+
+    @Test
+    void isSslCertificateIdentifierDefinedTestWhenPresent() {
+        when(server.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn(SSL_CERTIFICATE_IDENTIFIER);
+
+        assertThat(underTest.isSslCertificateIdentifierDefined()).isTrue();
+    }
+
+    @Test
+    void getSslCertificateIdentifierTestWhenAbsent() {
+        when(server.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn(null);
+
+        assertThat(underTest.getSslCertificateIdentifier()).isNull();
+    }
+
+    @Test
+    void getSslCertificateIdentifierTestWhenEmpty() {
+        when(server.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn("");
+
+        assertThat(underTest.getSslCertificateIdentifier()).isEqualTo("");
+    }
+
+    @Test
+    void getSslCertificateIdentifierTestWhenPresent() {
+        when(server.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn(SSL_CERTIFICATE_IDENTIFIER);
+
+        assertThat(underTest.getSslCertificateIdentifier()).isEqualTo(SSL_CERTIFICATE_IDENTIFIER);
+    }
+
 }

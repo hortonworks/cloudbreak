@@ -28,6 +28,9 @@ public class SslConfigV4Response implements Serializable {
     @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_HIGHEST_AVAILABLE_VERSION)
     private int sslCertificateHighestAvailableVersion;
 
+    @ApiModelProperty(DatabaseServer.SSL_CERTIFICATE_ACTIVE_CLOUD_PROVIDER_IDENTIFIER)
+    private String sslCertificateActiveCloudProviderIdentifier;
+
     public Set<String> getSslCertificates() {
         return sslCertificates;
     }
@@ -66,6 +69,14 @@ public class SslConfigV4Response implements Serializable {
 
     public void setSslCertificateHighestAvailableVersion(int sslCertificateHighestAvailableVersion) {
         this.sslCertificateHighestAvailableVersion = sslCertificateHighestAvailableVersion;
+    }
+
+    public String getSslCertificateActiveCloudProviderIdentifier() {
+        return sslCertificateActiveCloudProviderIdentifier;
+    }
+
+    public void setSslCertificateActiveCloudProviderIdentifier(String sslCertificateActiveCloudProviderIdentifier) {
+        this.sslCertificateActiveCloudProviderIdentifier = sslCertificateActiveCloudProviderIdentifier;
     }
 
 }

@@ -62,6 +62,9 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter
                 sslConfigV4Response.setSslCertificateHighestAvailableVersion(databaseServerSslCertificateConfig.getMaxVersionByPlatform(cloudPlatform));
                 sslConfigV4Response.setSslCertificateActiveVersion(Optional.ofNullable(sslConfig.getSslCertificateActiveVersion())
                         .orElse(databaseServerSslCertificateConfig.getLegacyMaxVersionByPlatform(cloudPlatform)));
+                sslConfigV4Response.setSslCertificateActiveCloudProviderIdentifier(
+                        Optional.ofNullable(sslConfig.getSslCertificateActiveCloudProviderIdentifier())
+                                .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByPlatform(cloudPlatform)));
                 response.setSslConfig(sslConfigV4Response);
             }
         } else if (source.getHost() != null && source.getPort() != null) {

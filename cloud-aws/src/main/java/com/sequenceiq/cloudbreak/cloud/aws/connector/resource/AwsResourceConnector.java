@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
@@ -125,7 +126,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> terminateDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
             List<CloudResource> resources, PersistenceNotifier persistenceNotifier, boolean force) throws Exception {
-        DescribeDBInstancesResult describeDBInstancesResult = awsRdsStatusLookupService.getDescribeDBInstancesResult(ac, stack);
+        DescribeDBInstancesResult describeDBInstancesResult = awsRdsStatusLookupService.getDescribeDBInstancesResultForDeleteProtection(ac, stack);
         if (awsRdsStatusLookupService.isDeleteProtectionEnabled(describeDBInstancesResult)) {
             LOGGER.debug("Delete protection is enabled for DB: {}, Disabling it", stack.getDatabaseServer().getServerId());
             awsRdsModifyService.disableDeleteProtection(ac, stack);
@@ -146,6 +147,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         return awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
+    }
+
+    @Override
+    public CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return awsRdsStatusLookupService.getActiveSslRootCertificate(authenticatedContext, stack);
     }
 
     @Override

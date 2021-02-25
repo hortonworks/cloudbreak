@@ -66,9 +66,14 @@ public class RedbeamsProvisionActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                return new AllocateDatabaseServerRequest(context.getCloudContext(), context.getCloudCredential(),
-                        context.getDatabaseStack());
+                return new AllocateDatabaseServerRequest(
+                        context.getCloudContext(),
+                        context.getCloudCredential(),
+                        context.getDBStack(),
+                        context.getDatabaseStack()
+                );
             }
+
         };
     }
 
@@ -83,11 +88,14 @@ public class RedbeamsProvisionActions {
                 sendEvent(context,
                         new UpdateDatabaseServerRegistrationRequest(
                                 context.getCloudContext(),
+                                context.getCloudCredential(),
                                 context.getDBStack(),
+                                context.getDatabaseStack(),
                                 ResourceLists.transform(dbResourcesList)
                         )
                 );
             }
+
         };
     }
 

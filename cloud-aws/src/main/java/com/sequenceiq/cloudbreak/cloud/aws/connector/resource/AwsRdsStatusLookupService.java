@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
 
 @Service
 public class AwsRdsStatusLookupService {
@@ -27,6 +28,18 @@ public class AwsRdsStatusLookupService {
     private AwsClient awsClient;
 
     public ExternalDatabaseStatus getStatus(AuthenticatedContext ac, DatabaseStack dbStack) {
+        DescribeDBInstancesResult describeDBInstancesResult = getDescribeDBInstancesResultInternal(ac, dbStack, "RDS Querying ExternalDatabaseStatus",
+                "DB Instance does not exist: {}");
+
+        return describeDBInstancesResult == null ? ExternalDatabaseStatus.DELETED : describeDBInstancesResult.getDBInstances()
+                .stream()
+                .map(i -> getExternalDatabaseStatus(i.getDBInstanceStatus()))
+                .findFirst()
+                .get();
+    }
+
+    private DescribeDBInstancesResult getDescribeDBInstancesResultInternal(AuthenticatedContext ac, DatabaseStack dbStack, String preDescribeMessage,
+            String notFoundMessage) {
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
@@ -36,17 +49,26 @@ public class AwsRdsStatusLookupService {
         DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
         DescribeDBInstancesResult describeDBInstancesResult;
         try {
+            if (preDescribeMessage != null) {
+                LOGGER.debug(preDescribeMessage);
+            }
             describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
         } catch (DBInstanceNotFoundException ex) {
-            LOGGER.debug("DB Instance does not exist: {}", ex.getMessage());
-            return ExternalDatabaseStatus.DELETED;
+            LOGGER.debug(notFoundMessage, ex.getMessage());
+            describeDBInstancesResult = null;
         } catch (RuntimeException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }
+        return describeDBInstancesResult;
+    }
 
-        return describeDBInstancesResult.getDBInstances()
+    public CloudDatabaseServerSslCertificate getActiveSslRootCertificate(AuthenticatedContext ac, DatabaseStack dbStack) {
+        DescribeDBInstancesResult describeDBInstancesResult = getDescribeDBInstancesResultInternal(ac, dbStack, "RDS Fetching active SSL root certificate",
+                "DB Instance does not exist: {}");
+
+        return describeDBInstancesResult == null ? null : describeDBInstancesResult.getDBInstances()
                 .stream()
-                .map(i -> getExternalDatabaseStatus(i.getDBInstanceStatus()))
+                .map(i -> new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, i.getCACertificateIdentifier()))
                 .findFirst()
                 .get();
     }
@@ -67,26 +89,9 @@ public class AwsRdsStatusLookupService {
         return describeDBInstancesResult != null;
     }
 
-    @Nullable
-    public DescribeDBInstancesResult getDescribeDBInstancesResult(AuthenticatedContext ac, DatabaseStack dbStack) {
-        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
-        String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonRdsClient rdsClient = awsClient.createRdsClient(credentialView, regionName);
-
-        String dbInstanceIdentifier = dbStack.getDatabaseServer().getServerId();
-
-        DescribeDBInstancesRequest describeDBInstancesRequest = new DescribeDBInstancesRequest().withDBInstanceIdentifier(dbInstanceIdentifier);
-        DescribeDBInstancesResult describeDBInstancesResult;
-        try {
-            LOGGER.debug("RDS Checking if delete protection is enabled");
-            describeDBInstancesResult = rdsClient.describeDBInstances(describeDBInstancesRequest);
-        } catch (DBInstanceNotFoundException ex) {
-            LOGGER.debug("DB Instance does not exist! Therefore termination protection check is not relevant anymore: {}", ex.getMessage());
-            return null;
-        } catch (RuntimeException ex) {
-            throw new CloudConnectorException(ex.getMessage(), ex);
-        }
-        return describeDBInstancesResult;
+    public DescribeDBInstancesResult getDescribeDBInstancesResultForDeleteProtection(AuthenticatedContext ac, DatabaseStack dbStack) {
+        return getDescribeDBInstancesResultInternal(ac, dbStack, "RDS Checking if delete protection is enabled",
+                "DB Instance does not exist! Therefore termination protection check is not relevant anymore: {}");
     }
 
     private ExternalDatabaseStatus getExternalDatabaseStatus(String dbInstanceStatus) {
@@ -99,4 +104,5 @@ public class AwsRdsStatusLookupService {
             default: return ExternalDatabaseStatus.UPDATE_IN_PROGRESS;
         }
     }
+
 }

@@ -65,12 +65,14 @@ class CloudFormationTemplateBuilderDBTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
-    void buildTestWhenHavingSecurityGroupAndNoPort(String templatePath) throws IOException {
+    void buildTestWhenHavingSecurityGroupAndNoPortAndNoSslEnforcementAndNoSslCertificateIdentifier(String templatePath) throws IOException {
         //GIVEN
         String awsCloudFormationTemplate = factoryBean.getObject().getTemplate(templatePath, "UTF-8").toString();
         //WHEN
         RDSModelContext modelContext = new RDSModelContext()
                 .withHasSecurityGroup(true)
+                .withUseSslEnforcement(false)
+                .withSslCertificateIdentifierDefined(false)
                 .withTemplate(awsCloudFormationTemplate);
         String result = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -78,6 +80,7 @@ class CloudFormationTemplateBuilderDBTest {
         assertThat(result).doesNotContain("\"PortParameter\": {");
         assertThat(result).doesNotContain("\"DBParameterGroupNameParameter\": {");
         assertThat(result).doesNotContain("\"DBParameterGroupFamilyParameter\": {");
+        assertThat(result).doesNotContain("\"SslCertificateIdentifierParameter\": {");
         assertThat(result).contains("\"VPCSecurityGroupsParameter\": {");
         assertThat(result).doesNotContain("\"DBSecurityGroupNameParameter\": {");
         assertThat(result).doesNotContain("\"VPCIdParameter\": {");
@@ -87,6 +90,7 @@ class CloudFormationTemplateBuilderDBTest {
         assertThat(result).doesNotContain("\"CidrIp\" :");
         assertThat(result).doesNotContain("\"DBParameterGroup\": {");
         assertThat(result).doesNotContain("\"DBParameterGroupName\": { \"Ref\": \"DBParameterGroup\" },");
+        assertThat(result).doesNotContain("\"CACertificateIdentifier\": { \"Ref\": \"SslCertificateIdentifierParameter\" },");
         assertThat(result).doesNotContain("\"Port\": { \"Ref\": \"PortParameter\" },");
         assertThat(result).contains("\"VPCSecurityGroups\": { \"Ref\": \"VPCSecurityGroupsParameter\" }");
         assertThat(result).doesNotContain("\"VPCSecurityGroups\": [{ \"Ref\": \"VPCSecurityGroup\" }]");
@@ -95,13 +99,48 @@ class CloudFormationTemplateBuilderDBTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
-    void buildTestWhenHavingSecurityGroupAndUsingSslEnforcement(String templatePath) throws IOException {
+    void buildTestWhenHavingSecurityGroupAndNoPortAndNoSslEnforcementAndWithSslCertificateIdentifier(String templatePath) throws IOException {
+        //GIVEN
+        String awsCloudFormationTemplate = factoryBean.getObject().getTemplate(templatePath, "UTF-8").toString();
+        //WHEN
+        RDSModelContext modelContext = new RDSModelContext()
+                .withHasSecurityGroup(true)
+                .withUseSslEnforcement(false)
+                .withSslCertificateIdentifierDefined(true)
+                .withTemplate(awsCloudFormationTemplate);
+        String result = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
+        assertThat(result).doesNotContain("\"PortParameter\": {");
+        assertThat(result).doesNotContain("\"DBParameterGroupNameParameter\": {");
+        assertThat(result).doesNotContain("\"DBParameterGroupFamilyParameter\": {");
+        assertThat(result).doesNotContain("\"SslCertificateIdentifierParameter\": {");
+        assertThat(result).contains("\"VPCSecurityGroupsParameter\": {");
+        assertThat(result).doesNotContain("\"DBSecurityGroupNameParameter\": {");
+        assertThat(result).doesNotContain("\"VPCIdParameter\": {");
+        assertThat(result).doesNotContain("\"VPCSecurityGroup\": {");
+        assertThat(result).doesNotContain("\"FromPort\"");
+        assertThat(result).doesNotContain("\"ToPort\"");
+        assertThat(result).doesNotContain("\"CidrIp\" :");
+        assertThat(result).doesNotContain("\"DBParameterGroup\": {");
+        assertThat(result).doesNotContain("\"DBParameterGroupName\": { \"Ref\": \"DBParameterGroup\" },");
+        assertThat(result).doesNotContain("\"CACertificateIdentifier\": { \"Ref\": \"SslCertificateIdentifierParameter\" },");
+        assertThat(result).doesNotContain("\"Port\": { \"Ref\": \"PortParameter\" },");
+        assertThat(result).contains("\"VPCSecurityGroups\": { \"Ref\": \"VPCSecurityGroupsParameter\" }");
+        assertThat(result).doesNotContain("\"VPCSecurityGroups\": [{ \"Ref\": \"VPCSecurityGroup\" }]");
+        assertThat(result).doesNotContain("\"CreatedDBParameterGroup\": { \"Value\": { \"Ref\": \"DBParameterGroup\" } },");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    void buildTestWhenHavingSecurityGroupAndNoPortAndUsingSslEnforcementAndNoSslCertificateIdentifier(String templatePath) throws IOException {
         //GIVEN
         String awsCloudFormationTemplate = factoryBean.getObject().getTemplate(templatePath, "UTF-8").toString();
         //WHEN
         RDSModelContext modelContext = new RDSModelContext()
                 .withHasSecurityGroup(true)
                 .withUseSslEnforcement(true)
+                .withSslCertificateIdentifierDefined(false)
                 .withTemplate(awsCloudFormationTemplate);
         String result = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -109,6 +148,7 @@ class CloudFormationTemplateBuilderDBTest {
         assertThat(result).doesNotContain("\"PortParameter\": {");
         assertThat(result).contains("\"DBParameterGroupNameParameter\": {");
         assertThat(result).contains("\"DBParameterGroupFamilyParameter\": {");
+        assertThat(result).doesNotContain("\"SslCertificateIdentifierParameter\": {");
         assertThat(result).contains("\"VPCSecurityGroupsParameter\": {");
         assertThat(result).doesNotContain("\"DBSecurityGroupNameParameter\": {");
         assertThat(result).doesNotContain("\"VPCIdParameter\": {");
@@ -119,6 +159,42 @@ class CloudFormationTemplateBuilderDBTest {
         assertThat(result).contains("\"DBParameterGroup\": {");
         assertThat(result).contains("\"Parameters\": { \"rds.force_ssl\": \"1\" },");
         assertThat(result).contains("\"DBParameterGroupName\": { \"Ref\": \"DBParameterGroup\" },");
+        assertThat(result).doesNotContain("\"CACertificateIdentifier\": { \"Ref\": \"SslCertificateIdentifierParameter\" },");
+        assertThat(result).doesNotContain("\"Port\": { \"Ref\": \"PortParameter\" },");
+        assertThat(result).contains("\"VPCSecurityGroups\": { \"Ref\": \"VPCSecurityGroupsParameter\" }");
+        assertThat(result).doesNotContain("\"VPCSecurityGroups\": [{ \"Ref\": \"VPCSecurityGroup\" }]");
+        assertThat(result).contains("\"CreatedDBParameterGroup\": { \"Value\": { \"Ref\": \"DBParameterGroup\" } },");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    void buildTestWhenHavingSecurityGroupAndNoPortAndUsingSslEnforcementAndWithSslCertificateIdentifier(String templatePath) throws IOException {
+        //GIVEN
+        String awsCloudFormationTemplate = factoryBean.getObject().getTemplate(templatePath, "UTF-8").toString();
+        //WHEN
+        RDSModelContext modelContext = new RDSModelContext()
+                .withHasSecurityGroup(true)
+                .withUseSslEnforcement(true)
+                .withSslCertificateIdentifierDefined(true)
+                .withTemplate(awsCloudFormationTemplate);
+        String result = cloudFormationTemplateBuilder.build(modelContext);
+        //THEN
+        assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
+        assertThat(result).doesNotContain("\"PortParameter\": {");
+        assertThat(result).contains("\"DBParameterGroupNameParameter\": {");
+        assertThat(result).contains("\"DBParameterGroupFamilyParameter\": {");
+        assertThat(result).contains("\"SslCertificateIdentifierParameter\": {");
+        assertThat(result).contains("\"VPCSecurityGroupsParameter\": {");
+        assertThat(result).doesNotContain("\"DBSecurityGroupNameParameter\": {");
+        assertThat(result).doesNotContain("\"VPCIdParameter\": {");
+        assertThat(result).doesNotContain("\"VPCSecurityGroup\": {");
+        assertThat(result).doesNotContain("\"FromPort\"");
+        assertThat(result).doesNotContain("\"ToPort\"");
+        assertThat(result).doesNotContain("\"CidrIp\" :");
+        assertThat(result).contains("\"DBParameterGroup\": {");
+        assertThat(result).contains("\"Parameters\": { \"rds.force_ssl\": \"1\" },");
+        assertThat(result).contains("\"DBParameterGroupName\": { \"Ref\": \"DBParameterGroup\" },");
+        assertThat(result).contains("\"CACertificateIdentifier\": { \"Ref\": \"SslCertificateIdentifierParameter\" },");
         assertThat(result).doesNotContain("\"Port\": { \"Ref\": \"PortParameter\" },");
         assertThat(result).contains("\"VPCSecurityGroups\": { \"Ref\": \"VPCSecurityGroupsParameter\" }");
         assertThat(result).doesNotContain("\"VPCSecurityGroups\": [{ \"Ref\": \"VPCSecurityGroup\" }]");

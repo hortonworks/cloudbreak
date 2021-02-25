@@ -39,6 +39,12 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String CERT_ISSUER_AZURE_1 = "CN=DigiCert Global Root G2,OU=www.digicert.com,O=DigiCert Inc,C=US";
 
+    private static final String CLOUD_PROVIDER_IDENTIFIER_AWS_0 = "rds-ca-2019";
+
+    private static final String CLOUD_PROVIDER_IDENTIFIER_AZURE_0 = "BaltimoreCyberTrustRoot";
+
+    private static final String CLOUD_PROVIDER_IDENTIFIER_AZURE_1 = "DigiCertGlobalRootG2";
+
     @Inject
     private DatabaseServerSslCertificateConfig underTest;
 
@@ -97,35 +103,39 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         assertThat(certsAws).isNotNull();
         assertThat(certsAws).hasSize(SINGLE_CERT);
         assertThat(certsAws).doesNotContainNull();
-        verifyCertEntry(certsAws, VERSION_0, CERT_ISSUER_AWS_0);
+        verifyCertEntry(certsAws, VERSION_0, CERT_ISSUER_AWS_0, CLOUD_PROVIDER_IDENTIFIER_AWS_0);
 
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatformAndVersions(CloudPlatform.AZURE.name(), VERSION_0, VERSION_1);
 
         assertThat(certsAzure).isNotNull();
         assertThat(certsAzure).hasSize(TWO_CERTS);
         assertThat(certsAzure).doesNotContainNull();
-        verifyCertEntry(certsAzure, VERSION_0, CERT_ISSUER_AZURE_0);
-        verifyCertEntry(certsAzure, VERSION_1, CERT_ISSUER_AZURE_1);
+        verifyCertEntry(certsAzure, VERSION_0, CERT_ISSUER_AZURE_0, CLOUD_PROVIDER_IDENTIFIER_AZURE_0);
+        verifyCertEntry(certsAzure, VERSION_1, CERT_ISSUER_AZURE_1, CLOUD_PROVIDER_IDENTIFIER_AZURE_1);
     }
 
     @Test
     void getCertByPlatformAndVersionTest() {
-        verifyCertEntry(underTest.getCertByPlatformAndVersion(CloudPlatform.AWS.name(), VERSION_0), VERSION_0, CERT_ISSUER_AWS_0);
-        verifyCertEntry(underTest.getCertByPlatformAndVersion(CloudPlatform.AZURE.name(), VERSION_0), VERSION_0, CERT_ISSUER_AZURE_0);
-        verifyCertEntry(underTest.getCertByPlatformAndVersion(CloudPlatform.AZURE.name(), VERSION_1), VERSION_1, CERT_ISSUER_AZURE_1);
+        verifyCertEntry(underTest.getCertByPlatformAndVersion(CloudPlatform.AWS.name(), VERSION_0), VERSION_0, CERT_ISSUER_AWS_0,
+                CLOUD_PROVIDER_IDENTIFIER_AWS_0);
+        verifyCertEntry(underTest.getCertByPlatformAndVersion(CloudPlatform.AZURE.name(), VERSION_0), VERSION_0, CERT_ISSUER_AZURE_0,
+                CLOUD_PROVIDER_IDENTIFIER_AZURE_0);
+        verifyCertEntry(underTest.getCertByPlatformAndVersion(CloudPlatform.AZURE.name(), VERSION_1), VERSION_1, CERT_ISSUER_AZURE_1,
+                CLOUD_PROVIDER_IDENTIFIER_AZURE_1);
     }
 
-    void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String issuerExpected) {
+    private void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String certIssuerExpected, String cloudProviderIdentifierExpected) {
         Optional<SslCertificateEntry> cert = certs.stream()
                 .filter(e -> e.getVersion() == version)
                 .findFirst();
         assertThat(cert).isPresent();
-        verifyCertEntry(cert.get(), version, issuerExpected);
+        verifyCertEntry(cert.get(), version, certIssuerExpected, cloudProviderIdentifierExpected);
     }
 
-    void verifyCertEntry(SslCertificateEntry cert, int version, String certIssuerExpected) {
+    private void verifyCertEntry(SslCertificateEntry cert, int version, String certIssuerExpected, String cloudProviderIdentifierExpected) {
         assertThat(cert.getVersion()).isEqualTo(version);
         assertThat(cert.getCertPem()).isNotBlank();
+        assertThat(cert.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifierExpected);
 
         X509Certificate x509Cert = cert.getX509Cert();
         assertThat(x509Cert).isNotNull();
@@ -133,6 +143,16 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
         X500Principal issuerX500Principal = x509Cert.getIssuerX500Principal();
         assertThat(issuerX500Principal).isNotNull();
         assertThat(issuerX500Principal.getName()).isEqualTo(certIssuerExpected);
+    }
+
+    @Test
+    void getCertByPlatformAndCloudProviderIdentifierTest() {
+        verifyCertEntry(underTest.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_AWS_0), VERSION_0,
+                CERT_ISSUER_AWS_0, CLOUD_PROVIDER_IDENTIFIER_AWS_0);
+        verifyCertEntry(underTest.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_AZURE_0), VERSION_0,
+                CERT_ISSUER_AZURE_0, CLOUD_PROVIDER_IDENTIFIER_AZURE_0);
+        verifyCertEntry(underTest.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_AZURE_1), VERSION_1,
+                CERT_ISSUER_AZURE_1, CLOUD_PROVIDER_IDENTIFIER_AZURE_1);
     }
 
     @Configuration

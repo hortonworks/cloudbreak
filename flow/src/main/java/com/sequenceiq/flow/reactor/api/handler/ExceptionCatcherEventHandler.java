@@ -31,8 +31,9 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
             HandlerEvent handlerEvent = new HandlerEvent(event);
             sendEvent(doAccept(handlerEvent), handlerEvent);
             if (handlerEvent.getCounter() < 1) {
-                LOGGER.error("No event has been sent from {}", handlerName);
-                throw new IllegalStateException("No event has been sent from " + handlerName);
+                String message = "No event has been sent from " + handlerName;
+                LOGGER.error(message);
+                throw new IllegalStateException(message);
             }
         } catch (Exception e) {
             LOGGER.error("Something unexpected happened in handler {}", handlerName, e);
@@ -76,4 +77,5 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
             return eventCounter;
         }
     }
+
 }

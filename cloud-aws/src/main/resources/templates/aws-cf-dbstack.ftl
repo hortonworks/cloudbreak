@@ -101,6 +101,12 @@
         "Type": "String",
         "Description": "DB parameter group family"
     },
+    <#if sslCertificateIdentifierDefined>
+    "SslCertificateIdentifierParameter": {
+        "Type": "String",
+        "Description": "SSL CA certificate identifier"
+    },
+    </#if>
     </#if>
     <#if hasSecurityGroup>
     "VPCSecurityGroupsParameter": {
@@ -192,6 +198,9 @@
                 "DBInstanceIdentifier": { "Ref": "DBInstanceIdentifierParameter" },
                 <#if useSslEnforcement>
                 "DBParameterGroupName": { "Ref": "DBParameterGroup" },
+                <#if sslCertificateIdentifierDefined>
+                "CACertificateIdentifier": { "Ref": "SslCertificateIdentifierParameter" },
+                </#if>
                 </#if>
                 "DBSubnetGroupName": { "Ref": "DBSubnetGroup" },
                 "Engine": { "Ref": "EngineParameter" },

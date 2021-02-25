@@ -6,6 +6,7 @@ import java.util.List;
  * In order to integrate a Cloud provider into the Cloudbreak this interface needs to be implemented.  Loading of the Cloud provider specific code
  * is automatically done by Cloudbreak, if the class which implements this interface is on the classpath. Cloud providers implementations are
  * stored in a map in Cloudbreak and the {@link CloudPlatformAware} is used as key to identify the different implementations.
+ * @param <R> the type of resources supported by {@link #resources()}
  */
 public interface CloudConnector<R> extends CloudPlatformAware {
 
@@ -26,7 +27,7 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     /**
      * Access to the available {@link Validator}s.
      *
-     * @return the available {@link Validator}s object
+     * @return the available {@link Validator} objects
      */
     List<Validator> validators();
 
@@ -45,9 +46,9 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     ResourceConnector<R> resources();
 
     /**
-     * Access to the {@link MetadataCollector} object.
+     * Access to the {@link InstanceConnector} object.
      *
-     * @return the {@link MetadataCollector} object
+     * @return the {@link InstanceConnector} object
      */
     InstanceConnector instances();
 

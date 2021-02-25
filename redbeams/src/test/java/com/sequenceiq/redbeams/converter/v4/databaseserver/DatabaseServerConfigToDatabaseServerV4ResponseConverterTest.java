@@ -12,6 +12,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,7 +58,11 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final int CERT_ACTIVE_VERSION = 2;
 
+    private static final String CERT_ACTIVE_CLOUD_PROVIDER_IDENTIFIER = "cert-id-2";
+
     private static final int CERT_LEGACY_MAX_VERSION = 1;
+
+    private static final String CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER = "cert-id-1";
 
     private static final String CLOUD_PLATFORM = CloudPlatform.AWS.name();
 
@@ -233,13 +239,23 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(sslConfigV4Response.getSslCertificateType()).isEqualTo(SslCertificateType.BRING_YOUR_OWN);
     }
 
-    @Test
-    void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedAndActiveVersionMissing() {
-        testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedInternal(null, CERT_LEGACY_MAX_VERSION);
+    static Object[][] testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedDataProvider() {
+        return new Object[][]{
+                // testCaseName certActiveVersionInput certActiveCloudProviderIdentifierInput certActiveVersionExpected
+                //      certActiveCloudProviderIdentifierExpected
+                {"null, null", null, null, CERT_LEGACY_MAX_VERSION, CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER},
+                {"certActiveVersion, null", CERT_ACTIVE_VERSION, null, CERT_ACTIVE_VERSION, CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER},
+                {"null, certActiveCloudProviderIdentifier", null, CERT_ACTIVE_CLOUD_PROVIDER_IDENTIFIER, CERT_LEGACY_MAX_VERSION,
+                        CERT_ACTIVE_CLOUD_PROVIDER_IDENTIFIER},
+                {"certActiveVersion, certActiveCloudProviderIdentifier", CERT_ACTIVE_VERSION, CERT_ACTIVE_CLOUD_PROVIDER_IDENTIFIER, CERT_ACTIVE_VERSION,
+                        CERT_ACTIVE_CLOUD_PROVIDER_IDENTIFIER},
+        };
     }
 
-    private void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedInternal(Integer certActiveVersionInput,
-            int certActiveVersionExpected) {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedDataProvider")
+    void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwned(String testCaseName, Integer certActiveVersionInput,
+            String certActiveCloudProviderIdentifierInput, int certActiveVersionExpected, String certActiveCloudProviderIdentifierExpected) {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setResourceCrn(TestData.getTestCrn(RESOURCE_TYPE_DATABASE_SERVER, RESOURCE_ID));
         server.setDatabaseVendor(DatabaseVendor.POSTGRES);
@@ -250,11 +266,13 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         sslConfig.setSslCertificates(CERTS);
         sslConfig.setSslCertificateActiveVersion(certActiveVersionInput);
+        sslConfig.setSslCertificateActiveCloudProviderIdentifier(certActiveCloudProviderIdentifierInput);
         dbStack.setSslConfig(sslConfig);
         server.setDbStack(dbStack);
 
         when(databaseServerSslCertificateConfig.getMaxVersionByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_MAX_VERSION);
         when(databaseServerSslCertificateConfig.getLegacyMaxVersionByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_LEGACY_MAX_VERSION);
+        when(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER);
 
         DatabaseServerV4Response response = converter.convert(server);
 
@@ -266,11 +284,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         assertThat(sslConfigV4Response.getSslCertificates()).isSameAs(CERTS);
         assertThat(sslConfigV4Response.getSslCertificateHighestAvailableVersion()).isEqualTo(CERT_MAX_VERSION);
         assertThat(sslConfigV4Response.getSslCertificateActiveVersion()).isEqualTo(certActiveVersionExpected);
-    }
-
-    @Test
-    void testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedAndActiveVersionPresent() {
-        testConversionOfSslConfigWhenDbStackPresentAndCertificateTypeCloudProviderOwnedInternal(CERT_ACTIVE_VERSION, CERT_ACTIVE_VERSION);
+        assertThat(sslConfigV4Response.getSslCertificateActiveCloudProviderIdentifier()).isEqualTo(certActiveCloudProviderIdentifierExpected);
     }
 
     private void initializeSecrets(DatabaseServerConfig server) {

@@ -87,6 +87,8 @@ class AwsRdsLaunchServiceTest {
 
     private static final String SECURITY_GROUP_ID = "sg-98e47c";
 
+    private static final String SSL_CERTIFICATE_IDENTIFIER = "mycert";
+
     private static final String OUT_DB_INSTANCE = "db-" + UUID.randomUUID().toString();
 
     private static final String OUT_HOSTNAME = OUT_DB_INSTANCE + ".oijeojwodihfoih." + REGION + ".rds.amazonaws.com";
@@ -175,20 +177,26 @@ class AwsRdsLaunchServiceTest {
     }
 
     @Test
-    void launchTestUseSslEnforcementWhenFalse() throws Exception {
-        launchTestUseSslEnforcementInternal(false);
+    void launchTestUseSslEnforcementWhenEnforcementDisabled() {
+        launchTestUseSslEnforcementInternal(false, false);
     }
 
     @Test
-    void launchTestUseSslEnforcementWhenTrue() throws Exception {
-        launchTestUseSslEnforcementInternal(true);
+    void launchTestUseSslEnforcementWhenEnforcementEnabledAndCertificateIdentifierMissing() {
+        launchTestUseSslEnforcementInternal(true, false);
     }
 
-    private void launchTestUseSslEnforcementInternal(boolean useSslEnforcement) throws Exception {
+    @Test
+    void launchTestUseSslEnforcementWhenEnforcementEnabledAndCertificateIdentifierPresent() {
+        launchTestUseSslEnforcementInternal(true, true);
+    }
+
+    private void launchTestUseSslEnforcementInternal(boolean useSslEnforcement, boolean sslCertificateIdentifierDefined) {
         when(cfStackUtil.getOutputs(STACK_NAME_CF, cfRetryClient))
                 .thenReturn(useSslEnforcement ? CF_OUTPUTS_WITH_DB_PARAMETER_GROUP : CF_OUTPUTS_WITHOUT_DB_PARAMETER_GROUP);
 
-        List<CloudResourceStatus> cloudResourceStatuses = underTest.launch(authenticatedContext, createDatabaseStack(useSslEnforcement), resourceNotifier);
+        List<CloudResourceStatus> cloudResourceStatuses = underTest.launch(authenticatedContext,
+                createDatabaseStack(useSslEnforcement, sslCertificateIdentifierDefined), resourceNotifier);
 
         assertThat(cloudResourceStatuses).isNotNull();
         assertThat(cloudResourceStatuses).hasSize(useSslEnforcement ? 6 : 5);
@@ -213,16 +221,23 @@ class AwsRdsLaunchServiceTest {
         Boolean useSslEnforcementResult = (Boolean) ReflectionTestUtils.getField(rdsModelContext, "useSslEnforcement");
         assertThat(useSslEnforcementResult).isNotNull();
         assertThat(useSslEnforcementResult.booleanValue()).isEqualTo(useSslEnforcement);
+        Boolean sslCertificateIdentifierDefinedResult = (Boolean) ReflectionTestUtils.getField(rdsModelContext, "sslCertificateIdentifierDefined");
+        assertThat(sslCertificateIdentifierDefinedResult).isNotNull();
+        assertThat(sslCertificateIdentifierDefinedResult.booleanValue()).isEqualTo(sslCertificateIdentifierDefined);
     }
 
-    private DatabaseStack createDatabaseStack(boolean useSslEnforcement) {
+    private DatabaseStack createDatabaseStack(boolean useSslEnforcement, boolean sslCertificateIdentifierDefined) {
         Subnet subnet = new Subnet(SUBNET_CIDR);
         Network network = new Network(subnet, List.of(NETWORK_CIDR), OutboundInternetTraffic.ENABLED);
         network.putParameter("subnetId", SUBNET_ID);
         network.putParameter("vpcCidr", NETWORK_CIDR);
 
         Security security = new Security(Collections.emptyList(), List.of(SECURITY_GROUP_ID));
-        DatabaseServer databaseServer = DatabaseServer.builder().useSslEnforcement(useSslEnforcement).security(security).build();
+        DatabaseServer databaseServer = DatabaseServer.builder()
+                .useSslEnforcement(useSslEnforcement)
+                .params(sslCertificateIdentifierDefined ? Map.of(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER, SSL_CERTIFICATE_IDENTIFIER) : Map.of())
+                .security(security)
+                .build();
 
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), null);
     }

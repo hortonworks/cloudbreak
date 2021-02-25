@@ -1,13 +1,14 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -29,7 +30,12 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsContext;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
+@ExtendWith(MockitoExtension.class)
 public class AbstractRedbeamsProvisionActionTest {
+
+    private static final long RESOURCE_ID = 1L;
+
+    private static final String ENVIRONMENT_CRN = "myenv";
 
     @Mock
     private DBStackService dbStackService;
@@ -44,7 +50,7 @@ public class AbstractRedbeamsProvisionActionTest {
     private DBStackToDatabaseStackConverter databaseStackConverter;
 
     @InjectMocks
-    private AbstractRedbeamsProvisionAction underTest = new TestAction(TestPayload.class);
+    private TestAction underTest;
 
     private DBStack dbStack;
 
@@ -61,10 +67,8 @@ public class AbstractRedbeamsProvisionActionTest {
     @Mock
     private StateContext<RedbeamsProvisionState, RedbeamsProvisionEvent> stateContext;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
-
         dbStack = new DBStack();
         dbStack.setId(101L);
         dbStack.setResourceCrn(Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
@@ -76,7 +80,7 @@ public class AbstractRedbeamsProvisionActionTest {
         dbStack.setAvailabilityZone("us-east-1b");
         dbStack.setCloudPlatform("AWS");
         dbStack.setPlatformVariant("GovCloud");
-        dbStack.setEnvironmentId("myenv");
+        dbStack.setEnvironmentId(ENVIRONMENT_CRN);
         dbStack.setOwnerCrn(Crn.safeFromString("crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com"));
 
         credential = new Credential("userId", null, "userCrn");
@@ -86,8 +90,8 @@ public class AbstractRedbeamsProvisionActionTest {
 
     @Test
     public void testCreateFlowContext() {
-        when(dbStackService.getById(Long.valueOf(1L))).thenReturn(dbStack);
-        when(credentialService.getCredentialByEnvCrn("myenv")).thenReturn(credential);
+        when(dbStackService.getById(RESOURCE_ID)).thenReturn(dbStack);
+        when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(databaseStackConverter.convert(dbStack)).thenReturn(databaseStack);
 
@@ -110,13 +114,14 @@ public class AbstractRedbeamsProvisionActionTest {
     private static class TestPayload implements Payload {
         @Override
         public Long getResourceId() {
-            return 1L;
+            return RESOURCE_ID;
         }
     }
 
     private static class TestAction extends AbstractRedbeamsProvisionAction<TestPayload> {
-        TestAction(Class<TestPayload> payloadClass) {
-            super(payloadClass);
+        TestAction() {
+            super(TestPayload.class);
         }
     }
+
 }

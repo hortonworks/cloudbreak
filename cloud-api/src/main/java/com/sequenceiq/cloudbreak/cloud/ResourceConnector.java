@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
@@ -32,9 +33,10 @@ import com.sequenceiq.common.api.type.AdjustmentType;
  * CloudResource} which is  CLOUDFORMATION_STACK, HEAT_STACK or ARM_TEMPLATE and all the infrastructure related changes are done through that resource.
  * In other words when a new VM is removed from stack (cluster) then the CLoudbreak is not addressing that VM resource to be removed from stack, but uses the
  * the template resource reference e.g HEAT_STACK to inform the Cloud provider to remove the VM instance from stack.
+ * @param <R> the type of resources supported by {@link #downscale(AuthenticatedContext, CloudStack, List, List, Object)} and
+ *           {@link #collectResourcesToRemove(AuthenticatedContext, CloudStack, List, List)}
  */
 public interface ResourceConnector<R> {
-
 
     /**
      * Launch a complete stack on Cloud platform. The stack consist of the following resources:
@@ -140,20 +142,34 @@ public interface ResourceConnector<R> {
     void stopDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
-     *
-     * @param authenticatedContext the authenticated context which holds the client object
-     * @param stack contains the full description of infrastructure
-     * @return The status of the given database server instance
+     * Determines the status of a database server.
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @return The status of the given database server instance; never {@code null}
+     * @throws NullPointerException if either argument is {@code null}
      * @throws Exception in case of any error
      */
     ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
+
+    /**
+     * Queries the SSL root certificate currently active for a database server.
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @return The active SSL root certificate of the given database server instance, or {@code null} if the database server does not exist anymore
+     * @throws NullPointerException if either argument is {@code null}
+     * @throws Exception in case of any error
+     */
+    default CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack)
+            throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 
     /**
      * Update of infrastructure on Cloud platform. (e.g change Security groups). It does not need to wait/block until the infrastructure update is
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.
      * <br>
-     * Note: this method is a bit generic at the moment, but complex changes like replace the existing network with the a new one or add/remove instances
+     * Note: this method is a bit generic at the moment, but complex changes like replace the existing network with a new one or add/remove instances
      * are not executed over this method.
      *
      * @param authenticatedContext the authenticated context which holds the client object
@@ -246,4 +262,5 @@ public interface ResourceConnector<R> {
      */
     List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
             PersistenceNotifier persistenceNotifier) throws Exception;
+
 }
