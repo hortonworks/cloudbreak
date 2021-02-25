@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -56,6 +58,9 @@ public class LoadBalancerConfigService {
 
     @Value("${cb.knox.port:8443}")
     private String knoxServicePort;
+
+    @Value("${cb.loadBalancer.supportedPlatforms:}")
+    private String supportedPlatforms;
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
@@ -150,7 +155,7 @@ public class LoadBalancerConfigService {
         LOGGER.info("Setting up load balancers for stack {}", stack.getDisplayName());
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if (isLoadBalancerEnabled(stack.getType(), environment)) {
+        if (isLoadBalancerEnabled(stack.getType(), environment) && getSupportedPlatforms().contains(stack.getCloudPlatform())) {
             LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
             Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack);
             if (knoxTargetGroup.isPresent()) {
@@ -271,5 +276,9 @@ public class LoadBalancerConfigService {
     private void setupKnoxLoadBalancer(LoadBalancer loadBalancer, TargetGroup knoxTargetGroup) {
         loadBalancer.addTargetGroup(knoxTargetGroup);
         knoxTargetGroup.addLoadBalancer(loadBalancer);
+    }
+
+    private List<String> getSupportedPlatforms() {
+        return supportedPlatforms == null ? List.of() : Arrays.asList(supportedPlatforms.split(","));
     }
 }
