@@ -80,4 +80,15 @@ public class NetworkTest {
         subnets.put(PUBLIC_ID_2, createPublicSubnet(PUBLIC_ID_2, AZ_2));
         return subnets;
     }
+
+    protected Map<String, CloudSubnet> createPrivateSubnetsWithInternetRouting() {
+        Map<String, CloudSubnet> subnets = new HashMap<>();
+        CloudSubnet subnet1 = createPrivateSubnet(ID_1, AZ_1);
+        subnet1.setRoutableToInternet(true);
+        subnets.put(ID_1, subnet1);
+        CloudSubnet subnet2 = createPrivateSubnet(ID_2, AZ_2);
+        subnet2.setRoutableToInternet(true);
+        subnets.put(ID_2, subnet2);
+        return subnets;
+    }
 }
