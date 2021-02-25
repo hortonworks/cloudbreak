@@ -1070,7 +1070,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             ExitCriteriaModel exitModel, String state) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                OrchestratorBootstrap pillarSave = new PillarSave(sc, target, propertiesEntry.getValue());
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
                 saltPillarRunner.call();
             }
