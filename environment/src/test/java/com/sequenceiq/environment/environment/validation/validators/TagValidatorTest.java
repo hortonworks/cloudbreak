@@ -50,7 +50,12 @@ class TagValidatorTest {
                 DynamicTest.dynamicTest("tag key is invalid, regular expression is printed",
                         () -> testNegative(BAD_KEY, GOOD_VALUE, "regular expression")),
                 DynamicTest.dynamicTest("tag value is valid ",
-                        () -> testPositive(GOOD_KEY, GOOD_VALUE)));
+                        () -> testPositive(GOOD_KEY, GOOD_VALUE)),
+                DynamicTest.dynamicTest("tag value is valid ",
+                        () -> testPositive("cod_database_name", "appletree")),
+                DynamicTest.dynamicTest("tag value is valid ",
+                        () -> testPositive("cod_database_crn", "appletree"))
+        );
     }
 
     public void testNegative(String tag, String value, String messagePortion) {
