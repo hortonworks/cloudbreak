@@ -78,6 +78,7 @@ dependencies {
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation group: 'org.mockito',               name: 'mockito-core'
   testCompile project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':flow', configuration: 'tests')
 
   constraints {
     compile            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'

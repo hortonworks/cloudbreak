@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
@@ -171,25 +172,29 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return dbStack;
     }
 
+    // FIXME Potentially extract this whole logic into a service as it might be needed later for cert rotation
     private SslConfig getSslConfig(AllocateDatabaseServerV4Request source, DBStack dbStack) {
         SslConfig sslConfig = new SslConfig();
         if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
             String cloudPlatform = dbStack.getCloudPlatform();
-            // TODO Determine the highest available SSL cert version for GCP
+            // TODO Determine the highest available SSL cert version for GCP; update sslCertificateActiveVersion during provisioning
             int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByPlatform(cloudPlatform);
             sslConfig.setSslCertificateActiveVersion(maxVersion);
             // TODO Add SslConfig.sslCertificateMaxVersion and keep it up-to-date (mostly for GCP)
 
             Set<String> certs;
+            String cloudProviderIdentifier;
             int numberOfCerts = databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(cloudPlatform);
             if (numberOfCerts == 0) {
-                // TODO Initialize SSL cert for GCP
+                // TODO Initialize SSL cert & CloudProviderIdentifier for GCP
                 // This is possible for cloud platforms where SSL is supported, but the certs are not pre-registered in CB; see e.g. GCP
                 certs = Collections.emptySet();
+                cloudProviderIdentifier = null;
             } else if (numberOfCerts == 1 || !CloudPlatform.AZURE.equals(source.getCloudPlatform())) {
                 SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByPlatformAndVersion(cloudPlatform, maxVersion);
-                ensureExistingCert(cloudPlatform, maxVersion, cert);
+                validateCert(cloudPlatform, maxVersion, cert);
                 certs = Collections.singleton(cert.getCertPem());
+                cloudProviderIdentifier = cert.getCloudProviderIdentifier();
             } else {
                 // In Azure and for > 1 certs, include both the most recent cert and the preceding one
                 Set<SslCertificateEntry> certsTemp =
@@ -197,35 +202,63 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
-                ensureNonNullCertsCountEqualsTwo(cloudPlatform, maxVersion, certsTemp);
+                validateNonNullCertsCount(cloudPlatform, maxVersion, certsTemp);
+                findAndValidateCertByVersion(cloudPlatform, maxVersion - 1, certsTemp);
+                cloudProviderIdentifier = findAndValidateCertByVersion(cloudPlatform, maxVersion, certsTemp).getCloudProviderIdentifier();
                 certs = certsTemp
                         .stream()
                         .map(SslCertificateEntry::getCertPem)
                         .collect(Collectors.toSet());
-                ensureUniqueCertsCountEqualsTwo(cloudPlatform, maxVersion, certs);
+                validateUniqueCertsCount(cloudPlatform, maxVersion, certs);
             }
             sslConfig.setSslCertificates(certs);
+            sslConfig.setSslCertificateActiveCloudProviderIdentifier(cloudProviderIdentifier);
 
             sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         }
         return sslConfig;
     }
 
-    private void ensureExistingCert(String cloudPlatform, int maxVersion, SslCertificateEntry cert) {
+    private void validateCert(String cloudPlatform, int versionExpected, SslCertificateEntry cert) {
         if (cert == null) {
-            throw new IllegalStateException(String.format("Could not find SSL certificate version %d for cloud platform \"%s\"", maxVersion, cloudPlatform));
+            throw new IllegalStateException(
+                    String.format("Could not find SSL certificate version %d for cloud platform \"%s\"", versionExpected, cloudPlatform));
+        }
+
+        int version = cert.getVersion();
+        if (version != versionExpected) {
+            throw new IllegalStateException(String.format("SSL certificate version mismatch for cloud platform \"%s\": expected=%d, actual=%d", cloudPlatform,
+                    versionExpected, version));
+        }
+
+        if (Strings.isNullOrEmpty(cert.getCloudProviderIdentifier())) {
+            throw new IllegalStateException(
+                    String.format("Blank CloudProviderIdentifier in SSL certificate version %d for cloud platform \"%s\"", versionExpected, cloudPlatform));
+        }
+
+        if (Strings.isNullOrEmpty(cert.getCertPem())) {
+            throw new IllegalStateException(String.format("Blank PEM in SSL certificate version %d for cloud platform \"%s\"", versionExpected, cloudPlatform));
         }
     }
 
-    private void ensureNonNullCertsCountEqualsTwo(String cloudPlatform, int maxVersion, Set<SslCertificateEntry> certsTemp) {
-        if (certsTemp.size() != 2) {
+    private void validateNonNullCertsCount(String cloudPlatform, int maxVersion, Set<SslCertificateEntry> certs) {
+        if (certs.size() != 2) {
             throw new IllegalStateException(
                     String.format("Could not find SSL certificate(s) when requesting versions [%d, %d] for cloud platform \"%s\": " +
-                            "expected 2 certificates, got %d", maxVersion - 1, maxVersion, cloudPlatform, certsTemp.size()));
+                            "expected 2 certificates, got %d", maxVersion - 1, maxVersion, cloudPlatform, certs.size()));
         }
     }
 
-    private void ensureUniqueCertsCountEqualsTwo(String cloudPlatform, int maxVersion, Set<String> certs) {
+    private SslCertificateEntry findAndValidateCertByVersion(String cloudPlatform, int version, Set<SslCertificateEntry> certs) {
+        SslCertificateEntry result = certs.stream()
+                .filter(c -> c.getVersion() == version)
+                .findFirst()
+                .orElse(null);
+        validateCert(cloudPlatform, version, result);
+        return result;
+    }
+
+    private void validateUniqueCertsCount(String cloudPlatform, int maxVersion, Set<String> certs) {
         if (certs.size() != 2) {
             throw new IllegalStateException(
                     String.format("Received duplicated SSL certificate PEM when requesting versions [%d, %d] for cloud platform \"%s\"",
@@ -398,7 +431,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
      *
      * @param source                 - the request
      * @param securityAccessResponse - environment data
-     * @return returns the saved security groups. If none is specified, then an empty security gorup is returned.
+     * @return returns the saved security groups. If none is specified, then an empty security group is returned.
      */
     private SecurityGroup buildExistingSecurityGroup(SecurityGroupV4StackRequest source, SecurityAccessResponse securityAccessResponse) {
         SecurityGroup securityGroup = new SecurityGroup();

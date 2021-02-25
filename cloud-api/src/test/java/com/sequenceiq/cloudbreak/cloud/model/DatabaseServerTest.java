@@ -43,4 +43,21 @@ class DatabaseServerTest {
         assertThat(databaseServer.toString()).contains("useSslEnforcement='true'");
     }
 
+    @Test
+    void toStringTestWhenEmptyDynamicModel() {
+        DatabaseServer databaseServer = DatabaseServer.builder().build();
+
+        assertThat(databaseServer).isNotNull();
+        assertThat(databaseServer.toString()).contains("dynamicModel=DynamicModel{parameters={}}");
+    }
+
+    @Test
+    void toStringTestWhenDynamicModelWithSslCertificateIdentifier() {
+        DatabaseServer databaseServer = DatabaseServer.builder().build();
+        databaseServer.putParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER, "mycert");
+
+        assertThat(databaseServer).isNotNull();
+        assertThat(databaseServer.toString()).contains("dynamicModel=DynamicModel{parameters={sslCertificateIdentifier=mycert}}");
+    }
+
 }

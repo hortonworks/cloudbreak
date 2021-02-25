@@ -3,6 +3,7 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
@@ -14,12 +15,15 @@ public class AllocateDatabaseServerRequest extends RedbeamsEvent {
 
     private final CloudCredential cloudCredential;
 
+    private final DBStack dbStack;
+
     private final DatabaseStack databaseStack;
 
-    public AllocateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack) {
+    public AllocateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DBStack dbStack, DatabaseStack databaseStack) {
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
+        this.dbStack = dbStack;
         this.databaseStack = databaseStack;
     }
 
@@ -31,15 +35,22 @@ public class AllocateDatabaseServerRequest extends RedbeamsEvent {
         return cloudCredential;
     }
 
+    public DBStack getDbStack() {
+        return dbStack;
+    }
+
     public DatabaseStack getDatabaseStack() {
         return databaseStack;
     }
 
+    @Override
     public String toString() {
-        return "AllocateDatabaseServerRequest{"
-            + "cloudContext=" + cloudContext
-            + ", cloudCredential=" + cloudCredential
-            + ", databaseStack=" + databaseStack
-            + '}';
+        return "AllocateDatabaseServerRequest{" +
+                "cloudContext=" + cloudContext +
+                ", cloudCredential=" + cloudCredential +
+                ", dbStack=" + dbStack +
+                ", databaseStack=" + databaseStack +
+                '}';
     }
+
 }

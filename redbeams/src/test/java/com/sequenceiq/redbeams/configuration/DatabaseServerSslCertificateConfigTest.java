@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
 class DatabaseServerSslCertificateConfigTest {
 
-    private static final String CERT_ENTRY_FORMAT = "%d:%s";
+    private static final String CERT_ENTRY_FORMAT = "%d:%s:%s";
 
     private static final String CERT_LIST_SEPARATOR = ";";
 
@@ -44,6 +44,8 @@ class DatabaseServerSslCertificateConfigTest {
                     "-----END CERTIFICATE-----";
 
     private static final String CERT_ISSUER_1 = "CN=SSL.com Root Certification Authority ECC,O=SSL Corporation,L=Houston,ST=Texas,C=US";
+
+    private static final String CLOUD_PROVIDER_IDENTIFIER_1 = "SSL.com-Root-Certification-Authority-ECC";
 
     private static final String CERT_PEM_2 =
             "-----BEGIN CERTIFICATE-----\n" +
@@ -82,6 +84,8 @@ class DatabaseServerSslCertificateConfigTest {
 
     private static final String CERT_ISSUER_2 = "CN=SwissSign Platinum CA - G2,O=SwissSign AG,C=CH";
 
+    private static final String CLOUD_PROVIDER_IDENTIFIER_2 = "SwissSign-Platinum-CA-G2";
+
     private static final String CERT_PEM_3 =
             "-----BEGIN CERTIFICATE-----\n" +
                     "MIICaTCCAe+gAwIBAgIQISpWDK7aDKtARb8roi066jAKBggqhkjOPQQDAzBtMQsw\n" +
@@ -101,6 +105,8 @@ class DatabaseServerSslCertificateConfigTest {
 
     private static final String CERT_ISSUER_3 = "CN=OISTE WISeKey Global Root GC CA,OU=OISTE Foundation Endorsed,O=WISeKey,C=CH";
 
+    private static final String CLOUD_PROVIDER_IDENTIFIER_3 = "OISTE-WISeKey-Global-Root-GC-CA";
+
     private static final int VERSION_0 = 0;
 
     private static final int VERSION_1 = 1;
@@ -111,6 +117,15 @@ class DatabaseServerSslCertificateConfigTest {
 
     private static final int DUMMY_VERSION = Integer.MIN_VALUE;
 
+    private static final String RDS_CA_2019 = "rds-ca-2019";
+
+    private static final String DIGI_CERT_GLOBAL_ROOT_G_2 = "DigiCertGlobalRootG2";
+
+    private static final String LONG_CLOUD_PROVIDER_IDENTIFIER =
+            "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
+                    "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
+
     private DatabaseServerSslCertificateConfig underTest;
 
     @BeforeEach
@@ -118,8 +133,8 @@ class DatabaseServerSslCertificateConfigTest {
         underTest = new DatabaseServerSslCertificateConfig();
     }
 
-    private static String certEntry(int version, String certPem) {
-        return String.format(CERT_ENTRY_FORMAT, version, certPem);
+    private static String certEntry(int version, String cloudProviderIdentifier, String certPem) {
+        return String.format(CERT_ENTRY_FORMAT, version, cloudProviderIdentifier, certPem);
     }
 
     private static String certList(String... certEntries) {
@@ -127,8 +142,32 @@ class DatabaseServerSslCertificateConfigTest {
     }
 
     @Test
+    void configReadTestWhenEmptyConfigShouldReturnZeroCerts() {
+        Map<String, String> certs = Map.of();
+        initCerts(certs);
+
+        assertThat(underTest.getCerts()).isEqualTo(certs);
+        assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of());
+
+        verifyCertStatistics(CloudPlatform.AZURE.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByPlatform(CloudPlatform.AZURE.name())).isEmpty();
+        assertThat(underTest.getCertsByPlatform("Azure")).isEmpty();
+        assertThat(underTest.getCertsByPlatform("aZure")).isEmpty();
+
+        verifyCertStatistics(CloudPlatform.AWS.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByPlatform(CloudPlatform.AWS.name())).isEmpty();
+        assertThat(underTest.getCertsByPlatform("aws")).isEmpty();
+        assertThat(underTest.getCertsByPlatform("Aws")).isEmpty();
+
+        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByPlatform("")).isEmpty();
+        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
+        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+    }
+
+    @Test
     void configReadTestWhenAzureHasOneCertShouldReturnOneCert() {
-        Map<String, String> certs = Map.of("azure", certEntry(VERSION_0, CERT_PEM_1));
+        Map<String, String> certs = Map.of("azure", certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1));
         initCerts(certs);
 
         assertThat(underTest.getCerts()).isEqualTo(certs);
@@ -138,7 +177,7 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
         assertThat(certsAzure).hasSize(1);
         assertThat(certsAzure).doesNotContainNull();
-        verifyCertEntry(certsAzure, VERSION_0, CERT_PEM_1, CERT_ISSUER_1);
+        verifyCertEntry(certsAzure, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
         assertThat(underTest.getCertsByPlatform("Azure")).hasSize(1);
         assertThat(underTest.getCertsByPlatform("aZure")).hasSize(1);
 
@@ -165,13 +204,15 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getMaxVersionByPlatform(cloudPlatform)).isEqualTo(maxVersion);
     }
 
-    private void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String certPemExpected, String certIssuerExpected) {
-        Optional<SslCertificateEntry> entry = certs.stream()
+    private void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String cloudProviderIdentifierExpected, String certPemExpected,
+            String certIssuerExpected) {
+        Optional<SslCertificateEntry> match = certs.stream()
                 .filter(e -> e.getVersion() == version)
                 .findFirst();
-        assertThat(entry).overridingErrorMessage("No cert found for version %d", version).isPresent();
+        assertThat(match).overridingErrorMessage("No cert found for version %d", version).isPresent();
 
-        SslCertificateEntry sslCertificateEntry = entry.get();
+        SslCertificateEntry sslCertificateEntry = match.get();
+        assertThat(sslCertificateEntry.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifierExpected);
         assertThat(sslCertificateEntry.getCertPem()).isEqualTo(certPemExpected);
 
         X509Certificate x509Certificate = sslCertificateEntry.getX509Cert();
@@ -184,7 +225,7 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void configReadTestWhenAwsIsDummyAzureHasOneCertShouldReturnOneCert() {
-        Map<String, String> certs = Map.of("aws", "", "azure", certEntry(VERSION_0, CERT_PEM_1));
+        Map<String, String> certs = Map.of("aws", "", "azure", certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1));
         initCerts(certs);
 
         assertThat(underTest.getCerts()).isEqualTo(certs);
@@ -194,7 +235,7 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
         assertThat(certsAzure).hasSize(1);
         assertThat(certsAzure).doesNotContainNull();
-        verifyCertEntry(certsAzure, VERSION_0, CERT_PEM_1, CERT_ISSUER_1);
+        verifyCertEntry(certsAzure, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
         assertThat(underTest.getCertsByPlatform("Azure")).hasSize(1);
         assertThat(underTest.getCertsByPlatform("aZure")).hasSize(1);
 
@@ -211,7 +252,8 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void configReadTestWhenAwsHasTwoCertsShouldReturnTwoCerts() {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_1, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2),
+                certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
         initCerts(certs);
 
         assertThat(underTest.getCerts()).isEqualTo(certs);
@@ -221,8 +263,8 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
         assertThat(certsAws).hasSize(2);
         assertThat(certsAws).doesNotContainNull();
-        verifyCertEntry(certsAws, VERSION_1, CERT_PEM_2, CERT_ISSUER_2);
-        verifyCertEntry(certsAws, VERSION_2, CERT_PEM_3, CERT_ISSUER_3);
+        verifyCertEntry(certsAws, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAws, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
         assertThat(underTest.getCertsByPlatform("aws")).hasSize(2);
         assertThat(underTest.getCertsByPlatform("Aws")).hasSize(2);
 
@@ -239,8 +281,9 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void configReadTestWhenAwsHasOneCertAndAzureHasTwoCertsShouldReturnThreeCerts() {
-        Map<String, String> certs = Map.of("aws", certEntry(VERSION_0, CERT_PEM_1),
-                "azure", certList(certEntry(VERSION_1, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws", certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                "azure", certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2),
+                        certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
         initCerts(certs);
 
         assertThat(underTest.getCerts()).isEqualTo(certs);
@@ -250,7 +293,7 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
-        verifyCertEntry(certsAws, VERSION_0, CERT_PEM_1, CERT_ISSUER_1);
+        verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
         assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
         assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
 
@@ -258,8 +301,8 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
-        verifyCertEntry(certsAzure, VERSION_1, CERT_PEM_2, CERT_ISSUER_2);
-        verifyCertEntry(certsAzure, VERSION_2, CERT_PEM_3, CERT_ISSUER_3);
+        verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
         assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
         assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
 
@@ -271,8 +314,9 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void configReadTestWhenAwsHasOneCertCommonWithAzureShouldReturnThreeCerts() {
-        Map<String, String> certs = Map.of("aws", certEntry(VERSION_0, CERT_PEM_1),
-                "azure", certList(certEntry(VERSION_1, CERT_PEM_1), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws", certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                "azure", certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                        certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
         initCerts(certs);
 
         assertThat(underTest.getCerts()).isEqualTo(certs);
@@ -282,7 +326,7 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
-        verifyCertEntry(certsAws, VERSION_0, CERT_PEM_1, CERT_ISSUER_1);
+        verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
         assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
         assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
 
@@ -290,8 +334,8 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
-        verifyCertEntry(certsAzure, VERSION_1, CERT_PEM_1, CERT_ISSUER_1);
-        verifyCertEntry(certsAzure, VERSION_2, CERT_PEM_3, CERT_ISSUER_3);
+        verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
+        verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
         assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
         assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
 
@@ -303,8 +347,9 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void configReadTestWhenAwsHasOneCertAndAzureHasTwoCertsWithOneCommonVersionShouldReturnThreeCerts() {
-        Map<String, String> certs = Map.of("aws", certEntry(VERSION_1, CERT_PEM_1),
-                "azure", certList(certEntry(VERSION_1, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws", certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                "azure", certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2),
+                        certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
         initCerts(certs);
 
         assertThat(underTest.getCerts()).isEqualTo(certs);
@@ -314,7 +359,7 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
-        verifyCertEntry(certsAws, VERSION_1, CERT_PEM_1, CERT_ISSUER_1);
+        verifyCertEntry(certsAws, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
         assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
         assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
 
@@ -322,8 +367,8 @@ class DatabaseServerSslCertificateConfigTest {
         Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
-        verifyCertEntry(certsAzure, VERSION_1, CERT_PEM_2, CERT_ISSUER_2);
-        verifyCertEntry(certsAzure, VERSION_2, CERT_PEM_3, CERT_ISSUER_3);
+        verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
         assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
         assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
 
@@ -334,8 +379,51 @@ class DatabaseServerSslCertificateConfigTest {
     }
 
     @Test
-    void setupCertsCacheTestWhenErrorMalformedEntry() {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_2, CERT_PEM_2), "broken-entry"));
+    void configReadTestWhenAwsHasOneCertAndAzureHasTwoCertsWithOneCommonCloudProviderIdentifierShouldReturnThreeCerts() {
+        Map<String, String> certs = Map.of("aws", certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                "azure", certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_2),
+                        certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
+        initCerts(certs);
+
+        assertThat(underTest.getCerts()).isEqualTo(certs);
+        assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "azure"));
+
+        verifyCertStatistics(CloudPlatform.AWS.name(), 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
+        assertThat(certsAws).hasSize(1);
+        assertThat(certsAws).doesNotContainNull();
+        verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
+        assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
+        assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
+
+        verifyCertStatistics(CloudPlatform.AZURE.name(), 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        assertThat(certsAzure).hasSize(2);
+        assertThat(certsAzure).doesNotContainNull();
+        verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
+        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
+
+        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByPlatform("")).isEmpty();
+        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
+        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+    }
+
+    @Test
+    void setupCertsCacheTestWhenErrorMalformedEntryGarbage() {
+        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), "broken-entry"));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws\": \"");
+    }
+
+    @Test
+    void setupCertsCacheTestWhenErrorMalformedEntryExtraField() {
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                        certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2) + ":foo"));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws\": \"");
@@ -343,15 +431,25 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void setupCertsCacheTestWhenErrorEmptyEntry() {
-        Map<String, String> certs = Map.of("aws", certList("", certEntry(VERSION_2, CERT_PEM_2)));
+        Map<String, String> certs = Map.of("aws", certList("", certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws\": \"");
     }
 
     @Test
+    void setupCertsCacheTestWhenErrorMalformedCloudProviderIdentifier() {
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1), certEntry(VERSION_2, LONG_CLOUD_PROVIDER_IDENTIFIER, CERT_PEM_2)));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate CloudProviderIdentifier for cloud platform \"aws\": \"");
+    }
+
+    @Test
     void setupCertsCacheTestWhenErrorMalformedPem() {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_2, CERT_PEM_2), certEntry(VERSION_2, "broken-pem")));
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, "broken-pem")));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException).hasMessageStartingWith("Error parsing SSL certificate PEM for cloud platform \"aws\": \"");
@@ -359,15 +457,27 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void setupCertsCacheTestWhenErrorDuplicatedVersion() {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_2, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException).hasMessage("Duplicated SSL certificate version 2 for cloud platform \"aws\"");
     }
 
     @Test
+    void setupCertsCacheTestWhenErrorDuplicatedCloudProviderIdentifier() {
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_3)));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException)
+                .hasMessage("Duplicated SSL certificate CloudProviderIdentifier for cloud platform \"aws\": \"SwissSign-Platinum-CA-G2\"");
+    }
+
+    @Test
     void setupCertsCacheTestWhenErrorDuplicatedPem() {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_1, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_2)));
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_2)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException).hasMessageStartingWith("Duplicated SSL certificate PEM for cloud platform \"aws\": \"");
@@ -375,7 +485,8 @@ class DatabaseServerSslCertificateConfigTest {
 
     @Test
     void setupCertsCacheTestWhenErrorBadVersionRange() {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_0, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException).hasMessage("SSL certificate versions are not contiguous for cloud platform \"aws\"");
@@ -384,6 +495,7 @@ class DatabaseServerSslCertificateConfigTest {
     static Object[][] getLegacyMaxVersionByPlatformDataProvider() {
         return new Object[][]{
                 // testCaseName cloudPlatform legacyMaxVersionExpected
+                {"null", null, DUMMY_VERSION},
                 {"empty", "", DUMMY_VERSION},
                 {"AWS", CloudPlatform.AWS.name(), 0},
                 {"aws", "aws", 0},
@@ -404,9 +516,38 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getLegacyMaxVersionByPlatform(cloudPlatform)).isEqualTo(legacyMaxVersionExpected);
     }
 
+    static Object[][] getLegacyCloudProviderIdentifierByPlatformDataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform legacyCloudProviderIdentifierExpected
+                {"null", null, null},
+                {"empty", "", null},
+                {"AWS", CloudPlatform.AWS.name(), RDS_CA_2019},
+                {"aws", "aws", RDS_CA_2019},
+                {"Aws", "Aws", RDS_CA_2019},
+                {"AZURE", CloudPlatform.AZURE.name(), DIGI_CERT_GLOBAL_ROOT_G_2},
+                {"Azure", "Azure", DIGI_CERT_GLOBAL_ROOT_G_2},
+                {"aZure", "aZure", DIGI_CERT_GLOBAL_ROOT_G_2},
+                {"GCP", CloudPlatform.GCP.name(), null},
+                {"MOCK", CloudPlatform.MOCK.name(), null},
+                {"OPENSTACK", CloudPlatform.OPENSTACK.name(), null},
+                {"YARN", CloudPlatform.YARN.name(), null},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getLegacyCloudProviderIdentifierByPlatformDataProvider")
+    void getLegacyCloudProviderIdentifierByPlatformTest(String testCaseName, String cloudPlatform, String legacyCloudProviderIdentifierExpected) {
+        assertThat(underTest.getLegacyCloudProviderIdentifierByPlatform(cloudPlatform)).isEqualTo(legacyCloudProviderIdentifierExpected);
+    }
+
     @Test
     void getSupportedPlatformsForLegacyMaxVersionTest() {
         assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion()).isEqualTo(Set.of("aws", "azure"));
+    }
+
+    @Test
+    void getSupportedPlatformsForLegacyCloudProviderIdentifierTest() {
+        assertThat(underTest.getSupportedPlatformsForLegacyCloudProviderIdentifier()).isEqualTo(Set.of("aws", "azure"));
     }
 
     static Object[][] getCertByPlatformAndVersionDataProvider() {
@@ -416,13 +557,17 @@ class DatabaseServerSslCertificateConfigTest {
                 {"AWS, v0", CloudPlatform.AWS.name(), VERSION_0, false},
                 {"AWS, v1", CloudPlatform.AWS.name(), VERSION_1, true},
                 {"AWS, v2", CloudPlatform.AWS.name(), VERSION_2, true},
+                {"AZURE, v0", CloudPlatform.AZURE.name(), VERSION_0, false},
+                {"AZURE, v1", CloudPlatform.AZURE.name(), VERSION_1, false},
+                {"AZURE, v2", CloudPlatform.AZURE.name(), VERSION_2, false},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getCertByPlatformAndVersionDataProvider")
     void getCertByPlatformAndVersionTest(String testCaseName, String cloudPlatform, int version, boolean certFoundExpected) {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_1, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
         initCerts(certs);
 
         SslCertificateEntry result = underTest.getCertByPlatformAndVersion(cloudPlatform, version);
@@ -447,13 +592,15 @@ class DatabaseServerSslCertificateConfigTest {
                 {"AWS, [v2, v0, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_0, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
                 {"AWS, [v2, v2, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
                 {"AWS, [v2, v0, v2, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_0, VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AZURE, [v0, v2, v1]", CloudPlatform.AZURE.name(), new int[]{VERSION_0, VERSION_2, VERSION_1}, Set.of()},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getCertsByPlatformAndVersionsDataProvider")
     void getCertsByPlatformAndVersionsTest(String testCaseName, String cloudPlatform, int[] versions, Set<Integer> versionsExpected) {
-        Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_1, CERT_PEM_2), certEntry(VERSION_2, CERT_PEM_3)));
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
         initCerts(certs);
 
         Set<SslCertificateEntry> result = underTest.getCertsByPlatformAndVersions(cloudPlatform, versions);
@@ -463,6 +610,36 @@ class DatabaseServerSslCertificateConfigTest {
                 .map(SslCertificateEntry::getVersion)
                 .collect(Collectors.toSet());
         assertThat(versionsFound).containsExactlyInAnyOrderElementsOf(versionsExpected);
+    }
+
+    static Object[][] getCertByPlatformAndCloudProviderIdentifierDataProvider() {
+        return new Object[][]{
+                // testCaseName cloudPlatform cloudProviderIdentifier certFoundExpected
+                {"AWS, null", CloudPlatform.AWS.name(), null, false},
+                {"AWS, empty", CloudPlatform.AWS.name(), "", false},
+                {"AWS, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_1, false},
+                {"AWS, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_2, true},
+                {"AWS, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_3, true},
+                {"AZURE, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_1, false},
+                {"AZURE, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_2, false},
+                {"AZURE, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_3, false},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("getCertByPlatformAndCloudProviderIdentifierDataProvider")
+    void getCertByPlatformAndCloudProviderIdentifierTest(String testCaseName, String cloudPlatform, String cloudProviderIdentifier, boolean certFoundExpected) {
+        Map<String, String> certs = Map.of("aws",
+                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
+        initCerts(certs);
+
+        SslCertificateEntry result = underTest.getCertByPlatformAndCloudProviderIdentifier(cloudPlatform, cloudProviderIdentifier);
+        if (certFoundExpected) {
+            assertThat(result).isNotNull();
+            assertThat(result.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifier);
+        } else {
+            assertThat(result).isNull();
+        }
     }
 
 }

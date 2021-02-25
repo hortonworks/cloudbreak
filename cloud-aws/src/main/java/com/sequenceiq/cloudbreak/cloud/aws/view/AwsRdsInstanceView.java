@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
-
 import java.util.List;
+
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
 public class AwsRdsInstanceView {
 
@@ -75,6 +76,14 @@ public class AwsRdsInstanceView {
 
     public List<String> getVPCSecurityGroups() {
         return databaseServer.getSecurity().getCloudSecurityIds();
+    }
+
+    public String getSslCertificateIdentifier() {
+        return databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER);
+    }
+
+    public boolean isSslCertificateIdentifierDefined() {
+        return !Strings.isNullOrEmpty(getSslCertificateIdentifier());
     }
 
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,8 +13,10 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -21,20 +24,23 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
+import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
-public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatabaseServerRequest> {
+public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<AllocateDatabaseServerRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AllocateDatabaseServerHandler.class);
+
+    private static final String ERROR_FAILED_TO_LAUNCH_THE_DATABASE_STACK = "Failed to launch the database stack for %s due to: %s";
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -49,7 +55,7 @@ public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatab
     private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
     @Inject
-    private EventBus eventBus;
+    private DatabaseServerSslCertificatePrescriptionService databaseServerSslCertificatePrescriptionService;
 
     @Override
     public String selector() {
@@ -57,31 +63,61 @@ public class AllocateDatabaseServerHandler implements EventHandler<AllocateDatab
     }
 
     @Override
-    public void accept(Event<AllocateDatabaseServerRequest> event) {
+    protected Selectable doAccept(HandlerEvent handlerEvent) {
+        Event<AllocateDatabaseServerRequest> event = handlerEvent.getEvent();
         LOGGER.debug("Received event: {}", event);
         AllocateDatabaseServerRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
+        Selectable response;
         try {
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudResourceStatus> resourceStatuses =
-                connector.resources().launchDatabaseServer(ac, request.getDatabaseStack(), persistenceNotifier);
+            CloudCredential cloudCredential = request.getCloudCredential();
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
+            DatabaseStack databaseStack = request.getDatabaseStack();
+            databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, request.getDbStack(), databaseStack);
+            List<CloudResourceStatus> resourceStatuses = connector.resources().launchDatabaseServer(ac, databaseStack, persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatuses);
             if (!task.completed(statePollerResult)) {
-                syncPollingScheduler.schedule(task);
+                statePollerResult = syncPollingScheduler.schedule(task);
             }
-            RedbeamsEvent success = new AllocateDatabaseServerSuccess(request.getResourceId());
+            validateResourcesState(cloudContext, statePollerResult);
+            response = new AllocateDatabaseServerSuccess(request.getResourceId());
             // request.getResult().onNext(success);
-            eventBus.notify(success.selector(), new Event<>(event.getHeaders(), success));
             LOGGER.debug("Launching the database stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
-            AllocateDatabaseServerFailed failure = new AllocateDatabaseServerFailed(request.getResourceId(), e);
+            response = new AllocateDatabaseServerFailed(request.getResourceId(), e);
             LOGGER.warn("Error launching the database stack:", e);
             // request.getResult().onNext(failure);
-            eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
+        }
+        return response;
+    }
+
+    @Override
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<AllocateDatabaseServerRequest> event) {
+        AllocateDatabaseServerFailed failure = new AllocateDatabaseServerFailed(resourceId, e);
+        LOGGER.warn("Error launching the database stack:", e);
+        return failure;
+    }
+
+    private void validateResourcesState(CloudContext cloudContext, ResourcesStatePollerResult statePollerResult) {
+        if (statePollerResult == null || statePollerResult.getResults() == null) {
+            throw new IllegalStateException(String.format("%s is null, cannot check launch status of database stack for %s",
+                    statePollerResult == null ? "ResourcesStatePollerResult" : "ResourcesStatePollerResult.results", cloudContext));
+        }
+
+        List<CloudResourceStatus> results = statePollerResult.getResults();
+        if (results.size() == 1 && (results.get(0).isFailed() || results.get(0).isDeleted())) {
+            throw new OperationException(String.format(ERROR_FAILED_TO_LAUNCH_THE_DATABASE_STACK, cloudContext, results.get(0).getStatusReason()));
+        }
+        List<CloudResourceStatus> failedResources = results.stream()
+                .filter(r -> r.isFailed() || r.isDeleted())
+                .collect(Collectors.toList());
+        if (!failedResources.isEmpty()) {
+            throw new OperationException(String.format(ERROR_FAILED_TO_LAUNCH_THE_DATABASE_STACK, cloudContext, failedResources));
         }
     }
+
 }

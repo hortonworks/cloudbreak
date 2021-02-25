@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 /**
- * Cloudbreak collects metadata about VM instances like private and floating (public) addresses.
+ * A selection of methods for collecting metadata about various cloud resources, like private and floating (public) addresses associated with VM instances.
  */
 public interface MetadataCollector {
 
@@ -27,4 +27,5 @@ public interface MetadataCollector {
             List<CloudInstance> vms, List<CloudInstance> allInstances);
 
     List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes);
+
 }

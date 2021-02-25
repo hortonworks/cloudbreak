@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -101,6 +102,7 @@ public class AwsRdsLaunchService {
                     .withNetworkCidrs(awsNetworkView.getExistingVpcCidrs())
                     .withHasPort(databaseServer.getPort() != null)
                     .withUseSslEnforcement(useSslEnforcement)
+                    .withSslCertificateIdentifierDefined(new AwsRdsInstanceView(databaseServer).isSslCertificateIdentifierDefined())
                     .withHasSecurityGroup(!databaseServer.getSecurity().getCloudSecurityIds().isEmpty());
             String cfTemplate = cloudFormationTemplateBuilder.build(rdsModelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);

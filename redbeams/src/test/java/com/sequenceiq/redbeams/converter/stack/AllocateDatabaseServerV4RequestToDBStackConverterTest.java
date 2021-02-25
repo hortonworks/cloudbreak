@@ -116,6 +116,10 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final CloudPlatform AZURE_CLOUD_PLATFORM = CloudPlatform.AZURE;
 
+    private static final String CLOUD_PROVIDER_IDENTIFIER_V2 = "cert-id-2";
+
+    private static final String CLOUD_PROVIDER_IDENTIFIER_V3 = "cert-id-3";
+
     private static final String CERT_PEM_V2 = "super-cert-2";
 
     private static final String CERT_PEM_V3 = "super-cert-3";
@@ -127,6 +131,8 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     private static final String FIELD_SSL_ENABLED = "sslEnabled";
 
     private static final int MAX_VERSION = 3;
+
+    private static final int VERSION_1 = 1;
 
     private static final int VERSION_2 = 2;
 
@@ -231,8 +237,8 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(uuidGeneratorService.uuidVariableParts(anyInt())).thenReturn("parts");
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
 
-        sslCertificateEntryV2 = new SslCertificateEntry(VERSION_2, CERT_PEM_V2, x509Certificate);
-        sslCertificateEntryV3 = new SslCertificateEntry(VERSION_3, CERT_PEM_V3, x509Certificate);
+        sslCertificateEntryV2 = new SslCertificateEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_V2, CERT_PEM_V2, x509Certificate);
+        sslCertificateEntryV3 = new SslCertificateEntry(VERSION_3, CLOUD_PROVIDER_IDENTIFIER_V3, CERT_PEM_V3, x509Certificate);
         when(databaseServerSslCertificateConfig.getMaxVersionByPlatform(anyString())).thenReturn(MAX_VERSION);
 
         when(clock.getCurrentInstant()).thenReturn(NOW);
@@ -289,7 +295,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
-        verifySsl(dbStack, Set.of(CERT_PEM_V3));
+        verifySsl(dbStack, Set.of(CERT_PEM_V3), CLOUD_PROVIDER_IDENTIFIER_V3);
         verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
 
         verify(providerParameterCalculator).get(allocateRequest);
@@ -360,7 +366,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds().iterator().next(), DEFAULT_SECURITY_GROUP_ID);
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");
 
-        verifySsl(dbStack, Set.of(CERT_PEM_V3));
+        verifySsl(dbStack, Set.of(CERT_PEM_V3), CLOUD_PROVIDER_IDENTIFIER_V3);
         verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
 
         verify(providerParameterCalculator).get(allocateRequest);
@@ -456,7 +462,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
-        verifySsl(dbStack, Set.of());
+        verifySsl(dbStack, Set.of(), null);
 
         verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
         verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
@@ -475,7 +481,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
-        verifySsl(dbStack, Set.of(CERT_PEM_V3));
+        verifySsl(dbStack, Set.of(CERT_PEM_V3), CLOUD_PROVIDER_IDENTIFIER_V3);
 
         verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
     }
@@ -489,6 +495,47 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
         assertThat(illegalStateException).hasMessage("Could not find SSL certificate version 3 for cloud platform \"AWS\"");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndSingleCertErrorVersionMismatch() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(sslCertificateEntryV2);
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException).hasMessage("SSL certificate version mismatch for cloud platform \"AWS\": expected=3, actual=2");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndSingleCertErrorBlankCloudProviderIdentifier() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
+        SslCertificateEntry sslCertificateEntryV3Broken = new SslCertificateEntry(VERSION_3, "", CERT_PEM_V3, x509Certificate);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(sslCertificateEntryV3Broken);
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException).hasMessage("Blank CloudProviderIdentifier in SSL certificate version 3 for cloud platform \"AWS\"");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
+    }
+
+    @Test
+    void conversionTestWhenSslEnabledAndAwsAndSingleCertErrorBlankPem() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AWS_CLOUD_PLATFORM);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
+        SslCertificateEntry sslCertificateEntryV3Broken = new SslCertificateEntry(VERSION_3, CLOUD_PROVIDER_IDENTIFIER_V3, "", x509Certificate);
+        when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(sslCertificateEntryV3Broken);
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException).hasMessage("Blank PEM in SSL certificate version 3 for cloud platform \"AWS\"");
 
         verify(databaseServerSslCertificateConfig, never()).getCertsByPlatformAndVersions(anyString(), any());
     }
@@ -528,7 +575,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
         DBStack dbStack = underTest.convert(allocateRequest, OWNER_CRN);
 
-        verifySsl(dbStack, Set.of(CERT_PEM_V2, CERT_PEM_V3));
+        verifySsl(dbStack, Set.of(CERT_PEM_V2, CERT_PEM_V3), CLOUD_PROVIDER_IDENTIFIER_V3);
 
         verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
     }
@@ -567,10 +614,10 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     }
 
     @Test
-    void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorDuplicatedCerts() {
+    void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorDuplicatedCertPem() {
         setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
 
-        SslCertificateEntry sslCertificateEntryV2DuplicateOfV3 = new SslCertificateEntry(VERSION_2, CERT_PEM_V3, x509Certificate);
+        SslCertificateEntry sslCertificateEntryV2DuplicateOfV3 = new SslCertificateEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_V3, CERT_PEM_V3, x509Certificate);
 
         when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AZURE_CLOUD_PLATFORM.name())).thenReturn(TWO_CERTS);
         when(databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(AZURE_CLOUD_PLATFORM.name(), VERSION_2, VERSION_3))
@@ -584,13 +631,30 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     }
 
     @Test
+    void conversionTestWhenSslEnabledAndAzureAndTwoCertsErrorVersionMismatch() {
+        setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
+
+        SslCertificateEntry sslCertificateEntryV2Broken = new SslCertificateEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_V2, CERT_PEM_V2, x509Certificate);
+
+        when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AZURE_CLOUD_PLATFORM.name())).thenReturn(TWO_CERTS);
+        when(databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(AZURE_CLOUD_PLATFORM.name(), VERSION_2, VERSION_3))
+                .thenReturn(Set.of(sslCertificateEntryV2Broken, sslCertificateEntryV3));
+
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.convert(allocateRequest, OWNER_CRN));
+        assertThat(illegalStateException)
+                .hasMessage("Could not find SSL certificate version 2 for cloud platform \"AZURE\"");
+
+        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndVersion(anyString(), anyInt());
+    }
+
+    @Test
     void conversionTestWhenSslEnabledAndAzureAndThreeCerts() {
         setupMinimalValid(createSslConfigV4Request(SslMode.ENABLED), AZURE_CLOUD_PLATFORM);
 
         conversionTestWhenSslEnabledAndTwoCertsReturnedInternal(AZURE_CLOUD_PLATFORM.name(), THREE_CERTS);
     }
 
-    private void verifySsl(DBStack dbStack, Set<String> sslCertificatesExpected) {
+    private void verifySsl(DBStack dbStack, Set<String> sslCertificatesExpected, String cloudProviderIdentifierExpected) {
         SslConfig sslConfig = dbStack.getSslConfig();
         assertThat(sslConfig).isNotNull();
         Set<String> sslCertificates = sslConfig.getSslCertificates();
@@ -598,6 +662,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertThat(sslCertificates).isEqualTo(sslCertificatesExpected);
         assertThat(sslConfig.getSslCertificateType()).isEqualTo(SslCertificateType.CLOUD_PROVIDER_OWNED);
         assertThat(sslConfig.getSslCertificateActiveVersion()).isEqualTo(MAX_VERSION);
+        assertThat(sslConfig.getSslCertificateActiveCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifierExpected);
     }
 
     private void setupAllocateRequest(boolean provideOptionalFields) {

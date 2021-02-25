@@ -4,8 +4,14 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -15,20 +21,19 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.amazonaws.AmazonServiceException;
@@ -68,10 +73,13 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.amazonaws.services.rds.model.Certificate;
+import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -80,10 +88,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
+import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTable;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AwsPlatformResourcesTest {
 
     private static final String AZ_NAME = "eu-central-1a";
@@ -93,9 +105,6 @@ public class AwsPlatformResourcesTest {
     private static final String NOT_ENABLED_REGION_NAME = "not-enabled-region";
 
     private static final String NOT_ENABLED_AZ_NAME = "not-enabled-az";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private AwsPlatformResources underTest;
@@ -133,33 +142,33 @@ public class AwsPlatformResourcesTest {
     @Mock
     private DescribeInstanceTypeOfferingsResult describeInstanceTypeOfferingsResult;
 
-    private final Region region = new Region();
-
-    private final InstanceTypeOffering instanceTypeOffering = new InstanceTypeOffering();
-
-    private final List<InstanceTypeInfo> instanceTypeInfos = new ArrayList<>();
-
-    private final AvailabilityZone availabilityZone = new AvailabilityZone();
+    private List<InstanceTypeInfo> instanceTypeInfos;
 
     @Mock
     private AmazonDynamoDBClient amazonDynamoDB;
 
-    @Before
+    private CloudCredential cloudCredential;
+
+    private com.sequenceiq.cloudbreak.cloud.model.Region region;
+
+    @BeforeEach
     public void setUp() {
+        AvailabilityZone availabilityZone = new AvailabilityZone();
         availabilityZone.setZoneName(AZ_NAME);
-        region.setRegionName(REGION_NAME);
+        Region awsRegion = new Region();
+        awsRegion.setRegionName(REGION_NAME);
+        InstanceTypeOffering instanceTypeOffering = new InstanceTypeOffering();
         instanceTypeOffering.setInstanceType("m5.2xlarge");
 
+        instanceTypeInfos = new ArrayList<>();
         instanceTypeInfos.add(getInstanceTypeInfo("m5.2xlarge"));
         describeInstanceTypesResult.setInstanceTypes(instanceTypeInfos);
-
-        Mockito.reset(awsClient);
 
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
         when(awsClient.createEc2Client(any(AwsCredentialView.class))).thenReturn(amazonEC2Client);
         when(awsClient.createEc2Client(any(AwsCredentialView.class), any())).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
-        when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
+        when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(awsRegion));
         when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any()))
                 .thenReturn(List.of(availabilityZone));
         when(amazonEC2Client.describeInstanceTypeOfferings(any(DescribeInstanceTypeOfferingsRequest.class)))
@@ -171,8 +180,11 @@ public class AwsPlatformResourcesTest {
                 .thenReturn(Collections.singletonList(instanceTypeOffering));
 
         ReflectionTestUtils.setField(underTest, "fetchMaxItems", 500);
-        ReflectionTestUtils.setField(underTest, "enabledRegions", Set.of(region(REGION_NAME)));
+        region = region(REGION_NAME);
+        ReflectionTestUtils.setField(underTest, "enabledRegions", Set.of(region));
         ReflectionTestUtils.setField(underTest, "enabledAvailabilityZones", Set.of(availabilityZone(AZ_NAME)));
+
+        cloudCredential = new CloudCredential("crn", "aws-credential");
     }
 
     private InstanceTypeInfo getInstanceTypeInfo(String name) {
@@ -200,13 +212,9 @@ public class AwsPlatformResourcesTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
 
-        thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage("unauthorized.");
-
-        CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), new HashMap<>());
-
-        Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.accessConfigs(cloudCredential, region, new HashMap<>()));
+        assertThat(cloudConnectorException).hasMessageStartingWith("unauthorized.");
     }
 
     @Test
@@ -218,13 +226,9 @@ public class AwsPlatformResourcesTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(amazonServiceException);
 
-        thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage("Amazon problem.");
-
-        CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
-
-        Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.accessConfigs(cloudCredential, region, Collections.emptyMap()));
+        assertThat(cloudConnectorException).hasMessageStartingWith("Amazon problem.");
     }
 
     @Test
@@ -234,13 +238,9 @@ public class AwsPlatformResourcesTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenThrow(badRequestException);
 
-        thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage("BadRequestException problem.");
-
-        CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
-
-        Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
+                () -> underTest.accessConfigs(cloudCredential, region, Collections.emptyMap()));
+        assertThat(cloudConnectorException).hasMessageContaining("BadRequestException problem.");
     }
 
     @Test
@@ -259,10 +259,9 @@ public class AwsPlatformResourcesTest {
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonCFClient);
         when(amazonCFClient.listInstanceProfiles(any(ListInstanceProfilesRequest.class))).thenReturn(listInstanceProfilesResult);
 
-        CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
+        CloudAccessConfigs cloudAccessConfigs = underTest.accessConfigs(cloudCredential, region, Collections.emptyMap());
 
-        Assert.assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
+        assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
 
     @Test
@@ -295,46 +294,45 @@ public class AwsPlatformResourcesTest {
         when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
         when(awskmsClient.listAliases(any(ListAliasesRequest.class))).thenReturn(describeAliasResult);
 
-        CloudEncryptionKeys cloudEncryptionKeys =
-                underTest.encryptionKeys(new CloudCredential("crn", "aws-credential"), region("London"), new HashMap<>());
+        CloudEncryptionKeys cloudEncryptionKeys = underTest.encryptionKeys(cloudCredential, region("London"), new HashMap<>());
 
-        Assert.assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+        assertEquals(4L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
     }
 
     @Test
     public void testVirtualMachinesDisabledTypesEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
-        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
+        assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
     }
 
     @Test
     public void testVirtualMachinesDisabledTypesContainsEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList(""));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
-        Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
+        assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
     }
 
     @Test
     public void testVirtualMachinesOkStartWith() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
-        Assert.assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
+        assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
     }
 
     @Test
     public void testVirtualMachinesOkFullMatch() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5.2xlarge"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
-        Assert.assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
+        assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
     }
 
     private InstanceProfile instanceProfile(int i) {
@@ -369,7 +367,7 @@ public class AwsPlatformResourcesTest {
                 new ListTablesResult().withTableNames("c", "d")
         );
 
-        CloudNoSqlTables cloudNoSqlTables = underTest.noSqlTables(new CloudCredential(), region("region"), null);
+        CloudNoSqlTables cloudNoSqlTables = underTest.noSqlTables(cloudCredential, region("region"), null);
         assertThat(cloudNoSqlTables.getCloudNoSqlTables()).hasSameElementsAs(List.of(
                 new CloudNoSqlTable("a"),
                 new CloudNoSqlTable("b"),
@@ -387,7 +385,7 @@ public class AwsPlatformResourcesTest {
         String availabilityZone = "not-enabled-az";
         subnets.setSubnets(List.of(new Subnet().withAvailabilityZone(availabilityZone).withMapPublicIpOnLaunch(true)));
         when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
-        CloudNetworks cloudNetworks = underTest.networks(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Map.of());
+        CloudNetworks cloudNetworks = underTest.networks(cloudCredential, region, Map.of());
 
         assertThat(cloudNetworks.getCloudNetworkResponses().get(REGION_NAME))
                 .allMatch(cloudNetwork -> cloudNetwork.getSubnets().isEmpty());
@@ -397,11 +395,11 @@ public class AwsPlatformResourcesTest {
     public void regionsShouldBeFilteredByEnabledRegionsAndEnabledAvailabilityZones() {
         setUpRegions();
 
-        CloudRegions cloudRegions = underTest.regions(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Map.of(), true);
+        CloudRegions cloudRegions = underTest.regions(cloudCredential, region, Map.of(), true);
         assertThat(cloudRegions.getCloudRegions())
-                .containsKey(region(REGION_NAME))
+                .containsKey(region)
                 .doesNotContainKey(region(NOT_ENABLED_REGION_NAME));
-        assertThat(cloudRegions.getCloudRegions().get(region(REGION_NAME)))
+        assertThat(cloudRegions.getCloudRegions().get(region))
                 .contains(availabilityZone(AZ_NAME))
                 .doesNotContain(availabilityZone(NOT_ENABLED_AZ_NAME));
     }
@@ -428,11 +426,11 @@ public class AwsPlatformResourcesTest {
         when(describeInstanceTypesResult.getInstanceTypes()).thenReturn(instanceTypeInfos);
 
         ReflectionTestUtils.setField(underTest, "defaultVmTypes", Map.of(
-                region(REGION_NAME), vmType("vm1"),
+                region, vmType("vm1"),
                 region(NOT_ENABLED_REGION_NAME), vmType("vm2")));
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", List.of());
 
-        CloudVmTypes cloudVmTypes = underTest.virtualMachines(new CloudCredential("crn", "aws-credential"), region(REGION_NAME), Map.of());
+        CloudVmTypes cloudVmTypes = underTest.virtualMachines(cloudCredential, region, Map.of());
         assertThat(cloudVmTypes.getCloudVmResponses())
                 .containsKey(AZ_NAME)
                 .doesNotContainKey(NOT_ENABLED_AZ_NAME);
@@ -445,7 +443,7 @@ public class AwsPlatformResourcesTest {
     public void testEncryptionWhenNoEbsInfoShouldReturnFalse() {
         InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
-        Assert.assertFalse(encryptionSupported);
+        assertFalse(encryptionSupported);
     }
 
     @Test
@@ -454,7 +452,7 @@ public class AwsPlatformResourcesTest {
         EbsInfo ebsInfo = new EbsInfo();
         instanceTypeInfo.setEbsInfo(ebsInfo);
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
-        Assert.assertFalse(encryptionSupported);
+        assertFalse(encryptionSupported);
     }
 
     @Test
@@ -464,7 +462,7 @@ public class AwsPlatformResourcesTest {
         ebsInfo.setEncryptionSupport("supported");
         instanceTypeInfo.setEbsInfo(ebsInfo);
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
-        Assert.assertTrue(encryptionSupported);
+        assertTrue(encryptionSupported);
     }
 
     @Test
@@ -474,6 +472,49 @@ public class AwsPlatformResourcesTest {
         ebsInfo.setEncryptionSupport("nonsupported");
         instanceTypeInfo.setEbsInfo(ebsInfo);
         boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
-        Assert.assertFalse(encryptionSupported);
+        assertFalse(encryptionSupported);
     }
+
+    @Test
+    void databaseServerGeneralSslRootCertificatesTestNPEWhenNullCloudCredential() {
+        assertThrows(NullPointerException.class, () -> underTest.databaseServerGeneralSslRootCertificates(null, region));
+    }
+
+    @Test
+    void databaseServerGeneralSslRootCertificatesTestNPEWhenNullRegion() {
+        assertThrows(NullPointerException.class, () -> underTest.databaseServerGeneralSslRootCertificates(cloudCredential, null));
+    }
+
+    @Test
+    void databaseServerGeneralSslRootCertificatesTestWhenSuccess() {
+        Certificate certificate1 = mock(Certificate.class);
+        when(certificate1.getCertificateIdentifier()).thenReturn("cert1");
+        Certificate certificate2 = mock(Certificate.class);
+        when(certificate2.getCertificateIdentifier()).thenReturn("cert2");
+
+        AmazonRdsClient amazonRdsClient = mock(AmazonRdsClient.class);
+        when(amazonRdsClient.describeCertificates(any(DescribeCertificatesRequest.class))).thenReturn(List.of(certificate1, certificate2));
+        when(awsClient.createRdsClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(amazonRdsClient);
+
+        CloudDatabaseServerSslCertificates cloudDatabaseServerSslCertificates = underTest.databaseServerGeneralSslRootCertificates(cloudCredential, region);
+
+        assertThat(cloudDatabaseServerSslCertificates).isNotNull();
+
+        Set<CloudDatabaseServerSslCertificate> sslCertificates = cloudDatabaseServerSslCertificates.getSslCertificates();
+        assertThat(sslCertificates).isNotNull();
+        assertThat(sslCertificates).hasSize(2);
+        verifySslRootCertificate(sslCertificates, "cert1");
+        verifySslRootCertificate(sslCertificates, "cert2");
+    }
+
+    private void verifySslRootCertificate(Set<CloudDatabaseServerSslCertificate> sslCertificates, String certificateIdentifier) {
+        Optional<CloudDatabaseServerSslCertificate> match = sslCertificates.stream()
+                .filter(c -> certificateIdentifier.equals(c.getCertificateIdentifier()))
+                .findFirst();
+        assertThat(match).overridingErrorMessage("No cert found for certificateIdentifier %s", certificateIdentifier).isNotEmpty();
+
+        CloudDatabaseServerSslCertificate sslCertificate = match.get();
+        assertThat(sslCertificate.getCertificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
+    }
+
 }

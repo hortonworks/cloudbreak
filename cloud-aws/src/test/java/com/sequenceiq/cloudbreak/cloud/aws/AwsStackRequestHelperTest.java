@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,10 +15,16 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.Parameter;
@@ -42,7 +47,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AwsStackRequestHelperTest {
+
+    private static final String SSL_CERTIFICATE_IDENTIFIER = "mycert";
 
     @Mock
     private AwsTaggingService awsTaggingService;
@@ -80,10 +89,8 @@ public class AwsStackRequestHelperTest {
     @InjectMocks
     private AwsStackRequestHelper underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(authenticatedContext.getParameter(any())).thenReturn(amazonEC2Client);
 
@@ -133,8 +140,19 @@ public class AwsStackRequestHelperTest {
         assertEquals(tags, createStackRequest.getTags());
     }
 
-    @Test
-    public void testGetStackParametersDb() {
+    static Object[][] testGetStackParametersDbDataProvider() {
+        return new Object[][]{
+                // testCaseName sslCertificateIdentifier sslCertificateIdentifierParameterDefinedExpected sslCertificateIdentifierParameterExpected
+                {"sslCertificateIdentifier=null", null, false, null},
+                {"sslCertificateIdentifier=empty", "", false, null},
+                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER, true, SSL_CERTIFICATE_IDENTIFIER},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testGetStackParametersDbDataProvider")
+    public void testGetStackParametersDb(String testCaseName, String sslCertificateIdentifier, boolean sslCertificateIdentifierParameterDefinedExpected,
+            String sslCertificateIdentifierParameterExpected) {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
         when(databaseServer.getStorageSize()).thenReturn(50L);
@@ -150,6 +168,7 @@ public class AwsStackRequestHelperTest {
         when(databaseServer.getRootPassword()).thenReturn("cloudera");
         when(databaseServer.getSecurity().getCloudSecurityIds()).thenReturn(List.of("sg-1234", "sg-5678"));
         when(databaseServer.isUseSslEnforcement()).thenReturn(true);
+        when(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn(sslCertificateIdentifier);
 
         when(cloudContext.getUserName()).thenReturn("bob@cloudera.com");
 
@@ -172,13 +191,28 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
         assertContainsParameter(parameters, "DBParameterGroupNameParameter", "dpg-myserver");
         assertContainsParameter(parameters, "DBParameterGroupFamilyParameter", "postgres10");
+        if (sslCertificateIdentifierParameterDefinedExpected) {
+            assertContainsParameter(parameters, "SslCertificateIdentifierParameter", sslCertificateIdentifierParameterExpected);
+        } else {
+            assertDoesNotContainParameter(parameters, "SslCertificateIdentifierParameter");
+        }
 
         parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
         assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
     }
 
-    @Test
-    public void testGetMinimalStackParametersDb() {
+    static Object[][] testGetMinimalStackParametersDbDataProvider() {
+        return new Object[][]{
+                // testCaseName sslCertificateIdentifier
+                {"sslCertificateIdentifier=null", null},
+                {"sslCertificateIdentifier=empty", ""},
+                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("testGetMinimalStackParametersDbDataProvider")
+    public void testGetMinimalStackParametersDb(String testCaseName, String sslCertificateIdentifier) {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
         when(databaseServer.getStorageSize()).thenReturn(null);
@@ -193,6 +227,8 @@ public class AwsStackRequestHelperTest {
         when(databaseServer.getRootUserName()).thenReturn("root");
         when(databaseServer.getRootPassword()).thenReturn("cloudera");
         when(databaseServer.getSecurity().getCloudSecurityIds()).thenReturn(List.of("sg-1234", "sg-5678"));
+        when(databaseServer.isUseSslEnforcement()).thenReturn(false);
+        when(databaseServer.getStringParameter(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER)).thenReturn(sslCertificateIdentifier);
 
         when(cloudContext.getUserName()).thenReturn("bob@cloudera.com");
 
@@ -206,6 +242,7 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "PortParameter");
         assertDoesNotContainParameter(parameters, "DBParameterGroupNameParameter");
         assertDoesNotContainParameter(parameters, "DBParameterGroupFamilyParameter");
+        assertDoesNotContainParameter(parameters, "SslCertificateIdentifierParameter");
         assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
 
         parameters = underTest.getStackParameters(authenticatedContext, databaseStack, true);
@@ -218,6 +255,7 @@ public class AwsStackRequestHelperTest {
         assertDoesNotContainParameter(parameters, "PortParameter");
         assertDoesNotContainParameter(parameters, "DBParameterGroupNameParameter");
         assertDoesNotContainParameter(parameters, "DBParameterGroupFamilyParameter");
+        assertDoesNotContainParameter(parameters, "SslCertificateIdentifierParameter");
         assertContainsParameter(parameters, "DeletionProtectionParameter", "true");
     }
 
@@ -267,16 +305,17 @@ public class AwsStackRequestHelperTest {
         Optional<Parameter> foundParameterOpt = parameters.stream()
             .filter(p -> p.getParameterKey().equals(key))
             .findFirst();
-        assertTrue("Parameters are missing " + key, foundParameterOpt.isPresent());
+        assertTrue(foundParameterOpt.isPresent(), "Parameters are missing " + key);
         String foundValue = foundParameterOpt.get().getParameterValue();
-        assertEquals("Parameter " + key + " should have value " + value + " but has value " + foundValue,
-            value, foundValue);
+        assertEquals(
+                value, foundValue, "Parameter " + key + " should have value " + value + " but has value " + foundValue);
     }
 
     private void assertDoesNotContainParameter(Collection<Parameter> parameters, String key) {
         Optional<Parameter> foundParameterOpt = parameters.stream()
             .filter(p -> p.getParameterKey().equals(key))
             .findFirst();
-        assertFalse("Parameters include " + key, foundParameterOpt.isPresent());
+        assertFalse(foundParameterOpt.isPresent(), "Parameters include " + key);
     }
+
 }

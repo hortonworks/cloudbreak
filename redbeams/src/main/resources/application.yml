@@ -71,7 +71,7 @@ redbeams:
     enabled: true
     certs:
       aws: |-
-        0:-----BEGIN CERTIFICATE-----
+        0:rds-ca-2019:-----BEGIN CERTIFICATE-----
         MIIEBjCCAu6gAwIBAgIJAMc0ZzaSUK51MA0GCSqGSIb3DQEBCwUAMIGPMQswCQYD
         VQQGEwJVUzEQMA4GA1UEBwwHU2VhdHRsZTETMBEGA1UECAwKV2FzaGluZ3RvbjEi
         MCAGA1UECgwZQW1hem9uIFdlYiBTZXJ2aWNlcywgSW5jLjETMBEGA1UECwwKQW1h
@@ -96,7 +96,7 @@ redbeams:
         zPW4CXXvhLmE02TA9/HeCw3KEHIwicNuEfw=
         -----END CERTIFICATE-----
       azure: |-
-        0:-----BEGIN CERTIFICATE-----
+        0:BaltimoreCyberTrustRoot:-----BEGIN CERTIFICATE-----
         MIIDdzCCAl+gAwIBAgIEAgAAuTANBgkqhkiG9w0BAQUFADBaMQswCQYDVQQGEwJJ
         RTESMBAGA1UEChMJQmFsdGltb3JlMRMwEQYDVQQLEwpDeWJlclRydXN0MSIwIAYD
         VQQDExlCYWx0aW1vcmUgQ3liZXJUcnVzdCBSb290MB4XDTAwMDUxMjE4NDYwMFoX
@@ -117,7 +117,7 @@ redbeams:
         ksLi4xaNmjICq44Y3ekQEe5+NauQrz4wlHrQMz2nZQ/1/I6eYs9HRCwBXbsdtTLS
         R9I4LtD+gdwyah617jzV/OeBHRnDJELqYzmp
         -----END CERTIFICATE-----;
-        1:-----BEGIN CERTIFICATE-----
+        1:DigiCertGlobalRootG2:-----BEGIN CERTIFICATE-----
         MIIDjjCCAnagAwIBAgIQAzrx5qcRqaC7KGSxHQn65TANBgkqhkiG9w0BAQsFADBh
         MQswCQYDVQQGEwJVUzEVMBMGA1UEChMMRGlnaUNlcnQgSW5jMRkwFwYDVQQLExB3
         d3cuZGlnaWNlcnQuY29tMSAwHgYDVQQDExdEaWdpQ2VydCBHbG9iYWwgUm9vdCBH

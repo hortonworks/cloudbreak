@@ -9,18 +9,25 @@ public class SslCertificateEntry {
 
     private final int version;
 
+    private final String cloudProviderIdentifier;
+
     private final String certPem;
 
     private final X509Certificate x509Cert;
 
-    public SslCertificateEntry(int version, String certPem, X509Certificate x509Cert) {
+    public SslCertificateEntry(int version, String cloudProviderIdentifier, String certPem, X509Certificate x509Cert) {
         this.version = version;
+        this.cloudProviderIdentifier = requireNonNull(cloudProviderIdentifier);
         this.certPem = requireNonNull(certPem);
         this.x509Cert = requireNonNull(x509Cert);
     }
 
     public int getVersion() {
         return version;
+    }
+
+    public String getCloudProviderIdentifier() {
+        return cloudProviderIdentifier;
     }
 
     public String getCertPem() {
@@ -63,6 +70,7 @@ public class SslCertificateEntry {
     public String toString() {
         return "SslCertificateEntry{" +
                 "version=" + version +
+                ", cloudProviderIdentifier='" + cloudProviderIdentifier + '\'' +
                 ", certPem='" + certPem + '\'' +
                 ", x509Cert=" + x509Cert +
                 '}';

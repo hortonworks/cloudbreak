@@ -48,3 +48,18 @@ dependencies {
   testCompile project(path: ':authorization-common', configuration: 'tests')
   testCompile project(path: ':common', configuration: 'tests')
 }
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  classifier 'test'
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}

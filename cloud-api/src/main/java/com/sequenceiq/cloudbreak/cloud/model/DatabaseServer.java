@@ -7,6 +7,19 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class DatabaseServer extends DynamicModel {
 
+    /**
+     * Key of the optional dynamic parameter denoting the cloud provider specific identifier of the SSL root certificate to use for the DB server instance.
+     * The exact interpretation of this setting is up to the target cloud provider. Relevant only if {@code useSslEnforcement == true}.
+     *
+     * <p>
+     *     When set, the value shall be a nonempty {@link String} containing the SSL root certificate identifier in a cloud provider specific syntax.
+     * </p>
+     *
+     * @see #isUseSslEnforcement()
+     * @see #putParameter(String, Object)
+     */
+    public static final String SSL_CERTIFICATE_IDENTIFIER = "sslCertificateIdentifier";
+
     private final String serverId;
 
     private final String flavor;
@@ -35,25 +48,22 @@ public class DatabaseServer extends DynamicModel {
 
     private final boolean highAvailability;
 
-    private DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String connectionDriver,
-            String connectorJarUrl, String rootUserName, String rootPassword,
-            Integer port, boolean useSslEnforcement, Long storageSize, Security security, InstanceStatus status, String location, boolean highAvailability,
-            Map<String, Object> parameters) {
-        super(parameters);
-        this.serverId = serverId;
-        this.flavor = flavor;
-        this.engine = engine;
-        this.connectionDriver = connectionDriver;
-        this.connectorJarUrl = connectorJarUrl;
-        this.rootUserName = rootUserName;
-        this.rootPassword = rootPassword;
-        this.port = port;
-        this.useSslEnforcement = useSslEnforcement;
-        this.storageSize = storageSize;
-        this.security = security;
-        this.status = status;
-        this.location = location;
-        this.highAvailability = highAvailability;
+    private DatabaseServer(Builder builder) {
+        super(builder.params);
+        this.serverId = builder.serverId;
+        this.flavor = builder.flavor;
+        this.engine = builder.engine;
+        this.connectionDriver = builder.connectionDriver;
+        this.connectorJarUrl = builder.connectorJarUrl;
+        this.rootUserName = builder.rootUserName;
+        this.rootPassword = builder.rootPassword;
+        this.port = builder.port;
+        this.useSslEnforcement = builder.useSslEnforcement;
+        this.storageSize = builder.storageSize;
+        this.security = builder.security;
+        this.status = builder.status;
+        this.location = builder.location;
+        this.highAvailability = builder.highAvailability;
     }
 
     public String getServerId() {
@@ -127,6 +137,7 @@ public class DatabaseServer extends DynamicModel {
                 + ", security=" + security
                 + ", status=" + status
                 + ", highAvailability=" + highAvailability
+                + ", dynamicModel=" + super.toString()
                 + '}';
     }
 
@@ -242,8 +253,7 @@ public class DatabaseServer extends DynamicModel {
         }
 
         public DatabaseServer build() {
-            return new DatabaseServer(serverId, flavor, engine, connectionDriver, connectorJarUrl, rootUserName, rootPassword,
-                port, useSslEnforcement, storageSize, security, status, location, highAvailability, params);
+            return new DatabaseServer(this);
         }
 
     }

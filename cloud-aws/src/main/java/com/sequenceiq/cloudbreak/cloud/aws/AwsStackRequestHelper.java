@@ -229,10 +229,12 @@ public class AwsStackRequestHelper {
         addParameterIfNotNull(parameters, "MultiAZParameter", awsRdsInstanceView.getMultiAZ());
         addParameterIfNotNull(parameters, "StorageTypeParameter", awsRdsInstanceView.getStorageType());
         addParameterIfNotNull(parameters, "PortParameter", databaseServer.getPort());
-        addParameterIfNotNull(parameters, "DBParameterGroupNameParameter",
-                databaseServer.isUseSslEnforcement() ? awsRdsDbParameterGroupView.getDBParameterGroupName() : null);
+        boolean useSslEnforcement = databaseServer.isUseSslEnforcement();
+        addParameterIfNotNull(parameters, "DBParameterGroupNameParameter", useSslEnforcement ? awsRdsDbParameterGroupView.getDBParameterGroupName() : null);
         addParameterIfNotNull(parameters, "DBParameterGroupFamilyParameter",
-                databaseServer.isUseSslEnforcement() ? awsRdsDbParameterGroupView.getDBParameterGroupFamily() : null);
+                useSslEnforcement ? awsRdsDbParameterGroupView.getDBParameterGroupFamily() : null);
+        addParameterIfNotNull(parameters, "SslCertificateIdentifierParameter",
+                useSslEnforcement && awsRdsInstanceView.isSslCertificateIdentifierDefined() ? awsRdsInstanceView.getSslCertificateIdentifier() : null);
 
         if (awsRdsInstanceView.getVPCSecurityGroups().isEmpty()) {
             // VPC-id and VPC cidr should be filled in

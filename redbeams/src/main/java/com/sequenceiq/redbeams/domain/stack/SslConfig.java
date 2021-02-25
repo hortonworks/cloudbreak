@@ -36,6 +36,8 @@ public class SslConfig {
 
     private Integer sslCertificateActiveVersion;
 
+    private String sslCertificateActiveCloudProviderIdentifier;
+
     public Long getId() {
         return id;
     }
@@ -66,6 +68,25 @@ public class SslConfig {
 
     public void setSslCertificateActiveVersion(Integer sslCertificateActiveVersion) {
         this.sslCertificateActiveVersion = sslCertificateActiveVersion;
+    }
+
+    public String getSslCertificateActiveCloudProviderIdentifier() {
+        return sslCertificateActiveCloudProviderIdentifier;
+    }
+
+    public void setSslCertificateActiveCloudProviderIdentifier(String sslCertificateActiveCloudProviderIdentifier) {
+        this.sslCertificateActiveCloudProviderIdentifier = sslCertificateActiveCloudProviderIdentifier;
+    }
+
+    @Override
+    public String toString() {
+        return "SslConfig{" +
+                "id=" + id +
+                ", sslCertificates=" + sslCertificates +
+                ", sslCertificateType=" + sslCertificateType +
+                ", sslCertificateActiveVersion=" + sslCertificateActiveVersion +
+                ", sslCertificateActiveCloudProviderIdentifier='" + sslCertificateActiveCloudProviderIdentifier + '\'' +
+                '}';
     }
 
 }
