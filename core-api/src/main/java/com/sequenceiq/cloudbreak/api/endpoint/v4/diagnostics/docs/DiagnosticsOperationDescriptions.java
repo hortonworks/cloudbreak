@@ -10,6 +10,11 @@ public final class DiagnosticsOperationDescriptions {
     public static final String LIST_COLLECTIONS = "Returns a list of the recent diagnostics collections.";
     public static final String CANCEL_COLLECTIONS = "Cancel the not finished diagnostics collections.";
 
+    public static final String GET_METERING_REPORT = "Returns metering configuration check results from the cluster nodes.";
+    public static final String GET_NETWORK_REPORT = "Returns network configuration check results from the cluster nodes.";
+    public static final String GET_SERVICES_REPORT = "Returns services check results from the cluster nodes.";
+    public static final String GET_SALT_REPORT = "Returns sa;t check results from the cluster nodes.";
+
     private DiagnosticsOperationDescriptions() {
     }
 }

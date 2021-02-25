@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
+import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -63,5 +64,23 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     @DisableCheckPermissions
     public List<String> getCmRoles(String stackCrn) {
         return diagnosticsService.getCmRoles(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public NodeStatusResponse getMeteringReport(@ResourceCrn String stackCrn) {
+        return diagnosticsService.getMeteringReport(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public NodeStatusResponse getNetworkReport(@ResourceCrn String stackCrn) {
+        return diagnosticsService.getNetworkReport(stackCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public NodeStatusResponse getServicesReport(@ResourceCrn String stackCrn) {
+        return diagnosticsService.getServicesReport(stackCrn);
     }
 }

@@ -6,11 +6,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.node.health.client.model.HealthReport;
+import com.sequenceiq.node.health.client.model.SaltReport;
 
 public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
@@ -49,24 +52,28 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         restClient.close();
     }
 
     public RPCResponse<HealthReport> nodeMeteringReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node metering check", "/metering_report.json", HealthReport.class);
+        return invoke("node metering check", "/report/metering_report.json", HealthReport.class);
     }
 
     public RPCResponse<HealthReport> nodeNetworkReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node network check", "/network_report.json", HealthReport.class);
+        return invoke("node network check", "/report/network_report.json", HealthReport.class);
     }
 
     public RPCResponse<HealthReport> nodeServicesReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node services check", "/services_report.json", HealthReport.class);
+        return invoke("node services check", "/report/services_report.json", HealthReport.class);
+    }
+
+    public RPCResponse<SaltReport> saltReport() throws CdpNodeStatusMonitorClientException {
+        return invoke("node services check", "/report/salt_report.json", SaltReport.class);
     }
 
     private <T> RPCResponse<T> invoke(String name, String path, Class<T> resultType) throws CdpNodeStatusMonitorClientException {
-        Invocation.Builder builder = rpcTarget.path(path)
+        Builder builder = rpcTarget.path(path)
                 .request()
                 .headers(headers);
         if (username.isPresent() && password.isPresent()) {
@@ -100,8 +107,8 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
     }
 
     private void checkResponseStatus(Response response) throws CdpNodeStatusMonitorClientException {
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL &&
-                response.getStatus() != Response.Status.SERVICE_UNAVAILABLE.getStatusCode()) {
+        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL &&
+                response.getStatus() != Status.SERVICE_UNAVAILABLE.getStatusCode()) {
             String message = String.format("Invoke FreeIPA health check failed: %d", response.getStatus());
             LOGGER.warn("{}, reason: {}", message, response.readEntity(String.class));
             throw new CdpNodeStatusMonitorClientException(message, response.getStatus());
