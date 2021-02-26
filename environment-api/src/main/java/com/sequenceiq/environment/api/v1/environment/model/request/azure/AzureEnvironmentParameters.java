@@ -14,6 +14,10 @@ public class AzureEnvironmentParameters {
     @ApiModelProperty(EnvironmentModelDescription.RESOURCE_GROUP_PARAMETERS)
     private AzureResourceGroup resourceGroup;
 
+    @Valid
+    @ApiModelProperty(EnvironmentModelDescription.RESOURCE_ENCRYPTION_PARAMETERS)
+    private AzureResourceEncryptionParameters resourceEncryptionParameters;
+
     public AzureResourceGroup getResourceGroup() {
         return resourceGroup;
     }
@@ -22,10 +26,19 @@ public class AzureEnvironmentParameters {
         this.resourceGroup = resourceGroup;
     }
 
+    public AzureResourceEncryptionParameters getResourceEncryptionParameters() {
+        return resourceEncryptionParameters;
+    }
+
+    public void setResourceEncryptionParameters(AzureResourceEncryptionParameters resourceEncryptionParameters) {
+        this.resourceEncryptionParameters = resourceEncryptionParameters;
+    }
+
     @Override
     public String toString() {
         return "AzureEnvironmentParameters{" +
                 "resourceGroup=" + resourceGroup +
+                ", resourceEncryptionParameters=" + resourceEncryptionParameters +
                 '}';
     }
 
@@ -37,14 +50,22 @@ public class AzureEnvironmentParameters {
 
         private AzureResourceGroup azureResourceGroup;
 
+        private AzureResourceEncryptionParameters resourceEncryptionParameters;
+
         public Builder withAzureResourceGroup(AzureResourceGroup azureResourceGroup) {
             this.azureResourceGroup = azureResourceGroup;
+            return this;
+        }
+
+        public Builder withResourceEncryptionParameters(AzureResourceEncryptionParameters resourceEncryptionParameters) {
+            this.resourceEncryptionParameters = resourceEncryptionParameters;
             return this;
         }
 
         public AzureEnvironmentParameters build() {
             AzureEnvironmentParameters azureEnvironmentParameters = new AzureEnvironmentParameters();
             azureEnvironmentParameters.setResourceGroup(azureResourceGroup);
+            azureEnvironmentParameters.setResourceEncryptionParameters(resourceEncryptionParameters);
             return azureEnvironmentParameters;
         }
     }
