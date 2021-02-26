@@ -65,12 +65,7 @@ public class AzureInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         LOGGER.info("Stopping vms on Azure: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        try {
-            return azureUtils.deallocateInstances(ac, vms);
-        } catch (BatchInstanceActionFailedException e) {
-            LOGGER.error("Stoppings vms on Azure failed: {}", e.getFailedInstanceStatusReasons());
-            return e.getInstanceStatuses();
-        }
+        return azureUtils.deallocateInstances(ac, vms);
     }
 
     @Override
@@ -110,16 +105,12 @@ public class AzureInstanceConnector implements InstanceConnector {
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
         LOGGER.info("Check instances on Azure: {}", cloudInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, cloudInstances, statuses);
-        return statuses;
+        return azureVirtualMachineService.getVmsAndVmStatusesFromAzure(ac, cloudInstances).getStatuses();
     }
 
     @Override
     public List<CloudVmInstanceStatus> checkWithoutRetry(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
         LOGGER.info("Check instances on Azure: {}", cloudInstances.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(ac, cloudInstances, statuses);
-        return statuses;
+        return azureVirtualMachineService.getVmsAndVmStatusesFromAzureWithoutRetry(ac, cloudInstances).getStatuses();
     }
 }
