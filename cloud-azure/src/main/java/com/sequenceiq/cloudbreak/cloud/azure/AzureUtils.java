@@ -247,10 +247,9 @@ public class AzureUtils {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public List<CloudVmInstanceStatus> deallocateInstances(AuthenticatedContext ac, List<CloudInstance> vms) throws BatchInstanceActionFailedException {
+    public List<CloudVmInstanceStatus> deallocateInstances(AuthenticatedContext ac, List<CloudInstance> vms) {
         LOGGER.info("Deallocate VMs: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        List<CloudVmInstanceStatus> actualVmStatuses = new ArrayList<>();
-        azureVirtualMachineService.getVmsFromAzureAndFillStatusesWithoutRetry(ac, vms, actualVmStatuses);
+        List<CloudVmInstanceStatus> actualVmStatuses = azureVirtualMachineService.getVmsAndVmStatusesFromAzureWithoutRetry(ac, vms).getStatuses();
         List<CloudVmInstanceStatus> statusesAfterDeallocate = new ArrayList<>();
         List<CloudInstance> vmsNotStopped = new ArrayList<>();
         actualVmStatuses.stream().forEach(instance -> {
@@ -267,27 +266,29 @@ public class AzureUtils {
     }
 
     private void deallocateInstancesAndFillStatuses(AuthenticatedContext ac, List<CloudVmInstanceStatus> statusesAfterDeallocate,
-            List<CloudInstance> vmsNotStopped) throws BatchInstanceActionFailedException {
+            List<CloudInstance> vmsNotStopped) {
         try {
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
             List<Completable> deallocateCompletables = new ArrayList<>();
             for (CloudInstance vm : vmsNotStopped) {
-                deallocateInstance(ac, statusesAfterDeallocate, deallocateCompletables, vm);
+                deallocateInstance(azureClient, ac.getCloudContext(), statusesAfterDeallocate, deallocateCompletables, vm);
             }
             Completable.mergeDelayError(deallocateCompletables).await();
         } catch (CompositeException e) {
-            LOGGER.error("Error(s) occured while waiting for vm deallocation: [{}]",
-                    e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining()));
-            throw new BatchInstanceActionFailedException(statusesAfterDeallocate, e);
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for vm deallocation: {}, statuses: {}", errorMessages, statusesAfterDeallocate);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for vm deallocation: " + errorMessages
+                    + ", statuses: " + convertToStatusText(statusesAfterDeallocate), e);
         } catch (RuntimeException e) {
-            LOGGER.error("Error occured while waiting for vm deallocation: {}", e.getMessage(), e);
-            throw new BatchInstanceActionFailedException(statusesAfterDeallocate, e);
+            LOGGER.error("Error occured while waiting for vm deallocation: {}, statuses: {}", e.getMessage(), statusesAfterDeallocate, e);
+            throw new CloudbreakServiceException("Error occured while waiting for vm deallocation: " + e.getMessage()
+                    + ", statuses: " + convertToStatusText(statusesAfterDeallocate), e);
         }
     }
 
-    private void deallocateInstance(AuthenticatedContext ac, List<CloudVmInstanceStatus> statusesAfterDeallocate,
+    private void deallocateInstance(AzureClient azureClient, CloudContext cloudContext, List<CloudVmInstanceStatus> statusesAfterDeallocate,
             List<Completable> deallocateCompletables, CloudInstance vm) {
-        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
-        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, vm);
         deallocateCompletables.add(azureClient.deallocateVirtualMachineAsync(resourceGroupName, vm.getInstanceId())
                 .doOnError(throwable -> {
                     LOGGER.error("Error happend on azure instance stop: {}", vm, throwable);
@@ -300,41 +301,85 @@ public class AzureUtils {
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public List<CloudVmInstanceStatus> deleteInstances(AuthenticatedContext ac, List<CloudInstance> vms) {
         LOGGER.info("Delete VMs: {}", vms.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
-        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
-        List<Completable> deleteCompletables = new ArrayList<>();
-        for (CloudInstance vm : vms) {
-            String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), vm);
-            AzureClient azureClient = ac.getParameter(AzureClient.class);
-            deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, vm.getInstanceId())
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure instance delete: {}", vm, throwable);
-                        statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
-                    })
-                    .doOnCompleted(() -> statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED)))
-                    .subscribeOn(Schedulers.io()));
+        List<CloudVmInstanceStatus> statusesAfterDelete = new ArrayList<>();
+        AzureVirtualMachinesWithStatuses virtualMachinesWithStatuses = azureVirtualMachineService.getVmsAndVmStatusesFromAzure(ac, vms);
+        List<CloudInstance> vmsNotDeleted = new ArrayList<>();
+        for (CloudVmInstanceStatus instance : virtualMachinesWithStatuses.getStatuses()) {
+            if (virtualMachinesWithStatuses.getVirtualMachines().containsKey(instance.getCloudInstance().getInstanceId())) {
+                if (InstanceStatus.TERMINATED.equals(instance.getStatus()) || InstanceStatus.TERMINATED_BY_PROVIDER.equals(instance.getStatus())) {
+                    statusesAfterDelete.add(instance);
+                } else {
+                    vmsNotDeleted.add(instance.getCloudInstance());
+                }
+            }
         }
-        Completable.merge(deleteCompletables).await();
-        return statuses;
+        LOGGER.info("Delete not stopped VMs: {}", vmsNotDeleted.stream().map(CloudInstance::getInstanceId).collect(Collectors.toList()));
+        deleteInstancesAndFillStatuses(ac, statusesAfterDelete, vmsNotDeleted);
+
+        return statusesAfterDelete;
+    }
+
+    private void deleteInstancesAndFillStatuses(AuthenticatedContext ac, List<CloudVmInstanceStatus> statusesAfterDelete, List<CloudInstance> vmsNotDeleted) {
+        try {
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            List<Completable> deleteCompletables = new ArrayList<>();
+            for (CloudInstance vm : vmsNotDeleted) {
+                deleteInstance(azureClient, ac.getCloudContext(), statusesAfterDelete, deleteCompletables, vm);
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for vm deletion: {}, statuses: {}", errorMessages, statusesAfterDelete);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for vm deletion: " + errorMessages
+                    + ", statuses: " + convertToStatusText(statusesAfterDelete), e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for vm deletion: {}, statuses: {}", e.getMessage(), statusesAfterDelete, e);
+            throw new CloudbreakServiceException("Error occured while waiting for vm deletion: " + e.getMessage()
+                    + ", statuses: " + convertToStatusText(statusesAfterDelete), e);
+        }
+    }
+
+    private void deleteInstance(AzureClient azureClient, CloudContext cloudContext, List<CloudVmInstanceStatus> statusesAfterDelete,
+            List<Completable> deleteCompletables, CloudInstance vm) {
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, vm);
+        deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, vm.getInstanceId())
+                .doOnError(throwable -> {
+                    LOGGER.error("Error happened on azure instance delete: {}", vm, throwable);
+                    statusesAfterDelete.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, throwable.getMessage()));
+                })
+                .doOnCompleted(() -> statusesAfterDelete.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED)))
+                .subscribeOn(Schedulers.io()));
+    }
+
+    private String convertToStatusText(List<CloudVmInstanceStatus> statusesAfterDeallocate) {
+        return statusesAfterDeallocate.stream()
+                .map(status -> status.getCloudInstance().getInstanceId() + " - " + status.getStatus())
+                .collect(Collectors.joining());
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public void deleteCloudResourceInstances(AuthenticatedContext ac, String resourceGroupName, List<String> instanceIdList) {
-        LOGGER.info("Delete VM-s by name: {}", instanceIdList);
+    public void deleteInstancesByName(AuthenticatedContext ac, String resourceGroupName, List<String> instanceNameList) {
+        LOGGER.info("Delete VM-s by name: {}", instanceNameList);
         List<String> failedToDeleteVms = new ArrayList<>();
-        List<Completable> deleteCompletables = new ArrayList<>();
-        for (String name : instanceIdList) {
+        try {
+            List<Completable> deleteCompletables = new ArrayList<>();
             AzureClient azureClient = ac.getParameter(AzureClient.class);
-            deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, name)
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure instance delete: {}", name, throwable);
-                        failedToDeleteVms.add(name);
-                    })
-                    .subscribeOn(Schedulers.io()));
-        }
-        Completable.mergeDelayError(deleteCompletables).await();
-        if (!failedToDeleteVms.isEmpty()) {
-            LOGGER.error("Can't delete every vm: {}", failedToDeleteVms);
-            throw new CloudbreakServiceException("Can't delete every vm: " + failedToDeleteVms);
+            for (String vmName : instanceNameList) {
+                deleteCompletables.add(azureClient.deleteVirtualMachine(resourceGroupName, vmName)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure instance delete: {}", vmName, throwable);
+                            failedToDeleteVms.add(vmName);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for vm deletion: {}", errorMessages);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for vm deletion: " + errorMessages, e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for vm deletion: {}", e.getMessage(), e);
+            throw new CloudbreakServiceException("Error occured while waiting for vm deletion: " + e.getMessage(), e);
         }
     }
 
@@ -354,60 +399,75 @@ public class AzureUtils {
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void deleteNetworkInterfaces(AzureClient azureClient, String resourceGroupName, Collection<String> networkInterfaceNames) {
         LOGGER.info("Delete network interfaces: {}", networkInterfaceNames);
-        List<Completable> deleteCompletables = new ArrayList<>();
         List<String> failedToDeleteNetworkInterfaces = new ArrayList<>();
-        for (String networkInterfaceName : networkInterfaceNames) {
-            deleteCompletables.add(azureClient.deleteNetworkInterfaceAsync(resourceGroupName, networkInterfaceName)
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure network interface delete: {}", networkInterfaceName, throwable);
-                        failedToDeleteNetworkInterfaces.add(networkInterfaceName);
-                    })
-                    .subscribeOn(Schedulers.io()));
-        }
-        Completable.merge(deleteCompletables).await();
-        if (!failedToDeleteNetworkInterfaces.isEmpty()) {
-            LOGGER.error("Can't delete every network interfaces: {}", failedToDeleteNetworkInterfaces);
-            throw new CloudbreakServiceException("Can't delete every network interfaces: " + failedToDeleteNetworkInterfaces);
+        try {
+            List<Completable> deleteCompletables = new ArrayList<>();
+            for (String networkInterfaceName : networkInterfaceNames) {
+                deleteCompletables.add(azureClient.deleteNetworkInterfaceAsync(resourceGroupName, networkInterfaceName)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure network interface delete: {}", networkInterfaceName, throwable);
+                            failedToDeleteNetworkInterfaces.add(networkInterfaceName);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for network interface deletion: {}", errorMessages);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for network interface deletion: " + errorMessages, e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for network interface deletion: {}", e.getMessage(), e);
+            throw new CloudbreakServiceException("Error occured while waiting for network interface deletion: " + e.getMessage(), e);
         }
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void deletePublicIps(AzureClient azureClient, String resourceGroupName, Collection<String> publicIpNames) {
         LOGGER.info("Delete public ips: {}", publicIpNames);
-        List<Completable> deleteCompletables = new ArrayList<>();
         List<String> failedToDeletePublicIps = new ArrayList<>();
-        for (String publicIpName : publicIpNames) {
-            deleteCompletables.add(azureClient.deletePublicIpAddressByNameAsync(resourceGroupName, publicIpName)
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure public ip delete: {}", publicIpName, throwable);
-                        failedToDeletePublicIps.add(publicIpName);
-                    })
-                    .subscribeOn(Schedulers.io()));
-        }
-        Completable.merge(deleteCompletables).await();
-        if (!failedToDeletePublicIps.isEmpty()) {
-            LOGGER.error("Can't delete every public ips: {}", failedToDeletePublicIps);
-            throw new CloudbreakServiceException("Can't delete public ips: " + failedToDeletePublicIps);
+        try {
+            List<Completable> deleteCompletables = new ArrayList<>();
+            for (String publicIpName : publicIpNames) {
+                deleteCompletables.add(azureClient.deletePublicIpAddressByNameAsync(resourceGroupName, publicIpName)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure public ip delete: {}", publicIpName, throwable);
+                            failedToDeletePublicIps.add(publicIpName);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for public ip deletion: {}", errorMessages);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for public ip deletion: " + errorMessages, e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for public ip deletion: {}", e.getMessage(), e);
+            throw new CloudbreakServiceException("Error occured while waiting for public ip deletion: " + e.getMessage(), e);
         }
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void deleteAvailabilitySets(AzureClient azureClient, String resourceGroupName, Collection<String> availabilitySetNames) {
         LOGGER.info("Delete availability sets: {}", availabilitySetNames);
-        List<Completable> deleteCompletables = new ArrayList<>();
         List<String> failedToDeleteAvailabiltySets = new ArrayList<>();
-        for (String availabilitySetName : availabilitySetNames) {
-            deleteCompletables.add(azureClient.deleteAvailabilitySetAsync(resourceGroupName, availabilitySetName)
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure availability set delete: {}", availabilitySetName, throwable);
-                        failedToDeleteAvailabiltySets.add(availabilitySetName);
-                    })
-                    .subscribeOn(Schedulers.io()));
-        }
-        Completable.mergeDelayError(deleteCompletables).await();
-        if (!failedToDeleteAvailabiltySets.isEmpty()) {
-            LOGGER.error("Can't delete every availability set: {}", failedToDeleteAvailabiltySets);
-            throw new CloudbreakServiceException("Can't delete availability sets: " + failedToDeleteAvailabiltySets);
+        try {
+            List<Completable> deleteCompletables = new ArrayList<>();
+            for (String availabilitySetName : availabilitySetNames) {
+                deleteCompletables.add(azureClient.deleteAvailabilitySetAsync(resourceGroupName, availabilitySetName)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure availability set delete: {}", availabilitySetName, throwable);
+                            failedToDeleteAvailabiltySets.add(availabilitySetName);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for availability set deletion: {}", errorMessages);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for availability set deletion: " + errorMessages, e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for availability set deletion: {}", e.getMessage(), e);
+            throw new CloudbreakServiceException("Error occured while waiting for availability set deletion: " + e.getMessage(), e);
         }
     }
 
@@ -482,20 +542,25 @@ public class AzureUtils {
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void deleteGenericResources(AzureClient azureClient, Collection<String> genericResourceIds) {
         LOGGER.info("Delete generic resources: {}", genericResourceIds);
-        List<Completable> deleteCompletables = new ArrayList<>();
         List<String> failedToDeleteGenericResources = new ArrayList<>();
-        for (String resourceId : genericResourceIds) {
-            deleteCompletables.add(azureClient.deleteGenericResourceByIdAsync(resourceId)
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure during generic delete: {}", resourceId, throwable);
-                        failedToDeleteGenericResources.add(resourceId);
-                    })
-                    .subscribeOn(Schedulers.io()));
-        }
-        Completable.mergeDelayError(deleteCompletables).await();
-        if (!failedToDeleteGenericResources.isEmpty()) {
-            LOGGER.error("Can't delete every resource: {}", failedToDeleteGenericResources);
-            throw new CloudbreakServiceException("Can't delete every generic resource: " + failedToDeleteGenericResources);
+        try {
+            List<Completable> deleteCompletables = new ArrayList<>();
+            for (String resourceId : genericResourceIds) {
+                deleteCompletables.add(azureClient.deleteGenericResourceByIdAsync(resourceId)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure during generic delete: {}", resourceId, throwable);
+                            failedToDeleteGenericResources.add(resourceId);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            String errorMessages = e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining());
+            LOGGER.error("Error(s) occured while waiting for generic resource deletion: {}", errorMessages);
+            throw new CloudbreakServiceException("Error(s) occured while waiting for generic resource deletion: " + errorMessages, e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for generic resource deletion: {}", e.getMessage(), e);
+            throw new CloudbreakServiceException("Error occured while waiting for generic resource deletion: " + e.getMessage(), e);
         }
     }
 
@@ -572,17 +637,22 @@ public class AzureUtils {
         LOGGER.info("Deleting managed disks: {}", managedDiskNames);
         List<Completable> deleteCompletables = new ArrayList<>();
         List<String> failedToDeleteManagedDisks = new ArrayList<>();
-        for (String resourceId : managedDiskNames) {
-            deleteCompletables.add(azureClient.deleteManagedDiskAsync(resourceGroupName, resourceId)
-                    .doOnError(throwable -> {
-                        LOGGER.error("Error happened on azure during managed disk deletion: {}", resourceId, throwable);
-                        failedToDeleteManagedDisks.add(resourceId);
-                    })
-                    .subscribeOn(Schedulers.io()));
-        }
-        Completable.mergeDelayError(deleteCompletables).await();
-        if (!failedToDeleteManagedDisks.isEmpty()) {
-            LOGGER.error("Can't delete every managed disk: {}", failedToDeleteManagedDisks);
+        try {
+            for (String resourceId : managedDiskNames) {
+                deleteCompletables.add(azureClient.deleteManagedDiskAsync(resourceGroupName, resourceId)
+                        .doOnError(throwable -> {
+                            LOGGER.error("Error happened on azure during managed disk deletion: {}", resourceId, throwable);
+                            failedToDeleteManagedDisks.add(resourceId);
+                        })
+                        .subscribeOn(Schedulers.io()));
+            }
+            Completable.mergeDelayError(deleteCompletables).await();
+        } catch (CompositeException e) {
+            LOGGER.error("Error(s) occured while waiting for managed disks deletion: [{}]",
+                    e.getExceptions().stream().map(Throwable::getMessage).collect(Collectors.joining()));
+            throw new CloudbreakServiceException("Can't delete every managed disk: " + failedToDeleteManagedDisks);
+        } catch (RuntimeException e) {
+            LOGGER.error("Error occured while waiting for managed disks deletion: {}", e.getMessage(), e);
             throw new CloudbreakServiceException("Can't delete every managed disk: " + failedToDeleteManagedDisks);
         }
     }

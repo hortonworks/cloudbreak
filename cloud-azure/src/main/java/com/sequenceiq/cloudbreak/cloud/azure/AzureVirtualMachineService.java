@@ -55,22 +55,20 @@ public class AzureVirtualMachineService {
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Map<String, VirtualMachine> getVmsFromAzureAndFillStatuses(AuthenticatedContext ac, List<CloudInstance> cloudInstances,
-            List<CloudVmInstanceStatus> statuses) {
-        return getUpdatedVMs(ac, cloudInstances, statuses);
+    public AzureVirtualMachinesWithStatuses getVmsAndVmStatusesFromAzure(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
+        return getUpdatedVMs(ac, cloudInstances);
     }
 
-    public Map<String, VirtualMachine> getVmsFromAzureAndFillStatusesWithoutRetry(AuthenticatedContext ac, List<CloudInstance> cloudInstances,
-            List<CloudVmInstanceStatus> statuses) {
-        return getUpdatedVMs(ac, cloudInstances, statuses);
+    public AzureVirtualMachinesWithStatuses getVmsAndVmStatusesFromAzureWithoutRetry(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
+        return getUpdatedVMs(ac, cloudInstances);
     }
 
-    private Map<String, VirtualMachine> getUpdatedVMs(AuthenticatedContext ac, List<CloudInstance> cloudInstances, List<CloudVmInstanceStatus> statuses) {
-        Map<String, VirtualMachine> virtualMachines = getVmsFromAzureAndFillStatusesIfResourceGroupRemoved(ac, cloudInstances, statuses);
-        LOGGER.info("VirtualMachines from Azure: {}", virtualMachines.keySet());
-        refreshInstanceViews(virtualMachines);
-        fillVmStatuses(cloudInstances, statuses, virtualMachines);
-        return virtualMachines;
+    private AzureVirtualMachinesWithStatuses getUpdatedVMs(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
+        AzureVirtualMachinesWithStatuses virtualMachinesWithStatuses = getVmsFromAzureAndFillStatusesIfResourceGroupRemoved(ac, cloudInstances);
+        LOGGER.info("VirtualMachines from Azure: {}", virtualMachinesWithStatuses.getVirtualMachines().keySet());
+        refreshInstanceViews(virtualMachinesWithStatuses.getVirtualMachines());
+        fillVmStatuses(cloudInstances, virtualMachinesWithStatuses);
+        return virtualMachinesWithStatuses;
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
@@ -108,9 +106,9 @@ public class AzureVirtualMachineService {
         }
     }
 
-    private Map<String, VirtualMachine> getVmsFromAzureAndFillStatusesIfResourceGroupRemoved(AuthenticatedContext ac, List<CloudInstance> cloudInstances,
-            List<CloudVmInstanceStatus> statuses) {
+    private AzureVirtualMachinesWithStatuses getVmsFromAzureAndFillStatusesIfResourceGroupRemoved(AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
         LOGGER.info("Get vms from azure: {}", cloudInstances);
+        List<CloudVmInstanceStatus> statuses = new ArrayList<>();
         AzureClient azureClient = ac.getParameter(AzureClient.class);
         ArrayListMultimap<String, String> resourceGroupInstanceMultimap = cloudInstances.stream()
                 .collect(Multimaps.toMultimap(
@@ -138,10 +136,12 @@ public class AzureVirtualMachineService {
                 }
             }
         }
-        return virtualMachines;
+        return new AzureVirtualMachinesWithStatuses(virtualMachines, statuses);
     }
 
-    private void fillVmStatuses(List<CloudInstance> cloudInstances, List<CloudVmInstanceStatus> statuses, Map<String, VirtualMachine> virtualMachines) {
+    private void fillVmStatuses(List<CloudInstance> cloudInstances, AzureVirtualMachinesWithStatuses virtualMachineListResult) {
+        Map<String, VirtualMachine> virtualMachines = virtualMachineListResult.getVirtualMachines();
+        List<CloudVmInstanceStatus> statuses = virtualMachineListResult.getStatuses();
         LOGGER.info("Fill vm statuses from returned virtualmachines from azure: {}", virtualMachines.keySet());
         for (CloudInstance cloudInstance : cloudInstances) {
             virtualMachines.values().stream()
