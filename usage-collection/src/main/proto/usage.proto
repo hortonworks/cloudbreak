@@ -796,6 +796,19 @@ message CDPClusterDetails {
   CDPImageDetails imageDetails = 3;
 }
 
+message CDPStatusDetails {
+  // Status of the stack
+  string stackStatus = 1;
+  // Detailed status of the stack
+  string stackDetailedStatus = 2;
+  // Status reason of the stack
+  string stackStatusReason = 3;
+  // Status of the cluster
+  string clusterStatus = 4;
+  // Status reason of the cluster
+  string clusterStatusReason = 5;
+}
+
 // Generated when Datalake creation has been requested or finished
 message CDPDatalakeRequested {
     // Operation metadata
@@ -814,30 +827,30 @@ message CDPDatalakeStatusChanged {
   CDPClusterStatus.Value oldStatus = 2;
   // The datalake's status after the change.
   CDPClusterStatus.Value newStatus = 3;
-  // Describe the reason of the failure if any
-  string failureReason = 4;
+  // Describes the detailed status of the stack and the cluster of the datalake
+  CDPStatusDetails statusDetails = 4;
 }
 
-// Generated when Datalake creation has been requested or finished
+// Generated when Datahub creation has been requested or finished
 message CDPDatahubRequested {
     // Operation metadata
     CDPOperationDetails operationDetails = 1;
     // Environment Crn
     string environmentCrn = 2;
-    // Details for DataHub
+    // Details for datahub
     CDPClusterDetails clusterDetails = 3;
 }
 
-// Generated when Datalake status has changed
+// Generated when Datahub status has changed
 message CDPDatahubStatusChanged {
   // Operation metadata
   CDPOperationDetails operationDetails = 1;
-  // The datalake's status before the change.
+  // The datahub's status before the change.
   CDPClusterStatus.Value oldStatus = 2;
-  // The datalake's status after the change.
+  // The datahub's status after the change.
   CDPClusterStatus.Value newStatus = 3;
-  // Describe the reason of the failure if any
-  string failureReason = 4;
+  // Describes the detailed status of the stack and the cluster of the datahub
+  CDPStatusDetails statusDetails = 4;
 }
 
 message CDPSyncDetails {
