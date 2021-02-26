@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -91,6 +92,9 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Inject
     private AzureRegionProvider azureRegionProvider;
+
+    @Inject
+    private MinimalHardwareFilter minimalHardwareFilter;
 
     @Inject
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
@@ -264,12 +268,16 @@ public class AzurePlatformResources implements PlatformResources {
         if (restrictInstanceTypes) {
             for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
                 returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .filter(e -> minimalHardwareFilter
+                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
                         .filter(enabledDistroxInstanceTypeFilter)
                         .collect(Collectors.toSet()));
             }
         } else {
             for (Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
                 returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .filter(e -> minimalHardwareFilter
+                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
                         .collect(Collectors.toSet()));
             }
         }
