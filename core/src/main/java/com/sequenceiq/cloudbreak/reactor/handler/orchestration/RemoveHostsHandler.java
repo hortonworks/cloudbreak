@@ -90,7 +90,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         LOGGER.debug("Remove hosts from orchestrator: {}", hostNames);
         try {
             Map<String, String> removeNodePrivateIPsByFQDN = new HashMap<>();
-            stack.getInstanceMetaDataAsList().stream()
+            stack.getNotTerminatedInstanceMetaDataList().stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .filter(instanceMetaData ->
                             hostNames.stream()
