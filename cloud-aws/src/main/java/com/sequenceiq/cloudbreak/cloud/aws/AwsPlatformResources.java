@@ -98,6 +98,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudUnauthorizedException;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
@@ -184,6 +185,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Inject
     private AwsAvailabilityZoneProvider awsAvailabilityZoneProvider;
+
+    @Inject
+    private MinimalHardwareFilter minimalHardwareFilter;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
@@ -611,21 +615,21 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter);
+        return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         if (restrictInstanceTypes) {
-            return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter);
+            return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter, true);
         } else {
-            return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter);
+            return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, true);
         }
     }
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
-            Predicate<VmType> enabledInstanceTypeFilter) {
+            Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
         CloudRegions regions = regions(cloudCredential, region, filters, true);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
@@ -646,6 +650,12 @@ public class AwsPlatformResources implements PlatformResources {
             DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
             request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
             getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
+        }
+        if (enableMinimalHardwareFilter) {
+            awsInstances = awsInstances.stream()
+                    .filter(e -> minimalHardwareFilter
+                            .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
+                    .collect(Collectors.toSet());
         }
         fillUpAvailabilityZones(region, enabledInstanceTypeFilter, regions, cloudVmResponses, defaultCloudVmResponses, awsInstances);
         filterInstancesByFilters(enabledInstanceTypeFilter, cloudVmResponses);

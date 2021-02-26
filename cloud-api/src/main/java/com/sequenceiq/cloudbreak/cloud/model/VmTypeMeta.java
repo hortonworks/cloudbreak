@@ -71,6 +71,16 @@ public class VmTypeMeta {
         return properties;
     }
 
+    public Integer getCPU() {
+        Object cpuAsObject = properties.get(CPU);
+        return cpuAsObject != null ? Integer.valueOf(cpuAsObject.toString()) : null;
+    }
+
+    public Float getMemoryInGb() {
+        Object memoryAsObject = properties.get(MEMORY);
+        return memoryAsObject != null ? Float.valueOf(memoryAsObject.toString()) : null;
+    }
+
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }

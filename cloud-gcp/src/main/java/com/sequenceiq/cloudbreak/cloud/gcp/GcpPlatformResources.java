@@ -27,7 +27,6 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,6 +53,7 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCloudKMSFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpIamFactory;
@@ -115,6 +115,9 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Inject
     private GcpIamFactory gcpIamFactory;
+
+    @Inject
+    private MinimalHardwareFilter minimalHardwareFilter;
 
     @Inject
     private GcpCloudKMSFactory gcpCloudKMSFactory;
@@ -396,19 +399,22 @@ public class GcpPlatformResources implements PlatformResources {
             for (Map.Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
                 returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
                         .filter(enabledDistroxInstanceTypeFilter)
+                        .filter(e -> minimalHardwareFilter
+                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
                         .collect(Collectors.toSet()));
             }
         } else {
             for (Map.Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
                 returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .filter(e -> minimalHardwareFilter
+                                .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
                         .collect(Collectors.toSet()));
             }
         }
         return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
     }
 
-    @NotNull
-    public CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
 
@@ -443,7 +449,6 @@ public class GcpPlatformResources implements PlatformResources {
                         defaultVmType = vmType;
                     }
                 }
-
                 cloudVmResponses.put(availabilityZone.value(), types);
                 defaultCloudVmResponses.put(availabilityZone.value(), defaultVmType);
             }
