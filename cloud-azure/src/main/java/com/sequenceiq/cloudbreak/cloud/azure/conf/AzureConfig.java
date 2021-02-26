@@ -18,7 +18,7 @@ public class AzureConfig {
     @Value("${cb.azure.tag.key.max.length:512}")
     private Integer maxKeyLength;
 
-    @Value("${cb.azure.tag.key.validator:^(?!microsoft|azure|windows|\\s)[^,$/<>&%?\\\\b\\\\.]*$}")
+    @Value("${cb.azure.tag.key.validator:^(?!microsoft|azure|windows|\\s)[^,]*$}")
     private String keyValidator;
 
     @Value("${cb.azure.tag.value.min.length:1}")
