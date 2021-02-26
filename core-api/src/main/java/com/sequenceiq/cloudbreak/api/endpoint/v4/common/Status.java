@@ -50,7 +50,11 @@ public enum Status {
     EXTERNAL_DATABASE_START_FAILED(StatusKind.FINAL),
     EXTERNAL_DATABASE_STOP_IN_PROGRESS(StatusKind.PROGRESS),
     EXTERNAL_DATABASE_STOP_FINISHED(StatusKind.PROGRESS),
-    EXTERNAL_DATABASE_STOP_FAILED(StatusKind.FINAL);
+    EXTERNAL_DATABASE_STOP_FAILED(StatusKind.FINAL),
+    LOAD_BALANCER_UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
+    LOAD_BALANCER_UPDATE_FINISHED(StatusKind.FINAL),
+    LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL);
+
 
     private StatusKind statusKind;
 
@@ -145,7 +149,10 @@ public enum Status {
                 BACKUP_FAILED,
                 BACKUP_FINISHED,
                 RESTORE_FAILED,
-                RESTORE_FINISHED);
+                RESTORE_FINISHED,
+                LOAD_BALANCER_UPDATE_IN_PROGRESS,
+                LOAD_BALANCER_UPDATE_FAILED,
+                LOAD_BALANCER_UPDATE_FINISHED);
     }
 
     public Status mapToFailedIfInProgress() {

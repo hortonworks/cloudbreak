@@ -38,7 +38,7 @@ public class AwsListener {
         return name;
     }
 
-    private static String getListenerName(int port, AwsLoadBalancerScheme scheme) {
+    public static String getListenerName(int port, AwsLoadBalancerScheme scheme) {
         return LISTENER_NAME_PREFIX + port + scheme.resourceName();
     }
 }

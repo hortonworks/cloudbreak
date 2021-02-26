@@ -598,4 +598,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         pollingResultErrorHandler.handlePollingResult(pollingResult, cancellationMessage, timeoutMessage);
     }
 
+    @Override
+    public void updateServiceConfigAndRestartService(String serviceType, String configName, String newConfigValue) throws Exception {
+        configService.modifyServiceConfigValue(apiClient, stack.getName(), serviceType, configName, newConfigValue);
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        restartStaleServices(clustersResourceApi);
+    }
+
 }

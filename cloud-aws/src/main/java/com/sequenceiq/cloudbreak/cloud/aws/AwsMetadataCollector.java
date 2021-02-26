@@ -190,12 +190,13 @@ public class AwsMetadataCollector implements MetadataCollector {
             LOGGER.debug("Attempting to collected metadata for load balancer {}, type {}", loadBalancerName, type);
             try {
                 LoadBalancer loadBalancer = cloudFormationStackUtil.getLoadBalancerByLogicalId(ac, loadBalancerName);
-                cloudLoadBalancerMetadata.add(new CloudLoadBalancerMetadata(
-                    type,
-                    loadBalancer.getDNSName(),
-                    loadBalancer.getCanonicalHostedZoneId(),
-                    null
-                ));
+                CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
+                    .withType(type)
+                    .withCloudDns(loadBalancer.getDNSName())
+                    .withHostedZoneId(loadBalancer.getCanonicalHostedZoneId())
+                    .withName(loadBalancerName)
+                    .build();
+                cloudLoadBalancerMetadata.add(loadBalancerMetadata);
                 LOGGER.debug("Saved metdata for load balancer {}: DNS {}, zone id {}", loadBalancerName, loadBalancer.getDNSName(),
                     loadBalancer.getCanonicalHostedZoneId());
             } catch (RuntimeException e) {

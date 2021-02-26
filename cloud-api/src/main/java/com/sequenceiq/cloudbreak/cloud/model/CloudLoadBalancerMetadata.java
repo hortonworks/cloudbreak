@@ -12,11 +12,14 @@ public class CloudLoadBalancerMetadata {
 
     private final String ip;
 
-    public CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip) {
+    private final String name;
+
+    private CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip, String name) {
         this.type = type;
         this.cloudDns = cloudDns;
         this.hostedZoneId = hostedZoneId;
         this.ip = ip;
+        this.name = name;
     }
 
     public LoadBalancerType getType() {
@@ -33,5 +36,62 @@ public class CloudLoadBalancerMetadata {
 
     public String getIp() {
         return ip;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String toString() {
+        return "CloudLoadBalancerMetadata{" +
+            "type=" + type +
+            ", cloudDns='" + cloudDns + '\'' +
+            ", hostedZoneId='" + hostedZoneId + '\'' +
+            ", ip='" + ip + '\'' +
+            ", name='" + name + '\'' +
+            '}';
+    }
+
+    public static class Builder {
+
+        private LoadBalancerType type;
+
+        private String cloudDns;
+
+        private String hostedZoneId;
+
+        private String ip;
+
+        private String name;
+
+        public Builder withType(LoadBalancerType type) {
+            this.type = type;
+            return this;
+        }
+
+        public Builder withCloudDns(String cloudDns) {
+            this.cloudDns = cloudDns;
+            return this;
+        }
+
+        public Builder withHostedZoneId(String hostedZoneId) {
+            this.hostedZoneId = hostedZoneId;
+            return this;
+        }
+
+        public Builder withIp(String ip) {
+            this.ip = ip;
+            return this;
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public CloudLoadBalancerMetadata build() {
+            return new CloudLoadBalancerMetadata(type, cloudDns, hostedZoneId, ip, name);
+        }
     }
 }

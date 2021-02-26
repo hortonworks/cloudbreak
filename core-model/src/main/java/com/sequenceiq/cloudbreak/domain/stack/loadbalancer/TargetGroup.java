@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.loadbalancer;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.Convert;
@@ -93,5 +94,22 @@ public class TargetGroup implements ProvisionEntity {
 
     public void setInstanceGroups(Set<InstanceGroup> instanceGroups) {
         this.instanceGroups = instanceGroups;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TargetGroup that = (TargetGroup) o;
+        return type == that.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type);
     }
 }
