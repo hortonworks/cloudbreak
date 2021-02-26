@@ -127,12 +127,29 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         assertEquals(expected, ex.getMessage());
     }
 
+    @Test
+    void checkStatusWithActiveCommands() throws ApiException {
+        ApiCommand addRepositoriesCmd = addReposCmd().success(Boolean.FALSE)
+                .resultMessage("Permission denied");
+        ApiCommand deployParcelsCmd = deployParcelsCmd().success(Boolean.FALSE)
+                .resultMessage("Host not found");
+        ApiCommand firstRunCmd = firstRunCmd().active(Boolean.TRUE)
+                .resultMessage("Actually this has not finished yet...");
+        ApiCommand templateInstallCmd = templateInstallCmd(addRepositoriesCmd, deployParcelsCmd, firstRunCmd)
+                .resultMessage("Failed to import cluster template");
+        expectReadCommandForFailedCommands(templateInstallCmd);
+
+        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        String expected = expectMessageForCommands(addRepositoriesCmd, deployParcelsCmd, firstRunCmd);
+        assertEquals(expected, ex.getMessage());
+    }
+
     private void expectReadCommandForFailedCommands(ApiCommand templateInstallCmd) throws ApiException {
         Map<BigDecimal, ApiCommand> failedCommands = Stream.concat(
                 Stream.of(templateInstallCmd),
                 templateInstallCmd.getChildren().getItems().stream()
         )
-                .filter(cmd -> !cmd.getSuccess())
+                .filter(cmd -> (cmd.getActive() != null && cmd.getActive()) || (cmd.getSuccess() != null && !cmd.getSuccess()))
                 .collect(Collectors.toMap(ApiCommand::getId, Function.identity()));
 
         when(commandsResourceApi.readCommand(any(BigDecimal.class))).thenAnswer(invocation -> {
@@ -146,7 +163,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     }
 
     private String expectMessageForCommands(ApiCommand... commands) {
-        String msgFormat = "Cluster template install failed: [%s]";
+        String msgFormat = "Installation of CDP with Cloudera Manager has failed: [%s]";
         String cmdFormat = "Command [%s], with id [%d] failed: %s";
         return String.format(msgFormat,
                 Arrays.stream(commands)
@@ -157,6 +174,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
 
     private ApiCommand templateInstallCmd(ApiCommand... children) {
         return cmd(TEMPLATE_INSTALL_ID, TEMPLATE_INSTALL_NAME)
+                .active(Boolean.FALSE)
                 .success(Boolean.FALSE)
                 .children(new ApiCommandList().items(List.of(children)));
     }

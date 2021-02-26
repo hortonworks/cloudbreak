@@ -340,7 +340,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
                 LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
             } catch (ApiException e) {
-                String msg = "Cluster template install failed: " + extractMessage(e);
+                String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
                 throw new ClouderaManagerOperationFailedException(msg, e);
             }
         }
