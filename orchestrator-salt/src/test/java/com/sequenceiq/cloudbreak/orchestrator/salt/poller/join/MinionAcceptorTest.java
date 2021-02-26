@@ -183,4 +183,27 @@ class MinionAcceptorTest {
 
         verify(sc).wheel(eq("key.accept"), argThat(arg -> arg.containsAll(List.of("m2.d", "m1.d"))), eq(Object.class));
     }
+
+    @Test
+    public void handleIfMinionDenied() throws Exception {
+        MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        Minion m2 = new Minion();
+        m2.setHostName("m2");
+        m2.setDomain("d");
+        Minion m3 = new Minion();
+        m3.setHostName("m3");
+        m3.setDomain("d");
+
+        when(response.getAllMinions()).thenReturn(List.of("m1.d", "m2.d", "m3.d"));
+        when(response.getDeniedMinions()).thenReturn(List.of("m2.d", "m3.d"));
+        when(response.getUnacceptedMinions()).thenReturn(List.of());
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
+
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        underTest.acceptMinions();
+    }
 }
