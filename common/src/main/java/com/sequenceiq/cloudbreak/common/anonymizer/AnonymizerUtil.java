@@ -39,7 +39,7 @@ public class AnonymizerUtil {
     public static String anonymize(String content) {
         String ret = content;
         if (ret != null) {
-            LOGGER.info("Anonymize the content with length: {}", content.length());
+            LOGGER.trace("Anonymize the content with length: {}", content.length());
             for (ReplacePattern pattern : PATTERNS) {
                 ret = pattern.replaceAll(ret);
             }
