@@ -9,17 +9,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
+import org.apache.commons.lang3.StringUtils;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -294,9 +295,12 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return stack.getPrimaryGatewayInstance().getShortHostname();
     }
 
-    private Set<String> getLoadBalancerNamesForStack(Stack stack) {
+    @VisibleForTesting
+    Set<String> getLoadBalancerNamesForStack(Stack stack) {
         return loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
-            .map(LoadBalancer::getEndpoint).collect(Collectors.toSet());
+            .filter(lb -> StringUtils.isNotEmpty(lb.getEndpoint()))
+            .map(LoadBalancer::getEndpoint)
+            .collect(Collectors.toSet());
     }
 
     private Optional<LoadBalancer> getLoadBalancerWithEndpoint(Stack stack) {
