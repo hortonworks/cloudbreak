@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,17 +15,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jetbrains.annotations.NotNull;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import javax.validation.constraints.NotNull;
+
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -40,8 +40,10 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 import rx.Completable;
+import rx.plugins.RxJavaHooks;
+import rx.schedulers.Schedulers;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureUtilsTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
@@ -49,9 +51,6 @@ public class AzureUtilsTest {
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String MAX_RESOURCE_NAME_LENGTH = "50";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private AzurePremiumValidatorService azurePremiumValidatorService;
@@ -65,9 +64,15 @@ public class AzureUtilsTest {
     @InjectMocks
     private AzureUtils underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ReflectionTestUtils.setField(underTest, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
+        RxJavaHooks.setOnIOScheduler(current -> Schedulers.immediate());
+    }
+
+    @AfterEach
+    public void tearDown() {
+        RxJavaHooks.reset();
     }
 
     @Test
@@ -86,27 +91,26 @@ public class AzureUtilsTest {
         String testResult = underTest.getStackName(context);
 
         //THEN
-        Assert.assertNotNull("The generated name must not be null!", testResult);
-        assertEquals("The resource name is not the excepted one!", "thisisaverylongazureresourcenamewhichneedstobe7899", testResult);
-        assertEquals("The resource name length is wrong", testResult.length(), Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
+        assertNotNull(testResult, "The generated name must not be null!");
+        assertEquals("thisisaverylongazureresourcenamewhichneedstobe7899", testResult, "The resource name is not the excepted one!");
+        assertEquals(Integer.parseInt(MAX_RESOURCE_NAME_LENGTH), testResult.length(), "The resource name length is wrong");
 
     }
 
     @Test
     public void validateStorageTypeForGroupWhenPremiumStorageConfiguredAndFlavorNotPremiumThenShouldThrowCloudConnectorException() {
-        thrown.expect(CloudConnectorException.class);
-
         String flavor = "Standard_A10";
         AzureDiskType azureDiskType = AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
 
         when(azurePremiumValidatorService.premiumDiskTypeConfigured(azureDiskType)).thenReturn(true);
         when(azurePremiumValidatorService.validPremiumConfiguration(flavor)).thenReturn(false);
 
-        underTest.validateStorageTypeForGroup(azureDiskType, flavor);
+        assertThrows(
+                CloudConnectorException.class,
+                () -> underTest.validateStorageTypeForGroup(azureDiskType, flavor));
 
         verify(azurePremiumValidatorService, times(1)).premiumDiskTypeConfigured(azureDiskType);
         verify(azurePremiumValidatorService, times(1)).validPremiumConfiguration(flavor);
-
     }
 
     @Test
