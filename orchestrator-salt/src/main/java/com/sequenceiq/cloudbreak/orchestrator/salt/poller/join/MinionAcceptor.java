@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -43,13 +44,19 @@ public class MinionAcceptor {
             MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, minions);
             List<String> unacceptedMinions = minionKeysOnMaster.getUnacceptedMinions();
             List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
-            removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
+            cleanupMinionIds(sc, deniedMinions, unacceptedMinions);
             if (!unacceptedMinions.isEmpty()) {
                 proceedWithAcceptingMinions(sc, unacceptedMinions);
             } else {
-                LOGGER.info("No unaccepted minions found on master");
+                LOGGER.info("No unaccepted minions found on master: [{}]", sc.getHostname());
             }
         }
+    }
+
+    private void cleanupMinionIds(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
+            throws CloudbreakOrchestratorFailedException {
+        removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
+        removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
     }
 
     private void removeMinionIdsInBothDeniedAndUnacceptedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
@@ -64,6 +71,15 @@ public class MinionAcceptor {
             sc.wheel("key.delete", minionIdsInBothDeniedAndUnacceptedState, Object.class);
             throw new CloudbreakOrchestratorFailedException("There were minions in denied and unaccepted state at the same time: " +
                     minionIdsInBothDeniedAndUnacceptedState);
+        }
+    }
+
+    private void removeMinionIdsOnlyInDeniedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions) {
+        ArrayList<String> minionIdsOnlyDenied = new ArrayList<String>(deniedMinions);
+        minionIdsOnlyDenied.removeAll(unacceptedMinions);
+        if (!minionIdsOnlyDenied.isEmpty()) {
+            LOGGER.info("There are minions in denied state, removing: ", minionIdsOnlyDenied);
+            sc.wheel("key.delete", minionIdsOnlyDenied, Object.class);
         }
     }
 
