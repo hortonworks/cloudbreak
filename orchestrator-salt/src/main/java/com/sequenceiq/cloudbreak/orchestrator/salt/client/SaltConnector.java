@@ -182,7 +182,7 @@ public class SaltConnector implements Closeable {
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
         try {
-            LOGGER.debug("Salt run has been executed. fun: {}, response: {}", fun, anonymize(JsonUtil.writeValueAsString(responseEntity)));
+            LOGGER.debug("Salt run has been executed. fun: [{}],  parsed response: [{}]", fun, anonymize(JsonUtil.writeValueAsString(responseEntity)));
         } catch (JsonProcessingException e) {
             LOGGER.error("Can not read response from salt", e);
         }

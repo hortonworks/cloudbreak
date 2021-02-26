@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -256,7 +257,7 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void jobIsRunningTest() {
+    public void jobIsRunningTest() throws CloudbreakOrchestratorFailedException {
         String jid = "3";
         RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
         List<Map<String, Map<String, Object>>> result = new ArrayList<>();
@@ -271,6 +272,19 @@ public class SaltStatesTest {
         resultMap.clear();
         running = SaltStates.jobIsRunning(saltConnector, jid);
         assertFalse(running);
+    }
+
+    @Test(expected = CloudbreakOrchestratorFailedException.class)
+    public void testJobIsRunningReturnsExceptionOnNullResult() throws CloudbreakOrchestratorFailedException {
+        RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
+        when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
+        SaltStates.jobIsRunning(saltConnector, "1");
+    }
+
+    @Test(expected = CloudbreakOrchestratorFailedException.class)
+    public void testJobIsRunningReturnsExceptionOnNullResponse() throws CloudbreakOrchestratorFailedException {
+        when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(null);
+        SaltStates.jobIsRunning(saltConnector, "1");
     }
 
     @Test
