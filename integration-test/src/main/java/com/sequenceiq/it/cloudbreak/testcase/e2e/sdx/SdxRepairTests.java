@@ -23,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -84,7 +85,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
                     return testDto;
                 })
-                .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto, actualVolumeIds, expectedVolumeIds))
                 .validate();
     }
 
@@ -145,7 +146,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     actualVolumeIds.addAll(getCloudFunctionality(tc).listInstanceVolumeIds(instanceIds));
                     return testDto;
                 })
-                .then((tc, testDto, client) -> compareVolumeIdsAfterRepair(testDto,
+                .then((tc, testDto, client) -> VolumeUtils.compareVolumeIdsAfterRepair(testDto,
                         new ArrayList<>(actualVolumeIds),
                         new ArrayList<>(expectedVolumeIds)));
     }

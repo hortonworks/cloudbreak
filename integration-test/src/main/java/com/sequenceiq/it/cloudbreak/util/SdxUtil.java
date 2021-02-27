@@ -15,6 +15,6 @@ public class SdxUtil {
     public List<String> getInstanceIds(AbstractSdxTestDto testDto, SdxClient sdxClient, String hostGroupName) {
         List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(testDto.getName(), new HashSet<>())
                 .getStackV4Response().getInstanceGroups();
-        return InstanceGroupUtil.getInstanceIds(instanceGroups, hostGroupName);
+        return InstanceUtil.getInstanceIds(instanceGroups, hostGroupName);
     }
 }
