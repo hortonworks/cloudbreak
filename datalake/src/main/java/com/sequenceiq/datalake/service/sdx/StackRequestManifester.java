@@ -193,7 +193,7 @@ public class StackRequestManifester {
         if (envTelemetry != null && envTelemetry.getLogging() != null) {
             TelemetryRequest telemetryRequest = new TelemetryRequest();
             LoggingRequest loggingRequest = new LoggingRequest();
-            LoggingResponse envLogging =  envTelemetry.getLogging();
+            LoggingResponse envLogging = envTelemetry.getLogging();
             loggingRequest.setS3(envLogging.getS3());
             loggingRequest.setAdlsGen2(envLogging.getAdlsGen2());
             loggingRequest.setGcs(envLogging.getGcs());
@@ -276,11 +276,17 @@ public class StackRequestManifester {
     }
 
     void validateMappingsConfig(MappingsConfig mappingsConfig, StackV4Request stackRequest) {
+        LOGGER.debug("Validating IDBMMS mapping for this cluster: {}", JsonUtil.writeValueAsStringSilent(mappingsConfig));
+        // Just to make it a bit more defensive
+        if (mappingsConfig == null || mappingsConfig.getActorMappings() == null || mappingsConfig.getActorMappings().isEmpty()) {
+            LOGGER.error("We have not found cloud storage access mapping for this cluster! {}", JsonUtil.writeValueAsStringSilent(mappingsConfig));
+            throw new BadRequestException("We have not found cloudstorage access mapping for this cluster!");
+        }
         // Validate RAZ if enabled, making sure that the RAZ mapping exists when it is required.
         if (stackRequest.getCluster().isRangerRazEnabled()) {
             if (!mappingsConfig.getActorMappings().containsKey("rangerraz")) {
-                LOGGER.error("IDBMMS mappings must contain the RAZ role if RAZ is to be created!");
-                throw new BadRequestException("IDBMMS mappings must contain the RAZ role if RAZ is to be created!");
+                LOGGER.error("Cloud storage access (IDBroker) mapping must contain the RAZ role if RAZ is to be created!");
+                throw new BadRequestException("Cloud storage access (IDBroker) mapping must contain the RAZ role if RAZ is to be created!");
             }
         }
     }

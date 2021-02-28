@@ -10,6 +10,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerCommandApiErrorParserUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -33,19 +34,20 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         } else if (apiCommand.getSuccess()) {
             return true;
         } else {
-            throw new ClouderaManagerOperationFailedException(failedMessage("", apiCommand, commandsResourceApi));
+            fail("", apiCommand, commandsResourceApi);
         }
+        return false;
     }
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
-        String msg = "Installation of CDP with Cloudera Manager has timed out (command id: " + pollerObject.getId() + ")";
+        String msg = "Installation of CDP with Cloudera Manager has timed out (command id: " + pollerObject.getId() + ").";
         try {
             CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
             ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
-            throw new ClouderaManagerOperationFailedException(failedMessage(msg + " ", apiCommand, commandsResourceApi));
+            fail(msg, apiCommand, commandsResourceApi);
         } catch (ApiException e) {
-            LOGGER.info("Cloudera Manager had run into a timeout and, we were unable to determine the failure reason", e);
+            LOGGER.info("Cloudera Manager had run into a timeout, and we were unable to determine the failure reason", e);
         }
 
         throw new ClouderaManagerOperationFailedException(msg);
@@ -61,10 +63,20 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
         return "Template install";
     }
 
-    private String failedMessage(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi) {
+    private void fail(String messagePrefix, ApiCommand apiCommand, CommandsResourceApi commandsResourceApi) {
         List<String> errorReasons = ClouderaManagerCommandApiErrorParserUtil.getErrors(apiCommand, commandsResourceApi);
         String msg = messagePrefix + "Installation of CDP with Cloudera Manager has failed: [" + String.join(", ", errorReasons) + "]";
         LOGGER.info(msg);
-        return msg;
+        for (String errorReason : errorReasons) {
+            // Unfortunately CM is not giving back too much details about the errors, and what is returned usually nondeterministic:
+            // In a good case it returns "Failed to create HDFS directory",
+            // but sometines it just returns "Aborted command" or "Command timed-out after 186 seconds", so matching on such generic error error messages
+            // has no added value, therefore we are just checing whether AuditDir related commands are failing or not.
+            if (errorReason.matches(".*[RangerPluginCreateAuditDir|CreateRangerAuditDir|CreateRangerKafkaPluginAuditDirCommand|" +
+                    "CreateHiveWarehouseExternalDir|CreateHiveWarehouseDir|CreateRangerKnoxPluginAuditDirCommand].*")) {
+                throw new CloudStorageConfigurationFailedException(msg);
+            }
+        }
+        throw new ClouderaManagerOperationFailedException(msg);
     }
 }
