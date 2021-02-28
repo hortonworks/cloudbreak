@@ -25,6 +25,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
+import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -39,6 +40,8 @@ class ClouderaManagerTemplateInstallationCheckerTest {
 
     private static final BigDecimal FIRST_RUN_ID = new BigDecimal(13);
 
+    private static final BigDecimal AUDIT_DIR = new BigDecimal(14);
+
     private static final String TEMPLATE_INSTALL_NAME = "TemplateInstall";
 
     private static final String ADD_REPOSITORIES_NAME = "AddRepositories";
@@ -46,6 +49,8 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     private static final String DEPLOY_PARCELS_NAME = "DeployParcels";
 
     private static final String FIRST_RUN_NAME = "First Run";
+
+    private static final String AUDIT_DIR_COMMAND_NAME = "CreateRangerKafkaPluginAuditDirCommand";
 
     private ApiClient apiClient = Mockito.mock(ApiClient.class);
 
@@ -144,6 +149,23 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         assertEquals(expected, ex.getMessage());
     }
 
+    @Test
+    void testCloudStorageFailure() throws ApiException {
+        ApiCommand auditDirCmd = auditDirCmd().success(Boolean.FALSE)
+                .resultMessage("Aborted");
+        ApiCommand deployParcelsCmd = deployParcelsCmd().success(Boolean.FALSE)
+                .resultMessage("Host not found");
+        ApiCommand firstRunCmd = firstRunCmd().success(Boolean.FALSE)
+                .resultMessage("Failed to perform First Run of services.");
+        ApiCommand templateInstallCmd = templateInstallCmd(auditDirCmd, deployParcelsCmd, firstRunCmd)
+                .resultMessage("Failed to import cluster template");
+        expectReadCommandForFailedCommands(templateInstallCmd);
+
+        CloudStorageConfigurationFailedException ex = assertThrows(CloudStorageConfigurationFailedException.class, () -> underTest.checkStatus(pollerObject));
+        String expected = expectMessageForCommands(auditDirCmd, deployParcelsCmd, firstRunCmd);
+        assertEquals(expected, ex.getMessage());
+    }
+
     private void expectReadCommandForFailedCommands(ApiCommand templateInstallCmd) throws ApiException {
         Map<BigDecimal, ApiCommand> failedCommands = Stream.concat(
                 Stream.of(templateInstallCmd),
@@ -177,6 +199,10 @@ class ClouderaManagerTemplateInstallationCheckerTest {
                 .active(Boolean.FALSE)
                 .success(Boolean.FALSE)
                 .children(new ApiCommandList().items(List.of(children)));
+    }
+
+    private ApiCommand auditDirCmd() {
+        return cmd(AUDIT_DIR, AUDIT_DIR_COMMAND_NAME);
     }
 
     private ApiCommand addReposCmd() {
