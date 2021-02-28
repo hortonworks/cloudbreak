@@ -24,10 +24,11 @@ public class ClouderaManagerStorageErrorMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStorageErrorMapper.class);
 
     public String map(CloudStorageConfigurationFailedException e, String cloudPlatform, Cluster cluster) {
-        String errorMessage;
+
+        String errorMessage = e.getMessage();
 
         if (cluster.isRangerRazEnabled()) {
-            errorMessage = e.getMessage() + "Ranger RAZ is enabled on this cluster.";
+            errorMessage += "Ranger RAZ is enabled on this cluster.";
         } else {
             try {
                 CloudStorage cloudStorage = cluster.getFileSystem().getCloudStorage();
@@ -39,15 +40,14 @@ public class ClouderaManagerStorageErrorMapper {
                         errorMessage = azureError(cloudStorage);
                         break;
                     default:
-                        errorMessage = e.getMessage();
+                        LOGGER.debug("We don't have error massage mapper for platform: {}", cloudPlatform);
                 }
             } catch (RuntimeException runtimeException) {
                 CloudStorage cloudStorage = Optional.ofNullable(cluster).map(Cluster::getFileSystem)
                         .map(FileSystem::getCloudStorage).orElse(null);
                 LOGGER.error("No surprise that cluster creation has failed, probably something was not validated properly " +
                                 "in cloud storage config. This is most probably a control plane bug: {}",
-                        JsonUtil.writeValueAsStringSilent(cloudStorage), e);
-                errorMessage = e.getMessage();
+                        JsonUtil.writeValueAsStringSilent(cloudStorage), runtimeException);
             }
         }
 
