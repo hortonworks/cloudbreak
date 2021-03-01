@@ -1,10 +1,9 @@
 plugins {
   id "java"
-  id 'maven' 
+  id 'maven'
 }
 
 repositories {
-  mavenLocal()
   maven { url = "$repoUrl" }
   mavenCentral()
   maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
