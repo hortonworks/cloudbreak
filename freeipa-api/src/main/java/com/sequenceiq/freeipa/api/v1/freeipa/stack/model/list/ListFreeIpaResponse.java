@@ -2,10 +2,8 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list;
 
 import javax.validation.constraints.NotNull;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
@@ -16,7 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel("ListFreeIpaV1Response")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ListFreeIpaResponse implements ResourceCrnAwareApiModel {
+public class ListFreeIpaResponse {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.ENVIRONMENT_CRN, required = true)
@@ -81,11 +79,5 @@ public class ListFreeIpaResponse implements ResourceCrnAwareApiModel {
 
     public void setStatusString(String statusString) {
         this.statusString = statusString;
-    }
-
-    @Override
-    @JsonIgnore
-    public String getResourceCrn() {
-        return environmentCrn;
     }
 }

@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
@@ -176,11 +178,6 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
     }
 
     @Override
-    public List<String> getResourceCrnsInAccount() {
-        return recipeViewRepository.findAllResourceCrnsByTenantId(ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
     public AuthorizationResourceType getResourceType() {
         return AuthorizationResourceType.RECIPE;
     }
@@ -196,5 +193,13 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
     @Override
     public EnumSet<Crn.ResourceType> getCrnTypes() {
         return EnumSet.of(Crn.ResourceType.RECIPE);
+    }
+
+    public Set<RecipeView> findAllViewById(List<Long> ids) {
+        return Sets.newLinkedHashSet(recipeViewRepository.findAllById(ids));
+    }
+
+    public List<AuthorizationResource> findAsAuthorizationResourcesInWorkspace(Long workspaceId) {
+        return recipeViewRepository.findAsAuthorizationResourcesInWorkspace(workspaceId);
     }
 }

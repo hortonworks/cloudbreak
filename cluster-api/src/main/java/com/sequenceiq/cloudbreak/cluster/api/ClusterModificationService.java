@@ -31,6 +31,8 @@ public interface ClusterModificationService {
 
     Map<String, String> gatherInstalledParcels(String stackName);
 
+    void updateServiceConfigAndRestartService(String serviceName, String configName, String newConfigValue) throws Exception;
+
     default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
         throw new UnsupportedOperationException("Interface not implemented.");
     }

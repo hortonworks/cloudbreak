@@ -22,6 +22,7 @@ public enum ResourceType {
     RDS_PORT,
     RDS_DB_SUBNET_GROUP,
     RDS_DB_PARAMETER_GROUP,
+    ELASTIC_LOAD_BALANCER,
 
     // OPENSTACK
     HEAT_STACK(CommonResourceType.TEMPLATE),

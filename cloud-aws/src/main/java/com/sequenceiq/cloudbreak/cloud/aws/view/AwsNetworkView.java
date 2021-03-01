@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.aws.view;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.INTERNET_GATEWAY_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.List;
@@ -9,8 +13,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 public class AwsNetworkView {
 
-    public static final String VPC_ID = "vpcId";
-
     public static final String REGION = "region";
 
     @VisibleForTesting
@@ -18,14 +20,6 @@ public class AwsNetworkView {
 
     @VisibleForTesting
     static final String VPC_CIDRS = "vpcCidrs";
-
-    @VisibleForTesting
-    static final String IGW = "internetGatewayId";
-
-    @VisibleForTesting
-    static final String SUBNET_ID = "subnetId";
-
-    static final String ENDPOINT_GATEWAY_SUBNET_ID = "endpointGatewaySubnetId";
 
     private final Network network;
 
@@ -42,7 +36,7 @@ public class AwsNetworkView {
     }
 
     public boolean isExistingIGW() {
-        return isNotEmpty(network.getStringParameter(IGW));
+        return isNotEmpty(network.getStringParameter(INTERNET_GATEWAY_ID));
     }
 
     public String getExistingSubnet() {
@@ -75,7 +69,7 @@ public class AwsNetworkView {
     }
 
     public String getExistingIgw() {
-        return network.getStringParameter(IGW);
+        return network.getStringParameter(INTERNET_GATEWAY_ID);
     }
 
     public String getExistingVpc() {

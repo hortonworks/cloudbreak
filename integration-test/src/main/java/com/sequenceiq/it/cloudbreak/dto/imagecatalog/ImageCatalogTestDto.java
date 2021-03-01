@@ -117,6 +117,11 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     }
 
     @Override
+    public String getCrn() {
+        return getResponse().getCrn();
+    }
+
+    @Override
     public Class<CloudbreakClient> client() {
         return CloudbreakClient.class;
     }

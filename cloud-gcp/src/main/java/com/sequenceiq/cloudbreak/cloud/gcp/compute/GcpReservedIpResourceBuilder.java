@@ -76,6 +76,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
         String projectId = context.getProjectId();
         String region = context.getLocation().getRegion().value();
         try {
+            LOGGER.info("About to delete GCP reserved ip address in: [projectID: {}, region: {}, resource: {}]", projectId, region, resource.getName());
             Operation operation = compute.addresses().delete(projectId, region, resource.getName()).execute();
             return createOperationAwareCloudResource(resource, operation);
         } catch (GoogleJsonResponseException e) {

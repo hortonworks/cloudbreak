@@ -1,8 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -170,15 +168,6 @@ public class CommonPermissionCheckingUtilsTest {
         Assert.assertEquals(expected, result);
         verify(methodSignature, times(0)).toLongString();
         verify(proceedingJoinPoint, times(1)).proceed();
-    }
-
-    @Test
-    public void testCheckIfAuthorizationDisabled() {
-        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleDisabledAuthorizationResourceClass());
-        assertTrue(underTest.isAuthorizationDisabled(proceedingJoinPoint));
-
-        when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleAuthorizationResourceClass());
-        assertFalse(underTest.isAuthorizationDisabled(proceedingJoinPoint));
     }
 
     @Test

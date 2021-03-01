@@ -232,9 +232,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
-    public Set<ClusterTemplateView> findAllByEnvironment(String environmenCrn) {
-        LOGGER.debug("About to collect cluster definitions by environment: [crn: {}]", environmenCrn);
-        return clusterTemplateViewService.findAllByEnvironmentCrn(environmenCrn);
+    public Set<ClusterTemplateView> findAllByEnvironment(String environmentCrn, String cloudPlatform, String runtime) {
+        LOGGER.debug("About to collect cluster definitions by environment: [crn: {}, cloudPlatform: {}, runtime: {}]",
+                environmentCrn, cloudPlatform, runtime);
+        return clusterTemplateViewService.findAllUserManagedAndDefaultByEnvironmentCrn(environmentCrn, cloudPlatform, runtime);
     }
 
     @Override
@@ -425,11 +426,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
         return clusterTemplateRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        return clusterTemplateRepository.findAllResourceCrnsByAccountId(ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override

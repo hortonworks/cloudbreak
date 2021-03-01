@@ -232,4 +232,18 @@ public interface ResourceConnector<R> {
      * @throws TemplatingNotSupportedException if templating is not supported by provider
      */
     String getDBStackTemplate() throws TemplatingNotSupportedException;
+
+    /**
+     * Updates an existing stack with one or more load balancers, if the load balances do not already exist. This method will initiate the
+     * creation of load balancers on the Cloud platform, and will configure the load balancer routing in accordance with the specified
+     * target group configuration. It returns a list of CloudResourceStatus for any created load balancers.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param persistenceNotifier  Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platfrom
+     * @return the status of load balancers allocated on Cloud platform
+     * @throws Exception in case of any error
+     */
+    List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) throws Exception;
 }

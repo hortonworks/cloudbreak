@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -53,12 +54,14 @@ public class AzureParameterValidator implements ParameterValidator {
             return validationResultBuilder.build();
         }
 
+        AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto = azureParametersDto.getAzureResourceEncryptionParametersDto();
         AzureResourceGroupDto azureResourceGroupDto = azureParametersDto.getAzureResourceGroupDto();
         if (Objects.isNull(azureResourceGroupDto)) {
             return validationResultBuilder.build();
         }
 
-        ValidationResult validationResult = validateEntitlement(validationResultBuilder, azureResourceGroupDto, environmentDto.getAccountId());
+        ValidationResult validationResult = validateEntitlement(validationResultBuilder, azureResourceGroupDto,
+                azureResourceEncryptionParametersDto, environmentDto.getAccountId());
         if (validationResult.hasError()) {
             return validationResult;
         }
@@ -96,14 +99,14 @@ public class AzureParameterValidator implements ParameterValidator {
             return validationResultBuilder.error(
                     String.format("You specified to use multiple resource groups for your resources, " +
                                     "but then the single resource group name '%s' cannot not be specified.",
-                    azureResourceGroupDto.getName())).build();
+                            azureResourceGroupDto.getName())).build();
         } else {
             return validationResultBuilder.build();
         }
     }
     //CHECKSTYLE:OFF:FallThroughCheck
     private ValidationResult validateEntitlement(ValidationResultBuilder validationResultBuilder, AzureResourceGroupDto azureResourceGroupDto,
-            String accountId) {
+            AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto, String accountId) {
 
         ResourceGroupUsagePattern resourceGroupUsagePattern = azureResourceGroupDto.getResourceGroupUsagePattern();
         if (Objects.nonNull(resourceGroupUsagePattern)) {
@@ -124,11 +127,21 @@ public class AzureParameterValidator implements ParameterValidator {
                                         + "but that feature is currently disabled").build();
                     }
                 default:
-                    return validationResultBuilder.build();
+                    break;
             }
-        } else {
-            return validationResultBuilder.build();
         }
+
+        String keyUrl = azureResourceEncryptionParametersDto.getKeyUrl();
+        if (Objects.nonNull(keyUrl)) {
+            if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
+                LOGGER.info("Invalid request, isAzureDiskSSEWithCMKEnabled entitlement turned off for account {}", accountId);
+                return validationResultBuilder.error(
+                        "You specified keyUrl to use Server Side Encryption for Azure Managed disks with CMK, "
+                                + "but that feature is currently disabled").
+                        build();
+            }
+        }
+        return validationResultBuilder.build();
     }
     //CHECKSTYLE:ON
 

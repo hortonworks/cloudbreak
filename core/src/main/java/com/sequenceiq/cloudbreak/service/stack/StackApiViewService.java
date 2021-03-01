@@ -1,5 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.stack.StackListItemToStackApiViewConverter;
@@ -11,21 +28,6 @@ import com.sequenceiq.cloudbreak.repository.HostGroupViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackApiViewRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.flow.core.FlowLogService;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import javax.inject.Inject;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 @Service
 public class StackApiViewService {
@@ -87,6 +89,21 @@ public class StackApiViewService {
                 .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
 
         Set<StackListItem> stackList = stackService.getByWorkspaceId(workspaceId, environmentCrn, stackTypes);
+        Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());
+        Map<Long, List<HostGroupView>> clusterHgMap = getClusterHostGroupMap(clusterIds);
+        return stackList.stream()
+                .map(item -> stackListItemToStackApiViewConverter.convert(item, instanceCounts, clusterHgMap.get(item.getClusterId())))
+                .collect(Collectors.toSet());
+    }
+
+    public Set<StackApiView> retrieveStackViewsByStackIdsAndEnvironmentCrn(Long workspaceId, List<Long> stackIds, String environmentCrn,
+            List<StackType> stackTypes) {
+        LOGGER.info("Retrieving stacks of type: {}, in environment: {}", stackTypes, environmentCrn);
+
+        Map<Long, Integer> instanceCounts = instanceMetaDataService.countByWorkspaceId(workspaceId, environmentCrn, stackTypes).stream()
+                .collect(Collectors.toMap(StackInstanceCount::getStackId, StackInstanceCount::getInstanceCount));
+
+        Set<StackListItem> stackList = stackService.getByWorkspaceIdAndStackIds(workspaceId, stackIds, stackTypes);
         Set<Long> clusterIds = stackList.stream().map(StackListItem::getClusterId).collect(Collectors.toSet());
         Map<Long, List<HostGroupView>> clusterHgMap = getClusterHostGroupMap(clusterIds);
         return stackList.stream()

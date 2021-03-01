@@ -30,4 +30,8 @@ public class TargetGroupPersistenceService {
         }
         return targetGroups;
     }
+
+    public Set<TargetGroup> findByIntanceGroupId(Long instanceGroupId) {
+        return repository.findByInstanceGroupId(instanceGroupId);
+    }
 }

@@ -49,7 +49,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 .findFirst()
                 .orElseThrow(() -> new AzureResourceException("Instance resource not found"));
 
-        LOGGER.info("Attach disk to the instance {}", instance.toString());
+        LOGGER.info("Attach disk to the instance {}", instance);
 
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
@@ -69,17 +69,28 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                     Disk disk = client.getDiskById(volume.getId());
                     if (!diskIds.contains(disk.id())) {
                         if (disk.isAttachedToVirtualMachine()) {
-                            client.detachDiskFromVm(disk.id(), client.getVirtualMachine(disk.virtualMachineId()));
+                            detachDiskFromVmByVmId(client, disk);
                         }
-                        client.attachDiskToVm(disk, vm);
+                        attachDiskToVm(client, disk, vm);
                     } else {
-                        LOGGER.debug("Managed disk {} is already attached to VM {}", disk, vm);
+                        LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
                     }
                 });
         volumeSet.setInstanceId(instance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
-        LOGGER.debug("Volume set {} attached successfully", volumeSet.toString());
+        LOGGER.info("Volume set {} attached successfully", volumeSet);
         return List.of(volumeSet);
+    }
+
+    private void detachDiskFromVmByVmId(AzureClient client, Disk disk) {
+        VirtualMachine vm = client.getVirtualMachine(disk.virtualMachineId());
+        LOGGER.info("Going to detach disk ([id: {}]) from virtual machine ([id: {}])", disk.id(), vm.vmId());
+        client.detachDiskFromVm(disk.id(), client.getVirtualMachine(disk.virtualMachineId()));
+    }
+
+    private void attachDiskToVm(AzureClient client, Disk disk, VirtualMachine vm) {
+        LOGGER.info("Going to attach disk ([id: {}]) to virtual machine ([id: {}])", disk.id(), vm.vmId());
+        client.attachDiskToVm(disk, vm);
     }
 
     @Override

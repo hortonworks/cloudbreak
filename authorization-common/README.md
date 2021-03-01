@@ -6,10 +6,10 @@ __Table of content__
 
 * [Usage](#usage)
     + [Authorization annotations on `Controller`](#authorization-annotations-on--controller-)
+    + [How to make an API internally callable](#how-to-make-an-api-internally-callable)
     + [Rules for annotation usage](#rules-for-annotation-usage)
         - [DisableCheckPermissions](#disablecheckpermissions)
         - [InternalOnly](#internalonly)
-            * [How to make an API internally callable](#how-to-make-an-api-internally-callable)
         - [CustomPermissionCheck](#custompermissioncheck)
         - [CheckPermissionByAccount](#checkpermissionbyaccount)
         - [FilterListBasedOnPermissions](#filterlistbasedonpermissions)
@@ -18,7 +18,9 @@ __Table of content__
         - [CheckPermissionByResourceCrnList](#checkpermissionbyresourcecrnlist)
         - [CheckPermissionByResourceNameList](#checkpermissionbyresourcenamelist)
         - [CheckPermissionByRequestProperty](#checkpermissionbyrequestproperty)
-    + [Example controller](#example-controller)
+    + [List filtering](#list-filtering)
+        - [Notes on performance](#notes-on-performance)
+    + [Example](#example)
 * [Introduction of new resources](#introduction-of-new-resources)
 * [How does it work internally](#how-does-it-work-internally)
     + [Resource based authorization internals](#resource-based-authorization-internals)
@@ -112,11 +114,7 @@ Checks whether the user has the specified right in the account.
 
 #### FilterListBasedOnPermissions
 
-Filters the resources in the response based on the specified right. The response should be one of the followings:
-
-- `List<T extends ResourceCrnAwareApiModel>`
-- `Set<T extends ResourceCrnAwareApiModel>`
-- `AuthorizationFilterableResponseCollection<T extends ResourceCrnAwareApiModel>`
+To support list filtering you need to extend the `AbstractAuthorizationFiltering` and use that in your controller. See details in the list filtering section.
 
 #### CheckPermissionByResourceCrn
 
@@ -144,11 +142,34 @@ Where:
 - the field can be `null` based on `CheckPermissionByRequestProperty.skipOnNull`,
 - the field will be handled as crn, name, crn list or name list based on `CheckPermissionByRequestProperty.type`
 
-### Example controller
+### List filtering
+
+Required entitlement: `PERSONAL_VIEW_CB_BY_RIGHT`.
+
+To support list filtering you need to extend `AbstractAuthorizationFiltering` class and use it in your controller.
+
+With that the authorization will follow the below logic:
+
+1. `AbstractAuthorizationFiltering.getAllResources`: read a list of (id, resourceCrn, optional(parentResourceCrn)) items from the database,
+2. call UMS and find out the ids where the user has the given right,
+3. `AbstractAuthorizationFiltering.filterByIds`: read the necessary items from the database, `SELECT * FROM myresource WHERE id IN (:authorizedIds)`.
+
+If the user is a machine user, or an internal user then we will return all resources from the account based on the `AbstractAuthorizationFiltering.getAll` implementation.
+
+#### Notes on performance
+
+The primary key based lookup `SELECT ... WHERE id IN (:ids)` will be fast even with many items.
+
+:exclamation: The `AbstractAuthorizationFiltering.getAllResources` implementation should read the least amount of data from the database, potentially those that can be served from indices. Reading a list of `Stack` objects and converting them to `AuthorizationResource` objects with lambdas and streams is a poor solution and will hurt response time.
+
+### Example
 
 ```java
 @Controller
 public class MyResourceController {
+
+    @Inject
+    private MyResourceFiltering myResourceFiltering;
 
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_MY_RESOURCE)
     public void create() {}
@@ -159,8 +180,11 @@ public class MyResourceController {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.GET_RESOURCE)
     public MyResource getByName(@ResourceName String name) {}
 
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.GET_RESOURCE)
-    public List<MyResource> list() {}
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.GET_RESOURCE, filter = MyResourceFiltering.class)
+    public List<MyResource> list(@FilterParam(MyResourceFiltering.QUERY_PARAM) String queryParam) {
+      return myResourceFiltering.filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()),
+        AuthorizationResourceAction.GET_RESOURCE, Map.of(MyResourceFiltering.QUERY_PARAM, queryParam));
+    }
 
     @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DELETE_RESOURCE)
     public void deleteMultipleByCrn(@ResourceCrnList Set<String> crns) {}
@@ -185,6 +209,41 @@ public class MyResourceController {
 }
 ```
 
+
+```java
+@Component
+public class MyResourceFiltering extends AbstractAuthorizationFiltering<List<MyResource>> {
+    
+    public static final String QUERY_PARAM = "QUERY_PARAM";
+
+    @Inject
+    private MyResourceService myResourceService;
+
+    @Override
+    public List<AuthorizationResource> getAllResources(Map<String, Object> args) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String queryParam = getQueryParam(args);
+        return myResourceService.findAllAuthorizationResources(accountId, queryParam);
+    }
+
+    @Override
+    public List<MyResource> filterByIds(List<Long> authorizedResourceIds, Map<String, Object> args) {
+        return myResourceService.findAllById(authorizedResourceIds);
+    }
+
+    @Override
+    public List<MyResource> getAll(Map<String, Object> args) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        String queryParam = getQueryParam(args);
+        return myResourceService.findAllInAccount(accountId, queryParam);
+    }
+
+    private String getQueryParam(Map<String, Object> args) {
+        return (String) args.get(QUERY_PARAM);
+    }
+}
+```
+
 ## Introduction of new resources
 
 You can support authorization on new resources, and you can specify the rights as well.
@@ -195,7 +254,6 @@ You can support authorization on new resources, and you can specify the rights a
 4. implement `ResourceBasedCrnProvider`'s methods to support different scenarios on API level,
     - `ResourceBasedCrnProvider.getResourceCrnByResourceName(String)` - if you want to support resoure names,
     - `ResourceBasedCrnProvider.getResourceCrnListByResourceNameList(Collection<String>)` - if you want to support list of resoure names,
-    - `ResourceBasedCrnProvider.getResourceCrnsInAccount()` - if you want to support `@FilterListBasedOnPermissions`,
     - `ResourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(String)` - if you want to support environment level authorization as well (has right on resource or on resource's environment),
     - `ResourceBasedCrnProvider.getEnvironmentCrnsByResourceCrns(Collection<String>)` - if you want to support environment level authorization when the request contains a list of crn-s, names,
 5. if certain resoures should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.

@@ -52,6 +52,8 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
     @ApiModelProperty(hidden = true)
     private Integer gatewayPort;
 
+    private boolean enableLoadBalancer;
+
     public String getEnvironmentName() {
         return environmentName;
     }
@@ -142,6 +144,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setGatewayPort(Integer port) {
         gatewayPort = port;
+    }
+
+    public boolean isEnableLoadBalancer() {
+        return enableLoadBalancer;
+    }
+
+    public void setEnableLoadBalancer(boolean enableLoadBalancer) {
+        this.enableLoadBalancer = enableLoadBalancer;
     }
 
     @JsonIgnore

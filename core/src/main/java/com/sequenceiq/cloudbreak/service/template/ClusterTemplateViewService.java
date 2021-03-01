@@ -6,8 +6,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -37,7 +37,7 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
         return repository.findAllActive(workspaceId);
     }
 
-    public Set<ClusterTemplateView> findAllByEnvironmentCrn(String environmentCrn) {
-        return repository.getAllByEnvironmentCrn(environmentCrn);
+    public Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(String environmentCrn, String cloudPlatform, String runtime) {
+        return repository.findAllUserManagedAndDefaultByEnvironmentCrn(environmentCrn, cloudPlatform, runtime);
     }
 }

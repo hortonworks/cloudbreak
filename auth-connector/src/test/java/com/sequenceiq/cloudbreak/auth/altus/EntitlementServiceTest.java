@@ -95,6 +95,9 @@ class EntitlementServiceTest {
                 {"CDP_DATA_LAKE_AWS_EFS", (EntitlementCheckFunction) EntitlementService::dataLakeEfsEnabled, false},
                 {"CDP_DATA_LAKE_AWS_EFS", (EntitlementCheckFunction) EntitlementService::dataLakeEfsEnabled, true},
 
+                {"CDP_DATA_LAKE_CUSTOM_IMAGE", (EntitlementCheckFunction) EntitlementService::dataLakeCustomImageEnabled, false},
+                {"CDP_DATA_LAKE_CUSTOM_IMAGE", (EntitlementCheckFunction) EntitlementService::dataLakeCustomImageEnabled, true},
+
                 {"CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE",
                         (EntitlementCheckFunction) EntitlementService::isDifferentDataHubAndDataLakeVersionAllowed, false},
                 {"CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE",

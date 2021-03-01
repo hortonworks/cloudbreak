@@ -10,13 +10,12 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
-public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource, ResourceCrnAwareApiModel {
+public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "imagecatalog_generator")
@@ -49,7 +48,6 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource, Re
         return created;
     }
 
-    @Override
     public String getResourceCrn() {
         return resourceCrn;
     }

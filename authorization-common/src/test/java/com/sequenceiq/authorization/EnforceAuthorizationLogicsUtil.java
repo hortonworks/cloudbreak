@@ -1,6 +1,5 @@
 package com.sequenceiq.authorization;
 
-import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.authFilterable;
 import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.list;
 import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.set;
 import static java.util.stream.Collectors.toList;
@@ -53,8 +52,6 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.resource.AuthorizationFilterableResponseCollection;
-import com.sequenceiq.authorization.resource.ResourceCrnAwareApiModel;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -82,11 +79,7 @@ public class EnforceAuthorizationLogicsUtil {
                     .put(CheckPermissionByAccount.class, noRestriction())
                     .put(InternalOnly.class, noRestriction())
                     .put(CustomPermissionCheck.class, noRestriction())
-                    .put(FilterListBasedOnPermissions.class,
-                            returnsAnyOf(
-                                    list(ResourceCrnAwareApiModel.class),
-                                    set(ResourceCrnAwareApiModel.class),
-                                    authFilterable(ResourceCrnAwareApiModel.class)))
+                    .put(FilterListBasedOnPermissions.class, noRestriction())
                     .put(CheckPermissionByRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
                     .put(CheckPermissionByCompositeRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
                     .build();
@@ -220,32 +213,6 @@ public class EnforceAuthorizationLogicsUtil {
         }
     }
 
-    private static Function<Method, Optional<String>> returnsAnyOf(GenericType... genericTypes) {
-        return method -> {
-            long count = Arrays.stream(genericTypes)
-                    .filter(genericType -> genericType.wrapperType.isAssignableFrom(method.getReturnType()))
-                    .filter(genericType -> {
-                        Type[] actualTypeArguments;
-                        if (method.getReturnType().getSuperclass() == null) {
-                            actualTypeArguments = ((ParameterizedType) method.getGenericReturnType()).getActualTypeArguments();
-                        } else {
-                            actualTypeArguments = ((ParameterizedType) method.getReturnType().getGenericSuperclass()).getActualTypeArguments();
-                        }
-                        return actualTypeArguments.length == 1 && genericType.genericType.isAssignableFrom((Class<?>) actualTypeArguments[0]);
-                    })
-                    .count();
-            String errorMessage = "Return " + method.getReturnType().getSimpleName() + " type is not one of" +
-                    Arrays.stream(genericTypes)
-                            .map(GenericType::toString)
-                            .collect(Collectors.joining(",", "[", "]"));
-            if (count != 1) {
-                return Optional.of(invalid(method, errorMessage));
-            } else {
-                return Optional.empty();
-            }
-        };
-    }
-
     private static Function<Pair<Method, Class<?>>, Optional<String>> requestObject() {
         return ctx -> {
             Method method = ctx.getKey();
@@ -324,10 +291,6 @@ public class EnforceAuthorizationLogicsUtil {
 
         static GenericType set(Class<?> genericType) {
             return new GenericType(Set.class, genericType);
-        }
-
-        static GenericType authFilterable(Class<?> genericType) {
-            return new GenericType(AuthorizationFilterableResponseCollection.class, genericType);
         }
 
         @Override

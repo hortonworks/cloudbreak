@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.domain.stack.loadbalancer;
 
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import java.util.HashSet;
 import java.util.Set;
 
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -127,6 +129,12 @@ public class LoadBalancer implements ProvisionEntity  {
         } else {
             return targetGroups;
         }
+    }
+
+    public Set<InstanceGroup> getAllInstanceGroups() {
+        return targetGroupSet.stream()
+            .flatMap(tg -> tg.getInstanceGroups().stream())
+            .collect(Collectors.toSet());
     }
 
     public void setTargetGroupSet(Set<TargetGroup> targetGroups) {

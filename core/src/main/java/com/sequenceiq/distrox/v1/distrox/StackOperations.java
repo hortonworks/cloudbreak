@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.cdp.shaded.org.apache.commons.lang3.StringUtils;
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -140,6 +141,19 @@ public class StackOperations implements ResourceBasedCrnProvider {
                 StackViewV4Response.class);
         LOGGER.info("Adding environment name and credential to the responses.");
         NameOrCrn nameOrCrn = StringUtils.isEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
+        environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
+        LOGGER.info("Adding SDX CRN and name to the responses.");
+        sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
+        return new StackViewV4Responses(stackViewResponses);
+    }
+
+    public StackViewV4Responses listByStackIds(Long workspaceId, List<Long> stackIds, String environmentCrn, List<StackType> stackTypes) {
+        Set<StackViewV4Response> stackViewResponses;
+        stackViewResponses = converterUtil.convertAllAsSet(
+                stackApiViewService.retrieveStackViewsByStackIdsAndEnvironmentCrn(workspaceId, stackIds, environmentCrn, stackTypes),
+                StackViewV4Response.class);
+        LOGGER.info("Adding environment name and credential to the responses.");
+        NameOrCrn nameOrCrn = Strings.isNullOrEmpty(environmentCrn) ? NameOrCrn.empty() : NameOrCrn.ofCrn(environmentCrn);
         environmentServiceDecorator.prepareEnvironmentsAndCredentialName(stackViewResponses, nameOrCrn);
         LOGGER.info("Adding SDX CRN and name to the responses.");
         sdxServiceDecorator.prepareMultipleSdxAttributes(stackViewResponses);
@@ -363,11 +377,6 @@ public class StackOperations implements ResourceBasedCrnProvider {
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceName) {
         return new ArrayList<>(stackService.getResourceCrnsByNameListInTenant(resourceName, ThreadBasedUserCrnProvider.getAccountId()));
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        return new ArrayList<>(stackService.getResourceCrnsByTenant(ThreadBasedUserCrnProvider.getAccountId()));
     }
 
     @Override

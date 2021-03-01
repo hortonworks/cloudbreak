@@ -12,4 +12,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 @Target(ElementType.METHOD)
 public @interface FilterListBasedOnPermissions {
     AuthorizationResourceAction action();
+
+    Class<?> filter();
 }

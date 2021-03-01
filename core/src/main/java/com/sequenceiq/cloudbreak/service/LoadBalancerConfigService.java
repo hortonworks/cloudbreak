@@ -151,27 +151,37 @@ public class LoadBalancerConfigService {
         return loadBalancerOptional;
     }
 
-    public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment) {
-        LOGGER.info("Setting up load balancers for stack {}", stack.getDisplayName());
+    public boolean isLoadBalancerCreationConfigured(Stack stack, DetailedEnvironmentResponse environment) {
+        return !setupLoadBalancers(stack, environment, true, false).isEmpty();
+    }
+
+    public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean loadBalancerFlagEnabled) {
+        return setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
+    }
+
+    public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
+        if (dryRun) {
+            LOGGER.info("Checking if load balancers are enabled and configurable for stack {}", stack.getName());
+        } else {
+            LOGGER.info("Setting up load balancers for stack {}", stack.getDisplayName());
+        }
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if (isLoadBalancerEnabled(stack.getType(), environment) && getSupportedPlatforms().contains(stack.getCloudPlatform())) {
-            LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
-            Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack);
+        if (getSupportedPlatforms().contains(stack.getCloudPlatform()) && (loadBalancerFlagEnabled || isLoadBalancerEnabled(stack.getType(), environment))) {
+            if (!loadBalancerFlagEnabled) {
+                LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
+            } else {
+                LOGGER.debug("Load balancer is explicitly defined for the stack.");
+            }
+            Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
             if (knoxTargetGroup.isPresent()) {
                 if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
-                    LOGGER.debug("Found Knox enabled instance groups in stack. Setting up internal Knox load balancer");
-                    setupKnoxLoadBalancer(
-                        createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PRIVATE, stack),
-                        knoxTargetGroup.get());
+                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
                 } else {
                     LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
                 }
                 if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork())) {
-                    LOGGER.debug("Public endpoint access gateway is enabled. Setting up public Knox load balancer");
-                    setupKnoxLoadBalancer(
-                        createLoadBalancerIfNotExists(loadBalancers, LoadBalancerType.PUBLIC, stack),
-                        knoxTargetGroup.get());
+                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
                 } else {
                     LOGGER.debug("External load balancer creation is disabled.");
                 }
@@ -182,7 +192,23 @@ public class LoadBalancerConfigService {
             // TODO CB-9368 - create target group for CM instances
         }
 
+        LOGGER.debug("Adding {} load balancers for stack {}", loadBalancers.size(), stack.getName());
         return loadBalancers;
+    }
+
+    private void setupLoadBalancer(boolean dryRun, Stack stack, Set<LoadBalancer> loadBalancers, TargetGroup knoxTargetGroup,
+            LoadBalancerType type) {
+        if (dryRun) {
+            LOGGER.debug("{} load balancer can be configured for stack {}. Adding mock LB to configurable LB list.", type, stack.getName());
+            LoadBalancer mockLb = new LoadBalancer();
+            mockLb.setType(type);
+            loadBalancers.add(mockLb);
+        } else {
+            LOGGER.debug("Found Knox enabled instance groups in stack. Setting up {} Knox load balancer.", type);
+            setupKnoxLoadBalancer(
+                createLoadBalancerIfNotExists(loadBalancers, type, stack),
+                knoxTargetGroup);
+        }
     }
 
     private boolean isNetworkUsingPrivateSubnet(Network network, EnvironmentNetworkResponse envNetwork) {
@@ -212,7 +238,8 @@ public class LoadBalancerConfigService {
     }
 
     private boolean isLoadBalancerEnabled(StackType type, DetailedEnvironmentResponse environment) {
-        return isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment);
+        return environment != null &&
+            (isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment));
     }
 
     private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {
@@ -240,7 +267,7 @@ public class LoadBalancerConfigService {
         return result;
     }
 
-    private Optional<TargetGroup> setupKnoxTargetGroup(Stack stack) {
+    private Optional<TargetGroup> setupKnoxTargetGroup(Stack stack, boolean dryRun) {
         TargetGroup knoxTargetGroup = null;
         Set<String> knoxGatewayGroupNames = getKnoxGatewayGroups(stack);
         Set<InstanceGroup> knoxGatewayInstanceGroups = stack.getInstanceGroups().stream()
@@ -251,8 +278,13 @@ public class LoadBalancerConfigService {
             knoxTargetGroup = new TargetGroup();
             knoxTargetGroup.setType(TargetGroupType.KNOX);
             knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
-            TargetGroup finalKnoxTargetGroup = knoxTargetGroup;
-            knoxGatewayInstanceGroups.forEach(ig -> ig.addTargetGroup(finalKnoxTargetGroup));
+            if (!dryRun) {
+                LOGGER.debug("Adding target group to Knox gateway instances groups.");
+                TargetGroup finalKnoxTargetGroup = knoxTargetGroup;
+                knoxGatewayInstanceGroups.forEach(ig -> ig.addTargetGroup(finalKnoxTargetGroup));
+            } else {
+                LOGGER.debug("Dry run, skipping instance group/target group linkage.");
+            }
         }
         return Optional.ofNullable(knoxTargetGroup);
     }

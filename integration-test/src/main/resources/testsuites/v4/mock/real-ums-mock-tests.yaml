@@ -9,3 +9,10 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvironmentCreateTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.EnvStopStartWithEnvAdmin
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.RecipeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.CredentialListFilteringTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.DataHubListFilteringTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.DataLakeListFilteringTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.EnvironmentListFilteringTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.FreeIpaListFilteringTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.ImageCatalogListFiltering
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.RecipeListFilteringTest

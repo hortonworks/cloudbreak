@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
@@ -55,7 +56,7 @@ public class EnvironmentResourceDeletionService {
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
         try {
-            Set<String> names = getClusterDefinitionNamesInEnvironment(environmentCrn);
+            Set<String> names = getNonDefaultClusterDefinitionNamesInEnvironment(environmentCrn);
             if (!names.isEmpty()) {
                 clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, names, null, environmentCrn);
             } else {
@@ -68,9 +69,10 @@ public class EnvironmentResourceDeletionService {
         }
     }
 
-    private Set<String> getClusterDefinitionNamesInEnvironment(String environmentCrn) {
+    private Set<String> getNonDefaultClusterDefinitionNamesInEnvironment(String environmentCrn) {
         ClusterTemplateViewV4Responses responses = doAsInternalActor(() -> clusterTemplateV4Endpoint.listByEnv(TEMP_WORKSPACE_ID, environmentCrn));
         return responses.getResponses().stream()
+                .filter(e -> ResourceStatus.USER_MANAGED.equals(e.getStatus()))
                 .map(ClusterTemplateViewV4Response::getName)
                 .collect(Collectors.toSet());
     }

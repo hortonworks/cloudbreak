@@ -2,11 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
-import static java.lang.String.format;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -16,13 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
+import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 
 public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
@@ -30,20 +24,13 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     private static final String CREATE_FILE_RECIPE = "classpath:/recipes/post-install.sh";
 
-    private Map<String, InstanceStatus> instancesHealthy = new HashMap<>() {{
-        put(HostGroupType.MASTER.getName(), InstanceStatus.SERVICES_HEALTHY);
-        put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
-    }};
+    private final Map<String, InstanceStatus> instancesHealthy = InstanceUtil.getHealthySDXInstances();
 
-    private final Map<String, InstanceStatus> instancesDeletedOnProviderSide = new HashMap<>() {{
-        put(MASTER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-        put(IDBROKER.getName(), InstanceStatus.DELETED_ON_PROVIDER_SIDE);
-    }};
+    private final Map<String, InstanceStatus> instancesDeletedOnProviderSide = InstanceUtil.getInstanceStatuses(
+            InstanceStatus.DELETED_ON_PROVIDER_SIDE, MASTER, IDBROKER);
 
-    private final Map<String, InstanceStatus> instancesStopped = new HashMap<>() {{
-        put(MASTER.getName(), InstanceStatus.STOPPED);
-        put(IDBROKER.getName(), InstanceStatus.STOPPED);
-    }};
+    private final Map<String, InstanceStatus> instancesStopped = InstanceUtil.getInstanceStatuses(
+            InstanceStatus.STOPPED, MASTER, IDBROKER);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -79,21 +66,6 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
 
     protected String getDefaultSDXBlueprintName() {
         return commonClusterManagerProperties().getInternalSdxBlueprintName();
-    }
-
-    protected SdxTestDto compareVolumeIdsAfterRepair(SdxTestDto sdxTestDto, List<String> actualVolumeIds, List<String> expectedVolumeIds) {
-        actualVolumeIds.sort(Comparator.naturalOrder());
-        expectedVolumeIds.sort(Comparator.naturalOrder());
-
-        if (!actualVolumeIds.equals(expectedVolumeIds)) {
-            LOGGER.error("Host Group does not have the desired volume IDs!");
-            actualVolumeIds.forEach(volumeid -> Log.log(LOGGER, format(" Actual volume ID: %s ", volumeid)));
-            expectedVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Desired volume ID: %s ", volumeId)));
-            throw new TestFailException("Host Group does not have the desired volume IDs!");
-        } else {
-            actualVolumeIds.forEach(volumeId -> Log.log(LOGGER, format(" Before and after SDX repair volume IDs are equal [%s]. ", volumeId)));
-        }
-        return sdxTestDto;
     }
 
     protected String getBaseLocation(SdxTestDto testDto) {

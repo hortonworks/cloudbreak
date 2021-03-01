@@ -123,6 +123,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
     public CloudResource delete(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         try {
             OSClient<?> osClient = createOSClient(auth);
+            LOGGER.info("About to delete volume: [{}]", resource);
             ActionResponse response = osClient.compute().servers().delete(resource.getReference());
             return checkDeleteResponse(response, resourceType(), auth, resource, "Instance deletion failed");
         } catch (OS4JException ex) {

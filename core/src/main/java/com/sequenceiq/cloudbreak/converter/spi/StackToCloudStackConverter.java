@@ -381,7 +381,7 @@ public class StackToCloudStackConverter {
         return spiFileSystem;
     }
 
-    private Network buildNetwork(Stack stack) {
+    public Network buildNetwork(Stack stack) {
         com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
         Network result = null;
         if (stackNetwork != null) {

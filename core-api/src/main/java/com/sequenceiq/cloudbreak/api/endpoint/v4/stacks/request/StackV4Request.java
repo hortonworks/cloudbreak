@@ -97,6 +97,9 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
     @ApiModelProperty(StackModelDescription.EXTERNAL_DATABASE)
     private DatabaseRequest externalDatabase;
 
+    @ApiModelProperty(StackModelDescription.ENABLE_LOAD_BALANCER)
+    private boolean enableLoadBalancer;
+
     @DatalakeCrn
     @ApiModelProperty(value = StackModelDescription.RESOURCE_CRN)
     private String resourceCrn;
@@ -231,6 +234,14 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setExternalDatabase(DatabaseRequest externalDatabase) {
         this.externalDatabase = externalDatabase;
+    }
+
+    public boolean isEnableLoadBalancer() {
+        return enableLoadBalancer;
+    }
+
+    public void setEnableLoadBalancer(boolean enableLoadBalancer) {
+        this.enableLoadBalancer = enableLoadBalancer;
     }
 
     public String getResourceCrn() {

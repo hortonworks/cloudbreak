@@ -26,12 +26,13 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto.Builder;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameters.validation.validators.parameter.AzureParameterValidator;
 
 public class AzureParameterValidatorTest {
@@ -55,6 +56,7 @@ public class AzureParameterValidatorTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -78,11 +80,12 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseMultipleResourceGroupsThenNoError() {
+    public void testWhenUseMultipleResourceGroupsAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
 
@@ -92,13 +95,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseExistingResourceGroupAndExistsThenNoError() {
+    public void testWhenUseExistingResourceGroupAndExistsAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -112,13 +116,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenMultipleResourceGroupAndEmptyNameThenNoError() {
+    public void testWhenMultipleResourceGroupAndEmptyNameAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -132,13 +137,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenMultipleResourceGroupAndNonEmptyNameThenError() {
+    public void testWhenMultipleResourceGroupAndNonEmptyNameAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -155,13 +161,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseExistingResourceGroupAndEmptyNameThenError() {
+    public void testWhenUseExistingResourceGroupAndEmptyNameAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -176,12 +183,13 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseExistingResourceGroupAndEmptyResourceGroupUsageThenError() {
+    public void testWhenUseExistingResourceGroupAndEmptyResourceGroupUsageAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -196,13 +204,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseExistingResourceGroupAndNotExistsThenError() {
+    public void testWhenUseExistingResourceGroupAndNotExistsAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -217,11 +226,12 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenFeatureTurnedOffAndUseMultipleThenNoError() {
+    public void testWhenFeatureTurnedOffAndUseMultipleAndNoEncryptionParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -239,13 +249,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenFeatureTurnedOffAndUseSingleThenError() {
+    public void testWhenFeatureTurnedOffAndUseSingleAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -262,13 +273,14 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenDedicatedStorageAccountFeatureTurnedOffAndUseSingleThenError() {
+    public void testWhenDedicatedStorageAccountFeatureTurnedOffAndUseSingleAndNoEncryptionParametersThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
                                 .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT)
                                 .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                 .withName("myResourceGroup").build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
@@ -283,6 +295,60 @@ public class AzureParameterValidatorTest {
         assertTrue(validationResult.hasError());
         assertEquals("1. You specified to use a single resource group with dedicated storage account for the images, but that feature is currently disabled",
                 validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEntitlementDisabledThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                .withKeyUrl("DummyKeyUrl").build())
+                        .build())
+                .build();
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+    }
+
+    @Test
+    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEntitlementEnabledThenNoError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder()
+                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                .withKeyUrl("DummyKeyUrl").build())
+                        .build())
+                .build();
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testWhenNoResourceGroupAndNoResourceEncryptionParameterAndEntitlementDisabledThenNoError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder().build())
+                .build();
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    public void testNoResourceGroupAndNoResourceEncryptionParameterAndEntitlementEnabledThenNoError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder().build())
+                .build();
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertFalse(validationResult.hasError());
     }
 
     @Test

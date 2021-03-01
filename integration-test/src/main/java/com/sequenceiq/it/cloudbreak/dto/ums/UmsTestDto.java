@@ -17,15 +17,17 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
 
     private static final String DH_CREATOR_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataHubCreator";
 
-    private static final String DH_ADMIN_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DatahubAdmin";
+    private static final String DH_ADMIN_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataHubAdmin";
 
-    private static final String DH_USER_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DatahubUser";
+    private static final String DH_USER_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataHubUser";
 
     private static final String ENV_USER_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentUser";
 
     private static final String ENV_ADMIN_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin";
 
     private static final String DATA_STEWARD_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:DataSteward";
+
+    private static final String SHARED_RESOURCE_USER = "crn:altus:iam:us-west-1:altus:resourceRole:SharedResourceUser";
 
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
@@ -56,8 +58,13 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
         return this;
     }
 
+    public UmsTestDto withSharedResourceUser() {
+        getRequest().setRoleCrn(SHARED_RESOURCE_USER);
+        return this;
+    }
+
     public UmsTestDto withDatahubAdmin() {
-        getRequest().setRoleCrn(DH_USER_CRN);
+        getRequest().setRoleCrn(DH_ADMIN_CRN);
         return this;
     }
 

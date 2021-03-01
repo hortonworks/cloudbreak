@@ -92,13 +92,18 @@ public abstract class AbstractOpenStackResourceBuilder implements CloudPlatformA
     protected CloudResource checkDeleteResponse(ActionResponse response, ResourceType resourceType, AuthenticatedContext auth, CloudResource resource,
             String faultMsg) {
         if (!response.isSuccess()) {
+            LOGGER.warn("OpenStack Action for resource [type: {}] was not successful! [status: {}, msg: {}]", resourceType,
+                    StatusCode.fromCode(response.getCode()), response.getFault());
             if (response.getCode() != StatusCode.NOT_FOUND.getCode()) {
                 throw new OpenStackResourceException(faultMsg, resourceType, resource.getName(), auth.getCloudContext().getId(),
                         response.getFault());
             } else {
+                LOGGER.warn("OpenStack Action for resource [type: {}] was not NOT_FOUND (404) hence null will be returned from " +
+                                "{}.checkDeleteResponse() method!", resourceType, AbstractOpenStackResourceBuilder.class.getSimpleName());
                 return null;
             }
         }
+        LOGGER.info("OpenStack Action for resource [type: {}] was successful!", resourceType);
         return resource;
     }
 

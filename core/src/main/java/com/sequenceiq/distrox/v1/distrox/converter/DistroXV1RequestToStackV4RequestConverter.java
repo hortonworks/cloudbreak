@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
@@ -99,7 +100,29 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
+        request.setEnableLoadBalancer(source.isEnableLoadBalancer());
+        checkMultipleGatewayNodes(source);
         return request;
+    }
+
+    private void checkMultipleGatewayNodes(DistroXV1Request distroXV1Request) {
+        if (distroXV1Request.getInstanceGroups() == null || distroXV1Request.getInstanceGroups().isEmpty()) {
+            return;
+        }
+        distroXV1Request.getInstanceGroups().forEach(ig -> {
+            if (InstanceGroupType.GATEWAY == ig.getType()) {
+                if (distroXV1Request.isEnableLoadBalancer()) {
+                    if (ig.getNodeCount() < 1) {
+                        throw new BadRequestException("Instance group with GATEWAY type must contain at least 1 node!");
+                    }
+                } else {
+                    if (ig.getNodeCount() != 1) {
+                        throw new BadRequestException("Instance group with GATEWAY type must contain 1 node!");
+                    }
+                }
+            }
+        });
+
     }
 
     public StackV4Request convertAsTemplate(DistroXV1Request source) {
@@ -135,6 +158,8 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setTimeToLive(source.getTimeToLive());
         request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
+        request.setEnableLoadBalancer(source.isEnableLoadBalancer());
+        checkMultipleGatewayNodes(source);
         return request;
     }
 
@@ -204,6 +229,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setSdx(getIfNotNull(source.getSharedService(), sdxConverter::getSdx));
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
+        request.setEnableLoadBalancer(source.isEnableLoadBalancer());
         return request;
     }
 

@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.update.loadbalancer.StackLoadBalancerUpdateEvent.STACK_LOAD_BALANCER_UPDATE_EVENT;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackD
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -296,5 +298,11 @@ public class ReactorFlowManager {
         ClusterCertificatesRotationTriggerEvent clusterCertificatesRotationTriggerEvent = new ClusterCertificatesRotationTriggerEvent(selector, stackId,
                 certificatesRotationV4Request.getRotateCertificatesType());
         return reactorNotifier.notify(stackId, selector, clusterCertificatesRotationTriggerEvent);
+    }
+
+    public FlowIdentifier triggerStackLoadBalancerUpdate(Long stackId) {
+        String selector = STACK_LOAD_BALANCER_UPDATE_EVENT.event();
+        StackLoadBalancerUpdateTriggerEvent stackLoadBalancerUpdateTriggerEvent = new StackLoadBalancerUpdateTriggerEvent(selector, stackId);
+        return reactorNotifier.notify(stackId, selector, stackLoadBalancerUpdateTriggerEvent);
     }
 }

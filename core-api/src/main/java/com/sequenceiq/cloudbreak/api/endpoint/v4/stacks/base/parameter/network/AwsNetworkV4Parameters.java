@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network;
 
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.INTERNET_GATEWAY_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.VPC_ID;
+
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -65,10 +70,10 @@ public class AwsNetworkV4Parameters extends MappableBase implements JsonEntity {
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
-        putIfValueNotNull(map, "vpcId", vpcId);
-        putIfValueNotNull(map, "internetGatewayId", internetGatewayId);
-        putIfValueNotNull(map, "subnetId", subnetId);
-        putIfValueNotNull(map, "endpointGatewaySubnetId", endpointGatewaySubnetId);
+        putIfValueNotNull(map, VPC_ID, vpcId);
+        putIfValueNotNull(map, INTERNET_GATEWAY_ID, internetGatewayId);
+        putIfValueNotNull(map, SUBNET_ID, subnetId);
+        putIfValueNotNull(map, ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnetId);
         return map;
     }
 
@@ -81,9 +86,9 @@ public class AwsNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @Override
     public void parse(Map<String, Object> parameters) {
-        vpcId = getParameterOrNull(parameters, "vpcId");
-        internetGatewayId = getParameterOrNull(parameters, "internetGatewayId");
-        subnetId = getParameterOrNull(parameters, "subnetId");
-        endpointGatewaySubnetId = getParameterOrNull(parameters, "endpointGatewaySubnetId");
+        vpcId = getParameterOrNull(parameters, VPC_ID);
+        internetGatewayId = getParameterOrNull(parameters, INTERNET_GATEWAY_ID);
+        subnetId = getParameterOrNull(parameters, SUBNET_ID);
+        endpointGatewaySubnetId = getParameterOrNull(parameters, ENDPOINT_GATEWAY_SUBNET_ID);
     }
 }

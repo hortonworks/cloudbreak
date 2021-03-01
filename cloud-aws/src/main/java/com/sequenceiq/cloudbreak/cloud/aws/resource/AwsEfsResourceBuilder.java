@@ -147,6 +147,8 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
             LifeCycleState efsLifeCycleState = LifeCycleState.fromValue(efsDescription.getLifeCycleState());
 
             if (LifeCycleState.DELETED.equals(efsLifeCycleState) || LifeCycleState.DELETING.equals(efsLifeCycleState)) {
+                LOGGER.debug("The given AWS EFS's [name: {}] lifecycle state was [{}] hence we are going to skip any delete operation over this resource",
+                        efsDescription.getName(), efsLifeCycleState);
                 continue;
             }
 
@@ -158,6 +160,7 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
                 // Only delete the mount targets.
                 for (MountTargetDescription mtDescription : mountTargetDescriptionList) {
                     DeleteMountTargetRequest mtDelRequest = new DeleteMountTargetRequest().withMountTargetId(mtDescription.getMountTargetId());
+                    LOGGER.debug("About to delete AWS EFS mount target that has the following id: {}", mtDescription.getMountTargetId());
                     client.deleteMountTarget(mtDelRequest);
                 }
 

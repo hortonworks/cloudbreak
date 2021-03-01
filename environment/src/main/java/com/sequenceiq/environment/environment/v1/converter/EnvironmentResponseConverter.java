@@ -12,6 +12,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -31,11 +32,12 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 
 @Component
@@ -174,14 +176,18 @@ public class EnvironmentResponseConverter {
     }
 
     private AzureEnvironmentParameters azureEnvParamsToAzureEnvironmentParams(ParametersDto parameters) {
-        return Optional.ofNullable(parameters.getAzureParametersDto())
+        AzureResourceGroupDto resourceGroupDto = Optional.ofNullable(parameters.getAzureParametersDto())
                 .map(AzureParametersDto::getAzureResourceGroupDto)
                 .filter(resourceGroupDto -> Objects.nonNull(resourceGroupDto.getResourceGroupUsagePattern()))
                 .filter(resourceGroupDto -> Objects.nonNull(resourceGroupDto.getResourceGroupCreation()))
-                .map(resourceGroupDto -> AzureEnvironmentParameters.builder()
-                        .withAzureResourceGroup(getIfNotNull(resourceGroupDto, this::azureParametersToAzureResourceGroup))
-                        .build())
                 .orElse(null);
+        AzureResourceEncryptionParametersDto resourceEncryptionParametersDto = Optional.ofNullable(parameters.getAzureParametersDto())
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .orElse(null);
+        return AzureEnvironmentParameters.builder()
+                        .withAzureResourceGroup(getIfNotNull(resourceGroupDto, this::azureParametersToAzureResourceGroup))
+                        .withResourceEncryptionParameters(getIfNotNull(resourceEncryptionParametersDto, this::azureParametersToAzureResourceEncryptionParameters))
+                        .build();
     }
 
     private YarnEnvironmentParameters yarnEnvParamsToYarnEnvironmentParams(ParametersDto parameters) {
@@ -211,6 +217,13 @@ public class EnvironmentResponseConverter {
                 .build();
     }
 
+    private AzureResourceEncryptionParameters azureParametersToAzureResourceEncryptionParameters(
+            AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
+        return AzureResourceEncryptionParameters.builder()
+                .withKeyUrl(azureResourceEncryptionParametersDto.getKeyUrl())
+                .build();
+    }
+
     private ResourceGroupUsage resourceGroupUsagePatternToResourceGroupUsage(ResourceGroupUsagePattern resourceGroupUsagePattern) {
         switch (resourceGroupUsagePattern) {
             case USE_SINGLE:
@@ -219,8 +232,8 @@ public class EnvironmentResponseConverter {
                 return ResourceGroupUsage.MULTIPLE;
             case USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT:
                 return ResourceGroupUsage.SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT;
-                default:
-                    throw new RuntimeException("Unknown resource group usage pattern: %s" + resourceGroupUsagePattern);
+            default:
+                throw new RuntimeException("Unknown resource group usage pattern: %s" + resourceGroupUsagePattern);
         }
     }
 

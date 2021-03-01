@@ -62,9 +62,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     public boolean generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
         boolean success = false;
-        if (manageCertificateAndDnsInPem()
-                && stack != null
-                && stack.getCluster() != null) {
+        if (isCertRenewalTriggerable(stack)) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 success = generateCertAndSaveForStack(stack);
             }
@@ -120,39 +118,52 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
-    public void updateDnsEntryForLoadBalancers(Stack stack) {
-        Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
-        Set<String> hueHostGroups = getHueHostGroups(stack);
-        if (loadBalancerOptional.isEmpty()) {
-            LOGGER.error("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
-        } else {
-            LOGGER.info("Updating load balancer DNS entries");
-            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
-            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+    public boolean updateDnsEntryForLoadBalancers(Stack stack) {
+        boolean success = false;
+        if (manageCertificateAndDnsInPem() && stack != null) {
+            Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
 
-            LoadBalancer loadBalancer = loadBalancerOptional.get();
-            String endpoint = loadBalancer.getEndpoint();
-            boolean dnsRegistered = false;
-            if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
-                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
-                    endpoint, environment.getName(), loadBalancer.getDns());
-                dnsRegistered = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(userCrn, accountId, endpoint,
-                    environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
-            } else if (loadBalancer.getIp() != null) {
-                LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
-                    endpoint, environment.getName(), loadBalancer.getIp());
-                dnsRegistered = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpoint,
-                    environment.getName(), false, List.of(loadBalancer.getIp()));
+            if (loadBalancerOptional.isEmpty()) {
+                LOGGER.error("Unable find appropriate load balancer in stack. Load balancer public domain name will not be registered.");
             } else {
-                LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
-                    "DNS registration will be skipped.", loadBalancer.getEndpoint());
+                success = registerLoadBalancersDnsEntries(loadBalancerOptional.get(), stack.getEnvironmentCrn(), getHueHostGroups(stack));
             }
-
-            if (dnsRegistered) {
-                setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment.getName(), userCrn);
-            }
+        } else {
+            LOGGER.debug("DNS registration in PEM service not enabled for load balancer.");
+            success = true;
         }
+
+        return success;
+    }
+
+    private boolean registerLoadBalancersDnsEntries(LoadBalancer loadBalancer, String environmentCrn, Set<String> hueHostGroups) {
+        boolean success = false;
+        LOGGER.info("Updating load balancer DNS entries");
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
+
+        String endpoint = loadBalancer.getEndpoint();
+        if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
+            LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
+                endpoint, environment.getName(), loadBalancer.getDns());
+            success = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(userCrn, accountId, endpoint,
+                environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
+        } else if (loadBalancer.getIp() != null) {
+            LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
+                endpoint, environment.getName(), loadBalancer.getIp());
+            success = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpoint,
+                environment.getName(), false, List.of(loadBalancer.getIp()));
+        } else {
+            LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
+                "DNS registration will be skipped.", loadBalancer.getEndpoint());
+        }
+
+        if (success) {
+            setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment.getName(), userCrn);
+        }
+
+        return success;
     }
 
     private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, String envName, String userCrn) {
@@ -188,7 +199,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
 
         if (loadBalancerOptional.isEmpty()) {
-            LOGGER.error("Unable to find appropriate load balancer in stack. Load balancer public domain name will not be deleted.");
+            LOGGER.warn("Unable to find appropriate load balancer in stack. Load balancer public domain name will not be deleted.");
         } else {
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             String accountId = ThreadBasedUserCrnProvider.getAccountId();

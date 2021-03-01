@@ -395,7 +395,7 @@ public class EnvironmentTestDto
         if (getResponse() == null) {
             throw new IllegalStateException("Environment response hasn't been set, therefore 'getResourceCrn' cannot be fulfilled.");
         }
-        return getResponse().getResourceCrn();
+        return getResponse().getCrn();
     }
 
     public String getParentEnvironmentCrn() {

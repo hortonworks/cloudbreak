@@ -8,6 +8,8 @@ import javax.ws.rs.core.Response.Status.Family;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+
 public class JaxRSUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JaxRSUtil.class);
@@ -28,6 +30,7 @@ public class JaxRSUtil {
             LOGGER.warn("Couldn't parse response: [{}]", response, e);
             throw handleUnexpectedError(response);
         } finally {
+            LOGGER.debug("Original salt response: {}", AnonymizerUtil.anonymize(response.readEntity(String.class)));
             response.close();
         }
     }

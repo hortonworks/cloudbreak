@@ -93,6 +93,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Inject
     private AwsRdsStatusLookupService awsRdsStatusLookupService;
 
+    @Inject
+    private AwsLoadBalancerLaunchService awsLoadBalancerLaunchService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
@@ -192,5 +195,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         } catch (IOException e) {
             throw new CloudConnectorException("can't get freemarker template", e);
         }
+    }
+
+    @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) {
+        return awsLoadBalancerLaunchService.updateCloudformationWithLoadBalancers(authenticatedContext, stack, persistenceNotifier);
     }
 }

@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -30,6 +32,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpDiskResourceBuilder.class);
 
     @Inject
     private GcpDiskEncryptionService gcpDiskEncryptionService;
@@ -76,6 +80,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         String resourceName = resource.getName();
         try {
+            LOGGER.info("Creating operation to delete disk [name: {}] in project [id: {}] in the following availability zone: {}", resourceName,
+                    context.getProjectId(), context.getLocation().getAvailabilityZone().value());
             Operation operation = context.getCompute().disks()
                     .delete(context.getProjectId(), context.getLocation().getAvailabilityZone().value(), resourceName).execute();
             return createOperationAwareCloudResource(resource, operation);

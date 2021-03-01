@@ -55,6 +55,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 @Component
 public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
+    private static final String VOLUME_DELETION_FAILED_BASE_MSG = "Volume deletion operation has failed due to:";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpAttachedDiskResourceBuilder.class);
 
     private static final String DEVICE_NAME_TEMPLATE = "/dev/sd%s";
@@ -183,17 +185,25 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
             Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
                 try {
+                    LOGGER.info("Going to delete volume [id: {}] from project [id: {}] in the following availability zone: {}", volume.getId(),
+                            context.getProjectId(), volumeSetAttributes.getAvailabilityZone());
                     Operation operation = context.getCompute().disks()
                             .delete(context.getProjectId(), volumeSetAttributes.getAvailabilityZone(), volume.getId()).execute();
                     syncedOperations.add(operation.getName());
                     if (operation.getHttpErrorStatusCode() != null) {
+                        String message = String.format("%s [code: %d, message: %s, error: %s]", VOLUME_DELETION_FAILED_BASE_MSG,
+                                operation.getHttpErrorStatusCode(), operation.getHttpErrorMessage(), operation.getError());
+                        LOGGER.warn(message);
                         throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), volume.getId());
                     }
                 } catch (TokenResponseException e) {
+                    logVolumeDeletionProblem(e);
                     getMissingServiceAccountKeyError(e, context.getProjectId());
                 } catch (GoogleJsonResponseException e) {
+                    logVolumeDeletionProblem(e);
                     exceptionHandler(e, resource.getName(), resourceType());
                 } catch (IOException e) {
+                    logVolumeDeletionProblem(e);
                     throw new GcpResourceException(e.getMessage(), e);
                 }
                 return null;
@@ -259,4 +269,9 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         }
         return result;
     }
+
+    private void logVolumeDeletionProblem(Exception e) {
+        LOGGER.info(String.format("%s %s", VOLUME_DELETION_FAILED_BASE_MSG, e.getMessage()), e);
+    }
+
 }

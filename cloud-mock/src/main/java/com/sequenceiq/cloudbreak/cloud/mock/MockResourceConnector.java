@@ -208,4 +208,10 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
     }
+
+    @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+            PersistenceNotifier persistenceNotifier) {
+        throw new UnsupportedOperationException("Load balancers updates are not supported for " + getClass().getName());
+    }
 }

@@ -72,7 +72,7 @@ public class ClusterCreationService {
     }
 
     public void bootstrapPrivateEndpoints(Stack stack) {
-        clusterPublicEndpointManagementService.registerDomainsWithFreeIPA(stack);
+        clusterPublicEndpointManagementService.registerLoadBalancerWithFreeIPA(stack);
     }
 
     public void startingClusterServices(StackView stack) {

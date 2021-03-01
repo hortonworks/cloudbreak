@@ -49,6 +49,8 @@ public class StatusToPollGroupConverter extends AbstractConversionServiceAwareCo
             case BACKUP_FAILED:
             case RESTORE_IN_PROGRESS:
             case RESTORE_FAILED:
+            case LOAD_BALANCER_UPDATE_IN_PROGRESS:
+            case LOAD_BALANCER_UPDATE_FAILED:
                 return PollGroup.POLLABLE;
             case DELETE_COMPLETED:
                 return PollGroup.CANCELLED;

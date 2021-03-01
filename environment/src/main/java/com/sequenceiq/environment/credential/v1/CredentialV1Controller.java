@@ -15,15 +15,15 @@ import javax.ws.rs.core.Response.Status;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
-import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -37,6 +37,7 @@ import com.sequenceiq.environment.api.v1.credential.model.response.CredentialRes
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponses;
 import com.sequenceiq.environment.api.v1.credential.model.response.EmptyResponse;
 import com.sequenceiq.environment.api.v1.credential.model.response.InteractiveCredentialResponse;
+import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -52,21 +53,25 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     private final CredentialDeleteService credentialDeleteService;
 
+    private final EnvironmentCredentialFiltering environmentCredentialFiltering;
+
     public CredentialV1Controller(
             CredentialService credentialService,
             CredentialToCredentialV1ResponseConverter credentialConverter,
-            CredentialDeleteService credentialDeleteService) {
+            CredentialDeleteService credentialDeleteService,
+            EnvironmentCredentialFiltering environmentCredentialFiltering) {
         this.credentialService = credentialService;
         this.credentialConverter = credentialConverter;
         this.credentialDeleteService = credentialDeleteService;
+        this.environmentCredentialFiltering = environmentCredentialFiltering;
     }
 
     @Override
-    @DisableCheckPermissions
+    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, filter = EnvironmentCredentialFiltering.class)
     public CredentialResponses list() {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Set<Credential> credentials = environmentCredentialFiltering.filterCredntials(AuthorizationResourceAction.DESCRIBE_CREDENTIAL);
         return new CredentialResponses(
-                credentialService.listAvailablesByAccountId(accountId, ENVIRONMENT)
+                credentials
                         .stream()
                         .map(credentialConverter::convert)
                         .collect(Collectors.toSet()));

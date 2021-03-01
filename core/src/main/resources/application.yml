@@ -679,3 +679,6 @@ gateway:
       attempt: 50
       intervall: 10
     base.domain.name: cloudera.com
+
+notification:
+  urls: http://localhost:3000/notifications

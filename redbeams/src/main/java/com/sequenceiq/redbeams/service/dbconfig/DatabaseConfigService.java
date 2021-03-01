@@ -304,12 +304,6 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public List<String> getResourceCrnsInAccount() {
-        return repository.findAllResourceCrnsByAccountId(ThreadBasedUserCrnProvider.getAccountId())
-                .stream().map(Crn::toString).collect(Collectors.toList());
-    }
-
-    @Override
     public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         repository.findResourceNamesByCrn(crns).stream()

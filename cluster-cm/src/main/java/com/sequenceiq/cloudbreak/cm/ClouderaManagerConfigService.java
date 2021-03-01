@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -98,6 +99,43 @@ public class ClouderaManagerConfigService {
                     .findFirst();
         } catch (ApiException e) {
             LOGGER.debug("Failed to get KNOX service name from Cloudera Manager.", e);
+            return Optional.empty();
+        }
+    }
+
+    public void modifyServiceConfigValue(ApiClient client, String clusterName, String serviceType, String configName, String newConfigValue) {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        LOGGER.info("Trying to modify {} {} to {}", serviceType, configName, newConfigValue);
+        getServiceName(clusterName, serviceType, servicesResourceApi)
+            .ifPresentOrElse(
+                modifyServiceConfigValue(clusterName, servicesResourceApi, configName, newConfigValue),
+                () -> LOGGER.info("{} service name is missing, skip modifying the {} property.", serviceType, configName));
+    }
+
+    private Consumer<String> modifyServiceConfigValue(String clusterName, ServicesResourceApi servicesResourceApi, String configName,
+            String newConfigValue) {
+        return serviceName -> {
+            ApiConfig autorestartConfig = new ApiConfig().name(configName).value(newConfigValue);
+            ApiServiceConfig serviceConfig = new ApiServiceConfig().addItemsItem(autorestartConfig);
+            try {
+                servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", serviceConfig);
+            } catch (ApiException e) {
+                LOGGER.debug(String.format("Failed to set config %s to %s in service %s", configName, newConfigValue, serviceName), e);
+            }
+        };
+    }
+
+    private Optional<String> getServiceName(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
+        Objects.requireNonNull(serviceType);
+        try {
+            LOGGER.debug("Looking for service of name {} in cluster {}", serviceType, clusterName);
+            ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
+            return serviceList.getItems().stream()
+                .filter(service -> serviceType.equals(service.getType()))
+                .map(ApiService::getName)
+                .findFirst();
+        } catch (ApiException e) {
+            LOGGER.debug(String.format("Failed to get %s service name from Cloudera Manager.", serviceType), e);
             return Optional.empty();
         }
     }

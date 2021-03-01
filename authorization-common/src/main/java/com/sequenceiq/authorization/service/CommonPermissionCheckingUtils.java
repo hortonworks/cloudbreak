@@ -21,8 +21,6 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.defaults.CrnsByCategory;
@@ -127,14 +125,6 @@ public class CommonPermissionCheckingUtils {
         } catch (Throwable t) {
             throw new AccessDeniedException(t.getMessage(), t);
         }
-    }
-
-    public boolean isAuthorizationDisabled(ProceedingJoinPoint proceedingJoinPoint) {
-        return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(DisableCheckPermissions.class);
-    }
-
-    public boolean isInternalOnly(ProceedingJoinPoint proceedingJoinPoint) {
-        return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(InternalOnly.class);
     }
 
     public <T> T getParameter(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Class<? extends Annotation> annotation,

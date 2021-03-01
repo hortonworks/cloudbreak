@@ -27,6 +27,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Table;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -175,9 +176,10 @@ public class SaltStates {
                 TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
     }
 
-    public static boolean jobIsRunning(SaltConnector sc, String jid) {
+    public static boolean jobIsRunning(SaltConnector sc, String jid) throws CloudbreakOrchestratorFailedException {
         RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
         LOGGER.debug("Active salt jobs: {}", runningInfo);
+        validateRunningInfoResultNotNull(runningInfo);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
                 if (stringMapEntry.getKey().equals(jid)) {
@@ -186,6 +188,13 @@ public class SaltStates {
             }
         }
         return false;
+    }
+
+    private static void validateRunningInfoResultNotNull(RunningJobsResponse runningInfo) throws CloudbreakOrchestratorFailedException {
+        if (runningInfo == null || runningInfo.getResult() == null) {
+            throw new CloudbreakOrchestratorFailedException("Configuration Management Software (Salt) installed on CDP cluster has returned an empty response "
+                    + "multiple times. Contact Cloudera support with this message for resolving this error.");
+        }
     }
 
     public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {

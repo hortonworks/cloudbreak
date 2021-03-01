@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.client;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -12,11 +14,13 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstanceAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 
@@ -73,5 +77,9 @@ public class DistroXTestClient {
 
     public Action<RenewDistroXCertificateTestDto, CloudbreakClient> renewDistroXCertificateV4() {
         return new RenewDistroXCertificateAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> repair(HostGroupType... hostGroupTypes) {
+        return new DistroXRepairAction(List.of(hostGroupTypes));
     }
 }

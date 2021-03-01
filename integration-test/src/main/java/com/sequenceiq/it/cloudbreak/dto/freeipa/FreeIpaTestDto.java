@@ -255,7 +255,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    private FreeIpaTestDto withEnvironment(EnvironmentTestDto environment) {
+    public FreeIpaTestDto withEnvironment(EnvironmentTestDto environment) {
         getRequest().setEnvironmentCrn(environment.getResponse().getCrn());
         return this;
     }

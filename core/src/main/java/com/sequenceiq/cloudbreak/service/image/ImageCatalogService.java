@@ -36,6 +36,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
@@ -120,6 +122,19 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     @Override
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
         Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
+        imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+        if (legacyCatalogEnabled) {
+            imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+        }
+        return imageCatalogs;
+    }
+
+    public List<AuthorizationResource> findAsAuthorizationResorcesInWorkspace(Long workspaceId) {
+        return imageCatalogRepository.findAsAuthorizationResourcesInWorkspace(workspaceId);
+    }
+
+    public Set<ImageCatalog> findAllByIdsWithDefaults(Iterable<Long> ids) {
+        Set<ImageCatalog> imageCatalogs = Sets.newLinkedHashSet(imageCatalogRepository.findAllById(ids));
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         if (legacyCatalogEnabled) {
             imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
@@ -590,17 +605,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             result.addAll(imageCatalogRepository.findAllResourceCrnsByNamesAndTenantId(notDefaultCatalogs, ThreadBasedUserCrnProvider.getAccountId()));
         }
         return result;
-    }
-
-    @Override
-    public List<String> getResourceCrnsInAccount() {
-        List<String> crns = new ArrayList<>();
-        crns.add(getCloudbreakDefaultImageCatalog().getResourceCrn());
-        if (legacyCatalogEnabled) {
-            crns.add(getCloudbreakLegacyDefaultImageCatalog().getResourceCrn());
-        }
-        crns.addAll(imageCatalogRepository.findAllResourceCrnsByTenantId(ThreadBasedUserCrnProvider.getAccountId()));
-        return crns;
     }
 
     public List<ImageCatalog> getDefaultImageCatalogs() {
