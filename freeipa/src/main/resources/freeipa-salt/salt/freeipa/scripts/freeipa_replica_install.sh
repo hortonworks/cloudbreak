@@ -2,6 +2,12 @@
 
 set -e
 
+function cleanup() {
+  kdestroy
+}
+
+trap cleanup EXIT
+
 FQDN=$(hostname -f)
 # Get the ipaddresses of the host
 IPADDRS=$(hostname -i)
@@ -23,7 +29,7 @@ ipa-client-install \
   --realm "$REALM" \
   --domain "$DOMAIN" \
   --mkhomedir \
-  --hostname $FQDN \
+  --hostname "$FQDN" \
   --ip-address "$IPADDR" \
   --principal "$ADMIN_USER" \
   --password "$FPW" \
@@ -31,6 +37,24 @@ ipa-client-install \
   --force-join \
   --ssh-trust-dns \
   --no-ntp
+
+echo "$FPW" | kinit $ADMIN_USER
+
+if ipa server-find "$FQDN"; then
+  echo "Cleaning up a prior installation for $FQDN. Deleting the server."
+  ipa server-del --ignore-topology-disconnect --ignore-last-of-role --force "$FQDN"
+fi
+
+ipa topologysuffix-find | grep "Suffix name" | cut -f2 -d":" | cut -f2 -d" " | while read -r SUFFIX; do
+  ipa topologysegment-find "--leftnode=$FQDN" "$SUFFIX" | grep "Segment name" | while read -r SEGMENT; do
+    echo "Cleaning up a prior installation for $FQDN. Deleting the topology segment $SEGMENT for $SUFFIX."
+    ipa topologysegment-del --continue "$SUFFIX" "$SEGMENT"
+  done
+  ipa topologysegment-find "--rightnode=$FQDN" "$SUFFIX" | grep "Segment name" | while read -r SEGMENT; do
+    echo "Cleaning up a prior installation for $FQDN. Deleting the topology segment $SEGMENT for $SUFFIX."
+    ipa topologysegment-del --continue "$SUFFIX" "$SEGMENT"
+  done
+done
 
 FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}')
 PRIMARY_IPA=$(grep -Ev '^#|^;' /etc/resolv.conf | grep nameserver | awk '{print $2}')
