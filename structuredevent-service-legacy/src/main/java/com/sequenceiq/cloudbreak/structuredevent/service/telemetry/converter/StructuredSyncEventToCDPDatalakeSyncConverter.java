@@ -15,10 +15,16 @@ public class StructuredSyncEventToCDPDatalakeSyncConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredSyncEventToCDPDatalakeSyncConverter.class);
 
     @Inject
-    private StructuredSyncEventToCDPOperationDetailsConverter operationDetailsConverter;
+    private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
     private StructuredSyncEventToCDPSyncDetailsConverter syncDetailsConverter;
+
+    @Inject
+    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+
+    @Inject
+    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatalakeSync convert(StructuredSyncEvent structuredSyncEvent) {
         if (structuredSyncEvent == null) {
@@ -28,6 +34,8 @@ public class StructuredSyncEventToCDPDatalakeSyncConverter {
         UsageProto.CDPDatalakeSync.Builder cdpDatalakeSyncBuilder = UsageProto.CDPDatalakeSync.newBuilder();
         cdpDatalakeSyncBuilder.setOperationDetails(operationDetailsConverter.convert(structuredSyncEvent));
         cdpDatalakeSyncBuilder.setSyncDetails(syncDetailsConverter.convert(structuredSyncEvent));
+        cdpDatalakeSyncBuilder.setClusterDetails(clusterDetailsConverter.convert(structuredSyncEvent));
+        cdpDatalakeSyncBuilder.setStatusDetails(statusDetailsConverter.convert(structuredSyncEvent));
 
         UsageProto.CDPDatalakeSync ret = cdpDatalakeSyncBuilder.build();
         LOGGER.debug("Converted telemetry event: {}", ret);
