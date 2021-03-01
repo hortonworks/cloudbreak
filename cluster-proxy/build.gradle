@@ -1,6 +1,5 @@
 buildscript {
   repositories {
-    mavenLocal()
     mavenCentral()
     maven { url = "$repoUrl" }
     maven { url = "$springRepoUrl" }

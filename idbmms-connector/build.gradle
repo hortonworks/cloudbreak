@@ -2,7 +2,6 @@ apply plugin: 'com.google.protobuf'
 
 buildscript {
   repositories {
-    mavenLocal()
     mavenCentral()
     maven { url = "$repoUrl" }
     maven { url '= "$springRepoUrl"' }

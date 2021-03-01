@@ -2,7 +2,6 @@ import org.ajoberstar.grgit.Grgit
 
 buildscript {
     repositories {
-        mavenLocal()
         maven { url = "$repoUrl" }
         mavenCentral()
         jcenter()
@@ -189,7 +188,7 @@ dependencies {
     testCompile group: "com.h2database",            name: "h2",     version: h2databaseVersion
     testCompile project(path: ':common', configuration: 'tests')
     testCompile project(path: ':authorization-common', configuration: 'tests')
-    
+
     compile project(':core-api')
     compile project(':autoscale-api')
     compile project(':common')

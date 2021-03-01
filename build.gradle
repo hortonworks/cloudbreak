@@ -3,7 +3,6 @@ import org.ajoberstar.grgit.Grgit
 
 buildscript {
   repositories {
-    mavenLocal()
     maven { url = "$repoUrl" }
     mavenCentral()
     jcenter()
@@ -37,7 +36,6 @@ ext['junit-jupiter.version'] = "$junitJupiterVersion"
 allprojects {
 
   repositories {
-    mavenLocal()
     maven { url = "$cdpRepoUrl" }
     maven { url = "$repoUrl" }
   }
@@ -191,7 +189,6 @@ subprojects {
   }
 
   repositories {
-    mavenLocal()
     maven { url = "$repoUrl" }
     mavenCentral()
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }

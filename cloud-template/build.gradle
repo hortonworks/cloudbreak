@@ -1,10 +1,8 @@
 apply plugin: 'java'
 
 repositories {
-    mavenLocal()
     maven { url = "$repoUrl" }
     maven { url = "$springRepoUrl" }
-    mavenLocal()
     mavenCentral()
 }
 
