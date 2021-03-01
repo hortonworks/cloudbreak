@@ -5,6 +5,8 @@
 {% set postgres_directory = salt['pillar.get']('postgres:postgres_directory') %}
 {% set postgres_log_directory = salt['pillar.get']('postgres:postgres_log_directory') %}
 {% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
+{% set command = 'systemctl show -p FragmentPath postgresql' %}
+{% set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
 
 {% if 'None' != configure_remote_db %}
 
@@ -52,9 +54,6 @@ init-db-with-utf8:
 
 {%- if postgres_data_on_attached_disk %}
 
-{%- set command = 'systemctl show -p FragmentPath postgresql' %}
-{%- set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
-
 change-db-location:
   file.replace:
     - name: {{ unitFile }}
@@ -71,7 +70,7 @@ start-postgresql:
       - cmd: init-db-with-utf8
 {%- if postgres_data_on_attached_disk %}
     - watch:
-      - file: /usr/lib/systemd/system/postgresql-10.service
+      - file: {{ unitFile }}
 {%- endif %}
     - name: postgresql
 
