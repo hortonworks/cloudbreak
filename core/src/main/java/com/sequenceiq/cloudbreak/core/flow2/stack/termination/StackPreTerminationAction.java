@@ -19,12 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -37,9 +35,6 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
-
-    @Inject
-    private ClusterService clusterService;
 
     public StackPreTerminationAction() {
         super(TerminationEvent.class);
@@ -59,7 +54,6 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
             StackPreTerminationFailed terminateStackResult = new StackPreTerminationFailed(payload.getResourceId(), new IllegalArgumentException(statusReason));
             sendEvent(context, StackTerminationEvent.PRE_TERMINATION_FAILED_EVENT.event(), terminateStackResult);
         } else {
-            putClusterToDeleteInProgressState(stack);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(), STACK_DELETE_IN_PROGRESS);
             sendEvent(context);
@@ -77,13 +71,5 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
     @Override
     protected StackPreTerminationRequest createRequest(StackTerminationContext context) {
         return new StackPreTerminationRequest(context.getStack().getId(), context.getTerminationForced());
-    }
-
-    private void putClusterToDeleteInProgressState(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            cluster.setStatus(DELETE_IN_PROGRESS);
-            clusterService.updateCluster(cluster);
-        }
     }
 }
