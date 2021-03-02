@@ -48,8 +48,13 @@ public class AwsIDBrokerAssumeRoleValidator {
             } catch (AmazonIdentityManagementException e) {
                 // Log the error and return true. We don't want to block if there is an IAM failure.
                 // This can happen due to throttling or other issues.
+                // If error messages access denied we add the error to the result
                 LOGGER.error("Unable to check assume role from instance profile {} for roles {} due to {}",
                         instanceProfile.getArn(), roleArns, e.getMessage(), e);
+                if ("AccessDenied".equals(e.getErrorCode())) {
+                    resultBuilder.error("Unable to check assume role: " + e.getErrorMessage());
+                    return false;
+                }
                 return true;
             }
             if (roleArns.isEmpty()) {

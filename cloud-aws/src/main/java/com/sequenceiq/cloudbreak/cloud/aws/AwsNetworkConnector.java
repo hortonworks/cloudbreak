@@ -110,7 +110,11 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
                 String cloudFormationTemplate = createTemplate(networkRequest, subnetRequests);
                 return createNewCfNetworkStack(networkRequest, credentialView, cloudFormationClient, cloudFormationTemplate, subnetRequests);
             } else {
-                throw new CloudConnectorException("Failed to create network.", e);
+                String region = networkRequest.getRegion().getRegionName();
+                String errorReason = awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, region, cfStackName, ResourceStatus.CREATE_FAILED);
+                String message = String.format("Failed to create network: %s", errorReason);
+                LOGGER.debug(message, e);
+                throw new CloudConnectorException(message, e);
             }
         }
     }

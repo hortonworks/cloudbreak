@@ -136,7 +136,7 @@ public class AwsCloudWatchService {
             LOGGER.debug("Deleted cloudwatch alarms [{}]", alarmNames);
         } catch (AmazonCloudWatchException acwe) {
             LOGGER.error("Unable to delete cloudwatch alarms [{}]: {}", alarmNames, acwe.getLocalizedMessage());
-            throw new CloudConnectorException("unable to delete cloud watch alarms", acwe);
+            throw new CloudConnectorException("Unable to delete cloud watch alarms: " + acwe.getLocalizedMessage(), acwe);
         }
     }
 }
