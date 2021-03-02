@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.sequenceiq.cloudbreak.validation.VolumeParameterConstants;
+
 public class VolumeParameterConfig {
 
     public static final VolumeParameterConfig EMPTY = new VolumeParameterConfig();
@@ -27,7 +29,7 @@ public class VolumeParameterConfig {
         this.minimumSize = minimumSize;
         this.maximumSize = maximumSize;
         this.minimumNumber = minimumNumber;
-        this.maximumNumber = maximumNumber;
+        this.maximumNumber = calculateSupportedMaximumNumber(maximumNumber);
     }
 
     public VolumeParameterType volumeParameterType() {
@@ -59,5 +61,13 @@ public class VolumeParameterConfig {
                 + ", minimumNumber=" + minimumNumber
                 + ", maximumNumber=" + maximumNumber
                 + '}';
+    }
+
+    private Integer calculateSupportedMaximumNumber(Integer maximumNumber) {
+        Integer result = maximumNumber;
+        if (maximumNumber != null && maximumNumber > VolumeParameterConstants.MAXIMUM_NUMBER_OF_VOLUMES) {
+            result = VolumeParameterConstants.MAXIMUM_NUMBER_OF_VOLUMES;
+        }
+        return result;
     }
 }
