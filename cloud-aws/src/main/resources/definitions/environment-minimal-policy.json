@@ -1,0 +1,102 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DeleteTags"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "ec2:ResourceTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:ImportKeyPair",
+        "cloudformation:DeleteStack"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:CreateStack",
+        "ec2:CreateTags"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringLike": {
+          "aws:RequestTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DescribeKeyPairs",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeRegions",
+        "ec2:DescribeRouteTables",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeVpcAttribute",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeInternetGateways",
+        "ec2:DescribeVpcEndpoints",
+        "ec2:describeAddresses",
+        "ec2:DescribeNatGateways",
+        "ec2:DescribeVpcEndpointServices",
+        "ec2:ModifySubnetAttribute",
+        "ec2:ModifyVpcAttribute",
+        "ec2:CreateVpc",
+        "ec2:CreateNatGateway",
+        "ec2:CreateRouteTable",
+        "ec2:CreateSubnet",
+        "ec2:CreateVpcEndpoint",
+        "ec2:CreateInternetGateway",
+        "ec2:DeleteSubnet",
+        "ec2:DeleteInternetGateway",
+        "ec2:AttachInternetGateway",
+        "ec2:DetachInternetGateway",
+        "ec2:AllocateAddress",
+        "ec2:AssociateRouteTable",
+        "ec2:CreateRoute",
+        "ec2:DeleteRouteTable",
+        "ec2:DeleteVpcEndpoints",
+        "ec2:DisassociateRouteTable",
+        "ec2:ReleaseAddress",
+        "ec2:DeleteRoute",
+        "ec2:DeleteNatGateway",
+        "ec2:DeleteVpc",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "sts:DecodeAuthorizationMessage",
+        "cloudformation:DescribeStacks",
+        "dynamodb:DeleteTable",
+        "dynamodb:DescribeTable",
+        "iam:ListInstanceProfiles",
+        "iam:SimulatePrincipalPolicy",
+        "iam:ListRoles"
+      ],
+      "Resource": "*"
+    }
+  ]
+}

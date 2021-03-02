@@ -1,0 +1,106 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:DeleteSecurityGroup",
+        "ec2:AssociateAddress",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:DeleteLaunchTemplate",
+        "autoscaling:DeleteAutoScalingGroup"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringLike": {
+          "ec2:ResourceTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:CreateTags",
+        "cloudformation:CreateStack"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringLike": {
+          "aws:RequestTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DeleteStack",
+        "autoscaling:SuspendProcesses",
+        "autoscaling:UpdateAutoScalingGroup",
+        "autoscaling:ResumeProcesses"
+      ],
+      "Resource": [
+        "*"
+      ],
+      "Condition": {
+        "StringLike": {
+          "aws:ResourceTag/Cloudera-Resource-Name": [
+            "crn:cdp:*"
+          ]
+        }
+      }
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeScalingActivities",
+        "autoscaling:CreateAutoScalingGroup",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:DescribeStacks",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:DescribeStackEvents",
+        "ec2:ImportKeyPair",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:DescribeRegions",
+        "ec2:DescribeAvailabilityZones",
+        "ec2:DescribeKeyPairs",
+        "ec2:DescribeVpcs",
+        "ec2:DescribeImages",
+        "ec2:DescribeInstances",
+        "ec2:DescribeRouteTables",
+        "ec2:DescribeSubnets",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateLaunchTemplate",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RunInstances",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DescribeAlarms"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "${ID_BROKER_ROLE}"
+      ]
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sts:DecodeAuthorizationMessage"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
