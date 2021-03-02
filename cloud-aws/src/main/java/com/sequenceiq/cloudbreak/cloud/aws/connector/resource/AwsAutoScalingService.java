@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.model.Activity;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
@@ -136,8 +137,12 @@ public class AwsAutoScalingService {
                 try {
                     instanceRunningStateWaiter.run(new WaiterParameters<>(new DescribeInstancesRequest().withInstanceIds(partitionedInstanceIds))
                             .withPollingStrategy(backoff));
+                } catch (AmazonServiceException e) {
+                    LOGGER.error("Cannot describeInstances", e);
+                    e.setErrorMessage("Cannot describeInstances. " + e.getErrorMessage());
+                    throw e;
                 } catch (Exception e) {
-                    throw new AmazonAutoscalingFailed(e.getMessage(), e);
+                    throw new AmazonAutoscalingFailed("Error occurred in describeInstances: " + e.getMessage(), e);
                 }
             }
         }

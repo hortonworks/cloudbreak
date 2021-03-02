@@ -33,7 +33,7 @@ class AmazonClientExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        lenient().when(sdkClientExceptionMapper.map(any(), eq(REGION), any())).thenReturn(MAPPED_EXCEPTION);
+        lenient().when(sdkClientExceptionMapper.map(any(), eq(REGION), any(), any())).thenReturn(MAPPED_EXCEPTION);
 
         AmazonEC2 ec2 = mock(AmazonEC2.class);
         AspectJProxyFactory proxyFactory = new AspectJProxyFactory(ec2);

@@ -19,6 +19,7 @@ import com.amazonaws.services.autoscaling.model.ResumeProcessesRequest;
 import com.amazonaws.services.autoscaling.model.UpdateAutoScalingGroupRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
+import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterParameters;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.util.AwsCloudFormationErrorMessageProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -55,6 +57,9 @@ public class AwsTerminateService {
 
     @Inject
     private AwsResourceConnector awsResourceConnector;
+
+    @Inject
+    private AwsCloudFormationErrorMessageProvider awsCloudFormationErrorMessageProvider;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -103,8 +108,10 @@ public class AwsTerminateService {
         try {
             retryService.testWith2SecDelayMax5Times(() -> isStackDeleted(amazonCloudFormationClient, describeStacksRequest, deleteStackRequest));
         } catch (Exception e) {
-            LOGGER.debug("Cloudformation stack delete failed ", e);
-            throw new CloudConnectorException(e.getMessage(), e);
+            String errorReason = awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.DELETE_FAILED);
+            String message = String.format("Cloudformation stack delete failed: %s", errorReason);
+            LOGGER.debug(message, e);
+            throw new CloudConnectorException(message, e);
         }
         LOGGER.debug("Cloudformation stack from resources has been deleted");
     }
@@ -174,7 +181,7 @@ public class AwsTerminateService {
                     LOGGER.debug("Autoscaling Group's physical id is null (the resource doesn't exist), it is not needed to resume scaling policies.");
                 }
             } catch (AmazonServiceException e) {
-                if (e.getErrorMessage().matches("Resource.*does not exist for stack.*") || e.getErrorMessage().matches("Stack '.*' does not exist.*")) {
+                if (e.getErrorMessage().matches(".*Resource.*does not exist for stack.*") || e.getErrorMessage().matches(".*Stack '.*' does not exist.*")) {
                     LOGGER.debug(e.getMessage());
                 } else {
                     throw e;

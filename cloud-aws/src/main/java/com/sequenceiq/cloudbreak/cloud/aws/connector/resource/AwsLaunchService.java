@@ -173,7 +173,7 @@ public class AwsLaunchService {
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
 
         String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
-        LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
+        LOGGER.debug("Update CloudFormationTemplate: {}", cfTemplate);
         cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
 
         Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();

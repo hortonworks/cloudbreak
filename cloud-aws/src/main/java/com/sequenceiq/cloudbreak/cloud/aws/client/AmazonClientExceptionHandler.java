@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.client;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.amazonaws.SdkClientException;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
@@ -10,6 +12,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
 @Aspect
 public class AmazonClientExceptionHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AmazonClientExceptionHandler.class);
 
     private final AwsCredentialView awsCredentialView;
 
@@ -28,7 +32,8 @@ public class AmazonClientExceptionHandler {
         try {
             return proceedingJoinPoint.proceed();
         } catch (SdkClientException e) {
-            throw sdkClientExceptionMapper.map(awsCredentialView, region, e);
+            LOGGER.error("Cannot execute `{}`: {}", proceedingJoinPoint.getSignature().toString(), e.getMessage(), e);
+            throw sdkClientExceptionMapper.map(awsCredentialView, region, e, proceedingJoinPoint.getSignature());
         } catch (Throwable e) {
             throw (RuntimeException) e;
         }
