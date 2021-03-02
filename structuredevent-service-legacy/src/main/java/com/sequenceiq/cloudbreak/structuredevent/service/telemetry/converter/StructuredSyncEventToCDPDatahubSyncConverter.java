@@ -15,10 +15,16 @@ public class StructuredSyncEventToCDPDatahubSyncConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredSyncEventToCDPDatahubSyncConverter.class);
 
     @Inject
-    private StructuredSyncEventToCDPOperationDetailsConverter operationDetailsConverter;
+    private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
     private StructuredSyncEventToCDPSyncDetailsConverter syncDetailsConverter;
+
+    @Inject
+    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+
+    @Inject
+    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatahubSync convert(StructuredSyncEvent structuredSyncEvent) {
         if (structuredSyncEvent == null) {
@@ -28,6 +34,8 @@ public class StructuredSyncEventToCDPDatahubSyncConverter {
         UsageProto.CDPDatahubSync.Builder cdpDatahubSyncBuilder = UsageProto.CDPDatahubSync.newBuilder();
         cdpDatahubSyncBuilder.setOperationDetails(operationDetailsConverter.convert(structuredSyncEvent));
         cdpDatahubSyncBuilder.setSyncDetails(syncDetailsConverter.convert(structuredSyncEvent));
+        cdpDatahubSyncBuilder.setClusterDetails(clusterDetailsConverter.convert(structuredSyncEvent));
+        cdpDatahubSyncBuilder.setStatusDetails(statusDetailsConverter.convert(structuredSyncEvent));
 
         UsageProto.CDPDatahubSync ret = cdpDatahubSyncBuilder.build();
         LOGGER.debug("Converted telemetry event: {}", ret);

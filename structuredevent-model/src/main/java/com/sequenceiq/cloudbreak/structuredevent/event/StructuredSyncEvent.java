@@ -1,28 +1,27 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
-import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StructuredSyncEvent extends StructuredEvent {
 
-    private SyncDetails syncDetails;
+    private StackDetails stack;
 
-    @JsonSerialize(using = Base64Serializer.class)
-    @JsonDeserialize(using = Base64Deserializer.class)
-    private String exception;
+    private ClusterDetails cluster;
+
+    private BlueprintDetails blueprintDetails;
 
     public StructuredSyncEvent() {
         super(StructuredSyncEvent.class.getSimpleName());
     }
 
-    public StructuredSyncEvent(OperationDetails operationDetails, SyncDetails syncDetails) {
-        super(StructuredSyncEvent.class.getSimpleName(), operationDetails);
-        this.syncDetails = syncDetails;
+    public StructuredSyncEvent(OperationDetails operation, StackDetails stack,
+            ClusterDetails cluster, BlueprintDetails blueprintDetails) {
+        super(StructuredSyncEvent.class.getSimpleName(), operation);
+        this.stack = stack;
+        this.cluster = cluster;
+        this.blueprintDetails = blueprintDetails;
     }
 
     @Override
@@ -35,19 +34,27 @@ public class StructuredSyncEvent extends StructuredEvent {
         return ZERO;
     }
 
-    public SyncDetails getsyncDetails() {
-        return syncDetails;
+    public StackDetails getStack() {
+        return stack;
     }
 
-    public void setsyncDetails(SyncDetails syncDetails) {
-        this.syncDetails = syncDetails;
+    public void setStack(StackDetails stack) {
+        this.stack = stack;
     }
 
-    public String getException() {
-        return exception;
+    public ClusterDetails getCluster() {
+        return cluster;
     }
 
-    public void setException(String exception) {
-        this.exception = exception;
+    public void setCluster(ClusterDetails cluster) {
+        this.cluster = cluster;
+    }
+
+    public BlueprintDetails getBlueprintDetails() {
+        return blueprintDetails;
+    }
+
+    public void setBlueprintDetails(BlueprintDetails blueprintDetails) {
+        this.blueprintDetails = blueprintDetails;
     }
 }
