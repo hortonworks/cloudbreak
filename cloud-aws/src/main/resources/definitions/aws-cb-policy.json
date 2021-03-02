@@ -252,8 +252,8 @@
       "Sid": "ECRAccessRead",
       "Effect": "Allow",
       "Action": [
-        "ecr:GetRegistryPolicy",
-        "ecr:DescribeRegistry",
+        "ecr:DescribeRepositories",
+        "ecr:DescribeImages",
         "ecr:GetAuthorizationToken"
       ],
       "Resource": [
