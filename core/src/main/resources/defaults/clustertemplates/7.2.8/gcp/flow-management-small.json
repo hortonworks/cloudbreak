@@ -32,6 +32,25 @@
         }
       },
       {
+        "nodeCount": 0,
+        "name": "nifi_scaling",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "rootVolume": {
+            "size": 150
+          },
+          "attachedVolumes": [
+            {
+              "size": 500,
+              "count": 4,
+              "type": "pd-standard"
+            }
+          ]
+        }
+      },
+      {
         "nodeCount": 3,
         "name": "nifi",
         "type": "CORE",

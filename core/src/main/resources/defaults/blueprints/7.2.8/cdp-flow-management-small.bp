@@ -49,6 +49,30 @@
             "base": true,
             "configs": [
               {
+                "name": "ssl_enabled",
+                "value": "true"
+              },
+              {
+                "name": "ssl_server_keystore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_server_keystore_keypassword",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_location",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
+                "name": "ssl_client_truststore_password",
+                "value": "{{CM_AUTO_TLS}}"
+              },
+              {
                 "name": "xml.authorizers.userGroupProvider.file-user-group-provider.enabled",
                 "value": "true"
               },
@@ -278,6 +302,14 @@
         "roleConfigGroupsRefNames": [
           "nifi-NIFI_NODE-BASE",
           "zookeeper-SERVER-BASE",
+          "core_settings-STORAGEOPERATIONS-BASE"
+        ]
+      },
+      {
+        "refName": "nifi_scaling",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "nifi-NIFI_NODE-BASE",
           "core_settings-STORAGEOPERATIONS-BASE"
         ]
       },
