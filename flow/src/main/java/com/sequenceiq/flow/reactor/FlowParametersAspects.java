@@ -67,8 +67,8 @@ public class FlowParametersAspects {
                 LOGGER.debug("Couldn't set MDCContext from crn: [{}]", flowTriggerUserCrn, e);
             }
         }
-        LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, user crn on thread local is: {}",
-                proceedingJoinPoint.toShortString(), flowTriggerUserCrn);
+        LOGGER.debug("A Reactor '{}' handler's '{}' has been intercepted: {}, user crn on thread local is: {}",
+                event.getKey(), proceedingJoinPoint.toShortString(), event.getData(), flowTriggerUserCrn);
         return proceedingJoinPoint.proceed();
     }
 }

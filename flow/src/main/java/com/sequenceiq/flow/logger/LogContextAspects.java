@@ -37,7 +37,9 @@ public class LogContextAspects {
             + "com.sequenceiq.flow.logger.LogContextAspects.interceptFlowChainHandlerAcceptMethod()")
     public void buildLogContextForReactorHandler(JoinPoint joinPoint) {
         buildLogContextForEventHandler(joinPoint);
-        LOGGER.debug("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+        Event<?> event = (Event<?>) joinPoint.getArgs()[0];
+        LOGGER.debug("A Reactor '{}' handler's '{}' has been intercepted: {}, MDC logger context is built.",
+                event.getKey(), joinPoint.toShortString(), event.getData());
     }
 
     public static void buildLogContextForEventHandler(JoinPoint joinPoint) {
