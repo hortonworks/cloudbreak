@@ -52,6 +52,8 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
+import com.sequenceiq.cloudbreak.cm.exception.CloudStorageConfigurationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
@@ -116,6 +118,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClusterCommandRepository clusterCommandRepository;
+
+    @Inject
+    private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
 
     private final Stack stack;
 
@@ -249,6 +254,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.info("Error while building the cluster. Message: {}; Response: {}", e.getMessage(), e.getResponseBody(), e);
             String msg = extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);
+        } catch (CloudStorageConfigurationFailedException e) {
+            LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
+            throw new ClouderaManagerOperationFailedException(clouderaManagerStorageErrorMapper.map(e, stack.cloudPlatform(), cluster), e);
         } catch (Exception e) {
             LOGGER.info("Error while building the cluster. Message: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -340,7 +348,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                 importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
                 LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
             } catch (ApiException e) {
-                String msg = "Cluster template install failed: " + extractMessage(e);
+                String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
                 throw new ClouderaManagerOperationFailedException(msg, e);
             }
         }
