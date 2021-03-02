@@ -103,7 +103,7 @@ public class StackDownscaleService {
 
     public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
         LOGGER.info("Exception during the downscaling of stack", errorDetails);
-        flowMessageService.fireEventAndLog(context.getStackView().getId(), UPDATE_FAILED.name(), STACK_DOWNSCALE_FAILED);
+        flowMessageService.fireEventAndLog(context.getStackView().getId(), UPDATE_FAILED.name(), STACK_DOWNSCALE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.DOWNSCALE_FAILED);
     }
 }
