@@ -15,10 +15,10 @@ public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventToCDPDatahubStatusChangedConverter.class);
 
     @Inject
-    private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
+    private StructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
+    private StructuredFlowEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatahubStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
         if (structuredFlowEvent == null) {

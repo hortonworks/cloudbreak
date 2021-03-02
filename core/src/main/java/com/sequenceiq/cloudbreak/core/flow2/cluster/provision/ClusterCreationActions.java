@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILDING;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -20,6 +22,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -27,6 +30,22 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.HandleClusterCreationSuccessRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.HandleClusterCreationSuccessSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareDatalakeResourceRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareDatalakeResourceSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareExtendedTemplateRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareExtendedTemplateSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareProxyConfigRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareProxyConfigSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SetupMonitoringRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SetupMonitoringSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationRequest;
@@ -257,18 +276,162 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "INSTALLING_CLUSTER_STATE")
-    public Action<?, ?> installingClusterAction() {
+    @Bean(name = "WAIT_FOR_CLUSTER_MANAGER_STATE")
+    public Action<?, ?> waitForClusterManagerAction() {
         return new AbstractClusterAction<>(LdapSSOConfigurationSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, LdapSSOConfigurationSuccess payload, Map<Object, Object> variables) {
-                clusterCreationService.installingCluster(context.getStack());
+                clusterCreationService.waitClusterManagerStart(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new WaitForClusterManagerRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_STATE")
+    public Action<?, ?> executePostClusterManagerStartRecipesAction() {
+        return new AbstractClusterAction<>(WaitForClusterManagerSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, WaitForClusterManagerSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new ExecutePostClusterManagerStartRecipesRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_PROXY_CONFIG_STATE")
+    public Action<?, ?> prepareProxyConfigAction() {
+        return new AbstractClusterAction<>(ExecutePostClusterManagerStartRecipesSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, ExecutePostClusterManagerStartRecipesSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new PrepareProxyConfigRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_MONITORING_STATE")
+    public Action<?, ?> setupMonitoringAction() {
+        return new AbstractClusterAction<>(PrepareProxyConfigSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, PrepareProxyConfigSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new SetupMonitoringRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_EXTENDED_TEMPLATE_STATE")
+    public Action<?, ?> prepareExtendedTemplateAction() {
+        return new AbstractClusterAction<>(SetupMonitoringSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, SetupMonitoringSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new PrepareExtendedTemplateRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "INSTALLING_CLUSTER_STATE")
+    public Action<?, ?> installingClusterAction() {
+        return new AbstractClusterAction<>(PrepareExtendedTemplateSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, PrepareExtendedTemplateSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
                 return new InstallClusterRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "EXECUTE_POST_INSTALL_RECIPES_STATE")
+    public Action<?, ?> executePostInstallRecipesAction() {
+        return new AbstractClusterAction<>(InstallClusterSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new ExecutePostInstallRecipesRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "PREPARE_DATALAKE_RESOURCE_STATE")
+    public Action<?, ?> prepareDatalakeResourceAction() {
+        return new AbstractClusterAction<>(ExecutePostInstallRecipesSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, ExecutePostInstallRecipesSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new PrepareDatalakeResourceRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "HANDLE_CLUSTER_CREATION_SUCCESS_STATE")
+    public Action<?, ?> handleClusterCreationSuccessAction() {
+        return new AbstractClusterAction<>(PrepareDatalakeResourceSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, PrepareDatalakeResourceSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.updateCluster(context.getStack(), "Building the cluster", CLUSTER_BUILDING);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new HandleClusterCreationSuccessRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE")
+    public Action<?, ?> clusterProxyGatewayRegistrationAction() {
+        return new AbstractStackCreationAction<>(PrepareDatalakeResourceSuccess.class) {
+            @Override
+            protected void doExecute(StackContext context, PrepareDatalakeResourceSuccess payload, Map<Object, Object> variables) {
+                clusterCreationService.registeringGatewayToClusterProxy(context.getStack());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
     }
@@ -306,22 +469,6 @@ public class ClusterCreationActions {
             @Override
             protected Selectable createRequest(StackFailureContext context) {
                 return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
-            }
-        };
-    }
-
-    @Bean(name = "CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE")
-    public Action<?, ?> clusterProxyGatewayRegistrationAction() {
-        return new AbstractStackCreationAction<>(InstallClusterSuccess.class) {
-            @Override
-            protected void doExecute(StackContext context, InstallClusterSuccess payload, Map<Object, Object> variables) {
-                clusterCreationService.registeringGatewayToClusterProxy(context.getStack());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new ClusterProxyGatewayRegistrationRequest(context.getStack().getId(), context.getStack().cloudPlatform());
             }
         };
     }

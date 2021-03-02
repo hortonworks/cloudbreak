@@ -17,18 +17,34 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_KEYTABS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CONFIGURE_KEYTABS_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_INSTALL_RECIPES_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.EXECUTE_POST_INSTALL_RECIPES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HANDLE_CLUSTER_CREATION_SUCCESS_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HANDLE_CLUSTER_CREATION_SUCCESS_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HOST_METADATASETUP_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.HOST_METADATASETUP_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.INSTALL_CLUSTER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.INSTALL_CLUSTER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.LDAP_SSO_CONFIGURATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.LDAP_SSO_CONFIGURATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_DATALAKE_RESOURCE_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_DATALAKE_RESOURCE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_EXTENDED_TEMPLATE_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_EXTENDED_TEMPLATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_PROXY_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_PROXY_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE;
@@ -40,12 +56,20 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.COLLECTING_HOST_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CONFIGURE_KEYTABS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CONFIGURE_LDAP_SSO_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.EXECUTE_POST_INSTALL_RECIPES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINAL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.HANDLE_CLUSTER_CREATION_SUCCESS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INSTALLING_CLUSTER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_DATALAKE_RESOURCE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_EXTENDED_TEMPLATE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_PROXY_CONFIG_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.SETUP_MONITORING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_CLUSTER_MANAGER_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_CLUSTER_MANAGER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.WAIT_FOR_CLUSTER_MANAGER_STATE;
 
 import java.util.List;
 
@@ -60,34 +84,102 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
         implements RetryableFlowConfiguration<ClusterCreationEvent> {
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
-            .from(INIT_STATE).to(CLUSTER_PROXY_REGISTRATION_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
-            .from(CLUSTER_PROXY_REGISTRATION_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT)
+            .from(INIT_STATE)
+                    .to(CLUSTER_PROXY_REGISTRATION_STATE)
+                    .event(CLUSTER_CREATION_EVENT)
+                    .noFailureEvent()
+            .from(CLUSTER_PROXY_REGISTRATION_STATE)
+                    .to(BOOTSTRAPPING_MACHINES_STATE)
+                    .event(CLUSTER_PROXY_REGISTRATION_SUCCEEDED_EVENT)
                     .failureEvent(CLUSTER_PROXY_REGISTRATION_FAILED_EVENT)
-            .from(INIT_STATE).to(INSTALLING_CLUSTER_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
-            .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
+            .from(INIT_STATE)
+                    .to(INSTALLING_CLUSTER_STATE)
+                    .event(CLUSTER_INSTALL_EVENT)
+                    .noFailureEvent()
+            .from(BOOTSTRAPPING_MACHINES_STATE)
+                    .to(COLLECTING_HOST_METADATA_STATE)
+                    .event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
-            .from(COLLECTING_HOST_METADATA_STATE).to(CLEANUP_FREEIPA_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
+            .from(COLLECTING_HOST_METADATA_STATE)
+                    .to(CLEANUP_FREEIPA_STATE)
+                    .event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
-            .from(CLEANUP_FREEIPA_STATE).to(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE).event(CLEANUP_FREEIPA_FINISHED_EVENT).failureEvent(CLEANUP_FREEIPA_FAILED_EVENT)
-            .from(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE).to(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE).event(BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT)
+            .from(CLEANUP_FREEIPA_STATE)
+                    .to(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE)
+                    .event(CLEANUP_FREEIPA_FINISHED_EVENT)
+                    .failureEvent(CLEANUP_FREEIPA_FAILED_EVENT)
+            .from(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE)
+                    .to(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE)
+                    .event(BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT)
                     .defaultFailureEvent()
-            .from(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE).to(UPLOAD_RECIPES_STATE).event(BOOTSTRAP_FREEIPA_ENDPOINT_FINISHED_EVENT)
+            .from(BOOTSTRAPPING_FREEIPA_ENDPOINT_STATE)
+                    .to(UPLOAD_RECIPES_STATE)
+                    .event(BOOTSTRAP_FREEIPA_ENDPOINT_FINISHED_EVENT)
                 .defaultFailureEvent()
-            .from(UPLOAD_RECIPES_STATE).to(CONFIGURE_KEYTABS_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
+            .from(UPLOAD_RECIPES_STATE)
+                    .to(CONFIGURE_KEYTABS_STATE)
+                    .event(UPLOAD_RECIPES_FINISHED_EVENT)
                     .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
-            .from(CONFIGURE_KEYTABS_STATE).to(STARTING_CLUSTER_MANAGER_SERVICES_STATE).event(CONFIGURE_KEYTABS_FINISHED_EVENT)
+            .from(CONFIGURE_KEYTABS_STATE)
+                    .to(STARTING_CLUSTER_MANAGER_SERVICES_STATE)
+                    .event(CONFIGURE_KEYTABS_FINISHED_EVENT)
                     .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
-            .from(STARTING_CLUSTER_MANAGER_SERVICES_STATE).to(STARTING_CLUSTER_MANAGER_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
+            .from(STARTING_CLUSTER_MANAGER_SERVICES_STATE)
+                    .to(STARTING_CLUSTER_MANAGER_STATE)
+                    .event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
-            .from(STARTING_CLUSTER_MANAGER_STATE).to(CONFIGURE_LDAP_SSO_STATE).event(START_AMBARI_FINISHED_EVENT)
+            .from(STARTING_CLUSTER_MANAGER_STATE)
+                    .to(CONFIGURE_LDAP_SSO_STATE)
+                    .event(START_AMBARI_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_FAILED_EVENT)
-            .from(CONFIGURE_LDAP_SSO_STATE).to(INSTALLING_CLUSTER_STATE).event(LDAP_SSO_CONFIGURATION_FINISHED_EVENT)
+            .from(CONFIGURE_LDAP_SSO_STATE)
+                    .to(WAIT_FOR_CLUSTER_MANAGER_STATE)
+                    .event(LDAP_SSO_CONFIGURATION_FINISHED_EVENT)
                     .failureEvent(LDAP_SSO_CONFIGURATION_FAILED_EVENT)
-            .from(INSTALLING_CLUSTER_STATE).to(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE).event(INSTALL_CLUSTER_FINISHED_EVENT)
+            .from(WAIT_FOR_CLUSTER_MANAGER_STATE)
+                    .to(EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_STATE)
+                    .event(WAIT_FOR_CLUSTER_MANAGER_FINISHED_EVENT)
+                    .failureEvent(WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT)
+            .from(EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_STATE)
+                    .to(PREPARE_PROXY_CONFIG_STATE)
+                    .event(EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FINISHED_EVENT)
+                    .failureEvent(EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FAILED_EVENT)
+            .from(PREPARE_PROXY_CONFIG_STATE)
+                    .to(SETUP_MONITORING_STATE)
+                    .event(PREPARE_PROXY_CONFIG_FINISHED_EVENT)
+                    .failureEvent(PREPARE_PROXY_CONFIG_FAILED_EVENT)
+            .from(SETUP_MONITORING_STATE)
+                    .to(PREPARE_EXTENDED_TEMPLATE_STATE)
+                    .event(SETUP_MONITORING_FINISHED_EVENT)
+                    .failureEvent(SETUP_MONITORING_FAILED_EVENT)
+            .from(PREPARE_EXTENDED_TEMPLATE_STATE)
+                    .to(INSTALLING_CLUSTER_STATE)
+                    .event(PREPARE_EXTENDED_TEMPLATE_FINISHED_EVENT)
+                    .failureEvent(PREPARE_EXTENDED_TEMPLATE_FAILED_EVENT)
+            .from(INSTALLING_CLUSTER_STATE)
+                    .to(EXECUTE_POST_INSTALL_RECIPES_STATE)
+                    .event(INSTALL_CLUSTER_FINISHED_EVENT)
                     .failureEvent(INSTALL_CLUSTER_FAILED_EVENT)
-            .from(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE).to(CLUSTER_CREATION_FINISHED_STATE).event(CLUSTER_PROXY_GATEWAY_REGISTRATION_SUCCEEDED_EVENT)
+            .from(EXECUTE_POST_INSTALL_RECIPES_STATE)
+                    .to(HANDLE_CLUSTER_CREATION_SUCCESS_STATE)
+                    .event(EXECUTE_POST_INSTALL_RECIPES_FINISHED_EVENT)
+                    .failureEvent(EXECUTE_POST_INSTALL_RECIPES_FAILED_EVENT)
+            .from(HANDLE_CLUSTER_CREATION_SUCCESS_STATE)
+                    .to(PREPARE_DATALAKE_RESOURCE_STATE)
+                    .event(HANDLE_CLUSTER_CREATION_SUCCESS_FINISHED_EVENT)
+                    .failureEvent(HANDLE_CLUSTER_CREATION_SUCCESS_FAILED_EVENT)
+            .from(PREPARE_DATALAKE_RESOURCE_STATE)
+                    .to(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE)
+                    .event(PREPARE_DATALAKE_RESOURCE_FINISHED_EVENT)
+                    .failureEvent(PREPARE_DATALAKE_RESOURCE_FAILED_EVENT)
+            .from(CLUSTER_PROXY_GATEWAY_REGISTRATION_STATE)
+                    .to(CLUSTER_CREATION_FINISHED_STATE)
+                    .event(CLUSTER_PROXY_GATEWAY_REGISTRATION_SUCCEEDED_EVENT)
                     .failureEvent(CLUSTER_PROXY_GATEWAY_REGISTRATION_FAILED_EVENT)
-            .from(CLUSTER_CREATION_FINISHED_STATE).to(FINAL_STATE).event(CLUSTER_CREATION_FINISHED_EVENT).defaultFailureEvent()
+            .from(CLUSTER_CREATION_FINISHED_STATE)
+                    .to(FINAL_STATE)
+                    .event(CLUSTER_CREATION_FINISHED_EVENT)
+                    .defaultFailureEvent()
             .build();
 
     private static final FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> EDGE_CONFIG =

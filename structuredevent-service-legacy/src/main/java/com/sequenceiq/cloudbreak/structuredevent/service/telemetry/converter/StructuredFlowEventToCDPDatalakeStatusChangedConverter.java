@@ -15,10 +15,10 @@ public class StructuredFlowEventToCDPDatalakeStatusChangedConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventToCDPDatalakeStatusChangedConverter.class);
 
     @Inject
-    private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
+    private StructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
+    private StructuredFlowEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatalakeStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
         if (structuredFlowEvent == null) {

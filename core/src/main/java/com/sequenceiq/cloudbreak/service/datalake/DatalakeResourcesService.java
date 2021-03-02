@@ -24,10 +24,6 @@ public class DatalakeResourcesService extends AbstractWorkspaceAwareResourceServ
         return datalakeResourcesRepository.findByDatalakeStackId(datalakeStackId);
     }
 
-    public Set<String> findDatalakeResourcesNamesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
-        return datalakeResourcesRepository.findDatalakeResourcesNamesByWorkspaceAndEnvironment(workspaceId, environmentCrn);
-    }
-
     public Set<DatalakeResources> findDatalakeResourcesByWorkspaceAndEnvironment(Long workspaceId, String environmentCrn) {
         return datalakeResourcesRepository.findDatalakeResourcesByWorkspaceAndEnvironment(workspaceId, environmentCrn);
     }

@@ -10,62 +10,43 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
 
-public class StructuredEventToCDPOperationDetailsConverterTest {
+public class StructuredFlowEventToCDPOperationDetailsConverterTest {
 
-    private StructuredEventToCDPOperationDetailsConverter underTest;
+    private StructuredFlowEventToCDPOperationDetailsConverter underTest;
 
     @BeforeEach
     public void setUp() {
-        underTest = new StructuredEventToCDPOperationDetailsConverter();
+        underTest = new StructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(underTest, "appVersion", "version-1234");
         Whitebox.setInternalState(underTest, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
     }
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNull("We should return with null if the input is null", underTest.convert((StructuredFlowEvent) null));
-        Assert.assertNull("We should return with null if the input is null", underTest.convert((StructuredSyncEvent) null));
+        Assert.assertNull("We should return with null if the input is null", underTest.convert(null));
     }
 
     @Test
     public void testConversionWithNullOperation() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
 
-        UsageProto.CDPOperationDetails flowOperationDetails = underTest.convert(structuredFlowEvent);
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("", flowOperationDetails.getAccountId());
-        Assert.assertEquals("", flowOperationDetails.getResourceCrn());
-        Assert.assertEquals("", flowOperationDetails.getResourceName());
-        Assert.assertEquals("", flowOperationDetails.getInitiatorCrn());
-        Assert.assertEquals("", flowOperationDetails.getCorrelationId());
-        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, flowOperationDetails.getCdpRequestProcessingStep());
-        Assert.assertEquals("", flowOperationDetails.getFlowId());
-        Assert.assertEquals("", flowOperationDetails.getFlowChainId());
-        Assert.assertEquals("", flowOperationDetails.getFlowState());
-        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, flowOperationDetails.getEnvironmentType());
+        Assert.assertEquals("", details.getAccountId());
+        Assert.assertEquals("", details.getResourceCrn());
+        Assert.assertEquals("", details.getResourceName());
+        Assert.assertEquals("", details.getInitiatorCrn());
+        Assert.assertEquals("", details.getCorrelationId());
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowId());
+        Assert.assertEquals("", details.getFlowChainId());
+        Assert.assertEquals("", details.getFlowState());
+        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
 
-        Assert.assertEquals("version-1234", flowOperationDetails.getApplicationVersion());
-
-        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
-
-        UsageProto.CDPOperationDetails syncOperationDetails = underTest.convert(structuredSyncEvent);
-
-        Assert.assertEquals("", syncOperationDetails.getAccountId());
-        Assert.assertEquals("", syncOperationDetails.getResourceCrn());
-        Assert.assertEquals("", syncOperationDetails.getResourceName());
-        Assert.assertEquals("", syncOperationDetails.getInitiatorCrn());
-        Assert.assertEquals("", syncOperationDetails.getCorrelationId());
-        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.SYNC, syncOperationDetails.getCdpRequestProcessingStep());
-        Assert.assertEquals("", syncOperationDetails.getFlowId());
-        Assert.assertEquals("", syncOperationDetails.getFlowChainId());
-        Assert.assertEquals("", syncOperationDetails.getFlowState());
-        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, syncOperationDetails.getEnvironmentType());
-
-        Assert.assertEquals("version-1234", syncOperationDetails.getApplicationVersion());
+        Assert.assertEquals("version-1234", details.getApplicationVersion());
     }
 
     @Test
@@ -146,45 +127,14 @@ public class StructuredEventToCDPOperationDetailsConverterTest {
     }
 
     @Test
-    public void testFlowRelatedOperationDetailsFieldsReturnEmptyStringWhenConvertingStructuredSyncEvent() {
-        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
-        OperationDetails operationDetails = new OperationDetails();
-        operationDetails.setTenant("tenant1");
-        operationDetails.setResourceCrn("crn1");
-        operationDetails.setResourceName("name1");
-        operationDetails.setUserCrn("crn2");
-        structuredSyncEvent.setOperation(operationDetails);
-
-        UsageProto.CDPOperationDetails details = underTest.convert(structuredSyncEvent);
-
-        Assert.assertEquals("tenant1", details.getAccountId());
-        Assert.assertEquals("crn1", details.getResourceCrn());
-        Assert.assertEquals("name1", details.getResourceName());
-        Assert.assertEquals("crn2", details.getInitiatorCrn());
-
-        Assert.assertEquals("", details.getFlowId());
-        Assert.assertEquals("", details.getFlowChainId());
-        Assert.assertEquals("", details.getFlowState());
-    }
-
-    @Test
     public void testEnvironmentTypeSetCorrectly() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
-        StackDetails flowStackDetails = new StackDetails();
-        flowStackDetails.setCloudPlatform(CloudPlatform.AWS.name());
-        structuredFlowEvent.setStack(flowStackDetails);
+        StackDetails stackDetails = new StackDetails();
+        stackDetails.setCloudPlatform(CloudPlatform.AWS.name());
+        structuredFlowEvent.setStack(stackDetails);
 
-        UsageProto.CDPOperationDetails flowOperationDetails = underTest.convert(structuredFlowEvent);
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.AWS, flowOperationDetails.getEnvironmentType());
-
-        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
-        StackDetails syncStackDetails = new StackDetails();
-        syncStackDetails.setCloudPlatform(CloudPlatform.AWS.name());
-        structuredSyncEvent.setStack(syncStackDetails);
-
-        UsageProto.CDPOperationDetails syncOperationDetails = underTest.convert(structuredSyncEvent);
-
-        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.AWS, syncOperationDetails.getEnvironmentType());
+        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.AWS, details.getEnvironmentType());
     }
 }

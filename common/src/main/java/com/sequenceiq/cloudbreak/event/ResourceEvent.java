@@ -217,7 +217,11 @@ public enum ResourceEvent {
     STACK_LB_UPDATE_FINISHED("stack.lb.update.finished"),
     STACK_LB_UPDATE_FAILED("stack.lb.update.failed"),
 
+    CLUSTER_WAIT_CLUSTER_MANAGER_START("cluster.manager.start"),
     CLUSTER_BUILDING("cluster.building"),
+
+
+
     CLUSTER_RESET("cluster.reset"),
     CLUSTER_BUILT("cluster.built"),
     CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed"),

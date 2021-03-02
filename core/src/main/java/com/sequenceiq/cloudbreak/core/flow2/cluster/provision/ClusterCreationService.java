@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILDING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_WAIT_CLUSTER_MANAGER_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_BOOTSTRAP;
 
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -89,6 +91,12 @@ public class ClusterCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
                 String.format("Building the cluster"));
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_BUILDING);
+    }
+
+    public void waitClusterManagerStart(StackView stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
+                String.format("Wait for Cloudera Manager start"));
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_WAIT_CLUSTER_MANAGER_START);
     }
 
     public void clusterInstallationFinished(StackView stackView) {

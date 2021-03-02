@@ -517,7 +517,7 @@ message CDPCMLWorkspaceStatusChanged {
   string toVersion = 6;
 }
 
-// The status of a CDP request
+// The status of a CDP environment
 message CDPRequestProcessingStep {
   enum Value {
       // A value indicating the enum is unset.
@@ -526,8 +526,6 @@ message CDPRequestProcessingStep {
       INIT = 1;
       // Last step of the request processing
       FINAL = 2;
-      // Indicating that the event is a sync event
-      SYNC = 3;
   }
 }
 
@@ -856,6 +854,10 @@ message CDPDatahubStatusChanged {
 }
 
 message CDPSyncDetails {
+  // Status of the stack
+  string status = 1;
+  // Detailed status of the stack
+  string detailedStatus = 2;
   // The timestamp of the start of the cluster creation
   uint64 clusterCreationStarted = 3;
   // The timestamp of the finish of the cluster creation
@@ -868,10 +870,6 @@ message CDPDatalakeSync {
   CDPOperationDetails operationDetails = 1;
   // Additional metadata about the cluster
   CDPSyncDetails syncDetails = 2;
-  // Details for datalake
-  CDPClusterDetails clusterDetails = 3;
-  // Describes the detailed status of the stack and the cluster of the datalake
-  CDPStatusDetails statusDetails = 4;
 }
 
 // Generated periodically for Datahub clusters
@@ -880,8 +878,4 @@ message CDPDatahubSync {
   CDPOperationDetails operationDetails = 1;
   // Additional metadata about the cluster
   CDPSyncDetails syncDetails = 2;
-  // Details for datahub
-  CDPClusterDetails clusterDetails = 3;
-  // Describes the detailed status of the stack and the cluster of the datahub
-  CDPStatusDetails statusDetails = 4;
 }

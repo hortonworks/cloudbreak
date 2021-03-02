@@ -15,10 +15,10 @@ public class StructuredFlowEventToCDPDatahubRequestedConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredFlowEventToCDPDatahubRequestedConverter.class);
 
     @Inject
-    private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
+    private StructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+    private StructuredFlowEventToClusterDetailsConverter clusterDetailsConverter;
 
     public UsageProto.CDPDatahubRequested convert(StructuredFlowEvent structuredFlowEvent) {
         if (structuredFlowEvent == null) {
