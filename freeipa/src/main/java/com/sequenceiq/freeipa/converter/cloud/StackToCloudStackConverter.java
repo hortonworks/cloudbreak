@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +60,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -265,32 +267,88 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         return new Security(rules, ig.getSecurityGroup().getSecurityGroupIds(), true);
     }
 
-    private Optional<CloudFileSystemView> buildFileSystemView(Stack stack) {
+    public Optional<CloudFileSystemView> buildFileSystemView(Stack stack) {
         Telemetry telemetry = stack.getTelemetry();
+        Backup backup = stack.getBackup();
+        Optional<CloudFileSystemView> fileSystemView = Optional.empty();
+        if (telemetry != null && telemetry.getLogging() != null && backup != null) {
+            checkLoggingAndBackupFileSystemConflicting(telemetry.getLogging(), backup);
+        }
         if (telemetry != null && telemetry.getLogging() != null) {
-            Logging logging = telemetry.getLogging();
-            if (logging.getStorageLocation() != null) {
-                if (logging.getS3() != null) {
-                    CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
-                    s3View.setInstanceProfile(logging.getS3().getInstanceProfile());
-                    return Optional.of(s3View);
-                } else if (logging.getAdlsGen2() != null) {
-                    CloudAdlsGen2View adlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
-                    AdlsGen2CloudStorageV1Parameters adlsGen2Params = logging.getAdlsGen2();
-                    adlsGen2View.setAccountKey(adlsGen2Params.getAccountKey());
-                    adlsGen2View.setAccountName(adlsGen2Params.getAccountName());
-                    adlsGen2View.setSecure(adlsGen2Params.isSecure());
-                    adlsGen2View.setManagedIdentity(adlsGen2Params.getManagedIdentity());
-                    return Optional.of(adlsGen2View);
-                } else if (logging.getGcs() != null) {
-                    CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
-                    cloudGcsView.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
-                    return Optional.of(cloudGcsView);
-                } else if (logging.getCloudwatch() != null) {
-                    CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
-                    s3View.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
-                    return Optional.of(s3View);
-                }
+            fileSystemView = buildFileSystemViewFromTelemetry(telemetry.getLogging());
+        }
+        if (fileSystemView.isEmpty() && backup != null) {
+            fileSystemView = buildFileSystemViewFromBackup(backup);
+        }
+        return fileSystemView;
+    }
+
+    private void checkLoggingAndBackupFileSystemConflicting(Logging logging, Backup backup) {
+        if (logging.getS3() != null && backup.getS3() != null && !logging.getS3().equals(backup.getS3())) {
+                throw new BadRequestException(
+                        String.format("Logging [%s] and backup [%s] instance profiles are conflicting. " +
+                        "Please use the same for both or define only one of them",
+                        logging.getS3(), backup.getS3()));
+        }
+        if (logging.getAdlsGen2() != null && backup.getAdlsGen2() != null && !logging.getAdlsGen2().equals(backup.getAdlsGen2())) {
+                throw new BadRequestException(
+                        String.format("Logging [%s] and backup [%s] managed identities are conflicting. " +
+                        "Please use the same for both or define only one of them",
+                        logging.getAdlsGen2(), backup.getAdlsGen2()));
+        }
+        if (logging.getGcs() != null && backup.getGcs() != null && !logging.getGcs().equals(backup.getGcs())) {
+                throw new BadRequestException(
+                        String.format("Logging [%s] and backup [%s] service account emails are conflicting. " +
+                        "Please use the same for both or define only one of them",
+                        logging.getGcs(), backup.getGcs()));
+        }
+    }
+
+    private Optional<CloudFileSystemView> buildFileSystemViewFromTelemetry(Logging logging) {
+        if (logging.getStorageLocation() != null) {
+            if (logging.getS3() != null) {
+                CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
+                s3View.setInstanceProfile(logging.getS3().getInstanceProfile());
+                return Optional.of(s3View);
+            } else if (logging.getAdlsGen2() != null) {
+                CloudAdlsGen2View adlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
+                AdlsGen2CloudStorageV1Parameters adlsGen2Params = logging.getAdlsGen2();
+                adlsGen2View.setAccountKey(adlsGen2Params.getAccountKey());
+                adlsGen2View.setAccountName(adlsGen2Params.getAccountName());
+                adlsGen2View.setSecure(adlsGen2Params.isSecure());
+                adlsGen2View.setManagedIdentity(adlsGen2Params.getManagedIdentity());
+                return Optional.of(adlsGen2View);
+            } else if (logging.getGcs() != null) {
+                CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
+                cloudGcsView.setServiceAccountEmail(logging.getGcs().getServiceAccountEmail());
+                return Optional.of(cloudGcsView);
+            } else if (logging.getCloudwatch() != null) {
+                CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
+                s3View.setInstanceProfile(logging.getCloudwatch().getInstanceProfile());
+                return Optional.of(s3View);
+            }
+        }
+        return Optional.empty();
+    }
+
+    private Optional<CloudFileSystemView> buildFileSystemViewFromBackup(Backup backup) {
+        if (backup.getStorageLocation() != null) {
+            if (backup.getS3() != null) {
+                CloudS3View s3View = new CloudS3View(CloudIdentityType.LOG);
+                s3View.setInstanceProfile(backup.getS3().getInstanceProfile());
+                return Optional.of(s3View);
+            } else if (backup.getAdlsGen2() != null) {
+                CloudAdlsGen2View adlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
+                AdlsGen2CloudStorageV1Parameters adlsGen2Params = backup.getAdlsGen2();
+                adlsGen2View.setAccountKey(adlsGen2Params.getAccountKey());
+                adlsGen2View.setAccountName(adlsGen2Params.getAccountName());
+                adlsGen2View.setSecure(adlsGen2Params.isSecure());
+                adlsGen2View.setManagedIdentity(adlsGen2Params.getManagedIdentity());
+                return Optional.of(adlsGen2View);
+            } else if (backup.getGcs() != null) {
+                CloudGcsView cloudGcsView = new CloudGcsView(CloudIdentityType.LOG);
+                cloudGcsView.setServiceAccountEmail(backup.getGcs().getServiceAccountEmail());
+                return Optional.of(cloudGcsView);
             }
         }
         return Optional.empty();
