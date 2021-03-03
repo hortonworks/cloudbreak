@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -25,6 +26,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.state.State;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
@@ -382,6 +384,7 @@ public class StackImageUpdateActionsTest {
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.UPDATE_FAILED.name()),
                 eq(ResourceEvent.STACK_IMAGE_UPDATE_FAILED), eq("test"));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event()), any(Event.class));
-
+        verify(stackUpdater).updateStackStatus(eq(1L), eq(DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED));
+        verifyNoInteractions(componentConfigProviderService);
     }
 }
