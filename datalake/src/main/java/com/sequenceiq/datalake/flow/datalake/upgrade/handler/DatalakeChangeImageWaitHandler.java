@@ -58,10 +58,10 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
             String imageId = upgradeService.getImageId(sdxId);
             String expectedImageId = request.getUpgradeOption().getUpgrade().getImageId();
             if (Objects.equals(imageId, expectedImageId)) {
-                LOGGER.info("Start polling change image process for id: {}", sdxId);
+                LOGGER.info("Image changed in cloudbreak side for SDX {}, actual image: {}", sdxId, imageId);
                 response = new DatalakeVmReplaceEvent(sdxId, userId);
             } else {
-                String message = "Image not changed in cloudbreak side, expected image: " + expectedImageId + ", actual image: " + imageId;
+                String message = String.format("Image not changed in cloudbreak side, expected image: %s, actual image: %s", expectedImageId, imageId);
                 LOGGER.info(message);
                 response = new DatalakeUpgradeFailedEvent(sdxId, userId, new IllegalStateException(message));
             }
@@ -71,7 +71,7 @@ public class DatalakeChangeImageWaitHandler extends ExceptionCatcherEventHandler
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Change image poller stopped for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake repair timed out after " + DURATION_IN_MINUTES + " minutes"));
+                    new PollerStoppedException("Change image poller timed out after " + DURATION_IN_MINUTES + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Change image polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);
