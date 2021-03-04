@@ -379,12 +379,12 @@
                            "dataDisks": [
                            <#list instance.volumes as volume>
                                {
-                                   "name": "[concat('datadisk', '${instance.instanceId}', '${volume_index}')]",
+                                   "name": "[concat('datadisk', '${instance.instanceId}', '-', '${volume_index}')]",
                                    "diskSizeGB": ${volume.size},
                                    "lun":  ${volume_index},
                                    <#if instance.managedDisk == false>
                                    "vhd": {
-                                        "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
+                                        "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '-', '${volume_index}', '.vhd')]"
                                    },
                                    <#else>
                                    "managedDisk": {
