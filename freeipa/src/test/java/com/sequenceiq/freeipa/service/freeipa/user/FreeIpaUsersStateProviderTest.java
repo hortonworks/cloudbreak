@@ -31,7 +31,6 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FreeIpaUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
@@ -94,15 +93,15 @@ class FreeIpaUsersStateProviderTest {
             userMetadata.ifPresent(meta -> expectedUserMetadata.put(username, meta));
         });
 
-        FreeIpaUsersState ipaState = underTest.getUsersState(freeIpaClient);
+        UsersState ipaState = underTest.getUsersState(freeIpaClient);
 
-        for (FmsUser fmsUser : ipaState.getUsersState().getUsers()) {
+        for (FmsUser fmsUser : ipaState.getUsers()) {
             assertTrue(expectedUsers.contains(fmsUser.getName()));
             expectedUsers.remove(fmsUser.getName());
         }
         assertTrue(expectedUsers.isEmpty());
 
-        for (FmsGroup fmsGroup : ipaState.getUsersState().getGroups()) {
+        for (FmsGroup fmsGroup : ipaState.getGroups()) {
             assertTrue(expectedGroups.contains(fmsGroup.getName()));
             expectedGroups.remove(fmsGroup.getName());
         }
@@ -139,15 +138,15 @@ class FreeIpaUsersStateProviderTest {
         doReturn(Optional.of(user1Metadata)).when(userMetadataConverter).toUserMetadata(argThat(arg -> user1.getUid().equals(arg.getUid())));
         Map<String, UserMetadata> expectedUserMetadata = Map.of(user1.getUid(), user1Metadata);
 
-        FreeIpaUsersState ipaState = underTest.getFilteredFreeIpaState(freeIpaClient, Set.of(user1.getUid()));
+        UsersState ipaState = underTest.getFilteredFreeIpaState(freeIpaClient, Set.of(user1.getUid()));
 
-        for (FmsUser fmsUser : ipaState.getUsersState().getUsers()) {
+        for (FmsUser fmsUser : ipaState.getUsers()) {
             assertTrue(expectedUsers.contains(fmsUser.getName()));
             expectedUsers.remove(fmsUser.getName());
         }
         assertTrue(expectedUsers.isEmpty());
 
-        for (FmsGroup fmsGroup : ipaState.getUsersState().getGroups()) {
+        for (FmsGroup fmsGroup : ipaState.getGroups()) {
             assertTrue(expectedGroups.contains(fmsGroup.getName()));
             expectedGroups.remove(fmsGroup.getName());
         }
@@ -169,7 +168,7 @@ class FreeIpaUsersStateProviderTest {
         when(freeIpaClient.userFindAll()).thenReturn(usersFindAll);
         when(freeIpaClient.groupFindAll()).thenReturn(groupsFindAll);
 
-        UsersState ipaState = underTest.getUsersState(freeIpaClient).getUsersState();
+        UsersState ipaState = underTest.getUsersState(freeIpaClient);
 
         assertEquals(1, ipaState.getUsers().size());
         FmsUser ipaUser = ipaState.getUsers().asList().get(0);

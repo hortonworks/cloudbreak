@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
@@ -110,12 +111,12 @@ class BaseUmsUsersStateProviderTest {
                 verifyActor(u.getCrn(), u.getWorkloadUsername(), workloadUsersWithAccess,
                         groupsPerMember.get(u.getWorkloadUsername()),
                         state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername()),
-                        state.getUserToCrnMap().get(u.getWorkloadUsername())));
+                        usersState.getUserMetadataMap().get(u.getWorkloadUsername())));
         testData.machineUsers.forEach(u ->
                 verifyActor(u.getCrn(), u.getWorkloadUsername(), workloadUsersWithAccess,
                         groupsPerMember.get(u.getWorkloadUsername()),
                         state.getUsersWorkloadCredentialMap().get(u.getWorkloadUsername()),
-                        state.getUserToCrnMap().get(u.getWorkloadUsername())));
+                        usersState.getUserMetadataMap().get(u.getWorkloadUsername())));
 
         assertEquals(testData.servicePrincipalCloudIdentities, state.getServicePrincipalCloudIdentities());
     }
@@ -125,7 +126,7 @@ class BaseUmsUsersStateProviderTest {
             Set<String> workloadUsersWithAccess,
             Collection<String> actualGroups,
             WorkloadCredential workloadCredential,
-            String actorCrnMapping) {
+            UserMetadata userMetadata) {
         if (testData.memberCrnToActorRights.get(actorCrn).get(UserSyncConstants.RIGHTS.get(0))) {
             assertTrue(workloadUsersWithAccess.contains(workloadUsername));
             Map<String, Boolean> expectedGroupMembership = testData.memberCrnToGroupMembership.get(actorCrn);
@@ -147,11 +148,12 @@ class BaseUmsUsersStateProviderTest {
             testData.wagsForOtherEnvironment.forEach(wag ->
                     assertFalse(actualGroups.contains(wag.getWorkloadAdministrationGroupName())));
             verifyWorkloadCredential(actorCrn, workloadCredential);
-            assertEquals(actorCrn, actorCrnMapping);
+            assertEquals(actorCrn, userMetadata.getCrn());
+            assertEquals(workloadCredential.getVersion(), userMetadata.getWorkloadCredentialsVersion());
         } else {
             assertFalse(workloadUsersWithAccess.contains(workloadUsername));
             assertNull(workloadCredential);
-            assertNull(actorCrnMapping);
+            assertNull(userMetadata);
         }
     }
 

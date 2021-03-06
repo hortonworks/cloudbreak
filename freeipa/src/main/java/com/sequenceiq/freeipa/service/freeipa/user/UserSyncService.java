@@ -12,11 +12,13 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -66,11 +68,13 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FreeIpaUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.SyncStatusDetail;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsUsersStateProviderDispatcher;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -402,12 +406,12 @@ public class UserSyncService {
             FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         LogEvent logEvent = fullSync ? LogEvent.RETRIEVE_FULL_IPA_STATE : LogEvent.RETRIEVE_PARTIAL_IPA_STATE;
         LOGGER.debug("Starting {} ...", logEvent);
-        FreeIpaUsersState freeIpaUsersState = getIpaUserState(freeIpaClient, umsUsersState, fullSync);
+        UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, fullSync);
         LOGGER.debug("Finished {}, found {} users and {} groups.", logEvent,
-                freeIpaUsersState.getUsersState().getUsers().size(), freeIpaUsersState.getUsersState().getGroups().size());
+                ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
         LOGGER.debug("Starting {} ...", LogEvent.CALCULATE_UMS_IPA_DIFFERENCE);
-        UsersStateDifference usersStateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, freeIpaUsersState,
+        UsersStateDifference usersStateDifference = UsersStateDifference.fromUmsAndIpaUsersStates(umsUsersState, ipaUsersState,
                 credentialsUpdateOptimizationEnabled);
         LOGGER.debug("Finished {}.", LogEvent.CALCULATE_UMS_IPA_DIFFERENCE);
 
@@ -426,12 +430,26 @@ public class UserSyncService {
         } else {
             // If the credentials update optimization is enabled, sync credentials for users with updated credentials.
             // Otherwise, sync credentials for all users.
-            LOGGER.debug("Starting {} for {} users ...", LogEvent.SET_WORKLOAD_CREDENTIALS, umsUsersState.getUsersWorkloadCredentialMap().size());
+            LOGGER.debug("Starting {} for {} users ...", LogEvent.SET_WORKLOAD_CREDENTIALS, usersStateDifference.getUsersWithCredentialsToUpdate().size());
+            Map<String, Pair<String, WorkloadCredential>> userToCredentialUpdateParamsMap =
+                    usersStateDifference.getUsersWithCredentialsToUpdate().stream().collect(Collectors.toMap(
+                            Function.identity(), username -> getCredentialUpdateParams(username, umsUsersState)));
             workloadCredentialService.setWorkloadCredentials(fmsToFreeipaBatchCallEnabled, credentialsUpdateOptimizationEnabled, freeIpaClient,
-                    umsUsersState.getUsersWorkloadCredentialMap(), usersStateDifference.getUsersWithCredentialsToUpdate(), umsUsersState.getUserToCrnMap(),
-                    warnings::put);
+                    userToCredentialUpdateParamsMap, warnings::put);
             LOGGER.debug("Finished {}.", LogEvent.SET_WORKLOAD_CREDENTIALS);
         }
+    }
+
+    private Pair<String, WorkloadCredential> getCredentialUpdateParams(String username, UmsUsersState umsUsersState) {
+        UserMetadata userMetadata = umsUsersState.getUsersState().getUserMetadataMap().get(username);
+        if (userMetadata == null) {
+            throw new IllegalStateException(String.format("No UserMetadata mapping for user %s", username));
+        }
+        WorkloadCredential workloadCredential = umsUsersState.getUsersWorkloadCredentialMap().get(username);
+        if (workloadCredential == null) {
+            throw new IllegalStateException(String.format("No WorkloadCredential mapping for user %s", username));
+        }
+        return Pair.of(userMetadata.getCrn(), workloadCredential);
     }
 
     private SyncStatusDetail internalSynchronizeStackForDeleteUser(Stack stack, String deletedWorkloadUser, boolean fmsToFreeipaBatchCallEnabled) {
@@ -444,13 +462,13 @@ public class UserSyncService {
             LOGGER.debug("Starting {} for environment {} and deleted user {} ...", LogEvent.USER_SYNC_DELETE, environmentCrn, deletedWorkloadUser);
 
             LOGGER.debug("Starting {} ...", LogEvent.RETRIEVE_PARTIAL_IPA_STATE);
-            FreeIpaUsersState ipaUserState = getIpaStateForUser(freeIpaClient, deletedWorkloadUser);
-            LOGGER.debug("Finished {}, found {} users and {} groups.", LogEvent.RETRIEVE_PARTIAL_IPA_STATE, ipaUserState.getUsersState().getUsers().size(),
-                    ipaUserState.getUsersState().getGroups().size());
+            UsersState ipaUserState = getIpaStateForUser(freeIpaClient, deletedWorkloadUser);
+            LOGGER.debug("Finished {}, found {} users and {} groups.", LogEvent.RETRIEVE_PARTIAL_IPA_STATE, ipaUserState.getUsers().size(),
+                    ipaUserState.getGroups().size());
 
-            if (!ipaUserState.getUsersState().getUsers().isEmpty()) {
-                ImmutableCollection<String> groupsToRemove = ipaUserState.getUsersState().getGroupMembership().get(deletedWorkloadUser);
-                UsersStateDifference usersStateDifference = UsersStateDifference.forDeletedUser(deletedWorkloadUser, groupsToRemove);
+            if (!ipaUserState.getUsers().isEmpty()) {
+                ImmutableCollection<String> groupMembershipsToRemove = ipaUserState.getGroupMembership().get(deletedWorkloadUser);
+                UsersStateDifference usersStateDifference = UsersStateDifference.forDeletedUser(deletedWorkloadUser, groupMembershipsToRemove);
                 LOGGER.debug("Starting {} ...", LogEvent.APPLY_DIFFERENCE_TO_IPA);
                 applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient, usersStateDifference, warnings::put, fmsToFreeipaBatchCallEnabled);
                 LOGGER.debug("Finished {}.", LogEvent.APPLY_DIFFERENCE_TO_IPA);
@@ -473,7 +491,7 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    FreeIpaUsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, boolean fullSync)
+    UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, boolean fullSync)
             throws FreeIpaClientException {
         return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
                 freeIpaUsersStateProvider.getFilteredFreeIpaState(
@@ -481,7 +499,7 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    FreeIpaUsersState getIpaStateForUser(FreeIpaClient freeIpaClient, String workloadUserName) throws FreeIpaClientException {
+    UsersState getIpaStateForUser(FreeIpaClient freeIpaClient, String workloadUserName) throws FreeIpaClientException {
         return freeIpaUsersStateProvider.getFilteredFreeIpaState(freeIpaClient, Set.of(workloadUserName));
     }
 

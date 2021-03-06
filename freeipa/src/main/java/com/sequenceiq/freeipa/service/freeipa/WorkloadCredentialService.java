@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -11,6 +10,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,6 @@ import com.sequenceiq.freeipa.client.operation.SetWlCredentialOperation;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 @Service
@@ -38,32 +37,17 @@ public class WorkloadCredentialService {
 
     public void setWorkloadCredential(boolean credentialsUpdateOptimizationEnabled, FreeIpaClient freeIpaClient, String username, String userCrn,
             WorkloadCredential workloadCredential) throws IOException, FreeIpaClientException {
-        boolean updateCredentials = true;
-        if (credentialsUpdateOptimizationEnabled) {
-            Optional<com.sequenceiq.freeipa.client.model.User> ipaUser = freeIpaClient.userFind(username);
-            if (ipaUser.isPresent()) {
-                Optional<UserMetadata> userMetadata = userMetadataConverter.toUserMetadata(ipaUser.get());
-                if (userMetadata.isPresent() && userMetadata.get().getWorkloadCredentialsVersion() >= workloadCredential.getVersion()) {
-                    updateCredentials = false;
-                }
-            }
-        }
-
-        if (updateCredentials) {
-            LOGGER.debug("Setting workload credentials for user '{}'", username);
-            getOperation(username, userCrn, workloadCredential, credentialsUpdateOptimizationEnabled, freeIpaClient).invoke(freeIpaClient);
-        } else {
-            LOGGER.debug("Not setting workload credentials for user '{}' because credentials are already up to date", username);
-        }
+        LOGGER.debug("Setting workload credentials for user '{}'", username);
+        getOperation(username, userCrn, workloadCredential, credentialsUpdateOptimizationEnabled, freeIpaClient).invoke(freeIpaClient);
     }
 
     public void setWorkloadCredentials(boolean fmsToFreeipaBatchCallEnabled, boolean credentialsUpdateOptimizationEnabled, FreeIpaClient freeIpaClient,
-            Map<String, WorkloadCredential> workloadCredentials, Set<String> usersWithCredentialsToUpdate, Map<String, String> userToCrnMap,
-            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+            Map<String, Pair<String, WorkloadCredential>> userToCredentialUpdateParamsMap, BiConsumer<String, String> warnings)
+            throws FreeIpaClientException {
         List<SetWlCredentialOperation> operations = Lists.newArrayList();
-        usersWithCredentialsToUpdate.forEach(username -> {
+        userToCredentialUpdateParamsMap.forEach((username, credentialInfo) -> {
             try {
-                operations.add(getOperation(username, userToCrnMap.get(username), workloadCredentials.get(username), credentialsUpdateOptimizationEnabled,
+                operations.add(getOperation(username, credentialInfo.getLeft(), credentialInfo.getRight(), credentialsUpdateOptimizationEnabled,
                         freeIpaClient));
             } catch (IOException e) {
                 recordWarning(username, e, warnings);

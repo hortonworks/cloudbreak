@@ -16,9 +16,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -38,7 +40,6 @@ import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 @ExtendWith(MockitoExtension.class)
@@ -90,36 +91,7 @@ class WorkloadCredentialServiceTest {
     }
 
     @Test
-    void testSetWorkloadCredentialWithUpdateOptimizationIpaCredentialStale() throws Exception {
-        User user = getIpaUser(USER);
-        when(freeIpaClient.userFind(USER)).thenReturn(Optional.of(user));
-        UserMetadata userMetadata = new UserMetadata(USER_CRN, UMS_WORKLOAD_CREDENTIALS_VERSION - 1);
-        doReturn(Optional.of(userMetadata)).when(userMetadataConverter).toUserMetadata(argThat(matchesUser(user)));
-        doReturn("userMetadataJson").when(userMetadataConverter).toUserMetadataJson(USER_CRN, UMS_WORKLOAD_CREDENTIALS_VERSION);
-        when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
-
-        underTest.setWorkloadCredential(true, freeIpaClient, USER, USER_CRN, createWorkloadCredential());
-
-        verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), argThat(matchesTitleAttribute("userMetadataJson")), any());
-    }
-
-    @Test
-    void testSetWorkloadCredentialWithUpdateOptimizationIpaCredentialUpToDate() throws Exception {
-        User user = getIpaUser(USER);
-        when(freeIpaClient.userFind(USER)).thenReturn(Optional.of(user));
-        UserMetadata userMetadata = new UserMetadata(USER_CRN, UMS_WORKLOAD_CREDENTIALS_VERSION);
-        doReturn(Optional.of(userMetadata)).when(userMetadataConverter).toUserMetadata(argThat(matchesUser(user)));
-
-        underTest.setWorkloadCredential(true, freeIpaClient, USER, USER_CRN, createWorkloadCredential());
-
-        verify(freeIpaClient, times(0)).invoke(eq("user_mod"), eq(List.of(USER)), argThat(matchesTitleAttribute("userMetadataJson")), any());
-    }
-
-    @Test
-    void testSetWorkloadCredentialWithUpdateOptimizationIpaCredentialVersionUnknown() throws Exception {
-        User user = getIpaUser(USER);
-        when(freeIpaClient.userFind(USER)).thenReturn(Optional.of(user));
-        doReturn(Optional.empty()).when(userMetadataConverter).toUserMetadata(argThat(matchesUser(user)));
+    void testSetWorkloadCredentialWithUpdateOptimization() throws Exception {
         doReturn("userMetadataJson").when(userMetadataConverter).toUserMetadataJson(USER_CRN, UMS_WORKLOAD_CREDENTIALS_VERSION);
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
 
@@ -134,8 +106,7 @@ class WorkloadCredentialServiceTest {
         when(batchPartitionSizeProperties.getByOperation(any())).thenReturn(100);
         doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
 
-        underTest.setWorkloadCredentials(true, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(),
-                warnings::put);
+        setWorkloadCredentials(true, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
         verify(freeIpaClient).callBatch(any(), any(), any(), any());
     }
@@ -147,8 +118,7 @@ class WorkloadCredentialServiceTest {
         doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
         when(userMetadataConverter.toUserMetadataJson(any(), anyLong())).thenReturn("userMetadataJson");
 
-        underTest.setWorkloadCredentials(true, true, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(),
-                warnings::put);
+        setWorkloadCredentials(true, true, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
         verify(freeIpaClient).callBatch(any(), any(), any(), any());
         verify(userMetadataConverter, times(USERS.size())).toUserMetadataJson(any(), anyLong());
@@ -159,8 +129,7 @@ class WorkloadCredentialServiceTest {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
 
-        underTest.setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(),
-                warnings::put);
+        setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
         verify(freeIpaClient, times(4)).invoke(eq("user_mod"), any(), any(), any());
     }
@@ -173,8 +142,7 @@ class WorkloadCredentialServiceTest {
         userToCrnMap.forEach((username, crn) ->
             when(userMetadataConverter.toUserMetadataJson(eq(crn), anyLong())).thenReturn(username + "-userMetadataJson"));
 
-        underTest.setWorkloadCredentials(false, true, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), userToCrnMap,
-                warnings::put);
+        setWorkloadCredentials(false, true, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), userToCrnMap, warnings::put);
 
         for (String username : userToCrnMap.keySet()) {
             verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(username)), argThat(matchesTitleAttribute(username + "-userMetadataJson")), any());
@@ -187,8 +155,7 @@ class WorkloadCredentialServiceTest {
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenThrow(
                 new FreeIpaClientException("error", new JsonRpcClientException(4202, "", null)));
 
-        underTest.setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(),
-                warnings::put);
+        setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
         verify(freeIpaClient, times(4)).invoke(eq("user_mod"), any(), any(), any());
         assertEquals(0, warnings.size());
@@ -200,8 +167,7 @@ class WorkloadCredentialServiceTest {
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenThrow(
                 new FreeIpaClientException("error", new JsonRpcClientException(5000, "", null)));
 
-        underTest.setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(),
-                warnings::put);
+        setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
         verify(freeIpaClient, times(4)).invoke(eq("user_mod"), any(), any(), any());
         assertEquals(4, warnings.size());
@@ -212,7 +178,7 @@ class WorkloadCredentialServiceTest {
     }
 
     private WorkloadCredential createWorkloadCredential() {
-        return UserSyncTestUtils.createWorkloadCredential(UMS_WORKLOAD_CREDENTIALS_VERSION);
+        return UserSyncTestUtils.createWorkloadCredential("hashedPassword", UMS_WORKLOAD_CREDENTIALS_VERSION);
     }
 
     private Set<String> getUsersWithCredentialsToUpdate() {
@@ -229,16 +195,6 @@ class WorkloadCredentialServiceTest {
         return response;
     }
 
-    private User getIpaUser(String uid) {
-        User user = new User();
-        user.setUid(uid);
-        return user;
-    }
-
-    private ArgumentMatcher<User> matchesUser(User user) {
-        return arg -> user.getUid().equals(arg.getUid());
-    }
-
     private ArgumentMatcher<Map<String, Object>> matchesTitleAttribute(String expectedTitle) {
         String titleSetattrArg = String.format("title=%s", expectedTitle);
         // The downcast may fail if the params are not as expected, but that's OK because it will cause the test to fail, as it should.
@@ -250,5 +206,13 @@ class WorkloadCredentialServiceTest {
                 .setAccountId(UUID.randomUUID().toString())
                 .setResource(UUID.randomUUID().toString())
                 .build().toString();
+    }
+
+    private void setWorkloadCredentials(boolean batchCallEnabled, boolean updateOptimizationEnabled, FreeIpaClient ipaClient,
+            Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<String> usersWithCredentialsToUpdate, Map<String, String> userToCrnMap,
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+        Map<String, Pair<String, WorkloadCredential>> userToCredentialUpdateParams = usersWithCredentialsToUpdate.stream()
+                .collect(Collectors.toMap(Function.identity(), username -> Pair.of(userToCrnMap.get(username), usersWorkloadCredentialMap.get(username))));
+        underTest.setWorkloadCredentials(batchCallEnabled, updateOptimizationEnabled, ipaClient, userToCredentialUpdateParams, warnings);
     }
 }

@@ -35,11 +35,9 @@ class UsersStateDifferenceTest {
                         .build())
                 .build();
 
-        FreeIpaUsersState ipaUsersState = FreeIpaUsersState.newBuilder()
-                .setUsersState(new UsersState.Builder()
-                        .addUser(userBoth)
-                        .addUser(userIPA)
-                        .build())
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addUser(userBoth)
+                .addUser(userIPA)
                 .build();
 
         ImmutableSet<FmsUser> usersToAdd = UsersStateDifference.calculateUsersToAdd(umsUsersState, ipaUsersState);
@@ -70,16 +68,14 @@ class UsersStateDifferenceTest {
                         .build())
                 .build();
 
-        FreeIpaUsersState ipaUsersState = FreeIpaUsersState.newBuilder()
-                .setUsersState(new UsersState.Builder()
-                        .addUser(userBoth)
-                        .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userBoth.getName())
-                        .addUser(userIPA)
-                        .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userIPA.getName())
-                        .addUser(userIPA2)
-                        .addUser(userProtected)
-                        .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userProtected.getName())
-                        .build())
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addUser(userBoth)
+                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userBoth.getName())
+                .addUser(userIPA)
+                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userIPA.getName())
+                .addUser(userIPA2)
+                .addUser(userProtected)
+                .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userProtected.getName())
                 .build();
 
         ImmutableSet<String> usersToRemove = UsersStateDifference.calculateUsersToRemove(umsUsersState, ipaUsersState);
@@ -111,11 +107,9 @@ class UsersStateDifferenceTest {
                 .setWorkloadAdministrationGroups(Set.of(groupWag))
                 .build();
 
-        FreeIpaUsersState ipaUsersState = FreeIpaUsersState.newBuilder()
-                .setUsersState(new UsersState.Builder()
-                        .addGroup(groupBoth)
-                        .addGroup(groupIPA)
-                        .build())
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addGroup(groupBoth)
+                .addGroup(groupIPA)
                 .build();
 
         ImmutableSet<FmsGroup> groupsToAdd = UsersStateDifference.calculateGroupsToAdd(umsUsersState, ipaUsersState);
@@ -147,13 +141,11 @@ class UsersStateDifferenceTest {
                 .setWorkloadAdministrationGroups(Set.of(groupWag))
                 .build();
 
-        FreeIpaUsersState ipaUsersState = FreeIpaUsersState.newBuilder()
-                .setUsersState(new UsersState.Builder()
-                        .addGroup(groupBoth)
-                        .addGroup(groupIPA)
-                        .addGroup(groupWag)
-                        .addGroup(groupProtected)
-                        .build())
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addGroup(groupBoth)
+                .addGroup(groupIPA)
+                .addGroup(groupWag)
+                .addGroup(groupProtected)
                 .build();
 
         ImmutableSet<FmsGroup> groupsToRemove = UsersStateDifference.calculateGroupsToRemove(umsUsersState, ipaUsersState);
@@ -187,11 +179,9 @@ class UsersStateDifferenceTest {
                         .build())
                 .build();
 
-        FreeIpaUsersState ipaUsersState = FreeIpaUsersState.newBuilder()
-                .setUsersState(new UsersState.Builder()
-                        .addMemberToGroup(group, userBoth)
-                        .addMemberToGroup(group, userIPA)
-                        .build())
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addMemberToGroup(group, userBoth)
+                .addMemberToGroup(group, userIPA)
                 .build();
 
         ImmutableMultimap<String, String> groupMembershipsToAdd = UsersStateDifference.calculateGroupMembershipToAdd(umsUsersState, ipaUsersState);
@@ -221,12 +211,10 @@ class UsersStateDifferenceTest {
                         .build())
                 .build();
 
-        FreeIpaUsersState ipaUsersState = FreeIpaUsersState.newBuilder()
-                .setUsersState(new UsersState.Builder()
-                        .addMemberToGroup(group, userBoth)
-                        .addMemberToGroup(group, userIPA)
-                        .addMemberToGroup(unmanagedGroup, userUms)
-                        .build())
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addMemberToGroup(group, userBoth)
+                .addMemberToGroup(group, userIPA)
+                .addMemberToGroup(unmanagedGroup, userUms)
                 .build();
 
         ImmutableMultimap<String, String> groupMembershipsToRemove = UsersStateDifference.calculateGroupMembershipToRemove(umsUsersState, ipaUsersState);
@@ -253,25 +241,24 @@ class UsersStateDifferenceTest {
     private void testCalculateUsersWithCredentialsToUpdate(boolean updatedOptimizationEnabled) {
         UmsUsersState.Builder umsUsersStateBuilder = UmsUsersState.newBuilder();
         UsersState.Builder usersStateBuilderForUms = UsersState.newBuilder();
-        FreeIpaUsersState.Builder ipaUsersStateBuilder = FreeIpaUsersState.newBuilder();
         UsersState.Builder usersStateBuilderForIpa = UsersState.newBuilder();
 
         FmsUser userUms = addUmsUser("userUms", 1L, umsUsersStateBuilder, usersStateBuilderForUms);
 
         FmsUser userWithNoIpaMetadata = addUmsUser("userWithNoIpaMetadata", 0L, umsUsersStateBuilder, usersStateBuilderForUms);
-        addIpaUser(userWithNoIpaMetadata.getName(), Optional.empty(), ipaUsersStateBuilder, usersStateBuilderForIpa);
+        addIpaUser(userWithNoIpaMetadata.getName(), Optional.empty(), usersStateBuilderForIpa);
 
         FmsUser userWithStaleIpaCredentials = addUmsUser("userWithStaleIpaCredentials", 2L, umsUsersStateBuilder, usersStateBuilderForUms);
-        addIpaUser(userWithStaleIpaCredentials.getName(), Optional.of(1L), ipaUsersStateBuilder, usersStateBuilderForIpa);
+        addIpaUser(userWithStaleIpaCredentials.getName(), Optional.of(1L), usersStateBuilderForIpa);
 
         FmsUser userWithUpToDateIpaCredentials = addUmsUser("userWithUpToDateIpaCredentials", 5L, umsUsersStateBuilder, usersStateBuilderForUms);
-        addIpaUser(userWithUpToDateIpaCredentials.getName(), Optional.of(5L), ipaUsersStateBuilder, usersStateBuilderForIpa);
+        addIpaUser(userWithUpToDateIpaCredentials.getName(), Optional.of(5L), usersStateBuilderForIpa);
 
         FmsUser userProtected = addUmsUser(FreeIpaChecks.IPA_PROTECTED_USERS.get(0), 0L, umsUsersStateBuilder, usersStateBuilderForUms);
-        addIpaUser(userProtected.getName(), Optional.empty(), ipaUsersStateBuilder, usersStateBuilderForIpa);
+        addIpaUser(userProtected.getName(), Optional.empty(), usersStateBuilderForIpa);
 
         UmsUsersState umsUsersState = umsUsersStateBuilder.setUsersState(usersStateBuilderForUms.build()).build();
-        FreeIpaUsersState ipaUsersState = ipaUsersStateBuilder.setUsersState(usersStateBuilderForIpa.build()).build();
+        UsersState ipaUsersState = usersStateBuilderForIpa.build();
 
         ImmutableSet<String> usersWithCredentialsToUpdate = UsersStateDifference.calculateUsersWithCredentialsToUpdate(
                 umsUsersState, ipaUsersState, updatedOptimizationEnabled);
@@ -292,12 +279,11 @@ class UsersStateDifferenceTest {
             UsersState.Builder usersStateBuilder) {
         FmsUser fmsUser = new FmsUser().withName(username);
         usersStateBuilder.addUser(fmsUser);
-        umsStateBuilder.addWorkloadCredentials(username, UserSyncTestUtils.createWorkloadCredential(umsCredentialsVersion));
+        umsStateBuilder.addWorkloadCredentials(username, UserSyncTestUtils.createWorkloadCredential("hashedPassword", umsCredentialsVersion));
         return fmsUser;
     }
 
-    private void addIpaUser(String username, Optional<Long> ipaCredentialsVersion, FreeIpaUsersState.Builder ipaStateBuilder,
-            UsersState.Builder usersStateBuilder) {
+    private void addIpaUser(String username, Optional<Long> ipaCredentialsVersion, UsersState.Builder usersStateBuilder) {
         FmsUser fmsUser = new FmsUser().withName(username);
         usersStateBuilder.addUser(fmsUser);
         if (ipaCredentialsVersion.isPresent()) {
@@ -305,7 +291,7 @@ class UsersStateDifferenceTest {
                     .setAccountId(UUID.randomUUID().toString())
                     .setResource(UUID.randomUUID().toString())
                     .build().toString();
-            ipaStateBuilder.addUserMetadata(username, new UserMetadata(crn, ipaCredentialsVersion.get()));
+            usersStateBuilder.addUserMetadata(username, new UserMetadata(crn, ipaCredentialsVersion.get()));
         }
     }
 }

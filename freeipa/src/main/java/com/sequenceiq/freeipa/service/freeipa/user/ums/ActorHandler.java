@@ -7,6 +7,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import org.slf4j.Logger;
@@ -88,8 +89,8 @@ public class ActorHandler {
             }
 
             umsUsersStateBuilder.addWorkloadCredentials(workloadUsername, workloadCredential);
-            umsUsersStateBuilder.addUserCrn(workloadUsername, actorCrn);
             umsUsersStateBuilder.addUserCloudIdentities(workloadUsername, cloudIdentityList);
+            usersStateBuilder.addUserMetadata(workloadUsername, new UserMetadata(actorCrn, workloadCredential.getVersion()));
             usersStateBuilder.addUser(fmsUser);
         }
     }

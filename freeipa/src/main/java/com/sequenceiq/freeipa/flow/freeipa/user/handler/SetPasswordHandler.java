@@ -15,14 +15,19 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
+import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsCredentialProvider;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.stack.StackService;
+
+import java.util.Optional;
 
 import reactor.bus.Event;
 
@@ -46,6 +51,9 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private UserMetadataConverter userMetadataConverter;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(SetPasswordRequest.class);
@@ -61,15 +69,31 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
 
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             if (FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
+                LOGGER.info("IPA has password hash support. Credentials information from UMS will be used.");
                 WorkloadCredential workloadCredential = umsCredentialProvider.getCredentials(request.getUserCrn(), MDCUtils.getRequestId());
 
                 String accountId = Crn.fromString(stack.getEnvironmentCrn()).getAccountId();
                 boolean credentialsUpdateOptimizationEnabled = entitlementService.usersyncCredentialsUpdateOptimizationEnabled(accountId);
                 LOGGER.info("Credentials update optimization is{} enabled for account {}", credentialsUpdateOptimizationEnabled ? "" : " not", accountId);
 
-                LOGGER.info("IPA has password hash support. Credentials information from UMS will be used.");
-                workloadCredentialService.setWorkloadCredential(credentialsUpdateOptimizationEnabled, freeIpaClient, request.getUsername(),
-                        request.getUserCrn(), workloadCredential);
+                boolean updateCredentials = true;
+                if (credentialsUpdateOptimizationEnabled) {
+                    Optional<User> ipaUser = freeIpaClient.userFind(request.getUsername());
+                    if (ipaUser.isPresent()) {
+                        Optional<UserMetadata> userMetadata = userMetadataConverter.toUserMetadata(ipaUser.get());
+                        if (userMetadata.isPresent() && userMetadata.get().getWorkloadCredentialsVersion() >= workloadCredential.getVersion()) {
+                            updateCredentials = false;
+                        }
+                    }
+                }
+
+                if (updateCredentials) {
+                    workloadCredentialService.setWorkloadCredential(credentialsUpdateOptimizationEnabled, freeIpaClient, request.getUsername(),
+                            request.getUserCrn(), workloadCredential);
+                } else {
+                    LOGGER.debug("Not setting workload credentials for user '{}' because credentials are already up to date", request.getUsername());
+                }
+
                 if (StringUtils.isBlank(workloadCredential.getHashedPassword())) {
                     LOGGER.info("IPA has password hash support but user does not have a password set in UMS; using the provided password directly.");
                     freeIpaClient.userSetPasswordWithExpiration(

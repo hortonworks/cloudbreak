@@ -30,19 +30,11 @@ public class UmsUsersState {
 
     private final ImmutableList<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities;
 
-    // TODO: CDPCP-3994: It would be cleaner to model the user's CRN as a property of FmsUser. But FmsUser is used to represent users read from the
-    //  IPA as well as from the UMS, and we don't always know the CRN of a user read from the IPA. Once the rollout of the workload credentials sync
-    //  optimization is complete, and all production environments have been sync'd, we can rely on the CRN being present in the IPA record, and can
-    //  then move the CRN into FmsUser.
-    private final ImmutableMap<String, String> userToCrnMap;
-
-    @SuppressWarnings("checkstyle:ExecutableStatementCount")
     private UmsUsersState(
             UsersState usersState, Map<String, WorkloadCredential> usersWorkloadCredentialMap,
             Collection<String> requestedWorkloadUsernames, Collection<FmsGroup> workloadAdministrationGroups,
             Map<String, List<CloudIdentity>> userToCloudIdentityMap,
-            Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities,
-            Map<String, String> userToCrnMap) {
+            Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities) {
         this.usersState = requireNonNull(usersState, "UsersState is null");
         this.usersWorkloadCredentialMap = ImmutableMap.copyOf(
                 requireNonNull(usersWorkloadCredentialMap, "workload credential map is null"));
@@ -54,8 +46,6 @@ public class UmsUsersState {
                 requireNonNull(userToCloudIdentityMap, "userToCloudIdentityMap is null"));
         this.servicePrincipalCloudIdentities = ImmutableList.copyOf(
                 requireNonNull(servicePrincipalCloudIdentities, "servicePrincipalCloudIdentities is null"));
-        this.userToCrnMap = ImmutableMap.copyOf(
-                requireNonNull(userToCrnMap, "userToCrnMap is null"));
     }
 
     public UsersState getUsersState() {
@@ -82,10 +72,6 @@ public class UmsUsersState {
         return servicePrincipalCloudIdentities;
     }
 
-    public ImmutableMap<String, String> getUserToCrnMap() {
-        return userToCrnMap;
-    }
-
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -102,8 +88,6 @@ public class UmsUsersState {
         private Map<String, List<CloudIdentity>> userToCloudIdentityMap = new HashMap<>();
 
         private Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities = new ArrayList<>();
-
-        private Map<String, String> userToCrnMap = new HashMap<>();
 
         public Builder setUsersState(UsersState usersState) {
             this.usersState = usersState;
@@ -140,14 +124,9 @@ public class UmsUsersState {
             return this;
         }
 
-        public Builder addUserCrn(String userName, String crn) {
-            userToCrnMap.put(userName, crn);
-            return this;
-        }
-
         public UmsUsersState build() {
             return new UmsUsersState(usersState, workloadCredentialMap, requestedWorkloadUsernames,
-                    workloadAdministrationGroups, userToCloudIdentityMap, servicePrincipalCloudIdentities, userToCrnMap);
+                    workloadAdministrationGroups, userToCloudIdentityMap, servicePrincipalCloudIdentities);
         }
     }
 

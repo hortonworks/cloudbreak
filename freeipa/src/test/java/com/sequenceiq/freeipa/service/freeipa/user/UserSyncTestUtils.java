@@ -39,8 +39,8 @@ public class UserSyncTestUtils {
         return umsEventGenerationIds;
     }
 
-    public static WorkloadCredential createWorkloadCredential(long credentialsVersion) {
-        return new WorkloadCredential("hashedpassword",
+    public static WorkloadCredential createWorkloadCredential(String hashedPassword, long credentialsVersion) {
+        return new WorkloadCredential(hashedPassword,
                 List.of(),
                 Optional.of(Instant.now()),
                 List.of(UserManagementProto.SshPublicKey.newBuilder().setPublicKey("fakepublickey").build(),
