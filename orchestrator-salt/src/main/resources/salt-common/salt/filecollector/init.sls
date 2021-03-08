@@ -3,7 +3,7 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 
-{% set cdp_telemetry_version = '0.3.6' %}
+{% set cdp_telemetry_version = '0.3.12' %}
 {% set cdp_telemetry_rpm_location = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/'%}
 {% set cdp_telemetry_rpm_repo_url = cdp_telemetry_rpm_location + 'cdp_telemetry-' + cdp_telemetry_version + '.x86_64.rpm' %}
 {% set cdp_telemetry_package_name = 'cdp-telemetry' %}
