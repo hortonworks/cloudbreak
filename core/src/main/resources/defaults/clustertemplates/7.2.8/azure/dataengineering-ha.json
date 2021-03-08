@@ -25,10 +25,13 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_D16_v3",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [
             {
-              "size": 100,
+              "size": 150,
               "count": 1,
               "type": "StandardSSD_LRS"
             }
@@ -44,17 +47,14 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "azure": {
-            "availabilitySet": {
-              "name": "",
-              "faultDomainCount": 2,
-              "updateDomainCount": 20
-            }
+          "azure": {},
+          "instanceType": "Standard_D16_v3",
+          "rootVolume": {
+            "size": 150
           },
-          "instanceType": "Standard_D8_v3",
           "attachedVolumes": [
             {
-              "size": 100,
+              "size": 150,
               "count": 1,
               "type": "StandardSSD_LRS"
             }
@@ -77,10 +77,13 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_D16_v3",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [
             {
-              "size": 100,
+              "size": 500,
               "count": 1,
               "type": "StandardSSD_LRS"
             }
@@ -103,10 +106,13 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_D16_v3",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [
             {
-              "size": 100,
+              "size": 150,
               "count": 1,
               "type": "StandardSSD_LRS"
             }
@@ -128,10 +134,13 @@
               "updateDomainCount": 20
             }
           },
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_D16_v3",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [
             {
-              "size": 100,
+              "size": 150,
               "count": 1,
               "type": "StandardSSD_LRS"
             }

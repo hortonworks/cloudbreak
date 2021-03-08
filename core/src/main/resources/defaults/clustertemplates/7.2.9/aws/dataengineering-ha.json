@@ -17,12 +17,19 @@
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
       "template": {
-        "aws": {},
-        "instanceType": "m5.2xlarge",
+        "aws": {
+          "placementGroup" : {
+            "strategy" : "PARTITION"
+          }
+        },
+        "instanceType": "m5.4xlarge",
+        "rootVolume": {
+          "size": 150
+        },
         "attachedVolumes": [{
-          "size": 100,
+          "size": 150,
           "count": 1,
-          "type": "standard"
+          "type": "gp2"
         }],
         "cloudPlatform": "AWS"
       },
@@ -35,11 +42,11 @@
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {},
-          "instanceType": "m5.2xlarge",
+          "instanceType": "m5.4xlarge",
           "attachedVolumes": [{
-            "size": 100,
+            "size": 150,
             "count": 1,
-            "type": "standard"
+            "type": "gp2"
           }],
           "cloudPlatform": "AWS"
         },
@@ -52,11 +59,14 @@
         "recoveryMode": "MANUAL",
         "template": {
           "aws": {},
-          "instanceType": "m5.2xlarge",
+          "instanceType": "m5.4xlarge",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [{
-            "size": 100,
+            "size": 150,
             "count": 1,
-            "type": "standard"
+            "type": "gp2"
           }],
           "cloudPlatform": "AWS"
         },
@@ -68,12 +78,19 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "aws": {},
-          "instanceType": "m5.2xlarge",
+          "aws": {
+            "placementGroup" : {
+              "strategy" : "PARTITION"
+            }
+          },
+          "instanceType": "m5.4xlarge",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [{
-            "size": 100,
+            "size": 500,
             "count": 1,
-            "type": "standard"
+            "type": "gp2"
           }],
           "cloudPlatform": "AWS"
         },
@@ -85,12 +102,19 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "aws": {},
-          "instanceType": "m5.2xlarge",
+          "aws": {
+            "placementGroup" : {
+              "strategy" : "PARTITION"
+            }
+          },
+          "instanceType": "m5.4xlarge",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [{
-            "size": 100,
+            "size": 150,
             "count": 1,
-            "type": "standard"
+            "type": "gp2"
           }],
           "cloudPlatform": "AWS"
         },
