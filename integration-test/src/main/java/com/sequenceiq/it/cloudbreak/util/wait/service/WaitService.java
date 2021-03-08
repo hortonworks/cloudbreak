@@ -18,7 +18,6 @@ public class WaitService<T extends WaitObject> {
 
     public Result<WaitResult, Exception> waitObject(StatusChecker<T> statusChecker, T t, TestContext testContext, Duration interval,
             TimeoutChecker timeoutChecker, int maxFailure) {
-        boolean success = false;
         boolean timeout = false;
         int attempts = 0;
         int failures = 0;
@@ -28,23 +27,25 @@ public class WaitService<T extends WaitObject> {
         while (!timeout && !exit) {
             LOGGER.info("Waiting round {} and elapsed time {} ms", attempts, System.currentTimeMillis() - startTime);
             try {
-                success = statusChecker.checkStatus(t);
+                statusChecker.refresh(t);
             } catch (Exception ex) {
-                LOGGER.debug("Exception occurred during waiting: {}", ex.getMessage(), ex);
+                LOGGER.debug("Exception occurred during refresh: {}", ex.getMessage(), ex);
                 failures++;
                 actual = ex;
+
+                if (failures >= maxFailure) {
+                    LOGGER.debug("Waiting failure reached the limit which was {}, wait will drop the last exception.", maxFailure);
+                    statusChecker.handleException(actual);
+                    testContext.setStatuses(statusChecker.getStatuses(t));
+                    return Result.exception(actual);
+                }
             }
-            if (failures >= maxFailure) {
-                LOGGER.debug("Waiting failure reached the limit which was {}, wait will drop the last exception.", maxFailure);
-                statusChecker.handleException(actual);
-                testContext.setStatuses(getStatuses(statusChecker, t));
-                return Result.exception(actual);
-            } else if (success) {
+            if (statusChecker.checkStatus(t)) {
                 LOGGER.debug(statusChecker.successMessage(t));
-                testContext.setStatuses(getStatuses(statusChecker, t));
+                testContext.setStatuses(statusChecker.getStatuses(t));
                 return Result.result(WaitResult.SUCCESS);
             }
-            sleep(interval, getStatuses(statusChecker, t));
+            sleep(interval, statusChecker.getStatuses(t));
             attempts++;
             timeout = timeoutChecker.checkTimeout();
             LOGGER.info("Checking if wait can exit.");
@@ -53,23 +54,19 @@ public class WaitService<T extends WaitObject> {
         if (timeout) {
             LOGGER.debug("Wait timeout.");
             statusChecker.handleTimeout(t);
-            testContext.setStatuses(getStatuses(statusChecker, t));
+            testContext.setStatuses(statusChecker.getStatuses(t));
             return Result.exception(actual);
         }
         LOGGER.debug("Wait exiting.");
-        testContext.setStatuses(getStatuses(statusChecker, t));
+        testContext.setStatuses(statusChecker.getStatuses(t));
         return Result.result(WaitResult.EXIT);
-    }
-
-    public Map<String, String> getStatuses(StatusChecker<T> statusChecker, T t) {
-        return statusChecker.getStatuses(t);
     }
 
     private void sleep(Duration duration, Map<String, String> statusMap) {
         try {
             Thread.sleep(duration.toMillis());
-        } catch (InterruptedException ignored) {
-            LOGGER.warn("Waiting for '{}' has been interrupted, because of: {}", statusMap, ignored.getMessage(), ignored);
+        } catch (InterruptedException e) {
+            LOGGER.warn("Waiting for '{}' has been interrupted, because of: {}", statusMap, e.getMessage(), e);
         }
     }
 }

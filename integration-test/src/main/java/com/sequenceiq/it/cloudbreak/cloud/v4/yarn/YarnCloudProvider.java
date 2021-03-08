@@ -18,6 +18,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.Instan
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -66,8 +67,12 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
+        final AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        attachedFreeIpaRequest.setCreate(Boolean.FALSE);
+
         return environment
-                .withLocation(location());
+                .withLocation(location())
+                .withFreeIpa(attachedFreeIpaRequest);
     }
 
     @Override
