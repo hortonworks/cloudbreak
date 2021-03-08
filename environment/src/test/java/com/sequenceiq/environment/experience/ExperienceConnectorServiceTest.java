@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,7 +31,11 @@ class ExperienceConnectorServiceTest {
 
     private static final int ONCE = 1;
 
+    private static final boolean EXPERIENCE_SCAN_IN_SPRING_CONFIG_IS_ENABLED = true;
+
     private static final String TEST_ENV_CRN = "someTestEnvCrn";
+
+    private static final boolean EXPERIENCE_SCAN_IN_SPRING_CONFIG_IS_DISABLED = false;
 
     private static final String TEST_ENV_NAME = "someTestEnvName";
 
@@ -47,7 +52,7 @@ class ExperienceConnectorServiceTest {
 
     @BeforeEach
     void setUp() {
-        underTest = new ExperienceConnectorService(mockExperiences, entitlementServiceMock);
+        underTest = new ExperienceConnectorService(mockExperiences, entitlementServiceMock, EXPERIENCE_SCAN_IN_SPRING_CONFIG_IS_ENABLED);
     }
 
     @Test
@@ -65,9 +70,22 @@ class ExperienceConnectorServiceTest {
     @Test
     void testWhenNoExperienceHasConfiguredThenZeroShouldReturn() {
         EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
-        underTest = new ExperienceConnectorService(new ArrayList<>(), entitlementServiceMock);
+        underTest = new ExperienceConnectorService(new ArrayList<>(), entitlementServiceMock, EXPERIENCE_SCAN_IN_SPRING_CONFIG_IS_ENABLED);
 
         when(entitlementServiceMock.isExperienceDeletionEnabled(dto.getAccountId())).thenReturn(true);
+
+        int result = underTest.getConnectedExperienceCount(dto);
+
+        assertEquals(0, result);
+        mockExperiences.forEach(xp -> verify(xp, never()).getConnectedClustersForEnvironment(any(EnvironmentExperienceDto.class)));
+    }
+
+    @Test
+    void testWhenExperienceScanIsEnabledButHaveConfiguredExperiencesAndTheEntitlementIsEnabledThenNoExperienceCallShouldHappen() {
+        EnvironmentExperienceDto dto = createEnvironmentExperienceDto();
+        underTest = new ExperienceConnectorService(mockExperiences, entitlementServiceMock, EXPERIENCE_SCAN_IN_SPRING_CONFIG_IS_DISABLED);
+
+        lenient().when(entitlementServiceMock.isExperienceDeletionEnabled(dto.getAccountId())).thenReturn(true);
 
         int result = underTest.getConnectedExperienceCount(dto);
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience;
 
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 
 import java.util.Collection;
@@ -9,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -19,11 +21,18 @@ public class ExperienceConnectorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExperienceConnectorService.class);
 
+    private static final String XP_SCAN_DISABLED_BASE_MSG = "Scanning experience(s) has disabled due to {}, which means the returning amount of connected " +
+            "experiences may not represent the reality!";
+
     private final EntitlementService entitlementService;
+
+    private final boolean experienceScanEnabled;
 
     private final List<Experience> experiences;
 
-    public ExperienceConnectorService(List<Experience> experiences, EntitlementService entitlementService) {
+    public ExperienceConnectorService(List<Experience> experiences, EntitlementService entitlementService,
+            @Value("${environment.experience.scan.enabled}") boolean experienceScanEnabled) {
+        this.experienceScanEnabled = experienceScanEnabled;
         this.entitlementService = entitlementService;
         this.experiences = experiences;
     }
@@ -34,15 +43,25 @@ public class ExperienceConnectorService {
 
     public Set<ExperienceCluster> getConnectedExperiences(EnvironmentExperienceDto environmentExperienceDto) {
         checkEnvironmentExperienceDto(environmentExperienceDto);
-        if (entitlementService.isExperienceDeletionEnabled(environmentExperienceDto.getAccountId()) && !experiences.isEmpty()) {
-            LOGGER.debug("Collecting connected experiences for environment: {}", environmentExperienceDto.getName());
+        if (experienceScanEnabled) {
+            if (isEntitlementEnabledForExperienceInteraction(environmentExperienceDto)) {
+                if (!experiences.isEmpty()) {
+                    LOGGER.debug("Collecting connected experiences for environment: {}", environmentExperienceDto.getName());
 
-            return experiences.stream()
-                    .map(experience -> experience.getConnectedClustersForEnvironment(environmentExperienceDto))
-                    .flatMap(Collection::stream)
-                    .collect(Collectors.toSet());
+                    return experiences.stream()
+                            .map(experience -> experience.getConnectedClustersForEnvironment(environmentExperienceDto))
+                            .flatMap(Collection::stream)
+                            .collect(Collectors.toSet());
+                } else {
+                    LOGGER.info("No configured experiences has been provided for checking!");
+                }
+            } else {
+                LOGGER.info(XP_SCAN_DISABLED_BASE_MSG, "the experience deletion is disabled by entitlement " +
+                        "(" + CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT.name() + ")");
+            }
+        } else {
+            LOGGER.info(XP_SCAN_DISABLED_BASE_MSG, "the experience deletion is disabled in the Spring config");
         }
-        LOGGER.info("Scanning experience(s) has disabled, which means the returning amount of connected experiences may not represent the reality!");
         return Set.of();
     }
 
@@ -68,6 +87,10 @@ public class ExperienceConnectorService {
 
     private void checkEnvironmentExperienceDto(EnvironmentExperienceDto dto) {
         throwIfNull(dto, () -> new IllegalArgumentException("environment should not be null!"));
+    }
+
+    private boolean isEntitlementEnabledForExperienceInteraction(EnvironmentExperienceDto environmentExperienceDto) {
+        return entitlementService.isExperienceDeletionEnabled(environmentExperienceDto.getAccountId());
     }
 
 }
