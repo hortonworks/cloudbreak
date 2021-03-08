@@ -16,7 +16,7 @@ fi
 mkdir -p ./src/main/resources/ums-users
 
 echo "Executing secret fetching from Azure 'jenkins-secret' store"
-az keyvault secret show --name "real-ums-users-dev" --vault-name "jenkins-secret" --version $secret_version --query 'value' -o tsv | jq > $USER_JSON_LOCATION
+az keyvault secret show --name "real-ums-users-dev" --vault-name "jenkins-secret" --version $secret_version --query 'value' -o tsv | jq '.' > $USER_JSON_LOCATION
 
 echo "Checking if valid json file was fetched: $USER_JSON_LOCATION"
 cat $USER_JSON_LOCATION | jq type

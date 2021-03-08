@@ -83,12 +83,12 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         if (toleratedErrorCounter < TOLERATED_ERROR_LIMIT) {
             toleratedErrorCounter++;
             LOGGER.warn("Command [{}] with id [{}] failed with a tolerated error '{}' for the {}. time(s). Tolerating till {} occasions.",
-                    getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), toleratedErrorCounter, TOLERATED_ERROR_LIMIT);
+                    getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), toleratedErrorCounter, TOLERATED_ERROR_LIMIT, e);
             return false;
         } else {
             throw new ClouderaManagerOperationFailedException(
                     String.format("Command [%s] with id [%s] failed with a tolerated error '%s' for %s times. Operation is considered failed.",
-                            getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), TOLERATED_ERROR_LIMIT));
+                            getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), TOLERATED_ERROR_LIMIT), e);
         }
     }
 
