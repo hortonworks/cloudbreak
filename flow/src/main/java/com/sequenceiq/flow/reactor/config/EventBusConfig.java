@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Lazy;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.reactor.eventbus.ConsumerCheckerEventBus;
+import com.sequenceiq.flow.reactor.eventbus.EventCanNotBeDeliveredException;
 import com.sequenceiq.flow.reactor.handler.ConsumerNotFoundHandler;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -54,15 +56,16 @@ public class EventBusConfig {
 
     private void handleFlowFail(Throwable throwable) {
         try {
-            String flowId = getFlowIdFromHeaders(throwable);
+            String flowId = getFlowIdFromThrowable(throwable);
             if (flowId == null) {
                 flowId = getFlowIdFromMDC();
             }
             if (flowId != null) {
                 LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, throwable);
                 flowLogDBService.getLastFlowLog(flowId).ifPresent(flowLog -> {
-                    flowLogDBService.updateLastFlowLogStatus(flowLog, true);
                     applicationFlowInformation.handleFlowFail(flowLog);
+                    flowLogDBService.updateLastFlowLogStatus(flowLog, true);
+                    flowLogDBService.finalize(flowLog.getFlowId());
                 });
             } else {
                 LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
@@ -84,25 +87,33 @@ public class EventBusConfig {
         return flowId;
     }
 
-    private String getFlowIdFromHeaders(Throwable throwable) {
+    private String getFlowIdFromThrowable(Throwable throwable) {
         try {
             if (throwable.getCause() instanceof Exceptions.ValueCause) {
                 if (((Exceptions.ValueCause) throwable.getCause()).getValue() instanceof Event) {
                     Event event = (Event) ((Exceptions.ValueCause) throwable.getCause()).getValue();
                     LOGGER.info("Failed event: {}", event);
-                    Event.Headers headers = event.getHeaders();
-                    if (headers != null) {
-                        LOGGER.info("Failed event headers: {}", headers);
-                        if (headers.get("FLOW_ID") != null) {
-                            return headers.get("FLOW_ID").toString();
-                        }
-                    } else {
-                        LOGGER.info("Headers is null object for the event {}", event);
-                    }
+                    return getFlowIdFromEventHeaders(event);
                 }
+            } else if (throwable instanceof EventCanNotBeDeliveredException) {
+                Event event = ((EventCanNotBeDeliveredException) throwable).getEvent();
+                return getFlowIdFromEventHeaders(event);
             }
         } catch (Exception e) {
             LOGGER.error("Something wrong happened when we tried to get flowId from headers", e);
+        }
+        return null;
+    }
+
+    private String getFlowIdFromEventHeaders(Event event) {
+        Event.Headers headers = event.getHeaders();
+        if (headers != null) {
+            LOGGER.info("Failed event headers: {}", headers);
+            if (headers.get("FLOW_ID") != null) {
+                return headers.get("FLOW_ID").toString();
+            }
+        } else {
+            LOGGER.info("Headers is null object for the event {}", event);
         }
         return null;
     }
@@ -119,7 +130,7 @@ public class EventBusConfig {
 
     @Bean
     public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor, Environment env) {
-        return new EventBusSpec()
+        EventBus eventBus = new EventBusSpec()
                 .env(env)
                 .dispatcher(new ThreadPoolExecutorDispatcher(eventBusThreadPoolBacklogSize, eventBusThreadPoolCoreSize, threadPoolExecutor))
                 .traceEventPath()
@@ -127,8 +138,13 @@ public class EventBusConfig {
                     handleFlowFail(throwable);
                     LOGGER.error("Exception happened in dispatcher", throwable);
                 })
+                .uncaughtErrorHandler(throwable -> {
+                    handleFlowFail(throwable);
+                    LOGGER.error("Uncaught exception happened", throwable);
+                })
                 .consumerNotFoundHandler(new ConsumerNotFoundHandler())
                 .get();
+        return new ConsumerCheckerEventBus(eventBus);
     }
 
     @Bean("eventBusThreadPoolExecutor")

@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.service;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.sequenceiq.flow.domain.StateStatus.FAILED;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.Comparator;
@@ -165,8 +166,8 @@ public class FlowService {
     private List<FlowChainLog> getRelatedFlowChainLogs(List<FlowChainLog> sourceFlowChains) {
         Optional<FlowChainLog> flowChainWithParent = sourceFlowChains.stream()
                 .filter(flowChainLog -> StringUtils.isNotBlank(flowChainLog.getParentFlowChainId())).findFirst();
-        FlowChainLog lastFlowChain = sourceFlowChains.stream().sorted(Comparator.comparing(FlowChainLog::getCreated).reversed()).findFirst().get();
-        FlowChainLog inputFlowChain = flowChainWithParent.isPresent() ? flowChainWithParent.get() : lastFlowChain;
+        FlowChainLog lastFlowChain = sourceFlowChains.stream().max(Comparator.comparing(FlowChainLog::getCreated)).get();
+        FlowChainLog inputFlowChain = flowChainWithParent.orElse(lastFlowChain);
         return flowChainLogService.collectRelatedFlowChains(inputFlowChain);
     }
 
@@ -174,9 +175,15 @@ public class FlowService {
         if (firstIsPending(flowLogs)) {
             return false;
         }
+        if (firstIsFinalizedAndFailed(flowLogs)) {
+            return true;
+        }
+        return hasFinishedFlow(marker, flowChainId, flowChainLogs, flowLogs);
+    }
+
+    private boolean hasFinishedFlow(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLog> flowLogs) {
         boolean hasFinishedFlowLog = false;
         for (FlowLog flowLog : flowLogs) {
-
             String currentState = flowLog.getCurrentState();
             if (failHandledEvents.contains(flowLog.getNextEvent())
                     || (currentState != null && CANCELLED_TERMINATED_STATES.contains(currentState))) {
@@ -193,6 +200,14 @@ public class FlowService {
             }
         }
         LOGGER.info("{} {} marked as not completed", marker, flowChainId);
+        return false;
+    }
+
+    private boolean firstIsFinalizedAndFailed(List<FlowLog> flowLogs) {
+        if (!flowLogs.isEmpty()) {
+            FlowLog recentFlowLog = flowLogs.get(0);
+            return recentFlowLog.getFinalized() && FAILED.equals(recentFlowLog.getStateStatus());
+        }
         return false;
     }
 
