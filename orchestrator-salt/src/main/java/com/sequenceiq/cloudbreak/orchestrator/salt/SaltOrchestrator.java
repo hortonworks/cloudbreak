@@ -805,6 +805,22 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public Map<String, String> getFreeDiskSpaceByNodes(Set<Node> nodes, List<GatewayConfig> gatewayConfigs) {
+        Map<String, String> freeDiskSpaceByNode;
+        try {
+            GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
+            SaltConnector sc = saltService.createSaltConnector(primaryGateway);
+            Target<String> allHosts = new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+            freeDiskSpaceByNode = SaltStates.runCommandOnHosts(retry, sc, allHosts, "df -k / | tail -1 | awk '{print $4}'");
+        } catch (Exception e) {
+            String errorMessage = String.format("Failed to get free disk space on hosts. Reason: %s", e.getMessage());
+            LOGGER.warn(errorMessage, e);
+            throw new CloudbreakServiceException(errorMessage, e);
+        }
+        return freeDiskSpaceByNode;
+    }
+
+    @Override
     public void applyDiagnosticsState(List<GatewayConfig> gatewayConfigs, String state, Map<String, Object> properties,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);

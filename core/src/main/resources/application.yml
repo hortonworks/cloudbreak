@@ -678,6 +678,10 @@ cb:
   loadBalancer:
     supportedPlatforms: AWS,YARN
 
+  upgrade:
+    validation:
+      enabled: true
+
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
   enabled: true

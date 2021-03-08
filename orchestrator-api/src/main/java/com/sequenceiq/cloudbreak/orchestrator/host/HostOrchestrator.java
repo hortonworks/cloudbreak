@@ -111,4 +111,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             throws CloudbreakOrchestratorFailedException;
 
     void runOrchestratorState(OrchestratorStateParams stateParameters) throws CloudbreakOrchestratorFailedException;
+
+    Map<String, String> getFreeDiskSpaceByNodes(Set<Node> nodes, List<GatewayConfig> gatewayConfigs);
 }

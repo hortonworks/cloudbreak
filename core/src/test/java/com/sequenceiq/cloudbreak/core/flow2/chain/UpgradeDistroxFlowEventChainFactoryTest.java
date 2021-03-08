@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,8 +21,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
@@ -54,10 +58,12 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForNonReplaceVms() {
+        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false);
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(3, flowChainQueue.getQueue().size());
+        assertEquals(4, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
@@ -65,18 +71,27 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     public void testChainQueueForReplaceVms() {
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
-                Result.success(new HashMap<>());
+        ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult = Result.success(new HashMap<>());
         when(clusterRepairService.validateRepair(any(), any(), any(), eq(false))).thenReturn(repairStartResult);
 
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, true);
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(4, flowChainQueue.getQueue().size());
+        assertEquals(5, flowChainQueue.getQueue().size());
+        assertUpdateValidationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
         assertRepairEvent(flowChainQueue);
+    }
+
+    private void assertUpdateValidationEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable upgradeValidationEvent = flowChainQueue.getQueue().remove();
+        assertEquals(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), upgradeValidationEvent.selector());
+        assertEquals(STACK_ID, upgradeValidationEvent.getResourceId());
+        assertTrue(upgradeValidationEvent instanceof ClusterUpgradeValidationEvent);
+        assertEquals(imageChangeDto.getImageId(), ((ClusterUpgradeValidationEvent) upgradeValidationEvent).getImageId());
     }
 
     private void assertImageUpdateEvent(FlowTriggerEventQueue flowChainQueue) {

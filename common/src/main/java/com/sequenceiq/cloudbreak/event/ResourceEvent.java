@@ -280,6 +280,10 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_ACTIVATE_PARCEL("cluster.upgrade.activate.parcel"),
     CLUSTER_UPGRADE_START_UPGRADE("cluster.upgrade.start.upgrade"),
     CLUSTER_UPGRADE_FAILED("cluster.upgrade.failed"),
+    CLUSTER_UPGRADE_VALIDATION_STARTED("cluster.upgrade.validation.started"),
+    CLUSTER_UPGRADE_VALIDATION_FINISHED("cluster.upgrade.validation.finished"),
+    CLUSTER_UPGRADE_VALIDATION_SKIPPED("cluster.upgrade.validation.skipped"),
+    CLUSTER_UPGRADE_VALIDATION_FAILED("cluster.upgrade.validation.failed"),
 
     CLUSTER_SALT_UPDATE_STARTED("cluster.salt.update.started"),
     CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),

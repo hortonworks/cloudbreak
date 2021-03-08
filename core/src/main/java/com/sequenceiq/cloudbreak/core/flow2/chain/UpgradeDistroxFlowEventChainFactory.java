@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -14,9 +16,11 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
@@ -37,6 +41,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDistroxFlowEventChainFactory.class);
 
+    @Value("${cb.upgrade.validation.enabled:true}")
+    private boolean upgradeValidationEnabled;
+
     @Inject
     private ClusterRepairService clusterRepairService;
 
@@ -49,6 +56,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DistroXUpgradeTriggerEvent event) {
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        addUpgradeValidationToChain(event, flowEventChain);
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
                 event.getImageChangeDto().getImageId()));
@@ -60,9 +68,16 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 
+    private void addUpgradeValidationToChain(DistroXUpgradeTriggerEvent event, Queue<Selectable> flowEventChain) {
+        if (upgradeValidationEnabled) {
+            flowEventChain.add(new ClusterUpgradeValidationEvent(START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
+                    event.getImageChangeDto().getImageId()));
+        }
+    }
+
     private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {
-        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult =
-                clusterRepairService.validateRepair(ManualClusterRepairMode.ALL, event.getResourceId(), Set.of(), false);
+        Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ManualClusterRepairMode.ALL,
+                event.getResourceId(), Set.of(), false);
         return toStringMap(validationResult.getSuccess());
     }
 
