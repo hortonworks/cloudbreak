@@ -1,5 +1,5 @@
 {
   "instanceType": "MO_Gen5_4",
   "vendor": "postgres",
-  "volumeSize": 1000
+  "volumeSize": 100
 }
