@@ -69,6 +69,11 @@ configure_httpd_log_filter:
     - repl: ErrorLog "|/etc/httpd/conf/httpd-log-filter.sh"
     - unless: grep "httpd-log-filter.sh" /etc/httpd/conf/httpd.conf
 
+disable_http_trace:
+  file.append:
+    - name: /etc/httpd/conf/httpd.conf
+    - text: 'TraceEnable Off'
+
 restart_httpd:
   service.running:
     - name: httpd
