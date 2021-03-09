@@ -34,10 +34,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeVolumes;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -60,12 +58,6 @@ public class StackUtil {
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    @Inject
-    private HostOrchestrator hostOrchestrator;
-
-    @Inject
-    private GatewayConfigService gatewayConfigService;
-
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
@@ -84,7 +76,18 @@ public class StackUtil {
     }
 
     public Set<Node> collectReachableNodes(Stack stack) {
-        return hostOrchestrator.getResponsiveNodes(collectNodes(stack), gatewayConfigService.getPrimaryGatewayConfig(stack));
+        return stack.getInstanceGroups()
+                .stream()
+                .filter(ig -> ig.getNodeCount() != 0)
+                .flatMap(ig -> ig.getReachableInstanceMetaDataSet().stream())
+                .filter(im -> im.getDiscoveryFQDN() != null)
+                .map(im -> {
+                    String instanceId = im.getInstanceId();
+                    String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
+                    return new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
+                            im.getDiscoveryFQDN(), im.getInstanceGroupName());
+                })
+                .collect(Collectors.toSet());
     }
 
     public Set<Node> collectNodesFromHostnames(Stack stack, Set<String> hostnames) {
