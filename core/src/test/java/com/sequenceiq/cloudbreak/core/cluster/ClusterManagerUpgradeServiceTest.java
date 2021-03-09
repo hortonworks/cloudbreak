@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -66,7 +66,7 @@ public class ClusterManagerUpgradeServiceTest {
     private ParcelService parcelService;
 
     @Mock
-    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+    private CsdParcelDecorator csdParcelDecorator;
 
     @InjectMocks
     private ClusterManagerUpgradeService underTest;
@@ -127,7 +127,7 @@ public class ClusterManagerUpgradeServiceTest {
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
-        verify(clusterHostServiceRunner, never()).decoratePillarWithClouderaManagerCsds(any(), any());
+        verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
     }
 
     @Test
@@ -136,7 +136,6 @@ public class ClusterManagerUpgradeServiceTest {
         stack.setType(StackType.WORKLOAD);
         Set<ClusterComponent> clusterComponents = Collections.emptySet();
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
-        when(clouderaManagerProductsProvider.getProducts(clusterComponents)).thenReturn(Collections.emptySet());
 
         underTest.upgradeClusterManager(STACK_ID, true);
 
@@ -147,6 +146,6 @@ public class ClusterManagerUpgradeServiceTest {
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
-        verify(clusterHostServiceRunner, times(1)).addClouderaManagerCsdsToServicePillar(any(), any());
+        verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
     }
 }

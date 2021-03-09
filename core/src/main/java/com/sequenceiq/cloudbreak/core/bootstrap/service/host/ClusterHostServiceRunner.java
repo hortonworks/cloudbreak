@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+
 import static java.util.Collections.singletonMap;
+
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -13,14 +15,12 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -62,6 +61,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -223,6 +223,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private IdBrokerService idBrokerService;
+
+    @Inject
+    private CsdParcelDecorator csdParcelDecorator;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
         try {
@@ -388,7 +391,7 @@ public class ClusterHostServiceRunner {
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
         decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
-        decoratePillarWithClouderaManagerCsds(cluster, servicePillar);
+        csdParcelDecorator.decoratePillarWithCsdParcels(stack, servicePillar);
         decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
     }
 
@@ -499,18 +502,6 @@ public class ClusterHostServiceRunner {
             }
         });
         return pillarValues;
-    }
-
-    public void decoratePillarWithClouderaManagerCsds(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        List<ClouderaManagerProduct> product = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
-        addClouderaManagerCsdsToServicePillar(product, servicePillar);
-    }
-
-    public void addClouderaManagerCsdsToServicePillar(Collection<ClouderaManagerProduct> product, Map<String, SaltPillarProperties> servicePillar) {
-        List<String> csdUrls = getCsdUrlList(product);
-        servicePillar.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
-                singletonMap("cloudera-manager",
-                        singletonMap("csd-urls", csdUrls))));
     }
 
     public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo,
@@ -777,14 +768,5 @@ public class ClusterHostServiceRunner {
             Map<String, Object> jdbcConnectors = singletonMap("jdbc_connectors", connectorJarUrlsByVendor);
             servicePillar.put("jdbc-connectors", new SaltPillarProperties("/jdbc/connectors.sls", jdbcConnectors));
         }
-    }
-
-    private List<String> getCsdUrlList(Collection<ClouderaManagerProduct> product) {
-        return product
-                .stream()
-                .map(ClouderaManagerProduct::getCsd)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .collect(Collectors.toList());
     }
 }
