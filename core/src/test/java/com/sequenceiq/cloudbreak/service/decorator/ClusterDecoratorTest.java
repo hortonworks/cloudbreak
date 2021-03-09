@@ -18,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -99,9 +98,8 @@ class ClusterDecoratorTest {
         Blueprint blueprint = getBlueprint();
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
-        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, expectedClusterInstance)).thenReturn(false);
-        Cluster result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null));
+        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
+        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null);
 
         assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(User.class), any(Workspace.class));
@@ -116,10 +114,9 @@ class ClusterDecoratorTest {
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
         when(platformParameters.isAutoTlsSupported()).thenReturn(useAutoTls);
-        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, expectedClusterInstance)).thenReturn(false);
+        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
 
-        Cluster result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null));
+        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null);
 
         assertEquals(useAutoTls, result.getAutoTlsEnabled());
     }
@@ -132,11 +129,10 @@ class ClusterDecoratorTest {
                 .thenReturn(expectedClusterInstance);
         ArgumentCaptor<Platform> platformArgumentCaptor = ArgumentCaptor.forClass(Platform.class);
         when(cloudPlatformConnectors.get(platformArgumentCaptor.capture(), any())).thenReturn(connector);
-        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, expectedClusterInstance)).thenReturn(false);
+        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
 
         String platform = CloudPlatform.YARN.name();
-        ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, platform));
+        underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, platform);
 
         assertEquals(platform, platformArgumentCaptor.getValue().value());
     }

@@ -61,7 +61,7 @@ public class TerminateExternalDatabaseHandler implements EventHandler<TerminateE
         LOGGER.debug("External database: {} for stack {}", externalDatabase.name(), stack.getName());
         Selectable result;
         try {
-            if (externalDatabase == DatabaseAvailabilityType.NONE) {
+            if (externalDatabase.isEmbedded()) {
                 LOGGER.info("External database for stack {} is not requested. Termination is not necessary.", stack.getName());
                 result = new TerminateExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_WAIT_TERMINATION_SUCCESS_EVENT.event(),
                         stack.getName(), null);

@@ -76,7 +76,7 @@ public class StopExternalDatabaseHandler extends ExceptionCatcherEventHandler<St
                 LOGGER.debug("External database stop in Cloudbreak service is required for WORKLOAD stacks only.");
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), null);
-            } else if (externalDatabase == DatabaseAvailabilityType.NONE) {
+            } else if (externalDatabase.isEmbedded()) {
                 LOGGER.info("External database for stack {} is not requested. Stop is not possible.", stack.getName());
                 result = new StopExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STOPPED_EVENT.event(),
                         stack.getName(), null);

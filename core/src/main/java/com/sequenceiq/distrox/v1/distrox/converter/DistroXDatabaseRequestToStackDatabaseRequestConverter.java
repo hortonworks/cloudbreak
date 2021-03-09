@@ -37,6 +37,8 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
                 return DatabaseAvailabilityType.NON_HA;
             case HA:
                 return DatabaseAvailabilityType.HA;
+            case ON_ROOT_VOLUME:
+                return DatabaseAvailabilityType.ON_ROOT_VOLUME;
             default:
                 throw new IllegalStateException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, availabilityType.name()));
         }
@@ -53,9 +55,10 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
                 return DistroXDatabaseAvailabilityType.NON_HA;
             case HA:
                 return DistroXDatabaseAvailabilityType.HA;
+            case ON_ROOT_VOLUME:
+                return DistroXDatabaseAvailabilityType.ON_ROOT_VOLUME;
             default:
                 throw new IllegalStateException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, availabilityType.name()));
         }
     }
-
 }

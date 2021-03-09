@@ -92,7 +92,7 @@ class ExternalDatabaseServiceTest {
     @ParameterizedTest
     @EnumSource(DatabaseAvailabilityType.class)
     void provisionDatabase(DatabaseAvailabilityType availabilty) throws JsonProcessingException {
-        Assumptions.assumeTrue(availabilty != DatabaseAvailabilityType.NONE);
+        Assumptions.assumeTrue(!availabilty.isEmbedded());
 
         DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
         createResponse.setResourceCrn(RDBMS_CRN);

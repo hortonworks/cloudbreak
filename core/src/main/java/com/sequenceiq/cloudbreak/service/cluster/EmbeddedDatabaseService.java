@@ -24,7 +24,7 @@ public class EmbeddedDatabaseService {
     @Inject
     private CloudParameterCache cloudParameterCache;
 
-    public boolean isEmbeddedDatabaseOnAttachedDiskEnabled(String accountId, Stack stack, Cluster cluster) {
+    public boolean isEmbeddedDatabaseOnAttachedDiskEnabled(Stack stack, Cluster cluster) {
         DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE);
         String databaseCrn = cluster == null ? "" : cluster.getDatabaseServerCrn();
         return DatabaseAvailabilityType.NONE == externalDatabase

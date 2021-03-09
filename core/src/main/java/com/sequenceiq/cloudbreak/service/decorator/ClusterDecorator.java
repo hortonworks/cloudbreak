@@ -14,7 +14,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -111,7 +110,6 @@ public class ClusterDecorator {
     }
 
     private void setupEmbeddedDatabase(Cluster cluster, Stack stack) {
-        cluster.setEmbeddedDatabaseOnAttachedDisk(embeddedDatabaseService
-                .isEmbeddedDatabaseOnAttachedDiskEnabled(ThreadBasedUserCrnProvider.getAccountId(), stack, cluster));
+        cluster.setEmbeddedDatabaseOnAttachedDisk(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, cluster));
     }
 }
