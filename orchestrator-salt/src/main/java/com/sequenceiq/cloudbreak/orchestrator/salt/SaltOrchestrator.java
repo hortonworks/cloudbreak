@@ -966,7 +966,7 @@ SaltOrchestrator implements HostOrchestrator {
     @Override
     public Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
-            return getResponsiveNodes(nodes, saltConnector);
+            return retry.testWith1SecDelayMax5Times(() -> getResponsiveNodes(nodes, saltConnector));
         }
     }
 
