@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -14,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.management.compute.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
@@ -34,9 +32,6 @@ public class AzureTerminationHelperService {
 
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
-
-    @Inject
-    private AzureVirtualMachineService azureVirtualMachineService;
 
     @Inject
     private AzureUtils azureUtils;
@@ -95,11 +90,7 @@ public class AzureTerminationHelperService {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
 
         deleteInstancesInProgress(ac, vms, resourcesToRemove, resourceGroupName);
-        Map<String, VirtualMachine> vmsFromAzure = azureVirtualMachineService.getVmsFromAzureAndFillStatuses(ac, vms, new ArrayList<>());
-        List<CloudInstance> cloudInstancesSyncedWithAzure = vms.stream()
-                .filter(cloudInstance -> vmsFromAzure.containsKey(cloudInstance.getInstanceId()))
-                .collect(Collectors.toList());
-        azureUtils.deleteInstances(ac, cloudInstancesSyncedWithAzure);
+        azureUtils.deleteInstances(ac, vms);
         deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_INSTANCE);
 
         List<String> networkInterfaceNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
@@ -146,7 +137,7 @@ public class AzureTerminationHelperService {
         if (instancesInProgress.size() > 0) {
             LOGGER.info("The following instances are not yet created: {}", instancesInProgress);
             List<String> instancesProgress = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_INSTANCE);
-            azureUtils.deleteCloudResourceInstances(ac, resourceGroupName, instancesProgress);
+            azureUtils.deleteInstancesByName(ac, resourceGroupName, instancesProgress);
             vms.removeAll(instancesInProgress);
         }
     }
