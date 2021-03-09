@@ -1,47 +1,33 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -55,15 +41,6 @@ public class StackUtilTest {
 
     @Mock
     private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Mock
-    private HostOrchestrator hostOrchestrator;
-
-    @Mock
-    private GatewayConfigService gatewayConfigService;
-
-    @Captor
-    private ArgumentCaptor<Set<Node>> nodesCaptor;
 
     @InjectMocks
     private final StackUtil stackUtil = new StackUtil();
@@ -140,40 +117,6 @@ public class StackUtilTest {
 
         int numberOfVolumeSetsWithoutInstanceReference = 2;
         assertEquals(volumeSets.size() - numberOfVolumeSetsWithoutInstanceReference, actual.size());
-    }
-
-    @Test
-    public void collectReachableNodesTest() {
-        Stack stack = new Stack();
-        Set<InstanceGroup> instanceGroupSet = new HashSet<>();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setInstanceGroup(instanceGroup);
-        instanceMetaData1.setDiscoveryFQDN("node1.example.com");
-        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
-        instanceMetaData2.setInstanceStatus(InstanceStatus.TERMINATED);
-        instanceMetaData2.setInstanceGroup(instanceGroup);
-        instanceMetaData2.setDiscoveryFQDN("node2.example.com");
-        InstanceMetaData instanceMetaData3 = new InstanceMetaData();
-        instanceMetaData3.setInstanceGroup(instanceGroup);
-        instanceMetaData3.setDiscoveryFQDN("node3.example.com");
-        instanceMetaDataSet.add(instanceMetaData1);
-        instanceMetaDataSet.add(instanceMetaData2);
-        instanceMetaDataSet.add(instanceMetaData3);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-        Template template = new Template();
-        template.setInstanceType("m5.xlarge");
-        instanceGroup.setTemplate(template);
-        instanceGroupSet.add(instanceGroup);
-        stack.setInstanceGroups(instanceGroupSet);
-        stackUtil.collectReachableNodes(stack);
-
-        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any());
-        List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
-        assertTrue(fqdns.contains("node1.example.com"));
-        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
-        assertTrue(fqdns.contains("node3.example.com"));
     }
 
     private Resource getVolumeSetResource(String instanceID) {
