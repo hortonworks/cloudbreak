@@ -26,8 +26,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
 public class EmbeddedDatabaseServiceTest {
-    private static final String ACCOUNT_ID = "cloudera";
-
     private static final String CLOUDPLATFORM = "cloudplatform";
 
     @Mock
@@ -42,18 +40,18 @@ public class EmbeddedDatabaseServiceTest {
         Stack stack = createStack(1);
         Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(true);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
         // THEN
         assertTrue(actualResult);
     }
 
     @Test
-    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenAttachedDiskEntitlementIsEnabledButNoDisksAttachedSupported() {
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenNoDisksAttachedSupported() {
         // GIVEN
         Stack stack = createStack(0);
         Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(false);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
         // THEN
         assertFalse(actualResult);
     }
@@ -64,7 +62,7 @@ public class EmbeddedDatabaseServiceTest {
         Stack stack = createStack(0);
         stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.NON_HA);
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, null);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
         // THEN
         assertFalse(actualResult);
     }
@@ -76,7 +74,18 @@ public class EmbeddedDatabaseServiceTest {
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn("dbcrn");
         // WHEN
-        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(ACCOUNT_ID, stack, cluster);
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, cluster);
+        // THEN
+        assertFalse(actualResult);
+    }
+
+    @Test
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenEmbeddedDbOnRootDisk() {
+        // GIVEN
+        Stack stack = createStack(0);
+        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.ON_ROOT_VOLUME);
+        // WHEN
+        boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
         // THEN
         assertFalse(actualResult);
     }
@@ -121,7 +130,7 @@ public class EmbeddedDatabaseServiceTest {
     }
 
     @Test
-    public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenDbOnAttachedDisIsDisabled() {
+    public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenDbOnAttachedDiskIsDisabled() {
         // GIVEN
         Stack stack = createStack(1);
         Cluster cluster = new Cluster();

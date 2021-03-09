@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -229,7 +228,6 @@ public class StackDecorator {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
                 .getInstanceGroupParameters(extendedCloudCredentialConverter.convert(credential), getInstanceGroupParameterRequests(subject));
         CloudbreakUser cloudbreakUser = legacyRestRequestThreadLocalService.getCloudbreakUser();
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         subject.getInstanceGroups().parallelStream().forEach(instanceGroup -> {
             subject.getCluster().getHostGroups().stream()
                     .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
@@ -248,7 +246,7 @@ public class StackDecorator {
                     template = templateDecorator.decorate(credential, template, region, availabilityZone, subject.getPlatformVariant(),
                             cdpResourceType);
                     template.setWorkspace(subject.getWorkspace());
-                    setupDatabaseAttachedVolume(subject, accountId, instanceGroup, template);
+                    setupDatabaseAttachedVolume(subject, instanceGroup, template);
                     template = templateService.create(user, template);
                     instanceGroup.setTemplate(template);
                 }
@@ -265,10 +263,10 @@ public class StackDecorator {
         });
     }
 
-    private void setupDatabaseAttachedVolume(Stack subject, String accountId, InstanceGroup instanceGroup, Template template) {
+    private void setupDatabaseAttachedVolume(Stack subject, InstanceGroup instanceGroup, Template template) {
         InstanceGroupType instanceGroupType = instanceGroup.getInstanceGroupType();
         if (instanceGroupType == InstanceGroupType.GATEWAY
-                && embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(accountId, subject, subject.getCluster())) {
+                && embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(subject, subject.getCluster())) {
             String databaseVolumeType = embeddedDatabaseConfig.getPlatformVolumeType(subject.cloudPlatform())
                     .orElseThrow(() -> new BadRequestException(String.format("If embedded db is enabled on attached disk, database volumetype" +
                     " have to be defined for cloudprovider in app config! Missing database volumetype on %s provider", subject.cloudPlatform())));

@@ -65,7 +65,7 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
         Selectable result;
         try {
             String resourceCrn = null;
-            if (externalDatabase == DatabaseAvailabilityType.NONE) {
+            if (externalDatabase.isEmbedded()) {
                 LOGGER.info("External database for stack {} is not requested.", stack.getName());
             } else {
                 LOGGER.debug("Updating stack {} status from {} to {}",

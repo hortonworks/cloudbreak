@@ -76,7 +76,7 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
                 LOGGER.debug("External database start in Cloudbreak service is required for WORKLOAD stacks only.");
                 result = new StartExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STARTED_EVENT.event(),
                         stack.getName(), null);
-            } else if (externalDatabase == DatabaseAvailabilityType.NONE) {
+            } else if (externalDatabase.isEmbedded()) {
                 LOGGER.info("External database for stack {} is not requested. Start is not possible.", stack.getName());
                 result = new StartExternalDatabaseResult(stack.getId(), EXTERNAL_DATABASE_STARTED_EVENT.event(),
                         stack.getName(), null);
