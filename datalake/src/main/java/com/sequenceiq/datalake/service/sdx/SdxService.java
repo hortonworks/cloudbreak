@@ -539,9 +539,10 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape())) {
             boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
-            if (!mediumDutySdxEntitlementEnabled) {
-                validationBuilder.error("Provisioning a medium duty data lake cluster is not enabled for this account. " +
-                        "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.");
+            boolean entitlementRequiredForCloudProvider = isMediumDutyEntitlementRequiredForCloudProvider(environment.getCloudPlatform());
+            if (!mediumDutySdxEntitlementEnabled && entitlementRequiredForCloudProvider) {
+                validationBuilder.error(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. " +
+                        "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
             }
             if (!isMediumDutySdxSupported(sdxClusterRequest.getRuntime())) {
                 validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION +
@@ -552,6 +553,10 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private boolean isMediumDutyEntitlementRequiredForCloudProvider(String cloudPlatform) {
+        return !(AWS.equalsIgnoreCase(cloudPlatform));
     }
 
     /**

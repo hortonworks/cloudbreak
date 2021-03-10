@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static java.util.Objects.requireNonNull;
 
 import org.slf4j.Logger;
@@ -44,8 +45,7 @@ public class EnvironmentLoadBalancerService {
                 PublicEndpointAccessGateway.ENABLED.equals(environmentLbDto.getEndpointAccessGateway())) {
             throw new BadRequestException("Public Endpoint Gateway entitlement is not enabled.");
         } else {
-            if (!entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
-                !entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (!isLoadBalancerEnabledForDatalake(ThreadBasedUserCrnProvider.getAccountId(), environmentDto.getCloudPlatform())) {
                 throw new BadRequestException("Neither Endpoint Gateway nor Data Lake load balancer is enabled. Nothing to do.");
             }
 
@@ -62,5 +62,15 @@ public class EnvironmentLoadBalancerService {
                 .triggerLoadBalancerUpdateFlow(environmentDto, environment.getId(), environment.getName(), environment.getResourceCrn(),
                     environmentLbDto.getEndpointAccessGateway(), environmentLbDto.getEndpointGatewaySubnetIds(), userCrn);
         }
+    }
+
+    private boolean isLoadBalancerEnabledForDatalake(String accountId, String cloudPlatform) {
+        return !isLoadBalancerEntitlementRequiredForCloudProvider(cloudPlatform) ||
+                entitlementService.datalakeLoadBalancerEnabled(accountId) ||
+                entitlementService.publicEndpointAccessGatewayEnabled(accountId);
+    }
+
+    private boolean isLoadBalancerEntitlementRequiredForCloudProvider(String cloudPlatform) {
+        return !(AWS.equalsIgnoreCase(cloudPlatform));
     }
 }

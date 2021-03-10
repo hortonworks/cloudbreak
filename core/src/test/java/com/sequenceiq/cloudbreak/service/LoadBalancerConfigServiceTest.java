@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.core.network.SubnetTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -201,6 +202,43 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
             assert loadBalancers.isEmpty();
+        });
+    }
+
+    @Test
+    public void testCreateAWSLoadBalancerForDataLakeEntitlementDisabledPublicSubnets() {
+        Stack stack = createStack(StackType.DATALAKE, PUBLIC_ID_1);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(false);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
+            assertEquals(1, loadBalancers.size());
+            assertEquals(LoadBalancerType.PUBLIC, loadBalancers.iterator().next().getType());
+        });
+    }
+
+    @Test
+    public void testCreateAWSLoadBalancerForDataLakeEntitlementDisabledPrivateSubnets() {
+        Stack stack = createStack(StackType.DATALAKE, PRIVATE_ID_1);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+        environment.setCloudPlatform(CloudPlatform.AWS.name());
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(false);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
+            assertEquals(1, loadBalancers.size());
+            assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
+            assertEquals(1, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
         });
     }
 
