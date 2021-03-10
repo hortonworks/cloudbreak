@@ -1,6 +1,8 @@
 package com.sequenceiq.periscope.monitor.handler;
 
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,10 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 public class UpdateFailedHandlerTest {
@@ -34,6 +39,12 @@ public class UpdateFailedHandlerTest {
 
     @Mock
     private StackResponseUtils stackResponseUtils;
+
+    @Mock
+    private HistoryService historyService;
+
+    @Mock
+    private CloudbreakMessagesService messagesService;
 
     @InjectMocks
     private UpdateFailedHandler underTest;
@@ -68,11 +79,13 @@ public class UpdateFailedHandlerTest {
     public void testOnApplicationEventWhenFailsFiveTimes() {
         Cluster cluster = getARunningCluster();
         when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(messagesService.getMessage(anyString())).thenReturn("trigger failed");
 
         IntStream.range(0, 5).forEach(i -> underTest.onApplicationEvent(new UpdateFailedEvent(AUTOSCALE_CLUSTER_ID)));
 
         verify(clusterService, times(5)).findById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService).setState(AUTOSCALE_CLUSTER_ID, ClusterState.SUSPENDED);
+        verify(historyService).createEntry(eq(ScalingStatus.TRIGGER_FAILED), eq("trigger failed"), eq(cluster));
     }
 
     private Cluster getARunningCluster() {
