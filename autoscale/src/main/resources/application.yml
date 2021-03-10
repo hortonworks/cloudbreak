@@ -88,6 +88,8 @@ spring:
     prefer-file-system-access: false
   datasource:
       maxActive: 30
+  lifecycle:
+    timeout-per-shutdown-phase: 60
 
 secret:
   application: as/shared

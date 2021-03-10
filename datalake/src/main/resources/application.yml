@@ -6,6 +6,8 @@ server:
 spring:
   application:
     name: DatalakeService
+  lifecycle:
+    timeout-per-shutdown-phase: 60
 
 opentracing:
   jaeger:

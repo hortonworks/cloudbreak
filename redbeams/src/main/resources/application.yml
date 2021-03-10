@@ -146,6 +146,8 @@ spring:
   freemarker:
     template-loader-path: file:/etc/redbeams,classpath:/
     prefer-file-system-access: false
+  lifecycle:
+    timeout-per-shutdown-phase: 60
 
 rest:
   debug: false
