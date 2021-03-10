@@ -725,16 +725,57 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxCreateMediumDutySdxNoEntitlement() throws IOException {
+    void testSdxCreateAzureMediumDutySdxNoEntitlement() throws IOException {
+        final String runtime = "7.2.7";
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
+        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals(String.format("1. Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
+                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateGcpMediumDutySdxNoEntitlement() throws IOException {
+        final String runtime = "7.2.7";
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.GCP);
+        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+        assertEquals(String.format("1. Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.GCP.name()) +
+                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testSdxCreateAWSMediumDutySdxNoEntitlememt() throws IOException, TransactionExecutionException {
         final String runtime = "7.2.7";
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning a medium duty data lake cluster is not enabled for this account. " +
-                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/medium_duty_ha.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        withCloudStorage(sdxClusterRequest);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        SdxCluster createdSdxCluster = result.getLeft();
+        Assertions.assertEquals(id, createdSdxCluster.getId());
+        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        SdxCluster capturedSdx = captor.getValue();
+        assertTrue(capturedSdx.getClusterShape().equals(MEDIUM_DUTY_HA));
     }
 
     @Test

@@ -42,6 +42,8 @@ import com.sequenceiq.common.api.type.TargetGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+
 @Service
 public class LoadBalancerConfigService {
 
@@ -245,7 +247,12 @@ public class LoadBalancerConfigService {
     private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {
         return StackType.DATALAKE.equals(type) && environment != null &&
             (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId()) ||
+                isLoadBalancerEntitlementNotRequiredForCloudProvider(environment.getCloudPlatform()) ||
                 isEndpointGatewayEnabled(environment.getNetwork()));
+    }
+
+    private boolean isLoadBalancerEntitlementNotRequiredForCloudProvider(String cloudPlatform) {
+        return AWS.equalsIgnoreCase(cloudPlatform);
     }
 
     private boolean isLoadBalancerEnabledForDatahub(StackType type, DetailedEnvironmentResponse environment) {
