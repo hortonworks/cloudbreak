@@ -103,19 +103,18 @@ public class EnvironmentNetworkService {
                 .withRegion(environment.getLocation().getName())
                 .withSingleResourceGroup(isSingleResourceGroup(environment))
                 .withSubnetIds(environment.getNetwork().getSubnetIds())
-                .withNetworkId(environment.getNetwork().getNetworkId())
                 .withEnvName(environment.getName())
                 .withEnvId(environment.getId())
                 .withAccountId(environment.getAccountId())
                 .withUserId(environment.getCreator())
                 .withRegion(environment.getLocation().getName())
                 .withNetworkId(getNetworkId(environment.getNetwork(), environment.getName()));
-        getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
+        getAzureResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         builder.withExisting(environment.getNetwork().getRegistrationType() == RegistrationType.EXISTING);
         return builder.build();
     }
 
-    private Optional<String> getResourceGroupName(EnvironmentDto environmentDto) {
+    private Optional<String> getAzureResourceGroupName(EnvironmentDto environmentDto) {
         if (isSingleResourceGroup(environmentDto)) {
             return Optional.of(environmentDto)
                     .map(EnvironmentDto::getParameters)
@@ -131,10 +130,14 @@ public class EnvironmentNetworkService {
     }
 
     private String getNetworkId(NetworkDto networkDto, String envName) {
-        return Optional.of(networkDto)
-                .map(NetworkDto::getAzure)
-                .map(AzureParams::getNetworkId)
-                .orElse(envName);
+        String networkId = networkDto.getNetworkId();
+        if (networkDto.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.name())) {
+            networkId = Optional.of(networkDto)
+                    .map(NetworkDto::getAzure)
+                    .map(AzureParams::getNetworkId)
+                    .orElse(envName);
+        }
+        return networkId;
     }
 
     private boolean isSingleResourceGroup(EnvironmentDto environmentDto) {
