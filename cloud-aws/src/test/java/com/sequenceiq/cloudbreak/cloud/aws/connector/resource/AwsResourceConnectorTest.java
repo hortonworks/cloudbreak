@@ -9,12 +9,12 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 
-import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -64,7 +64,7 @@ public class AwsResourceConnectorTest {
                 Collections.emptyList(), persistenceNotifier, true);
         verify(awsRdsModifyService, times(1)).disableDeleteProtection(any(), any());
         verify(awsRdsTerminateService, times(1)).terminate(authenticatedContext, dbStack,
-                true, persistenceNotifier, Collections.emptyList(), true);
+                true, persistenceNotifier, Collections.emptyList());
 
     }
 
@@ -80,6 +80,6 @@ public class AwsResourceConnectorTest {
                 Collections.emptyList(), persistenceNotifier, true);
         verify(awsRdsModifyService, times(0)).disableDeleteProtection(any(), any());
         verify(awsRdsTerminateService, times(1)).terminate(authenticatedContext, dbStack,
-                true, persistenceNotifier, Collections.emptyList(), true);
+                true, persistenceNotifier, Collections.emptyList());
     }
 }

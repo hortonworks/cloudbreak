@@ -62,22 +62,18 @@ public class AwsRdsTerminateService {
      * @throws CloudConnectorException if stack deletion fails due to a runtime exception
      */
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, DatabaseStack stack, boolean force,
-        PersistenceNotifier persistenceNotifier, List<CloudResource> resources, boolean existOnProviderSide)
+            PersistenceNotifier persistenceNotifier, List<CloudResource> resources)
             throws Exception {
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         try {
-            if (existOnProviderSide) {
-                initiateCFTemplateDeletion(
-                        ac,
-                        cFStackName,
-                        credentialView,
-                        regionName,
-                        describeStacksRequest
-                );
-            }
+            initiateCFTemplateDeletion(
+                    ac,
+                    cFStackName,
+                    credentialView,
+                    regionName
+            );
         } catch (AmazonServiceException e) {
             return getAmazonServiceException(force, cFStackName, e);
         } catch (Exception ex) {
@@ -121,9 +117,9 @@ public class AwsRdsTerminateService {
             AuthenticatedContext ac,
             String cFStackName,
             AwsCredentialView credentialView,
-            String regionName,
-            DescribeStacksRequest describeStacksRequest
+            String regionName
     ) {
+        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
         cfClient.describeStacks(describeStacksRequest);
         DeleteStackRequest deleteStackRequest = awsStackRequestHelper.createDeleteStackRequest(cFStackName);

@@ -64,7 +64,7 @@ public class AwsRdsStatusLookupService {
     }
 
     public boolean isDbStackExistOnProviderSide(DescribeDBInstancesResult describeDBInstancesResult) {
-        return describeDBInstancesResult == null ? false : true;
+        return describeDBInstancesResult != null;
     }
 
     @Nullable
