@@ -50,6 +50,8 @@ spring:
       hibernate:
         jdbc.batch_size: 50
         order_inserts: true
+  lifecycle:
+    timeout-per-shutdown-phase: 60
 
 rest:
   debug: false

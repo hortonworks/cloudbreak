@@ -206,6 +206,8 @@ spring:
     prefer-file-system-access: false
   datasource:
     maxActive: 30
+  lifecycle:
+    timeout-per-shutdown-phase: 60
 
 notification:
   urls: http://localhost:3000/notifications
