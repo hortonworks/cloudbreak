@@ -93,7 +93,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -325,7 +324,6 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
-        AmazonNetworkFirewallClient nfwClient = awsClient.createNetworkFirewallClient(new AwsCredentialView(cloudCredential), region.value());
         try {
             LOGGER.debug("Describing route tables in region {}", region.getRegionName());
             List<RouteTable> allRouteTables = AwsPageCollector.getAllRouteTables(ec2Client, new DescribeRouteTablesRequest());
@@ -339,7 +337,7 @@ public class AwsPlatformResources implements PlatformResources {
                 first = false;
                 describeVpcsRequest.setNextToken(describeVpcsResult == null ? null : describeVpcsResult.getNextToken());
                 describeVpcsResult = ec2Client.describeVpcs(describeVpcsRequest);
-                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, nfwClient, allRouteTables, describeVpcsResult);
+                Set<CloudNetwork> partialNetworks = getCloudNetworks(ec2Client, allRouteTables, describeVpcsResult);
                 cloudNetworks.addAll(partialNetworks);
             }
             Map<String, Set<CloudNetwork>> result = new HashMap<>();
@@ -362,14 +360,14 @@ public class AwsPlatformResources implements PlatformResources {
         return describeVpcsRequest;
     }
 
-    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client, AmazonNetworkFirewallClient nfwClient,
+    private Set<CloudNetwork> getCloudNetworks(AmazonEc2Client ec2Client,
             List<RouteTable> describeRouteTablesResult, DescribeVpcsResult describeVpcsResult) {
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
         LOGGER.debug("Processing VPCs");
         for (Vpc vpc : describeVpcsResult.getVpcs()) {
             List<Subnet> awsSubnets = getSubnets(ec2Client, vpc);
-            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(ec2Client, nfwClient, describeRouteTablesResult, awsSubnets);
+            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResult, awsSubnets);
 
             Map<String, Object> properties = prepareNetworkProperties(vpc);
             Optional<String> name = getName(vpc.getTags());
@@ -398,13 +396,10 @@ public class AwsPlatformResources implements PlatformResources {
         return awsSubnets;
     }
 
-    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(AmazonEc2Client ec2Client, AmazonNetworkFirewallClient nfwClient,
-            List<RouteTable> describeRouteTablesResult, List<Subnet> awsSubnets) {
+    private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResult, List<Subnet> awsSubnets) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
             boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId(), subnet.getVpcId());
-            boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(ec2Client, nfwClient, describeRouteTablesResult,
-                subnet.getSubnetId(), subnet.getVpcId());
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
             Optional<String> subnetName = getName(subnet.getTags());
             subnets.add(
@@ -416,8 +411,7 @@ public class AwsPlatformResources implements PlatformResources {
                             !hasInternetGateway,
                             subnet.getMapPublicIpOnLaunch(),
                             hasInternetGateway,
-                            hasInternetGateway ? PUBLIC : PRIVATE,
-                            routableToInternet)
+                            hasInternetGateway ? PUBLIC : PRIVATE)
             );
         }
         return subnets;
@@ -646,7 +640,7 @@ public class AwsPlatformResources implements PlatformResources {
                 .collect(Collectors.toList());
 
         Set<VmType> awsInstances = new HashSet<>();
-        for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
+        for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment = actualSegment + SEGMENT) {
             DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
             request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
             getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
