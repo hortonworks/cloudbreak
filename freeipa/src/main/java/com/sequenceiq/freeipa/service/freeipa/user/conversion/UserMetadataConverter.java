@@ -34,7 +34,6 @@ public class UserMetadataConverter {
 
     private static final ObjectWriter OBJECT_WRITER = new ObjectMapper().writerFor(JsonUserMetadata.class);
 
-    @SuppressWarnings("checkstyle:NPathComplexity")
     public Optional<UserMetadata> toUserMetadata(User user) {
         requireNonNull(user);
 
@@ -44,37 +43,17 @@ public class UserMetadataConverter {
             return Optional.empty();
         }
 
-        JsonUserMetadata jsonUserMetadata;
-        try {
-            jsonUserMetadata = OBJECT_READER.readValue(user.getTitle());
-        } catch (JsonProcessingException e) {
-            LOGGER.warn("Unable to parse metadata string {} for user with workload username {}", user.getTitle(), user.getUid(), e);
-            return Optional.empty();
+        Optional<UserMetadata> userMetadata = Optional.empty();
+        Optional<JsonUserMetadata> jsonUserMetadata = getJsonUserMetadata(user);
+
+        if (jsonUserMetadata.isPresent() && isValidActorCrn(jsonUserMetadata.get().getCrn(), user.getUid())) {
+            Optional<UserManagementProto.WorkloadUserSyncActorMetadata> protoMetadata = decodeProtoMetadata(jsonUserMetadata.get().getMeta(), user.getUid());
+            if (protoMetadata.isPresent()) {
+                userMetadata = Optional.of(new UserMetadata(jsonUserMetadata.get().getCrn(), protoMetadata.get().getWorkloadCredentialsVersion()));
+            }
         }
 
-        Crn crn;
-        try {
-            crn = Crn.safeFromString(jsonUserMetadata.getCrn());
-        } catch (CrnParseException e) {
-            LOGGER.warn("Unable to parse CRN {} in metadata for user with workload username {}", jsonUserMetadata.getCrn(), user.getUid(), e);
-            return Optional.empty();
-        }
-        if (crn.getService() != Crn.Service.IAM ||
-                (crn.getResourceType() != Crn.ResourceType.USER && crn.getResourceType() != Crn.ResourceType.MACHINE_USER)) {
-            LOGGER.warn("CRN {} in metadata for user with workload username {} is not a user or machine user CRN", crn, user.getUid());
-            return Optional.empty();
-        }
-
-        UserManagementProto.WorkloadUserSyncActorMetadata protoMetadata;
-        try {
-            byte[] base64Decoded = BaseEncoding.base64().decode(jsonUserMetadata.getMeta());
-            protoMetadata = UserManagementProto.WorkloadUserSyncActorMetadata.parseFrom(base64Decoded);
-        } catch (Exception e) {
-            LOGGER.warn("Unable to decode meta attribute {} for user work workload username {}", jsonUserMetadata.getMeta(), user.getUid(), e);
-            return Optional.empty();
-        }
-
-        return Optional.of(new UserMetadata(jsonUserMetadata.getCrn(), protoMetadata.getWorkloadCredentialsVersion()));
+        return userMetadata;
     }
 
     public String toUserMetadataJson(UserMetadata userMetadata) {
@@ -96,5 +75,48 @@ public class UserMetadataConverter {
         } catch (JsonProcessingException e) {
             throw new IllegalStateException(String.format("Unable to serialize %s as JSON: ", jsonUserMetadata), e);
         }
+    }
+
+    private Optional<JsonUserMetadata> getJsonUserMetadata(User user) {
+        Optional<JsonUserMetadata> jsonUserMetadata = Optional.empty();
+        try {
+            jsonUserMetadata = Optional.of(OBJECT_READER.readValue(user.getTitle()));
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Unable to parse metadata string {} for user with workload username {}", user.getTitle(), user.getUid(), e);
+        }
+        return jsonUserMetadata;
+    }
+
+    private boolean isValidActorCrn(String crnToValidate, String username) {
+        Optional<Crn> crn = Optional.empty();
+        try {
+            crn = Optional.of(Crn.safeFromString(crnToValidate));
+        } catch (CrnParseException e) {
+            LOGGER.warn("Unable to parse CRN {} in metadata for user with workload username {}", crnToValidate, username, e);
+        }
+
+        boolean validCrn = false;
+        if (crn.isPresent()) {
+            Crn crnVal = crn.get();
+            if (crnVal.getService() == Crn.Service.IAM &&
+                    (crnVal.getResourceType() == Crn.ResourceType.USER || crnVal.getResourceType() == Crn.ResourceType.MACHINE_USER)) {
+                validCrn = true;
+            } else {
+                LOGGER.warn("CRN {} in metadata for user with workload username {} is not a user or machine user CRN", crnToValidate, username);
+            }
+        }
+
+        return validCrn;
+    }
+
+    private Optional<UserManagementProto.WorkloadUserSyncActorMetadata> decodeProtoMetadata(String encodedMetadata, String username) {
+        Optional<UserManagementProto.WorkloadUserSyncActorMetadata> protoMetadata = Optional.empty();
+        try {
+            byte[] base64Decoded = BaseEncoding.base64().decode(encodedMetadata);
+            protoMetadata = Optional.of(UserManagementProto.WorkloadUserSyncActorMetadata.parseFrom(base64Decoded));
+        } catch (Exception e) {
+            LOGGER.warn("Unable to decode meta attribute {} for user work workload username {}", encodedMetadata, username, e);
+        }
+        return protoMetadata;
     }
 }

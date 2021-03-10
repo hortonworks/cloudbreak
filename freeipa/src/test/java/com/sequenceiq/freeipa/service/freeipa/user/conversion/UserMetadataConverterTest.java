@@ -64,6 +64,7 @@ class UserMetadataConverterTest {
     @Test
     void testToUserMetadataEmptyJson() {
         User user = new User();
+        user.setUid("username");
         assertFalse(underTest.toUserMetadata(user).isPresent());
 
         user.setTitle("");
@@ -125,6 +126,7 @@ class UserMetadataConverterTest {
 
     private void testToUserMetadataValidInput(String input, String expectedCrn, long expectedWorkloadCredentialsVersion) {
         User user = new User();
+        user.setUid("username");
         user.setTitle(input);
         Optional<UserMetadata> decoded = underTest.toUserMetadata(user);
         assertTrue(decoded.isPresent());
@@ -139,6 +141,7 @@ class UserMetadataConverterTest {
     private void testToUserMetadataInvalidInput(List<String> inputs) {
         inputs.forEach(input -> {
             User user = new User();
+            user.setUid("username");
             user.setTitle(input);
             assertFalse(underTest.toUserMetadata(user).isPresent());
         });
@@ -151,6 +154,7 @@ class UserMetadataConverterTest {
         assertTrue(encoded.contains(makeValidEncodedMeta(workloadCredentialsVersion)));
 
         User user = new User();
+        user.setUid("username");
         user.setTitle(encoded);
         Optional<UserMetadata> decoded = underTest.toUserMetadata(user);
         assertTrue(decoded.isPresent());
