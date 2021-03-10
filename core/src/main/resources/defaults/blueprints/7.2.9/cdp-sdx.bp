@@ -229,6 +229,10 @@
           {
             "name": "service_config_suppression_hadoop_secure_web_ui",
             "value": "true"
+          },
+          {
+            "name": "hbase_service_config_safety_valve",
+            "value": "<property><name>hbase.data.umask.enable</name><value>true</value></property><property><name>hbase.data.umask</name><value>007</value></property>"
           }
         ],
         "serviceType": "HBASE"
