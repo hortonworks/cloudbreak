@@ -118,6 +118,20 @@
       "latitude": "37.29998293",
       "longitude": "-121.8499891",
       "k8sSupported": false
+    },
+    {
+      "name": "af-south-1",
+      "displayName": "Africa (Cape Town)",
+      "latitude": "-34.270836",
+      "longitude": "18.459778",
+      "k8sSupported": true
+    },
+    {
+      "name": "eu-south-1",
+      "displayName": "EU (Milan)",
+      "latitude": "45.464664",
+      "longitude": "9.188540",
+      "k8sSupported": true
     }
   ]
 }

@@ -67,6 +67,14 @@
     {
       "name": "us-gov-west-1",
       "displayName": "GovCloud (US)"
+    },
+    {
+      "name": "af-south-1",
+      "displayName": "Africa (Cape Town)"
+    },
+    {
+      "name": "eu-south-1",
+      "displayName": "EU (Milan)"
     }
   ]
 }
