@@ -225,7 +225,7 @@ subprojects {
   task('buildInfo', type: BuildInfoTask, dependsOn: processResources)
 
   afterEvaluate { Project project ->
-    if (project.name in ['core', 'autoscale', 'freeipa', 'redbeams', 'environment', 'datalake', 'integration-test'] && project.plugins.hasPlugin('org.springframework.boot')) {
+    if (project.name in ['core', 'autoscale', 'freeipa', 'redbeams', 'environment', 'datalake', 'integration-test', 'common'] && project.plugins.hasPlugin('org.springframework.boot')) {
       buildInfo.configure {
         destination = file("$project.buildDir")
         basename = project.bootJar.baseName

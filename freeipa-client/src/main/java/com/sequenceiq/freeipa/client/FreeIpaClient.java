@@ -17,14 +17,14 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sequenceiq.freeipa.client.clusterproxy.ClusterProxyError;
+import com.sequenceiq.freeipa.client.clusterproxy.ClusterProxyException;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Cert;

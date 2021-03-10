@@ -35,5 +35,4 @@ dependencies {
   compile            group: 'org.springframework.boot',         name: 'spring-boot-starter-web',     version: springBootVersion
 
   implementation project(':common')
-  implementation project(':cluster-proxy')
 }

@@ -11,6 +11,17 @@ repositories {
   maven { url "https://plugins.gradle.org/m2/" }
 }
 
+uploadBootArchives {
+  repositories {
+    mavenDeployer {
+      configuration = configurations.deployerJars
+      repository(url: "$System.env.NEXUS_URL") {
+        authentication(userName: "$System.env.NEXUS_USER", password: "$System.env.NEXUS_PASSWORD")
+      }
+    }
+  }
+}
+
 jar {
   baseName = 'common'
 }
