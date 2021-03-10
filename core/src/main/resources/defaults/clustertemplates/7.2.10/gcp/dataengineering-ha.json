@@ -8,6 +8,9 @@
     "cluster": {
       "blueprintName": "7.2.10 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie"
     },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
     "instanceGroups": [
       {
         "name": "manager",
