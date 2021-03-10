@@ -452,6 +452,10 @@
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
         {%- endfor %}
+        <param>
+             <name>replayBufferSize</name>
+             <value>128</value>
+        </param>
     </service>
     {%- endif %}
     {%- endif %}
@@ -463,6 +467,10 @@
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVESERVER2'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['HIVE'] }}/cliservice</url>
         {%- endfor %}
+        <param>
+            <name>replayBufferSize</name>
+            <value>128</value>
+        </param>
     </service>
     {%- endif %}
     {%- endif %}
