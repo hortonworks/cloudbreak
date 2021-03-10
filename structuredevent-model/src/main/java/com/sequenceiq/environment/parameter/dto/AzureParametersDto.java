@@ -4,12 +4,19 @@ public class AzureParametersDto {
 
     private AzureResourceGroupDto azureResourceGroupDto;
 
-    public AzureParametersDto(Builder builder) {
+    private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
+
+    private AzureParametersDto(Builder builder) {
         azureResourceGroupDto = builder.azureResourceGroupDto;
+        azureResourceEncryptionParametersDto = builder.azureResourceEncryptionParametersDto;
     }
 
     public AzureResourceGroupDto getAzureResourceGroupDto() {
         return azureResourceGroupDto;
+    }
+
+    public AzureResourceEncryptionParametersDto getAzureResourceEncryptionParametersDto() {
+        return azureResourceEncryptionParametersDto;
     }
 
     public static Builder builder() {
@@ -19,8 +26,8 @@ public class AzureParametersDto {
     @Override
     public String toString() {
         return "AzureParametersDto{"
-                + "azureResourceGroupDto="
-                + azureResourceGroupDto
+                + "azureResourceGroupDto=" + azureResourceGroupDto
+                + ", azureResourceEncryptionParametersDto=" + azureResourceEncryptionParametersDto
                 + '}';
     }
 
@@ -28,8 +35,15 @@ public class AzureParametersDto {
 
         private AzureResourceGroupDto azureResourceGroupDto;
 
+        private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto;
+
         public Builder withResourceGroup(AzureResourceGroupDto azureResourceGroupDto) {
             this.azureResourceGroupDto = azureResourceGroupDto;
+            return this;
+        }
+
+        public Builder withEncryptionParameters(AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
+            this.azureResourceEncryptionParametersDto = azureResourceEncryptionParametersDto;
             return this;
         }
 

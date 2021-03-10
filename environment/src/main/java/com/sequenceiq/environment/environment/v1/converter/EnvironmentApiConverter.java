@@ -37,6 +37,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
@@ -53,6 +54,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
@@ -208,8 +210,23 @@ public class EnvironmentApiConverter {
                                         || !StringUtils.isEmpty(resourceGroup.getName()))
                                 .map(this::azureResourceGroupToAzureResourceGroupDto)
                                 .orElse(buildDefaultResourceGroupDto())
-                ).build();
+                )
+                .withEncryptionParameters(
+                        Optional.ofNullable(azureEnvironmentParameters)
+                                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                                .filter(resourceEncryptionParameters -> Objects.nonNull(resourceEncryptionParameters.getEncryptionKeyUrl()))
+                                .map(this::azureResourceEncryptionParametersToAzureEncryptionParametersDto)
+                                .orElse(null)
+                )
+                .build();
 
+    }
+
+    private AzureResourceEncryptionParametersDto azureResourceEncryptionParametersToAzureEncryptionParametersDto(
+            AzureResourceEncryptionParameters azureResourceEncryptionParameters) {
+        return AzureResourceEncryptionParametersDto.builder()
+                .withEncryptionKeyUrl(azureResourceEncryptionParameters.getEncryptionKeyUrl())
+                .build();
     }
 
     private AzureResourceGroupDto buildDefaultResourceGroupDto() {
@@ -332,8 +349,8 @@ public class EnvironmentApiConverter {
 
     public EnvironmentLoadBalancerDto initLoadBalancerDto(EnvironmentLoadBalancerUpdateRequest request) {
         return EnvironmentLoadBalancerDto.builder()
-            .withEndpointAccessGateway(request.getPublicEndpointAccessGateway())
-            .withEndpointGatewaySubnetIds(request.getSubnetIds())
-            .build();
+                .withEndpointAccessGateway(request.getPublicEndpointAccessGateway())
+                .withEndpointGatewaySubnetIds(request.getSubnetIds())
+                .build();
     }
 }
