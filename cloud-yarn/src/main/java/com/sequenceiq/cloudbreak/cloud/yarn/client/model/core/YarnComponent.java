@@ -89,4 +89,18 @@ public class YarnComponent implements Serializable {
     public void setConfiguration(Configuration configuration) {
         this.configuration = configuration;
     }
+
+    @Override
+    public String toString() {
+        return "YarnComponent {"
+                + "name=" + name
+                + ", dependencies=" + dependencies
+                + ", numberOfContainers=" + numberOfContainers
+                + ", artifact=" + artifact
+                + ", launchCommand=" + launchCommand
+                + ", resource=" + resource
+                + ", runPrivilegedContainer=" + runPrivilegedContainer
+                + ", configuration=" + configuration
+                + '}';
+    }
 }

@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -58,17 +60,14 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
         LOGGER.debug("Received event: {}", launchStackRequestEvent);
         LaunchStackRequest request = launchStackRequestEvent.getData();
         CloudContext cloudContext = request.getCloudContext();
+        CloudStack cloudStack = request.getCloudStack();
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+        AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
         try {
-            CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, request.getCloudStack(), persistenceNotifier,
+            List<CloudResourceStatus> resourceStatus = connector.resources().launch(ac, cloudStack, persistenceNotifier,
                     request.getAdjustmentType(), request.getThreshold());
-            List<CloudResource> resources = ResourceLists.transform(resourceStatus);
-            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
-            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
-            if (!task.completed(statePollerResult)) {
-                statePollerResult = syncPollingScheduler.schedule(task);
-            }
+            ResourcesStatePollerResult statePollerResult = waitForResources(ac, resourceStatus, cloudContext);
+            launchLoadBalancers(cloudStack, connector, ac, persistenceNotifier, cloudContext, statePollerResult);
             LaunchStackResult result = ResourcesStatePollerResults.transformToLaunchStackResult(request, statePollerResult);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(launchStackRequestEvent.getHeaders(), result));
@@ -82,5 +81,44 @@ public class LaunchStackHandler implements CloudPlatformEventHandler<LaunchStack
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(launchStackRequestEvent.getHeaders(), failure));
         }
+    }
+
+    /**
+     * Launches the desired load balancers for the stack using the cloud provider resource connector.
+     * Adds the results of the launch to the existing state poller result from the launch of the main stack instances.
+     */
+    private void launchLoadBalancers(CloudStack cloudStack, CloudConnector<Object> connector, AuthenticatedContext authenticatedContext,
+            PersistenceNotifier persistenceNotifier, CloudContext cloudContext, ResourcesStatePollerResult statePollerResult) throws Exception {
+        if (statePollerResult.getResults().stream().anyMatch(result -> ResourceStatus.FAILED.equals(result.getStatus()) ||
+                ResourceStatus.DELETED.equals(result.getStatus()))) {
+            LOGGER.error("Some cloud resources failed creation. Load balancers will not be created.");
+            return;
+        }
+
+        if (!cloudStack.getLoadBalancers().isEmpty()) {
+            List<CloudResourceStatus> loadBalancerResourceStatus = connector.resources().launchLoadBalancers(authenticatedContext, cloudStack,
+                    persistenceNotifier);
+            if (!loadBalancerResourceStatus.isEmpty()) {
+                ResourcesStatePollerResult loadBalancerStatePollerResult = waitForResources(authenticatedContext, loadBalancerResourceStatus, cloudContext);
+                statePollerResult.addResults(loadBalancerStatePollerResult.getResults());
+            }
+        }
+    }
+
+    /**
+     * Creates a poll task which waits for the resources to be fully up and running, or more specifically,
+     * for the resources to be in a permanent successful state.
+     *
+     * Returns the result of the poll task.
+     */
+    private ResourcesStatePollerResult waitForResources(AuthenticatedContext ac, List<CloudResourceStatus> resourceStatuses, CloudContext cloudContext)
+            throws Exception {
+        List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
+        PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
+        ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatuses);
+        if (!task.completed(statePollerResult)) {
+            statePollerResult = syncPollingScheduler.schedule(task);
+        }
+        return statePollerResult;
     }
 }

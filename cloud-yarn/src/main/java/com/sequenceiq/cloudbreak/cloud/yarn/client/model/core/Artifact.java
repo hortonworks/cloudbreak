@@ -17,11 +17,18 @@ public class Artifact implements Serializable {
     }
 
     public String getId() {
-
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    @Override
+    public String toString() {
+        return "Artifact {"
+                + "id=" + id
+                + ", type=" + type
+                + '}';
     }
 }

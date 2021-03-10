@@ -72,6 +72,7 @@ public enum ResourceType {
 
     // YARN
     YARN_APPLICATION(CommonResourceType.TEMPLATE),
+    YARN_LOAD_BALANCER(CommonResourceType.TEMPLATE),
 
     // MOCK
     MOCK_INSTANCE,

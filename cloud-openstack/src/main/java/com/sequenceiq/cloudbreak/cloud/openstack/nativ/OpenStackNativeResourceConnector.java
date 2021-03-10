@@ -39,8 +39,8 @@ public class OpenStackNativeResourceConnector extends AbstractResourceConnector 
     }
 
     @Override
-    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
-            PersistenceNotifier persistenceNotifier) {
-        throw new UnsupportedOperationException("OpenStackNativeResource load balancers are not currently supported.");
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        throw new UnsupportedOperationException("Load balancers are not supported for the open stack native resource connector.");
     }
 }

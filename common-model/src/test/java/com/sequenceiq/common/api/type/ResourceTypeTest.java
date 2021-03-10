@@ -13,7 +13,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 class ResourceTypeTest {
 
     private static final Set<ResourceType> TEMPLATE_TYPES = EnumSet.of(ResourceType.CLOUDFORMATION_STACK, ResourceType.HEAT_STACK, ResourceType.ARM_TEMPLATE,
-            ResourceType.YARN_APPLICATION);
+            ResourceType.YARN_APPLICATION, ResourceType.YARN_LOAD_BALANCER);
 
     private static final Set<ResourceType> INSTANCE_TYPES = EnumSet.of(ResourceType.GCP_INSTANCE, ResourceType.OPENSTACK_INSTANCE, ResourceType.MOCK_INSTANCE);
 

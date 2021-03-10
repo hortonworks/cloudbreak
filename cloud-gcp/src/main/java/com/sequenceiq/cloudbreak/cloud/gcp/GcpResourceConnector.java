@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
@@ -63,6 +63,12 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     @Override
     public String getDBStackTemplate() throws TemplatingNotSupportedException {
         return "";
+    }
+
+    @Override
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        throw new UnsupportedOperationException("Load balancers are not supported for GCP.");
     }
 
     @Override
@@ -138,12 +144,5 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
         return List.of();
-    }
-
-    @Override
-    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
-            PersistenceNotifier persistenceNotifier) {
-
-        throw new UnsupportedOperationException("GCP load balancers are not currently supported.");
     }
 }

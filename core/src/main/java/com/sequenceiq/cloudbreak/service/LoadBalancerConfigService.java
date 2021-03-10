@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -182,7 +183,7 @@ public class LoadBalancerConfigService {
                 } else {
                     LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
                 }
-                if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork())) {
+                if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
                     setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
                 } else {
                     LOGGER.debug("External load balancer creation is disabled.");
@@ -246,21 +247,23 @@ public class LoadBalancerConfigService {
 
     private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {
         return StackType.DATALAKE.equals(type) && environment != null &&
-            (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId()) ||
-                isLoadBalancerEntitlementNotRequiredForCloudProvider(environment.getCloudPlatform()) ||
+                (entitlementService.datalakeLoadBalancerEnabled(ThreadBasedUserCrnProvider.getAccountId()) ||
+                !isLoadBalancerEntitlementRequiredForCloudProvider(environment.getCloudPlatform()) ||
                 isEndpointGatewayEnabled(environment.getNetwork()));
     }
 
-    private boolean isLoadBalancerEntitlementNotRequiredForCloudProvider(String cloudPlatform) {
-        return AWS.equalsIgnoreCase(cloudPlatform);
+    private boolean isLoadBalancerEntitlementRequiredForCloudProvider(String cloudPlatform) {
+        return !(AWS.equalsIgnoreCase(cloudPlatform));
     }
 
     private boolean isLoadBalancerEnabledForDatahub(StackType type, DetailedEnvironmentResponse environment) {
         return StackType.WORKLOAD.equals(type) && environment != null && isEndpointGatewayEnabled(environment.getNetwork());
     }
 
-    private boolean shouldCreateExternalKnoxLoadBalancer(Network network, EnvironmentNetworkResponse envNetwork) {
-        return isEndpointGatewayEnabled(envNetwork) || isNetworkUsingPublicSubnet(network, envNetwork);
+    private boolean shouldCreateExternalKnoxLoadBalancer(Network network, EnvironmentNetworkResponse envNetwork, String cloudPlatform) {
+        return CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform) ||
+                isEndpointGatewayEnabled(envNetwork) ||
+                isNetworkUsingPublicSubnet(network, envNetwork);
     }
 
     private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
