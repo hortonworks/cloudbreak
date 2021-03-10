@@ -20,6 +20,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_ACTIVITY_SUCCESS = "autoscale.activity.success";
 
+    public static final String AUTOSCALING_TRIGGER_FAILURE = "autoscale.trigger.failure";
+
     public static final String SCHEDULE_CONFIG_OVERLAPS = "autoscale.schedule.config.overlap";
 
     public static final String CLUSTER_EXISTS_FOR_CRN = "autoscale.cluster.exists.for.crn";
