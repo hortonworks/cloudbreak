@@ -13,8 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-
 import java.util.Set;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +45,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIp
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -52,6 +53,7 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
@@ -59,10 +61,9 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
-import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.telemetry.domain.AccountTelemetry;
 import com.sequenceiq.environment.telemetry.service.AccountTelemetryService;
 
@@ -278,6 +279,36 @@ public class EnvironmentApiConverterTest {
         assertEquals(subnetIds, environmentLbDto.getEndpointGatewaySubnetIds());
     }
 
+    @Test
+    void testAzureResourceEncryptionParametersAndAzureRequest() {
+        EnvironmentRequest request = createEnvironmentRequest(AZURE);
+        request.setAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(
+                        AzureResourceEncryptionParameters.builder()
+                                .withEncryptionKeyUrl("dummy-key-url")
+                                .build())
+                .build());
+        FreeIpaCreationDto freeIpaCreationDto = mock(FreeIpaCreationDto.class);
+        EnvironmentTelemetry environmentTelemetry = mock(EnvironmentTelemetry.class);
+        EnvironmentBackup environmentBackup = mock(EnvironmentBackup.class);
+        AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
+        Features features = mock(Features.class);
+        NetworkDto networkDto = mock(NetworkDto.class);
+        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        when(freeIpaConverter.convert(request.getFreeIpa())).thenReturn(freeIpaCreationDto);
+        when(accountTelemetry.getFeatures()).thenReturn(features);
+        when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
+        when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
+        when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
+
+        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+
+        assertEquals("dummy-key-url",
+                actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+    }
+
     private void assertLocation(LocationRequest request, LocationDto actual) {
         assertEquals(request.getName(), actual.getName());
         assertEquals(request.getLatitude(), actual.getLatitude());
@@ -308,6 +339,8 @@ public class EnvironmentApiConverterTest {
     private void assertAzureParameters(EnvironmentRequest request, ParametersDto actual) {
         assertEquals(request.getAzure().getResourceGroup().getName(),
                 actual.getAzureParametersDto().getAzureResourceGroupDto().getName());
+        assertEquals(request.getAzure().getResourceEncryptionParameters().getEncryptionKeyUrl(),
+                actual.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
     }
 
     private void assertAwsParameters(EnvironmentRequest request, ParametersDto actual) {
@@ -384,6 +417,11 @@ public class EnvironmentApiConverterTest {
                 AzureResourceGroup.builder()
                         .withName("mySingleResourceGroupName")
                         .withResourceGroupUsage(ResourceGroupUsage.MULTIPLE)
+                        .build()
+        );
+        azureEnvironmentParameters.setResourceEncryptionParameters(
+                AzureResourceEncryptionParameters.builder()
+                        .withEncryptionKeyUrl("dummy-key-url")
                         .build()
         );
         return azureEnvironmentParameters;

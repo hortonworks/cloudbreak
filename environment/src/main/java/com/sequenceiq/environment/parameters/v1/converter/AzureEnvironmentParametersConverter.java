@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
@@ -43,6 +44,10 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                 .map(AzureParametersDto::getAzureResourceGroupDto)
                 .map(AzureResourceGroupDto::getResourceGroupUsagePattern)
                 .orElse(null));
+        azureParameters.setEncryptionKeyUrl(azureParametersDto
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
+                .orElse(null));
     }
 
     @Override
@@ -55,6 +60,10 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                                 .withName(azureParameters.getResourceGroupName())
                                 .withResourceGroupCreation(azureParameters.getResourceGroupCreation())
                                 .withResourceGroupUsagePattern(azureParameters.getResourceGroupUsagePattern())
+                                .build())
+                .withEncryptionParameters(
+                        AzureResourceEncryptionParametersDto.builder()
+                                .withEncryptionKeyUrl(azureParameters.getEncryptionKeyUrl())
                                 .build())
                 .build());
     }

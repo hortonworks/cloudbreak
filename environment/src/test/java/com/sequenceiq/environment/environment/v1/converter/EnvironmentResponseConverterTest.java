@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.common.api.backup.response.BackupResponse;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -21,6 +20,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
@@ -53,12 +53,13 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.v1.converter.ProxyConfigToProxyResponseConverter;
 
@@ -236,6 +237,8 @@ public class EnvironmentResponseConverterTest {
     private void assertAzureParameters(AzureParametersDto azureParametersDto, AzureEnvironmentParameters azureEnvironmentParameters) {
         assertNotNull(azureEnvironmentParameters);
         assertEquals(azureParametersDto.getAzureResourceGroupDto().getName(), azureEnvironmentParameters.getResourceGroup().getName());
+        assertEquals(azureParametersDto.getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl(),
+                azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyUrl());
     }
 
     private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
@@ -296,6 +299,10 @@ public class EnvironmentResponseConverterTest {
                                         .withName("my-resource-group-name")
                                         .withResourceGroupCreation(ResourceGroupCreation.USE_EXISTING)
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
+                                        .build())
+                        .withEncryptionParameters(
+                                AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl("dummy-key-url")
                                         .build())
                         .build())
                 .build();
