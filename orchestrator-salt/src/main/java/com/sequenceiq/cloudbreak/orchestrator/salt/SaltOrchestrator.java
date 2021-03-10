@@ -964,6 +964,13 @@ SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
+        try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
+            return retry.testWith1SecDelayMax5Times(() -> getResponsiveNodes(nodes, saltConnector));
+        }
+    }
+
+    @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
             if (saltConnector.health().getStatusCode() == HttpStatus.OK.value()) {
@@ -1192,6 +1199,8 @@ SaltOrchestrator implements HostOrchestrator {
                 if (minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
                     LOGGER.info("Salt-minion is responding on host: {}", node);
                     responsiveNodes.add(node);
+                } else {
+                    LOGGER.warn("Salt-minion is not responding on host: {}", node);
                 }
             });
         } else {

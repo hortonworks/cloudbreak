@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -25,14 +26,17 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
@@ -91,7 +95,16 @@ public class ClusterManagerUpgradeService {
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
         SaltConfig pillar = createSaltConfig(stack, cluster.getId());
-        hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), pillar, exitCriteriaModel);
+        Set<String> allNode = stackUtil.collectNodes(stack).stream().map(Node::getHostname).collect(Collectors.toSet());
+        try {
+            Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, allNode);
+            hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, reachableNodes, pillar, exitCriteriaModel);
+        } catch (NodesUnreachableException e) {
+            String errorMessage = "Can not upgrade cluster manager because the configuration management service is not responding on these nodes: "
+                    + e.getUnreachableNodes();
+            LOGGER.error(errorMessage);
+            throw new CloudbreakRuntimeException(errorMessage, e);
+        }
     }
 
     private void stopClusterServices(Stack stack) throws CloudbreakException {
