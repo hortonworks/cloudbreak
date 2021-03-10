@@ -667,7 +667,7 @@ cb:
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
 
   loadBalancer:
-    supportedPlatforms: AWS
+    supportedPlatforms: AWS,YARN
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy

@@ -77,6 +77,12 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        throw new UnsupportedOperationException("Load balancers are not supported for the mock resource connector.");
+    }
+
+    @Override
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) {
         List<CloudResource> cloudResources = List.of(
@@ -207,11 +213,5 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
-    }
-
-    @Override
-    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
-            PersistenceNotifier persistenceNotifier) {
-        throw new UnsupportedOperationException("Load balancers updates are not supported for " + getClass().getName());
     }
 }

@@ -23,4 +23,12 @@ public class Resource implements Serializable {
     public void setMemory(int memory) {
         this.memory = memory;
     }
+
+    @Override
+    public String toString() {
+        return "Resource {"
+                + "cpus=" + cpus
+                + ", memory=" + memory
+                + '}';
+    }
 }

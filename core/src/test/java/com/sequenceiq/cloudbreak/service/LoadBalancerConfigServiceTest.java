@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -73,7 +74,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         MockitoAnnotations.initMocks(this);
         Field supportedPlatformsField = ReflectionUtils.findField(LoadBalancerConfigService.class, "supportedPlatforms");
         ReflectionUtils.makeAccessible(supportedPlatformsField);
-        ReflectionUtils.setField(supportedPlatformsField, underTest, "AWS,AZURE");
+        ReflectionUtils.setField(supportedPlatformsField, underTest, "AWS,AZURE,YARN");
     }
 
     @Test
@@ -170,6 +171,22 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
+            assertEquals(1, loadBalancers.size());
+            assertEquals(LoadBalancerType.PUBLIC, loadBalancers.iterator().next().getType());
+        });
+    }
+
+    @Test
+    public void testCreateLoadBalancerForYarn() {
+        Stack stack = createYarnStack();
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
@@ -558,6 +575,19 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             network.setAttributes(new Json(attributes));
         }
         stack.setNetwork(network);
+        return stack;
+    }
+
+    private Stack createYarnStack() {
+        Cluster cluster = new Cluster();
+        cluster.setBlueprint(blueprint);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        stack.setCluster(cluster);
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        stack.setCloudPlatform(YARN);
         return stack;
     }
 

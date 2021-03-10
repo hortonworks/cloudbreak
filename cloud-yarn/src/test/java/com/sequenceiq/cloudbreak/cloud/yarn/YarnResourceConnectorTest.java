@@ -26,7 +26,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -105,27 +104,24 @@ public class YarnResourceConnectorTest {
     @Mock
     private ApplicationNameUtil applicationNameUtilMock;
 
+    @Mock
+    private YarnApplicationCreationService yarnApplicationCreationService;
+
     @Test
     public void testLaunchWithStackDefaultParameters() throws Exception {
-        String defaultQueue = "QUEUE";
-        int defaultLifeTime = 1;
-
-        ReflectionTestUtils.setField(underTest, "defaultQueue", defaultQueue);
-        ReflectionTestUtils.setField(underTest, "defaultLifeTime", defaultLifeTime);
-
         ArgumentCaptor<CreateApplicationRequest> createRequestCaptor = ArgumentCaptor.forClass(CreateApplicationRequest.class);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
 
         setUpHappyPath(createRequestCaptor, requestCaptor);
-        when(applicationNameUtilMock.decorateName("name-1", "horton")).thenReturn("name-1-horton");
+        when(applicationNameUtilMock.createApplicationName(authenticatedContextMock)).thenReturn("name-1-horton");
+        when(yarnApplicationCreationService.initializeRequest(any(), any())).thenReturn(createInitialApplicationRequest("name-1-horton"));
 
         underTest.launch(authenticatedContextMock,
                 stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
 
-        CreateApplicationRequest caputeredCreateRequest = createRequestCaptor.getValue();
-        assertEquals("name-1-horton", caputeredCreateRequest.getName());
-        assertEquals(defaultQueue, caputeredCreateRequest.getQueue());
-        assertEquals(defaultLifeTime, caputeredCreateRequest.getLifetime());
+        verify(yarnApplicationCreationService).createApplication(any(), createRequestCaptor.capture());
+        CreateApplicationRequest capturedCreateRequest = createRequestCaptor.getValue();
+        assertEquals("name-1-horton", capturedCreateRequest.getName());
     }
 
     @Test
@@ -134,7 +130,6 @@ public class YarnResourceConnectorTest {
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
 
         setUpHappyPath(createRequestCaptor, requestCaptor);
-        setUpStackParameters();
 
         List<Group> groupList = IntStream.range(0, 2).mapToObj(this::createGroup).collect(Collectors.toList());
         when(stackMock.getGroups()).thenReturn(groupList);
@@ -144,18 +139,30 @@ public class YarnResourceConnectorTest {
         when(cloudInstanceMock.getTemplate()).thenReturn(instanceTemplateMock);
         when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS, Integer.class)).thenReturn(2);
         when(instanceTemplateMock.getParameter(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY, Integer.class)).thenReturn(4096);
-        when(applicationNameUtilMock.decorateName("name-1", "horton")).thenReturn("n-1");
+        when(applicationNameUtilMock.createApplicationName(authenticatedContextMock)).thenReturn("n-1");
+        when(yarnApplicationCreationService.checkApplicationAlreadyCreated(any(), any())).thenReturn(false);
+        when(yarnApplicationCreationService.initializeRequest(any(), any())).thenReturn(createInitialApplicationRequest("n-1"));
 
         List<CloudResourceStatus> cloudResourceStatusList = underTest.launch(authenticatedContextMock,
                 stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);
 
         verify(persistenceNotifierMock, times(1)).notifyAllocation(any(), any());
+        verify(yarnApplicationCreationService).createApplication(any(), createRequestCaptor.capture());
 
         String expectedAppName = "n-1";
         assertCreateRequest(createRequestCaptor, groupList, expectedAppName);
         ApplicationDetailRequest capturedRequest = requestCaptor.getValue();
         assertEquals(expectedAppName, capturedRequest.getName());
         assertCloudResourceStatusList(cloudResourceStatusList, expectedAppName);
+    }
+
+    private CreateApplicationRequest createInitialApplicationRequest(String applicationName) {
+        CreateApplicationRequest request = new CreateApplicationRequest();
+        request.setName(applicationName);
+        Map<String, String> params = setUpStackParameters();
+        request.setQueue(params.get(YarnConstants.YARN_QUEUE_PARAMETER));
+        request.setLifetime(Integer.parseInt(params.get(YarnConstants.YARN_LIFETIME_PARAMETER)));
+        return request;
     }
 
     private void assertCloudResourceStatusList(List<CloudResourceStatus> cloudResourceStatusList, String expectedAppName) {
@@ -174,11 +181,11 @@ public class YarnResourceConnectorTest {
         return new Group(name, type, instances, null, null, null, null, null, 50, Optional.empty());
     }
 
-    private void setUpStackParameters() {
+    private Map<String, String> setUpStackParameters() {
         Map<String, String> parameters = new HashMap<>();
         parameters.put(YarnConstants.YARN_QUEUE_PARAMETER, YARN_QUEUE);
         parameters.put(YarnConstants.YARN_LIFETIME_PARAMETER, YARN_LIFE_TIME.toString());
-        when(stackMock.getParameters()).thenReturn(parameters);
+        return parameters;
     }
 
     private void assertCreateRequest(ArgumentCaptor<CreateApplicationRequest> createRequestCaptor, List<Group> groupList, String expectedAppName) {
@@ -252,16 +259,11 @@ public class YarnResourceConnectorTest {
         when(imageMock.getImageName()).thenReturn(IMAGE_NAME);
         List<Group> groupList = Collections.emptyList();
         when(stackMock.getGroups()).thenReturn(groupList);
-        Map<String, String> parameters = new HashMap<>();
-        when(stackMock.getParameters()).thenReturn(parameters);
-
         when(yarnClientUtilMock.createYarnClient(authenticatedContextMock)).thenReturn(yarnClientMock);
 
         ResponseContext responseContext = createResponseContext(YarnResourceConstants.HTTP_SUCCESS);
-        when(yarnClientMock.createApplication(createRequestCaptor.capture())).thenReturn(responseContext);
 
         when(yarnClientMock.getApplicationDetail(requestCaptor.capture()))
-                .thenReturn(createResponseContext(YarnResourceConstants.HTTP_NOT_FOUND))
                 .thenReturn(responseContext);
     }
 
@@ -292,7 +294,8 @@ public class YarnResourceConnectorTest {
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
         when(yarnClientMock.getApplicationDetail(requestCaptor.capture()))
                 .thenReturn(createResponseContext(YarnResourceConstants.HTTP_SUCCESS));
-        when(applicationNameUtilMock.decorateName("name-1", "horton")).thenReturn("n-1-hort");
+        when(yarnApplicationCreationService.checkApplicationAlreadyCreated(any(), any())).thenReturn(true);
+        when(applicationNameUtilMock.createApplicationName(authenticatedContextMock)).thenReturn("n-1-hort");
 
         List<CloudResourceStatus> cloudResourceStatusList = underTest.launch(authenticatedContextMock,
                 stackMock, persistenceNotifierMock, AdjustmentType.EXACT, Long.MAX_VALUE);

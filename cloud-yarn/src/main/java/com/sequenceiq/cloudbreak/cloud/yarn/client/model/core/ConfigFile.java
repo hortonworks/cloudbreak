@@ -50,4 +50,14 @@ public class ConfigFile implements Serializable {
     public void setProps(Map<String, String> props) {
         this.props = props;
     }
+
+    @Override
+    public String toString() {
+        return "ConfigFile {"
+                + "type=" + type
+                + ", destFile=" + destFile
+                + ", srcFile=" + srcFile
+                + ", props=" + props
+                + '}';
+    }
 }

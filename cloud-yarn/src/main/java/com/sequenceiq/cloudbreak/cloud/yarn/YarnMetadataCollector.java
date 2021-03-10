@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import java.net.MalformedURLException;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.request.ApplicationDeta
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDetailResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
+import com.sequenceiq.cloudbreak.cloud.yarn.loadbalancer.service.launch.YarnLoadBalancerLaunchService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -39,6 +40,12 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class YarnMetadataCollector implements MetadataCollector {
     @Inject
     private YarnClientUtil yarnClientUtil;
+
+    @Inject
+    private ApplicationNameUtil applicationNameUtil;
+
+    @Inject
+    private YarnLoadBalancerLaunchService yarnLoadBalancerLaunchService;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
@@ -138,7 +145,26 @@ public class YarnMetadataCollector implements MetadataCollector {
 
     @Override
     public List<CloudLoadBalancerMetadata> collectLoadBalancer(AuthenticatedContext ac, List<LoadBalancerType> loadBalancerTypes) {
-        // no-op
-        return Collections.emptyList();
+        List<CloudLoadBalancerMetadata> loadBalancerMetadata = Lists.newArrayList();
+
+        if (loadBalancerTypes.size() == 0) {
+            return loadBalancerMetadata;
+        }
+
+        YarnClient yarnClient = yarnClientUtil.createYarnClient(ac);
+        String loadBalancerApplicationName = applicationNameUtil.createLoadBalancerName(ac);
+        Iterable<Container> loadBalancerContainers = yarnLoadBalancerLaunchService.getContainers(loadBalancerApplicationName, yarnClient);
+        Iterator<Container> containerIterator = loadBalancerContainers.iterator();
+
+        for (LoadBalancerType loadBalancerType : loadBalancerTypes) {
+            Container container = containerIterator.next();
+            CloudLoadBalancerMetadata metadata = new CloudLoadBalancerMetadata.Builder()
+                    .withType(loadBalancerType)
+                    .withName(applicationNameUtil.createLoadBalancerComponentName(loadBalancerApplicationName, loadBalancerType))
+                    .withIp(container.getIp()).build();
+            loadBalancerMetadata.add(metadata);
+        }
+
+        return loadBalancerMetadata;
     }
 }

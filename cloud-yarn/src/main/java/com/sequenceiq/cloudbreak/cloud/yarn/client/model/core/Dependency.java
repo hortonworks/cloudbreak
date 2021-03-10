@@ -13,4 +13,9 @@ public class Dependency implements Serializable {
     public void setItem(String item) {
         this.item = item;
     }
+
+    @Override
+    public String toString() {
+        return item;
+    }
 }

@@ -83,7 +83,7 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
+        public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
                 PersistenceNotifier persistenceNotifier) {
             return null;
         }

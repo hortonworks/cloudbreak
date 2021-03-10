@@ -138,6 +138,12 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         return resources;
     }
 
+    @Override
+    public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        throw new UnsupportedOperationException("Load balancers are not supported for Azure.");
+    }
+
     private List<CloudResource> persistCloudResources(
             AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier, CloudContext cloudContext, String stackName,
             String resourceGroupName, Deployment templateDeployment) {
@@ -323,11 +329,5 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Override
     public String getDBStackTemplate() {
         return azureDatabaseResourceService.getDBStackTemplate();
-    }
-
-    @Override
-    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack,
-            PersistenceNotifier persistenceNotifier) {
-        throw new UnsupportedOperationException("Azure load balancers are not currently supported.");
     }
 }

@@ -38,4 +38,13 @@ public class Configuration  implements Serializable {
     public void setFiles(List<ConfigFile> files) {
         this.files = files;
     }
+
+    @Override
+    public String toString() {
+        return "Configuration {"
+                + "properties=" + properties
+                + ", env=" + env
+                + ", files=" + files
+                + '}';
+    }
 }

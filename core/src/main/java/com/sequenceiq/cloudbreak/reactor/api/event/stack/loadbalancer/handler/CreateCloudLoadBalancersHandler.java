@@ -1,22 +1,20 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.handler;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
-import com.sequenceiq.common.api.type.LoadBalancerType;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -27,8 +25,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateClou
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+
+import reactor.bus.Event;
 
 @Component
 public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandler<CreateCloudLoadBalancersRequest> {
@@ -79,7 +80,7 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             LOGGER.debug("Initiating cloud load balancer creation");
-            List<CloudResourceStatus> resourceStatus = connector.resources().updateLoadBalancers(ac, updatedCloudStack, persistenceNotifier);
+            List<CloudResourceStatus> resourceStatus = connector.resources().launchLoadBalancers(ac, updatedCloudStack, persistenceNotifier);
             if (resourceStatus.stream().anyMatch(CloudResourceStatus::isFailed)) {
                 Set<String> names = resourceStatus.stream()
                     .filter(CloudResourceStatus::isFailed)
