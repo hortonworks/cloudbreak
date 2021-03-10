@@ -38,7 +38,6 @@ dependencies {
   compile group: 'com.amazonaws',                 name: 'aws-java-sdk-cloudwatch',        version: awsSdkVersion
   compile group: 'com.amazonaws',                 name: 'aws-java-sdk-elasticloadbalancingv2',  version: awsSdkVersion
   compile group: 'com.amazonaws',                 name: 'aws-java-sdk-efs',               version: awsSdkVersion
-  compile group: 'com.amazonaws',                 name: 'aws-java-sdk-networkfirewall',   version: awsSdkVersion
 
   compile group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
   compile group: 'commons-net',                   name: 'commons-net',                    version: '3.6'

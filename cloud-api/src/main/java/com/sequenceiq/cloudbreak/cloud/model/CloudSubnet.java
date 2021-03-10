@@ -28,26 +28,23 @@ public class CloudSubnet extends DynamicModel implements Serializable {
 
     private boolean igwAvailable;
 
-    private boolean routableToInternet;
-
     public CloudSubnet() {
     }
 
     public CloudSubnet(String id, String name) {
-        this(id, name, null, null);
+        this.id = id;
+        this.name = name;
     }
 
     public CloudSubnet(String id, String name, String availabilityZone, String cidr) {
-        this(id, name, availabilityZone, cidr, false, false, false, null);
+        this.id = id;
+        this.name = name;
+        this.availabilityZone = availabilityZone;
+        this.cidr = cidr;
     }
 
     public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable,
             SubnetType type) {
-        this(id, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, false);
-    }
-
-    public CloudSubnet(String id, String name, String availabilityZone, String cidr, boolean privateSubnet, boolean mapPublicIpOnLaunch, boolean igwAvailable,
-            SubnetType type, boolean routableToInternet) {
         this.id = id;
         this.name = name;
         this.availabilityZone = availabilityZone;
@@ -56,7 +53,6 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.mapPublicIpOnLaunch = mapPublicIpOnLaunch;
         this.igwAvailable = igwAvailable;
         this.type = type;
-        this.routableToInternet = routableToInternet;
     }
 
     public String getId() {
@@ -123,19 +119,10 @@ public class CloudSubnet extends DynamicModel implements Serializable {
         this.type = type;
     }
 
-    public boolean isRoutableToInternet() {
-        return routableToInternet;
-    }
-
-    public void setRoutableToInternet(boolean routableToInternet) {
-        this.routableToInternet = routableToInternet;
-    }
-
     public CloudSubnet withId(String newId) {
-        return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type, routableToInternet);
+        return new CloudSubnet(newId, name, availabilityZone, cidr, privateSubnet, mapPublicIpOnLaunch, igwAvailable, type);
     }
 
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -151,8 +138,7 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 Objects.equals(id, that.id) &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(availabilityZone, that.availabilityZone) &&
-                Objects.equals(cidr, that.cidr) &&
-                Objects.equals(routableToInternet, that.routableToInternet);
+                Objects.equals(cidr, that.cidr);
     }
 
     @Override
@@ -170,7 +156,6 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 + ", privateSubnet=" + privateSubnet
                 + ", mapPublicIpOnLaunch=" + mapPublicIpOnLaunch
                 + ", igwAvailable=" + igwAvailable
-                + ", routableToInternet=" + routableToInternet
                 + ", parameters=" + getParameters()
                 + '}';
     }

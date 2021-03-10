@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelCo
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
@@ -103,7 +102,6 @@ public class AwsLoadBalancerLaunchService {
             AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
             List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cfRetryClient, amazonASClient, stack.getGroups());
             AmazonEc2Client amazonEC2Client = awsClient.createEc2Client(credentialView, regionName);
-            AmazonNetworkFirewallClient nfwClient = awsClient.createNetworkFirewallClient(credentialView, regionName);
             Network network = stack.getNetwork();
             AwsNetworkView awsNetworkView = new AwsNetworkView(network);
 
@@ -112,8 +110,7 @@ public class AwsLoadBalancerLaunchService {
                 modelContext = awsModelService.buildDefaultModelContext(ac, stack, resourceNotifier);
             }
 
-            List<AwsLoadBalancer> awsLoadBalancers = getAwsLoadBalancers(cloudLoadBalancers, instances, awsNetworkView,
-                amazonEC2Client, nfwClient);
+            List<AwsLoadBalancer> awsLoadBalancers = getAwsLoadBalancers(cloudLoadBalancers, instances, awsNetworkView, amazonEC2Client);
 
             modelContext.withLoadBalancers(awsLoadBalancers);
             LOGGER.debug("Starting CloudFormation update to create load balancer and target groups.");
@@ -146,13 +143,12 @@ public class AwsLoadBalancerLaunchService {
     }
 
     private List<AwsLoadBalancer> getAwsLoadBalancers(List<CloudLoadBalancer> cloudLoadBalancers, List<CloudResource> instances,
-            AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client, AmazonNetworkFirewallClient nfwClient) {
+            AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client) {
         LOGGER.debug("Converting internal load balancer model to AWS cloud provider model.");
         List<AwsLoadBalancer> awsLoadBalancers = new ArrayList<>();
         for (CloudLoadBalancer cloudLoadBalancer : cloudLoadBalancers) {
             LOGGER.debug("Found load balancer model of type {}", cloudLoadBalancer.getType());
-            AwsLoadBalancer loadBalancer = convertLoadBalancer(cloudLoadBalancer, instances, awsNetworkView, amazonEC2Client,
-                nfwClient, awsLoadBalancers);
+            AwsLoadBalancer loadBalancer = convertLoadBalancer(cloudLoadBalancer, instances, awsNetworkView, amazonEC2Client, awsLoadBalancers);
             if (loadBalancer != null && !awsLoadBalancers.contains(loadBalancer)) {
                 awsLoadBalancers.add(loadBalancer);
             }
@@ -211,13 +207,13 @@ public class AwsLoadBalancerLaunchService {
     }
 
     @VisibleForTesting
-    AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances, AwsNetworkView awsNetworkView,
-            AmazonEc2Client amazonEC2Client, AmazonNetworkFirewallClient nfwClient, List<AwsLoadBalancer> awsLoadBalancers) {
+    AwsLoadBalancer convertLoadBalancer(CloudLoadBalancer cloudLoadBalancer, List<CloudResource> instances,
+            AwsNetworkView awsNetworkView, AmazonEc2Client amazonEC2Client, List<AwsLoadBalancer> awsLoadBalancers) {
         // Check and see if we already have a load balancer whose scheme matches this one.
         AwsLoadBalancer currentLoadBalancer = null;
         LoadBalancerType cloudLbType = cloudLoadBalancer.getType();
         Set<String> subnetIds = selectLoadBalancerSubnetIds(cloudLbType, awsNetworkView);
-        AwsLoadBalancerScheme scheme = determinePublicVsPrivateSchema(subnetIds, awsNetworkView.getExistingVpc(), amazonEC2Client, nfwClient);
+        AwsLoadBalancerScheme scheme = determinePublicVsPrivateSchema(subnetIds, awsNetworkView.getExistingVpc(), amazonEC2Client);
 
         if ((AwsLoadBalancerScheme.INTERNAL.equals(scheme) && LoadBalancerType.PUBLIC.equals(cloudLbType)) ||
             (AwsLoadBalancerScheme.INTERNET_FACING.equals(scheme) && LoadBalancerType.PRIVATE.equals(cloudLbType))) {
@@ -261,13 +257,12 @@ public class AwsLoadBalancerLaunchService {
         return new HashSet<>(subnetIds);
     }
 
-    private AwsLoadBalancerScheme determinePublicVsPrivateSchema(Set<String> subnetIds, String vpcId, AmazonEc2Client amazonEC2Client,
-            AmazonNetworkFirewallClient nfwClient) {
+    private AwsLoadBalancerScheme determinePublicVsPrivateSchema(Set<String> subnetIds, String vpcId, AmazonEc2Client amazonEC2Client) {
         DescribeRouteTablesRequest describeRouteTablesRequest = new DescribeRouteTablesRequest()
             .withFilters(new Filter().withName("vpc-id").withValues(vpcId));
         List<RouteTable> routeTableList = AwsPageCollector.getAllRouteTables(amazonEC2Client, describeRouteTablesRequest);
         return subnetIds.stream()
-            .anyMatch(subnetId -> awsSubnetIgwExplorer.isRoutableToInternet(amazonEC2Client, nfwClient, routeTableList, subnetId, vpcId))
+            .anyMatch(subnetId -> awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(routeTableList, subnetId, vpcId))
             ? AwsLoadBalancerScheme.INTERNET_FACING : AwsLoadBalancerScheme.INTERNAL;
     }
 
