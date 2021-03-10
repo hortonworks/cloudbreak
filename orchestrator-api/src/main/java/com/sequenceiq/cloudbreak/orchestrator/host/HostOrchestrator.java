@@ -55,8 +55,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig);
-
     void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 

@@ -558,12 +558,20 @@
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
+        <param>
+              <name>replayBufferSize</name>
+              <value>128</value>
+        </param>
     </service>
     <service>
         <role>ATLAS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
+        <param>
+              <name>replayBufferSize</name>
+              <value>128</value>
+        </param>
     </service>
     {%- endif %}
     {%- endif %}
