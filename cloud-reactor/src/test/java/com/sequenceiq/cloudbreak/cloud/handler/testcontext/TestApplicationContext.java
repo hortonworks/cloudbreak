@@ -57,12 +57,13 @@ import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
+import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 import io.opentracing.Tracer;
 import reactor.Environment;
 
-@MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class)})
+@MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class), @MockBean(FlowRegister.class)})
 @Configuration
 @ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
         @ComponentScan("com.sequenceiq.cloudbreak.auth"), @ComponentScan("com.sequenceiq.cloudbreak.client")})
