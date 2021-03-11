@@ -63,8 +63,6 @@ import io.opentracing.Tracer;
 public class AppConfig implements ResourceLoaderAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(AppConfig.class);
 
-    private static final int AWAIT_TERMINATION_SECONDS = 60;
-
     @Value("${cb.etc.config.dir:}")
     private String etcConfigDir;
 
@@ -77,11 +75,17 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cb.threadpool.capacity.size:}")
     private int queueCapacity;
 
+    @Value("${cb.threadpool.termination.seconds:60}")
+    private int awaitTerminationSeconds;
+
     @Value("${cb.intermediate.threadpool.core.size:}")
     private int intermediateCorePoolSize;
 
     @Value("${cb.intermediate.threadpool.capacity.size:}")
     private int intermediateQueueCapacity;
+
+    @Value("${cb.intermediate.threadpool.termination.seconds:60}")
+    private int intermediateAwaitTerminationSeconds;
 
     @Value("${rest.debug}")
     private boolean restDebug;
@@ -186,7 +190,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
         executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
+        executor.setAwaitTerminationSeconds(intermediateAwaitTerminationSeconds);
         executor.initialize();
         return executor;
     }
@@ -199,7 +203,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
         executor.setTaskDecorator(new TracingAndMdcCopyingTaskDecorator(tracer));
         executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.setAwaitTerminationSeconds(AWAIT_TERMINATION_SECONDS);
+        executor.setAwaitTerminationSeconds(awaitTerminationSeconds);
         executor.initialize();
         return executor;
     }
