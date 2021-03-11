@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
@@ -54,7 +54,7 @@ class StackServiceTest {
     void getByIdWithListsInTransactionNotFound() {
         when(stackRepository.findOneWithLists(STACK_ID)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByIdWithListsInTransaction(STACK_ID));
-        assertEquals("Stack [" + STACK_ID + "] not found", notFoundException.getMessage());
+        assertEquals("FreeIPA stack [" + STACK_ID + "] not found", notFoundException.getMessage());
     }
 
     @Test
@@ -68,7 +68,7 @@ class StackServiceTest {
     void getStackByIdNotFound() {
         when(stackRepository.findById(STACK_ID)).thenReturn(Optional.empty());
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getStackById(STACK_ID));
-        assertEquals("Stack [" + STACK_ID + "] not found", notFoundException.getMessage());
+        assertEquals("FreeIPA stack [" + STACK_ID + "] not found", notFoundException.getMessage());
     }
 
     @Test
@@ -91,7 +91,7 @@ class StackServiceTest {
         when(childEnvironmentService.findParentByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(Optional.empty());
         NotFoundException notFoundException =
                 assertThrows(NotFoundException.class, () -> underTest.getByEnvironmentCrnAndAccountId(ENVIRONMENT_CRN, ACCOUNT_ID));
-        assertEquals("Stack by environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
+        assertEquals("FreeIPA stack by environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
     }
 
     @Test

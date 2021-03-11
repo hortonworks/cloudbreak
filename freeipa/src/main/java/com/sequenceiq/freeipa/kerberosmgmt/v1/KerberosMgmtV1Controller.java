@@ -23,6 +23,7 @@ import com.sequenceiq.authorization.service.UmsAccountAuthorizationService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.CheckedFunction;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
@@ -47,7 +48,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
 
     private static final String KEYTAB_CREATION_FAILED = "Keytab creation failed.";
 
-    private static final String DELETION_FAILED = "Deletion failed.";
+    private static final String DELETION_FAILED = "Deletion failed. Reason: ";
 
     @Inject
     private KerberosMgmtV1Service kerberosMgmtV1Service;
@@ -147,7 +148,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private <T> T retryableWithKeytabCreationException(CheckedFunction<Void, T, Exception> f) {
         try {
             return retryableFreeIpaClientService.invokeWithRetries(f);
-        } catch (KeytabCreationException | InvalidFreeIpaStateException e) {
+        } catch (KeytabCreationException | InvalidFreeIpaStateException | NotFoundException e) {
             throw e;
         } catch (RetryableFreeIpaClientException e) {
             LOGGER.error("internal server error", e);
@@ -165,7 +166,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private <T> T retryableWithDeletionException(CheckedFunction<Void, T, Exception> f) {
         try {
             return retryableFreeIpaClientService.invokeWithRetries(f);
-        } catch (DeleteException | InvalidFreeIpaStateException e) {
+        } catch (DeleteException | InvalidFreeIpaStateException | NotFoundException e) {
             throw e;
         } catch (RetryableFreeIpaClientException e) {
             LOGGER.error("internal server error", e);
@@ -173,10 +174,11 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
             if (exceptionForRestApi instanceof DeleteException) {
                 throw (DeleteException) exceptionForRestApi;
             }
-            throw new DeleteException(DELETION_FAILED);
+            String reason = exceptionForRestApi == null ? e.getMessage() : exceptionForRestApi.getMessage();
+            throw new DeleteException(DELETION_FAILED + reason);
         } catch (Exception e2) {
             LOGGER.error("internal server error", e2);
-            throw new DeleteException(DELETION_FAILED);
+            throw new DeleteException(DELETION_FAILED + e2.getMessage());
         }
     }
 }
