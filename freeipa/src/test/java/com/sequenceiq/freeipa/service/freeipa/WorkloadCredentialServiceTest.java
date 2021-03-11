@@ -20,7 +20,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
@@ -29,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -38,8 +38,10 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
+import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService.WorkloadCredentialUpdate;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +76,7 @@ class WorkloadCredentialServiceTest {
         when(freeIpaClient.formatDate(any(Optional.class))).thenReturn(FreeIpaClient.MAX_PASSWORD_EXPIRATION_DATETIME);
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
 
-        underTest.setWorkloadCredential(false, freeIpaClient, USER, USER_CRN, createWorkloadCredential());
+        underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), any(), any());
     }
@@ -85,7 +87,7 @@ class WorkloadCredentialServiceTest {
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenThrow(
                 new FreeIpaClientException("error", new JsonRpcClientException(4202, "", null)));
 
-        underTest.setWorkloadCredential(false, freeIpaClient, USER, USER_CRN, createWorkloadCredential());
+        underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), any(), any());
     }
@@ -95,7 +97,7 @@ class WorkloadCredentialServiceTest {
         doReturn("userMetadataJson").when(userMetadataConverter).toUserMetadataJson(USER_CRN, UMS_WORKLOAD_CREDENTIALS_VERSION);
         when(freeIpaClient.invoke(any(), any(), any(), any())).thenReturn(getRpcResponse());
 
-        underTest.setWorkloadCredential(true, freeIpaClient, USER, USER_CRN, createWorkloadCredential());
+        underTest.setWorkloadCredential(true, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), argThat(matchesTitleAttribute("userMetadataJson")), any());
     }
@@ -211,8 +213,10 @@ class WorkloadCredentialServiceTest {
     private void setWorkloadCredentials(boolean batchCallEnabled, boolean updateOptimizationEnabled, FreeIpaClient ipaClient,
             Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<String> usersWithCredentialsToUpdate, Map<String, String> userToCrnMap,
             BiConsumer<String, String> warnings) throws FreeIpaClientException {
-        Map<String, Pair<String, WorkloadCredential>> userToCredentialUpdateParams = usersWithCredentialsToUpdate.stream()
-                .collect(Collectors.toMap(Function.identity(), username -> Pair.of(userToCrnMap.get(username), usersWorkloadCredentialMap.get(username))));
-        underTest.setWorkloadCredentials(batchCallEnabled, updateOptimizationEnabled, ipaClient, userToCredentialUpdateParams, warnings);
+        ImmutableSet<WorkloadCredentialUpdate> credentialUpdates = usersWithCredentialsToUpdate.stream()
+                .map(username -> new WorkloadCredentialUpdate(username, userToCrnMap.get(username), usersWorkloadCredentialMap.get(username)))
+                .collect(ImmutableSet.toImmutableSet());
+        underTest.setWorkloadCredentials(new UserSyncOptions(false, batchCallEnabled, updateOptimizationEnabled), ipaClient, credentialUpdates,
+                warnings);
     }
 }

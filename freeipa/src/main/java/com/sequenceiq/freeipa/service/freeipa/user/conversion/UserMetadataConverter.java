@@ -64,11 +64,13 @@ public class UserMetadataConverter {
     public String toUserMetadataJson(String crn, long workloadCredentialsVersion) {
         checkArgument(!Strings.isNullOrEmpty(crn));
 
+        // Store the metadata in a protobuf to make it easy to evolve the metadata model.
         UserManagementProto.WorkloadUserSyncActorMetadata protoMetadata = UserManagementProto.WorkloadUserSyncActorMetadata.newBuilder()
                 .setWorkloadCredentialsVersion(workloadCredentialsVersion)
                 .build();
         String protoMetadataBase64Encoded = BaseEncoding.base64().encode(protoMetadata.toByteArray());
 
+        // Wrap the CRN and metadata in JSON to make it easy to search for an exact match of the CRN string delimited by quotes.
         JsonUserMetadata jsonUserMetadata = new JsonUserMetadata(crn, protoMetadataBase64Encoded);
         try {
             return OBJECT_WRITER.writeValueAsString(jsonUserMetadata);

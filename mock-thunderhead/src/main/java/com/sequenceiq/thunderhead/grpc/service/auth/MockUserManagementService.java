@@ -27,6 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
@@ -332,6 +333,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.azure.disk.SSEWithCMK.enable}")
     private boolean enableAzureDiskSSEWithCMK;
 
+    @Value("${auth.mock.user.sync.credentials.update.optimization.enable}")
+    private boolean userSyncCredentialsUpdateOptimizationEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -634,6 +638,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureDiskSSEWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));
+        }
+        if (userSyncCredentialsUpdateOptimizationEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

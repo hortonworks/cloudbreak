@@ -91,7 +91,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any(), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any());
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -109,7 +109,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(0)).setWorkloadCredential(eq(true), any(), any(), any(), any());
+        verify(workloadCredentialService, times(0)).setWorkloadCredential(eq(true), any(), any());
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -126,7 +126,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any(), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(true), any(), any());
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -139,7 +139,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(false), any(), any(), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(eq(false), any(), any());
         verify(mockFreeIpaClient, times(0)).userSetPasswordWithExpiration(any(), any(), any());
     }
 
@@ -152,7 +152,7 @@ class SetPasswordHandlerTest {
 
         underTest.accept(new Event<>(request));
 
-        verify(workloadCredentialService, times(1)).setWorkloadCredential(anyBoolean(), any(), any(), any(), any());
+        verify(workloadCredentialService, times(1)).setWorkloadCredential(anyBoolean(), any(), any());
         verify(mockFreeIpaClient, times(1)).userSetPasswordWithExpiration(any(), any(), any());
     }
 

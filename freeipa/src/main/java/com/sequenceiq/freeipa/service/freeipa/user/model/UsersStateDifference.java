@@ -88,13 +88,12 @@ public class UsersStateDifference {
                 + '}';
     }
 
-    public static UsersStateDifference fromUmsAndIpaUsersStates(UmsUsersState umsState, UsersState ipaState,
-            boolean credentialsUpdateOptimizationEnabled) {
+    public static UsersStateDifference fromUmsAndIpaUsersStates(UmsUsersState umsState, UsersState ipaState, UserSyncOptions options) {
         return new UsersStateDifference(
                 calculateGroupsToAdd(umsState, ipaState),
                 calculateGroupsToRemove(umsState, ipaState),
                 calculateUsersToAdd(umsState, ipaState),
-                calculateUsersWithCredentialsToUpdate(umsState, ipaState, credentialsUpdateOptimizationEnabled),
+                calculateUsersWithCredentialsToUpdate(umsState, ipaState, options.credentialsUpdateOptimizationEnabled()),
                 calculateUsersToRemove(umsState, ipaState),
                 calculateGroupMembershipToAdd(umsState, ipaState),
                 calculateGroupMembershipToRemove(umsState, ipaState));
@@ -127,31 +126,8 @@ public class UsersStateDifference {
 
     public static ImmutableSet<String> calculateUsersWithCredentialsToUpdate(UmsUsersState umsState, UsersState ipaState,
             boolean credentialsUpdateOptimizationEnabled) {
-        ImmutableSet<String> usersWithCredentialsToUpdate;
-
-        if (!credentialsUpdateOptimizationEnabled) {
-            usersWithCredentialsToUpdate = ImmutableSet.copyOf(umsState.getUsersState().getUsers().stream()
-                    .map(FmsUser::getName)
-                    .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
-                    .collect(Collectors.toSet()));
-        } else {
-            ImmutableSet.Builder<String> usersWithCredentialsToUpdateBuilder = ImmutableSet.builder();
-            umsState.getUsersState().getUsers().stream()
-                    .map(FmsUser::getName)
-                    .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
-                    .forEach(username -> {
-                        UserMetadata ipaUserMetadata = ipaState.getUserMetadataMap().get(username);
-                        if (ipaUserMetadata == null) {
-                            usersWithCredentialsToUpdateBuilder.add(username);
-                        } else {
-                            WorkloadCredential umsCredential = umsState.getUsersWorkloadCredentialMap().get(username);
-                            if (ipaUserMetadata.getWorkloadCredentialsVersion() < umsCredential.getVersion()) {
-                                usersWithCredentialsToUpdateBuilder.add(username);
-                            }
-                        }
-                    });
-            usersWithCredentialsToUpdate = usersWithCredentialsToUpdateBuilder.build();
-        }
+        ImmutableSet<String> usersWithCredentialsToUpdate = credentialsUpdateOptimizationEnabled ?
+                getUsersWithStaleCredentials(umsState, ipaState) : getAllUsers(umsState);
 
         LOGGER.info("usersWithCredentialsToUpdate size = {}", usersWithCredentialsToUpdate.size());
         LOGGER.debug("usersWithCredentialsToUpdate = {}", usersWithCredentialsToUpdate);
@@ -227,5 +203,29 @@ public class UsersStateDifference {
         LOGGER.debug("groupMembershipToRemove = {}", groupMembershipToRemove.asMap());
 
         return ImmutableMultimap.copyOf(groupMembershipToRemove);
+    }
+
+    private static ImmutableSet<String> getAllUsers(UmsUsersState umsState) {
+        return umsState.getUsersState().getUsers().stream()
+                .map(FmsUser::getName)
+                .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username))
+                .collect(ImmutableSet.toImmutableSet());
+    }
+
+    private static ImmutableSet<String> getUsersWithStaleCredentials(UmsUsersState umsState, UsersState ipaState) {
+        return umsState.getUsersState().getUsers().stream()
+                .map(FmsUser::getName)
+                .filter(username -> !FreeIpaChecks.IPA_PROTECTED_USERS.contains(username) && credentialsAreStale(username, umsState, ipaState))
+                .collect(ImmutableSet.toImmutableSet());
+    }
+
+    private static boolean credentialsAreStale(String username, UmsUsersState umsState, UsersState ipaState) {
+        boolean updateCredentials = true;
+        UserMetadata ipaUserMetadata = ipaState.getUserMetadataMap().get(username);
+        if (ipaUserMetadata != null) {
+            WorkloadCredential umsCredential = umsState.getUsersWorkloadCredentialMap().get(username);
+            updateCredentials = ipaUserMetadata.getWorkloadCredentialsVersion() < umsCredential.getVersion();
+        }
+        return updateCredentials;
     }
 }
