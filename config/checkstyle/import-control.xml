@@ -12,6 +12,9 @@
         <file name="AwsClient">
             <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
         </file>
+        <file name="AwsSessionCredentialClient">
+            <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
+        </file>
         <subpackage name="client">
             <allow pkg="(?!.*model)com\.amazonaws\.services.*" regex="true"/>
         </subpackage>
