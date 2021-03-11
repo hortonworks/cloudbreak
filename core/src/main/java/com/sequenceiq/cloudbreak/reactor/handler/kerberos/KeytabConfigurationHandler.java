@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -82,11 +81,12 @@ public class KeytabConfigurationHandler implements EventHandler<KeytabConfigurat
             Optional<KerberosConfig> kerberosConfigOptional = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
             boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
 
+            //if needed here make it so that we call getserivcekeytab on each gateway.
             if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfigOptional)) {
                 GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 ServiceKeytabResponse serviceKeytabResponse = keytabProvider.getServiceKeytabResponse(stack, primaryGatewayConfig);
                 KeytabModel keytabModel = buildKeytabModel(serviceKeytabResponse);
-                hostOrchestrator.uploadKeytabs(List.of(primaryGatewayConfig), Set.of(keytabModel),
+                hostOrchestrator.uploadKeytabs(gatewayConfigService.getAllGatewayConfigs(stack), Set.of(keytabModel),
                         ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stack.getCluster().getId()));
             }
             response = new KeytabConfigurationSuccess(stackId);

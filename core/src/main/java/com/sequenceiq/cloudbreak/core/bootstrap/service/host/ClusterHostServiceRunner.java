@@ -460,9 +460,14 @@ public class ClusterHostServiceRunner {
     private void decoratePillarWithClouderaManagerCommunicationSettings(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
         Boolean autoTls = cluster.getAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
+        String loadBalancer = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(cluster.getStack().getId());
         communication.put("port", autoTls ? CM_HTTPS_PORT : CM_HTTP_PORT);
         communication.put("protocol", autoTls ? "https" : "http");
         communication.put("autotls_enabled", autoTls);
+        if (StringUtils.isNotEmpty(loadBalancer)) {
+            communication.put("loadbalancer_url", loadBalancer);
+        }
+        communication.put("ha", true);
         servicePillar.put("cloudera-manager-communication", new SaltPillarProperties("/cloudera-manager/communication.sls",
                 singletonMap("cloudera-manager", singletonMap("communication", communication))));
     }

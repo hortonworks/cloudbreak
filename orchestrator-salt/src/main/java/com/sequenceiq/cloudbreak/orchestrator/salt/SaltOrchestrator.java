@@ -336,7 +336,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         Set<String> gatewayTargetHostnames = getGatewayHostnames(allGateway);
-        Set<String> serverHostname = Sets.newHashSet(primaryGateway.getHostname());
+        Set<String> serverHostname = allGateway.stream().map(GatewayConfig::getHostname).collect(Collectors.toSet());
         Set<String> allNodeHostname = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
