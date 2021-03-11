@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.ldap;
 
-import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static java.lang.String.format;
 
 import java.util.List;

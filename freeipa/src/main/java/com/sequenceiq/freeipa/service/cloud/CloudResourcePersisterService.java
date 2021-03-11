@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.cloud;
 
-import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.util.ThrowableUtil.notFound;
 
 import java.util.Optional;
 

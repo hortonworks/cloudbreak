@@ -17,8 +17,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
@@ -49,11 +49,11 @@ public class StackService implements ResourceCrnAndNameProvider {
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
-        return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
+        return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", id)));
     }
 
     public Stack getStackById(Long id) {
-        return stackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("Stack [%s] not found", id)));
+        return stackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", id)));
     }
 
     public Stack save(Stack stack) {
@@ -62,7 +62,7 @@ public class StackService implements ResourceCrnAndNameProvider {
 
     public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 
     public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
@@ -72,7 +72,7 @@ public class StackService implements ResourceCrnAndNameProvider {
 
     public Stack getByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
         return findByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] has never existed", environmentCrn)));
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] has never existed", environmentCrn)));
     }
 
     public Optional<Stack> findByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
@@ -99,12 +99,12 @@ public class StackService implements ResourceCrnAndNameProvider {
     public Stack getByEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
                 .or(() -> stackRepository.findByChildEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId))
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 
     public Stack getByOwnEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountIdWithList(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("Stack by environment [%s] not found", environmentCrn)));
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 
     public List<Stack> getAllByAccountId(String accountId) {

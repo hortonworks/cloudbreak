@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -31,7 +32,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesR
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -158,8 +158,9 @@ public class RepairInstancesService {
      * If instances passed in request, repair all valid passed bad instances (at least 1 instance must remain)
      * If force and instances passed in request, repair all valid passed instances (at least 1 instance must remain)
      * If force and no instances passed in request then report an error
+     *
      * @param accountId - The account id for the instance to repair.
-     * @param request - A RepairInstanceRequest containing request parameters.
+     * @param request   - A RepairInstanceRequest containing request parameters.
      */
     public OperationStatus repairInstances(String accountId, RepairInstancesRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
@@ -229,8 +230,9 @@ public class RepairInstancesService {
      * If instances passed in request, reboot all valid passed bad instances
      * If force and instances passed in request, reboot all valid passed instances
      * If force and no instances passed in request, reboot all instances
+     *
      * @param accountId - The account id for the instance to reboot.
-     * @param request - A RebootInstanceRequest containing request parameters.
+     * @param request   - A RebootInstanceRequest containing request parameters.
      */
     public OperationStatus rebootInstances(String accountId, RebootInstancesRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);

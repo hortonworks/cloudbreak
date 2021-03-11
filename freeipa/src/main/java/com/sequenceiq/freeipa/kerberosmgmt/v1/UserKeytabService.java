@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-import static com.sequenceiq.freeipa.controller.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +22,7 @@ import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;

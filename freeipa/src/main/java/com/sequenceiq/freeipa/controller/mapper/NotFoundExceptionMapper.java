@@ -7,7 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Component
 public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {

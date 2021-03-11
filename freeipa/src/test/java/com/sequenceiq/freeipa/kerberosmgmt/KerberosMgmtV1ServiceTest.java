@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -33,7 +34,6 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Host;
 import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.Service;
-import com.sequenceiq.freeipa.controller.exception.NotFoundException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.KeytabCreationException;
@@ -409,7 +409,7 @@ public class KerberosMgmtV1ServiceTest {
         request.setServerHostName(HOST);
         request.setRoleRequest(roleRequest);
         Assertions.assertThrows(KeytabCreationException.class,
-            () -> underTest.getExistingServiceKeytab(request, ACCOUNT_ID));
+                () -> underTest.getExistingServiceKeytab(request, ACCOUNT_ID));
     }
 
     @Test
@@ -424,7 +424,7 @@ public class KerberosMgmtV1ServiceTest {
         request.setServerHostName(HOST);
         request.setRoleRequest(roleRequest);
         Assertions.assertThrows(KeytabCreationException.class,
-            () -> underTest.getExistingHostKeytab(request, ACCOUNT_ID));
+                () -> underTest.getExistingHostKeytab(request, ACCOUNT_ID));
     }
 
 }
