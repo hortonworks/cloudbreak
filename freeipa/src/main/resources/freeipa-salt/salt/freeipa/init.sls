@@ -64,3 +64,22 @@ disable_old_tls_for_ldap_server:
   file.append:
     - name: /usr/share/ipa/updates/20-sslciphers.update
     - text: 'only:sslVersionMin: TLS1.2'
+
+replace_default_tomcat_error_page:
+  file.replace:
+    - name: /var/lib/pki/pki-tomcat/conf/web.xml
+    - pattern: '</web-app>'
+    - repl: '<error-page>
+             <error-code>404</error-code>
+                <location>/error.jsp</location>
+             </error-page>
+             <error-page>
+             <error-code>403</error-code>
+                <location>/error.jsp</location>
+             </error-page>
+             <error-page>
+             <error-code>500</error-code>
+                <location>/error.jsp</location>
+             </error-page>
+             </web-app>'
+    - backup: False
