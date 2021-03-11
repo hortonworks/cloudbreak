@@ -860,13 +860,13 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setLoadBalancers(Set.of(loadBalancer));
         String envName = "anEnvName";
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-            .builder()
-            .withName(envName)
-            .build();
+                .builder()
+                .withName(envName)
+                .build();
         String accountWorkloadSubdomain = "aWorkloadSubdomain";
         UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
-            .setWorkloadSubdomain(accountWorkloadSubdomain)
-            .build();
+                .setWorkloadSubdomain(accountWorkloadSubdomain)
+                .build();
 
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
         when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
