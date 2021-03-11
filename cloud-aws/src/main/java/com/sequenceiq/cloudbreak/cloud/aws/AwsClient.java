@@ -77,6 +77,7 @@ public class AwsClient {
 
     private static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
+    @Inject
     private AwsSessionCredentialClient credentialClient;
 
     @Inject
