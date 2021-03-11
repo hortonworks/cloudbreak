@@ -18,8 +18,8 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     public SdxTestDto rotateAutotlsCertificates(TestContext testContext, SdxTestDto testDto, SdxClient client) {
         OperationInfo operationInfo = OperationInfo.builder()
                 .withEventName("RotateDatalakeClusterCertificates")
-                .withFirstState("CLUSTER_CMCA_ROTATION_STATE")
-                .withLastState("CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE")
+                .withFirstStates("CLUSTER_CMCA_ROTATION_STATE")
+                .withLastStates("CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE")
                 .build();
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = getAuditClient().listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
@@ -31,8 +31,8 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     public SdxTestDto upgradeClusterByNameInternal(TestContext testContext, SdxTestDto testDto, SdxClient client) {
         OperationInfo operationInfo = OperationInfo.builder()
                 .withEventName("UpgradeDatalakeCluster")
-                .withFirstState("DATALAKE_UPGRADE_START_STATE")
-                .withLastState("DATALAKE_UPGRADE_FINISHED_STATE")
+                .withFirstStates("DATALAKE_UPGRADE_START_STATE")
+                .withLastStates("DATALAKE_UPGRADE_FINISHED_STATE")
                 .build();
         List<AuditProto.CdpAuditEvent> cdpAuditEvents = getAuditClient().listEvents(ListAuditEvent.builder()
                 .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
@@ -45,8 +45,8 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     protected OperationInfo getStopOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("StopDatalakeCluster")
-                .withFirstState("SDX_STOP_SYNC_STATE")
-                .withLastState("SDX_STOP_FINISHED_STATE")
+                .withFirstStates("SDX_STOP_SYNC_STATE")
+                .withLastStates("SDX_STOP_FINISHED_STATE")
                 .build();
     }
 
@@ -54,8 +54,8 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     protected OperationInfo getDeleteOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("DeleteDatalakeCluster")
-                .withFirstState("SDX_DELETION_START_STATE")
-                .withLastState("SDX_DELETION_FINISHED_STATE")
+                .withFirstStates("SDX_DELETION_START_STATE")
+                .withLastStates("SDX_DELETION_FINISHED_STATE")
                 .build();
     }
 
@@ -63,8 +63,8 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     protected OperationInfo getStartOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("StartDatalakeCluster")
-                .withFirstState("SDX_START_RDS_START_STATE")
-                .withLastState("SDX_START_FINISHED_STATE")
+                .withFirstStates("SDX_START_RDS_START_STATE")
+                .withLastStates("SDX_START_FINISHED_STATE")
                 .build();
     }
 
@@ -72,8 +72,8 @@ public class DatalakeAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion
     protected OperationInfo getCreateOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("CreateDatalakeCluster")
-                .withFirstState("SDX_CREATION_WAIT_RDS_STATE")
-                .withLastState("SDX_CREATION_FINISHED_STATE")
+                .withFirstStates("SDX_CREATION_WAIT_RDS_STATE")
+                .withLastStates("SDX_CREATION_FINISHED_STATE")
                 .build();
     }
 

@@ -1,31 +1,33 @@
 package com.sequenceiq.it.cloudbreak.assertion.audit;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class OperationInfo {
 
     private final String eventName;
 
-    private final String firstState;
+    private final Set<String> firstStates;
 
-    private final String lastState;
+    private final Set<String> lastStates;
 
     public OperationInfo(Builder builder) {
         eventName = builder.eventName;
-        firstState = builder.firstState;
-        lastState = builder.lastState;
+        firstStates = builder.firstStates;
+        lastStates = builder.lastStates;
     }
 
     public String getEventName() {
         return eventName;
     }
 
-    public String getFirstState() {
-        return firstState;
+    public Set<String> getFirstStates() {
+        return firstStates;
     }
 
-    public String getLastState() {
-        return lastState;
+    public Set<String> getLastStates() {
+        return lastStates;
     }
 
     public static Builder builder() {
@@ -36,22 +38,22 @@ public class OperationInfo {
 
         private String eventName;
 
-        private String firstState;
+        private final Set<String> firstStates = new HashSet<>();
 
-        private String lastState;
+        private final Set<String> lastStates = new HashSet<>();
 
         public Builder withEventName(String eventName) {
             this.eventName = eventName;
             return this;
         }
 
-        public Builder withFirstState(String firstState) {
-            this.firstState = firstState;
+        public Builder withFirstStates(String... firstStates) {
+            this.firstStates.addAll(Set.of(firstStates));
             return this;
         }
 
-        public Builder withLastState(String lastState) {
-            this.lastState = lastState;
+        public Builder withLastStates(String... lastStates) {
+            this.lastStates.addAll(Set.of(lastStates));
             return this;
         }
 

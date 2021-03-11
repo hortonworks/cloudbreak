@@ -13,8 +13,8 @@ public class EnvironmentAuditGrpcServiceAssertion extends AuditGrpcServiceAssert
     protected OperationInfo getStopOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("StopEnvironment")
-                .withFirstState("STOP_DATAHUB_STATE")
-                .withLastState("ENV_STOP_FINISHED_STATE")
+                .withFirstStates("STOP_DATAHUB_STATE")
+                .withLastStates("ENV_STOP_FINISHED_STATE")
                 .build();
     }
 
@@ -22,8 +22,8 @@ public class EnvironmentAuditGrpcServiceAssertion extends AuditGrpcServiceAssert
     protected OperationInfo getDeleteOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("DeleteEnvironment")
-                .withFirstState("FREEIPA_DELETE_STARTED_STATE")
-                .withLastState("ENV_DELETE_FINISHED_STATE")
+                .withFirstStates("FREEIPA_DELETE_STARTED_STATE")
+                .withLastStates("ENV_DELETE_FINISHED_STATE")
                 .build();
     }
 
@@ -31,8 +31,8 @@ public class EnvironmentAuditGrpcServiceAssertion extends AuditGrpcServiceAssert
     protected OperationInfo getStartOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("StartEnvironment")
-                .withFirstState("START_FREEIPA_STATE")
-                .withLastState("ENV_START_FINISHED_STATE")
+                .withFirstStates("START_FREEIPA_STATE")
+                .withLastStates("ENV_START_FINISHED_STATE")
                 .build();
     }
 
@@ -40,8 +40,8 @@ public class EnvironmentAuditGrpcServiceAssertion extends AuditGrpcServiceAssert
     protected OperationInfo getCreateOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("CreateEnvironment")
-                .withFirstState("ENVIRONMENT_INITIALIZATION_STATE")
-                .withLastState("ENV_CREATION_FINISHED_STATE")
+                .withFirstStates("ENVIRONMENT_INITIALIZATION_STATE")
+                .withLastStates("ENV_CREATION_FINISHED_STATE")
                 .build();
     }
 

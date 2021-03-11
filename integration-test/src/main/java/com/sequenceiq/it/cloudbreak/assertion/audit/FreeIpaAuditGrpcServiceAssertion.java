@@ -15,8 +15,8 @@ public class FreeIpaAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<
     protected OperationInfo getStopOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("StopFreeipa")
-                .withFirstState("STOP_STATE")
-                .withLastState("STOP_FINISHED_STATE")
+                .withFirstStates("STOP_STATE")
+                .withLastStates("STOP_FINISHED_STATE")
                 .build();
     }
 
@@ -25,8 +25,8 @@ public class FreeIpaAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<
     protected OperationInfo getDeleteOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("DeleteFreeipa")
-                .withFirstState("STOP_TELEMETRY_AGENT_STATE")
-                .withLastState("TERMINATION_FINISHED_STATE")
+                .withFirstStates("STOP_TELEMETRY_AGENT_STATE")
+                .withLastStates("TERMINATION_FINISHED_STATE")
                 .build();
     }
 
@@ -35,8 +35,8 @@ public class FreeIpaAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<
     protected OperationInfo getStartOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("StartFreeipa")
-                .withFirstState("START_STATE")
-                .withLastState("START_FINISHED_STATE")
+                .withFirstStates("START_STATE")
+                .withLastStates("START_FINISHED_STATE")
                 .build();
     }
 
@@ -45,8 +45,8 @@ public class FreeIpaAuditGrpcServiceAssertion extends AuditGrpcServiceAssertion<
     protected OperationInfo getCreateOperationInfo() {
         return OperationInfo.builder()
                 .withEventName("CreateFreeipa")
-                .withFirstState("BOOTSTRAPPING_MACHINES_STATE")
-                .withLastState("FREEIPA_PROVISION_FINISHED_STATE")
+                .withFirstStates("BOOTSTRAPPING_MACHINES_STATE")
+                .withLastStates("FREEIPA_PROVISION_FINISHED_STATE")
                 .build();
     }
 
