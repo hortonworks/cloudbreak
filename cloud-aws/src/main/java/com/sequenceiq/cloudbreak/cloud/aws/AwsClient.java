@@ -4,7 +4,6 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -43,7 +42,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonClientExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -57,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
@@ -80,6 +79,7 @@ public class AwsClient {
 
     private static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
+    @Inject
     private AwsSessionCredentialClient credentialClient;
 
     @Inject
@@ -374,16 +374,12 @@ public class AwsClient {
     }
 
     private AwsSessionCredentialProvider createAwsSessionCredentialProvider(AwsCredentialView awsCredential) {
-        return new AwsSessionCredentialProvider(awsCredential, Objects.requireNonNull(credentialClient));
+        return new AwsSessionCredentialProvider(awsCredential, credentialClient);
     }
 
     private <T> T proxy(T client, AwsCredentialView awsCredentialView, String region) {
         AspectJProxyFactory proxyFactory = new AspectJProxyFactory(client);
         proxyFactory.addAspect(new AmazonClientExceptionHandler(awsCredentialView, region, sdkClientExceptionMapper));
         return proxyFactory.getProxy();
-    }
-
-    public void setAwsSessionCredentialClient(AwsSessionCredentialClient awsSessionCredentialClient) {
-        this.credentialClient = awsSessionCredentialClient;
     }
 }
