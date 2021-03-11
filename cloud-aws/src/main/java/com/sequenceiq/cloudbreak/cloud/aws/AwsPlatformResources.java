@@ -87,6 +87,7 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
@@ -146,6 +147,8 @@ public class AwsPlatformResources implements PlatformResources {
     private static final int UNAUTHORIZED = 403;
 
     private static final String ENABLED_AVAILABILITY_ZONES_FILE = "enabled-availability-zones";
+
+    private static final String SUPPORTED = "supported";
 
     private static final int SEGMENT = 100;
 
@@ -717,13 +720,24 @@ public class AwsPlatformResources implements PlatformResources {
                             diskInfo.getCount(),
                             diskInfo.getCount()));
                 }
-                if (Boolean.valueOf(instanceType.getEbsInfo().getEncryptionSupport())) {
+                if (getEncryptionSupported(instanceType)) {
                     vmTypeMetaBuilder.withVolumeEncryptionSupport(true);
                 }
                 VmType vmType = vmTypeWithMeta(instanceType.getInstanceType(), vmTypeMetaBuilder.create(), true);
                 awsInstances.add(vmType);
             }
         }
+    }
+
+    @VisibleForTesting
+    boolean getEncryptionSupported(InstanceTypeInfo instanceTypeInfo) {
+        boolean supported = false;
+        if (instanceTypeInfo.getEbsInfo() != null) {
+            if (instanceTypeInfo.getEbsInfo().getEncryptionSupport() != null) {
+                supported = instanceTypeInfo.getEbsInfo().getEncryptionSupport().toLowerCase().equals(SUPPORTED);
+            }
+        }
+        return supported;
     }
 
     private float getMemory(InstanceTypeInfo instanceType) {
