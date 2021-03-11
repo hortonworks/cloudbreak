@@ -121,7 +121,7 @@ if [[ "$CIRCLECI" ]]; then
     export DOCKER_CLIENT_TIMEOUT=120
     export COMPOSE_HTTP_TIMEOUT=120
 
-    $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans test | tee test.out
+    set -o pipefail ; $INTEGCB_LOCATION/.deps/bin/docker-compose --compatibility up --remove-orphans --exit-code-from test test | tee test.out
     echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
     echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"
