@@ -32,7 +32,6 @@ public class StartDatalakeHandler extends EventSenderAwareHandler<EnvironmentSta
 
     @Override
     public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
-        //TODO [AF]: test is missing
         EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             sdxPollerService.startAttachedDatalake(environmentDto.getId(), environmentDto.getName());
