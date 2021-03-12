@@ -7,6 +7,12 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PILLAR_CONFI
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PILLAR_CONFIG_UPDATE_STARTED;
 
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -19,11 +25,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import java.util.List;
-import javax.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Component
 public class PillarConfigUpdateService {
@@ -57,7 +58,7 @@ public class PillarConfigUpdateService {
             .fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(),
                 CLUSTER_PILLAR_CONFIG_UPDATE_STARTED);
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
-        clusterHostServiceRunner.updateClusterConfigs(stack, stack.getCluster(), List.of());
+        clusterHostServiceRunner.updateClusterConfigs(stack, stack.getCluster());
     }
 
     public void configUpdateFinished(StackView stackView) {

@@ -3,17 +3,14 @@ package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.handler;
 import static java.util.Objects.requireNonNull;
 
 import java.util.HashSet;
-import java.util.List;
-
 import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import reactor.bus.Event;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -27,6 +24,8 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+
+import reactor.bus.Event;
 
 @Component
 public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<UpdateServiceConfigRequest> {
@@ -82,7 +81,7 @@ public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<Upd
             ClusterApi clusterApi = clusterApiConnectors.getConnector(stackService.getByIdWithListsInTransaction(event.getData().getResourceId()));
             clusterApi.clusterModificationService().updateServiceConfigAndRestartService(HUE_SERVICE, HUE_KNOX_PROXYHOSTS, String.join(",", proxyhosts));
             LOGGER.debug("Updating CM frontend URL with load balancer DNS");
-            clusterHostServiceRunner.updateClusterConfigs(stack, stack.getCluster(), List.of());
+            clusterHostServiceRunner.updateClusterConfigs(stack, stack.getCluster());
             LOGGER.debug("Service config update was successful");
             return new UpdateServiceConfigSuccess(stack);
         } catch (Exception e) {

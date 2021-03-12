@@ -109,6 +109,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
+import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -227,31 +228,36 @@ public class ClusterHostServiceRunner {
     @Inject
     private CsdParcelDecorator csdParcelDecorator;
 
-    public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
+    public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
-            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, candidateAddresses.keySet());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, reachableNodes);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initServiceRun(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.initServiceRun(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
             if (CollectionUtils.isEmpty(candidateAddresses)) {
                 mountDisks.mountAllDisks(stack.getId());
             } else {
-                mountDisks.mountDisksOnNewNodes(stack.getId(), new HashSet<>(candidateAddresses));
+                mountDisks.mountDisksOnNewNodes(stack.getId(), new HashSet<>(candidateAddresses.values()), reachableNodes);
             }
             recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException | CloudbreakException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
+        } catch (NodesUnreachableException e) {
+            String errorMessage = "Can not run cluster services on new nodes because the configuration management service is not responding on these nodes: "
+                    + e.getUnreachableNodes();
+            LOGGER.error(errorMessage);
+            throw new CloudbreakServiceException(errorMessage, e);
         }
     }
 
-    public void updateClusterConfigs(@Nonnull Stack stack, @Nonnull Cluster cluster, List<String> candidateAddresses) {
+    public void updateClusterConfigs(@Nonnull Stack stack, @Nonnull Cluster cluster) {
         try {
-            Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+            Set<Node> nodes = stackUtil.collectReachableNodesByInstanceStates(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs, nodes);
@@ -268,7 +274,7 @@ public class ClusterHostServiceRunner {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
         candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-        runClusterServices(stack, cluster, new ArrayList<>(candidates.values()));
+        runClusterServices(stack, cluster, candidates);
         return candidates;
     }
 

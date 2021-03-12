@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -16,6 +17,8 @@ import java.util.stream.IntStream;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -34,14 +37,18 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeVolumes;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
 public class StackUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackUtil.class);
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -57,6 +64,12 @@ public class StackUtil {
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
+
+    @Inject
+    private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
 
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
@@ -75,7 +88,7 @@ public class StackUtil {
         return agents;
     }
 
-    public Set<Node> collectReachableNodes(Stack stack) {
+    public Set<Node> collectReachableNodesByInstanceStates(Stack stack) {
         return stack.getInstanceGroups()
                 .stream()
                 .filter(ig -> ig.getNodeCount() != 0)
@@ -88,6 +101,23 @@ public class StackUtil {
                             im.getDiscoveryFQDN(), im.getInstanceGroupName());
                 })
                 .collect(Collectors.toSet());
+    }
+
+    public Set<Node> collectAndCheckReachableNodes(Stack stack, Collection<String> necessaryNodes) throws NodesUnreachableException {
+        Set<Node> reachableNodes = collectReachableNodes(stack);
+        Set<String> reachableAddresses = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        Set<String> unReachableCandidateNodes = necessaryNodes.stream()
+                .filter(necessaryNodeAddress -> !reachableAddresses.contains(necessaryNodeAddress)).collect(Collectors.toSet());
+        if (unReachableCandidateNodes.isEmpty()) {
+            return reachableNodes;
+        } else {
+            LOGGER.error("Some nodes are unreachable: {}", unReachableCandidateNodes);
+            throw new NodesUnreachableException("Some nodes are unreachable", unReachableCandidateNodes);
+        }
+    }
+
+    public Set<Node> collectReachableNodes(Stack stack) {
+        return hostOrchestrator.getResponsiveNodes(collectNodes(stack), gatewayConfigService.getPrimaryGatewayConfig(stack));
     }
 
     public Set<Node> collectNodesFromHostnames(Stack stack, Set<String> hostnames) {

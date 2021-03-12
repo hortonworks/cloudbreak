@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -62,7 +62,7 @@ public class ClusterServiceRunner {
         generateGatewaySignKeys(cluster);
 
         MDCBuilder.buildMdcContext(cluster);
-        hostRunner.runClusterServices(stack, cluster, List.of());
+        hostRunner.runClusterServices(stack, cluster, Map.of());
         updateAmbariClientConfig(stack, cluster);
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaDataSet()) {
             instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
@@ -89,7 +89,7 @@ public class ClusterServiceRunner {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
                 .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
-        hostRunner.runClusterServices(stack, cluster, List.of());
+        hostRunner.runClusterServices(stack, cluster, Map.of());
     }
 
     public void redeployGatewayCertificate(Long stackId) {
