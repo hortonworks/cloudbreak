@@ -64,6 +64,7 @@ public class FreeIpaPollerProvider {
 
     public AttemptMaker<Void> syncUsersPoller(Long envId, String envCrn, String operationId) {
         return () -> {
+            //TODO [AF]: I would prefer EnvironmentInMemoryStateStore.get(envId))).isCancelled()
             if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
                 LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
                 return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
@@ -112,6 +113,7 @@ public class FreeIpaPollerProvider {
     }
 
     private boolean freeipaAvailable(DescribeFreeIpaResponse freeipa) {
+        // TODO: is the Status.isAvailable() wrong instead of this?
         return Status.AVAILABLE.equals(freeipa.getStatus());
     }
 

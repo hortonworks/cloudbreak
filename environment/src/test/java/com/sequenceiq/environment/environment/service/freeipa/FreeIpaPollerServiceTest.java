@@ -123,6 +123,7 @@ public class FreeIpaPollerServiceTest {
         verify(freeIpaService, never()).synchronizeAllUsersInEnvironment(ENV_CRN);
     }
 
+    //TODO: AF test with poller stopped with exception
     private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {
         List<FailureDetails> failureDetails = new ArrayList<>();
         if (StringUtils.isNotBlank(error)) {
