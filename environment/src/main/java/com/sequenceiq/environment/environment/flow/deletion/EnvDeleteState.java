@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.environment.flow.deletion;
 
+import com.sequenceiq.environment.environment.flow.EnvironmentFillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum EnvDeleteState implements FlowState {
 
@@ -15,6 +17,10 @@ public enum EnvDeleteState implements FlowState {
     UMS_RESOURCE_DELETE_STARTED_STATE,
     ENV_DELETE_FINISHED_STATE,
     ENV_DELETE_FAILED_STATE,
-    FINAL_STATE
+    FINAL_STATE;
 
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return EnvironmentFillInMemoryStateStoreRestartAction.class;
+    }
 }

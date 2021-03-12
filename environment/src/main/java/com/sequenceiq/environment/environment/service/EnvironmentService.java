@@ -434,4 +434,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public EnumSet<Crn.ResourceType> getCrnTypes() {
         return EnumSet.of(Crn.ResourceType.ENVIRONMENT);
     }
+
+    public Optional<Environment> getById(Long environmentId) {
+        return environmentRepository.findById(environmentId);
+    }
 }

@@ -37,7 +37,9 @@ public class ContextClosedEventHandler {
     }
 
     private void shutdownEventBusThreadPoolExecutor() {
+        LOGGER.debug("Shutting down executor service.");
         executor.shutdownNow();
+        LOGGER.info("Executor service has been shut down.");
         try {
             if (!executor.awaitTermination(eventBusThreadpoolShutdownTimeout, TimeUnit.SECONDS)) {
                 LOGGER.warn("eventBusThreadPoolExecutor shutdown timed out.");

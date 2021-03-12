@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.environment.environment.flow.creation.config.EnvCreationFlowConfig;
 import com.sequenceiq.environment.environment.flow.deletion.config.EnvClustersDeleteFlowConfig;
 import com.sequenceiq.environment.environment.flow.deletion.config.EnvDeleteFlowConfig;
+import com.sequenceiq.environment.environment.flow.loadbalancer.config.LoadBalancerUpdateFlowConfig;
+import com.sequenceiq.environment.environment.flow.start.config.EnvStartFlowConfig;
+import com.sequenceiq.environment.environment.flow.stop.config.EnvStopFlowConfig;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
@@ -18,7 +21,12 @@ public class EnvironmentFlowInformation implements ApplicationFlowInformation {
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
-        return List.of(EnvCreationFlowConfig.class, EnvDeleteFlowConfig.class, EnvClustersDeleteFlowConfig.class);
+        return List.of(EnvCreationFlowConfig.class,
+                EnvDeleteFlowConfig.class,
+                EnvClustersDeleteFlowConfig.class,
+                EnvStopFlowConfig.class,
+                EnvStartFlowConfig.class,
+                LoadBalancerUpdateFlowConfig.class);
     }
 
     @Override

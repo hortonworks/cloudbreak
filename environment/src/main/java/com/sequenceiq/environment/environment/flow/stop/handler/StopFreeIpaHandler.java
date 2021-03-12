@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.flow.stop.handler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.google.common.base.Strings;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -12,11 +16,12 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-import org.springframework.stereotype.Component;
+
 import reactor.bus.Event;
 
 @Component
 public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StopFreeIpaHandler.class);
 
     private final FreeIpaPollerService freeIpaPollerService;
 
@@ -52,6 +57,7 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
                     .build();
             eventSender().sendEvent(envStopEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
+            LOGGER.warn("Failed to stop Freeipa.", e);
             EnvStopFailedEvent failedEvent = new EnvStopFailedEvent(environmentDto, e, EnvironmentStatus.STOP_FREEIPA_FAILED);
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
