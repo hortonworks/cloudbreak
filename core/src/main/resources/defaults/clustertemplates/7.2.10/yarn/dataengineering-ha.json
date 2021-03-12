@@ -90,6 +90,22 @@
           }
         },
         "recipeNames": []
+      },
+      {
+        "nodeCount": 1,
+        "name": "masterx",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "recipeNames": []
       }
     ]
   }

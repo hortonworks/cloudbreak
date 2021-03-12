@@ -75,6 +75,19 @@
           }
         },
         "recipeNames": []
+      },
+      {
+        "nodeCount": 1,
+        "name": "masterx",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "recipeNames": []
       }
     ]
   }
