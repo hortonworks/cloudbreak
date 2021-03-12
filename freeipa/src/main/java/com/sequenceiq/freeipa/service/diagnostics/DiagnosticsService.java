@@ -97,7 +97,7 @@ public class DiagnosticsService {
     public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
-        diagnosticsCollectionValidator.validate(request, stack.getTelemetry(), stack.getResourceCrn(), stack.getAppVersion());
+        diagnosticsCollectionValidator.validate(request, stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
         boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(stack.getAccountId());
         String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(stack.getTelemetry().getDatabusEndpoint(), useDbusCnameEndpoint);

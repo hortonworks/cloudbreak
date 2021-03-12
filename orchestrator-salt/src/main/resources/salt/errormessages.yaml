@@ -3,4 +3,4 @@
 'test_s3_put': 'Testing s3 put failed for dummy /tmp/.test_cloud_storage_upload.txt, please make sure you have write access from your nodes to your S3'
 'test_abfs_put': 'Testing abfs write failed for dummy /tmp/.test_cloud_storage_upload.txt, please make sure you have write access from your nodes to your Blob storage'
 'check_dbus_connection': 'DBus API is not available from your node(s). Please check you connection against "https://dbusapi.us-west-1.altus.cloudera.com" (or proper dev url on non-production environments)'
-'check_td_agent_running_systemctl': 'A running td-agent is required on your node(s) to collect and send diagnostics to ENG (engineering).'
+'check_logging_agent_running_systemctl': 'A running cdp-logging-agent or td-agent is required on your node(s) to collect and send diagnostics to ENG (engineering).'

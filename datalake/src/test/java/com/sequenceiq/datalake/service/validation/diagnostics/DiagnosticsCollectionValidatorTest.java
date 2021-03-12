@@ -28,7 +28,7 @@ class DiagnosticsCollectionValidatorTest {
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
-        assertTrue(thrown.getMessage().contains("Telemetry is not enabled for stack"));
+        assertTrue(thrown.getMessage().contains("Telemetry is not enabled for Data Lake"));
     }
 
     @Test
@@ -41,7 +41,7 @@ class DiagnosticsCollectionValidatorTest {
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
-        assertTrue(thrown.getMessage().contains("Cloud storage logging is disabled for this cluster"));
+        assertTrue(thrown.getMessage().contains("Cloud storage logging is disabled for Data Lake"));
     }
 
     @Test
@@ -56,7 +56,7 @@ class DiagnosticsCollectionValidatorTest {
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
-        assertTrue(thrown.getMessage().contains("S3, ABFS or GCS cloud storage logging setting should be enabled for stack"));
+        assertTrue(thrown.getMessage().contains("S3, ABFS or GCS cloud storage logging setting should be enabled for Data Lake"));
     }
 
     @Test
@@ -69,7 +69,7 @@ class DiagnosticsCollectionValidatorTest {
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () -> underTest.validate(request, stackV4Response));
 
-        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for this stack"));
+        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for Data Lake"));
     }
 
     @Test

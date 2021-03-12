@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.GcsConfig;
@@ -43,6 +44,9 @@ public class DiagnosticsDataToParameterConverter {
 
     @Inject
     private GcsConfigGenerator gcsConfigGenerator;
+
+    @Inject
+    private DataBusEndpointProvider dataBusEndpointProvider;
 
     public DiagnosticParameters convert(BaseDiagnosticsCollectionRequest request, Telemetry telemetry,
             String clusterType, String clusterVersion, String accountId, String region, String databusEndpoint) {
@@ -89,6 +93,7 @@ public class DiagnosticsDataToParameterConverter {
         builder.withAdditionalLogs(request.getAdditionalLogs());
         if (supportBundleConfiguration.isEnabled()) {
             builder.withDbusUrl(databusEndpoint);
+            builder.withDbusS3Url(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint));
             builder.withSupportBundleDbusStreamName(supportBundleConfiguration.getDbusStreamName());
             builder.withSupportBundleDbusAppName(supportBundleConfiguration.getDbusAppName());
         }

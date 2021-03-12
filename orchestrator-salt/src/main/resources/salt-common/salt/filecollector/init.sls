@@ -118,9 +118,9 @@ check_dbus_connection:
   cmd.run:
     - name: "cdp-telemetry utils check-connection --url {{ databus.endpoint }}"
     - failhard: True
-check_td_agent_running_systemctl:
+check_logging_agent_running_systemctl:
   cmd.run:
-    - name: "systemctl is-active --quiet td-agent"
+    - name: "systemctl is-active --quiet td-agent || systemctl is-active --quiet cdp-logging-agent"
     - failhard: True
 {% elif filecollector.dbusUrl and filecollector.destination == "SUPPORT" %}
 check_support_dbus_connection:
@@ -130,6 +130,15 @@ check_support_dbus_connection:
     - env: {% if filecollector.proxyProtocol == "https" %}
        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
        - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+{% if filecollector.dbusS3Url %}
+check_support_dbus_s3_connection:
+  cmd.run:
+    - name: "cdp-telemetry utils check-connection --url {{ filecollector.dbusS3Url }}"
+    - failhard: True{% if filecollector.proxyUrl %}
+    - env: {% if filecollector.proxyProtocol == "https" %}
+       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
+       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+{% endif %}
 {% endif %}
 
 {% if not filecollector.skipWorkspaceCleanupOnStartup %}

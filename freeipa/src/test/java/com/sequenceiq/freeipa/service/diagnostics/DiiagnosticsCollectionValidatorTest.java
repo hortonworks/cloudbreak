@@ -14,6 +14,9 @@ import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 
 public class DiiagnosticsCollectionValidatorTest {
 
@@ -27,9 +30,9 @@ public class DiiagnosticsCollectionValidatorTest {
         Telemetry telemetry = new Telemetry();
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
-                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
+                underTest.validate(request, createStackWithTelemetry(telemetry)));
 
-        assertTrue(thrown.getMessage().contains("Cloud storage logging is disabled for this cluster"));
+        assertTrue(thrown.getMessage().contains("Cloud storage logging is disabled for FreeIPA"));
     }
 
     @Test
@@ -40,9 +43,9 @@ public class DiiagnosticsCollectionValidatorTest {
         telemetry.setLogging(new Logging());
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
-                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
+                underTest.validate(request, createStackWithTelemetry(telemetry)));
 
-        assertTrue(thrown.getMessage().contains("S3, ABFS or GCS cloud storage logging setting should be enabled for stack"));
+        assertTrue(thrown.getMessage().contains("S3, ABFS or GCS cloud storage logging setting should be enabled for FreeIPA"));
     }
 
     @Test
@@ -54,7 +57,7 @@ public class DiiagnosticsCollectionValidatorTest {
         logging.setS3(new S3CloudStorageV1Parameters());
         telemetry.setLogging(logging);
 
-        underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48");
+        underTest.validate(request, createStackWithTelemetry(telemetry));
     }
 
     @Test
@@ -64,7 +67,7 @@ public class DiiagnosticsCollectionValidatorTest {
         Telemetry telemetry = new Telemetry();
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
-                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
+                underTest.validate(request, createStackWithTelemetry(telemetry)));
 
         assertTrue(thrown.getMessage().contains("Destination SUPPORT is not supported yet."));
     }
@@ -76,9 +79,9 @@ public class DiiagnosticsCollectionValidatorTest {
         Telemetry telemetry = new Telemetry();
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
-                underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48"));
+                underTest.validate(request, createStackWithTelemetry(telemetry)));
 
-        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for this stack"));
+        assertTrue(thrown.getMessage().contains("Cluster log collection is not enabled for FreeIPA"));
     }
 
     @Test
@@ -92,7 +95,7 @@ public class DiiagnosticsCollectionValidatorTest {
         features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
 
-        underTest.validate(request, telemetry, "stackCrn", "2.35.0-b48");
+        underTest.validate(request, createStackWithTelemetry(telemetry));
     }
 
     @Test
@@ -105,9 +108,23 @@ public class DiiagnosticsCollectionValidatorTest {
         clusterLogsCollection.setEnabled(true);
         features.setClusterLogsCollection(clusterLogsCollection);
         telemetry.setFeatures(features);
+        Stack stack = createStackWithTelemetry(telemetry);
+        stack.setAppVersion("2.32.0-b48");
 
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
-                underTest.validate(request, telemetry, "stackCrn", "2.32.0-b48"));
-        assertTrue(thrown.getMessage().contains("Required freeipa min major/minor version is 2.33"));
+                underTest.validate(request, stack));
+        assertTrue(thrown.getMessage().contains("Required FreeIPA min major/minor version is 2.33"));
+    }
+
+    private Stack createStackWithTelemetry(Telemetry telemetry) {
+        Stack stack = new Stack();
+        StackStatus status = new StackStatus();
+        status.setStatus(Status.AVAILABLE);
+        stack.setStackStatus(status);
+        stack.setTelemetry(telemetry);
+        stack.setAppVersion("2.35.0-b48");
+        stack.setResourceCrn("stackCrn");
+        stack.setName("stackCrn");
+        return stack;
     }
 }
