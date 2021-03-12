@@ -11,7 +11,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -22,11 +21,8 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDelet
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdbmsDeleteHandler.class);
 
-    private final EnvironmentService environmentService;
-
-    protected RdbmsDeleteHandler(EventSender eventSender, EnvironmentService environmentService) {
+    protected RdbmsDeleteHandler(EventSender eventSender) {
         super(eventSender);
-        this.environmentService = environmentService;
     }
 
     @Override
