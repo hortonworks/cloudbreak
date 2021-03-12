@@ -80,3 +80,16 @@ restart_httpd:
     - watch:
       - file: /etc/httpd/conf.d/ipa-rewrite.conf
       - file: /etc/httpd/conf/httpd.conf
+
+/etc/sssd/sssd.conf:
+  file.line:
+    - mode: ensure
+    - content: "entry_cache_timeout = 30"
+    - after: "cache_credentials.*"
+
+restart_sssd_if_reconfigured:
+  service.running:
+    - enable: True
+    - name: sssd
+    - watch:
+      - file: /etc/sssd/sssd.conf
