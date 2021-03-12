@@ -7,12 +7,8 @@ import reactor.rx.Promise;
 
 public class EnvCreationEvent extends BaseNamedFlowEvent {
 
-    public EnvCreationEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
-        super(selector, resourceId, resourceName, resourceCrn);
-    }
-
-    public EnvCreationEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
-        super(selector, resourceId, accepted, resourceName, resourceCrn);
+    private EnvCreationEvent(EnvCreationEventBuilder builder) {
+        super(builder.selector, builder.resourceId, builder.accepted, builder.resourceName, builder.resourceCrn);
     }
 
     public static EnvCreationEventBuilder builder() {
@@ -59,7 +55,7 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
         }
 
         public EnvCreationEvent build() {
-            return new EnvCreationEvent(selector, resourceId, accepted, resourceName, resourceCrn);
+            return new EnvCreationEvent(this);
         }
     }
 }
