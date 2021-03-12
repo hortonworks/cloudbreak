@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -26,8 +24,11 @@ import reactor.rx.Promise;
 // TODO: CB-11559
 public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFactory<EnvDeleteEvent> {
 
-    @Inject
     private EnvironmentService environmentService;
+
+    public EnvDeleteClustersFlowEventChainFactory(EnvironmentService environmentService) {
+        this.environmentService = environmentService;
+    }
 
     @Override
     public String initEvent() {
