@@ -33,7 +33,7 @@ public class FreeIpaCreationTest extends AbstractMockTest {
             then = "freeipa should be available with kerberos and ldap config")
     public void testCreateFreeIpa(MockedTestContext testContext) {
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .then(FreeIpaKerberosTestAssertion.validate())

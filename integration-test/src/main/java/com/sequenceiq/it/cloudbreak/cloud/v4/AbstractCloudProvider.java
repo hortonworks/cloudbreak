@@ -215,6 +215,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         return environmentSecurityAccessTestDto;
     }
 
+    @Override
+    public String getFreeIpaImageCatalogUrl() {
+        return null;
+    }
+
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
 
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);

@@ -50,7 +50,6 @@ public class EnvironmentLegacyAuthzGetTest extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
                 .given(FreeIpaTestDto.class)
-                .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.describe())

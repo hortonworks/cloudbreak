@@ -40,7 +40,7 @@ public class FreeIpaStartStopTest extends AbstractMockTest {
             then = "freeipa sould be available")
     public void testStopStartFreeIpa(MockedTestContext testContext) {
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.stop())
