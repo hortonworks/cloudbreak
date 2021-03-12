@@ -22,6 +22,7 @@
 {% set mode = salt['pillar.get']('filecollector:mode') %}
 {% set uuid = salt['pillar.get']('filecollector:uuid') %}
 {% set dbus_url = salt['pillar.get']('filecollector:dbusUrl') %}
+{% set dbus_s3_url = salt['pillar.get']('filecollector:dbusS3Url') %}
 {% if salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
   {% set support_bundle_dbus_headers = '--header unifieddiagnostics-app:' + salt['pillar.get']('filecollector:supportBundleDbusAppName') %}
 {% else %}
@@ -143,5 +144,6 @@
     "supportBundleDbusAccessKey": support_bundle_dbus_access_key,
     "supportBundleDbusPrivateKey": support_bundle_dbus_private_key,
     "compressedFilePattern": compressed_file_pattern,
-    "dbusUrl": dbus_url
+    "dbusUrl": dbus_url,
+    "dbusS3Url": dbus_s3_url
 }) %}

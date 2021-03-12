@@ -55,6 +55,8 @@ public class DiagnosticParameters {
 
     private String dbusUrl;
 
+    private String dbusS3Url;
+
     private String supportBundleDbusAccessKey;
 
     private String supportBundleDbusPrivateKey;
@@ -90,6 +92,7 @@ public class DiagnosticParameters {
         parameters.put("clusterVersion", clusterVersion);
         parameters.put("mode", null);
         parameters.put("dbusUrl", dbusUrl);
+        parameters.put("dbusS3Url", dbusS3Url);
         parameters.put("supportBundleDbusAccessKey", supportBundleDbusAccessKey);
         parameters.put("supportBundleDbusPrivateKey", supportBundleDbusPrivateKey);
         parameters.put("supportBundleDbusStreamName", supportBundleDbusStreamName);
@@ -182,6 +185,10 @@ public class DiagnosticParameters {
 
     public void setDbusUrl(String dbusUrl) {
         this.dbusUrl = dbusUrl;
+    }
+
+    private void setDbusS3Url(String dbusS3Url) {
+        this.dbusS3Url = dbusS3Url;
     }
 
     public void setSupportBundleDbusAccessKey(String supportBundleDbusAccessKey) {
@@ -282,6 +289,10 @@ public class DiagnosticParameters {
 
     public String getDbusUrl() {
         return dbusUrl;
+    }
+
+    public String getDbusS3Url() {
+        return dbusS3Url;
     }
 
     public String getSupportBundleDbusAccessKey() {
@@ -416,6 +427,11 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withDbusUrl(String dbusUrl) {
             diagnosticParameters.setDbusUrl(dbusUrl);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withDbusS3Url(String dbusS3Url) {
+            diagnosticParameters.setDbusS3Url(dbusS3Url);
             return this;
         }
 

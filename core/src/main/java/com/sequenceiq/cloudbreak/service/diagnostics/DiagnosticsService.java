@@ -118,7 +118,7 @@ public class DiagnosticsService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-        diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
+        diagnosticsCollectionValidator.validate(request, stack, telemetry);
         String clusterVersion = version;
         if (stack.getCluster() != null && stack.getCluster().getBlueprint() != null
                 && StringUtils.isNotBlank(stack.getCluster().getBlueprint().getStackVersion())) {
@@ -155,7 +155,7 @@ public class DiagnosticsService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Starting CM based diagnostics collection for Stack. Crn: '{}'", stack.getResourceCrn());
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
-        diagnosticsCollectionValidator.validate(request, telemetry, stackCrn);
+        diagnosticsCollectionValidator.validate(request, stack, telemetry);
         CmDiagnosticsParameters parameters = cmDiagnosticsDataToParameterConverter.convert(request, telemetry, stack.getName(), stack.getRegion());
         CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
                 .withAccepted(new Promise<>())
