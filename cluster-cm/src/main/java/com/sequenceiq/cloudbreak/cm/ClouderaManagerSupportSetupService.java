@@ -13,7 +13,6 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @Service
 public class ClouderaManagerSupportSetupService {
@@ -28,13 +27,13 @@ public class ClouderaManagerSupportSetupService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    void prepareSupportRole(ApiClient apiClient, TemplatePreparationObject templatePreparationObject) {
+    void prepareSupportRole(ApiClient apiClient, StackType type) {
         try {
             clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient).updateConfig("",
                 new ApiConfigList().addItemsItem(
                     new ApiConfig()
                         .name(CREATOR_TAG)
-                        .value(String.format("Cloudera %s %s", getServiceType(templatePreparationObject.getStackType()), cbVersion))
+                        .value(String.format("Cloudera %s %s", getServiceType(type), cbVersion))
                 ));
         } catch (ApiException e) {
             LOGGER.debug("Failed to set CREATOR_TAG on Cloudera Manager", e);

@@ -164,30 +164,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         }
     }
 
-    private ApiClient createApiClient() throws ClusterClientInitException {
-        ApiClient client = null;
-        try {
-            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
-            ToolsResourceApi toolsResourceApi = clouderaManagerApiFactory.getToolsResourceApi(client);
-            toolsResourceApi.echo("TEST");
-            LOGGER.debug("Cloudera Manager already running, old admin user's password has not been changed yet.");
-            return client;
-        } catch (ClouderaManagerClientInitException e) {
-            throw new ClusterClientInitException(e);
-        } catch (ApiException e) {
-            return returnClientBasedOnApiError(client, e);
-        }
-    }
-
-    private ApiClient returnClientBasedOnApiError(ApiClient client, ApiException e) {
-        if (org.springframework.http.HttpStatus.UNAUTHORIZED.value() == e.getCode()) {
-            LOGGER.debug("Cloudera Manager already running, old admin user's password has been changed.");
-            return apiClient;
-        }
-        LOGGER.debug("Cloudera Manager is not running yet.", e);
-        return client;
-    }
-
     @Override
     public String prepareTemplate(
             Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
@@ -208,206 +184,138 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (Exception e) {
-            LOGGER.info("Error while building the cluster. Message: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            throw mapException(e);
         }
     }
 
     @Override
-    public Cluster buildCluster(
-            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
-            TemplatePreparationObject templatePreparationObject,
+    public void validateLicence() {
+        try {
+            clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
+        } catch (Exception e) {
+            throw mapException(e);
+        }
+    }
+
+    @Override
+    public void configureManagementServices(TemplatePreparationObject templatePreparationObject,
             String sdxContext,
             String sdxStackCrn,
             Telemetry telemetry,
-            KerberosConfig kerberosConfig,
-            ProxyConfig proxyConfig,
-            String template) {
-        Cluster cluster = stack.getCluster();
-        Long clusterId = cluster.getId();
+            ProxyConfig proxyConfig) {
+        String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
         try {
-            Set<InstanceMetaData> instances = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-            waitForHosts(instances);
-            clouderaManagerLicenseService.validateClouderaManagerLicense(stack.getCreator());
-            String sdxContextName = Optional.ofNullable(sdxContext).map(this::createDataContext).orElse(null);
-
             configureCmMgmtServices(templatePreparationObject, sdxStackCrn, telemetry, sdxContextName, proxyConfig);
-            configureCmSupportTag(templatePreparationObject);
-            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
-            ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
-            cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
-            LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(template));
-            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
-            updateConfig(clouderaManagerResourceApi, stack.getType());
-
-            boolean prewarmed = isPrewarmed(clusterId);
-            if (prewarmed) {
-                refreshParcelRepos(clouderaManagerResourceApi);
-            }
-            installCluster(cluster, apiClusterTemplate, clouderaManagerResourceApi, prewarmed);
-            clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
-            clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);
-            configureKerberos(kerberosConfig, clouderaManagerRepoDetails);
-        } catch (CancellationException cancellationException) {
-            throw cancellationException;
         } catch (ApiException e) {
-            LOGGER.info("Error while building the cluster. Message: {}; Response: {}", e.getMessage(), e.getResponseBody(), e);
-            String msg = extractMessage(e);
+            throw mapApiException(e);
+        } catch (Exception e) {
+            throw mapException(e);
+        }
+    }
+
+    @Override
+    public void configureSupportTags(TemplatePreparationObject templatePreparationObject) {
+        try {
+            configureCmSupportTag(templatePreparationObject);
+        } catch (Exception e) {
+            throw mapException(e);
+        }
+    }
+
+    @Override
+    public void suppressWarnings() {
+        clouderaManagerYarnSetupService.suppressWarnings(stack, apiClient);
+    }
+
+    @Override
+    public void startManagementServices() {
+        try {
+            clouderaManagerMgmtLaunchService.startManagementServices(stack, apiClient);
+        } catch (ApiException e) {
+            throw mapApiException(e);
+        }
+    }
+
+    @Override
+    public void configureKerberos(KerberosConfig kerberosConfig) {
+        Cluster cluster = stack.getCluster();
+        try {
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
+            if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
+                kerberosService.configureKerberosViaApi(apiClient, clientConfig, stack, kerberosConfig);
+            }
+        } catch (ApiException e) {
+            throw mapApiException(e);
+        } catch (Exception e) {
+            throw mapException(e);
+        }
+    }
+
+    @Override
+    public void installCluster(String template) {
+        Cluster cluster = stack.getCluster();
+        try {
+            Optional<ApiCluster> cmCluster = getCmClusterByName(cluster.getName());
+            boolean prewarmed = isPrewarmed(cluster.getId());
+            Optional<ClusterCommand> importCommand = clusterCommandRepository.findTopByClusterIdAndClusterCommandType(cluster.getId(),
+                    ClusterCommandType.IMPORT_CLUSTER);
+            if (cmCluster.isEmpty() || importCommand.isEmpty()) {
+                    ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
+                    cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
+                    ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+                    LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(template));
+                    // addRepositories - if true the parcels repositories in the cluster template
+                    // will be added.
+                    ApiCommand apiCommand = clouderaManagerResourceApi
+                            .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
+                    ClusterCommand clusterCommand = new ClusterCommand();
+                    clusterCommand.setClusterId(cluster.getId());
+                    clusterCommand.setCommandId(apiCommand.getId());
+                    clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
+                    importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
+                    LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+            }
+            importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
+        } catch (ApiException e) {
+            String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (CloudStorageConfigurationFailedException e) {
             LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
             throw new ClouderaManagerOperationFailedException(clouderaManagerStorageErrorMapper.map(e, stack.cloudPlatform(), cluster), e);
         } catch (Exception e) {
-            LOGGER.info("Error while building the cluster. Message: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
-        }
-        return cluster;
-    }
-
-    private void configureKerberos(KerberosConfig kerberosConfig, ClouderaManagerRepo clouderaManagerRepoDetails)
-            throws ApiException, CloudbreakException {
-        if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
-            kerberosService.configureKerberosViaApi(apiClient, clientConfig, stack, kerberosConfig);
+            throw mapException(e);
         }
     }
 
-    private ApiClusterTemplate getCmTemplate(TemplatePreparationObject templatePreparationObject, String sdxContextName,
-            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, ClouderaManagerRepo clouderaManagerRepoDetails, Long clusterId) {
-
-        List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
-        Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
-        return cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
-                clouderaManagerProductDetails, sdxContextName);
-    }
-
-    private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
-            String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
-        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
-        if (optionalCmHost.isPresent()) {
-            ApiHost cmHost = optionalCmHost.get();
-            ApiHostRef cmHostRef = new ApiHostRef();
-            cmHostRef.setHostId(cmHost.getHostId());
-            cmHostRef.setHostname(cmHost.getHostname());
-            mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef, templatePreparationObject.getRdsConfigs(),
-                    telemetry, sdxContextName, sdxCrn, proxyConfig);
-        } else {
-            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
-        }
-    }
-
-    private void configureCmSupportTag(TemplatePreparationObject templatePreparationObject) throws ApiException {
-        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
-        if (optionalCmHost.isPresent()) {
-            clouderaManagerSupportSetupService.prepareSupportRole(apiClient, templatePreparationObject);
-        } else {
-            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping support tag setup.");
-        }
-    }
-
-    private Optional<ApiHost> getCmHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
-        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
-        return hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name()).getItems().stream().filter(
-                host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
-                .findFirst();
-    }
-
-    private String createDataContext(String sdxContext) {
-        Cluster cluster = stack.getCluster();
-        String user = cluster.getCloudbreakAmbariUser();
-        String password = cluster.getCloudbreakAmbariPassword();
+    @Override
+    public void updateConfig() {
+        com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType = stack.getType();
         try {
-            ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
-            CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
-            ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
-            LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
-            return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
-        } catch (ApiException | ClouderaManagerClientInitException e) {
-            LOGGER.info("Error while creating data context using: {}", sdxContext, e);
-            throw new ClouderaManagerOperationFailedException(String.format("Error while creating data context: %s", e.getMessage()), e);
-        } catch (IOException e) {
-            LOGGER.info("Failed to parse SDX context to CM API object.", e);
-            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse SDX context to CM API object: %s", e.getMessage()), e);
-        }
-    }
-
-    private void installCluster(Cluster cluster, ApiClusterTemplate apiClusterTemplate, ClouderaManagerResourceApi clouderaManagerResourceApi,
-            boolean prewarmed) throws ApiException {
-        Optional<ApiCluster> cmCluster = getCmClusterByName(cluster.getName());
-        Optional<ClusterCommand> importCommand = clusterCommandRepository.findTopByClusterIdAndClusterCommandType(cluster.getId(),
-                ClusterCommandType.IMPORT_CLUSTER);
-        if (cmCluster.isEmpty() || importCommand.isEmpty()) {
-            try {
-                // addRepositories - if true the parcels repositories in the cluster template
-                // will be added.
-                ApiCommand apiCommand = clouderaManagerResourceApi
-                        .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
-                ClusterCommand clusterCommand = new ClusterCommand();
-                clusterCommand.setClusterId(cluster.getId());
-                clusterCommand.setCommandId(apiCommand.getId());
-                clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
-                importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
-                LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
-            } catch (ApiException e) {
-                String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
-                throw new ClouderaManagerOperationFailedException(msg, e);
-            }
-        }
-        importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
-    }
-
-    private boolean calculateAddRepositories(ApiClusterTemplate apiClusterTemplate, boolean prewarmed) {
-        boolean addRepositories = !prewarmed;
-        if (isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_2_0)) {
-            addRepositories = true;
-        }
-        return addRepositories;
-    }
-
-    private Optional<ApiCluster> getCmClusterByName(String name) throws ApiException {
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
-        try {
-            return Optional.of(clustersResourceApi.readCluster(name));
-        } catch (ApiException apiException) {
-            if (apiException.getCode() != HttpStatus.SC_NOT_FOUND) {
-                throw apiException;
-            }
-            return Optional.empty();
-        }
-    }
-
-    private ApiConfig removeRemoteParcelRepos() {
-        return new ApiConfig().name("remote_parcel_repo_urls").value("");
-    }
-
-    private ApiConfig setHeader(com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
-        return new ApiConfig().name("custom_header_color").value(StackType.DATALAKE.equals(stackType) ? "RED" : "BLUE");
-    }
-
-    private void updateConfig(ClouderaManagerResourceApi clouderaManagerResourceApi,
-            com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
-        try {
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(removeRemoteParcelRepos())
                     .addItemsItem(setHeader(stackType));
             clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
         } catch (ApiException e) {
-            LOGGER.info("Error while updating configurations. Message {}, throwable: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            throw mapApiException(e);
+        } catch (Exception e) {
+            throw mapException(e);
         }
     }
 
-    private void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi) {
+    @Override
+    public void refreshParcelRepos() {
         try {
-            ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
-            clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient, apiCommand.getId());
-        } catch (ApiException e) {
+            boolean prewarmed = isPrewarmed(stack.getCluster().getId());
+            if (prewarmed) {
+                ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+                ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
+                clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient, apiCommand.getId());
+            }
+        } catch (Exception e) {
             LOGGER.info("Unable to refresh parcel repo", e);
             throw new CloudbreakServiceException(e);
         }
-    }
-
-    private String getExtendedBlueprintText(ApiClusterTemplate apiClusterTemplate) {
-        return JsonUtil.writeValueAsStringSilent(apiClusterTemplate);
     }
 
     @Override
@@ -469,6 +377,134 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             LOGGER.error(failMessage, e);
             throw new ClouderaManagerOperationFailedException(failMessage, e);
         }
+    }
+
+    private ClouderaManagerOperationFailedException mapApiException(ApiException e) {
+        LOGGER.info("Error while building the cluster. Message: {}; Response: {}", e.getMessage(), e.getResponseBody(), e);
+        String msg = extractMessage(e);
+        return new ClouderaManagerOperationFailedException(msg, e);
+    }
+
+    private ClouderaManagerOperationFailedException mapException(Exception e) {
+        LOGGER.info("Error while building the cluster. Message: {}", e.getMessage(), e);
+        return new ClouderaManagerOperationFailedException(e.getMessage(), e);
+    }
+
+    private ApiClient createApiClient() throws ClusterClientInitException {
+        ApiClient client = null;
+        try {
+            client = clouderaManagerApiClientProvider.getDefaultClient(stack.getGatewayPort(), clientConfig, ClouderaManagerApiClientProvider.API_V_31);
+            ToolsResourceApi toolsResourceApi = clouderaManagerApiFactory.getToolsResourceApi(client);
+            toolsResourceApi.echo("TEST");
+            LOGGER.debug("Cloudera Manager already running, old admin user's password has not been changed yet.");
+            return client;
+        } catch (ClouderaManagerClientInitException e) {
+            throw new ClusterClientInitException(e);
+        } catch (ApiException e) {
+            return returnClientBasedOnApiError(client, e);
+        }
+    }
+
+    private ApiClient returnClientBasedOnApiError(ApiClient client, ApiException e) {
+        if (org.springframework.http.HttpStatus.UNAUTHORIZED.value() == e.getCode()) {
+            LOGGER.debug("Cloudera Manager already running, old admin user's password has been changed.");
+            return apiClient;
+        }
+        LOGGER.debug("Cloudera Manager is not running yet.", e);
+        return client;
+    }
+
+    private ApiClusterTemplate getCmTemplate(TemplatePreparationObject templatePreparationObject, String sdxContextName,
+        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, ClouderaManagerRepo clouderaManagerRepoDetails, Long clusterId) {
+        List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
+        Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
+        return cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
+                clouderaManagerProductDetails, sdxContextName);
+    }
+
+    private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
+        String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
+        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
+        if (optionalCmHost.isPresent()) {
+            ApiHost cmHost = optionalCmHost.get();
+            ApiHostRef cmHostRef = new ApiHostRef();
+            cmHostRef.setHostId(cmHost.getHostId());
+            cmHostRef.setHostname(cmHost.getHostname());
+            mgmtSetupService.setupMgmtServices(stack, apiClient, cmHostRef,
+                    telemetry, sdxContextName, sdxCrn, proxyConfig);
+        } else {
+            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping management services installation.");
+        }
+    }
+
+    private void configureCmSupportTag(TemplatePreparationObject templatePreparationObject) throws ApiException {
+        Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
+        if (optionalCmHost.isPresent()) {
+            clouderaManagerSupportSetupService.prepareSupportRole(apiClient, stack.getType());
+        } else {
+            LOGGER.warn("Unable to determine Cloudera Manager host. Skipping support tag setup.");
+        }
+    }
+
+    private Optional<ApiHost> getCmHost(TemplatePreparationObject templatePreparationObject, ApiClient apiClient) throws ApiException {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
+        return hostsResourceApi.readHosts(null, null, DataView.SUMMARY.name())
+                .getItems()
+                .stream()
+                .filter(host -> host.getHostname().equals(templatePreparationObject.getGeneralClusterConfigs().getPrimaryGatewayInstanceDiscoveryFQDN().get()))
+                .findFirst();
+    }
+
+    private String createDataContext(String sdxContext) {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        try {
+            ApiClient rootClient = clouderaManagerApiClientProvider.getRootClient(stack.getGatewayPort(), user, password, clientConfig);
+            CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(rootClient);
+            ApiRemoteDataContext apiRemoteDataContext = JsonUtil.readValue(sdxContext, ApiRemoteDataContext.class);
+            LOGGER.debug("Posting remote context to workload. EndpointId: {}", apiRemoteDataContext.getEndPointId());
+            return cdpResourceApi.postRemoteContext(apiRemoteDataContext).getEndPointId();
+        } catch (ApiException | ClouderaManagerClientInitException e) {
+            LOGGER.info("Error while creating data context using: {}", sdxContext, e);
+            throw new ClouderaManagerOperationFailedException(String.format("Error while creating data context: %s", e.getMessage()), e);
+        } catch (IOException e) {
+            LOGGER.info("Failed to parse SDX context to CM API object.", e);
+            throw new ClouderaManagerOperationFailedException(String.format("Failed to parse SDX context to CM API object: %s", e.getMessage()), e);
+        }
+    }
+
+    private boolean calculateAddRepositories(ApiClusterTemplate apiClusterTemplate, boolean prewarmed) {
+        boolean addRepositories = !prewarmed;
+        if (apiClusterTemplate.getCmVersion() != null
+                && isVersionNewerOrEqualThanLimited(apiClusterTemplate.getCmVersion(), CLOUDERAMANAGER_VERSION_7_2_0)) {
+            addRepositories = true;
+        }
+        return addRepositories;
+    }
+
+    private Optional<ApiCluster> getCmClusterByName(String name) throws ApiException {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        try {
+            return Optional.of(clustersResourceApi.readCluster(name));
+        } catch (ApiException apiException) {
+            if (apiException.getCode() != HttpStatus.SC_NOT_FOUND) {
+                throw apiException;
+            }
+            return Optional.empty();
+        }
+    }
+
+    private ApiConfig removeRemoteParcelRepos() {
+        return new ApiConfig().name("remote_parcel_repo_urls").value("");
+    }
+
+    private ApiConfig setHeader(com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
+        return new ApiConfig().name("custom_header_color").value(StackType.DATALAKE.equals(stackType) ? "RED" : "BLUE");
+    }
+
+    private String getExtendedBlueprintText(ApiClusterTemplate apiClusterTemplate) {
+        return JsonUtil.writeValueAsStringSilent(apiClusterTemplate);
     }
 
     private Boolean isPrewarmed(Long clusterId) {

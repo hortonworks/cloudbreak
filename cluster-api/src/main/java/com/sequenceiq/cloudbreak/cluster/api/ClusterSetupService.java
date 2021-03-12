@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -27,15 +26,27 @@ public interface ClusterSetupService {
         String sdxStackCrn,
         KerberosConfig kerberosConfig);
 
-    Cluster buildCluster(
-            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup,
-            TemplatePreparationObject templatePreparationObject,
-            String sdxContext,
-            String sdxStackCrn,
-            Telemetry telemetry,
-            KerberosConfig kerberosConfig,
-            ProxyConfig proxyConfig,
-            String template);
+    void validateLicence();
+
+    void configureManagementServices(TemplatePreparationObject templatePreparationObject,
+        String sdxContext,
+        String sdxStackCrn,
+        Telemetry telemetry,
+        ProxyConfig proxyConfig);
+
+    void configureSupportTags(TemplatePreparationObject templatePreparationObject);
+
+    void updateConfig();
+
+    void refreshParcelRepos();
+
+    void installCluster(String template);
+
+    void startManagementServices();
+
+    void suppressWarnings();
+
+    void configureKerberos(KerberosConfig kerberosConfig) throws CloudbreakException;
 
     void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 

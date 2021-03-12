@@ -55,8 +55,7 @@ import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @RunWith(MockitoJUnitRunner.class)
-public class
-ClouderaManagerSecurityServiceTest {
+public class ClouderaManagerSecurityServiceTest {
 
     private static final int GATEWAY_PORT = 8080;
 

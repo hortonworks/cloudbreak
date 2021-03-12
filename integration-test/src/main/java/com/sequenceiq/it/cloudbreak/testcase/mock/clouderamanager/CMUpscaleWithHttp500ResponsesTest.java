@@ -90,7 +90,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .mockSalt().run().post().bodyContains("fun=grains.remove", 1).atLeast(1).verify()
 
                 .mockCm().clustersByClusterNameHost().get().pathVariable("clusterName", clusterName).times(2).verify()
-                .mockCm().hosts().get().atLeast(4).verify()
+                .mockCm().hosts().get().atLeast(3).verify()
                 .validate();
     }
 

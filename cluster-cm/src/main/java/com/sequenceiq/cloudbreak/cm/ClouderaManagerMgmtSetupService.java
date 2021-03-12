@@ -6,7 +6,6 @@ import static java.util.Objects.requireNonNull;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -91,9 +90,8 @@ public class ClouderaManagerMgmtSetupService {
      * @param proxyConfig ccm proxy configuration holder
      * @throws ApiException if there's a problem setting up management services
      */
-    public void setupMgmtServices(Stack stack, ApiClient apiClient, ApiHostRef cmHostRef,
-            Set<RDSConfig> rdsConfigs, Telemetry telemetry, String sdxContextName, String sdxStackCrn,
-            ProxyConfig proxyConfig)
+    public void setupMgmtServices(Stack stack, ApiClient apiClient, ApiHostRef cmHostRef, Telemetry telemetry,
+            String sdxContextName, String sdxStackCrn, ProxyConfig proxyConfig)
             throws ApiException {
         LOGGER.debug("Setting up Cloudera Management Services.");
         licenseService.validateClouderaManagerLicense(stack.getCreator());

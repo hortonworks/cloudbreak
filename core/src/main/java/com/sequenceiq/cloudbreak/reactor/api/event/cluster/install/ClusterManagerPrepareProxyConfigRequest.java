@@ -1,0 +1,9 @@
+package com.sequenceiq.cloudbreak.reactor.api.event.cluster.install;
+
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+
+public class ClusterManagerPrepareProxyConfigRequest extends StackEvent {
+    public ClusterManagerPrepareProxyConfigRequest(Long stackId) {
+        super(stackId);
+    }
+}
