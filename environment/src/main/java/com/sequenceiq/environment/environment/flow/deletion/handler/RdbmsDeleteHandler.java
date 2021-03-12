@@ -43,7 +43,7 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDelet
                 .build();
         try {
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-        } catch (Exception e) {
+        } catch (Exception e) { // TODO: CB-11556
             if (environmentDeletionDto.isForceDelete()) {
                 LOGGER.warn("The {} was not successful but the environment deletion was requested as force delete so " +
                         "continue the deletion flow", selector());
