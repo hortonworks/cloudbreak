@@ -15,8 +15,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
-public class ClusterCreationSuccessHandler {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationSuccessHandler.class);
+public class FinalizeClusterInstallHandlerService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FinalizeClusterInstallHandlerService.class);
 
     @Inject
     private ClusterService clusterService;
@@ -24,7 +24,7 @@ public class ClusterCreationSuccessHandler {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void handleClusterCreationSuccess(Set<InstanceMetaData> instances, Cluster cluster) {
+    public void finalizeClusterInstall(Set<InstanceMetaData> instances, Cluster cluster) {
         LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
         for (InstanceMetaData instance : instances) {
             instance.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);

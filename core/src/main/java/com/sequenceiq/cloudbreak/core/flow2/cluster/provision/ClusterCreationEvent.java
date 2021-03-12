@@ -4,6 +4,38 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartClusterSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerSupportTagsFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerSupportTagsSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerConfigureKerberosFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerConfigureKerberosSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostClusterManagerStartRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostInstallRecipesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareDatalakeResourceFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareDatalakeResourceSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareExtendedTemplateFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.PrepareExtendedTemplateSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerPrepareProxyConfigFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerPrepareProxyConfigSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerRefreshParcelFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerRefreshParcelSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerSetupMonitoringFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ClusterManagerSetupMonitoringSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.StartClusterManagerManagementServicesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.StartClusterManagerManagementServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClusterWarningsFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClusterWarningsSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.UpdateClusterConfigFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.UpdateClusterConfigSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ValidateClusterLicenceFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ValidateClusterLicenceSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.WaitForClusterManagerSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.ldap.LdapSSOConfigurationFailed;
@@ -48,10 +80,42 @@ public enum ClusterCreationEvent implements FlowEvent {
     START_AMBARI_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartAmbariServicesFailed.class)),
     LDAP_SSO_CONFIGURATION_FINISHED_EVENT(EventSelectorUtil.selector(LdapSSOConfigurationSuccess.class)),
     LDAP_SSO_CONFIGURATION_FAILED_EVENT(EventSelectorUtil.selector(LdapSSOConfigurationFailed.class)),
-    START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
-    START_AMBARI_FAILED_EVENT(EventSelectorUtil.selector(StartClusterFailed.class)),
+    WAIT_FOR_CLUSTER_MANAGER_FINISHED_EVENT(EventSelectorUtil.selector(WaitForClusterManagerSuccess.class)),
+    WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT(EventSelectorUtil.selector(WaitForClusterManagerFailed.class)),
+    EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePostClusterManagerStartRecipesSuccess.class)),
+    EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(ExecutePostClusterManagerStartRecipesFailed.class)),
+    PREPARE_PROXY_CONFIG_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerPrepareProxyConfigSuccess.class)),
+    PREPARE_PROXY_CONFIG_FAILED_EVENT(EventSelectorUtil.selector(ClusterManagerPrepareProxyConfigFailed.class)),
+    SETUP_MONITORING_FINISHED_EVENT(EventSelectorUtil.selector(ClusterManagerSetupMonitoringSuccess.class)),
+    SETUP_MONITORING_FAILED_EVENT(EventSelectorUtil.selector(ClusterManagerSetupMonitoringFailed.class)),
+    PREPARE_EXTENDED_TEMPLATE_FINISHED_EVENT(EventSelectorUtil.selector(PrepareExtendedTemplateSuccess.class)),
+    PREPARE_EXTENDED_TEMPLATE_FAILED_EVENT(EventSelectorUtil.selector(PrepareExtendedTemplateFailed.class)),
+    VALIDATE_LICENCE_FAILED_EVENT(EventSelectorUtil.selector(ValidateClusterLicenceFailed.class)),
+    VALIDATE_LICENCE_SUCCESS_EVENT(EventSelectorUtil.selector(ValidateClusterLicenceSuccess.class)),
+    CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT(EventSelectorUtil.selector(ConfigureClusterManagerManagementServicesSuccess.class)),
+    CONFIGURE_MANAGEMENT_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(ConfigureClusterManagerManagementServicesFailed.class)),
+    CONFIGURE_SUPPORT_TAGS_SUCCESS_EVENT(EventSelectorUtil.selector(ConfigureClusterManagerSupportTagsSuccess.class)),
+    CONFIGURE_SUPPORT_TAGS_FAILED_EVENT(EventSelectorUtil.selector(ConfigureClusterManagerSupportTagsFailed.class)),
+    CLUSTER_UPDATE_CONFIG_SUCCESS_EVENT(EventSelectorUtil.selector(UpdateClusterConfigSuccess.class)),
+    CLUSTER_UPDATE_CONFIG_FAILED_EVENT(EventSelectorUtil.selector(UpdateClusterConfigFailed.class)),
+    REFRESH_PARCEL_REPOS_SUCCESS_EVENT(EventSelectorUtil.selector(ClusterManagerRefreshParcelSuccess.class)),
+    REFRESH_PARCEL_REPOS_FAILED_EVENT(EventSelectorUtil.selector(ClusterManagerRefreshParcelFailed.class)),
     INSTALL_CLUSTER_FINISHED_EVENT(EventSelectorUtil.selector(InstallClusterSuccess.class)),
     INSTALL_CLUSTER_FAILED_EVENT(EventSelectorUtil.selector(InstallClusterFailed.class)),
+    START_MANAGEMENT_SERVICES_SUCCESS_EVENT(EventSelectorUtil.selector(StartClusterManagerManagementServicesSuccess.class)),
+    START_MANAGEMENT_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartClusterManagerManagementServicesFailed.class)),
+    SUPPRESS_WARNINGS_SUCCESS_EVENT(EventSelectorUtil.selector(SuppressClusterWarningsSuccess.class)),
+    SUPPRESS_WARNINGS_FAILED_EVENT(EventSelectorUtil.selector(SuppressClusterWarningsFailed.class)),
+    CONFIGURE_KERBEROS_SUCCESS_EVENT(EventSelectorUtil.selector(ClusterManagerConfigureKerberosSuccess.class)),
+    CONFIGURE_KERBEROS_FAILED_EVENT(EventSelectorUtil.selector(ClusterManagerConfigureKerberosFailed.class)),
+    EXECUTE_POST_INSTALL_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(ExecutePostInstallRecipesSuccess.class)),
+    EXECUTE_POST_INSTALL_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(ExecutePostInstallRecipesFailed.class)),
+    FINALIZE_CLUSTER_INSTALL_FINISHED_EVENT(EventSelectorUtil.selector(FinalizeClusterInstallSuccess.class)),
+    FINALIZE_CLUSTER_INSTALL_FAILED_EVENT(EventSelectorUtil.selector(FinalizeClusterInstallFailed.class)),
+    PREPARE_DATALAKE_RESOURCE_FINISHED_EVENT(EventSelectorUtil.selector(PrepareDatalakeResourceSuccess.class)),
+    PREPARE_DATALAKE_RESOURCE_FAILED_EVENT(EventSelectorUtil.selector(PrepareDatalakeResourceFailed.class)),
+    START_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(StartClusterSuccess.class)),
+    START_AMBARI_FAILED_EVENT(EventSelectorUtil.selector(StartClusterFailed.class)),
     CLUSTER_CREATION_FAILED_EVENT("CLUSTER_CREATION_FAILED"),
     CLUSTER_CREATION_FINISHED_EVENT("CLUSTER_CREATION_FINISHED"),
     CLUSTER_CREATION_FAILURE_HANDLED_EVENT("CLUSTER_CREATION_FAILHANDLED");

@@ -80,15 +80,14 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);
     }
 
+    public void installingCluster(StackView stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, "Building the cluster");
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_BUILDING);
+    }
+
     public void startingClusterManager(long stackId) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "cluster manager cluster is now starting.");
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
-    }
-
-    public void installingCluster(StackView stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
-                String.format("Building the cluster"));
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_BUILDING);
     }
 
     public void clusterInstallationFinished(StackView stackView) {

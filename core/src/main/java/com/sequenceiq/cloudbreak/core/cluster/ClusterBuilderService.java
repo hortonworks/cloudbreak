@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -30,14 +31,13 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
+import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.ClusterMonitoringEngine;
@@ -49,7 +49,6 @@ import com.sequenceiq.cloudbreak.service.sharedservice.ClouderaManagerDatalakeCo
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
 public class ClusterBuilderService {
@@ -76,7 +75,7 @@ public class ClusterBuilderService {
     private TransactionService transactionService;
 
     @Inject
-    private ClusterCreationSuccessHandler clusterCreationSuccessHandler;
+    private FinalizeClusterInstallHandlerService finalizeClusterInstallHandlerService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -119,69 +118,145 @@ public class ClusterBuilderService {
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 
-    public void buildCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
+    public void waitForClusterManager(Long stackId) throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
-        ClusterApi connector = clusterApiConnectors.getConnector(stack);
+        clusterService.updateCreationDateOnCluster(stack.getCluster());
+        clusterApiConnectors
+                .getConnector(stack)
+                .waitForServer(stack, true);
+    }
+
+    public void validateLicence(Long stackId) {
+        getClusterSetupService(stackId).validateLicence();
+    }
+
+    public void configureManagementServices(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(
+                stack.getCluster().getProxyConfigCrn(),
+                stack.getCluster().getEnvironmentCrn());
+
+        getClusterSetupService(stack).configureManagementServices(conversionService.convert(stack, TemplatePreparationObject.class),
+                getSdxContext(stack),
+                getSdxStackCrn(stack),
+                componentConfigProviderService.getTelemetry(stackId),
+                proxyConfig.orElse(null));
+    }
+
+    public void configureSupportTags(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        getClusterSetupService(stack).configureSupportTags(conversionService.convert(stack, TemplatePreparationObject.class));
+    }
+
+    public void updateConfig(Long stackId) {
+        getClusterSetupService(stackId).updateConfig();
+    }
+
+    public void refreshParcelRepos(Long stackId) {
+        getClusterSetupService(stackId).refreshParcelRepos();
+    }
+
+    public void startManagementServices(Long stackId) {
+        getClusterSetupService(stackId).startManagementServices();
+    }
+
+    public void suppressWarnings(Long stackId) {
+        getClusterSetupService(stackId).suppressWarnings();
+    }
+
+    public void configureKerberos(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        getClusterSetupService(stackId).configureKerberos(kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null));
+    }
+
+    public void installCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        getClusterSetupService(stack).installCluster(stack.getCluster().getExtendedBlueprintText());
+    }
+
+    public void prepareProxyConfig(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+
+        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(
+                stack.getCluster().getProxyConfigCrn(),
+                stack.getCluster().getEnvironmentCrn());
+        if (proxyConfig.isPresent()) {
+            LOGGER.info("proxyConfig is not null, setup proxy for cluster: {}", proxyConfig);
+            getClusterSetupService(stack).setupProxy(proxyConfig.orElse(null));
+        } else {
+            LOGGER.info("proxyConfig was not found by proxyConfigCrn");
+        }
+    }
+
+    public void executePostClusterManagerStartRecipes(Long stackId) throws CloudbreakException {
+        recipeEngine.executePostAmbariStartRecipes(
+                stackService.getByIdWithListsInTransaction(stackId),
+                hostGroupService.getRecipesByCluster(
+                        stackService.getByIdWithListsInTransaction(stackId).getCluster().getId()));
+    }
+
+    public void setupMonitoring(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+
+        if (componentConfigProviderService.getTelemetry(stackId).isMonitoringFeatureEnabled()) {
+            clusterApiConnectors.getConnector(stack)
+                    .clusterSecurityService()
+                    .setupMonitoringUser();
+            clusterMonitoringEngine.installAndStartMonitoring(
+                    stack,
+                    componentConfigProviderService.getTelemetry(stackId));
+        }
+    }
+
+    public void prepareExtendedTemplate(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
         Cluster cluster = stack.getCluster();
-        clusterService.updateCreationDateOnCluster(cluster);
-        connector.waitForServer(stack, true);
-        TemplatePreparationObject templatePreparationObject = conversionService.convert(stack, TemplatePreparationObject.class);
-        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup = loadInstanceMetadataForHostGroups(hostGroups);
-        recipeEngine.executePostAmbariStartRecipes(stack, hostGroupService.getRecipesByCluster(cluster.getId()));
-        String blueprintText = cluster.getBlueprint().getBlueprintText();
-        cluster.setExtendedBlueprintText(blueprintText);
-        clusterService.updateCluster(cluster);
-        final Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
 
-        Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
-        setupProxy(connector, proxyConfig.orElse(null));
-        Set<DatalakeResources> datalakeResources = datalakeResourcesService
-                .findDatalakeResourcesByWorkspaceAndEnvironment(stack.getWorkspace().getId(), stack.getEnvironmentCrn());
+        setInitialBlueprintText(cluster);
 
-        Optional<Stack> sdxStack = Optional.ofNullable(datalakeResources)
-                .map(Set::stream).flatMap(Stream::findFirst)
-                .map(DatalakeResources::getDatalakeStackId)
-                .map(stackService::getByIdWithListsInTransaction);
+        String template = getClusterSetupService(stack)
+                .prepareTemplate(
+                    loadInstanceMetadataForHostGroups(hostGroups),
+                    conversionService.convert(stack, TemplatePreparationObject.class),
+                    getSdxContext(stack),
+                    getSdxStackCrn(stack),
+                    kerberosConfigService.get(
+                            stack.getEnvironmentCrn(),
+                            stack.getName()
+                    ).orElse(null)
+                );
 
-        String sdxContext = sdxStack
-                .map(clusterApiConnectors::getConnector)
-                .map(ClusterApi::getSdxContext).orElse(null);
-        String sdxStackCrn = sdxStack
-                .map(Stack::getResourceCrn)
-                .orElse(null);
-        if (telemetry.isMonitoringFeatureEnabled()) {
-            connector.clusterSecurityService().setupMonitoringUser();
-            clusterMonitoringEngine.installAndStartMonitoring(stack, telemetry);
-        }
-
-        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        String template = connector.clusterSetupService().prepareTemplate(instanceMetaDataByHostGroup,
-                templatePreparationObject,
-                sdxContext,
-                sdxStackCrn,
-                kerberosConfig);
         cluster.setExtendedBlueprintText(template);
         clusterService.save(cluster);
-        cluster = connector.clusterSetupService().buildCluster(instanceMetaDataByHostGroup,
-                templatePreparationObject,
-                sdxContext,
-                sdxStackCrn,
-                telemetry,
-                kerberosConfig,
-                proxyConfig.orElse(null),
-                template);
-        clusterService.save(cluster);
-        recipeEngine.executePostInstallRecipes(stack);
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
-        clusterCreationSuccessHandler.handleClusterCreationSuccess(instanceMetaDatas, stack.getCluster());
+    }
+
+    public void finalizeClusterInstall(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
+
+        Set<InstanceMetaData> instanceMetaDatas = loadInstanceMetadataForHostGroups(hostGroups).values()
+                .stream()
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        finalizeClusterInstallHandlerService.finalizeClusterInstall(instanceMetaDatas, stack.getCluster());
+    }
+
+    public void executePostInstallRecipes(Long stackId) throws CloudbreakException {
+        recipeEngine.executePostInstallRecipes(
+                stackService.getByIdWithListsInTransaction(stackId));
+    }
+
+    public void prepareDatalakeResource(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+
         if (StackType.DATALAKE == stack.getType()) {
             try {
                 transactionService.required(() -> {
-                    Stack stackInTransaction = stackService.getByIdWithListsInTransaction(stackId);
-                    if (blueprintUtils.isClouderaManagerClusterTemplate(blueprintText)) {
-                        clouderaManagerDatalakeConfigProvider.collectAndStoreDatalakeResources(stackInTransaction);
+                    if (blueprintUtils.isClouderaManagerClusterTemplate(stack.getCluster().getBlueprint().getBlueprintText())) {
+                        clouderaManagerDatalakeConfigProvider.collectAndStoreDatalakeResources(
+                                stackService.getByIdWithListsInTransaction(stackId));
                     }
                     return null;
                 });
@@ -191,13 +266,47 @@ public class ClusterBuilderService {
         }
     }
 
-    private void setupProxy(ClusterApi connector, ProxyConfig proxyConfig) {
-        if (proxyConfig != null) {
-            LOGGER.info("proxyConfig is not null, setup proxy for cluster: {}", proxyConfig);
-            connector.clusterSetupService().setupProxy(proxyConfig);
-        } else {
-            LOGGER.info("proxyConfig was not found by proxyConfigCrn");
-        }
+    private String getSdxStackCrn(Stack stack) {
+        return getSdxStack(stack)
+                .map(Stack::getResourceCrn)
+                .orElse(null);
+    }
+
+    private String getSdxContext(Stack stack) {
+        return getSdxStack(stack)
+                .map(clusterApiConnectors::getConnector)
+                .map(ClusterApi::getSdxContext)
+                .orElse(null);
+    }
+
+    private Optional<Stack> getSdxStack(Stack stack) {
+        return Optional.ofNullable(getDatalakeResources(stack))
+                .map(Set::stream)
+                .flatMap(Stream::findFirst)
+                .map(DatalakeResources::getDatalakeStackId)
+                .map(stackService::getByIdWithListsInTransaction);
+    }
+
+    private ClusterSetupService getClusterSetupService(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        return getClusterSetupService(stack);
+    }
+
+    private ClusterSetupService getClusterSetupService(Stack stack) {
+        return clusterApiConnectors.getConnector(stack)
+                .clusterSetupService();
+    }
+
+    private Set<DatalakeResources> getDatalakeResources(Stack stack) {
+        return datalakeResourcesService
+                .findDatalakeResourcesByWorkspaceAndEnvironment(
+                        stack.getWorkspace().getId(),
+                        stack.getEnvironmentCrn());
+    }
+
+    private void setInitialBlueprintText(Cluster cluster) {
+        cluster.setExtendedBlueprintText(cluster.getBlueprint().getBlueprintText());
+        clusterService.updateCluster(cluster);
     }
 
     private Map<HostGroup, List<InstanceMetaData>> loadInstanceMetadataForHostGroups(Iterable<HostGroup> hostGroups) {

@@ -40,10 +40,10 @@ public class InstallClusterHandler implements EventHandler<InstallClusterRequest
         Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
-            clusterBuilderService.buildCluster(stackId);
+            clusterBuilderService.installCluster(stackId);
             response = new InstallClusterSuccess(stackId);
         } catch (RuntimeException | ClusterClientInitException | CloudbreakException e) {
-            LOGGER.error("Build cluster failed", e);
+            LOGGER.error("Failed to Install Cloudera Manager cluster: {}", e.getMessage());
             response = new InstallClusterFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event<>(event.getHeaders(), response));

@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterCreationSuccessHandler;
+import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
@@ -34,10 +34,10 @@ public class ClusterCreationSuccessHandlerTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
-    private final ClusterCreationSuccessHandler underTest = new ClusterCreationSuccessHandler();
+    private final FinalizeClusterInstallHandlerService underTest = new FinalizeClusterInstallHandlerService();
 
     @Test
-    public void testHandleClusterCreationSuccessWhenEverythingGoesFine() {
+    public void testFinalizeClusterInstallWhenEverythingGoesFine() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
 
@@ -47,7 +47,7 @@ public class ClusterCreationSuccessHandlerTest {
         when(clusterService.updateCluster(cluster)).thenReturn(cluster);
         when(instanceMetaDataService.saveAll(anyCollection())).thenReturn(instanceMetaDataList);
 
-        underTest.handleClusterCreationSuccess(instanceMetaDataList, cluster);
+        underTest.finalizeClusterInstall(instanceMetaDataList, cluster);
 
         ArgumentCaptor<Cluster> clusterCaptor = ArgumentCaptor.forClass(Cluster.class);
         verify(clusterService, times(1)).updateCluster(clusterCaptor.capture());
