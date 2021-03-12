@@ -496,7 +496,7 @@
         ]
       },
       {
-        "refName": "manager",
+        "refName": "masterx",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "hdfs-BALANCER-BASE",
@@ -535,6 +535,13 @@
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "yarn-NODEMANAGER-COMPUTE"
+        ]
+      },
+      {
+        "refName": "manager",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "knox-KNOX_GATEWAY-BASE"
         ]
       }
     ]

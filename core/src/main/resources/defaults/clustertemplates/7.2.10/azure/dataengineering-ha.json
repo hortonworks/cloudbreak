@@ -149,6 +149,35 @@
         },
         "recipeNames": [],
         "cloudPlatform": "AZURE"
+      },
+      {
+        "nodeCount": 1,
+        "name": "masterx",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16_v3",
+          "rootVolume": {
+            "size": 150
+          },
+          "attachedVolumes": [
+            {
+              "size": 150,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "cloudPlatform": "AZURE"
+        },
+        "recipeNames": [],
+        "cloudPlatform": "AZURE"
       }
     ]
   }
