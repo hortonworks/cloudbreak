@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -133,11 +134,7 @@ public class ClouderaManagerDecomissioner {
             verifyNodeCount(replication, scalingAdjustment, instancesForHostGroup.size(), 0, stack);
 
             ApiHostRefList hostRefList = clustersResourceApi.listHosts(stack.getName(), null, null);
-
-            Set<InstanceMetaData> instancesToRemove = instancesForHostGroup.stream()
-                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null)
-                    .limit(Math.abs(scalingAdjustment))
-                    .collect(Collectors.toSet());
+            Set<InstanceMetaData> instancesToRemove = getUnusedInstances(scalingAdjustment, instancesForHostGroup, hostRefList);
 
             List<ApiHost> apiHosts = hostRefList.getItems().stream()
                     .filter(host -> instancesForHostGroup.stream()
@@ -165,6 +162,39 @@ public class ClouderaManagerDecomissioner {
             LOGGER.error("Failed to get host list for cluster: {}", stack.getName(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
+    }
+
+    @NotNull
+    private Set<InstanceMetaData> getUnusedInstances(Integer scalingAdjustment, Set<InstanceMetaData> instancesForHostGroup, ApiHostRefList hostRefList) {
+        Set<InstanceMetaData> instancesWithoutFQDN = getInstancesWithoutFQDN(scalingAdjustment, instancesForHostGroup);
+        LOGGER.warn("Instances without FQDN: {}", instancesWithoutFQDN);
+        Set<InstanceMetaData> instancesNotKnownByCM = getInstancesNotKnownByCM(instancesForHostGroup, hostRefList);
+        addInstancesNotKnownByCMWithLimit(Math.abs(scalingAdjustment) - instancesWithoutFQDN.size(), instancesWithoutFQDN, instancesNotKnownByCM);
+        return instancesWithoutFQDN;
+    }
+
+    private void addInstancesNotKnownByCMWithLimit(Integer limit, Set<InstanceMetaData> instancesToRemove, Set<InstanceMetaData> instancesNotKnownByCM) {
+        instancesToRemove.addAll(instancesNotKnownByCM.stream().limit(limit).collect(Collectors.toSet()));
+    }
+
+    @NotNull
+    private Set<InstanceMetaData> getInstancesNotKnownByCM(Set<InstanceMetaData> instancesForHostGroup, ApiHostRefList hostRefList) {
+        Set<InstanceMetaData> instancesNotKnownByCM = instancesForHostGroup.stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> hostRefList.getItems().stream()
+                        .noneMatch(apiHostRef -> instanceMetaData.getDiscoveryFQDN().equals(apiHostRef.getHostname())))
+                .collect(Collectors.toSet());
+
+        LOGGER.warn("Instances not known by CM: {}", instancesNotKnownByCM);
+        return instancesNotKnownByCM;
+    }
+
+    @NotNull
+    private Set<InstanceMetaData> getInstancesWithoutFQDN(Integer scalingAdjustment, Set<InstanceMetaData> instancesForHostGroup) {
+        return instancesForHostGroup.stream()
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null)
+                .limit(Math.abs(scalingAdjustment))
+                .collect(Collectors.toSet());
     }
 
     public Map<String, InstanceMetaData> collectHostsToRemove(Stack stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {

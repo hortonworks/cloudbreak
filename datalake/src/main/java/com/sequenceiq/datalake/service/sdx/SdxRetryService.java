@@ -3,6 +3,8 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREATION_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_IN_PROGRESS_EVENT;
+import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -80,7 +82,9 @@ public class SdxRetryService {
         return Arrays.asList(
                 SDX_STACK_CREATION_IN_PROGRESS_EVENT,
                 DATALAKE_UPGRADE_IN_PROGRESS_EVENT,
-                SDX_REPAIR_IN_PROGRESS_EVENT
+                SDX_REPAIR_IN_PROGRESS_EVENT,
+                SDX_START_IN_PROGRESS_EVENT,
+                SDX_STOP_IN_PROGRESS_EVENT
         );
     }
 
