@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.dto;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -59,44 +60,33 @@ public class EnvironmentCreationDto {
 
     private final String proxyConfigName;
 
-    //CHECKSTYLE:OFF
-    public EnvironmentCreationDto(String name, String description, String cloudPlatform, String accountId,
-            String creator, LocationDto location, NetworkDto network, CredentialAwareEnvRequest credential,
-            Set<String> regions, FreeIpaCreationDto freeIpaCreation, AuthenticationDto authentication,
-            Long created, EnvironmentTelemetry telemetry, EnvironmentBackup backup, SecurityAccessDto securityAccess, String adminGroupName,
-            ParametersDto parameters, ExperimentalFeatures experimentalFeatures, Map<String, String> tags, String crn,
-            String parentEnvironmentName, String proxyConfigName) {
-        //CHECKSTYLE:ON
-        this.name = name;
-        this.description = description;
-        this.cloudPlatform = cloudPlatform;
-        this.accountId = accountId;
-        this.creator = creator;
-        this.location = location;
-        this.network = network;
-        this.credential = credential;
-        this.freeIpaCreation = freeIpaCreation;
-        this.created = created;
-        if (CollectionUtils.isEmpty(regions)) {
-            this.regions = new HashSet<>();
+    private EnvironmentCreationDto(Builder builder) {
+        name = builder.name;
+        description = builder.description;
+        cloudPlatform = builder.cloudPlatform;
+        accountId = builder.accountId;
+        creator = builder.creator;
+        location = builder.location;
+        network = builder.network;
+        credential = builder.credential;
+        freeIpaCreation = builder.freeIpaCreation;
+        created = builder.created;
+        if (CollectionUtils.isEmpty(builder.regions)) {
+            regions = new HashSet<>();
         } else {
-            this.regions = regions;
+            regions = builder.regions;
         }
-        this.authentication = authentication;
-        this.telemetry = telemetry;
-        this.backup = backup;
-        this.securityAccess = securityAccess;
-        this.adminGroupName = adminGroupName;
-        this.parameters = parameters;
-        this.experimentalFeatures = experimentalFeatures != null ? experimentalFeatures : new ExperimentalFeatures();
-        if (tags == null) {
-            this.tags = new HashMap<>();
-        } else {
-            this.tags = tags;
-        }
-        this.crn = crn;
-        this.parentEnvironmentName = parentEnvironmentName;
-        this.proxyConfigName = proxyConfigName;
+        authentication = builder.authentication;
+        telemetry = builder.telemetry;
+        backup = builder.backup;
+        securityAccess = builder.securityAccess;
+        adminGroupName = builder.adminGroupName;
+        parameters = builder.parameters;
+        experimentalFeatures =  Objects.requireNonNullElseGet(builder.experimentalFeatures, ExperimentalFeatures::new);
+        tags = Objects.requireNonNullElseGet(builder.tags, HashMap::new);
+        crn = builder.crn;
+        parentEnvironmentName = builder.parentEnvironmentName;
+        proxyConfigName = builder.proxyConfigName;
     }
 
     public static Builder builder() {
@@ -361,10 +351,7 @@ public class EnvironmentCreationDto {
         }
 
         public EnvironmentCreationDto build() {
-            return new EnvironmentCreationDto(name, description, cloudPlatform, accountId, creator,
-                    location, network, credential, regions, freeIpaCreation, authentication,
-                    created, telemetry, backup, securityAccess, adminGroupName, parameters, experimentalFeatures, tags, crn,
-                    parentEnvironmentName, proxyConfigName);
+            return new EnvironmentCreationDto(this);
         }
     }
 }
