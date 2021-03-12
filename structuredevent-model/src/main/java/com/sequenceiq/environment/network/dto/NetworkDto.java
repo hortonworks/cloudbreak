@@ -65,6 +65,7 @@ public class NetworkDto {
 
     private final CloudPlatform cloudPlatform;
 
+    // TODO [dberger]: create standard builder
     public NetworkDto(Builder builder) {
         id = builder.id;
         resourceCrn = builder.resourceCrn;

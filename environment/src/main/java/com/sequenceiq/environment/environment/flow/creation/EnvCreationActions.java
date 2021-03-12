@@ -50,6 +50,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 @Configuration
 public class EnvCreationActions {
 
+    // TODO [dberger]: use more extensive debug logging
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvCreationActions.class);
 
     private final EnvironmentService environmentService;
@@ -245,6 +246,7 @@ public class EnvCreationActions {
         };
     }
 
+    // TODO [dberger]: move out this class
     private abstract class AbstractEnvironmentCreationAction<P extends ResourceCrnPayload>
             extends AbstractAction<EnvCreationState, EnvCreationStateSelectors, CommonContext, P> {
 
