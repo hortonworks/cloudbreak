@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
 public enum DiagnosticsCollectionsState implements FlowState {
     INIT_STATE,
@@ -12,5 +14,10 @@ public enum DiagnosticsCollectionsState implements FlowState {
     DIAGNOSTICS_CLEANUP_STATE,
     DIAGNOSTICS_COLLECTION_FINISHED_STATE,
     DIAGNOSTICS_COLLECTION_FAILED_STATE,
-    FINAL_STATE
+    FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }

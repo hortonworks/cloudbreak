@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.start;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
 public enum StackStartState implements FlowState {
     INIT_STATE,
@@ -8,5 +10,10 @@ public enum StackStartState implements FlowState {
     START_STATE,
     COLLECTING_METADATA,
     START_FINISHED_STATE,
-    FINAL_STATE
+    FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }

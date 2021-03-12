@@ -47,4 +47,12 @@ public class StackEvent implements Selectable, Acceptable {
         return accepted;
     }
 
+    @Override
+    public String toString() {
+        return "StackEvent{" +
+                "selector='" + selector + '\'' +
+                ", stackId=" + stackId +
+                ", accepted=" + accepted +
+                '}';
+    }
 }

@@ -8,11 +8,15 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class CleanupFailureEvent extends AbstractCleanupEvent {
 
-    private final String failedPhase;
+    private String failedPhase;
 
-    private final Map<String, String> failureDetails;
+    private Map<String, String> failureDetails;
 
-    private final Set<String> success;
+    private Set<String> success;
+
+    protected CleanupFailureEvent(Long stackId) {
+        super(stackId);
+    }
 
     public CleanupFailureEvent(CleanupEvent cleanupEvent, String failedPhase, Map<String, String> failureDetails,
             Set<String> success) {

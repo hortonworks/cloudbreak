@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.provision;
 
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.provision.action.CheckImageAction;
 
@@ -39,6 +40,6 @@ public enum StackProvisionState implements FlowState {
 
     @Override
     public Class<? extends RestartAction> restartAction() {
-        return null;
+        return FillInMemoryStateStoreRestartAction.class;
     }
 }

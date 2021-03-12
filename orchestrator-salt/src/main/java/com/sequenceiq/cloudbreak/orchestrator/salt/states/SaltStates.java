@@ -145,7 +145,7 @@ public class SaltStates {
     }
 
     private static Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
-        Map<String, List<Map<String, Object>>> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+        Map<String, List<Map<String, Object>>> jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid, "missing", "True");
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }

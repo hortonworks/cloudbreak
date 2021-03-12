@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.InitializeMDCContextRestartAction;
 
 public enum FreeIpaCleanupState implements FlowState {
     INIT_STATE,
@@ -13,4 +15,11 @@ public enum FreeIpaCleanupState implements FlowState {
     CLEANUP_FINISHED_STATE,
     CLEANUP_FAILED_STATE,
     FINAL_STATE;
+
+    private Class<? extends RestartAction> restartAction = InitializeMDCContextRestartAction.class;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return restartAction;
+    }
 }

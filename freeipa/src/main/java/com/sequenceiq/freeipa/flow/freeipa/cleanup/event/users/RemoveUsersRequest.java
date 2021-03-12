@@ -6,6 +6,10 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveUsersRequest extends AbstractCleanupEvent {
 
+    protected RemoveUsersRequest(Long stackId) {
+        super(stackId);
+    }
+
     public RemoveUsersRequest(CleanupEvent cleanupEvent, Stack stack) {
         super(cleanupEvent);
     }

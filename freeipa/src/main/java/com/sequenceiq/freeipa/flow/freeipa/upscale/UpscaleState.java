@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
 public enum UpscaleState implements FlowState {
     INIT_STATE,
@@ -23,4 +25,9 @@ public enum UpscaleState implements FlowState {
     UPSCALE_FINISHED_STATE,
     UPSCALE_FAIL_STATE,
     FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }
