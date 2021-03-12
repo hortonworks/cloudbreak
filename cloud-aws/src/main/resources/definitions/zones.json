@@ -66,14 +66,5 @@
   "US West (Oregon)": {
     "zoneid": "us-west-2",
     "defaultvm": "i2.4xlarge"
-  },
-  "Africa (Cape Town)": {
-    "zoneid": "af-south-1",
-    "defaultvm": "i2.4xlarge"
-  },
-  "EU (Milan)": {
-    "zoneid": "eu-south-1",
-    "defaultvm": "i2.4xlarge"
   }
-
 }
