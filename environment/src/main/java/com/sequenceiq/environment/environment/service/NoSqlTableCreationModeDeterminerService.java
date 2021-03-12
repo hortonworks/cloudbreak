@@ -38,7 +38,7 @@ public class NoSqlTableCreationModeDeterminerService {
     }
 
     private NoSqlTableMetadataResponse getNoSqlTableMetaData(LocationAwareCredential locationAwareCredential, String dynamoDbTablename) {
-        Credential credential = locationAwareCredential.getCredential();
+        Credential credential = locationAwareCredential.getCredential(); // TODO: CB-11557
         String cloudPlatform = credential.getCloudPlatform();
         String location = locationAwareCredential.getLocation();
         NoSqlConnector noSqlConnector = getNoSqlConnector(cloudPlatform);
