@@ -440,4 +440,40 @@ public class AwsPlatformResourcesTest {
                 .containsKey(AZ_NAME)
                 .doesNotContainKey(NOT_ENABLED_AZ_NAME);
     }
+
+    @Test
+    public void testEncryptionWhenNoEbsInfoShouldReturnFalse() {
+        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
+        boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
+        Assert.assertFalse(encryptionSupported);
+    }
+
+    @Test
+    public void testEncryptionWhenEncryptionSupportedNotPresentedShouldReturnFalse() {
+        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
+        EbsInfo ebsInfo = new EbsInfo();
+        instanceTypeInfo.setEbsInfo(ebsInfo);
+        boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
+        Assert.assertFalse(encryptionSupported);
+    }
+
+    @Test
+    public void testEncryptionWhenEncryptionSupportedWithSupportedValuePresentedShouldReturnTrue() {
+        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
+        EbsInfo ebsInfo = new EbsInfo();
+        ebsInfo.setEncryptionSupport("supported");
+        instanceTypeInfo.setEbsInfo(ebsInfo);
+        boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
+        Assert.assertTrue(encryptionSupported);
+    }
+
+    @Test
+    public void testEncryptionWhenEncryptionSupportedWithNotSupportedValuePresentedShouldReturnFalse() {
+        InstanceTypeInfo instanceTypeInfo = new InstanceTypeInfo();
+        EbsInfo ebsInfo = new EbsInfo();
+        ebsInfo.setEncryptionSupport("nonsupported");
+        instanceTypeInfo.setEbsInfo(ebsInfo);
+        boolean encryptionSupported = underTest.getEncryptionSupported(instanceTypeInfo);
+        Assert.assertFalse(encryptionSupported);
+    }
 }
