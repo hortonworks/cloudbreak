@@ -30,7 +30,7 @@ public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFac
 
     @Override
     public String initEvent() {
-        return FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
+        return FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT.getValue();
     }
 
     @Override

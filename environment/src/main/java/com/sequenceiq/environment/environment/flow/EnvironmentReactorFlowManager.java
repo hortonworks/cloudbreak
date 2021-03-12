@@ -88,7 +88,7 @@ public class EnvironmentReactorFlowManager {
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
                 .withAccepted(new Promise<>())
-                .withSelector(ENV_DELETE_CLUSTERS_TRIGGER_EVENT)
+                .withSelector(ENV_DELETE_CLUSTERS_TRIGGER_EVENT.getValue())
                 .withResourceId(environment.getId())
                 .withResourceName(environment.getName())
                 .withForceDelete(forced)
