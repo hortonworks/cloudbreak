@@ -6,6 +6,11 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveDnsRequest extends AbstractCleanupEvent {
+
+    protected RemoveDnsRequest(Long stackId) {
+        super(stackId);
+    }
+
     public RemoveDnsRequest(CleanupEvent cleanupEvent) {
         super(cleanupEvent);    }
 

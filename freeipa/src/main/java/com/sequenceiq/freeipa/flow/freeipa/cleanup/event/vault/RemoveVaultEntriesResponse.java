@@ -8,9 +8,13 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveVaultEntriesResponse extends AbstractCleanupEvent {
 
-    private final Set<String> vaultCleanupSuccess;
+    private Set<String> vaultCleanupSuccess;
 
-    private final Map<String, String> vaultCleanupFailed;
+    private Map<String, String> vaultCleanupFailed;
+
+    protected RemoveVaultEntriesResponse(Long stackId) {
+        super(stackId);
+    }
 
     public RemoveVaultEntriesResponse(CleanupEvent cleanupEvent, Set<String> vaultCleanupSuccess,
             Map<String, String> vaultCleanupFailed) {

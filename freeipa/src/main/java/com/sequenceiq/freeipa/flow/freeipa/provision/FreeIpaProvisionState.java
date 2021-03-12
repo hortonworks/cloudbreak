@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
 public enum FreeIpaProvisionState implements FlowState {
     INIT_STATE,
@@ -14,4 +16,9 @@ public enum FreeIpaProvisionState implements FlowState {
     FREEIPA_POST_INSTALL_STATE,
     FREEIPA_PROVISION_FINISHED_STATE,
     FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }

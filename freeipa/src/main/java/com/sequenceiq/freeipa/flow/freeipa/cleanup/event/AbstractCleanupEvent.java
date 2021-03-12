@@ -4,6 +4,10 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 
 public abstract class AbstractCleanupEvent extends CleanupEvent {
 
+    protected AbstractCleanupEvent(Long stackId) {
+        super(stackId);
+    }
+
     public AbstractCleanupEvent(CleanupEvent cleanupEvent) {
         super(cleanupEvent.getResourceId(), cleanupEvent.getUsers(), cleanupEvent.getHosts(), cleanupEvent.getRoles(), cleanupEvent.getIps(),
                 cleanupEvent.getStatesToSkip(), cleanupEvent.getAccountId(), cleanupEvent.getOperationId(), cleanupEvent.getClusterName(),

@@ -8,6 +8,10 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RevokeCertsRequest extends AbstractCleanupEvent {
 
+    protected RevokeCertsRequest(Long stackId) {
+        super(stackId);
+    }
+
     public RevokeCertsRequest(CleanupEvent cleanupEvent, Stack stack) {
         super(cleanupEvent);
     }

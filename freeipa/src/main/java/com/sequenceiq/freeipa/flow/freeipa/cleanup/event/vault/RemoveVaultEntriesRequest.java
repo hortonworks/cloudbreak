@@ -7,6 +7,11 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveVaultEntriesRequest extends AbstractCleanupEvent {
+
+    protected RemoveVaultEntriesRequest(Long stackId) {
+        super(stackId);
+    }
+
     public RemoveVaultEntriesRequest(CleanupEvent cleanupEvent, Stack stack) {
         super(cleanupEvent);
     }

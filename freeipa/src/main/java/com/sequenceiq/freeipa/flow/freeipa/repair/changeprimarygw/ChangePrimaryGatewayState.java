@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
 public enum ChangePrimaryGatewayState implements FlowState {
     INIT_STATE,
@@ -11,4 +13,9 @@ public enum ChangePrimaryGatewayState implements FlowState {
     CHANGE_PRIMARY_GATEWAY_FINISHED_STATE,
     CHANGE_PRIMARY_GATEWAY_FAIL_STATE,
     FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }
