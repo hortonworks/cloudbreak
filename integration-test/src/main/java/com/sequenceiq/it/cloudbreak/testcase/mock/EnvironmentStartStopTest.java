@@ -108,6 +108,8 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
             when = "create an attached SDX and Datahub",
             then = "should be stopped first and started after it and validate the flow events")
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
+        //TODO [AF] hard to grasp I 'd like to introduce some "highlevel" testDto to make it readable
+        //TODO [AF] I'd like to see test about when datahub starts are not requested (might be implemented in unit test, that should be investigated)
         testContext
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
