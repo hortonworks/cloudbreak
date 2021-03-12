@@ -39,7 +39,6 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentStar
     public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
         EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
-            //TODO [AF]:, what happens when it is not present? I guess that could be an exception too, or just save the followings
             freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
                 if (freeIpa.getStatus() != null && !freeIpa.getStatus().isStartable()) {
                     throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to start! Current state is: " + freeIpa.getStatus().name());

@@ -34,7 +34,6 @@ public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentStar
 
     @Override
     public void accept(Event<EnvironmentStartDto> environmentStartDtoEvent) {
-        //TODO [AF]: test is missing
         EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             if (START_ALL == environmentStartDtoEvent.getData().getDataHubStart()) {

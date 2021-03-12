@@ -75,7 +75,6 @@ public class EnvironmentStartDto implements Payload {
         }
 
         public EnvironmentStartDto build() {
-            //TODO: AF; a null check would be wise on these (environmentDto, id, dataHubStartAction)
             EnvironmentStartDto environmentDeletionDto = new EnvironmentStartDto();
             environmentDeletionDto.setEnvironmentDto(environmentDto);
             environmentDeletionDto.setId(id);
