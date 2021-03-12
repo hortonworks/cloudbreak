@@ -245,20 +245,6 @@ message CDPEnvironmentsEnvironmentType {
   }
 }
 
-// The tunnel type of a CDP environment.
-message CDPEnvironmentsEnvironmentTunnel {
-  enum Value {
-    // A value indicating the enum is unset.
-    UNSET = 0;
-    // DIRECT
-    DIRECT = 1;
-    // CCM
-    CCM = 2;
-    // Cluster Proxy
-    CLUSTER_PROXY = 3;
-  }
-}
-
 // The status of a CDP Cloudbreak cluster.
 message CDPCloudbreakClusterStatus {
   enum Value {
@@ -711,6 +697,10 @@ message CDPEnvironmentTelemetryFeatureDetails {
 message CDPProxyDetails {
     // Shows whether a proxy is used
     bool proxy = 1;
+    // Shows whether it is http or https
+    string protocol = 2;
+    // Shows whether NONE or BASIC auth
+    string authentication = 3;
 }
 
 message CDPNetworkDetails {
