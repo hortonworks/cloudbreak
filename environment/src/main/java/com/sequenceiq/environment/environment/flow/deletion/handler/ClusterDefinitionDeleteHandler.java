@@ -21,6 +21,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
+// TODO: CB-11559
 public class ClusterDefinitionDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDefinitionDeleteHandler.class);

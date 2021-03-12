@@ -23,6 +23,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import reactor.rx.Promise;
 
 @Component
+// TODO: CB-11559
 public class EnvDeleteClustersFlowEventChainFactory implements FlowEventChainFactory<EnvDeleteEvent> {
 
     @Inject

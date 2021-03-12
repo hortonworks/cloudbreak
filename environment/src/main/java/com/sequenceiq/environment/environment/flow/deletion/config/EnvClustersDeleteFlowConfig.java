@@ -23,6 +23,7 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Buil
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
+// TODO: CB-11559
 public class EnvClustersDeleteFlowConfig extends AbstractFlowConfiguration<EnvClustersDeleteState, EnvClustersDeleteStateSelectors>
         implements RetryableFlowConfiguration<EnvClustersDeleteStateSelectors> {
 

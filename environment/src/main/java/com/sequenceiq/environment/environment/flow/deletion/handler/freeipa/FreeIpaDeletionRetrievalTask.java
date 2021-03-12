@@ -13,7 +13,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-
+// TODO: CB-11559
 public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIpaPollerObject> {
 
     public static final int FREEIPA_RETRYING_INTERVAL = 5000;

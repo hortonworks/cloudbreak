@@ -47,6 +47,7 @@ import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
+// TODO: CB-11559
 public class EnvDeleteActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvDeleteActions.class);

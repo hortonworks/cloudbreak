@@ -17,6 +17,7 @@ import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import reactor.bus.Event;
 
 @Component
+// TODO: CB-11559
 public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDeletionDto> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdbmsDeleteHandler.class);
