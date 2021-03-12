@@ -120,6 +120,30 @@
           "cloudPlatform": "AWS"
         },
         "recipeNames": []
+      },
+      {
+        "nodeCount": 1,
+        "name": "masterx",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "aws": {
+            "placementGroup" : {
+              "strategy" : "PARTITION"
+            }
+          },
+          "instanceType": "m5.4xlarge",
+          "rootVolume": {
+            "size": 150
+          },
+          "attachedVolumes": [{
+            "size": 150,
+            "count": 1,
+            "type": "gp2"
+          }],
+          "cloudPlatform": "AWS"
+        },
+        "recipeNames": []
       }
     ]
   }
