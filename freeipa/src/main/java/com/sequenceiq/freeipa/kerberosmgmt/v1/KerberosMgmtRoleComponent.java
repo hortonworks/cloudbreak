@@ -51,9 +51,18 @@ public class KerberosMgmtRoleComponent {
             FreeIpaClient ipaClient)
             throws FreeIpaClientException {
         if (roleRequest != null && StringUtils.isNotBlank(roleRequest.getRoleName())) {
-            Set<Role> allRole = ipaClient.findAllRole();
-            Optional<Role> optionalRole = allRole.stream().filter(role -> role.getCn().equals(roleRequest.getRoleName())).findFirst();
-            Role role = optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
+            Role role;
+            try {
+                Optional<Role> optionalRole = findRole(roleRequest.getRoleName(), ipaClient);
+                role = optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
+            } catch (FreeIpaClientException e) {
+                if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                    LOGGER.error("Failed to add the role [{}]", roleRequest.getRoleName(), e);
+                    throw e;
+                }
+                LOGGER.debug("The role [{}] was recently created in a different thread, retrieve it", roleRequest.getRoleName(), e);
+                role = findRole(roleRequest.getRoleName(), ipaClient).get();
+            }
             addPrivilegesToRole(roleRequest.getPrivileges(), ipaClient, role);
             role = ipaClient.showRole(role.getCn());
             Set<String> servicesToAssignRole = service.stream()
@@ -66,6 +75,11 @@ public class KerberosMgmtRoleComponent {
                     .collect(Collectors.toSet());
             ipaClient.addRoleMember(role.getCn(), null, null, hostsToAssignRole, null, servicesToAssignRole);
         }
+    }
+
+    private Optional<Role> findRole(String roleName, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        Set<Role> allRole = ipaClient.findAllRole();
+        return allRole.stream().filter(role -> role.getCn().equals(roleName)).findFirst();
     }
 
     private void addPrivilegesToRole(Set<String> privileges, FreeIpaClient ipaClient, Role role) throws FreeIpaClientException {
