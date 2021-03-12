@@ -136,7 +136,6 @@ public class EnvironmentCreateTest extends AbstractMockTest {
         testContext
                 //testing authorized freeipa calls for the environment
                 .given(FreeIpaTestDto.class)
-                .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .when(freeIpaTestClient.describe())

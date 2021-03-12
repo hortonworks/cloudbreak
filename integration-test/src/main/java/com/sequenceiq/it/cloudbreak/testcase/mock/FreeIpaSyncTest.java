@@ -39,7 +39,7 @@ public class FreeIpaSyncTest extends AbstractMockTest {
             then = "freeipa sould be available")
     public void testSyncFreeIpaWithInternalActor(MockedTestContext testContext) {
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
+                .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaUserSyncTestDto.class)

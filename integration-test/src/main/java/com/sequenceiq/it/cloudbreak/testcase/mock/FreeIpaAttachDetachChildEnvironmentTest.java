@@ -41,7 +41,6 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
     public void testAttachChildEnvironment(MockedTestContext testContext) {
         testContext
                 .given(FreeIpaTestDto.class)
-                    .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
@@ -63,7 +62,6 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
     public void testParentFreeIpaDeleteFailure(MockedTestContext testContext) {
         testContext
                 .given(FreeIpaTestDto.class)
-                    .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
@@ -87,7 +85,6 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
     public void testParentFreeIpaDeleteSuccess(MockedTestContext testContext) {
         testContext
                 .given(FreeIpaTestDto.class)
-                    .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)

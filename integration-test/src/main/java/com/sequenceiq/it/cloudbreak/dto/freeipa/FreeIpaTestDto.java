@@ -82,7 +82,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
-                .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins");
+                .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
+                .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl());
     }
 
     public FreeIpaTestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {

@@ -330,6 +330,11 @@ public class CloudProviderProxy implements CloudProvider {
         getDelegate(instanceTemplateV1Request.getCloudPlatform()).setInstanceTemplateV1Parameters(instanceTemplateV1Request);
     }
 
+    @Override
+    public String getFreeIpaImageCatalogUrl() {
+        return delegate.getFreeIpaImageCatalogUrl();
+    }
+
     private CloudProvider getDelegate(CloudPlatform cloudPlatform) {
         return cloudProviderMap.getOrDefault(cloudPlatform, delegate);
     }

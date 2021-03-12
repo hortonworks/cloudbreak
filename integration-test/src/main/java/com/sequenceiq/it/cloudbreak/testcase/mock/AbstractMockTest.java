@@ -37,8 +37,7 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
 
     protected void createDefaultFreeIpa(TestContext testContext) {
         testContext
-                .given(FreeIpaTestDto.class).withCatalog(getImageCatalogMockServerSetup()
-                .getFreeIpaImageCatalogUrl())
+                .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .validate();

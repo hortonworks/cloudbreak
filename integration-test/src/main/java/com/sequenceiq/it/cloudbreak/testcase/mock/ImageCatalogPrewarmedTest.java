@@ -45,8 +45,6 @@ public class ImageCatalogPrewarmedTest extends AbstractMockTest {
         testContext
                 .given(ImageCatalogTestDto.class)
                 .withName(imgCatalogName)
-                .withUrl(getImageCatalogMockServerSetup()
-                        .getPreWarmedImageCatalogUrl())
                 .when(imageCatalogTestClient.createV4(), key(imgCatalogName))
                 // .when(imageCatalogTestClient.setAsDefault(), key(imgCatalogName))
                 .given(StackTestDto.class)

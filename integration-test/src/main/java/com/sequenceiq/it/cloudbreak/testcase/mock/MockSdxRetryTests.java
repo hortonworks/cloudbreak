@@ -40,8 +40,6 @@ public class MockSdxRetryTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
-                .withCatalog(getImageCatalogMockServerSetup()
-                        .getFreeIpaImageCatalogUrl())
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .mockSpi().launch().post()
