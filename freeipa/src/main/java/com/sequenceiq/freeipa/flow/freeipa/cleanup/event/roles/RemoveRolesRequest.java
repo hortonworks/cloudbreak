@@ -5,6 +5,11 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveRolesRequest extends AbstractCleanupEvent {
+
+    protected RemoveRolesRequest(Long stackId) {
+        super(stackId);
+    }
+
     public RemoveRolesRequest(CleanupEvent cleanupEvent, Stack stack) {
         super(cleanupEvent);
     }

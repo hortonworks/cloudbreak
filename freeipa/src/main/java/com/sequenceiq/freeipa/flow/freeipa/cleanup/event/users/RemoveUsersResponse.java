@@ -8,9 +8,13 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveUsersResponse extends AbstractCleanupEvent {
 
-    private final Set<String> userCleanupSuccess;
+    private Set<String> userCleanupSuccess;
 
-    private final Map<String, String> userCleanupFailed;
+    private Map<String, String> userCleanupFailed;
+
+    protected RemoveUsersResponse(Long stackId) {
+        super(stackId);
+    }
 
     public RemoveUsersResponse(CleanupEvent cleanupEvent, Set<String> userCleanupSuccess, Map<String, String> userCleanupFailed) {
         super(cleanupEvent);

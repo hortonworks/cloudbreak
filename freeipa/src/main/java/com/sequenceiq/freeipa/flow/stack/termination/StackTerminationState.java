@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.termination;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.DeregisterCcmKeyAction;
 import com.sequenceiq.freeipa.flow.stack.termination.action.DeregisterClusterProxyAction;
@@ -33,5 +35,10 @@ public enum StackTerminationState implements FlowState {
     @Override
     public Class<? extends AbstractStackAction<?, ?, ?, ?>> action() {
         return action;
+    }
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
     }
 }

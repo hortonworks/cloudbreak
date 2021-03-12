@@ -6,23 +6,27 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class CleanupEvent extends StackEvent {
 
-    private final Set<String> users;
+    private Set<String> users;
 
-    private final Set<String> hosts;
+    private Set<String> hosts;
 
-    private final Set<String> roles;
+    private Set<String> roles;
 
-    private final Set<String> ips;
+    private Set<String> ips;
 
-    private final Set<String> statesToSkip;
+    private Set<String> statesToSkip;
 
-    private final String accountId;
+    private String accountId;
 
-    private final String operationId;
+    private String operationId;
 
-    private final String clusterName;
+    private String clusterName;
 
-    private final String environmentCrn;
+    private String environmentCrn;
+
+    protected CleanupEvent(Long stackId) {
+        super(stackId);
+    }
 
     @SuppressWarnings("ExecutableStatementCount")
     public CleanupEvent(Long stackId, Set<String> users, Set<String> hosts, Set<String> roles, Set<String> ips, Set<String> statesToSkip, String accountId,

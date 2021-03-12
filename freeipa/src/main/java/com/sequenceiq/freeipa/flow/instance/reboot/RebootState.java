@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.flow.instance.reboot;
 
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
 
 public enum RebootState implements FlowState {
     INIT_STATE,
@@ -9,6 +11,8 @@ public enum RebootState implements FlowState {
     REBOOT_FINISHED_STATE,
     FINAL_STATE;
 
-    RebootState() {
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
     }
 }

@@ -8,9 +8,13 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveDnsResponse extends AbstractCleanupEvent {
 
-    private final Set<String> dnsCleanupSuccess;
+    private Set<String> dnsCleanupSuccess;
 
-    private final Map<String, String> dnsCleanupFailed;
+    private Map<String, String> dnsCleanupFailed;
+
+    public RemoveDnsResponse(Long stackId) {
+        super(stackId);
+    }
 
     public RemoveDnsResponse(CleanupEvent cleanupEvent, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed) {
         super(cleanupEvent);

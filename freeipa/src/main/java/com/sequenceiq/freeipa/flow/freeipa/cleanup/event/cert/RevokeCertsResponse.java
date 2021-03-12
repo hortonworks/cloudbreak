@@ -8,9 +8,13 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RevokeCertsResponse extends AbstractCleanupEvent {
 
-    private final Set<String> certCleanupSuccess;
+    private Set<String> certCleanupSuccess;
 
-    private final Map<String, String> certCleanupFailed;
+    private Map<String, String> certCleanupFailed;
+
+    protected RevokeCertsResponse(Long stackId) {
+        super(stackId);
+    }
 
     public RevokeCertsResponse(CleanupEvent cleanupEvent, Set<String> certCleanupSuccess, Map<String, String> certCleanupFailed) {
         super(cleanupEvent);

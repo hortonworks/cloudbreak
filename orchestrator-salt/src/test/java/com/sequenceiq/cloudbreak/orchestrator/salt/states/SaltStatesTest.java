@@ -138,10 +138,10 @@ public class SaltStatesTest {
         String response = IOUtils.toString(responseStream, Charset.defaultCharset());
         responseStream.close();
         Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any(), eq("missing"), eq("True"))).thenReturn(responseMap);
 
         Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId, "missing", "True");
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(4));
@@ -169,7 +169,7 @@ public class SaltStatesTest {
         String runningJid = "20201116101144197633";
         String jobId = "2";
 
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("2"))).thenThrow(
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("2"), eq("missing"), eq("True"))).thenThrow(
                 new SaltExecutionWentWrongException("The function \"state.highstate\" is running as PID 100789 and was started at 2020, " +
                         "Nov 16 10:11:44.197633 with jid " + runningJid));
 
@@ -177,11 +177,11 @@ public class SaltStatesTest {
         String response = IOUtils.toString(responseStream, Charset.defaultCharset());
         responseStream.close();
         Map<?, ?> responseMap = new ObjectMapper().readValue(response, Map.class);
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq(runningJid))).thenReturn(responseMap);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq(runningJid), eq("missing"), eq("True"))).thenReturn(responseMap);
 
         Multimap<String, Map<String, String>> jidInfo = SaltStates.jidInfo(saltConnector, jobId, StateType.HIGH);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId, "missing", "True");
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(4));
@@ -209,11 +209,11 @@ public class SaltStatesTest {
         String runningJid = "20201116101144197633";
         String jobId = "2";
 
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("2"))).thenThrow(
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("2"), eq("missing"), eq("True"))).thenThrow(
                 new SaltExecutionWentWrongException("The function \"state.highstate\" is running as PID 100789 and was started at 2020, " +
                         "Nov 16 10:11:44.197633 with jid " + runningJid));
 
-        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("20201116101144197633"))).thenThrow(
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), eq("20201116101144197633"), eq("missing"), eq("True"))).thenThrow(
                 new SaltExecutionWentWrongException("other error"));
 
         try {
@@ -221,8 +221,8 @@ public class SaltStatesTest {
         } catch (SaltExecutionWentWrongException e) {
             assertEquals("other error", e.getMessage());
         }
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid);
-        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", runningJid, "missing", "True");
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId, "missing", "True");
     }
 
     @Test
