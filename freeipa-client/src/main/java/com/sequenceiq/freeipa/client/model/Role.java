@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.client.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -74,5 +75,17 @@ public class Role {
 
     public void setMemberService(List<String> memberService) {
         this.memberService = memberService;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Role.class.getSimpleName() + "[", "]")
+                .add("cn='" + cn + "'")
+                .add("memberUser=" + memberUser)
+                .add("memberGroup=" + memberGroup)
+                .add("memberHost=" + memberHost)
+                .add("memberHostGroup=" + memberHostGroup)
+                .add("memberService=" + memberService)
+                .toString();
     }
 }

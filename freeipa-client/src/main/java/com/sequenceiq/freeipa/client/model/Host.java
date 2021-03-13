@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.client.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -80,5 +81,18 @@ public class Host {
 
     public void setMemberOfRole(List<String> memberOfRole) {
         this.memberOfRole = memberOfRole;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Host.class.getSimpleName() + "[", "]")
+                .add("dn='" + dn + "'")
+                .add("sshpubkeyfp=" + sshpubkeyfp)
+                .add("krbprincipalname='" + krbprincipalname + "'")
+                .add("fqdn='" + fqdn + "'")
+                .add("krbcanonicalname='" + krbcanonicalname + "'")
+                .add("hasKeytab=" + hasKeytab)
+                .add("memberOfRole=" + memberOfRole)
+                .toString();
     }
 }

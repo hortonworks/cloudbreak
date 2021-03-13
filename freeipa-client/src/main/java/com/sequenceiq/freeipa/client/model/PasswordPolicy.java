@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.client.model;
 
+import java.util.StringJoiner;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.sequenceiq.freeipa.client.deserializer.ListFlatteningDeserializer;
@@ -71,5 +73,17 @@ public class PasswordPolicy {
 
     public void setKrbpwdlockoutduration(Integer krbpwdlockoutduration) {
         this.krbpwdlockoutduration = krbpwdlockoutduration;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PasswordPolicy.class.getSimpleName() + "[", "]")
+                .add("krbpwdminlength=" + krbpwdminlength)
+                .add("krbpwdmindiffchars=" + krbpwdmindiffchars)
+                .add("krbmaxpwdlife=" + krbmaxpwdlife)
+                .add("krbpwdmaxfailure=" + krbpwdmaxfailure)
+                .add("krbpwdfailurecountinterval=" + krbpwdfailurecountinterval)
+                .add("krbpwdlockoutduration=" + krbpwdlockoutduration)
+                .toString();
     }
 }

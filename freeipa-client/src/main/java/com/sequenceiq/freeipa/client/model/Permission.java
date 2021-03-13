@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.client.model;
 
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -69,5 +70,17 @@ public class Permission {
 
     public void setIpapermlocation(String ipapermlocation) {
         this.ipapermlocation = ipapermlocation;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Permission.class.getSimpleName() + "[", "]")
+                .add("cn='" + cn + "'")
+                .add("dn='" + dn + "'")
+                .add("ipapermbindruletype=" + ipapermbindruletype)
+                .add("ipapermissiontype=" + ipapermissiontype)
+                .add("ipapermdefaultattr=" + ipapermdefaultattr)
+                .add("ipapermlocation='" + ipapermlocation + "'")
+                .toString();
     }
 }
