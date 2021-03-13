@@ -33,6 +33,7 @@ import com.google.common.collect.Multimap;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
@@ -216,7 +217,9 @@ class WorkloadCredentialServiceTest {
         ImmutableSet<WorkloadCredentialUpdate> credentialUpdates = usersWithCredentialsToUpdate.stream()
                 .map(username -> new WorkloadCredentialUpdate(username, userToCrnMap.get(username), usersWorkloadCredentialMap.get(username)))
                 .collect(ImmutableSet.toImmutableSet());
-        underTest.setWorkloadCredentials(new UserSyncOptions(false, batchCallEnabled, updateOptimizationEnabled), ipaClient, credentialUpdates,
+        WorkloadCredentialsUpdateType credentialsUpdateType = updateOptimizationEnabled ?
+                WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED : WorkloadCredentialsUpdateType.FORCE_UPDATE;
+        underTest.setWorkloadCredentials(new UserSyncOptions(false, batchCallEnabled, credentialsUpdateType), ipaClient, credentialUpdates,
                 warnings);
     }
 }
