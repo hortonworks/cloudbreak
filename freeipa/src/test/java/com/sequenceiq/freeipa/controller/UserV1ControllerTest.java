@@ -29,6 +29,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -66,7 +67,7 @@ public class UserV1ControllerTest {
     @Test
     void synchronizeUser() {
         Operation operation = mock(Operation.class);
-        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any())).thenReturn(operation);
+        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
@@ -76,13 +77,13 @@ public class UserV1ControllerTest {
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(USER_CRN), Set.of(), Optional.empty());
         verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, Set.of(),
-                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
     @Test
     void synchronizeUserMachineUser() {
         Operation operation = mock(Operation.class);
-        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any())).thenReturn(operation);
+        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
@@ -92,7 +93,7 @@ public class UserV1ControllerTest {
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(MACHINE_USER_CRN), Optional.empty());
         verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, MACHINE_USER_CRN,
-                Set.of(), userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                Set.of(), userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
     @Test
@@ -100,7 +101,7 @@ public class UserV1ControllerTest {
         Operation operation = mock(Operation.class);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(USER_CRN), Set.of(), Optional.empty());
         when(userSyncService.synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, Set.of(), userSyncFilter,
-                AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)).thenReturn(operation);
+                WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
@@ -119,9 +120,10 @@ public class UserV1ControllerTest {
         request.setEnvironments(environments);
         request.setUsers(users);
         request.setMachineUsers(machineUsers);
+        request.setWorkloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE);
 
         Operation operation = mock(Operation.class);
-        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any())).thenReturn(operation);
+        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
@@ -129,7 +131,7 @@ public class UserV1ControllerTest {
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, machineUsers, Optional.empty());
         verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, environments,
-                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                userSyncFilter, WorkloadCredentialsUpdateType.FORCE_UPDATE, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
     @Test
@@ -142,7 +144,7 @@ public class UserV1ControllerTest {
         request.setDeletedWorkloadUsers(Set.of(deletedWorkloadUser));
 
         Operation operation = mock(Operation.class);
-        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any())).thenReturn(operation);
+        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
@@ -150,13 +152,12 @@ public class UserV1ControllerTest {
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, Set.of(), Optional.of(deletedWorkloadUser));
         verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, Set.of(),
-                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
     @Test
     void synchronizeAllUsersMultipleDeleteWorkloadUsers() {
         Set<String> users = Set.of(USER_CRN);
-        String deletedWorkloadUser = "workload-user";
         SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
         request.setEnvironments(Set.of());
         request.setUsers(users);
@@ -176,7 +177,7 @@ public class UserV1ControllerTest {
         request.setAccountId(ACCOUNT_ID);
 
         Operation operation = mock(Operation.class);
-        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any())).thenReturn(operation);
+        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
@@ -184,7 +185,7 @@ public class UserV1ControllerTest {
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, machineUsers, Optional.empty());
         verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, INTERNAL_ACTOR_CRN,
-                environments, userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                environments, userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
     @Test
@@ -206,7 +207,7 @@ public class UserV1ControllerTest {
         Operation operation = mock(Operation.class);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, Set.of(), Optional.empty());
         when(userSyncService.synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, environments, userSyncFilter,
-                AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)).thenReturn(operation);
+                WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);

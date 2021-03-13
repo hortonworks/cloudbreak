@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeUserRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.controller.exception.SyncOperationAlreadyRunningException;
 import com.sequenceiq.freeipa.converter.freeipa.user.OperationToSyncOperationStatus;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -83,7 +84,7 @@ public class UserV1Controller implements UserV1Endpoint {
         }
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
-                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 
@@ -99,7 +100,8 @@ public class UserV1Controller implements UserV1Endpoint {
                 nullToEmpty(request.getMachineUsers()),
                 getOptionalDeletedWorkloadUser(request.getDeletedWorkloadUsers()));
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
-                nullToEmpty(request.getEnvironments()), userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                nullToEmpty(request.getEnvironments()), userSyncFilter, request.getWorkloadCredentialsUpdateType(),
+                AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 

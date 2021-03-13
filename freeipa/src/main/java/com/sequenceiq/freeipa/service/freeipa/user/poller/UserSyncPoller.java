@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
@@ -121,7 +122,7 @@ public class UserSyncPoller {
                 LOGGER.debug("Environment {} in Account {} is not in sync.",
                         stack.getEnvironmentCrn(), stack.getAccountId());
                 Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
-                        Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                        Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
                 LOGGER.debug("User Sync request resulted in operation {}", operation);
             } else {
                 LOGGER.debug("Environment {} in Account {} is in sync or has been synchronized recently.", stack.getEnvironmentCrn(), stack.getAccountId());

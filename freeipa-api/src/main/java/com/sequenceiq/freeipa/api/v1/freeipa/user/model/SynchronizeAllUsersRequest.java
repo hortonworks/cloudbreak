@@ -24,6 +24,9 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
     @ApiModelProperty(value = UserModelDescriptions.USERSYNC_ACCOUNT_ID)
     private String accountId;
 
+    @ApiModelProperty(value = UserModelDescriptions.WORKLOAD_CREDENTIALS_UPDATE_TYPE)
+    private WorkloadCredentialsUpdateType workloadCredentialsUpdateType = WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED;
+
     public SynchronizeAllUsersRequest() {
     }
 
@@ -56,6 +59,14 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
         this.accountId = accountId;
     }
 
+    public WorkloadCredentialsUpdateType getWorkloadCredentialsUpdateType() {
+        return workloadCredentialsUpdateType;
+    }
+
+    public void setWorkloadCredentialsUpdateType(WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
+        this.workloadCredentialsUpdateType = workloadCredentialsUpdateType;
+    }
+
     public Set<String> getDeletedWorkloadUsers() {
         return deletedWorkloadUsers;
     }
@@ -71,6 +82,7 @@ public class SynchronizeAllUsersRequest extends SynchronizeOperationRequestBase 
                 + ", users=" + users
                 + ", deletedWorkloadUsers=" + deletedWorkloadUsers
                 + ", accountId=" + accountId
+                + ", workloadCredentialsUpdateType=" + workloadCredentialsUpdateType
                 + ", " + super.fieldsToString()
                 + '}';
     }

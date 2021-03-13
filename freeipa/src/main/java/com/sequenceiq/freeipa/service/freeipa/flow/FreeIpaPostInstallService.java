@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Permission;
@@ -89,7 +90,8 @@ public class FreeIpaPostInstallService {
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
         userSyncService.synchronizeUsers(
-                ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()),
+                Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
     }
 
     private void modifyAdminPasswordExpirationIfNeeded(FreeIpaClient client) throws FreeIpaClientException {
