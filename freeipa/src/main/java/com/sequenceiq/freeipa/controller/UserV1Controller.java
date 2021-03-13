@@ -83,7 +83,7 @@ public class UserV1Controller implements UserV1Endpoint {
         }
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn, environmentCrnFilter,
-                userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                userSyncFilter, false, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 
@@ -93,13 +93,15 @@ public class UserV1Controller implements UserV1Endpoint {
         String userCrn = checkActorCrn();
         String accountId = determineAccountId(userCrn, request.getAccountId());
 
+
         LOGGER.debug("synchronizeAllUsers() requested for account {}", accountId);
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(nullToEmpty(request.getUsers()),
                 nullToEmpty(request.getMachineUsers()),
                 getOptionalDeletedWorkloadUser(request.getDeletedWorkloadUsers()));
         Operation syncOperation = userSyncService.synchronizeUsersWithCustomPermissionCheck(accountId, userCrn,
-                nullToEmpty(request.getEnvironments()), userSyncFilter, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+                nullToEmpty(request.getEnvironments()), userSyncFilter, request.getForceWorkloadCredentialsUpdate(),
+                AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(syncOperation));
     }
 

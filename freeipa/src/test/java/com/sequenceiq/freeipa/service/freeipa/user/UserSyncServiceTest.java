@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -175,13 +174,11 @@ class UserSyncServiceTest {
         doAnswer(invocation -> {
             assertEquals(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             return null;
-        })
-                .when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), anyBoolean());
+        }).when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), any());
 
-        spyService.synchronizeUsers("accountId", "actorCrn",
-                Set.of(), Set.of(), Set.of());
+        spyService.synchronizeUsers("accountId", "actorCrn", Set.of(), Set.of(), Set.of(), false);
 
-        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), anyBoolean());
+        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), any());
     }
 
     @Test

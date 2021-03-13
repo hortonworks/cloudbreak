@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -72,7 +73,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
-                Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
+                Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of(), false);
     }
 
     @Test
@@ -84,7 +85,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService, times(0))
-                .synchronizeUsers(any(), any(), any(), any(), any());
+                .synchronizeUsers(any(), any(), any(), any(), any(), anyBoolean());
     }
 
     @Test
@@ -97,7 +98,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
-                Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of());
+                Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of(), false);
     }
 
     @Test
@@ -110,7 +111,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService, times(0))
-                .synchronizeUsers(any(), any(), any(), any(), any());
+                .synchronizeUsers(any(), any(), any(), any(), any(), anyBoolean());
     }
 
     @Test
@@ -121,7 +122,7 @@ class UserSyncPollerTest {
         underTest.syncAllFreeIpaStacks();
 
         verify(userSyncService, times(0))
-                .synchronizeUsers(any(), any(), any(), any(), any());
+                .synchronizeUsers(any(), any(), any(), any(), any(), anyBoolean());
     }
 
     private Stack setupMockStackService(Stack stack) {

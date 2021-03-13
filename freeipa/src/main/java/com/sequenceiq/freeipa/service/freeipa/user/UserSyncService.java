@@ -35,7 +35,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -154,21 +153,31 @@ public class UserSyncService {
     private BatchPartitionSizeProperties batchPartitionSizeProperties;
 
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-            Set<String> userCrnFilter, Set<String> machineUserCrnFilter) {
+            Set<String> userCrnFilter, Set<String> machineUserCrnFilter, boolean forceWorkloadCredentialsUpdate) {
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
         List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
-        return performSyncForStacks(accountId, actorCrn, userSyncFilter, stacks);
+        UserSyncOptions userSyncOptions = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), forceWorkloadCredentialsUpdate);
+        return performSyncForStacks(accountId, actorCrn, userSyncFilter, userSyncOptions, stacks);
     }
 
     public Operation synchronizeUsersWithCustomPermissionCheck(String accountId, String actorCrn, Set<String> environmentCrnFilter,
-            UserSyncRequestFilter userSyncFilter, AuthorizationResourceAction action) {
+            UserSyncRequestFilter userSyncFilter, boolean forceWorkloadCredentialsUpdate, AuthorizationResourceAction action) {
         List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
         List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
         CustomCheckUtil.run(actorCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns));
-        return performSyncForStacks(accountId, actorCrn, userSyncFilter, stacks);
+        UserSyncOptions userSyncOptions = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), forceWorkloadCredentialsUpdate);
+        return performSyncForStacks(accountId, actorCrn, userSyncFilter, userSyncOptions, stacks);
     }
 
-    private Operation performSyncForStacks(String accountId, String actorCrn, UserSyncRequestFilter userSyncFilter, List<Stack> stacks) {
+    private UserSyncOptions getUserSyncOptions(String accountId, boolean fullSync, boolean forceWorkloadCredentialsUpdate) {
+        boolean credentialsUpdateOptimizationEnabled = !forceWorkloadCredentialsUpdate &&
+                entitlementService.usersyncCredentialsUpdateOptimizationEnabled(accountId);
+        LOGGER.info("Credentials update optimization is{} enabled for account {}", credentialsUpdateOptimizationEnabled ? "" : " not", accountId);
+        return new UserSyncOptions(fullSync, entitlementService.isFmsToFreeipaBatchCallEnabled(accountId), credentialsUpdateOptimizationEnabled);
+    }
+
+    private Operation performSyncForStacks(String accountId, String actorCrn, UserSyncRequestFilter userSyncFilter, UserSyncOptions userSyncOptions,
+            List<Stack> stacks) {
         logAffectedStacks(stacks);
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
         Operation operation = operationService
@@ -190,7 +199,7 @@ public class UserSyncService {
                                 userSyncStatusService.save(userSyncStatus);
                             });
                         }
-                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userSyncFilter, fullSync);
+                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userSyncFilter, userSyncOptions);
                     }));
         }
 
@@ -221,10 +230,10 @@ public class UserSyncService {
 
     @VisibleForTesting
     void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-            boolean fullSync) {
+            UserSyncOptions userSyncOptions) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter, fullSync));
+            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter, userSyncOptions));
         } finally {
             MDCBuilder.removeOperationId();
         }
@@ -249,23 +258,23 @@ public class UserSyncService {
     }
 
     private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-            boolean fullSync) {
+            UserSyncOptions userSyncOptions) {
         tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
             Optional<String> requestId = MDCUtils.getRequestId();
 
-            UmsEventGenerationIds umsEventGenerationIds = fullSync ?
+            UmsEventGenerationIds umsEventGenerationIds = userSyncOptions.fullSync() ?
                     umsEventGenerationIdsProvider.getEventGenerationIds(accountId, requestId) :
                     null;
 
-            LogEvent logUserSyncEvent = fullSync ? LogEvent.FULL_USER_SYNC : LogEvent.PARTIAL_USER_SYNC;
+            LogEvent logUserSyncEvent = userSyncOptions.fullSync() ? LogEvent.FULL_USER_SYNC : LogEvent.PARTIAL_USER_SYNC;
             LOGGER.info("Starting {} for environments {} with operationId {} ...", logUserSyncEvent, environmentCrns, operationId);
 
             Map<String, Future<SyncStatusDetail>> statusFutures;
 
             if (userSyncFilter.getDeletedWorkloadUser().isEmpty()) {
-                LogEvent logRetrieveUmsEvent = fullSync ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
+                LogEvent logRetrieveUmsEvent = userSyncOptions.fullSync() ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
                 LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
                 Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProviderDispatcher
                         .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userSyncFilter.getUserCrnFilter(),
@@ -273,8 +282,8 @@ public class UserSyncService {
                 LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
                 statusFutures = stacks.stream()
                         .collect(Collectors.toMap(Stack::getEnvironmentCrn,
-                                stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, fullSync,
-                                        operationId, accountId)));
+                                stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds,
+                                        userSyncOptions, operationId, accountId)));
             } else {
                 String deletedWorkloadUser = userSyncFilter.getDeletedWorkloadUser().get();
                 statusFutures = stacks.stream()
@@ -321,10 +330,10 @@ public class UserSyncService {
     }
 
     private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
-            boolean fullSync, String operationId, String accountId) {
+            UserSyncOptions userSyncOptions, String operationId, String accountId) {
         return asyncTaskExecutor.submit(() -> {
-            SyncStatusDetail statusDetail = internalSynchronizeStack(stack, umsUsersState, fullSync);
-            if (fullSync && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
+            SyncStatusDetail statusDetail = internalSynchronizeStack(stack, umsUsersState, userSyncOptions);
+            if (userSyncOptions.fullSync() && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
                 userSyncStatus.setUmsEventGenerationIds(new Json(umsEventGenerationIds));
                 userSyncStatus.setLastSuccessfulFullSync(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
@@ -339,25 +348,19 @@ public class UserSyncService {
         return asyncTaskExecutor.submit(() -> internalSynchronizeStackForDeleteUser(stack, deletedWorkloadUser, false));
     }
 
-    private SyncStatusDetail internalSynchronizeStack(Stack stack, UmsUsersState umsUsersState, boolean fullSync) {
+    private SyncStatusDetail internalSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UserSyncOptions userSyncOptions) {
         MDCBuilder.buildMdcContext(stack);
         String environmentCrn = stack.getEnvironmentCrn();
         Multimap<String, String> warnings = ArrayListMultimap.create();
         try {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            String accountId = Crn.fromString(environmentCrn).getAccountId();
-            UserSyncOptions options = new UserSyncOptions(fullSync, entitlementService.isFmsToFreeipaBatchCallEnabled(accountId),
-                    entitlementService.usersyncCredentialsUpdateOptimizationEnabled(accountId));
-            LOGGER.info("Credentials update optimization is{} enabled for account {}",
-                    options.credentialsUpdateOptimizationEnabled() ? "" : " not", accountId);
+            UsersStateDifference usersStateDifferenceBeforeSync = compareUmsAndFreeIpa(umsUsersState, userSyncOptions, freeIpaClient);
+            applyDifference(umsUsersState, environmentCrn, warnings, usersStateDifferenceBeforeSync, userSyncOptions, freeIpaClient);
 
-            UsersStateDifference usersStateDifferenceBeforeSync = compareUmsAndFreeIpa(umsUsersState, options, freeIpaClient);
-            applyDifference(umsUsersState, environmentCrn, warnings, usersStateDifferenceBeforeSync, options, freeIpaClient);
-
-            retrySyncIfBatchCallHasWarnings(stack, umsUsersState, warnings, options, freeIpaClient, usersStateDifferenceBeforeSync);
+            retrySyncIfBatchCallHasWarnings(stack, umsUsersState, warnings, userSyncOptions, freeIpaClient, usersStateDifferenceBeforeSync);
 
             // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
-            if (options.fullSync() && entitlementService.cloudIdentityMappingEnabled(stack.getAccountId())) {
+            if (userSyncOptions.fullSync() && entitlementService.cloudIdentityMappingEnabled(stack.getAccountId())) {
                 LOGGER.debug("Starting {} ...", LogEvent.SYNC_CLOUD_IDENTITIES);
                 cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
                 LOGGER.debug("Finished {}.", LogEvent.SYNC_CLOUD_IDENTITIES);

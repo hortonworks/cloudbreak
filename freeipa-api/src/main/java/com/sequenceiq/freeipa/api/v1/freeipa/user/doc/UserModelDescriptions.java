@@ -18,6 +18,8 @@ public class UserModelDescriptions {
     public static final String FAILURE_ENVIRONMENTS = "details about environments where operation failed";
     public static final String USER_PASSWORD = "the user's password";
     public static final String USERSYNC_STATE = "state of user synchronization";
+    public static final String FORCE_WORKLOAD_CREDENTIALS_UPDATE = "when synchronizing a user, update workload credentials " +
+            "whether or not they have changed";
 
     private UserModelDescriptions() {
     }

@@ -121,7 +121,7 @@ public class UserSyncPoller {
                 LOGGER.debug("Environment {} in Account {} is not in sync.",
                         stack.getEnvironmentCrn(), stack.getAccountId());
                 Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
-                        Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of());
+                        Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of(), false);
                 LOGGER.debug("User Sync request resulted in operation {}", operation);
             } else {
                 LOGGER.debug("Environment {} in Account {} is in sync or has been synchronized recently.", stack.getEnvironmentCrn(), stack.getAccountId());
