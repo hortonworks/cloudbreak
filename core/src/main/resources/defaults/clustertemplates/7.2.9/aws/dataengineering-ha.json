@@ -11,6 +11,7 @@
     "externalDatabase": {
       "availabilityType": "HA"
     },
+    "enableLoadBalancer": true,
     "instanceGroups": [{
       "nodeCount": 1,
       "name": "manager",
