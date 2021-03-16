@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -15,6 +17,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,11 +44,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.powermock.reflect.Whitebox;
 import org.springframework.util.ReflectionUtils;
 
 import com.google.common.collect.Lists;
@@ -60,6 +65,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
@@ -70,6 +76,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ModifyGrainBase;
@@ -125,9 +132,9 @@ public class SaltOrchestratorTest {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, "privatekey", "publickey", null, null);
         targets = new HashSet<>();
-        targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg"));
-        targets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg"));
-        targets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
+        targets.add(new Node("10.0.0.1", "1.1.1.1", "instanceid1", "hg", "10-0-0-1.example.com", "hg"));
+        targets.add(new Node("10.0.0.2", "1.1.1.2", "instanceid2", "hg", "10-0-0-2.example.com", "hg"));
+        targets.add(new Node("10.0.0.3", "1.1.1.3", "instanceid3", "hg", "10-0-0-3.example.com", "hg"));
 
         saltConnector = mock(SaltConnector.class);
         whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
@@ -341,5 +348,61 @@ public class SaltOrchestratorTest {
                 .thenReturn(callable);
 
         saltOrchestrator.uploadGatewayPillar(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel, saltConfig);
+    }
+
+    @Test
+    public void testStopClusterManagerAgent() throws Exception {
+        Set<Node> downscaleTargets = new HashSet<>();
+        downscaleTargets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg"));
+        downscaleTargets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
+
+        PowerMockito.mockStatic(SaltStates.class);
+        MinionIpAddressesResponse minionIpAddressesResponse = mock(MinionIpAddressesResponse.class);
+        ArrayList<String> responsiveAddresses = new ArrayList<>();
+        responsiveAddresses.add("10.0.0.1");
+        responsiveAddresses.add("10.0.0.2");
+        responsiveAddresses.add("10.0.0.3");
+        when(minionIpAddressesResponse.getAllIpAddresses()).thenReturn(responsiveAddresses);
+        PowerMockito.when(SaltStates.collectMinionIpAddresses(any())).thenReturn(minionIpAddressesResponse);
+
+        Callable pillarSaveCallable = mock(Callable.class);
+        when(saltRunner.runner(any(), any(), any(), anyInt(), anyInt())).thenReturn(pillarSaveCallable);
+        when(saltRunner.runner(any(), any(), any(), anyInt(), anyBoolean())).thenReturn(mock(Callable.class));
+
+        saltOrchestrator.stopClusterManagerAgent(gatewayConfig, targets, downscaleTargets, exitCriteriaModel, false, false, false);
+
+        ArgumentCaptor<ModifyGrainBase> modifyGrainBaseArgumentCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
+        ArgumentCaptor<PillarSave> pillarSaveArgumentCaptor = ArgumentCaptor.forClass(PillarSave.class);
+        verify(pillarSaveCallable, times(1)).call();
+
+        InOrder inOrder = inOrder(saltCommandRunner, saltRunner);
+
+        inOrder.verify(saltCommandRunner).runModifyGrainCommand(any(), modifyGrainBaseArgumentCaptor.capture(), any(), any());
+        ModifyGrainBase modifyGrainBase = modifyGrainBaseArgumentCaptor.getValue();
+        assertThat(modifyGrainBase, instanceOf(GrainAddRunner.class));
+        assertEquals("roles", modifyGrainBase.getKey());
+        assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
+
+        inOrder.verify(saltRunner).runner(pillarSaveArgumentCaptor.capture(), any(), any(), anyInt(), anyInt());
+        PillarSave capturedPillarSave = pillarSaveArgumentCaptor.getValue();
+
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+        inOrder.verify(saltRunner).runner(saltJobIdCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+
+        inOrder.verify(saltCommandRunner).runModifyGrainCommand(any(), modifyGrainBaseArgumentCaptor.capture(), any(), any());
+        inOrder.verifyNoMoreInteractions();
+        modifyGrainBase = modifyGrainBaseArgumentCaptor.getValue();
+        assertThat(modifyGrainBase, instanceOf(GrainRemoveRunner.class));
+        assertEquals("roles", modifyGrainBase.getKey());
+        assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
+
+        Set<String> targets = Whitebox.getInternalState(capturedPillarSave, "targets");
+        assertTrue(targets.contains("172.16.252.43"));
+
+        Pillar pillar = Whitebox.getInternalState(capturedPillarSave, "pillar");
+        Map<String, Map> hosts = (Map) ((Map) pillar.getJson()).get("hosts");
+        assertTrue(hosts.keySet().contains("10.0.0.1"));
+        assertTrue(hosts.keySet().contains("10.0.0.2"));
+        assertTrue(hosts.keySet().contains("10.0.0.3"));
     }
 }
