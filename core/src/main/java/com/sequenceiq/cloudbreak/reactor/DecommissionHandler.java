@@ -125,8 +125,8 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             Set<Node> decommissionedNodes = stackUtil.collectNodesFromHostnames(stack, decommissionedHostNames);
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             boolean forced = request.getDetails() != null && request.getDetails().isForced();
-            hostOrchestrator.stopClusterManagerAgent(gatewayConfig, decommissionedNodes, clusterDeletionBasedModel(stack.getId(), cluster.getId()),
-                    kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig), forced);
+            hostOrchestrator.stopClusterManagerAgent(gatewayConfig, stackUtil.collectNodes(stack), decommissionedNodes, clusterDeletionBasedModel(stack.getId(),
+                    cluster.getId()), kerberosDetailService.isAdJoinable(kerberosConfig), kerberosDetailService.isIpaJoinable(kerberosConfig), forced);
             cleanUpFreeIpa(stack, hostsToRemove);
             List<InstanceMetaData> decommissionedInstances = decommissionedHostNames.stream()
                     .map(hostsToRemove::get)

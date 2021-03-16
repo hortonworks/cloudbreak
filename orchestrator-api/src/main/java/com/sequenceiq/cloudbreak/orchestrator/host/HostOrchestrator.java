@@ -88,8 +88,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
             ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 
-    void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable, boolean ipaJoinable,
-            boolean forced)
+    void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> stoppedNodes, ExitCriteriaModel exitCriteriaModel,
+            boolean adJoinable, boolean ipaJoinable, boolean forced)
             throws CloudbreakOrchestratorFailedException;
 
     void uploadKeytabs(List<GatewayConfig> allGatewayConfigs, Set<KeytabModel> keytabModels, ExitCriteriaModel exitModel)

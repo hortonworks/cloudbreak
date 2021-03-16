@@ -89,8 +89,7 @@ import com.sequenceiq.cloudbreak.util.CompressUtil;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @Component
-public class
-SaltOrchestrator implements HostOrchestrator {
+public class SaltOrchestrator implements HostOrchestrator {
 
     private static final int SLEEP_TIME = 10000;
 
@@ -857,42 +856,54 @@ SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel, boolean adJoinable,
-            boolean ipaJoinable, boolean forced) throws CloudbreakOrchestratorFailedException {
+    public void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> nodesUnderStopping, ExitCriteriaModel exitCriteriaModel,
+            boolean adJoinable, boolean ipaJoinable, boolean forced) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            Set<Node> responsiveNodes = getResponsiveNodes(nodes, sc);
-            if (!responsiveNodes.isEmpty()) {
-                LOGGER.debug("Applying role 'cloudera_manager_agent_stop' on nodes: [{}]", responsiveNodes);
-                Set<String> targetHostnames = responsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"),
-                        exitCriteriaModel, exitCriteria);
+            Set<Node> responsiveNodes = getResponsiveNodes(allNodes, sc);
+            Set<String> nodesUnderStoppingIPs = nodesUnderStopping.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
+            Set<Node> responsiveNodesUnderStopping =
+                    responsiveNodes.stream().filter(responsiveNode -> nodesUnderStoppingIPs.contains(responsiveNode.getPrivateIp())).collect(Collectors.toSet());
+            if (!responsiveNodesUnderStopping.isEmpty()) {
+                LOGGER.debug("Applying role 'cloudera_manager_agent_stop' on nodes: [{}]", responsiveNodesUnderStopping);
+                Set<String> targetHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
+                saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
+                                "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
                 if (adJoinable || ipaJoinable) {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
-                    LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodes);
-                    saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodes, "roles", identityRole), exitCriteriaModel,
-                            exitCriteria);
-                    String removeIdentityRole = adJoinable ? "ad_member" : "ipa_member";
-                    LOGGER.debug("Removing role '{}' on nodes: [{}]", removeIdentityRole, responsiveNodes);
-                    saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", removeIdentityRole),
+                    LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodesUnderStopping);
+                    saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodesUnderStopping, "roles", identityRole),
                             exitCriteriaModel, exitCriteria);
+                    String removeIdentityRole = adJoinable ? "ad_member" : "ipa_member";
+                    LOGGER.debug("Removing role '{}' on nodes: [{}]", removeIdentityRole, responsiveNodesUnderStopping);
+                    saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
+                                    removeIdentityRole), exitCriteriaModel, exitCriteria);
                 }
 
-                Set<String> allHostnames = responsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                runSyncAll(sc, allHostnames, responsiveNodes, exitCriteriaModel);
-                runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodes), exitCriteriaModel, maxRetry, true);
+                Set<String> allHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
+                runSyncAll(sc, allHostnames, responsiveNodesUnderStopping, exitCriteriaModel);
 
-                saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", "cloudera_manager_agent_stop"),
-                        exitCriteriaModel, exitCriteria);
+                refreshPillars(gatewayConfig, responsiveNodes, exitCriteriaModel, sc);
+                runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodesUnderStopping), exitCriteriaModel, maxRetry, true);
+
+                saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
+                                "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
                 if (adJoinable || ipaJoinable) {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
                     saltCommandRunner.runModifyGrainCommand(sc,
-                            new GrainRemoveRunner(targetHostnames, responsiveNodes, "roles", identityRole), exitCriteriaModel, exitCriteria);
+                            new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles", identityRole), exitCriteriaModel, exitCriteria);
                 }
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
             throwExceptionIfNotForced(forced, e);
         }
+    }
+
+    private void refreshPillars(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, SaltConnector sc) throws Exception {
+        PillarSave pillarSave = new PillarSave(sc, getGatewayPrivateIps(Collections.singleton(gatewayConfig)), allNodes);
+        Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitCriteriaModel, maxDatabaseDrRetry,
+                maxDatabaseDrRetryOnError);
+        saltPillarRunner.call();
     }
 
     private void runSyncAll(SaltConnector sc, Set<String> targetHostnames, Set<Node> allNode, ExitCriteriaModel exitCriteriaModel) throws Exception {
