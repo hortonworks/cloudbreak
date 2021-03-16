@@ -313,6 +313,56 @@ public final class UsageProto {
 
     /**
      * <pre>
+     * An Altus access token was created.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+     */
+    boolean hasAltusIamAccessTokenCreated();
+    /**
+     * <pre>
+     * An Altus access token was created.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated getAltusIamAccessTokenCreated();
+    /**
+     * <pre>
+     * An Altus access token was created.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder getAltusIamAccessTokenCreatedOrBuilder();
+
+    /**
+     * <pre>
+     * An Altus access token was deleted.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+     */
+    boolean hasAltusIamAccessTokenDeleted();
+    /**
+     * <pre>
+     * An Altus access token was deleted.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted getAltusIamAccessTokenDeleted();
+    /**
+     * <pre>
+     * An Altus access token was deleted.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder getAltusIamAccessTokenDeletedOrBuilder();
+
+    /**
+     * <pre>
      * A CDP Datalake cluster was requested to create.
      * </pre>
      *
@@ -1061,6 +1111,34 @@ public final class UsageProto {
               detailsCase_ = 37;
               break;
             }
+            case 306: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder subBuilder = null;
+              if (detailsCase_ == 38) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 38;
+              break;
+            }
+            case 314: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder subBuilder = null;
+              if (detailsCase_ == 39) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 39;
+              break;
+            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1107,6 +1185,8 @@ public final class UsageProto {
       ALTUSIAMMACHINEUSERDELETED(17),
       ALTUSIAMACCESSKEYCREATED(18),
       ALTUSIAMACCESSKEYDELETED(19),
+      ALTUSIAMACCESSTOKENCREATED(38),
+      ALTUSIAMACCESSTOKENDELETED(39),
       CDPDATALAKECLUSTERREQUESTED(22),
       CDPDATALAKECLUSTERSTATUSCHANGED(23),
       CDPDATAHUBCLUSTERREQUESTED(24),
@@ -1146,6 +1226,8 @@ public final class UsageProto {
           case 17: return ALTUSIAMMACHINEUSERDELETED;
           case 18: return ALTUSIAMACCESSKEYCREATED;
           case 19: return ALTUSIAMACCESSKEYDELETED;
+          case 38: return ALTUSIAMACCESSTOKENCREATED;
+          case 39: return ALTUSIAMACCESSTOKENDELETED;
           case 22: return CDPDATALAKECLUSTERREQUESTED;
           case 23: return CDPDATALAKECLUSTERSTATUSCHANGED;
           case 24: return CDPDATAHUBCLUSTERREQUESTED;
@@ -1628,6 +1710,82 @@ public final class UsageProto {
          return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessKeyDeleted) details_;
       }
       return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessKeyDeleted.getDefaultInstance();
+    }
+
+    public static final int ALTUSIAMACCESSTOKENCREATED_FIELD_NUMBER = 38;
+    /**
+     * <pre>
+     * An Altus access token was created.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+     */
+    public boolean hasAltusIamAccessTokenCreated() {
+      return detailsCase_ == 38;
+    }
+    /**
+     * <pre>
+     * An Altus access token was created.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated getAltusIamAccessTokenCreated() {
+      if (detailsCase_ == 38) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * An Altus access token was created.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder getAltusIamAccessTokenCreatedOrBuilder() {
+      if (detailsCase_ == 38) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+    }
+
+    public static final int ALTUSIAMACCESSTOKENDELETED_FIELD_NUMBER = 39;
+    /**
+     * <pre>
+     * An Altus access token was deleted.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+     */
+    public boolean hasAltusIamAccessTokenDeleted() {
+      return detailsCase_ == 39;
+    }
+    /**
+     * <pre>
+     * An Altus access token was deleted.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted getAltusIamAccessTokenDeleted() {
+      if (detailsCase_ == 39) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * An Altus access token was deleted.
+     * </pre>
+     *
+     * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder getAltusIamAccessTokenDeletedOrBuilder() {
+      if (detailsCase_ == 39) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
     }
 
     public static final int CDPDATALAKECLUSTERREQUESTED_FIELD_NUMBER = 22;
@@ -2257,6 +2415,12 @@ public final class UsageProto {
       if (detailsCase_ == 37) {
         output.writeMessage(37, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubSync) details_);
       }
+      if (detailsCase_ == 38) {
+        output.writeMessage(38, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_);
+      }
+      if (detailsCase_ == 39) {
+        output.writeMessage(39, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -2373,6 +2537,14 @@ public final class UsageProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(37, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubSync) details_);
       }
+      if (detailsCase_ == 38) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(38, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_);
+      }
+      if (detailsCase_ == 39) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(39, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2438,6 +2610,14 @@ public final class UsageProto {
         case 19:
           result = result && getAltusIamAccessKeyDeleted()
               .equals(other.getAltusIamAccessKeyDeleted());
+          break;
+        case 38:
+          result = result && getAltusIamAccessTokenCreated()
+              .equals(other.getAltusIamAccessTokenCreated());
+          break;
+        case 39:
+          result = result && getAltusIamAccessTokenDeleted()
+              .equals(other.getAltusIamAccessTokenDeleted());
           break;
         case 22:
           result = result && getCdpDatalakeClusterRequested()
@@ -2556,6 +2736,14 @@ public final class UsageProto {
         case 19:
           hash = (37 * hash) + ALTUSIAMACCESSKEYDELETED_FIELD_NUMBER;
           hash = (53 * hash) + getAltusIamAccessKeyDeleted().hashCode();
+          break;
+        case 38:
+          hash = (37 * hash) + ALTUSIAMACCESSTOKENCREATED_FIELD_NUMBER;
+          hash = (53 * hash) + getAltusIamAccessTokenCreated().hashCode();
+          break;
+        case 39:
+          hash = (37 * hash) + ALTUSIAMACCESSTOKENDELETED_FIELD_NUMBER;
+          hash = (53 * hash) + getAltusIamAccessTokenDeleted().hashCode();
           break;
         case 22:
           hash = (37 * hash) + CDPDATALAKECLUSTERREQUESTED_FIELD_NUMBER;
@@ -2860,6 +3048,20 @@ public final class UsageProto {
             result.details_ = altusIamAccessKeyDeletedBuilder_.build();
           }
         }
+        if (detailsCase_ == 38) {
+          if (altusIamAccessTokenCreatedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = altusIamAccessTokenCreatedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 39) {
+          if (altusIamAccessTokenDeletedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = altusIamAccessTokenDeletedBuilder_.build();
+          }
+        }
         if (detailsCase_ == 22) {
           if (cdpDatalakeClusterRequestedBuilder_ == null) {
             result.details_ = details_;
@@ -3056,6 +3258,14 @@ public final class UsageProto {
           }
           case ALTUSIAMACCESSKEYDELETED: {
             mergeAltusIamAccessKeyDeleted(other.getAltusIamAccessKeyDeleted());
+            break;
+          }
+          case ALTUSIAMACCESSTOKENCREATED: {
+            mergeAltusIamAccessTokenCreated(other.getAltusIamAccessTokenCreated());
+            break;
+          }
+          case ALTUSIAMACCESSTOKENDELETED: {
+            mergeAltusIamAccessTokenDeleted(other.getAltusIamAccessTokenDeleted());
             break;
           }
           case CDPDATALAKECLUSTERREQUESTED: {
@@ -5066,6 +5276,350 @@ public final class UsageProto {
         detailsCase_ = 19;
         onChanged();;
         return altusIamAccessKeyDeletedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder> altusIamAccessTokenCreatedBuilder_;
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public boolean hasAltusIamAccessTokenCreated() {
+        return detailsCase_ == 38;
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated getAltusIamAccessTokenCreated() {
+        if (altusIamAccessTokenCreatedBuilder_ == null) {
+          if (detailsCase_ == 38) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 38) {
+            return altusIamAccessTokenCreatedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public Builder setAltusIamAccessTokenCreated(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated value) {
+        if (altusIamAccessTokenCreatedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          altusIamAccessTokenCreatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 38;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public Builder setAltusIamAccessTokenCreated(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder builderForValue) {
+        if (altusIamAccessTokenCreatedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          altusIamAccessTokenCreatedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 38;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public Builder mergeAltusIamAccessTokenCreated(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated value) {
+        if (altusIamAccessTokenCreatedBuilder_ == null) {
+          if (detailsCase_ == 38 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 38) {
+            altusIamAccessTokenCreatedBuilder_.mergeFrom(value);
+          }
+          altusIamAccessTokenCreatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 38;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public Builder clearAltusIamAccessTokenCreated() {
+        if (altusIamAccessTokenCreatedBuilder_ == null) {
+          if (detailsCase_ == 38) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 38) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          altusIamAccessTokenCreatedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder getAltusIamAccessTokenCreatedBuilder() {
+        return getAltusIamAccessTokenCreatedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder getAltusIamAccessTokenCreatedOrBuilder() {
+        if ((detailsCase_ == 38) && (altusIamAccessTokenCreatedBuilder_ != null)) {
+          return altusIamAccessTokenCreatedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 38) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * An Altus access token was created.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder> 
+          getAltusIamAccessTokenCreatedFieldBuilder() {
+        if (altusIamAccessTokenCreatedBuilder_ == null) {
+          if (!(detailsCase_ == 38)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+          }
+          altusIamAccessTokenCreatedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 38;
+        onChanged();;
+        return altusIamAccessTokenCreatedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder> altusIamAccessTokenDeletedBuilder_;
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public boolean hasAltusIamAccessTokenDeleted() {
+        return detailsCase_ == 39;
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted getAltusIamAccessTokenDeleted() {
+        if (altusIamAccessTokenDeletedBuilder_ == null) {
+          if (detailsCase_ == 39) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 39) {
+            return altusIamAccessTokenDeletedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public Builder setAltusIamAccessTokenDeleted(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted value) {
+        if (altusIamAccessTokenDeletedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          altusIamAccessTokenDeletedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 39;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public Builder setAltusIamAccessTokenDeleted(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder builderForValue) {
+        if (altusIamAccessTokenDeletedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          altusIamAccessTokenDeletedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 39;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public Builder mergeAltusIamAccessTokenDeleted(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted value) {
+        if (altusIamAccessTokenDeletedBuilder_ == null) {
+          if (detailsCase_ == 39 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 39) {
+            altusIamAccessTokenDeletedBuilder_.mergeFrom(value);
+          }
+          altusIamAccessTokenDeletedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 39;
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public Builder clearAltusIamAccessTokenDeleted() {
+        if (altusIamAccessTokenDeletedBuilder_ == null) {
+          if (detailsCase_ == 39) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 39) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          altusIamAccessTokenDeletedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder getAltusIamAccessTokenDeletedBuilder() {
+        return getAltusIamAccessTokenDeletedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder getAltusIamAccessTokenDeletedOrBuilder() {
+        if ((detailsCase_ == 39) && (altusIamAccessTokenDeletedBuilder_ != null)) {
+          return altusIamAccessTokenDeletedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 39) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * An Altus access token was deleted.
+       * </pre>
+       *
+       * <code>.usage.AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder> 
+          getAltusIamAccessTokenDeletedFieldBuilder() {
+        if (altusIamAccessTokenDeletedBuilder_ == null) {
+          if (!(detailsCase_ == 39)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
+          }
+          altusIamAccessTokenDeletedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 39;
+        onChanged();;
+        return altusIamAccessTokenDeletedBuilder_;
       }
 
       private com.google.protobuf.SingleFieldBuilderV3<
@@ -17005,6 +17559,1731 @@ public final class UsageProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessKeyDeleted getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AltusIamAccessTokenCreatedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.AltusIamAccessTokenCreated)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The Altus access token ID of the new actor. This uniquely identifies
+     * the access token within Altus. This ID is immutable.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    java.lang.String getAccessTokenId();
+    /**
+     * <pre>
+     * The Altus access token ID of the new actor. This uniquely identifies
+     * the access token within Altus. This ID is immutable.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccessTokenIdBytes();
+
+    /**
+     * <pre>
+     * The Altus account ID of the access token.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The Altus account ID of the access token.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The CRN of the actor with which this access token is associated. This will be
+     * either an IAM user or an IAM machine user.
+     * </pre>
+     *
+     * <code>string actorCrn = 3;</code>
+     */
+    java.lang.String getActorCrn();
+    /**
+     * <pre>
+     * The CRN of the actor with which this access token is associated. This will be
+     * either an IAM user or an IAM machine user.
+     * </pre>
+     *
+     * <code>string actorCrn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getActorCrnBytes();
+
+    /**
+     * <pre>
+     * The CRN for the access token.
+     * </pre>
+     *
+     * <code>string crn = 4;</code>
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * The CRN for the access token.
+     * </pre>
+     *
+     * <code>string crn = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+  }
+  /**
+   * <pre>
+   * Generated when an IAM access token has been created.
+   * </pre>
+   *
+   * Protobuf type {@code usage.AltusIamAccessTokenCreated}
+   */
+  public  static final class AltusIamAccessTokenCreated extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.AltusIamAccessTokenCreated)
+      AltusIamAccessTokenCreatedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AltusIamAccessTokenCreated.newBuilder() to construct.
+    private AltusIamAccessTokenCreated(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AltusIamAccessTokenCreated() {
+      accessTokenId_ = "";
+      accountId_ = "";
+      actorCrn_ = "";
+      crn_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AltusIamAccessTokenCreated(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accessTokenId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              actorCrn_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              crn_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenCreated_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenCreated_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder.class);
+    }
+
+    public static final int ACCESSTOKENID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accessTokenId_;
+    /**
+     * <pre>
+     * The Altus access token ID of the new actor. This uniquely identifies
+     * the access token within Altus. This ID is immutable.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    public java.lang.String getAccessTokenId() {
+      java.lang.Object ref = accessTokenId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accessTokenId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Altus access token ID of the new actor. This uniquely identifies
+     * the access token within Altus. This ID is immutable.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccessTokenIdBytes() {
+      java.lang.Object ref = accessTokenId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accessTokenId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The Altus account ID of the access token.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The Altus account ID of the access token.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACTORCRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object actorCrn_;
+    /**
+     * <pre>
+     * The CRN of the actor with which this access token is associated. This will be
+     * either an IAM user or an IAM machine user.
+     * </pre>
+     *
+     * <code>string actorCrn = 3;</code>
+     */
+    public java.lang.String getActorCrn() {
+      java.lang.Object ref = actorCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        actorCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the actor with which this access token is associated. This will be
+     * either an IAM user or an IAM machine user.
+     * </pre>
+     *
+     * <code>string actorCrn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getActorCrnBytes() {
+      java.lang.Object ref = actorCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        actorCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CRN_FIELD_NUMBER = 4;
+    private volatile java.lang.Object crn_;
+    /**
+     * <pre>
+     * The CRN for the access token.
+     * </pre>
+     *
+     * <code>string crn = 4;</code>
+     */
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN for the access token.
+     * </pre>
+     *
+     * <code>string crn = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAccessTokenIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accessTokenId_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
+      }
+      if (!getActorCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, actorCrn_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, crn_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAccessTokenIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accessTokenId_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
+      }
+      if (!getActorCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, actorCrn_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, crn_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated other = (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) obj;
+
+      boolean result = true;
+      result = result && getAccessTokenId()
+          .equals(other.getAccessTokenId());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getActorCrn()
+          .equals(other.getActorCrn());
+      result = result && getCrn()
+          .equals(other.getCrn());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCESSTOKENID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccessTokenId().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + ACTORCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getActorCrn().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated when an IAM access token has been created.
+     * </pre>
+     *
+     * Protobuf type {@code usage.AltusIamAccessTokenCreated}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.AltusIamAccessTokenCreated)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreatedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenCreated_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenCreated_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accessTokenId_ = "";
+
+        accountId_ = "";
+
+        actorCrn_ = "";
+
+        crn_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenCreated_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated result = new com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated(this);
+        result.accessTokenId_ = accessTokenId_;
+        result.accountId_ = accountId_;
+        result.actorCrn_ = actorCrn_;
+        result.crn_ = crn_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated.getDefaultInstance()) return this;
+        if (!other.getAccessTokenId().isEmpty()) {
+          accessTokenId_ = other.accessTokenId_;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getActorCrn().isEmpty()) {
+          actorCrn_ = other.actorCrn_;
+          onChanged();
+        }
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object accessTokenId_ = "";
+      /**
+       * <pre>
+       * The Altus access token ID of the new actor. This uniquely identifies
+       * the access token within Altus. This ID is immutable.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public java.lang.String getAccessTokenId() {
+        java.lang.Object ref = accessTokenId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accessTokenId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Altus access token ID of the new actor. This uniquely identifies
+       * the access token within Altus. This ID is immutable.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccessTokenIdBytes() {
+        java.lang.Object ref = accessTokenId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accessTokenId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Altus access token ID of the new actor. This uniquely identifies
+       * the access token within Altus. This ID is immutable.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public Builder setAccessTokenId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accessTokenId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Altus access token ID of the new actor. This uniquely identifies
+       * the access token within Altus. This ID is immutable.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public Builder clearAccessTokenId() {
+        
+        accessTokenId_ = getDefaultInstance().getAccessTokenId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Altus access token ID of the new actor. This uniquely identifies
+       * the access token within Altus. This ID is immutable.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public Builder setAccessTokenIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accessTokenId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The Altus account ID of the access token.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Altus account ID of the access token.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The Altus account ID of the access token.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Altus account ID of the access token.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The Altus account ID of the access token.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object actorCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the actor with which this access token is associated. This will be
+       * either an IAM user or an IAM machine user.
+       * </pre>
+       *
+       * <code>string actorCrn = 3;</code>
+       */
+      public java.lang.String getActorCrn() {
+        java.lang.Object ref = actorCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          actorCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the actor with which this access token is associated. This will be
+       * either an IAM user or an IAM machine user.
+       * </pre>
+       *
+       * <code>string actorCrn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getActorCrnBytes() {
+        java.lang.Object ref = actorCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          actorCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the actor with which this access token is associated. This will be
+       * either an IAM user or an IAM machine user.
+       * </pre>
+       *
+       * <code>string actorCrn = 3;</code>
+       */
+      public Builder setActorCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        actorCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the actor with which this access token is associated. This will be
+       * either an IAM user or an IAM machine user.
+       * </pre>
+       *
+       * <code>string actorCrn = 3;</code>
+       */
+      public Builder clearActorCrn() {
+        
+        actorCrn_ = getDefaultInstance().getActorCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the actor with which this access token is associated. This will be
+       * either an IAM user or an IAM machine user.
+       * </pre>
+       *
+       * <code>string actorCrn = 3;</code>
+       */
+      public Builder setActorCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        actorCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * The CRN for the access token.
+       * </pre>
+       *
+       * <code>string crn = 4;</code>
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN for the access token.
+       * </pre>
+       *
+       * <code>string crn = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN for the access token.
+       * </pre>
+       *
+       * <code>string crn = 4;</code>
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN for the access token.
+       * </pre>
+       *
+       * <code>string crn = 4;</code>
+       */
+      public Builder clearCrn() {
+        
+        crn_ = getDefaultInstance().getCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN for the access token.
+       * </pre>
+       *
+       * <code>string crn = 4;</code>
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.AltusIamAccessTokenCreated)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.AltusIamAccessTokenCreated)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AltusIamAccessTokenCreated>
+        PARSER = new com.google.protobuf.AbstractParser<AltusIamAccessTokenCreated>() {
+      @java.lang.Override
+      public AltusIamAccessTokenCreated parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AltusIamAccessTokenCreated(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AltusIamAccessTokenCreated> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AltusIamAccessTokenCreated> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenCreated getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AltusIamAccessTokenDeletedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.AltusIamAccessTokenDeleted)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The access token Id of the deleted access token.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    java.lang.String getAccessTokenId();
+    /**
+     * <pre>
+     * The access token Id of the deleted access token.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccessTokenIdBytes();
+  }
+  /**
+   * <pre>
+   * Generated when an IAM access token has been deleted.
+   * </pre>
+   *
+   * Protobuf type {@code usage.AltusIamAccessTokenDeleted}
+   */
+  public  static final class AltusIamAccessTokenDeleted extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.AltusIamAccessTokenDeleted)
+      AltusIamAccessTokenDeletedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AltusIamAccessTokenDeleted.newBuilder() to construct.
+    private AltusIamAccessTokenDeleted(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AltusIamAccessTokenDeleted() {
+      accessTokenId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AltusIamAccessTokenDeleted(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accessTokenId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenDeleted_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenDeleted_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder.class);
+    }
+
+    public static final int ACCESSTOKENID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accessTokenId_;
+    /**
+     * <pre>
+     * The access token Id of the deleted access token.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    public java.lang.String getAccessTokenId() {
+      java.lang.Object ref = accessTokenId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accessTokenId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The access token Id of the deleted access token.
+     * </pre>
+     *
+     * <code>string accessTokenId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccessTokenIdBytes() {
+      java.lang.Object ref = accessTokenId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accessTokenId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAccessTokenIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accessTokenId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAccessTokenIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accessTokenId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted other = (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) obj;
+
+      boolean result = true;
+      result = result && getAccessTokenId()
+          .equals(other.getAccessTokenId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCESSTOKENID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccessTokenId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated when an IAM access token has been deleted.
+     * </pre>
+     *
+     * Protobuf type {@code usage.AltusIamAccessTokenDeleted}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.AltusIamAccessTokenDeleted)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeletedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenDeleted_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenDeleted_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.class, com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accessTokenId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_AltusIamAccessTokenDeleted_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted result = new com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted(this);
+        result.accessTokenId_ = accessTokenId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted.getDefaultInstance()) return this;
+        if (!other.getAccessTokenId().isEmpty()) {
+          accessTokenId_ = other.accessTokenId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object accessTokenId_ = "";
+      /**
+       * <pre>
+       * The access token Id of the deleted access token.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public java.lang.String getAccessTokenId() {
+        java.lang.Object ref = accessTokenId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accessTokenId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The access token Id of the deleted access token.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccessTokenIdBytes() {
+        java.lang.Object ref = accessTokenId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accessTokenId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The access token Id of the deleted access token.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public Builder setAccessTokenId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accessTokenId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The access token Id of the deleted access token.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public Builder clearAccessTokenId() {
+        
+        accessTokenId_ = getDefaultInstance().getAccessTokenId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The access token Id of the deleted access token.
+       * </pre>
+       *
+       * <code>string accessTokenId = 1;</code>
+       */
+      public Builder setAccessTokenIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accessTokenId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.AltusIamAccessTokenDeleted)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.AltusIamAccessTokenDeleted)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AltusIamAccessTokenDeleted>
+        PARSER = new com.google.protobuf.AbstractParser<AltusIamAccessTokenDeleted>() {
+      @java.lang.Override
+      public AltusIamAccessTokenDeleted parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AltusIamAccessTokenDeleted(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AltusIamAccessTokenDeleted> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AltusIamAccessTokenDeleted> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -55275,6 +57554,42 @@ public final class UsageProto {
 
     /**
      * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string detailedStatus = 2;</code>
+     */
+    java.lang.String getDetailedStatus();
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string detailedStatus = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getDetailedStatusBytes();
+
+    /**
+     * <pre>
      * The timestamp of the start of the cluster creation
      * </pre>
      *
@@ -55304,6 +57619,8 @@ public final class UsageProto {
       super(builder);
     }
     private CDPSyncDetails() {
+      status_ = "";
+      detailedStatus_ = "";
       clusterCreationStarted_ = 0L;
       clusterCreationFinished_ = 0L;
     }
@@ -55332,6 +57649,18 @@ public final class UsageProto {
             case 0:
               done = true;
               break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              status_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              detailedStatus_ = s;
+              break;
+            }
             case 24: {
 
               clusterCreationStarted_ = input.readUInt64();
@@ -55374,6 +57703,90 @@ public final class UsageProto {
               com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails.Builder.class);
     }
 
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private volatile java.lang.Object status_;
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status of the stack
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int DETAILEDSTATUS_FIELD_NUMBER = 2;
+    private volatile java.lang.Object detailedStatus_;
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string detailedStatus = 2;</code>
+     */
+    public java.lang.String getDetailedStatus() {
+      java.lang.Object ref = detailedStatus_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        detailedStatus_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Detailed status of the stack
+     * </pre>
+     *
+     * <code>string detailedStatus = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getDetailedStatusBytes() {
+      java.lang.Object ref = detailedStatus_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        detailedStatus_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     public static final int CLUSTERCREATIONSTARTED_FIELD_NUMBER = 3;
     private long clusterCreationStarted_;
     /**
@@ -55414,6 +57827,12 @@ public final class UsageProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
+      if (!getStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+      }
+      if (!getDetailedStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, detailedStatus_);
+      }
       if (clusterCreationStarted_ != 0L) {
         output.writeUInt64(3, clusterCreationStarted_);
       }
@@ -55429,6 +57848,12 @@ public final class UsageProto {
       if (size != -1) return size;
 
       size = 0;
+      if (!getStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+      }
+      if (!getDetailedStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, detailedStatus_);
+      }
       if (clusterCreationStarted_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(3, clusterCreationStarted_);
@@ -55453,6 +57878,10 @@ public final class UsageProto {
       com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails) obj;
 
       boolean result = true;
+      result = result && getStatus()
+          .equals(other.getStatus());
+      result = result && getDetailedStatus()
+          .equals(other.getDetailedStatus());
       result = result && (getClusterCreationStarted()
           == other.getClusterCreationStarted());
       result = result && (getClusterCreationFinished()
@@ -55468,6 +57897,10 @@ public final class UsageProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (37 * hash) + DETAILEDSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getDetailedStatus().hashCode();
       hash = (37 * hash) + CLUSTERCREATIONSTARTED_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getClusterCreationStarted());
@@ -55607,6 +58040,10 @@ public final class UsageProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
+        status_ = "";
+
+        detailedStatus_ = "";
+
         clusterCreationStarted_ = 0L;
 
         clusterCreationFinished_ = 0L;
@@ -55637,6 +58074,8 @@ public final class UsageProto {
       @java.lang.Override
       public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails buildPartial() {
         com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails(this);
+        result.status_ = status_;
+        result.detailedStatus_ = detailedStatus_;
         result.clusterCreationStarted_ = clusterCreationStarted_;
         result.clusterCreationFinished_ = clusterCreationFinished_;
         onBuilt();
@@ -55687,6 +58126,14 @@ public final class UsageProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails other) {
         if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPSyncDetails.getDefaultInstance()) return this;
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          onChanged();
+        }
+        if (!other.getDetailedStatus().isEmpty()) {
+          detailedStatus_ = other.detailedStatus_;
+          onChanged();
+        }
         if (other.getClusterCreationStarted() != 0L) {
           setClusterCreationStarted(other.getClusterCreationStarted());
         }
@@ -55719,6 +58166,184 @@ public final class UsageProto {
             mergeFrom(parsedMessage);
           }
         }
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public Builder clearStatus() {
+        
+        status_ = getDefaultInstance().getStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status of the stack
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object detailedStatus_ = "";
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string detailedStatus = 2;</code>
+       */
+      public java.lang.String getDetailedStatus() {
+        java.lang.Object ref = detailedStatus_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          detailedStatus_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string detailedStatus = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getDetailedStatusBytes() {
+        java.lang.Object ref = detailedStatus_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          detailedStatus_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string detailedStatus = 2;</code>
+       */
+      public Builder setDetailedStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        detailedStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string detailedStatus = 2;</code>
+       */
+      public Builder clearDetailedStatus() {
+        
+        detailedStatus_ = getDefaultInstance().getDetailedStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Detailed status of the stack
+       * </pre>
+       *
+       * <code>string detailedStatus = 2;</code>
+       */
+      public Builder setDetailedStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        detailedStatus_ = value;
+        onChanged();
         return this;
       }
 
@@ -58785,6 +61410,16 @@ public final class UsageProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_AltusIamAccessKeyDeleted_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_AltusIamAccessTokenCreated_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_AltusIamAccessTokenCreated_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_AltusIamAccessTokenDeleted_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_AltusIamAccessTokenDeleted_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -58973,7 +61608,7 @@ public final class UsageProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013usage.proto\022\005usage\"\360\r\n\005Event\022\n\n\002id\030\001 \001" +
+      "\n\013usage.proto\022\005usage\"\202\017\n\005Event\022\n\n\002id\030\001 \001" +
       "(\t\022\021\n\ttimestamp\030\002 \001(\004\022\017\n\007version\030\003 \001(\r\022?" +
       "\n\026altusIamAccountCreated\030\004 \001(\0132\035.usage.A" +
       "ltusIamAccountCreatedH\000\0229\n\023altusIamUserC" +
@@ -58992,255 +61627,264 @@ public final class UsageProto {
       "tusIamAccessKeyCreated\030\022 \001(\0132\037.usage.Alt" +
       "usIamAccessKeyCreatedH\000\022C\n\030altusIamAcces" +
       "sKeyDeleted\030\023 \001(\0132\037.usage.AltusIamAccess" +
-      "KeyDeletedH\000\022I\n\033cdpDatalakeClusterReques" +
-      "ted\030\026 \001(\0132\".usage.CDPDatalakeClusterRequ" +
-      "estedH\000\022Q\n\037cdpDatalakeClusterStatusChang" +
-      "ed\030\027 \001(\0132&.usage.CDPDatalakeClusterStatu" +
-      "sChangedH\000\022G\n\032cdpDatahubClusterRequested" +
-      "\030\030 \001(\0132!.usage.CDPDatahubClusterRequeste" +
-      "dH\000\022O\n\036cdpDatahubClusterStatusChanged\030\031 " +
-      "\001(\0132%.usage.CDPDatahubClusterStatusChang" +
-      "edH\000\022C\n\030cdpCMLWorkspaceRequested\030\033 \001(\0132\037" +
-      ".usage.CDPCMLWorkspaceRequestedH\000\022K\n\034cdp" +
-      "CMLWorkspaceStatusChanged\030\034 \001(\0132#.usage." +
-      "CDPCMLWorkspaceStatusChangedH\000\022A\n\027cdpEnv" +
-      "ironmentRequested\030\036 \001(\0132\036.usage.CDPEnvir" +
-      "onmentRequestedH\000\022I\n\033cdpEnvironmentStatu" +
-      "sChanged\030\037 \001(\0132\".usage.CDPEnvironmentSta" +
-      "tusChangedH\000\022;\n\024cdpDatalakeRequested\030  \001" +
-      "(\0132\033.usage.CDPDatalakeRequestedH\000\022C\n\030cdp" +
-      "DatalakeStatusChanged\030! \001(\0132\037.usage.CDPD" +
-      "atalakeStatusChangedH\000\0229\n\023cdpDatahubRequ" +
-      "ested\030\" \001(\0132\032.usage.CDPDatahubRequestedH" +
-      "\000\022A\n\027cdpDatahubStatusChanged\030# \001(\0132\036.usa" +
-      "ge.CDPDatahubStatusChangedH\000\0221\n\017cdpDatal" +
-      "akeSync\030$ \001(\0132\026.usage.CDPDatalakeSyncH\000\022" +
-      "/\n\016cdpDatahubSync\030% \001(\0132\025.usage.CDPDatah" +
-      "ubSyncH\000B\t\n\007detailsJ\004\010\010\020\tJ\004\010\t\020\nJ\004\010\n\020\013J\004\010" +
-      "\013\020\014J\004\010\014\020\rJ\004\010\r\020\016J\004\010\016\020\017J\004\010\017\020\020J\004\010\024\020\025J\004\010\025\020\026\"" +
-      "A\n\023AltusIamAccountType\"*\n\005Value\022\t\n\005UNSET" +
-      "\020\000\022\013\n\007REGULAR\020\001\022\t\n\005TRIAL\020\002\"\225\001\n\026AltusIamA" +
-      "ccountCreated\022\021\n\taccountId\030\001 \001(\t\022\032\n\022iden" +
-      "tifyProviderId\030\003 \001(\t\022\025\n\rsfdcAccountId\030\004 " +
-      "\001(\t\0225\n\013accountType\030\005 \001(\0162 .usage.AltusIa" +
-      "mAccountType.Value\"\333\001\n\023AltusIamUserCreat" +
-      "ed\022\016\n\006userId\030\001 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\036\n" +
-      "\026identityProviderUserId\030\004 \001(\t\022\025\n\rsfdcCon" +
-      "tactId\030\005 \001(\t\022\r\n\005admin\030\006 \001(\010\022\013\n\003crn\030\n \001(\t" +
-      "\022\033\n\023identityProviderCrn\030\013 \001(\t\022\031\n\021explici" +
-      "tlyCreated\030\014 \001(\010J\004\010\002\020\003J\004\010\007\020\010J\004\010\010\020\tJ\004\010\t\020\n" +
-      "\"F\n\023AltusIamUserUpdated\022\016\n\006userId\030\001 \001(\t\022" +
-      "\r\n\005admin\030\005 \001(\010J\004\010\002\020\003J\004\010\003\020\004J\004\010\004\020\005\"%\n\023Altu" +
-      "sIamUserDeleted\022\016\n\006userId\030\001 \001(\t\".\n\034Altus" +
-      "IamUserInteractiveLogin\022\016\n\006userId\030\001 \001(\t\"" +
-      "5\n#AltusIamUserInteractiveLoginFailure\022\016" +
-      "\n\006userId\030\001 \001(\t\"~\n\032AltusIamMachineUserCre" +
-      "ated\022\025\n\rmachineUserId\030\001 \001(\t\022\021\n\taccountId" +
-      "\030\002 \001(\t\022\027\n\017machineUserName\030\003 \001(\t\022\013\n\003crn\030\004" +
-      " \001(\t\022\020\n\010internal\030\005 \001(\010\"3\n\032AltusIamMachin" +
-      "eUserDeleted\022\025\n\rmachineUserId\030\001 \001(\t\"s\n\030A" +
-      "ltusIamAccessKeyCreated\022\023\n\013accessKeyId\030\001" +
-      " \001(\t\022\021\n\taccountId\030\002 \001(\t\022\020\n\010actorCrn\030\003 \001(" +
-      "\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005 \001(\010\"/\n\030Altu" +
-      "sIamAccessKeyDeleted\022\023\n\013accessKeyId\030\001 \001(" +
-      "\t\"e\n\036CDPEnvironmentsEnvironmentType\"C\n\005V" +
-      "alue\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003G" +
-      "CP\020\003\022\010\n\004YARN\020\004\022\010\n\004MOCK\020\005\"\353\003\n\032CDPCloudbre" +
-      "akClusterStatus\"\314\003\n\005Value\022\t\n\005UNSET\020\000\022\r\n\t" +
-      "REQUESTED\020\001\022\026\n\022CREATE_IN_PROGRESS\020\002\022\r\n\tA" +
-      "VAILABLE\020\003\022\026\n\022UPDATE_IN_PROGRESS\020\004\022\024\n\020UP" +
-      "DATE_REQUESTED\020\005\022\021\n\rUPDATE_FAILED\020\006\022\021\n\rC" +
-      "REATE_FAILED\020\007\022\032\n\026ENABLE_SECURITY_FAILED" +
-      "\020\010\022\032\n\026PRE_DELETE_IN_PROGRESS\020\t\022\026\n\022DELETE" +
-      "_IN_PROGRESS\020\n\022\021\n\rDELETE_FAILED\020\013\022\024\n\020DEL" +
-      "ETE_COMPLETED\020\014\022\013\n\007STOPPED\020\r\022\022\n\016STOP_REQ" +
-      "UESTED\020\016\022\023\n\017START_REQUESTED\020\017\022\024\n\020STOP_IN" +
-      "_PROGRESS\020\020\022\025\n\021START_IN_PROGRESS\020\021\022\020\n\014ST" +
-      "ART_FAILED\020\022\022\017\n\013STOP_FAILED\020\023\022\021\n\rWAIT_FO" +
-      "R_SYNC\020\024\022\034\n\030MAINTENANCE_MODE_ENABLED\020\025\"\215" +
-      "\002\n\033CDPDatalakeClusterRequested\022\022\n\ndatala" +
-      "keId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n\014datalak" +
-      "eName\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.u" +
-      "sage.CDPEnvironmentsEnvironmentType.Valu" +
-      "e\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion" +
-      "\030\006 \001(\t\022\013\n\003crn\030\007 \001(\t\022\022\n\ncreatorCrn\030\010 \001(\t\022" +
-      "\035\n\025clusterDefinitionName\030\t \001(\t\"\304\001\n\037CDPDa" +
-      "talakeClusterStatusChanged\022\022\n\ndatalakeId" +
-      "\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.usage.CDPClo" +
-      "udbreakClusterStatus.Value\022:\n\tnewStatus\030" +
-      "\003 \001(\0162\'.usage.CDPCloudbreakClusterStatus" +
-      ".Value\022\025\n\rfailureReason\030\004 \001(\t\"\237\002\n\032CDPDat" +
-      "ahubClusterRequested\022\021\n\tclusterId\030\001 \001(\t\022" +
-      "\021\n\taccountId\030\002 \001(\t\022\023\n\013clusterName\030\003 \001(\t\022" +
-      "D\n\017environmentType\030\004 \001(\0162+.usage.CDPEnvi" +
-      "ronmentsEnvironmentType.Value\022\026\n\016environ" +
-      "mentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\023\n\013da" +
-      "talakeCrn\030\007 \001(\t\022\013\n\003crn\030\010 \001(\t\022\022\n\ncreatorC" +
-      "rn\030\t \001(\t\022\035\n\025clusterDefinitionName\030\n \001(\t\"" +
-      "\302\001\n\036CDPDatahubClusterStatusChanged\022\021\n\tcl" +
-      "usterId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.usage" +
-      ".CDPCloudbreakClusterStatus.Value\022:\n\tnew" +
-      "Status\030\003 \001(\0162\'.usage.CDPCloudbreakCluste" +
-      "rStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"\222\004\n" +
-      "\025CDPCMLWorkspaceStatus\"\370\003\n\005Value\022\t\n\005UNSE" +
-      "T\020\000\022\025\n\021PROVISION_STARTED\020\001\022\026\n\022PROVISION_" +
-      "FINISHED\020\002\022\024\n\020PROVISION_FAILED\020\003\022\030\n\024INST" +
-      "ALLATION_STARTED\020\004\022\031\n\025INSTALLATION_FINIS" +
-      "HED\020\005\022\027\n\023INSTALLATION_FAILED\020\006\022\027\n\023DEPROV" +
-      "ISION_STARTED\020\007\022\030\n\024DEPROVISION_FINISHED\020" +
-      "\010\022\026\n\022DEPROVISION_FAILED\020\t\022\021\n\rRENEW_START" +
-      "ED\020\n\022\022\n\016RENEW_FINISHED\020\013\022\021\n\rRENEW_WARNIN" +
-      "G\020\014\022\023\n\017SUSPEND_STARTED\020\r\022\024\n\020SUSPEND_FINI" +
-      "SHED\020\016\022\022\n\016SUSPEND_FAILED\020\017\022\022\n\016RESUME_STA" +
-      "RTED\020\020\022\023\n\017RESUME_FINISHED\020\021\022\021\n\rRESUME_FA" +
-      "ILED\020\022\022\022\n\016RESUME_WARNING\020\023\022\023\n\017UPGRADE_ST" +
-      "ARTED\020\024\022\024\n\020UPGRADE_FINISHED\020\025\022\022\n\016UPGRADE" +
-      "_FAILED\020\026\"\231\001\n\032CDPCMLAWSWorkspaceMetadata" +
-      "\022\022\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(\005" +
-      "\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022work" +
-      "erInstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType\030" +
-      "\006 \001(\t\"\233\001\n\034CDPCMLAzureWorkspaceMetadata\022\022" +
-      "\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022\016" +
-      "\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022worker" +
-      "InstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType\030\006 " +
-      "\001(\t\"\224\003\n\030CDPCMLWorkspaceRequested\022\013\n\003crn\030" +
-      "\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\025\n\rworkspaceNam" +
-      "e\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usage" +
-      ".CDPEnvironmentsEnvironmentType.Value\022\026\n" +
-      "\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001" +
-      "(\t\022\022\n\ncreatorCrn\030\007 \001(\t\022G\n\032cdpCMLAWSWorks" +
-      "paceMetadata\030\010 \001(\0132!.usage.CDPCMLAWSWork" +
-      "spaceMetadataH\000\022K\n\034cdpCMLAzureWorkspaceM" +
-      "etadata\030\t \001(\0132#.usage.CDPCMLAzureWorkspa" +
-      "ceMetadataH\000\022\030\n\020workspaceVersion\030\n \001(\tB\n" +
-      "\n\010metadata\"\330\001\n\034CDPCMLWorkspaceStatusChan" +
-      "ged\022\013\n\003crn\030\001 \001(\t\0225\n\toldStatus\030\002 \001(\0162\".us" +
-      "age.CDPCMLWorkspaceStatus.Value\0225\n\tnewSt" +
-      "atus\030\003 \001(\0162\".usage.CDPCMLWorkspaceStatus" +
-      ".Value\022\025\n\rfailureReason\030\004 \001(\t\022\023\n\013fromVer" +
-      "sion\030\005 \001(\t\022\021\n\ttoVersion\030\006 \001(\t\"M\n\030CDPRequ" +
-      "estProcessingStep\"1\n\005Value\022\t\n\005UNSET\020\000\022\010\n" +
-      "\004INIT\020\001\022\t\n\005FINAL\020\002\022\010\n\004SYNC\020\003\"\236\002\n\024CDPEnvi" +
-      "ronmentStatus\"\205\002\n\005Value\022\t\n\005UNSET\020\000\022\022\n\016CR" +
-      "EATE_STARTED\020\001\022\023\n\017CREATE_FINISHED\020\002\022\021\n\rC" +
-      "REATE_FAILED\020\003\022\022\n\016DELETE_STARTED\020\004\022\023\n\017DE" +
-      "LETE_FINISHED\020\005\022\021\n\rDELETE_FAILED\020\006\022\023\n\017SU" +
-      "SPEND_STARTED\020\007\022\024\n\020SUSPEND_FINISHED\020\010\022\022\n" +
-      "\016SUSPEND_FAILED\020\t\022\022\n\016RESUME_STARTED\020\n\022\023\n" +
-      "\017RESUME_FINISHED\020\013\022\021\n\rRESUME_FAILED\020\014\"\361\005" +
-      "\n\020CDPClusterStatus\"\334\005\n\005Value\022\t\n\005UNSET\020\000\022" +
-      "\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FINISHED\020\002" +
-      "\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_STARTED\020\004\022" +
-      "\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_FAILED\020\006\022" +
-      "\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_FINISHED" +
-      "\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME_STARTED" +
-      "\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUME_FAILED" +
-      "\020\014\022\023\n\017UPGRADE_STARTED\020\r\022\024\n\020UPGRADE_FINIS" +
-      "HED\020\016\022\022\n\016UPGRADE_FAILED\020\017\022\022\n\016REPAIR_STAR" +
-      "TED\020\020\022\023\n\017REPAIR_FINISHED\020\021\022\021\n\rREPAIR_FAI" +
-      "LED\020\022\022\023\n\017UPSCALE_STARTED\020\023\022\024\n\020UPSCALE_FI" +
-      "NISHED\020\024\022\022\n\016UPSCALE_FAILED\020\025\022\025\n\021DOWNSCAL" +
-      "E_STARTED\020\026\022\026\n\022DOWNSCALE_FINISHED\020\027\022\024\n\020D" +
-      "OWNSCALE_FAILED\020\030\022\035\n\031RENEW_PUBLIC_CERT_S" +
-      "TARTED\020\031\022\036\n\032RENEW_PUBLIC_CERT_FINISHED\020\032" +
-      "\022\034\n\030RENEW_PUBLIC_CERT_FAILED\020\033\022\'\n#RENEW_" +
-      "CLUSTER_INTERNAL_CERT_STARTED\020\034\022(\n$RENEW" +
-      "_CLUSTER_INTERNAL_CERT_FINISHED\020\035\022&\n\"REN" +
-      "EW_CLUSTER_INTERNAL_CERT_FAILED\020\036\"\343\002\n\023CD" +
-      "POperationDetails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013" +
-      "resourceCrn\030\002 \001(\t\022\024\n\014resourceName\030\003 \001(\t\022" +
-      "\024\n\014initiatorCrn\030\004 \001(\t\022\032\n\022applicationVers" +
-      "ion\030\005 \001(\t\022G\n\030cdpRequestProcessingStep\030\006 " +
-      "\001(\0162%.usage.CDPRequestProcessingStep.Val" +
-      "ue\022\016\n\006flowId\030\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\022" +
-      "\021\n\tflowState\030\t \001(\t\022\025\n\rcorrelationId\030\n \001(" +
-      "\t\022D\n\017environmentType\030\013 \001(\0162+.usage.CDPEn" +
-      "vironmentsEnvironmentType.Value\"\313\002\n\025CDPE" +
-      "nvironmentDetails\022D\n\017environmentType\030\001 \001" +
-      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
-      "e.Value\022\016\n\006region\030\002 \001(\t\022!\n\031numberOfAvail" +
-      "abilityZones\030\003 \001(\005\022\031\n\021availabilityZones\030" +
-      "\004 \001(\t\0220\n\016networkDetails\030\005 \001(\0132\030.usage.CD" +
-      "PNetworkDetails\0223\n\nawsDetails\030\006 \001(\0132\037.us" +
-      "age.CDPEnvironmentAwsDetails\0227\n\014azureDet" +
-      "ails\030\007 \001(\0132!.usage.CDPEnvironmentAzureDe" +
-      "tails\"0\n\021CDPFreeIPADetails\022\r\n\005nodes\030\001 \001(" +
-      "\005\022\014\n\004spot\030\002 \001(\010\"9\n\032CDPEnvironmentAzureDe" +
-      "tails\022\033\n\023singleResourceGroup\030\001 \001(\010\"\032\n\030CD" +
-      "PEnvironmentAwsDetails\"a\n%CDPEnvironment" +
-      "TelemetryFeatureDetails\022\031\n\021workloadAnaly" +
-      "tics\030\001 \001(\t\022\035\n\025clusterLogsCollection\030\002 \001(" +
-      "\t\"J\n\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020\n\010p" +
-      "rotocol\030\002 \001(\t\022\026\n\016authentication\030\003 \001(\t\"\211\002" +
-      "\n\021CDPNetworkDetails\022\023\n\013networkType\030\001 \001(\t" +
-      "\022\024\n\014connectivity\030\002 \001(\t\022\033\n\023numberPublicSu" +
-      "bnets\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 \001(" +
-      "\005\022\037\n\027serviceEndpointCreation\030\005 \001(\t\022,\n\014pr" +
-      "oxyDetails\030\006 \001(\0132\026.usage.CDPProxyDetails" +
-      "\022#\n\033publicEndpointAccessGateway\030\007 \001(\t\022\032\n" +
-      "\022securityAccessType\030\010 \001(\t\"\203\002\n\027CDPEnviron" +
-      "mentRequested\0224\n\020operationDetails\030\001 \001(\0132" +
-      "\032.usage.CDPOperationDetails\0228\n\022environme" +
-      "ntDetails\030\002 \001(\0132\034.usage.CDPEnvironmentDe" +
-      "tails\022M\n\027telemetryFeatureDetails\030\003 \001(\0132," +
-      ".usage.CDPEnvironmentTelemetryFeatureDet" +
-      "ails\022)\n\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeIPA" +
-      "Details\"\326\001\n\033CDPEnvironmentStatusChanged\022" +
-      "4\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOpe" +
-      "rationDetails\0224\n\toldStatus\030\002 \001(\0162!.usage" +
-      ".CDPEnvironmentStatus.Value\0224\n\tnewStatus" +
-      "\030\003 \001(\0162!.usage.CDPEnvironmentStatus.Valu" +
-      "e\022\025\n\rfailureReason\030\004 \001(\t\"8\n\017CDPImageDeta" +
-      "ils\022\017\n\007imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001" +
-      "(\t\"t\n\017CDPClusterShape\022\033\n\023clusterTemplate" +
-      "Name\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022hostGroupNo" +
-      "deCount\030\003 \001(\t\022\031\n\021definitionDetails\030\004 \001(\t" +
-      "\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersion\030\001 \001(" +
-      "\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(" +
-      "\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005" +
-      " \001(\t\022\013\n\003all\030\006 \001(\t\"\241\001\n\021CDPClusterDetails\022" +
-      ",\n\014clusterShape\030\001 \001(\0132\026.usage.CDPCluster" +
-      "Shape\0220\n\016versionDetails\030\002 \001(\0132\030.usage.CD" +
-      "PVersionDetails\022,\n\014imageDetails\030\003 \001(\0132\026." +
-      "usage.CDPImageDetails\"\223\001\n\020CDPStatusDetai" +
-      "ls\022\023\n\013stackStatus\030\001 \001(\t\022\033\n\023stackDetailed" +
-      "Status\030\002 \001(\t\022\031\n\021stackStatusReason\030\003 \001(\t\022" +
-      "\025\n\rclusterStatus\030\004 \001(\t\022\033\n\023clusterStatusR" +
-      "eason\030\005 \001(\t\"\226\001\n\024CDPDatalakeRequested\0224\n\020" +
-      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
-      "ionDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016cl" +
-      "usterDetails\030\003 \001(\0132\030.usage.CDPClusterDet" +
-      "ails\"\344\001\n\030CDPDatalakeStatusChanged\0224\n\020ope" +
-      "rationDetails\030\001 \001(\0132\032.usage.CDPOperation" +
-      "Details\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPCl" +
-      "usterStatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.u" +
-      "sage.CDPClusterStatus.Value\022.\n\rstatusDet" +
-      "ails\030\004 \001(\0132\027.usage.CDPStatusDetails\"\225\001\n\023" +
-      "CDPDatahubRequested\0224\n\020operationDetails\030" +
-      "\001 \001(\0132\032.usage.CDPOperationDetails\022\026\n\016env" +
-      "ironmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(" +
-      "\0132\030.usage.CDPClusterDetails\"\343\001\n\027CDPDatah" +
-      "ubStatusChanged\0224\n\020operationDetails\030\001 \001(" +
+      "KeyDeletedH\000\022G\n\032altusIamAccessTokenCreat" +
+      "ed\030& \001(\0132!.usage.AltusIamAccessTokenCrea" +
+      "tedH\000\022G\n\032altusIamAccessTokenDeleted\030\' \001(" +
+      "\0132!.usage.AltusIamAccessTokenDeletedH\000\022I" +
+      "\n\033cdpDatalakeClusterRequested\030\026 \001(\0132\".us" +
+      "age.CDPDatalakeClusterRequestedH\000\022Q\n\037cdp" +
+      "DatalakeClusterStatusChanged\030\027 \001(\0132&.usa" +
+      "ge.CDPDatalakeClusterStatusChangedH\000\022G\n\032" +
+      "cdpDatahubClusterRequested\030\030 \001(\0132!.usage" +
+      ".CDPDatahubClusterRequestedH\000\022O\n\036cdpData" +
+      "hubClusterStatusChanged\030\031 \001(\0132%.usage.CD" +
+      "PDatahubClusterStatusChangedH\000\022C\n\030cdpCML" +
+      "WorkspaceRequested\030\033 \001(\0132\037.usage.CDPCMLW" +
+      "orkspaceRequestedH\000\022K\n\034cdpCMLWorkspaceSt" +
+      "atusChanged\030\034 \001(\0132#.usage.CDPCMLWorkspac" +
+      "eStatusChangedH\000\022A\n\027cdpEnvironmentReques" +
+      "ted\030\036 \001(\0132\036.usage.CDPEnvironmentRequeste" +
+      "dH\000\022I\n\033cdpEnvironmentStatusChanged\030\037 \001(\013" +
+      "2\".usage.CDPEnvironmentStatusChangedH\000\022;" +
+      "\n\024cdpDatalakeRequested\030  \001(\0132\033.usage.CDP" +
+      "DatalakeRequestedH\000\022C\n\030cdpDatalakeStatus" +
+      "Changed\030! \001(\0132\037.usage.CDPDatalakeStatusC" +
+      "hangedH\000\0229\n\023cdpDatahubRequested\030\" \001(\0132\032." +
+      "usage.CDPDatahubRequestedH\000\022A\n\027cdpDatahu" +
+      "bStatusChanged\030# \001(\0132\036.usage.CDPDatahubS" +
+      "tatusChangedH\000\0221\n\017cdpDatalakeSync\030$ \001(\0132" +
+      "\026.usage.CDPDatalakeSyncH\000\022/\n\016cdpDatahubS" +
+      "ync\030% \001(\0132\025.usage.CDPDatahubSyncH\000B\t\n\007de" +
+      "tailsJ\004\010\010\020\tJ\004\010\t\020\nJ\004\010\n\020\013J\004\010\013\020\014J\004\010\014\020\rJ\004\010\r\020" +
+      "\016J\004\010\016\020\017J\004\010\017\020\020J\004\010\024\020\025J\004\010\025\020\026\"A\n\023AltusIamAcc" +
+      "ountType\"*\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020" +
+      "\001\022\t\n\005TRIAL\020\002\"\225\001\n\026AltusIamAccountCreated\022" +
+      "\021\n\taccountId\030\001 \001(\t\022\032\n\022identifyProviderId" +
+      "\030\003 \001(\t\022\025\n\rsfdcAccountId\030\004 \001(\t\0225\n\013account" +
+      "Type\030\005 \001(\0162 .usage.AltusIamAccountType.V" +
+      "alue\"\333\001\n\023AltusIamUserCreated\022\016\n\006userId\030\001" +
+      " \001(\t\022\021\n\taccountId\030\003 \001(\t\022\036\n\026identityProvi" +
+      "derUserId\030\004 \001(\t\022\025\n\rsfdcContactId\030\005 \001(\t\022\r" +
+      "\n\005admin\030\006 \001(\010\022\013\n\003crn\030\n \001(\t\022\033\n\023identityPr" +
+      "oviderCrn\030\013 \001(\t\022\031\n\021explicitlyCreated\030\014 \001" +
+      "(\010J\004\010\002\020\003J\004\010\007\020\010J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamUs" +
+      "erUpdated\022\016\n\006userId\030\001 \001(\t\022\r\n\005admin\030\005 \001(\010" +
+      "J\004\010\002\020\003J\004\010\003\020\004J\004\010\004\020\005\"%\n\023AltusIamUserDelete" +
+      "d\022\016\n\006userId\030\001 \001(\t\".\n\034AltusIamUserInterac" +
+      "tiveLogin\022\016\n\006userId\030\001 \001(\t\"5\n#AltusIamUse" +
+      "rInteractiveLoginFailure\022\016\n\006userId\030\001 \001(\t" +
+      "\"~\n\032AltusIamMachineUserCreated\022\025\n\rmachin" +
+      "eUserId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\027\n\017mach" +
+      "ineUserName\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010intern" +
+      "al\030\005 \001(\010\"3\n\032AltusIamMachineUserDeleted\022\025" +
+      "\n\rmachineUserId\030\001 \001(\t\"s\n\030AltusIamAccessK" +
+      "eyCreated\022\023\n\013accessKeyId\030\001 \001(\t\022\021\n\taccoun" +
+      "tId\030\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t" +
+      "\022\020\n\010internal\030\005 \001(\010\"/\n\030AltusIamAccessKeyD" +
+      "eleted\022\023\n\013accessKeyId\030\001 \001(\t\"e\n\032AltusIamA" +
+      "ccessTokenCreated\022\025\n\raccessTokenId\030\001 \001(\t" +
+      "\022\021\n\taccountId\030\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n" +
+      "\003crn\030\004 \001(\t\"3\n\032AltusIamAccessTokenDeleted" +
+      "\022\025\n\raccessTokenId\030\001 \001(\t\"e\n\036CDPEnvironmen" +
+      "tsEnvironmentType\"C\n\005Value\022\t\n\005UNSET\020\000\022\007\n" +
+      "\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\022\010\n\004" +
+      "MOCK\020\005\"\353\003\n\032CDPCloudbreakClusterStatus\"\314\003" +
+      "\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001\022\026\n\022CRE" +
+      "ATE_IN_PROGRESS\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022UPDA" +
+      "TE_IN_PROGRESS\020\004\022\024\n\020UPDATE_REQUESTED\020\005\022\021" +
+      "\n\rUPDATE_FAILED\020\006\022\021\n\rCREATE_FAILED\020\007\022\032\n\026" +
+      "ENABLE_SECURITY_FAILED\020\010\022\032\n\026PRE_DELETE_I" +
+      "N_PROGRESS\020\t\022\026\n\022DELETE_IN_PROGRESS\020\n\022\021\n\r" +
+      "DELETE_FAILED\020\013\022\024\n\020DELETE_COMPLETED\020\014\022\013\n" +
+      "\007STOPPED\020\r\022\022\n\016STOP_REQUESTED\020\016\022\023\n\017START_" +
+      "REQUESTED\020\017\022\024\n\020STOP_IN_PROGRESS\020\020\022\025\n\021STA" +
+      "RT_IN_PROGRESS\020\021\022\020\n\014START_FAILED\020\022\022\017\n\013ST" +
+      "OP_FAILED\020\023\022\021\n\rWAIT_FOR_SYNC\020\024\022\034\n\030MAINTE" +
+      "NANCE_MODE_ENABLED\020\025\"\215\002\n\033CDPDatalakeClus" +
+      "terRequested\022\022\n\ndatalakeId\030\001 \001(\t\022\021\n\tacco" +
+      "untId\030\002 \001(\t\022\024\n\014datalakeName\030\003 \001(\t\022D\n\017env" +
+      "ironmentType\030\004 \001(\0162+.usage.CDPEnvironmen" +
+      "tsEnvironmentType.Value\022\026\n\016environmentCr" +
+      "n\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\013\n\003crn\030\007 \001(" +
+      "\t\022\022\n\ncreatorCrn\030\010 \001(\t\022\035\n\025clusterDefiniti" +
+      "onName\030\t \001(\t\"\304\001\n\037CDPDatalakeClusterStatu" +
+      "sChanged\022\022\n\ndatalakeId\030\001 \001(\t\022:\n\toldStatu" +
+      "s\030\002 \001(\0162\'.usage.CDPCloudbreakClusterStat" +
+      "us.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usage.CDPC" +
+      "loudbreakClusterStatus.Value\022\025\n\rfailureR" +
+      "eason\030\004 \001(\t\"\237\002\n\032CDPDatahubClusterRequest" +
+      "ed\022\021\n\tclusterId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t" +
+      "\022\023\n\013clusterName\030\003 \001(\t\022D\n\017environmentType" +
+      "\030\004 \001(\0162+.usage.CDPEnvironmentsEnvironmen" +
+      "tType.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013c" +
+      "dpdVersion\030\006 \001(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n" +
+      "\003crn\030\010 \001(\t\022\022\n\ncreatorCrn\030\t \001(\t\022\035\n\025cluste" +
+      "rDefinitionName\030\n \001(\t\"\302\001\n\036CDPDatahubClus" +
+      "terStatusChanged\022\021\n\tclusterId\030\001 \001(\t\022:\n\to" +
+      "ldStatus\030\002 \001(\0162\'.usage.CDPCloudbreakClus" +
+      "terStatus.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usa" +
+      "ge.CDPCloudbreakClusterStatus.Value\022\025\n\rf" +
+      "ailureReason\030\004 \001(\t\"\222\004\n\025CDPCMLWorkspaceSt" +
+      "atus\"\370\003\n\005Value\022\t\n\005UNSET\020\000\022\025\n\021PROVISION_S" +
+      "TARTED\020\001\022\026\n\022PROVISION_FINISHED\020\002\022\024\n\020PROV" +
+      "ISION_FAILED\020\003\022\030\n\024INSTALLATION_STARTED\020\004" +
+      "\022\031\n\025INSTALLATION_FINISHED\020\005\022\027\n\023INSTALLAT" +
+      "ION_FAILED\020\006\022\027\n\023DEPROVISION_STARTED\020\007\022\030\n" +
+      "\024DEPROVISION_FINISHED\020\010\022\026\n\022DEPROVISION_F" +
+      "AILED\020\t\022\021\n\rRENEW_STARTED\020\n\022\022\n\016RENEW_FINI" +
+      "SHED\020\013\022\021\n\rRENEW_WARNING\020\014\022\023\n\017SUSPEND_STA" +
+      "RTED\020\r\022\024\n\020SUSPEND_FINISHED\020\016\022\022\n\016SUSPEND_" +
+      "FAILED\020\017\022\022\n\016RESUME_STARTED\020\020\022\023\n\017RESUME_F" +
+      "INISHED\020\021\022\021\n\rRESUME_FAILED\020\022\022\022\n\016RESUME_W" +
+      "ARNING\020\023\022\023\n\017UPGRADE_STARTED\020\024\022\024\n\020UPGRADE" +
+      "_FINISHED\020\025\022\022\n\016UPGRADE_FAILED\020\026\"\231\001\n\032CDPC" +
+      "MLAWSWorkspaceMetadata\022\022\n\nminWorkers\030\001 \001" +
+      "(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016" +
+      "\n\006maxGpu\030\004 \001(\005\022\032\n\022workerInstanceType\030\005 \001" +
+      "(\t\022\027\n\017gpuInstanceType\030\006 \001(\t\"\233\001\n\034CDPCMLAz" +
+      "ureWorkspaceMetadata\022\022\n\nminWorkers\030\001 \001(\005" +
+      "\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006" +
+      "maxGpu\030\004 \001(\005\022\032\n\022workerInstanceType\030\005 \001(\t" +
+      "\022\027\n\017gpuInstanceType\030\006 \001(\t\"\224\003\n\030CDPCMLWork" +
+      "spaceRequested\022\013\n\003crn\030\001 \001(\t\022\021\n\taccountId" +
+      "\030\002 \001(\t\022\025\n\rworkspaceName\030\003 \001(\t\022D\n\017environ" +
+      "mentType\030\004 \001(\0162+.usage.CDPEnvironmentsEn" +
+      "vironmentType.Value\022\026\n\016environmentCrn\030\005 " +
+      "\001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\022\n\ncreatorCrn\030\007" +
+      " \001(\t\022G\n\032cdpCMLAWSWorkspaceMetadata\030\010 \001(\013" +
+      "2!.usage.CDPCMLAWSWorkspaceMetadataH\000\022K\n" +
+      "\034cdpCMLAzureWorkspaceMetadata\030\t \001(\0132#.us" +
+      "age.CDPCMLAzureWorkspaceMetadataH\000\022\030\n\020wo" +
+      "rkspaceVersion\030\n \001(\tB\n\n\010metadata\"\330\001\n\034CDP" +
+      "CMLWorkspaceStatusChanged\022\013\n\003crn\030\001 \001(\t\0225" +
+      "\n\toldStatus\030\002 \001(\0162\".usage.CDPCMLWorkspac" +
+      "eStatus.Value\0225\n\tnewStatus\030\003 \001(\0162\".usage" +
+      ".CDPCMLWorkspaceStatus.Value\022\025\n\rfailureR" +
+      "eason\030\004 \001(\t\022\023\n\013fromVersion\030\005 \001(\t\022\021\n\ttoVe" +
+      "rsion\030\006 \001(\t\"M\n\030CDPRequestProcessingStep\"" +
+      "1\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004INIT\020\001\022\t\n\005FINAL\020\002" +
+      "\022\010\n\004SYNC\020\003\"\236\002\n\024CDPEnvironmentStatus\"\205\002\n\005" +
+      "Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017" +
+      "CREATE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016" +
+      "DELETE_STARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n" +
+      "\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n" +
+      "\020SUSPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022" +
+      "\022\n\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013" +
+      "\022\021\n\rRESUME_FAILED\020\014\"\361\005\n\020CDPClusterStatus" +
+      "\"\334\005\n\005Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020" +
+      "\001\022\023\n\017CREATE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020" +
+      "\003\022\022\n\016DELETE_STARTED\020\004\022\023\n\017DELETE_FINISHED" +
+      "\020\005\022\021\n\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED" +
+      "\020\007\022\024\n\020SUSPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAIL" +
+      "ED\020\t\022\022\n\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINIS" +
+      "HED\020\013\022\021\n\rRESUME_FAILED\020\014\022\023\n\017UPGRADE_STAR" +
+      "TED\020\r\022\024\n\020UPGRADE_FINISHED\020\016\022\022\n\016UPGRADE_F" +
+      "AILED\020\017\022\022\n\016REPAIR_STARTED\020\020\022\023\n\017REPAIR_FI" +
+      "NISHED\020\021\022\021\n\rREPAIR_FAILED\020\022\022\023\n\017UPSCALE_S" +
+      "TARTED\020\023\022\024\n\020UPSCALE_FINISHED\020\024\022\022\n\016UPSCAL" +
+      "E_FAILED\020\025\022\025\n\021DOWNSCALE_STARTED\020\026\022\026\n\022DOW" +
+      "NSCALE_FINISHED\020\027\022\024\n\020DOWNSCALE_FAILED\020\030\022" +
+      "\035\n\031RENEW_PUBLIC_CERT_STARTED\020\031\022\036\n\032RENEW_" +
+      "PUBLIC_CERT_FINISHED\020\032\022\034\n\030RENEW_PUBLIC_C" +
+      "ERT_FAILED\020\033\022\'\n#RENEW_CLUSTER_INTERNAL_C" +
+      "ERT_STARTED\020\034\022(\n$RENEW_CLUSTER_INTERNAL_" +
+      "CERT_FINISHED\020\035\022&\n\"RENEW_CLUSTER_INTERNA" +
+      "L_CERT_FAILED\020\036\"\343\002\n\023CDPOperationDetails\022" +
+      "\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022" +
+      "\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 " +
+      "\001(\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n\030cdpRe" +
+      "questProcessingStep\030\006 \001(\0162%.usage.CDPReq" +
+      "uestProcessingStep.Value\022\016\n\006flowId\030\007 \001(\t" +
+      "\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t" +
+      "\022\025\n\rcorrelationId\030\n \001(\t\022D\n\017environmentTy" +
+      "pe\030\013 \001(\0162+.usage.CDPEnvironmentsEnvironm" +
+      "entType.Value\"\313\002\n\025CDPEnvironmentDetails\022" +
+      "D\n\017environmentType\030\001 \001(\0162+.usage.CDPEnvi" +
+      "ronmentsEnvironmentType.Value\022\016\n\006region\030" +
+      "\002 \001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001(\005" +
+      "\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016networkDe" +
+      "tails\030\005 \001(\0132\030.usage.CDPNetworkDetails\0223\n" +
+      "\nawsDetails\030\006 \001(\0132\037.usage.CDPEnvironment" +
+      "AwsDetails\0227\n\014azureDetails\030\007 \001(\0132!.usage" +
+      ".CDPEnvironmentAzureDetails\"0\n\021CDPFreeIP" +
+      "ADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030\002 \001(\010\"9\n" +
+      "\032CDPEnvironmentAzureDetails\022\033\n\023singleRes" +
+      "ourceGroup\030\001 \001(\010\"\032\n\030CDPEnvironmentAwsDet" +
+      "ails\"a\n%CDPEnvironmentTelemetryFeatureDe" +
+      "tails\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035\n\025clus" +
+      "terLogsCollection\030\002 \001(\t\"J\n\017CDPProxyDetai" +
+      "ls\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002 \001(\t\022\026\n\016a" +
+      "uthentication\030\003 \001(\t\"\211\002\n\021CDPNetworkDetail" +
+      "s\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectivity\030\002" +
+      " \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034\n\024num" +
+      "berPrivateSubnets\030\004 \001(\005\022\037\n\027serviceEndpoi" +
+      "ntCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132\026" +
+      ".usage.CDPProxyDetails\022#\n\033publicEndpoint" +
+      "AccessGateway\030\007 \001(\t\022\032\n\022securityAccessTyp" +
+      "e\030\010 \001(\t\"\203\002\n\027CDPEnvironmentRequested\0224\n\020o" +
+      "perationDetails\030\001 \001(\0132\032.usage.CDPOperati" +
+      "onDetails\0228\n\022environmentDetails\030\002 \001(\0132\034." +
+      "usage.CDPEnvironmentDetails\022M\n\027telemetry" +
+      "FeatureDetails\030\003 \001(\0132,.usage.CDPEnvironm" +
+      "entTelemetryFeatureDetails\022)\n\007freeIPA\030\004 " +
+      "\001(\0132\030.usage.CDPFreeIPADetails\"\326\001\n\033CDPEnv" +
+      "ironmentStatusChanged\0224\n\020operationDetail" +
+      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0224\n\to" +
+      "ldStatus\030\002 \001(\0162!.usage.CDPEnvironmentSta" +
+      "tus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDP" +
+      "EnvironmentStatus.Value\022\025\n\rfailureReason" +
+      "\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001" +
+      "(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPClusterSh" +
+      "ape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005node" +
+      "s\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021d" +
+      "efinitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDet" +
+      "ails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001" +
+      "(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004" +
+      " \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"" +
+      "\241\001\n\021CDPClusterDetails\022,\n\014clusterShape\030\001 " +
+      "\001(\0132\026.usage.CDPClusterShape\0220\n\016versionDe" +
+      "tails\030\002 \001(\0132\030.usage.CDPVersionDetails\022,\n" +
+      "\014imageDetails\030\003 \001(\0132\026.usage.CDPImageDeta" +
+      "ils\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStatus\030" +
+      "\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n\021st" +
+      "ackStatusReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004" +
+      " \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"\226\001\n\024CD" +
+      "PDatalakeRequested\0224\n\020operationDetails\030\001" +
+      " \001(\0132\032.usage.CDPOperationDetails\022\026\n\016envi" +
+      "ronmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\013" +
+      "2\030.usage.CDPClusterDetails\"\344\001\n\030CDPDatala" +
+      "keStatusChanged\0224\n\020operationDetails\030\001 \001(" +
       "\0132\032.usage.CDPOperationDetails\0220\n\toldStat" +
       "us\030\002 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
       "0\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterSta" +
       "tus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.usage" +
-      ".CDPStatusDetails\"Q\n\016CDPSyncDetails\022\036\n\026c" +
-      "lusterCreationStarted\030\003 \001(\004\022\037\n\027clusterCr" +
-      "eationFinished\030\004 \001(\004\"\325\001\n\017CDPDatalakeSync" +
-      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
-      "erationDetails\022*\n\013syncDetails\030\002 \001(\0132\025.us" +
-      "age.CDPSyncDetails\0220\n\016clusterDetails\030\003 \001" +
-      "(\0132\030.usage.CDPClusterDetails\022.\n\rstatusDe" +
-      "tails\030\004 \001(\0132\027.usage.CDPStatusDetails\"\324\001\n" +
-      "\016CDPDatahubSync\0224\n\020operationDetails\030\001 \001(" +
-      "\0132\032.usage.CDPOperationDetails\022*\n\013syncDet" +
-      "ails\030\002 \001(\0132\025.usage.CDPSyncDetails\0220\n\016clu" +
-      "sterDetails\030\003 \001(\0132\030.usage.CDPClusterDeta" +
-      "ils\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDPSt" +
-      "atusDetailsBV\n-com.cloudera.thunderhead." +
-      "service.common.usageB\nUsageProtoZ\031com/cl" +
-      "oudera/cdp/protobufb\006proto3"
+      ".CDPStatusDetails\"\225\001\n\023CDPDatahubRequeste" +
+      "d\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPO" +
+      "perationDetails\022\026\n\016environmentCrn\030\002 \001(\t\022" +
+      "0\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClust" +
+      "erDetails\"\343\001\n\027CDPDatahubStatusChanged\0224\n" +
+      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
+      "tionDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage.C" +
+      "DPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(\016" +
+      "2\035.usage.CDPClusterStatus.Value\022.\n\rstatu" +
+      "sDetails\030\004 \001(\0132\027.usage.CDPStatusDetails\"" +
+      "y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016det" +
+      "ailedStatus\030\002 \001(\t\022\036\n\026clusterCreationStar" +
+      "ted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030\004 \001" +
+      "(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operationDetai" +
+      "ls\030\001 \001(\0132\032.usage.CDPOperationDetails\022*\n\013" +
+      "syncDetails\030\002 \001(\0132\025.usage.CDPSyncDetails" +
+      "\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClus" +
+      "terDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
+      "e.CDPStatusDetails\"\324\001\n\016CDPDatahubSync\0224\n" +
+      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
+      "tionDetails\022*\n\013syncDetails\030\002 \001(\0132\025.usage" +
+      ".CDPSyncDetails\0220\n\016clusterDetails\030\003 \001(\0132" +
+      "\030.usage.CDPClusterDetails\022.\n\rstatusDetai" +
+      "ls\030\004 \001(\0132\027.usage.CDPStatusDetailsBV\n-com" +
+      ".cloudera.thunderhead.service.common.usa" +
+      "geB\nUsageProtoZ\031com/cloudera/cdp/protobu" +
+      "fb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -59259,7 +61903,7 @@ public final class UsageProto {
     internal_static_usage_Event_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_Event_descriptor,
-        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserDeleted", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "CdpCMLWorkspaceRequested", "CdpCMLWorkspaceStatusChanged", "CdpEnvironmentRequested", "CdpEnvironmentStatusChanged", "CdpDatalakeRequested", "CdpDatalakeStatusChanged", "CdpDatahubRequested", "CdpDatahubStatusChanged", "CdpDatalakeSync", "CdpDatahubSync", "Details", });
+        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserDeleted", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusIamAccessTokenCreated", "AltusIamAccessTokenDeleted", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "CdpCMLWorkspaceRequested", "CdpCMLWorkspaceStatusChanged", "CdpEnvironmentRequested", "CdpEnvironmentStatusChanged", "CdpDatalakeRequested", "CdpDatalakeStatusChanged", "CdpDatahubRequested", "CdpDatahubStatusChanged", "CdpDatalakeSync", "CdpDatahubSync", "Details", });
     internal_static_usage_AltusIamAccountType_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_usage_AltusIamAccountType_fieldAccessorTable = new
@@ -59326,218 +61970,230 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_AltusIamAccessKeyDeleted_descriptor,
         new java.lang.String[] { "AccessKeyId", });
-    internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor =
+    internal_static_usage_AltusIamAccessTokenCreated_descriptor =
       getDescriptor().getMessageTypes().get(12);
+    internal_static_usage_AltusIamAccessTokenCreated_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_AltusIamAccessTokenCreated_descriptor,
+        new java.lang.String[] { "AccessTokenId", "AccountId", "ActorCrn", "Crn", });
+    internal_static_usage_AltusIamAccessTokenDeleted_descriptor =
+      getDescriptor().getMessageTypes().get(13);
+    internal_static_usage_AltusIamAccessTokenDeleted_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_AltusIamAccessTokenDeleted_descriptor,
+        new java.lang.String[] { "AccessTokenId", });
+    internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor =
+      getDescriptor().getMessageTypes().get(14);
     internal_static_usage_CDPEnvironmentsEnvironmentType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentsEnvironmentType_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPCloudbreakClusterStatus_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_usage_CDPCloudbreakClusterStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCloudbreakClusterStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPDatalakeClusterRequested_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_usage_CDPDatalakeClusterRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeClusterRequested_descriptor,
         new java.lang.String[] { "DatalakeId", "AccountId", "DatalakeName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "Crn", "CreatorCrn", "ClusterDefinitionName", });
     internal_static_usage_CDPDatalakeClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_usage_CDPDatalakeClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeClusterStatusChanged_descriptor,
         new java.lang.String[] { "DatalakeId", "OldStatus", "NewStatus", "FailureReason", });
     internal_static_usage_CDPDatahubClusterRequested_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_usage_CDPDatahubClusterRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubClusterRequested_descriptor,
         new java.lang.String[] { "ClusterId", "AccountId", "ClusterName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "DatalakeCrn", "Crn", "CreatorCrn", "ClusterDefinitionName", });
     internal_static_usage_CDPDatahubClusterStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_usage_CDPDatahubClusterStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubClusterStatusChanged_descriptor,
         new java.lang.String[] { "ClusterId", "OldStatus", "NewStatus", "FailureReason", });
     internal_static_usage_CDPCMLWorkspaceStatus_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_usage_CDPCMLWorkspaceStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPCMLAWSWorkspaceMetadata_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_usage_CDPCMLAWSWorkspaceMetadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLAWSWorkspaceMetadata_descriptor,
         new java.lang.String[] { "MinWorkers", "MaxWorkers", "MinGpu", "MaxGpu", "WorkerInstanceType", "GpuInstanceType", });
     internal_static_usage_CDPCMLAzureWorkspaceMetadata_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_usage_CDPCMLAzureWorkspaceMetadata_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLAzureWorkspaceMetadata_descriptor,
         new java.lang.String[] { "MinWorkers", "MaxWorkers", "MinGpu", "MaxGpu", "WorkerInstanceType", "GpuInstanceType", });
     internal_static_usage_CDPCMLWorkspaceRequested_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_usage_CDPCMLWorkspaceRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceRequested_descriptor,
         new java.lang.String[] { "Crn", "AccountId", "WorkspaceName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "CreatorCrn", "CdpCMLAWSWorkspaceMetadata", "CdpCMLAzureWorkspaceMetadata", "WorkspaceVersion", "Metadata", });
     internal_static_usage_CDPCMLWorkspaceStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_usage_CDPCMLWorkspaceStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceStatusChanged_descriptor,
         new java.lang.String[] { "Crn", "OldStatus", "NewStatus", "FailureReason", "FromVersion", "ToVersion", });
     internal_static_usage_CDPRequestProcessingStep_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_usage_CDPRequestProcessingStep_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPRequestProcessingStep_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPEnvironmentStatus_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_usage_CDPEnvironmentStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPClusterStatus_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_usage_CDPClusterStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterStatus_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPOperationDetails_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_usage_CDPOperationDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPOperationDetails_descriptor,
         new java.lang.String[] { "AccountId", "ResourceCrn", "ResourceName", "InitiatorCrn", "ApplicationVersion", "CdpRequestProcessingStep", "FlowId", "FlowChainId", "FlowState", "CorrelationId", "EnvironmentType", });
     internal_static_usage_CDPEnvironmentDetails_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentDetails_descriptor,
         new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "NetworkDetails", "AwsDetails", "AzureDetails", });
     internal_static_usage_CDPFreeIPADetails_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_usage_CDPFreeIPADetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPFreeIPADetails_descriptor,
         new java.lang.String[] { "Nodes", "Spot", });
     internal_static_usage_CDPEnvironmentAzureDetails_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_usage_CDPEnvironmentAzureDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentAzureDetails_descriptor,
         new java.lang.String[] { "SingleResourceGroup", });
     internal_static_usage_CDPEnvironmentAwsDetails_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_usage_CDPEnvironmentAwsDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentAwsDetails_descriptor,
         new java.lang.String[] { });
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentTelemetryFeatureDetails_descriptor,
         new java.lang.String[] { "WorkloadAnalytics", "ClusterLogsCollection", });
     internal_static_usage_CDPProxyDetails_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_usage_CDPProxyDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPProxyDetails_descriptor,
         new java.lang.String[] { "Proxy", "Protocol", "Authentication", });
     internal_static_usage_CDPNetworkDetails_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(35);
     internal_static_usage_CDPNetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPNetworkDetails_descriptor,
         new java.lang.String[] { "NetworkType", "Connectivity", "NumberPublicSubnets", "NumberPrivateSubnets", "ServiceEndpointCreation", "ProxyDetails", "PublicEndpointAccessGateway", "SecurityAccessType", });
     internal_static_usage_CDPEnvironmentRequested_descriptor =
-      getDescriptor().getMessageTypes().get(34);
+      getDescriptor().getMessageTypes().get(36);
     internal_static_usage_CDPEnvironmentRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentDetails", "TelemetryFeatureDetails", "FreeIPA", });
     internal_static_usage_CDPEnvironmentStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(35);
+      getDescriptor().getMessageTypes().get(37);
     internal_static_usage_CDPEnvironmentStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentStatusChanged_descriptor,
         new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "FailureReason", });
     internal_static_usage_CDPImageDetails_descriptor =
-      getDescriptor().getMessageTypes().get(36);
+      getDescriptor().getMessageTypes().get(38);
     internal_static_usage_CDPImageDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPImageDetails_descriptor,
         new java.lang.String[] { "ImageId", "ImageCatalog", });
     internal_static_usage_CDPClusterShape_descriptor =
-      getDescriptor().getMessageTypes().get(37);
+      getDescriptor().getMessageTypes().get(39);
     internal_static_usage_CDPClusterShape_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterShape_descriptor,
         new java.lang.String[] { "ClusterTemplateName", "Nodes", "HostGroupNodeCount", "DefinitionDetails", });
     internal_static_usage_CDPVersionDetails_descriptor =
-      getDescriptor().getMessageTypes().get(38);
+      getDescriptor().getMessageTypes().get(40);
     internal_static_usage_CDPVersionDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPVersionDetails_descriptor,
         new java.lang.String[] { "CrVersion", "CmVersion", "CdpdVersion", "SaltVersion", "OsPatchLevel", "All", });
     internal_static_usage_CDPClusterDetails_descriptor =
-      getDescriptor().getMessageTypes().get(39);
+      getDescriptor().getMessageTypes().get(41);
     internal_static_usage_CDPClusterDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterDetails_descriptor,
         new java.lang.String[] { "ClusterShape", "VersionDetails", "ImageDetails", });
     internal_static_usage_CDPStatusDetails_descriptor =
-      getDescriptor().getMessageTypes().get(40);
+      getDescriptor().getMessageTypes().get(42);
     internal_static_usage_CDPStatusDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPStatusDetails_descriptor,
         new java.lang.String[] { "StackStatus", "StackDetailedStatus", "StackStatusReason", "ClusterStatus", "ClusterStatusReason", });
     internal_static_usage_CDPDatalakeRequested_descriptor =
-      getDescriptor().getMessageTypes().get(41);
+      getDescriptor().getMessageTypes().get(43);
     internal_static_usage_CDPDatalakeRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", });
     internal_static_usage_CDPDatalakeStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(42);
+      getDescriptor().getMessageTypes().get(44);
     internal_static_usage_CDPDatalakeStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeStatusChanged_descriptor,
         new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
     internal_static_usage_CDPDatahubRequested_descriptor =
-      getDescriptor().getMessageTypes().get(43);
+      getDescriptor().getMessageTypes().get(45);
     internal_static_usage_CDPDatahubRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", });
     internal_static_usage_CDPDatahubStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(44);
+      getDescriptor().getMessageTypes().get(46);
     internal_static_usage_CDPDatahubStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubStatusChanged_descriptor,
         new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
     internal_static_usage_CDPSyncDetails_descriptor =
-      getDescriptor().getMessageTypes().get(45);
+      getDescriptor().getMessageTypes().get(47);
     internal_static_usage_CDPSyncDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPSyncDetails_descriptor,
-        new java.lang.String[] { "ClusterCreationStarted", "ClusterCreationFinished", });
+        new java.lang.String[] { "Status", "DetailedStatus", "ClusterCreationStarted", "ClusterCreationFinished", });
     internal_static_usage_CDPDatalakeSync_descriptor =
-      getDescriptor().getMessageTypes().get(46);
+      getDescriptor().getMessageTypes().get(48);
     internal_static_usage_CDPDatalakeSync_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeSync_descriptor,
         new java.lang.String[] { "OperationDetails", "SyncDetails", "ClusterDetails", "StatusDetails", });
     internal_static_usage_CDPDatahubSync_descriptor =
-      getDescriptor().getMessageTypes().get(47);
+      getDescriptor().getMessageTypes().get(49);
     internal_static_usage_CDPDatahubSync_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubSync_descriptor,
