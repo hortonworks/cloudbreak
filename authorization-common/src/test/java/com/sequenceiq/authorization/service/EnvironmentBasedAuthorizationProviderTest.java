@@ -50,7 +50,7 @@ public class EnvironmentBasedAuthorizationProviderTest {
     private EnvironmentBasedAuthorizationProvider underTest;
 
     @Mock
-    private ResourceBasedCrnProvider resourceBasedCrnProvider;
+    private ResourcePropertyProvider resourceBasedCrnProvider;
 
     @Test
     public void testWithEnvironment() {

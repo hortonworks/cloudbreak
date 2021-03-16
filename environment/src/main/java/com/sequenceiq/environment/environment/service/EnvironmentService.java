@@ -24,10 +24,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -59,7 +59,7 @@ import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Service
-public class EnvironmentService extends AbstractAccountAwareResourceService<Environment> implements ResourceIdProvider, ResourceCrnAndNameProvider {
+public class EnvironmentService extends AbstractAccountAwareResourceService<Environment> implements ResourceIdProvider, ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -213,7 +213,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
                 .collect(Collectors.toList());
     }
 
-    public List<AuthorizationResource> findAsAuthorizationResourcesInAccount(String accountId) {
+    public List<ResourceWithId> findAsAuthorizationResourcesInAccount(String accountId) {
         return environmentRepository.findAsAuthorizationResourcesInAccount(accountId);
     }
 
@@ -359,8 +359,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.ENVIRONMENT;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
     }
 
     public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
@@ -431,7 +431,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.ENVIRONMENT);
     }
 

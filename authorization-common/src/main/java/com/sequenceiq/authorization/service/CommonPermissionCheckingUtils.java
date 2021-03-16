@@ -50,7 +50,7 @@ public class CommonPermissionCheckingUtils {
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
     @Inject
-    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap;
+    private Map<AuthorizationResourceType, ResourcePropertyProvider> resourceBasedCrnProviderMap;
 
     private AuthorizationMessageUtilsService authorizationMessageUtilsService;
 
@@ -58,7 +58,7 @@ public class CommonPermissionCheckingUtils {
         return !entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId());
     }
 
-    public ResourceBasedCrnProvider getResourceBasedCrnProvider(AuthorizationResourceAction action) {
+    public ResourcePropertyProvider getResourceBasedCrnProvider(AuthorizationResourceAction action) {
         AuthorizationResourceType resourceType = umsRightProvider.getResourceType(action);
         return resourceBasedCrnProviderMap.get(resourceType);
     }

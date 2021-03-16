@@ -35,7 +35,7 @@ public class ResourceNameAuthorizationFactoryTest {
     private ResourceNameAuthorizationFactory underTest;
 
     @Mock
-    private ResourceBasedCrnProvider resourceBasedCrnProvider;
+    private ResourcePropertyProvider resourceBasedCrnProvider;
 
     @Before
     public void setUp() {

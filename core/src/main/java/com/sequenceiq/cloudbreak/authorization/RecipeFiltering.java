@@ -9,7 +9,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -32,7 +32,7 @@ public class RecipeFiltering extends AbstractAuthorizationFiltering<Set<RecipeVi
     }
 
     @Override
-    public List<AuthorizationResource> getAllResources(Map<String, Object> args) {
+    public List<ResourceWithId> getAllResources(Map<String, Object> args) {
         return recipeService.findAsAuthorizationResourcesInWorkspace(workspaceService.getForCurrentUser().getId());
     }
 

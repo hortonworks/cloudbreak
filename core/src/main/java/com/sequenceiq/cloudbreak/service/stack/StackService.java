@@ -35,8 +35,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.service.ResourceNameProvider;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -119,7 +120,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class StackService implements ResourceIdProvider, ResourceNameProvider {
+public class StackService implements ResourceIdProvider, ResourcePropertyProvider {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK);
 
@@ -906,12 +907,16 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
         return stackRepository.findByWorkspaceIdAnStackIds(workspaceId, stackIds, stackTypes);
     }
 
-    public List<AuthorizationResource> getAsAuthorizationResourcesByEnvCrn(Long workspaceId, String environmentCrn, StackType stackType) {
+    public List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(Long workspaceId, String environmentCrn, StackType stackType) {
         return stackRepository.getAsAuthorizationResourcesByEnvCrn(workspaceId, environmentCrn, stackType);
     }
 
-    public List<AuthorizationResource> getAsAuthorizationResources(Long workspaceId, StackType stackType) {
+    public List<ResourceWithId> getAsAuthorizationResources(Long workspaceId, StackType stackType) {
         return stackRepository.getAsAuthorizationResources(workspaceId, stackType);
+    }
+
+    public List<ResourceWithId> getAsAuthorizationResourcesByCrns(Long workspaceId, StackType stackType, List<String> crns) {
+        return stackRepository.getAsAuthorizationResourcesByCrns(workspaceId, stackType, crns);
     }
 
     public int setMinaSshdServiceIdByStackId(Long id, String minaSshdServiceId) {
@@ -936,7 +941,12 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.DATALAKE, Crn.ResourceType.CLUSTER, Crn.ResourceType.STACK);
+    }
+
+    @Override
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.empty();
     }
 }

@@ -67,7 +67,7 @@ public class CommonPermissionCheckingUtilsBulkTest {
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
     @Mock
-    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap;
+    private Map<AuthorizationResourceType, ResourcePropertyProvider> resourceBasedCrnProviderMap;
 
     private AuthorizationResourceAction action;
 

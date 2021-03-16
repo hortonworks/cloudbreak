@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -46,6 +47,14 @@ public class AbstractAuthorizationFilteringTest {
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
+    private ResourceFilteringService resourceFilteringService;
+
+    @BeforeEach
+    public void setUp() {
+        resourceFilteringService = new ResourceFilteringService();
+        ReflectionTestUtils.setField(resourceFilteringService, "umsClient", grpcUmsClient);
+    }
+
     @Test
     public void whenNotEntitledThenReturnAllElememts() {
         disableListFiltering();
@@ -53,9 +62,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, ENVIRONMENT_CRN),
-                new AuthorizationResource(3L, datahubCrn3, ENVIRONMENT_CRN));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, ENVIRONMENT_CRN),
+                new ResourceWithId(3L, datahubCrn3, ENVIRONMENT_CRN));
 
         List<Long> result = underTest.filterResources(USER_CRN, ACTION, Map.of());
 
@@ -79,7 +88,7 @@ public class AbstractAuthorizationFilteringTest {
     public void testHasRight() {
         enableListFiltering();
 
-        LongFiltering underTest = longFiltering(new AuthorizationResource(1L, ENVIRONMENT_CRN));
+        LongFiltering underTest = longFiltering(new ResourceWithId(1L, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -97,7 +106,7 @@ public class AbstractAuthorizationFilteringTest {
     public void testHasNoRight() {
         enableListFiltering();
 
-        LongFiltering underTest = longFiltering(new AuthorizationResource(1L, ENVIRONMENT_CRN));
+        LongFiltering underTest = longFiltering(new ResourceWithId(1L, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -115,7 +124,7 @@ public class AbstractAuthorizationFilteringTest {
     public void testHasRightOnParent() {
         enableListFiltering();
 
-        LongFiltering underTest = longFiltering(new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
+        LongFiltering underTest = longFiltering(new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -133,7 +142,7 @@ public class AbstractAuthorizationFilteringTest {
     public void testHasRightOnResourceWithParant() {
         enableListFiltering();
 
-        LongFiltering underTest = longFiltering(new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
+        LongFiltering underTest = longFiltering(new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -151,7 +160,7 @@ public class AbstractAuthorizationFilteringTest {
     public void testHasNoRightOnResourceWithParent() {
         enableListFiltering();
 
-        LongFiltering underTest = longFiltering(new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
+        LongFiltering underTest = longFiltering(new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -172,9 +181,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, ENVIRONMENT_CRN),
-                new AuthorizationResource(3L, datahubCrn3, ENVIRONMENT_CRN));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, ENVIRONMENT_CRN),
+                new ResourceWithId(3L, datahubCrn3, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -195,9 +204,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, ENVIRONMENT_CRN),
-                new AuthorizationResource(3L, datahubCrn3, ENVIRONMENT_CRN));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, ENVIRONMENT_CRN),
+                new ResourceWithId(3L, datahubCrn3, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -218,9 +227,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, ENVIRONMENT_CRN),
-                new AuthorizationResource(3L, datahubCrn3, ENVIRONMENT_CRN));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, ENVIRONMENT_CRN),
+                new ResourceWithId(3L, datahubCrn3, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -242,9 +251,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, environmentCrn2),
-                new AuthorizationResource(3L, datahubCrn3, environmentCrn2));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, environmentCrn2),
+                new ResourceWithId(3L, datahubCrn3, environmentCrn2));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -266,9 +275,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, environmentCrn2),
-                new AuthorizationResource(3L, datahubCrn3, environmentCrn2));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, environmentCrn2),
+                new ResourceWithId(3L, datahubCrn3, environmentCrn2));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -290,9 +299,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, environmentCrn2),
-                new AuthorizationResource(3L, datahubCrn3, environmentCrn2));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, environmentCrn2),
+                new ResourceWithId(3L, datahubCrn3, environmentCrn2));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -314,9 +323,9 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn2 = dataHubCrn("datahub-2");
         String datahubCrn3 = dataHubCrn("datahub-3");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, environmentCrn2),
-                new AuthorizationResource(3L, datahubCrn3, environmentCrn2));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, environmentCrn2),
+                new ResourceWithId(3L, datahubCrn3, environmentCrn2));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -339,11 +348,11 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn4 = dataHubCrn("datahub-4");
         String datahubCrn5 = dataHubCrn("datahub-5");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, ENVIRONMENT_CRN),
-                new AuthorizationResource(3L, datahubCrn3),
-                new AuthorizationResource(4L, datahubCrn4),
-                new AuthorizationResource(5L, datahubCrn5));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, ENVIRONMENT_CRN),
+                new ResourceWithId(3L, datahubCrn3),
+                new ResourceWithId(4L, datahubCrn4),
+                new ResourceWithId(5L, datahubCrn5));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -367,11 +376,11 @@ public class AbstractAuthorizationFilteringTest {
         String datahubCrn4 = dataHubCrn("datahub-4");
         String datahubCrn5 = dataHubCrn("datahub-5");
         LongFiltering underTest = longFiltering(
-                new AuthorizationResource(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
-                new AuthorizationResource(2L, datahubCrn2, environmentCrn2),
-                new AuthorizationResource(3L, datahubCrn3, ENVIRONMENT_CRN),
-                new AuthorizationResource(4L, datahubCrn4, environmentCrn2),
-                new AuthorizationResource(5L, datahubCrn5, ENVIRONMENT_CRN));
+                new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN),
+                new ResourceWithId(2L, datahubCrn2, environmentCrn2),
+                new ResourceWithId(3L, datahubCrn3, ENVIRONMENT_CRN),
+                new ResourceWithId(4L, datahubCrn4, environmentCrn2),
+                new ResourceWithId(5L, datahubCrn5, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
@@ -382,7 +391,7 @@ public class AbstractAuthorizationFilteringTest {
 
         List<Long> result = underTest.filterResources(USER_CRN, ACTION, Map.of());
 
-        assertEquals(List.of(1L, 3L, 5L, 2L), result);
+        assertEquals(List.of(1L, 2L, 3L, 5L), result);
     }
 
     private void enableListFiltering() {
@@ -409,29 +418,29 @@ public class AbstractAuthorizationFilteringTest {
                 .toString();
     }
 
-    private LongFiltering longFiltering(AuthorizationResource... authorizationResources) {
+    private LongFiltering longFiltering(ResourceWithId... authorizationResources) {
         LongFiltering longFiltering = new LongFiltering(Arrays.asList(authorizationResources));
         ReflectionTestUtils.setField(longFiltering, "entitlementService", entitlementService);
-        ReflectionTestUtils.setField(longFiltering, "grpcUmsClient", grpcUmsClient);
+        ReflectionTestUtils.setField(longFiltering, "resourceFilteringService", resourceFilteringService);
         return longFiltering;
     }
 
     private static class LongFiltering extends AbstractAuthorizationFiltering<List<Long>> {
 
-        private List<AuthorizationResource> authorizationResources;
+        private List<ResourceWithId> authorizationResources;
 
         private List<Long> ids;
 
-        LongFiltering(List<AuthorizationResource> authorizationResources) {
+        LongFiltering(List<ResourceWithId> authorizationResources) {
             this.authorizationResources = authorizationResources;
             this.ids = authorizationResources
                     .stream()
-                    .map(AuthorizationResource::getId)
+                    .map(ResourceWithId::getId)
                     .collect(Collectors.toList());
         }
 
         @Override
-        protected List<AuthorizationResource> getAllResources(Map<String, Object> args) {
+        protected List<ResourceWithId> getAllResources(Map<String, Object> args) {
             return authorizationResources;
         }
 

@@ -28,7 +28,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
@@ -56,7 +56,7 @@ import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
-public class DatabaseServerConfigService extends AbstractArchivistService<DatabaseServerConfig> implements ResourceCrnAndNameProvider {
+public class DatabaseServerConfigService extends AbstractArchivistService<DatabaseServerConfig> implements ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerConfigService.class);
 
@@ -161,7 +161,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
                 DatabaseServerConfig resource = getByCrn(resourceCrn);
                 if (!resource.getResourceStatus().isReleasable()) {
                     throw new ConflictException(String.format("Database server configuration has unreleasable resource "
-                        + "status %s: releasable statuses are %s", resource.getResourceStatus(), ResourceStatus.getReleasableValues()));
+                            + "status %s: releasable statuses are %s", resource.getResourceStatus(), ResourceStatus.getReleasableValues()));
                 }
 
                 Optional<DBStack> dbStack = resource.getDbStack();
@@ -297,8 +297,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         // password of a database server, but we can try to follow them anyway. A user-managed
         // database server will not have a known cloud platform, however.
         Optional<CloudPlatform> cloudPlatform = databaseServerConfig.getDbStack()
-            .map(DBStack::getCloudPlatform)
-            .map(CloudPlatform::valueOf);
+                .map(DBStack::getCloudPlatform)
+                .map(CloudPlatform::valueOf);
 
         String databaseUserName = userGeneratorService.generateUserName();
         String databasePassword = passwordGeneratorService.generatePassword(cloudPlatform);
@@ -334,8 +334,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATABASE_SERVER;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.DATABASE_SERVER);
     }
 
     @Override
@@ -358,7 +358,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.DATABASE_SERVER);
     }
 }

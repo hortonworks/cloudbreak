@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
@@ -63,7 +63,7 @@ public class FreeIpaService implements ResourceIdProvider {
         return repository.findAllByIds(ids);
     }
 
-    public List<AuthorizationResource> getAllAsAuthorizationResources(String accountId) {
+    public List<ResourceWithId> getAllAsAuthorizationResources(String accountId) {
         return repository.findAllAsAuthorizationResources(accountId);
     }
 }

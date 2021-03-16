@@ -11,7 +11,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -72,7 +72,7 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Query("SELECT e FROM Environment e WHERE e.archived = false and e.status in (:statuses)")
     List<Environment> findAllRunningAndStatusIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
 
-    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(e.id, e.resourceCrn) FROM Environment e " +
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(e.id, e.resourceCrn) FROM Environment e " +
             "WHERE e.accountId = :accountId AND e.archived = false")
-    List<AuthorizationResource> findAsAuthorizationResourcesInAccount(@Param("accountId") String accountId);
+    List<ResourceWithId> findAsAuthorizationResourcesInAccount(@Param("accountId") String accountId);
 }

@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -49,7 +49,7 @@ public class DataHubFiltering extends AbstractAuthorizationFiltering<StackViewV4
     }
 
     @Override
-    protected List<AuthorizationResource> getAllResources(Map<String, Object> args) {
+    protected List<ResourceWithId> getAllResources(Map<String, Object> args) {
         Optional<String> envCrn = resolveEnvCrn(args);
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         if (envCrn.isPresent()) {

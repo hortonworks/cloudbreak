@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.cdp.shaded.org.apache.commons.lang3.StringUtils;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
@@ -70,7 +70,7 @@ import com.sequenceiq.distrox.v1.distrox.service.SdxServiceDecorator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
-public class StackOperations implements ResourceBasedCrnProvider {
+public class StackOperations implements ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperations.class);
 
@@ -383,8 +383,8 @@ public class StackOperations implements ResourceBasedCrnProvider {
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATAHUB;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.DATAHUB);
     }
 
     @Override

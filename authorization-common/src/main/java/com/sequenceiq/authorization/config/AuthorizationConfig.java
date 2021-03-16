@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.defaults.DefaultResourceChecker;
 
 @Configuration
@@ -22,7 +22,7 @@ public class AuthorizationConfig {
     private Optional<List<DefaultResourceChecker>> defaultResourceCheckers;
 
     @Inject
-    private Optional<List<ResourceBasedCrnProvider>> resourceBasedCrnProviders;
+    private Optional<List<ResourcePropertyProvider>> resourceBasedCrnProviders;
 
     @Bean
     public Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap() {
@@ -38,11 +38,13 @@ public class AuthorizationConfig {
     }
 
     @Bean
-    public Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap() {
+    public Map<AuthorizationResourceType, ResourcePropertyProvider> resourceBasedCrnProviderMap() {
         if (resourceBasedCrnProviders.isPresent()) {
-            Map<AuthorizationResourceType, ResourceBasedCrnProvider> bean = new EnumMap<>(AuthorizationResourceType.class);
-            for (ResourceBasedCrnProvider resourceBasedCrnProvider : resourceBasedCrnProviders.get()) {
-                bean.put(resourceBasedCrnProvider.getResourceType(), resourceBasedCrnProvider);
+            Map<AuthorizationResourceType, ResourcePropertyProvider> bean = new EnumMap<>(AuthorizationResourceType.class);
+            for (ResourcePropertyProvider resourceBasedCrnProvider : resourceBasedCrnProviders.get()) {
+                if (resourceBasedCrnProvider.getSupportedAuthorizationResourceType().isPresent()) {
+                    bean.put(resourceBasedCrnProvider.getSupportedAuthorizationResourceType().get(), resourceBasedCrnProvider);
+                }
             }
             return Maps.immutableEnumMap(bean);
         } else {
