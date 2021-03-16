@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +56,12 @@ public class ClusterPublicEndpointManagementService {
     }
 
     public void downscale(Stack stack, Map<String, String> downscaledAddressesByFqdn) {
-        dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack, downscaledAddressesByFqdn));
+        if (MapUtils.isNotEmpty(downscaledAddressesByFqdn)) {
+            LOGGER.info("Downscale candidate addresses to be de-registered from PEM: {}", String.join(", ", downscaledAddressesByFqdn.keySet()));
+            dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack, downscaledAddressesByFqdn));
+        } else {
+            LOGGER.info("There is no downscale candidate address specified, no need for de-registering DNS entries at this downscale attempt.");
+        }
     }
 
     public boolean changeGateway(Stack stack, String newGatewayIp) {
