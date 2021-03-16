@@ -32,7 +32,7 @@ import org.springframework.validation.MapBindingResult;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -71,7 +71,7 @@ import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
-public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> implements ResourceCrnAndNameProvider {
+public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> implements ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
@@ -446,8 +446,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.CLUSTER_TEMPLATE;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.CLUSTER_TEMPLATE);
     }
 
     public BlueprintStatusView getStatusViewByResourceCrn(String resourceCrn) {
@@ -463,7 +463,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.CLUSTER_TEMPLATE);
     }
 }

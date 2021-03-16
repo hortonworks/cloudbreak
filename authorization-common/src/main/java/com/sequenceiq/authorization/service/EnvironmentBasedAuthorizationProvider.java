@@ -30,7 +30,7 @@ public class EnvironmentBasedAuthorizationProvider {
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     public Optional<AuthorizationRule> getAuthorizations(String resourceCrn, AuthorizationResourceAction action) {
-        ResourceBasedCrnProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
+        ResourcePropertyProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
         if (resourceBasedCrnProvider == null) {
             return Optional.empty();
         }
@@ -43,7 +43,7 @@ public class EnvironmentBasedAuthorizationProvider {
     }
 
     public Optional<AuthorizationRule> getAuthorizations(Collection<String> resourceCrns, AuthorizationResourceAction action) {
-        ResourceBasedCrnProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
+        ResourcePropertyProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
         if (resourceBasedCrnProvider == null) {
             return Optional.empty();
         }

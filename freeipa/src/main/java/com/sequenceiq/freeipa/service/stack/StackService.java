@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -29,7 +29,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
-public class StackService implements ResourceCrnAndNameProvider {
+public class StackService implements ResourcePropertyProvider {
 
     @VisibleForTesting
     Supplier<LocalDateTime> nowSupplier = LocalDateTime::now;
@@ -144,8 +144,8 @@ public class StackService implements ResourceCrnAndNameProvider {
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.ENVIRONMENT;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
     }
 
     @Override
@@ -169,7 +169,7 @@ public class StackService implements ResourceCrnAndNameProvider {
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.FREEIPA, Crn.ResourceType.ENVIRONMENT);
     }
 

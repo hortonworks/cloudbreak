@@ -28,7 +28,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.transition.Transition;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -490,12 +490,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public List<AuthorizationResource> getAsAuthorizationResourcesByEnvCrn(Long id, String environmentCrn, StackType stackType) {
+        public List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(Long id, String environmentCrn, StackType stackType) {
             return List.of();
         }
 
         @Override
-        public List<AuthorizationResource> getAsAuthorizationResources(Long id, StackType stackType) {
+        public List<ResourceWithId> getAsAuthorizationResources(Long id, StackType stackType) {
+            return List.of();
+        }
+
+        @Override
+        public List<ResourceWithId> getAsAuthorizationResourcesByCrns(Long id, StackType stackType, List<String> crns) {
             return List.of();
         }
 

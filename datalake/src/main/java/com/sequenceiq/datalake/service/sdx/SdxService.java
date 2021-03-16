@@ -38,8 +38,8 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
@@ -102,7 +102,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 
 @Service
-public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvider {
+public class SdxService implements ResourceIdProvider, ResourcePropertyProvider {
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
 
@@ -164,15 +164,15 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
-    public List<AuthorizationResource> findAsAuthorizationResorces(String accountId) {
+    public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
     }
 
-    public List<AuthorizationResource> findAsAuthorizationResorcesByEnvName(String accountId, String envName) {
+    public List<ResourceWithId> findAsAuthorizationResorcesByEnvName(String accountId, String envName) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountIdAndEnvName(accountId, envName);
     }
 
-    public List<AuthorizationResource> findAsAuthorizationResorcesByEnvCrn(String accountId, String envCrn) {
+    public List<ResourceWithId> findAsAuthorizationResorcesByEnvCrn(String accountId, String envCrn) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountIdAndEnvCrn(accountId, envCrn);
     }
 
@@ -907,8 +907,8 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATALAKE;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.DATALAKE);
     }
 
     public SdxCluster save(SdxCluster sdxCluster) {
@@ -934,7 +934,7 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.DATALAKE);
     }
 }

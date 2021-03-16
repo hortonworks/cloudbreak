@@ -37,10 +37,10 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -57,7 +58,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -70,7 +70,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @Component
-public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourceCrnAndNameProvider {
+public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourcePropertyProvider {
 
     public static final String UNDEFINED = "";
 
@@ -129,7 +129,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public List<AuthorizationResource> findAsAuthorizationResorcesInWorkspace(Long workspaceId) {
+    public List<ResourceWithId> findAsAuthorizationResorcesInWorkspace(Long workspaceId) {
         return imageCatalogRepository.findAsAuthorizationResourcesInWorkspace(workspaceId);
     }
 
@@ -616,8 +616,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.IMAGE_CATALOG;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.IMAGE_CATALOG);
     }
 
     @Override
@@ -648,7 +648,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.IMAGE_CATALOG);
     }
 }

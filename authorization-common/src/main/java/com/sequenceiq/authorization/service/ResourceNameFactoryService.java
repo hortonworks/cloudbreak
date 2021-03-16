@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +23,7 @@ public class ResourceNameFactoryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNameFactoryService.class);
 
     @Inject
-    private Optional<List<ResourceNameProvider>> resourceNameProviderList;
+    private Optional<List<ResourcePropertyProvider>> resourceNameProviderList;
 
     public Map<String, Optional<String>> getNames(Collection<String> resourceCrns) {
         Map<String, Optional<String>> result = new HashMap<>();
@@ -35,8 +34,8 @@ public class ResourceNameFactoryService {
     }
 
     private Map<String, Optional<String>> getNamesForType(Crn.ResourceType resourceType, Collection<String> resourceCrns) {
-        return resourceNameProviderList.orElse((List<ResourceNameProvider>) Collections.EMPTY_LIST).stream()
-                .filter(provider -> provider.getCrnTypes().contains(resourceType))
+        return resourceNameProviderList.orElse(List.of()).stream()
+                .filter(provider -> provider.getSupportedCrnResourceTypes().contains(resourceType))
                 .findFirst()
                 .map(provider -> provider.getNamesByCrns(resourceCrns))
                 .orElse(resourceCrns.stream().collect(Collectors.toMap(crn -> crn, crn -> Optional.empty())));

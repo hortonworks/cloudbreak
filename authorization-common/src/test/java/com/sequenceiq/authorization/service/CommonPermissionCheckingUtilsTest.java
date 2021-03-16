@@ -76,7 +76,7 @@ public class CommonPermissionCheckingUtilsTest {
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap = new EnumMap<>(AuthorizationResourceType.class);
 
     @Spy
-    private Map<AuthorizationResourceType, ResourceBasedCrnProvider> resourceBasedCrnProviderMap = new EnumMap<>(AuthorizationResourceType.class);
+    private Map<AuthorizationResourceType, ResourcePropertyProvider> resourceBasedCrnProviderMap = new EnumMap<>(AuthorizationResourceType.class);
 
     @InjectMocks
     private CommonPermissionCheckingUtils underTest;
@@ -91,7 +91,7 @@ public class CommonPermissionCheckingUtilsTest {
     private DefaultResourceChecker defaultResourceChecker;
 
     @Mock
-    private ResourceBasedCrnProvider resourceBasedCrnProvider;
+    private ResourcePropertyProvider resourceBasedCrnProvider;
 
     private AuthorizationMessageUtilsService authorizationMessageUtilsService;
 

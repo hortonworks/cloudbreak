@@ -33,10 +33,10 @@ import org.springframework.stereotype.Service;
 import com.cloudera.cdp.environments.model.CreateAWSCredentialRequest;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
@@ -62,7 +62,7 @@ import com.sequenceiq.environment.credential.verification.CredentialVerification
 import com.sequenceiq.notification.NotificationSender;
 
 @Service
-public class CredentialService extends AbstractCredentialService implements ResourceCrnAndNameProvider {
+public class CredentialService extends AbstractCredentialService implements ResourcePropertyProvider {
 
     private static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login "
             + "request!";
@@ -102,7 +102,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return repository.findAllByAccountId(accountId, getValidPlatformsForAccountId(accountId), type);
     }
 
-    public List<AuthorizationResource> findAsAuthorizationResourcesInAccountByType(String accountId, CredentialType type) {
+    public List<ResourceWithId> findAsAuthorizationResourcesInAccountByType(String accountId, CredentialType type) {
         return repository.findAsAuthorizationResourcesInAccountByType(accountId, getValidPlatformsForAccountId(accountId), type);
     }
 
@@ -391,8 +391,8 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.CREDENTIAL;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.CREDENTIAL);
     }
 
     @Override
@@ -404,7 +404,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.CREDENTIAL);
     }
 }

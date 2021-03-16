@@ -12,7 +12,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -71,9 +71,9 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> {
             @Param("accountId") String accountId,
             @Param("type") CredentialType type);
 
-    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(c.id, c.resourceCrn) FROM Credential c " +
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(c.id, c.resourceCrn) FROM Credential c " +
             "WHERE c.accountId = :accountId AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms) AND c.type = :type")
-    List<AuthorizationResource> findAsAuthorizationResourcesInAccountByType(
+    List<ResourceWithId> findAsAuthorizationResourcesInAccountByType(
             @Param("accountId") String accountId,
             @Param("cloudPlatforms") Collection<String> cloudPlatforms,
             @Param("type") CredentialType type);

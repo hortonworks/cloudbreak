@@ -14,7 +14,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -319,19 +319,28 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Set<StackListItem> findByWorkspaceIdAnStackIds(@Param("workspaceId") Long workspaceId, @Param("stackIds") List<Long> stackIds,
             @Param("stackTypes") List<StackType> stackTypes);
 
-    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.resourceCrn, s.environmentCrn) "
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "
             + "WHERE s.workspace.id = :id AND s.terminated = null "
             + "AND s.environmentCrn = :environmentCrn "
             + "AND (s.type IS null OR s.type = :stackType)")
-    List<AuthorizationResource> getAsAuthorizationResourcesByEnvCrn(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
+    List<ResourceWithId> getAsAuthorizationResourcesByEnvCrn(@Param("id") Long id, @Param("environmentCrn") String environmentCrn,
             @Param("stackType") StackType stackType);
 
-    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(s.id, s.resourceCrn, s.environmentCrn) "
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
             + "FROM Stack s "
             + "WHERE s.workspace.id = :id AND s.terminated = null "
             + "AND (s.type IS null OR s.type = :stackType)")
-    List<AuthorizationResource> getAsAuthorizationResources(@Param("id") Long id, @Param("stackType") StackType stackType);
+    List<ResourceWithId> getAsAuthorizationResources(@Param("id") Long id, @Param("stackType") StackType stackType);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.resourceCrn, s.environmentCrn) "
+            + "FROM Stack s "
+            + "WHERE s.workspace.id = :id "
+            + "AND s.resourceCrn IN :crns "
+            + "AND s.terminated = null "
+            + "AND (s.type IS null OR s.type = :stackType)")
+    List<ResourceWithId> getAsAuthorizationResourcesByCrns(@Param("id") Long id, @Param("stackType") StackType stackType,
+            @Param("crns") List<String> crns);
 
     @Modifying
     @Query("UPDATE Stack s SET s.minaSshdServiceId = :minaSshdServiceId WHERE s.id = :id")

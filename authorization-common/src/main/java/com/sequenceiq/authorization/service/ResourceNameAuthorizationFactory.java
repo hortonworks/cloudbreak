@@ -38,7 +38,7 @@ public class ResourceNameAuthorizationFactory extends TypedAuthorizationFactory<
     }
 
     public Optional<AuthorizationRule> calcAuthorization(String resourceName, AuthorizationResourceAction action) {
-        ResourceBasedCrnProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
+        ResourcePropertyProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
         String resourceCrn = resourceBasedCrnProvider.getResourceCrnByResourceName(resourceName);
         if (StringUtils.isEmpty(resourceCrn)) {
             throw new NotFoundException(String.format("Could not find resourceCrn for resource by name: %s", resourceName));

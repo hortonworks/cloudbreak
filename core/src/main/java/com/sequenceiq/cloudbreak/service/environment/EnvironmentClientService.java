@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -19,7 +19,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 
 @Service
-public class EnvironmentClientService implements ResourceBasedCrnProvider {
+public class EnvironmentClientService implements ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentClientService.class);
 
@@ -98,8 +98,8 @@ public class EnvironmentClientService implements ResourceBasedCrnProvider {
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.ENVIRONMENT;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
     }
 
     @Override

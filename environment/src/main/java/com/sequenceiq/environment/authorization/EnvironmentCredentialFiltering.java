@@ -6,7 +6,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -31,7 +31,7 @@ public class EnvironmentCredentialFiltering extends AbstractAuthorizationFilteri
     }
 
     @Override
-    public List<AuthorizationResource> getAllResources(Map<String, Object> args) {
+    public List<ResourceWithId> getAllResources(Map<String, Object> args) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialService.findAsAuthorizationResourcesInAccountByType(accountId, ENVIRONMENT);
     }

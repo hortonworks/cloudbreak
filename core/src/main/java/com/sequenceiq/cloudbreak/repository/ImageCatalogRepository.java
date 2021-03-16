@@ -11,7 +11,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 @Transactional(TxType.REQUIRED)
 public interface ImageCatalogRepository extends WorkspaceResourceRepository<ImageCatalog, Long> {
 
-    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(i.id, i.resourceCrn) FROM ImageCatalog i " +
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(i.id, i.resourceCrn) FROM ImageCatalog i " +
             "WHERE i.workspace.id = :workspaceId AND i.archived = false")
-    List<AuthorizationResource> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
+    List<ResourceWithId> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
 
     Set<ImageCatalog> findAllByWorkspaceIdAndArchived(Long workspaceId, boolean archived);
 

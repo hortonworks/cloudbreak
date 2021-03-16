@@ -10,7 +10,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -32,7 +32,7 @@ public interface RecipeViewRepository extends WorkspaceResourceRepository<Recipe
     @Query("SELECT i.resourceCrn FROM RecipeView i WHERE i.workspace.tenant.name = :tenantId")
     List<String> findAllResourceCrnsByTenantId(@Param("tenantId") String tenantId);
 
-    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(r.id, r.resourceCrn) FROM Recipe r WHERE r.workspace.id = :workspaceId " +
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(r.id, r.resourceCrn) FROM Recipe r WHERE r.workspace.id = :workspaceId " +
             "AND r.archived = false")
-    List<AuthorizationResource> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
+    List<ResourceWithId> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
 }

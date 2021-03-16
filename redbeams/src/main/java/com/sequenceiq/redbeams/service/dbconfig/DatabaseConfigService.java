@@ -27,7 +27,7 @@ import org.springframework.validation.MapBindingResult;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
@@ -49,7 +49,7 @@ import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 @Service
-public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider, ResourceCrnAndNameProvider {
+public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider, ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfigService.class);
 
@@ -90,7 +90,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         if (configToSave.getConnectionDriver() == null) {
             configToSave.setConnectionDriver(configToSave.getDatabaseVendor().connectionDriver());
             LOGGER.info("Database configuration lacked a connection driver; defaulting to {}",
-                configToSave.getConnectionDriver());
+                    configToSave.getConnectionDriver());
         }
 
         if (test) {
@@ -159,10 +159,10 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         Set<DatabaseConfig> foundDatabaseConfigs = repository.findByResourceCrnIn(parsedCrns);
         if (resourceCrns.size() != foundDatabaseConfigs.size()) {
             Set<String> notFoundDatabaseConfigs = Sets.difference(resourceCrns,
-                foundDatabaseConfigs.stream()
-                    .map(DatabaseConfig::getResourceCrn)
-                    .map(Object::toString)
-                    .collect(Collectors.toSet()));
+                    foundDatabaseConfigs.stream()
+                            .map(DatabaseConfig::getResourceCrn)
+                            .map(Object::toString)
+                            .collect(Collectors.toSet()));
             throw new NotFoundException(
                     String.format("Database(s) not found: %s", String.join(", ", notFoundDatabaseConfigs)));
         }
@@ -210,10 +210,10 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
      * deletion from the server is the only action that <code>force</code>
      * applies to.)
      *
-     * @param  databaseConfig       database to delete
-     * @param  force                whether to force deletion
-     * @param  skipDeletionOnServer whether to skip deleting the database on its server
-     * @return                      deleted database
+     * @param databaseConfig       database to delete
+     * @param force                whether to force deletion
+     * @param skipDeletionOnServer whether to skip deleting the database on its server
+     * @return deleted database
      */
     public DatabaseConfig delete(DatabaseConfig databaseConfig, boolean force, boolean skipDeletionOnServer) {
         LOGGER.info("Deleting database with name: {}", databaseConfig.getName());
@@ -288,8 +288,8 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATABASE;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.DATABASE);
     }
 
     @Override
@@ -312,7 +312,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public EnumSet<Crn.ResourceType> getCrnTypes() {
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.DATABASE);
     }
 }

@@ -18,7 +18,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourceBasedCrnProvider;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -42,7 +42,7 @@ import com.sequenceiq.periscope.service.NotFoundException;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @Component
-public class AutoScaleClusterCommonService  implements ResourceBasedCrnProvider {
+public class AutoScaleClusterCommonService  implements ResourcePropertyProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoScaleClusterCommonService.class);
 
     @Inject
@@ -139,8 +139,8 @@ public class AutoScaleClusterCommonService  implements ResourceBasedCrnProvider 
     }
 
     @Override
-    public AuthorizationResourceType getResourceType() {
-        return AuthorizationResourceType.DATAHUB;
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.DATAHUB);
     }
 
     @Override

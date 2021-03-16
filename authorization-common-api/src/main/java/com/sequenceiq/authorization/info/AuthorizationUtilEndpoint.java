@@ -8,6 +8,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.authorization.info.model.CheckResourceRightsV4Request;
 import com.sequenceiq.authorization.info.model.CheckResourceRightsV4Response;
+import com.sequenceiq.authorization.info.model.CheckRightOnResourcesV4Request;
+import com.sequenceiq.authorization.info.model.CheckRightOnResourcesV4Response;
 import com.sequenceiq.authorization.info.model.CheckRightV4Request;
 import com.sequenceiq.authorization.info.model.CheckRightV4Response;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -35,5 +37,12 @@ public interface AuthorizationUtilEndpoint {
     @ApiOperation(value = "Checking rights from UI by resource CRN", produces = MediaType.APPLICATION_JSON, notes = "Check right from UI",
             nickname = "checkRightByCrn")
     CheckResourceRightsV4Response checkRightByCrn(CheckResourceRightsV4Request checkRightByCrnV4Request);
+
+    @POST
+    @Path("check_right_on_resources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Checking right from Uluwatu by resource CRNs", produces = MediaType.APPLICATION_JSON, notes = "Check right from Uluwatu",
+            nickname = "checkRightOnResources")
+    CheckRightOnResourcesV4Response checkRightOnResources(CheckRightOnResourcesV4Request checkRightOnResourcesV4Request);
 
 }

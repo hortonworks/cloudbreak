@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -41,7 +41,7 @@ public class DataLakeFiltering extends AbstractAuthorizationFiltering<List<SdxCl
     }
 
     @Override
-    public List<AuthorizationResource> getAllResources(Map<String, Object> args) {
+    public List<ResourceWithId> getAllResources(Map<String, Object> args) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (hasParam(ENV_NAME, args)) {
             String envName = getEnvName(args);
