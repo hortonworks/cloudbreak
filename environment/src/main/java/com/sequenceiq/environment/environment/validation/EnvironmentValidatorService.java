@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.validation;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isEmpty;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -39,6 +41,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
@@ -71,6 +74,10 @@ public class EnvironmentValidatorService {
 
     private final TagValidator tagValidator;
 
+    private final EncryptionKeyUrlValidator encryptionKeyUrlValidator;
+
+    private final EntitlementService entitlementService;
+
     public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -78,7 +85,9 @@ public class EnvironmentValidatorService {
             PublicKeyValidator publicKeyValidator,
             @Value("${environment.enabledParentPlatforms}") Set<String> enabledParentPlatforms,
             @Value("${environment.enabledChildPlatforms}") Set<String> enabledChildPlatforms,
-            TagValidator tagValidator) {
+            TagValidator tagValidator,
+            EncryptionKeyUrlValidator encryptionKeyUrlValidator,
+            EntitlementService entitlementService) {
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -87,6 +96,8 @@ public class EnvironmentValidatorService {
         this.enabledChildPlatforms = enabledChildPlatforms;
         this.enabledParentPlatforms = enabledParentPlatforms;
         this.tagValidator = tagValidator;
+        this.encryptionKeyUrlValidator = encryptionKeyUrlValidator;
+        this.entitlementService = entitlementService;
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
@@ -243,6 +254,27 @@ public class EnvironmentValidatorService {
         } else {
             String message = "You don't add a(n) %s storage location, please provide a valid storage location.";
             resultBuilder.error(String.format(message, storageType));
+        }
+        return resultBuilder.build();
+    }
+
+    public ValidationResult validateEncryptionKeyUrl(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        if (AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
+            String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
+                    .map(paramsDto -> paramsDto.getAzureParametersDto())
+                    .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
+                    .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
+            if (StringUtils.isNotEmpty(encryptionKeyUrl)) {
+                if (!entitlementService.isAzureDiskSSEWithCMKEnabled(creationDto.getAccountId())) {
+                    resultBuilder.error(String.format("You have specified encryption-key-url to enable Server Side Encryption for Azure Managed disks with CMK"
+                            + "but that feature is currently not enabled for this account."
+                            + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
+                } else {
+                    ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
+                    resultBuilder.merge(validationResult);
+                }
+            }
         }
         return resultBuilder.build();
     }

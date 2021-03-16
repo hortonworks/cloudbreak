@@ -99,7 +99,7 @@ class EnvironmentCreationServiceTest {
     private EnvironmentCreationService environmentCreationServiceUnderTest;
 
     @BeforeEach
-    void setup() {
+    void setUp() {
         when(validatorService.validatePublicKey(any())).thenReturn(ValidationResult.empty());
         when(validatorService.validateTags(any())).thenReturn(ValidationResult.empty());
     }
@@ -478,6 +478,39 @@ class EnvironmentCreationServiceTest {
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
+    }
+
+    @Test
+    void testEncryptionKeyUrlValidationError() {
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform("AZURE")
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .build();
+        final Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform("AZURE");
+
+        ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
+        validationResultBuilder.error("error");
+        when(validatorService.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(entitlementService.azureEnabled(eq(ACCOUNT_ID))).thenReturn(true);
+        when(environmentService.save(any())).thenReturn(environment);
+
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
     }
 
     @Configuration
