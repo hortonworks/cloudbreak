@@ -3,9 +3,12 @@ package com.sequenceiq.environment.environment.dto;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
@@ -360,8 +363,14 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
     }
 
     @Override
-    public boolean getProxyConfigConfigured() {
-        return proxyConfig == null ? false : true;
+    public ProxyDetails getProxyDetails() {
+        ProxyDetails.Builder builder = ProxyDetails.Builder.builder();
+        if (proxyConfig != null) {
+            builder = builder.withEnabled(true)
+                    .withProtocol(proxyConfig.getProtocol())
+                    .withAuthentication(StringUtils.isNoneEmpty(proxyConfig.getUserName()));
+        }
+        return builder.build();
     }
 
     public ProxyConfig getProxyConfig() {

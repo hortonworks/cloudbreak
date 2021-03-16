@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
@@ -25,7 +26,7 @@ public interface EnvironmentDetails {
 
     Tunnel getTunnel();
 
-    boolean getProxyConfigConfigured();
+    ProxyDetails getProxyDetails();
 
     EnvironmentFeatures getEnvironmentTelemetryFeatures();
 

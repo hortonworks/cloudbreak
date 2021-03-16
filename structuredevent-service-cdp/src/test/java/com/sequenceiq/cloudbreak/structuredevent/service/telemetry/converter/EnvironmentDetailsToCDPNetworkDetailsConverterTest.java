@@ -15,6 +15,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -102,22 +103,54 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
     }
 
     @Test
-    public void testConversionProxyWhenProxyPresentedShouldReturnProxyTrue() {
-        when(environmentDetails.getProxyConfigConfigured()).thenReturn(true);
+    public void testConversionProxyWhenProxyPresentedShouldReturnProxyTrueWithAuth() {
+        ProxyDetails proxyDetails = ProxyDetails.Builder.builder()
+                .withEnabled(true)
+                .withProtocol("http")
+                .withAuthentication(true)
+                .build();
+        when(environmentDetails.getProxyDetails()).thenReturn(proxyDetails);
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
         Assert.assertEquals(true,
                 networkDetails.getProxyDetails().getProxy());
+        Assert.assertEquals("http",
+                networkDetails.getProxyDetails().getProtocol());
+        Assert.assertEquals("BASIC",
+                networkDetails.getProxyDetails().getAuthentication());
+    }
+
+    @Test
+    public void testConversionProxyWhenProxyPresentedShouldReturnProxyTrueNoAuth() {
+        ProxyDetails proxyDetails = ProxyDetails.Builder.builder()
+                .withEnabled(true)
+                .withProtocol("https")
+                .withAuthentication(false)
+                .build();
+        when(environmentDetails.getProxyDetails()).thenReturn(proxyDetails);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assert.assertEquals(true,
+                networkDetails.getProxyDetails().getProxy());
+        Assert.assertEquals("https",
+                networkDetails.getProxyDetails().getProtocol());
+        Assert.assertEquals("NONE",
+                networkDetails.getProxyDetails().getAuthentication());
     }
 
     @Test
     public void testConversionProxyWhenProxyNotPresentedShouldReturnProxyFalse() {
-        when(environmentDetails.getProxyConfigConfigured()).thenReturn(false);
+        when(environmentDetails.getProxyDetails()).thenReturn(ProxyDetails.Builder.builder().build());
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
         Assert.assertEquals(false,
                 networkDetails.getProxyDetails().getProxy());
+        Assert.assertEquals("",
+                networkDetails.getProxyDetails().getProtocol());
+        Assert.assertEquals("",
+                networkDetails.getProxyDetails().getAuthentication());
     }
 }

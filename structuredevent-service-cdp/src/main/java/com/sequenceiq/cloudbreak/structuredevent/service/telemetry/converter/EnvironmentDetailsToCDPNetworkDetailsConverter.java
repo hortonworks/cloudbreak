@@ -14,6 +14,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -53,15 +54,21 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
             cdpNetworkDetails.setPublicEndpointAccessGateway(network.getPublicEndpointAccessGateway() != null ?
                     network.getPublicEndpointAccessGateway().name() : PublicEndpointAccessGateway.DISABLED.name());
         }
-
         cdpNetworkDetails.setSecurityAccessType(defaultIfEmpty(environmentDetails.getSecurityAccessType(), ""));
-
-        UsageProto.CDPProxyDetails.Builder cdpProxyDetails = UsageProto.CDPProxyDetails.newBuilder();
-        cdpProxyDetails.setProxy(environmentDetails.getProxyConfigConfigured());
-        cdpNetworkDetails.setProxyDetails(cdpProxyDetails.build());
+        cdpNetworkDetails.setProxyDetails(convertProxy(environmentDetails.getProxyDetails()));
 
         UsageProto.CDPNetworkDetails ret = cdpNetworkDetails.build();
         LOGGER.debug("Converted CDPNetworkDetails: {}", ret);
         return ret;
+    }
+
+    private UsageProto.CDPProxyDetails convertProxy(ProxyDetails proxyDetails) {
+        UsageProto.CDPProxyDetails.Builder cdpProxyDetailsBuilder = UsageProto.CDPProxyDetails.newBuilder();
+        if (proxyDetails != null) {
+            cdpProxyDetailsBuilder.setProxy(proxyDetails.isEnabled());
+            cdpProxyDetailsBuilder.setProtocol(proxyDetails.getProtocol());
+            cdpProxyDetailsBuilder.setAuthentication(proxyDetails.getAuthentication());
+        }
+        return cdpProxyDetailsBuilder.build();
     }
 }
