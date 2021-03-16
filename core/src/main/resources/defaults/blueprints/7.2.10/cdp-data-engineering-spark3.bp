@@ -305,10 +305,6 @@
             "base": true,
             "configs": [
               {
-                "name": "hive_server2_transport_mode",
-                "value": "http"
-              },
-              {
                 "name": "hiveserver2_mv_files_thread",
                 "value": 20
               },
