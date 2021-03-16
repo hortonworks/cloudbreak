@@ -91,6 +91,7 @@ workflows:
                 - rc-2.4
                 - rc-2.7
                 - rc-2.9
+                - release
       - upload-tagged:
           filters:
             branches:
@@ -104,6 +105,7 @@ workflows:
       - release:
           filters:
             branches:
-              only: release
+              only: 
+                - release
           requires:
             - build
