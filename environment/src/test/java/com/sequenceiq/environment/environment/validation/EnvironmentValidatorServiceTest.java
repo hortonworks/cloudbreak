@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.validation;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -18,11 +19,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -33,15 +34,20 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,11 +75,16 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private TagValidator tagValidator;
 
-    @InjectMocks
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private EncryptionKeyUrlValidator encryptionKeyUrlValidator;
+
     private EnvironmentValidatorService underTest;
 
     @BeforeEach
-    public void initTests() {
+    public void setUp() {
         underTest = new EnvironmentValidatorService(
                 networkCreationValidator,
                 platformParameterService,
@@ -82,7 +93,9 @@ class EnvironmentValidatorServiceTest {
                 publicKeyValidator,
                 singleton(CloudPlatform.AWS.name()),
                 singleton(CloudPlatform.YARN.name()),
-                tagValidator);
+                tagValidator,
+                encryptionKeyUrlValidator,
+                entitlementService);
     }
 
     @Test
@@ -342,6 +355,76 @@ class EnvironmentValidatorServiceTest {
 
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
         assertEquals("1. 'GCP' platform is not supported for child environment.", validationResult.getFormattedErrors());
+    }
+
+    @Test
+    void shouldFailIfEncryptionKeyUrlSpecifiedAndEntitlementAndWrongFormat() {
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withCloudPlatform("AZURE")
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl("Dummy-key-url")
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+
+        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        validationResultBuilder.error("error");
+        when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        assertTrue(validationResult.hasError());
+    }
+
+    @Test
+    void shouldFailIfEncryptionKeyUrlSpecifiedAndNotEntitlement() {
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withCloudPlatform("AZURE")
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl("Dummy-key-url")
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(false);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        assertTrue(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateEncryptionKeyUrlNotSpecified() {
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withCloudPlatform("AZURE")
+                .build();
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        assertFalse(validationResult.hasError());
+    }
+
+    @Test
+    void testValidateEncryptionKeyUrlSpecifiedAndEntitlement() {
+        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withCloudPlatform("AZURE")
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl("https://someVault.vault.azure.net/keys/someKey/someKeyVersion")
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
+        when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
+        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
+        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(creationDto);
+        assertFalse(validationResult.hasError());
     }
 
     @ParameterizedTest
