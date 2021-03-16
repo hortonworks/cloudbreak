@@ -8,6 +8,8 @@ public class SdxRepairRequest {
 
     private List<String> hostGroupNames;
 
+    private List<String> nodesIds;
+
     public String getHostGroupName() {
         return hostGroupName;
     }
@@ -24,11 +26,20 @@ public class SdxRepairRequest {
         this.hostGroupNames = hostGroupNames;
     }
 
+    public List<String> getNodesIds() {
+        return nodesIds;
+    }
+
+    public void setNodesIds(List<String> nodesIds) {
+        this.nodesIds = nodesIds;
+    }
+
     @Override
     public String toString() {
         return "SdxRepairRequest{" +
                 "hostGroupName='" + hostGroupName + '\'' +
                 ", hostGroupNames=" + hostGroupNames +
+                ", nodesIds=" + nodesIds +
                 '}';
     }
 }
