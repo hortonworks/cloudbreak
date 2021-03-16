@@ -53,6 +53,10 @@ message Event {
     AltusIamAccessKeyCreated altusIamAccessKeyCreated = 18;
     // An Altus access key was deleted.
     AltusIamAccessKeyDeleted altusIamAccessKeyDeleted = 19;
+    // An Altus access token was created.
+    AltusIamAccessTokenCreated altusIamAccessTokenCreated = 38;
+    // An Altus access token was deleted.
+    AltusIamAccessTokenDeleted altusIamAccessTokenDeleted = 39;
     // A CDP Datalake cluster was requested to create.
     CDPDatalakeClusterRequested cdpDatalakeClusterRequested = 22;
     // A CDP Datalake cluster's status changed.
@@ -225,6 +229,26 @@ message AltusIamAccessKeyCreated {
 message AltusIamAccessKeyDeleted {
   // The Altus access key ID of the deleted access key.
   string accessKeyId = 1;
+}
+
+// Generated when an IAM access token has been created.
+message AltusIamAccessTokenCreated {
+  // The Altus access token ID of the new actor. This uniquely identifies
+  // the access token within Altus. This ID is immutable.
+  string accessTokenId = 1;
+  // The Altus account ID of the access token.
+  string accountId = 2;
+  // The CRN of the actor with which this access token is associated. This will be
+  // either an IAM user or an IAM machine user.
+  string actorCrn = 3;
+  // The CRN for the access token.
+  string crn = 4;
+}
+
+// Generated when an IAM access token has been deleted.
+message AltusIamAccessTokenDeleted {
+  // The access token Id of the deleted access token.
+  string accessTokenId = 1;
 }
 
 // The type of a CDP environment.
@@ -506,14 +530,14 @@ message CDPCMLWorkspaceStatusChanged {
 // The status of a CDP request
 message CDPRequestProcessingStep {
   enum Value {
-      // A value indicating the enum is unset.
-      UNSET = 0;
-      // First step of the request processing
-      INIT = 1;
-      // Last step of the request processing
-      FINAL = 2;
-      // Indicating that the event is a sync event
-      SYNC = 3;
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // First step of the request processing
+    INIT = 1;
+    // Last step of the request processing
+    FINAL = 2;
+    // Indicating that the event is a sync event
+    SYNC = 3;
   }
 }
 
@@ -630,57 +654,57 @@ message CDPClusterStatus {
 }
 
 message CDPOperationDetails {
-    // The CDP account id of the event
-    string accountId = 1;
-    // The CRN for the resource
-    string resourceCrn = 2;
-    // Name of the resource
-    string resourceName = 3;
-    // User CRN initiated this event (it might be internal actor)
-    string initiatorCrn = 4;
-    // Version of the application that created this event
-    string applicationVersion = 5;
-    // Request processing type
-    CDPRequestProcessingStep.Value cdpRequestProcessingStep = 6;
-    // Flow UUID, to make it easy to identify which flow has triggered this event
-    string flowId = 7;
-    // Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
-    string flowChainId = 8;
-    // Flow state when this event is written
-    string flowState = 9;
-    // Correlation ID to correlate events written together
-    string correlationId = 10;
-    // Cloud provider identifier
-    CDPEnvironmentsEnvironmentType.Value environmentType = 11;
+  // The CDP account id of the event
+  string accountId = 1;
+  // The CRN for the resource
+  string resourceCrn = 2;
+  // Name of the resource
+  string resourceName = 3;
+  // User CRN initiated this event (it might be internal actor)
+  string initiatorCrn = 4;
+  // Version of the application that created this event
+  string applicationVersion = 5;
+  // Request processing type
+  CDPRequestProcessingStep.Value cdpRequestProcessingStep = 6;
+  // Flow UUID, to make it easy to identify which flow has triggered this event
+  string flowId = 7;
+  // Flow Chain UUID, to make it easy to identify which flowchain has triggered this event
+  string flowChainId = 8;
+  // Flow state when this event is written
+  string flowState = 9;
+  // Correlation ID to correlate events written together
+  string correlationId = 10;
+  // Cloud provider identifier
+  CDPEnvironmentsEnvironmentType.Value environmentType = 11;
 }
 
 message CDPEnvironmentDetails {
-    // Cloud provider identifier
-    CDPEnvironmentsEnvironmentType.Value environmentType = 1;
-    // Region of the deployment
-    string region = 2;
-    // Number of availability zones used in the environment
-    int32 numberOfAvailabilityZones = 3;
-    // Number of availability zones used in the environment
-    string availabilityZones = 4;
-    // Network metadata
-    CDPNetworkDetails networkDetails = 5;
-    // AWS specific details of the environment
-    CDPEnvironmentAwsDetails awsDetails = 6;
-    // Azure specific details of the environment
-    CDPEnvironmentAzureDetails azureDetails = 7;
+  // Cloud provider identifier
+  CDPEnvironmentsEnvironmentType.Value environmentType = 1;
+  // Region of the deployment
+  string region = 2;
+  // Number of availability zones used in the environment
+  int32 numberOfAvailabilityZones = 3;
+  // Number of availability zones used in the environment
+  string availabilityZones = 4;
+  // Network metadata
+  CDPNetworkDetails networkDetails = 5;
+  // AWS specific details of the environment
+  CDPEnvironmentAwsDetails awsDetails = 6;
+  // Azure specific details of the environment
+  CDPEnvironmentAzureDetails azureDetails = 7;
 }
 
 message CDPFreeIPADetails {
-    // Number of nodes
-    int32 nodes = 1;
-    // Shows whether spot is used for any FreeIPA nodes
-    bool spot = 2;
+  // Number of nodes
+  int32 nodes = 1;
+  // Shows whether spot is used for any FreeIPA nodes
+  bool spot = 2;
 }
 
 // Azure specific environment details
 message CDPEnvironmentAzureDetails {
-    bool singleResourceGroup = 1;
+  bool singleResourceGroup = 1;
 }
 
 // AWS specific environment details
@@ -688,50 +712,50 @@ message CDPEnvironmentAwsDetails {
 }
 
 message CDPEnvironmentTelemetryFeatureDetails {
-    // Workload analytics is enabled on this environment
-    string workloadAnalytics = 1;
-    // Cluster log collection is enabled on this environment
-    string clusterLogsCollection = 2;
+  // Workload analytics is enabled on this environment
+  string workloadAnalytics = 1;
+  // Cluster log collection is enabled on this environment
+  string clusterLogsCollection = 2;
 }
 
 message CDPProxyDetails {
-    // Shows whether a proxy is used
-    bool proxy = 1;
-    // Shows whether it is http or https
-    string protocol = 2;
-    // Shows whether NONE or BASIC auth
-    string authentication = 3;
+  // Shows whether a proxy is used
+  bool proxy = 1;
+  // Shows whether it is http or https
+  string protocol = 2;
+  // Shows whether NONE or BASIC auth
+  string authentication = 3;
 }
 
 message CDPNetworkDetails {
-    // Whether the network is created by CDP CP or by the customer
-    string networkType = 1;
-    // How CDP CP connects to the environment
-    string connectivity = 2;
-    // How many public subnets are used
-    int32 numberPublicSubnets = 3;
-    // How many public subnets are used
-    int32 numberPrivateSubnets = 4;
-    // Private endpoints are created for this particular environment
-    string serviceEndpointCreation = 5;
-    // Metadata around what type of proxy is used in this environment
-    CDPProxyDetails proxyDetails = 6;
-    // Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
-    string publicEndpointAccessGateway = 7;
-    // Whether the security groups are created by CDP CP or by the customer
-    string securityAccessType = 8;
+  // Whether the network is created by CDP CP or by the customer
+  string networkType = 1;
+  // How CDP CP connects to the environment
+  string connectivity = 2;
+  // How many public subnets are used
+  int32 numberPublicSubnets = 3;
+  // How many public subnets are used
+  int32 numberPrivateSubnets = 4;
+  // Private endpoints are created for this particular environment
+  string serviceEndpointCreation = 5;
+  // Metadata around what type of proxy is used in this environment
+  CDPProxyDetails proxyDetails = 6;
+  // Public Endpoint Access Gateway (aka semi-private networks) are enabled or not
+  string publicEndpointAccessGateway = 7;
+  // Whether the security groups are created by CDP CP or by the customer
+  string securityAccessType = 8;
 }
 
 // Generated when Environment creation has been requested or finished
 message CDPEnvironmentRequested {
-    // Operation metadata
-    CDPOperationDetails operationDetails = 1;
-    // Environment metadata
-    CDPEnvironmentDetails environmentDetails = 2;
-    // Data collection metadata
-    CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 3;
-    // FreeIPA metadata
-    CDPFreeIPADetails freeIPA = 4;
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // Environment metadata
+  CDPEnvironmentDetails environmentDetails = 2;
+  // Data collection metadata
+  CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 3;
+  // FreeIPA metadata
+  CDPFreeIPADetails freeIPA = 4;
 }
 
 // Generated when Environment status has changed
@@ -803,12 +827,12 @@ message CDPStatusDetails {
 
 // Generated when Datalake creation has been requested or finished
 message CDPDatalakeRequested {
-    // Operation metadata
-    CDPOperationDetails operationDetails = 1;
-    // Environment Crn
-    string environmentCrn = 2;
-    // Details for Datalake
-    CDPClusterDetails clusterDetails = 3;
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // Environment Crn
+  string environmentCrn = 2;
+  // Details for Datalake
+  CDPClusterDetails clusterDetails = 3;
 }
 
 // Generated when Datalake status has changed
@@ -825,12 +849,12 @@ message CDPDatalakeStatusChanged {
 
 // Generated when Datahub creation has been requested or finished
 message CDPDatahubRequested {
-    // Operation metadata
-    CDPOperationDetails operationDetails = 1;
-    // Environment Crn
-    string environmentCrn = 2;
-    // Details for datahub
-    CDPClusterDetails clusterDetails = 3;
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // Environment Crn
+  string environmentCrn = 2;
+  // Details for datahub
+  CDPClusterDetails clusterDetails = 3;
 }
 
 // Generated when Datahub status has changed
@@ -846,6 +870,10 @@ message CDPDatahubStatusChanged {
 }
 
 message CDPSyncDetails {
+  // Status of the stack
+  string status = 1;
+  // Detailed status of the stack
+  string detailedStatus = 2;
   // The timestamp of the start of the cluster creation
   uint64 clusterCreationStarted = 3;
   // The timestamp of the finish of the cluster creation
