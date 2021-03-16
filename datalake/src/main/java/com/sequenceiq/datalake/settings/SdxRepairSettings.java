@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.settings;
 
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -11,26 +13,42 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 public class SdxRepairSettings {
 
-    private List<String> hostGroupNames;
+    private List<String> hostGroupNames = List.of();
+
+    private List<String> nodeIds = List.of();
 
     private SdxRepairSettings() {
     }
 
     public static SdxRepairSettings from(SdxRepairRequest request) {
-        if (StringUtils.isNotBlank(request.getHostGroupName()) && CollectionUtils.isNotEmpty(request.getHostGroupNames())) {
-            throw new BadRequestException("Please send only one hostGroupName in the 'hostGroupName' field " +
-                    "or multiple hostGroups in the 'hostGroupNames' fields");
+        if (StringUtils.isBlank(request.getHostGroupName())
+                && CollectionUtils.isEmpty(request.getHostGroupNames())
+                && CollectionUtils.isEmpty(request.getNodesIds())) {
+            throw new BadRequestException("Please select the repairable host groups or nodes.");
+        }
+        if (Stream.of(StringUtils.isNotBlank(request.getHostGroupName()),
+                CollectionUtils.isNotEmpty(request.getHostGroupNames()),
+                CollectionUtils.isNotEmpty(request.getNodesIds()))
+                .filter(Predicate.isEqual(true)).count() > 1) {
+            throw new BadRequestException("Please select one host group ('hostGroupName'), multiple host groups ('hostGroupNames')" +
+                    ", or nodes ('nodesIds').");
         }
         SdxRepairSettings settings = new SdxRepairSettings();
         if (Strings.isNotEmpty(request.getHostGroupName())) {
             settings.hostGroupNames = List.of(request.getHostGroupName());
-        } else {
+        } else if (CollectionUtils.isNotEmpty(request.getHostGroupNames())) {
             settings.hostGroupNames = request.getHostGroupNames();
+        } else {
+            settings.nodeIds = request.getNodesIds();
         }
         return settings;
     }
 
     public List<String> getHostGroupNames() {
         return hostGroupNames;
+    }
+
+    public List<String> getNodeIds() {
+        return nodeIds;
     }
 }

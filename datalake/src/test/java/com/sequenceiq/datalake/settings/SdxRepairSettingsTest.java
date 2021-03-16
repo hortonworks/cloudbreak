@@ -13,11 +13,43 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 class SdxRepairSettingsTest {
 
     @Test
-    void throwsExceptionWhenBothParametersAreSpecified() {
+    void throwsExceptionWhenNoParamsAreSpecified() {
+        SdxRepairRequest request = new SdxRepairRequest();
+        request.setHostGroupName("");
+        request.setHostGroupNames(List.of());
+        request.setNodesIds(List.of());
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> SdxRepairSettings.from(request));
+        assertEquals("Please select the repairable host groups or nodes.", exception.getMessage());
+    }
+
+    @Test
+    void throwsExceptionWhenHostGroupAndHostGroupsAreSpecified() {
         SdxRepairRequest request = new SdxRepairRequest();
         request.setHostGroupName("hostgroup1");
         request.setHostGroupNames(List.of("hg1", "hg2"));
-        assertThrows(BadRequestException.class, () -> SdxRepairSettings.from(request));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> SdxRepairSettings.from(request));
+        assertEquals("Please select one host group ('hostGroupName'), multiple host groups ('hostGroupNames'), or nodes ('nodesIds').",
+                exception.getMessage());
+    }
+
+    @Test
+    void throwsExceptionWhenHostGroupAndNodeIdsAreSpecified() {
+        SdxRepairRequest request = new SdxRepairRequest();
+        request.setHostGroupName("hg1");
+        request.setNodesIds(List.of("node1", "node2"));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> SdxRepairSettings.from(request));
+        assertEquals("Please select one host group ('hostGroupName'), multiple host groups ('hostGroupNames'), or nodes ('nodesIds').",
+                exception.getMessage());
+    }
+
+    @Test
+    void throwsExceptionWhenHostGroupsAndNodeIdsAreSpecified() {
+        SdxRepairRequest request = new SdxRepairRequest();
+        request.setHostGroupNames(List.of("hg1", "hg2"));
+        request.setNodesIds(List.of("node1", "node2"));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> SdxRepairSettings.from(request));
+        assertEquals("Please select one host group ('hostGroupName'), multiple host groups ('hostGroupNames'), or nodes ('nodesIds').",
+                exception.getMessage());
     }
 
     @Test
@@ -25,7 +57,8 @@ class SdxRepairSettingsTest {
         SdxRepairRequest request = new SdxRepairRequest();
         request.setHostGroupNames(List.of("hg1", "hg2"));
         SdxRepairSettings settings = SdxRepairSettings.from(request);
-        assertEquals("hg1", settings.getHostGroupNames().get(0));
+        assertEquals(List.of("hg1", "hg2"), settings.getHostGroupNames());
+        assertEquals(List.of(), settings.getNodeIds());
     }
 
     @Test
@@ -33,6 +66,16 @@ class SdxRepairSettingsTest {
         SdxRepairRequest request = new SdxRepairRequest();
         request.setHostGroupName("hostgroup1");
         SdxRepairSettings settings = SdxRepairSettings.from(request);
-        assertEquals("hostgroup1", settings.getHostGroupNames().get(0));
+        assertEquals(List.of("hostgroup1"), settings.getHostGroupNames());
+        assertEquals(List.of(), settings.getNodeIds());
+    }
+
+    @Test
+    void setsCorrectNodeIdsWhenNodeIdsAreSpecified() {
+        SdxRepairRequest request = new SdxRepairRequest();
+        request.setNodesIds(List.of("node1", "node2"));
+        SdxRepairSettings settings = SdxRepairSettings.from(request);
+        assertEquals(List.of("node1", "node2"), settings.getNodeIds());
+        assertEquals(List.of(), settings.getHostGroupNames());
     }
 }

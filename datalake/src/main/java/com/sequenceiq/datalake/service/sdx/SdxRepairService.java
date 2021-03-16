@@ -11,6 +11,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairNodesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
@@ -113,7 +115,14 @@ public class SdxRepairService {
 
     private ClusterRepairV4Request createRepairRequest(SdxRepairSettings sdxRepairSettings) {
         ClusterRepairV4Request repairRequest = new ClusterRepairV4Request();
-        repairRequest.setHostGroups(sdxRepairSettings.getHostGroupNames());
+        if (CollectionUtils.isNotEmpty(sdxRepairSettings.getHostGroupNames())) {
+            repairRequest.setHostGroups(sdxRepairSettings.getHostGroupNames());
+        } else {
+            ClusterRepairNodesV4Request nodes = new ClusterRepairNodesV4Request();
+            nodes.setDeleteVolumes(false);
+            nodes.setIds(sdxRepairSettings.getNodeIds());
+            repairRequest.setNodes(nodes);
+        }
         repairRequest.setRestartServices(true);
         return repairRequest;
     }
