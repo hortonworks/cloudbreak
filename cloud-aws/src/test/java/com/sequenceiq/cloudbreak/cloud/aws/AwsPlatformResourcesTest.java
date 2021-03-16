@@ -516,5 +516,4 @@ public class AwsPlatformResourcesTest {
         CloudDatabaseServerSslCertificate sslCertificate = match.get();
         assertThat(sslCertificate.getCertificateType()).isEqualTo(CloudDatabaseServerSslCertificateType.ROOT);
     }
-
 }
