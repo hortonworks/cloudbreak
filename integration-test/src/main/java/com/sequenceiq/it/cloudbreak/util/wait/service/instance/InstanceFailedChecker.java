@@ -73,7 +73,6 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
     public boolean exitWaiting(T waitObject) {
         String hostGroup = waitObject.getHostGroup();
         try {
-            waitObject.fetchData();
             Optional<InstanceGroupV4Response> instanceGroup = waitObject.getInstanceGroup();
             if (instanceGroup.isEmpty()) {
                 LOGGER.info("'{}' instance group was not found. Exit waiting!", hostGroup);
@@ -95,7 +94,6 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        waitObject.fetchData();
         return waitObject.actualStatuses();
     }
 }

@@ -44,7 +44,6 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
     public void handleTimeout(T waitObject) {
         String name = waitObject.getName();
         try {
-            waitObject.fetchData();
             Map<String, String> actualStatuses = waitObject.actualStatuses();
             Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
             throw new TestFailException(String.format("Wait operation timed out, '%s' %s has not been failed. Status: '%s' " +
@@ -64,7 +63,6 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
     @Override
     public boolean exitWaiting(T waitObject) {
         try {
-            waitObject.fetchData();
             String name = waitObject.getName();
             if (waitObject.actualStatuses().isEmpty()) {
                 LOGGER.info("'{}' {} was not found. Exit waiting!", waitObject.getClass().getSimpleName(), name);
@@ -81,7 +79,6 @@ public class WaitFailedChecker<T extends WaitObject> extends ExceptionChecker<T>
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        waitObject.fetchData();
         return waitObject.actualStatuses();
     }
 }

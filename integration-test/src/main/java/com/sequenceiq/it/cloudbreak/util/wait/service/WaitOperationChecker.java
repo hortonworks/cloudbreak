@@ -49,7 +49,6 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
     @Override
     public void handleTimeout(T waitObject) {
         try {
-            waitObject.fetchData();
             String name = waitObject.getName();
             Map<String, String> actualStatuses = waitObject.actualStatuses();
             if (actualStatuses.isEmpty()) {
@@ -73,7 +72,6 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
     @Override
     public boolean exitWaiting(T waitObject) {
         try {
-            waitObject.fetchData();
             String name = waitObject.getName();
             Map<String, String> actualStatuses = waitObject.actualStatuses();
             if (actualStatuses.isEmpty()) {
@@ -84,6 +82,7 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
                 LOGGER.info("'{}' the polled resource entered into creation failed state. Exit waiting!", name);
                 return true;
             }
+            return waitObject.isFailed();
         } catch (ProcessingException clientException) {
             LOGGER.error("Exit waiting! Failed to get cluster due to API client exception: {}", clientException.getMessage(), clientException);
         } catch (Exception e) {
@@ -95,7 +94,6 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        waitObject.fetchData();
         return waitObject.actualStatuses();
     }
 }

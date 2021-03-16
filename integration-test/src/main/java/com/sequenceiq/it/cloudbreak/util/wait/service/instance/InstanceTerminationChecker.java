@@ -46,7 +46,6 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
     @Override
     public void handleTimeout(T waitObject) {
         try {
-            waitObject.fetchData();
             InstanceMetaDataV4Response instanceMetaDataV4Response = waitObject.getInstanceMetadata();
             InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
             String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
@@ -69,7 +68,6 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
     @Override
     public boolean exitWaiting(T waitObject) {
         try {
-            waitObject.fetchData();
             if (waitObject.isDeleteFailed()) {
                 return false;
             }
@@ -86,7 +84,6 @@ public class InstanceTerminationChecker<T extends InstanceWaitObject> extends Ex
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        waitObject.fetchData();
         return waitObject.actualStatuses();
     }
 }

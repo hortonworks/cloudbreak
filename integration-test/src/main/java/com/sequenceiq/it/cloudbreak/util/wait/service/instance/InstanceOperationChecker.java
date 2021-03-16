@@ -55,7 +55,6 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
     @Override
     public void handleTimeout(T waitObject) {
         try {
-            waitObject.fetchData();
             InstanceMetaDataV4Response instanceMetaDataV4Response = waitObject.getInstanceMetadata();
             InstanceStatus instanceStatus = instanceMetaDataV4Response.getInstanceStatus();
             String instanceGroupName = instanceMetaDataV4Response.getInstanceGroup();
@@ -77,7 +76,6 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
     @Override
     public boolean exitWaiting(T waitObject) {
         try {
-            waitObject.fetchData();
             InstanceStatus instanceStatus = waitObject.getInstanceStatus();
             if (instanceStatus.equals(ORCHESTRATION_FAILED)) {
                 return true;
@@ -95,7 +93,6 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
 
     @Override
     public Map<String, String> getStatuses(T waitObject) {
-        waitObject.fetchData();
         return waitObject.actualStatuses();
     }
 }

@@ -45,7 +45,6 @@ public class WaitTerminationChecker<T extends WaitObject> extends ExceptionCheck
     @Override
     public void handleTimeout(T waitObject) {
         try {
-            waitObject.fetchData();
             String name = waitObject.getName();
             Map<String, String> actualStatuses = waitObject.actualStatuses();
             Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
@@ -65,7 +64,6 @@ public class WaitTerminationChecker<T extends WaitObject> extends ExceptionCheck
     @Override
     public boolean exitWaiting(T waitObject) {
         try {
-            waitObject.fetchData();
             if (waitObject.isDeleteFailed()) {
                 return false;
             }
@@ -83,7 +81,6 @@ public class WaitTerminationChecker<T extends WaitObject> extends ExceptionCheck
     public Map<String, String> getStatuses(T waitObject) {
         String name = waitObject.getName();
         try {
-            waitObject.fetchData();
             return waitObject.actualStatuses();
         } catch (NotFoundException e) {
             LOGGER.warn("No cluster found with name '{}'! It has been deleted successfully.", name, e);
