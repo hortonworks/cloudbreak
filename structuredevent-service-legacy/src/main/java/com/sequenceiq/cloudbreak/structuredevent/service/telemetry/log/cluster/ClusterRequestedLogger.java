@@ -5,6 +5,8 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCluste
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.CREATE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DOWNSCALE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DOWNSCALE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.REPAIR_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UPSCALE_FAILED;
@@ -35,7 +37,8 @@ public class ClusterRequestedLogger implements LegacyTelemetryEventLogger {
     private static final EnumSet<UsageProto.CDPClusterStatus.Value> TRIGGER_CASES = EnumSet.of(CREATE_STARTED, CREATE_FINISHED, CREATE_FAILED,
             UPGRADE_FINISHED, UPGRADE_FAILED,
             UPSCALE_FINISHED, UPSCALE_FAILED,
-            DOWNSCALE_FINISHED, DOWNSCALE_FAILED);
+            DOWNSCALE_FINISHED, DOWNSCALE_FAILED,
+            REPAIR_FINISHED, REPAIR_FAILED);
 
     @Inject
     private UsageReporter usageReporter;

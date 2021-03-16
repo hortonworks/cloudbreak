@@ -38,10 +38,15 @@ public class FlowChains {
     private final Map<String, String> flowChainParentMap = new ConcurrentHashMap<>();
 
     public void putFlowChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue flowChain) {
-        flowChainMap.put(flowChainId, flowChain);
         if (parentFlowChainId != null) {
             flowChainParentMap.put(flowChainId, parentFlowChainId);
+            FlowTriggerEventQueue parentFlowChain = flowChainMap.get(parentFlowChainId);
+            if (parentFlowChain != null) {
+                flowChain = new FlowTriggerEventQueue(parentFlowChain.getFlowChainName() + "/" + flowChain.getFlowChainName(),
+                        flowChain.getQueue());
+            }
         }
+        flowChainMap.put(flowChainId, flowChain);
     }
 
     public void removeFlowChain(String flowChainId) {
