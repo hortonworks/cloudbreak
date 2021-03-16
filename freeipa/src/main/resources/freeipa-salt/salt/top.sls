@@ -18,6 +18,7 @@ base:
              - freeipa.backups
              - freeipa.healthagent
              - nodestatus
+             - freeipa.patch-pki-tomcat
 
            'roles:freeipa_replica':
              - match: grain
@@ -26,6 +27,7 @@ base:
              - freeipa.backups
              - freeipa.healthagent
              - nodestatus
+             - freeipa.patch-pki-tomcat
 
            'roles:freeipa_primary_replacement':
              - match: grain
@@ -35,3 +37,4 @@ base:
              - freeipa.backups
              - freeipa.healthagent
              - nodestatus
+             - freeipa.patch-pki-tomcat
