@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
@@ -52,18 +53,24 @@ public class CredentialVerificationHandler implements CloudPlatformEventHandler<
                 LOGGER.warn(errorMessage, e);
                 cloudCredentialStatus = new CloudCredentialStatus(request.getCloudCredential(), CredentialStatus.FAILED, e, errorMessage);
             }
-            CredentialVerificationResult credentialVerificationResult;
-            if (cloudCredentialStatus.getException() == null) {
-                credentialVerificationResult = new CredentialVerificationResult(request.getResourceId(), cloudCredentialStatus);
-            } else {
-                credentialVerificationResult = new CredentialVerificationResult(cloudCredentialStatus.getStatusReason(), cloudCredentialStatus.getException(),
-                        request.getResourceId(), cloudCredentialStatus);
-            }
+            CredentialVerificationResult credentialVerificationResult = createCredentialVerificationResult(request, cloudCredentialStatus);
             request.getResult().onNext(credentialVerificationResult);
             LOGGER.debug("Credential verification has finished");
         } catch (RuntimeException e) {
             request.getResult().onNext(new CredentialVerificationResult(e.getMessage(), e, request.getResourceId()));
         }
+    }
+
+    @VisibleForTesting
+    CredentialVerificationResult createCredentialVerificationResult(CredentialVerificationRequest request, CloudCredentialStatus cloudCredentialStatus) {
+        CredentialVerificationResult credentialVerificationResult;
+        if (cloudCredentialStatus.getStatus() != CredentialStatus.FAILED) {
+            credentialVerificationResult = new CredentialVerificationResult(request.getResourceId(), cloudCredentialStatus);
+        } else {
+            credentialVerificationResult = new CredentialVerificationResult(cloudCredentialStatus.getStatusReason(), cloudCredentialStatus.getException(),
+                    request.getResourceId(), cloudCredentialStatus);
+        }
+        return credentialVerificationResult;
     }
 
     private CredentialVerificationContext createVerificationContext(CredentialVerificationRequest request) {
