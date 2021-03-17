@@ -121,7 +121,7 @@ public class AzureResourceConnectorTest {
     }
 
     @Test
-    public void testWhenTemplateDeploymentDoesNotExistsThenComputeResourceServiceBuildsTheTheResources() {
+    public void testWhenTemplateDeploymentDoesNotExistsThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
 
@@ -135,7 +135,7 @@ public class AzureResourceConnectorTest {
     }
 
     @Test
-    public void testWhenTemplateDeploymentExistsThenComputeResourceServiceBuildsTheTheResources() {
+    public void testWhenTemplateDeploymentExistsThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
 

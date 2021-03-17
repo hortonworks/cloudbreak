@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -34,7 +32,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -168,21 +165,6 @@ public class AzureCloudResourceServiceTest {
         assertEquals(INSTANCE_1, resourceList.get(0).getName());
         assertEquals(INSTANCE_2, resourceList.get(1).getName());
         assertEquals(INSTANCE_3, resourceList.get(2).getName());
-    }
-
-    @Test
-    public void getInstanceCloudResourcesInstancesNotFound() {
-        List<Group> groupList = new ArrayList<>();
-        Group group = Mockito.mock(Group.class);
-        CloudResource storage1 = createCloudResource(STORAGE_1, ResourceType.AZURE_STORAGE);
-        CloudResource ip1 = createCloudResource(IP_1, ResourceType.AZURE_PUBLIC_IP);
-        List<CloudResource> cloudResourceList = List.of(storage1, ip1);
-        groupList.add(group);
-
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.getInstanceCloudResources(STACK_NAME, cloudResourceList, groupList, "resourceGroupName"));
-
-        assertTrue(exception.getMessage().contains("No VM resource found amongst cloud resources"));
     }
 
     @Test
