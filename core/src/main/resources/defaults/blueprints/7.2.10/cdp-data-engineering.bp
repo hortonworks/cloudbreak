@@ -305,6 +305,10 @@
               {
                 "name": "hiveserver2_load_dynamic_partitions_thread_count",
                 "value": 20
+              },
+              {
+                "name": "hiveserver2_idle_session_timeout",
+                "value": 14400000
               }
             ]
           }
