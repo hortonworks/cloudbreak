@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -59,6 +61,9 @@ import io.opentracing.Tracer;
 public class GrpcUmsClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcUmsClient.class);
+
+    private static final Predicate<String> VALID_AUTHZ_RESOURCE = resource -> Crn.isCrn(resource) ||
+            StringUtils.isEmpty(resource) || StringUtils.equals(resource, "*");
 
     @Inject
     private ManagedChannelWrapper channelWrapper;
@@ -421,6 +426,7 @@ public class GrpcUmsClient {
     }
 
     private boolean makeCheckRightCall(String actorCrn, String userCrn, String right, String resource, Optional<String> requestId) {
+        checkArgument(VALID_AUTHZ_RESOURCE.test(resource), String.format("Provided resource [%s] is not in CRN format", resource));
         try {
             AuthorizationClient client = new AuthorizationClient(channelWrapper.getChannel(), actorCrn, tracer);
             LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
@@ -460,6 +466,9 @@ public class GrpcUmsClient {
     public List<Boolean> hasRightsNoCache(String actorCrn, String memberCrn, List<RightCheck> rightChecks, Optional<String> requestId) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
                 rightChecks.stream().map(this::rightCheckToString).collect(Collectors.toList()));
+        checkArgument(rightChecks.stream().map(RightCheck::getResource).allMatch(VALID_AUTHZ_RESOURCE),
+                String.format("Following resources are not provided in CRN format: %s.", Joiner.on(",").join(
+                        rightChecks.stream().map(RightCheck::getResource).filter(Predicate.not(VALID_AUTHZ_RESOURCE)).collect(Collectors.toList()))));
         if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
@@ -497,6 +506,9 @@ public class GrpcUmsClient {
     }
 
     public List<Boolean> hasRightsOnResources(String actorCrn, String memberCrn, List<String> resourceCrns, String right, Optional<String> requestId) {
+        checkArgument(resourceCrns.stream().allMatch(VALID_AUTHZ_RESOURCE),
+                String.format("Following resources are not provided in CRN format: %s.", Joiner.on(",").join(
+                        resourceCrns.stream().filter(Predicate.not(VALID_AUTHZ_RESOURCE)).collect(Collectors.toList()))));
         if (CollectionUtils.isEmpty(resourceCrns)) {
             return List.of();
         }
