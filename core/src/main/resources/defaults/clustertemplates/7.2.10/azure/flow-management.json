@@ -52,9 +52,9 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_E4a_v4",
           "rootVolume": {
-            "size": 150
+            "size": 50
           },
           "attachedVolumes": [
             {
