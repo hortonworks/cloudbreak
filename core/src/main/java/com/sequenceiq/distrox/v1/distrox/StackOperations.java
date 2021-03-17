@@ -258,17 +258,20 @@ public class StackOperations implements ResourceBasedCrnProvider {
         return clusterCommonService.updatePillarConfiguration(nameOrCrn, workspaceId);
     }
 
-    public UpgradeV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+    public UpgradeV4Response checkForClusterUpgrade(@NotNull Stack stack, Long workspaceId, UpgradeV4Request request) {
         MDCBuilder.buildMdcContext(stack);
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
         boolean replacevms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replacevms);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request);
+            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
         }
         validateDatalakeHasNoRunningDatahub(workspaceId, stack, upgradeResponse);
         return upgradeResponse;
+    }
+
+    public UpgradeV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
+        return checkForClusterUpgrade(stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), workspaceId, request);
     }
 
     private void validateDatalakeHasNoRunningDatahub(Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
