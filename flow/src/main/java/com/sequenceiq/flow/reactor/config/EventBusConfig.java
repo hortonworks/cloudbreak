@@ -54,21 +54,25 @@ public class EventBusConfig {
     @Lazy
     private FlowLogDBService flowLogDBService;
 
-    private void handleFlowFail(Throwable throwable) {
+    private void handleFlowFail(Throwable throwable, ThreadPoolExecutorDispatcher dispatcher) {
         try {
-            String flowId = getFlowIdFromThrowable(throwable);
-            if (flowId == null) {
-                flowId = getFlowIdFromMDC();
-            }
-            if (flowId != null) {
-                LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, throwable);
-                flowLogDBService.getLastFlowLog(flowId).ifPresent(flowLog -> {
-                    applicationFlowInformation.handleFlowFail(flowLog);
-                    flowLogDBService.updateLastFlowLogStatus(flowLog, true);
-                    flowLogDBService.finalize(flowLog.getFlowId());
-                });
+            if (dispatcher.alive()) {
+                String flowId = getFlowIdFromThrowable(throwable);
+                if (flowId == null) {
+                    flowId = getFlowIdFromMDC();
+                }
+                if (flowId != null) {
+                    LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, throwable);
+                    flowLogDBService.getLastFlowLog(flowId).ifPresent(flowLog -> {
+                        applicationFlowInformation.handleFlowFail(flowLog);
+                        flowLogDBService.updateLastFlowLogStatus(flowLog, true);
+                        flowLogDBService.finalize(flowLog.getFlowId());
+                    });
+                } else {
+                    LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
+                }
             } else {
-                LOGGER.error("We were not able to guess flowId on thread: {}", generateStackTrace());
+                LOGGER.info("Dispatcher is not alive there is no need to handle flow failure.", throwable);
             }
         } catch (Exception e) {
             LOGGER.error("can't handle flow fail", e);
@@ -130,16 +134,18 @@ public class EventBusConfig {
 
     @Bean
     public EventBus reactor(MDCCleanerThreadPoolExecutor threadPoolExecutor, Environment env) {
+        ThreadPoolExecutorDispatcher dispatcher = new ThreadPoolExecutorDispatcher(eventBusThreadPoolBacklogSize, eventBusThreadPoolCoreSize,
+                threadPoolExecutor);
         EventBus eventBus = new EventBusSpec()
                 .env(env)
-                .dispatcher(new ThreadPoolExecutorDispatcher(eventBusThreadPoolBacklogSize, eventBusThreadPoolCoreSize, threadPoolExecutor))
+                .dispatcher(dispatcher)
                 .traceEventPath()
                 .dispatchErrorHandler(throwable -> {
-                    handleFlowFail(throwable);
+                    handleFlowFail(throwable, dispatcher);
                     LOGGER.error("Exception happened in dispatcher", throwable);
                 })
                 .uncaughtErrorHandler(throwable -> {
-                    handleFlowFail(throwable);
+                    handleFlowFail(throwable, dispatcher);
                     LOGGER.error("Uncaught exception happened", throwable);
                 })
                 .consumerNotFoundHandler(new ConsumerNotFoundHandler())

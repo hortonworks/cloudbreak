@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.flow.core.FlowRegister;
 
+import reactor.bus.EventBus;
+
 @Component
 public class ContextClosedEventHandler {
 
@@ -30,6 +32,9 @@ public class ContextClosedEventHandler {
     @Named("eventBusThreadPoolExecutor")
     private MDCCleanerThreadPoolExecutor executor;
 
+    @Inject
+    private EventBus eventBus;
+
     @EventListener
     public void handleContextClosedEvent(ContextClosedEvent event) {
         LOGGER.info("ContextClosedEvent received, shutdown eventBusThreadPoolExecutor. Running flows: {}", flowRegister.getRunningFlowIds());
@@ -38,6 +43,7 @@ public class ContextClosedEventHandler {
 
     private void shutdownEventBusThreadPoolExecutor() {
         LOGGER.debug("Shutting down executor service.");
+        eventBus.getDispatcher().forceShutdown();
         executor.shutdownNow();
         LOGGER.info("Executor service has been shut down.");
         try {
