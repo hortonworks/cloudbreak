@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
@@ -9,7 +8,10 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_ROLLBACK_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_TIME;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_PROVISIONING;
+import static com.sequenceiq.common.api.type.ImageStatus.CREATE_FAILED;
+import static com.sequenceiq.common.api.type.ImageStatus.CREATE_FINISHED;
 import static java.lang.String.format;
+import static java.util.EnumSet.of;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -26,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
@@ -165,7 +168,7 @@ public class StackCreationService {
             LOGGER.debug("Triggering event: {}", checkImageRequest);
             eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
             CheckImageResult result = checkImageRequest.await();
-            sendNotification(result, stack);
+            sendNotificationIfNecessary(result, stack);
             LOGGER.debug("Result: {}", result);
             return result;
         } catch (InterruptedException e) {
@@ -230,15 +233,17 @@ public class StackCreationService {
             if (!stack.isStackInDeletionPhase()) {
                 handleFailure(stack, errorReason);
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
-                flowMessageService.fireEventAndLog(stack.getId(), CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
+                flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             } else {
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             }
         }
     }
 
-    private void sendNotification(CheckImageResult result, Stack stack) {
-        notificationSender.send(getImageCopyNotification(result, stack));
+    private void sendNotificationIfNecessary(CheckImageResult result, Stack stack) {
+        if (of(CREATE_FAILED, CREATE_FINISHED).contains(result.getImageStatus())) {
+            notificationSender.send(getImageCopyNotification(result, stack));
+        }
     }
 
     private Notification<CloudbreakEventV4Response> getImageCopyNotification(CheckImageResult result, Stack stack) {
@@ -269,12 +274,12 @@ public class StackCreationService {
             } else {
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK);
                 connector.rollback(stack, stack.getResources());
-                flowMessageService.fireEventAndLog(stack.getId(), CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
+                flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             }
         } catch (Exception ex) {
             LOGGER.info("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, format("Rollback failed: %s", ex.getMessage()));
-            flowMessageService.fireEventAndLog(stack.getId(), CREATE_FAILED.name(), STACK_INFRASTRUCTURE_ROLLBACK_FAILED, ex.getMessage());
+            flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_ROLLBACK_FAILED, ex.getMessage());
         }
     }
 
