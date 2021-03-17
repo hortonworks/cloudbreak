@@ -127,7 +127,6 @@ public class ResourceAuthorizationService {
     private List<RightCheck> convertToRightChecks(AuthorizationRule rule, Function<AuthorizationResourceAction, String> rightMapper) {
         List<RightCheck> rightChecks = new ArrayList<>();
         rule.convert((action, crn) -> rightChecks.add(RightCheck.newBuilder()
-                .setResource(crn)
                 .setRight(rightMapper.apply(action))
                 .setResource(crn)
                 .build()));

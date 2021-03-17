@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,6 +33,11 @@ import io.opentracing.Tracer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GrpcUmsClientTest {
+
+    private static final String USER_CRN = Crn.builder(CrnResourceDescriptor.USER)
+            .setResource("user")
+            .setAccountId("acc")
+            .build().toString();
 
     @Mock
     private ManagedChannelWrapper channelWrapper;
@@ -120,5 +127,25 @@ public class GrpcUmsClientTest {
         verify(umsClient, times(2)).listServicePrincipalCloudIdentities(anyString(), eq(accountId), eq(envCrn), any(Optional.class));
         assertTrue(spCloudIds.containsAll(spIdsList01));
         assertTrue(spCloudIds.containsAll(spIdsList02));
+    }
+
+    @Test
+    public void testCheckRightWithInvalidCrn() {
+        assertEquals(
+                assertThrows(IllegalArgumentException.class, () -> underTest.checkResourceRight(USER_CRN, USER_CRN,
+                "environments/describeEnvironment", "invalidCrn", Optional.empty())).getMessage(),
+                "Provided resource [invalidCrn] is not in CRN format");
+    }
+
+    @Test
+    public void testHasRightsWithInvalidCrn() {
+        assertEquals(
+                assertThrows(IllegalArgumentException.class, () -> underTest.hasRights(USER_CRN, USER_CRN,
+                List.of("invalidCrn", "*"), "environments/describeEnvironment", Optional.empty())).getMessage(),
+                "Following resources are not provided in CRN format: invalidCrn.");
+        assertEquals(
+                assertThrows(IllegalArgumentException.class, () -> underTest.hasRightsOnResources(USER_CRN, USER_CRN,
+                List.of("invalidCrn", "*"), "environments/describeEnvironment", Optional.empty())).getMessage(),
+                "Following resources are not provided in CRN format: invalidCrn.");
     }
 }
