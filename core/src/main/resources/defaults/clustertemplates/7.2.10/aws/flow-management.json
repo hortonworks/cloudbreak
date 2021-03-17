@@ -52,9 +52,9 @@
         "type": "CORE",
         "recoveryMode": "MANUAL",
         "template": {
-          "instanceType": "m5.2xlarge",
+          "instanceType": "m5.xlarge",
           "rootVolume": {
-            "size": 150
+            "size": 50
           },
           "attachedVolumes": [
             {
