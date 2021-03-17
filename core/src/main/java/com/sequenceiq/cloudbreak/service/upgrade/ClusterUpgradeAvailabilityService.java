@@ -108,16 +108,16 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeOptions;
     }
 
-    public void filterUpgradeOptions(UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest) {
+    public void filterUpgradeOptions(UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {
         List<ImageInfoV4Response> upgradeCandidates = upgradeOptions.getUpgradeCandidates();
         List<ImageInfoV4Response> filteredUpgradeCandidates;
         // We would like to upgrade to latest available if no request params exist
-        if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) {
+        if ((Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) && datalake) {
             filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
             LOGGER.info("No request param, defaulting to latest image {}", filteredUpgradeCandidates);
         } else {
-            String requestImageId = upgradeRequest.getImageId();
-            String runtime = upgradeRequest.getRuntime();
+            String requestImageId = upgradeRequest != null ? upgradeRequest.getImageId() : null;
+            String runtime = upgradeRequest != null ? upgradeRequest.getRuntime() : null;
 
             // Image id param exists
             if (StringUtils.isNotEmpty(requestImageId)) {

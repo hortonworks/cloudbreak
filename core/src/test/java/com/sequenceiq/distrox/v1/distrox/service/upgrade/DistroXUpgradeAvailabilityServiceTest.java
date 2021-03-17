@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
@@ -24,7 +26,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
@@ -37,11 +46,22 @@ class DistroXUpgradeAvailabilityServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
+    private static final Stack STACK = new Stack();
+
     @Mock
     private EntitlementService entitlementService;
 
     @Mock
     private StackOperations stackOperations;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private StackViewService stackViewService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @InjectMocks
     private DistroXUpgradeAvailabilityService underTest;
@@ -83,7 +103,8 @@ class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class), mock(ImageInfoV4Response.class)));
-        when(stackOperations.checkForClusterUpgrade(CLUSTER, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
+        when(stackOperations.checkForClusterUpgrade(STACK, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -102,7 +123,8 @@ class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image3 = new ImageInfoV4Response();
         image3.setCreated(5L);
         response.setUpgradeCandidates(List.of(image1, image2, image3));
-        when(stackOperations.checkForClusterUpgrade(CLUSTER, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
+        when(stackOperations.checkForClusterUpgrade(STACK, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -125,13 +147,49 @@ class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image8 = createImageResponse(8L, "C");
         ImageInfoV4Response image9 = createImageResponse(6L, "C");
         response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
-        when(stackOperations.checkForClusterUpgrade(CLUSTER, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
+        when(stackOperations.checkForClusterUpgrade(STACK, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
         assertEquals(3, result.getUpgradeCandidates().size());
         assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 8L && "A".equals(img.getComponentVersions().getCdp())));
         assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 4L && "B".equals(img.getComponentVersions().getCdp())));
+        assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 9L && "C".equals(img.getComponentVersions().getCdp())));
+    }
+
+    @Test
+    public void testOnlyReturnCandidatesWithDatalakeVersion() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        request.setShowAvailableImages(UpgradeShowAvailableImages.LATEST_ONLY);
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response image1 = createImageResponse(2L, "A");
+        ImageInfoV4Response image2 = createImageResponse(8L, "A");
+        ImageInfoV4Response image3 = createImageResponse(6L, "A");
+        ImageInfoV4Response image4 = createImageResponse(1L, "B");
+        ImageInfoV4Response image5 = createImageResponse(4L, "B");
+        ImageInfoV4Response image6 = createImageResponse(3L, "B");
+        ImageInfoV4Response image7 = createImageResponse(9L, "C");
+        ImageInfoV4Response image8 = createImageResponse(8L, "C");
+        ImageInfoV4Response image9 = createImageResponse(6L, "C");
+        response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
+        Stack stackWithEnv = new Stack();
+        stackWithEnv.setEnvironmentCrn("envcrn");
+        StackView stackView = new StackView();
+        ClusterView clusterView = new ClusterView();
+        clusterView.setId(1L);
+        ReflectionTestUtils.setField(stackView, "cluster", clusterView);
+        ClouderaManagerProduct product = new ClouderaManagerProduct();
+        product.setVersion("C");
+        product.setName("CDH");
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
+        when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
+        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(List.of(product));
+
+        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
+
+        assertEquals(1, result.getUpgradeCandidates().size());
         assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 9L && "C".equals(img.getComponentVersions().getCdp())));
     }
 
