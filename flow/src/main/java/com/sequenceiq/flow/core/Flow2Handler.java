@@ -310,13 +310,17 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     flow.initialize(flowLog.getCurrentState(), variables);
                     RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
                     if (restartAction != null) {
+                        LOGGER.debug("Restarting flow with id: '{}', flow chain id: '{}', flow type: '{}', restart action: '{}'", flow.getFlowId(),
+                                flowLog.getFlowChainId(), flowLog.getFlowType().getSimpleName(), restartAction.getClass().getSimpleName());
                         Span span = tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
                         restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn(),
                                 span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
                         return;
                     }
                 } catch (RuntimeException e) {
-                    LOGGER.error("Can not read payload", e);
+                    String message = String.format("Flow could not be restarted with id: '%s', flow chain id: '%s' and flow type: '%s'", flowLog.getFlowId(),
+                            flowLog.getFlowChainId(), flowLog.getFlowType().getSimpleName());
+                    LOGGER.error(message, e);
                 }
             }
             try {
