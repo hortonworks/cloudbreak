@@ -5,6 +5,7 @@ import java.util.Date;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
+import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
@@ -88,10 +90,17 @@ public class AwsSessionCredentialClient {
     }
 
     private AWSSecurityTokenService awsSecurityTokenServiceClient(AwsCredentialView awsCredential) {
+        String defaultZone = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         return AWSSecurityTokenServiceClientBuilder.standard()
-                .withRegion(awsDefaultZoneProvider.getDefaultZone(awsCredential))
+                .withEndpointConfiguration(getEndpointConfiguration(defaultZone))
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                 .build();
+    }
+
+    @NotNull
+    private AwsClientBuilder.EndpointConfiguration getEndpointConfiguration(String defaultZone) {
+        return new AwsClientBuilder
+                .EndpointConfiguration(String.format("https://sts.%s.amazonaws.com", defaultZone), defaultZone);
     }
 
 }
