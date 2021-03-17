@@ -145,19 +145,27 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         List<CloudResource> instances;
         try {
             List<CloudResource> templateResources = azureCloudResourceService.getDeploymentCloudResources(templateDeployment);
-            LOGGER.debug("Template resources retrieved: {}", templateResources);
+            LOGGER.debug("Template resources retrieved: {} for {}", templateResources, stackName);
             allResourcesToPersist.addAll(templateResources);
             instances = azureCloudResourceService.getInstanceCloudResources(stackName, templateResources, stack.getGroups(), resourceGroupName);
-            AzureClient azureClient = ac.getParameter(AzureClient.class);
-            List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(instances, resourceGroupName, azureClient);
-            LOGGER.debug("OS disk resources retrieved: {}", osDiskResources);
-            allResourcesToPersist.addAll(osDiskResources);
+            if (!instances.isEmpty()) {
+                allResourcesToPersist.addAll(collectOsDisks(ac, resourceGroupName, instances));
+            } else {
+                LOGGER.warn("Skipping OS disk collection as there was no VM instance found amongst cloud resources for {}!", stackName);
+            }
         } finally {
             azureCloudResourceService.deleteCloudResources(notifier, cloudContext, allResourcesToPersist);
             azureCloudResourceService.saveCloudResources(notifier, cloudContext, allResourcesToPersist);
             LOGGER.info("Resources persisted: {}", allResourcesToPersist);
         }
         return instances;
+    }
+
+    private List<CloudResource> collectOsDisks(AuthenticatedContext ac, String resourceGroupName, List<CloudResource> instances) {
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        List<CloudResource> osDiskResources = azureCloudResourceService.getAttachedOsDiskResources(instances, resourceGroupName, azureClient);
+        LOGGER.debug("OS disk resources retrieved: {}", osDiskResources);
+        return osDiskResources;
     }
 
     @Override

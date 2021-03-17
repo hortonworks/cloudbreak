@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -185,11 +184,6 @@ public class AzureCloudResourceService {
                                 )
                         )
                 );
-        if (vmResourceList.size() == 0) {
-            String message = String.format("No VM resource found amongst cloud resources: %s", cloudResourceList.toString());
-            LOGGER.warn(message);
-            throw new CloudbreakServiceException(message);
-        }
         return vmResourceList;
     }
 
