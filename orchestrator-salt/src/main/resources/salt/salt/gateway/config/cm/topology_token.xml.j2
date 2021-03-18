@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-{# If you update this file, please add the same changes into topology_token.xml.j2 too #}
+{# If you update this file, please add the same changes into topology_api.xml.j2 too #}
 {# They have to be the same except the authentication/federation provider they use #}
 
 <topology>
@@ -8,24 +8,16 @@
     <gateway>
 
         <provider>
-           <role>authentication</role>
-           <name>ShiroProvider</name>
+           <role>federation</role>
+           <name>JWTProvider</name>
            <enabled>true</enabled>
            <param>
-              <name>sessionTimeout</name>
-              <value>30</value>
+               <name>knox.token.exp.server-managed</name>
+               <value>true</value>
            </param>
            <param>
-              <name>main.pamRealm</name>
-              <value>org.apache.hadoop.gateway.shirorealm.KnoxPamRealm</value>
-           </param>
-           <param>
-              <name>main.pamRealm.service</name>
-              <value>login</value>
-           </param>
-           <param>
-              <name>urls./**</name>
-              <value>authcBasic</value>
+               <name>knox.token.audiences</name>
+               <value>cdp-proxy-token</value>
            </param>
         </provider>
 

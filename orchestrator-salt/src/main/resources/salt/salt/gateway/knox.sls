@@ -61,6 +61,17 @@
       protocol: {{ salt['pillar.get']('gateway:protocol') }}
     - mode: 644
 
+{{ gateway.knox_data_root }}/topologies/{{ topology.name }}-token.xml:
+  file.managed:
+    - source: salt://gateway/config/cm/topology_token.xml.j2
+    - template: jinja
+    - context:
+      exposed: {{ topology.exposed }}
+      ports: {{ salt['pillar.get']('gateway:ports') }}
+      topology_name: {{ topology.name }}
+      protocol: {{ salt['pillar.get']('gateway:protocol') }}
+    - mode: 644
+
 {% endfor %}
 
 {{ gateway.knox_data_root }}/security/keystores/signkey.pem:
