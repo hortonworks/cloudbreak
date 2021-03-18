@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.dyngr.Polling;
+import com.dyngr.exception.PollerException;
+import com.dyngr.exception.PollerStoppedException;
+import com.dyngr.exception.UserBreakException;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
@@ -42,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -52,7 +58,9 @@ public class GcpProvisionSetup implements Setup {
 
     private static final String READY = "READY";
 
-    private static final int MAX_RECURSION_NUMBER = 100;
+    private static final int ATTEMPT_COUNT = 100;
+
+    private static final int SLEEPTIME = 20;
 
     @Inject
     private GcpComputeFactory gcpComputeFactory;
@@ -90,7 +98,7 @@ public class GcpProvisionSetup implements Setup {
                     }
                 }
                 String tarName = getTarName(imageName);
-                rewriteUntilDone(getBucket(imageName), tarName, bucket.getName(), tarName, storage);
+                copyImage(getBucket(imageName), tarName, bucket.getName(), tarName, storage);
 
                 Image gcpApiImage = new Image();
                 String finalImageName = getImageName(imageName);
@@ -123,35 +131,35 @@ public class GcpProvisionSetup implements Setup {
         }
     }
 
-    private void rewriteUntilDone(final String sourceBucket, final String sourceKey, final String destBucket,
-        final String destKey, Storage storage) throws IOException {
-        rewriteUntilDone(sourceBucket, sourceKey, destBucket, destKey, null, storage, 1);
-    }
-
-    private void rewriteUntilDone(final String sourceBucket, final String sourceKey, final String destBucket,
-        final String destKey, final String rewriteToken, Storage storage, int recursionNumber) throws IOException {
-        Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
-        if (rewriteToken != null) {
-            rewrite.setRewriteToken(rewriteToken);
-        }
-        RewriteResponse rewriteResponse = rewrite.execute();
-
-        if (recursionNumber > MAX_RECURSION_NUMBER) {
-            throw new CloudConnectorException(
-                    String.format("Image copy from %s/%s to %s/%s reached the maximum number. Exiting the recursion.",
-                            sourceBucket,
-                            sourceKey,
-                            destBucket,
-                            destKey));
-        }
-        if (!rewriteResponse.getDone()) {
-            String rewriteToken2 = rewriteResponse.getRewriteToken();
-            Long totalBytesRewritten = rewriteResponse.getTotalBytesRewritten();
-            LOGGER.debug("Rewriting not finished, bytes completed: {}. Calling rewrite again with token {}. Recursion reached the {}/100 attempt.",
-                    totalBytesRewritten,
-                    rewriteToken2,
-                    recursionNumber);
-            rewriteUntilDone(sourceBucket, sourceKey, destBucket, destKey, rewriteToken2, storage, ++recursionNumber);
+    public void copyImage(
+            final String sourceBucket,
+            final String sourceKey,
+            final String destBucket,
+            final String destKey,
+            Storage storage) {
+        try {
+            Storage.Objects.Rewrite rewrite = storage.objects().rewrite(sourceBucket, sourceKey, destBucket, destKey, new StorageObject());
+            RewriteResponse rewriteResponse = rewrite.execute();
+            Polling.stopAfterAttempt(ATTEMPT_COUNT)
+                    .stopIfException(true)
+                    .waitPeriodly(SLEEPTIME, TimeUnit.SECONDS)
+                    .run(new GcpImageAttemptMaker(rewriteResponse.getRewriteToken(), sourceBucket, sourceKey, destBucket, destKey, storage));
+            LOGGER.info("Image copy has been finished successfully for {}/{}.", destBucket, destKey);
+        } catch (UserBreakException userBreakException) {
+            LOGGER.error("Polling exited before timeout. Cause ", userBreakException);
+            throw new CloudbreakServiceException("The image copy failed because the one of the user in your "
+                    + "organization stopped the copy process.");
+        } catch (PollerStoppedException pollerStoppedException) {
+            LOGGER.error("Poller stopped for image copy: ", pollerStoppedException);
+            throw new CloudbreakServiceException("Image copy failed because the copy take too long time. "
+                    + "Please check Google Cloud console because probably the image should be ready.");
+        } catch (PollerException exception) {
+            LOGGER.error("Polling failed for image copy: {}", exception);
+            throw new CloudbreakServiceException("Image copy failed because: " + exception.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Polling could not started because: {}", e);
+            throw new CloudbreakServiceException("Copying the image could not started, "
+                    + "please check that you already giving access to CDP for storage API.");
         }
     }
 
