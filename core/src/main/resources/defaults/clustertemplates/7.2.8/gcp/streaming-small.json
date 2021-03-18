@@ -2,7 +2,7 @@
   "name": "7.2.8 - Streams Messaging Light Duty for Google Cloud",
   "description": "",
   "type": "STREAMING",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
