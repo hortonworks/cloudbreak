@@ -40,12 +40,8 @@ public class AwsIDBrokerObjectStorageValidator {
     @Inject
     private AwsIamService awsIamService;
 
-    @Inject
-    private AwsLogRolePermissionValidator awsLogRolePermissionValidator;
-
     public ValidationResult validateObjectStorage(AmazonIdentityManagementClient iam,
             SpiFileSystem spiFileSystem,
-            String logsLocationBase,
             ValidationResultBuilder resultBuilder) {
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         for (CloudFileSystemView cloudFileSystemView : cloudFileSystems) {
@@ -58,7 +54,7 @@ public class AwsIDBrokerObjectStorageValidator {
                 if (CloudIdentityType.ID_BROKER.equals(cloudIdentityType)) {
                     validateIDBroker(iam, instanceProfile, cloudFileSystem, resultBuilder);
                 } else if (CloudIdentityType.LOG.equals(cloudIdentityType)) {
-                    validateLog(iam, instanceProfile, cloudFileSystem, logsLocationBase, resultBuilder);
+                    validateLog(instanceProfile, cloudFileSystem, resultBuilder);
                 }
             }
         }
@@ -78,10 +74,12 @@ public class AwsIDBrokerObjectStorageValidator {
         awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
     }
 
-    private void validateLog(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
-            String logsLocationBase, ValidationResultBuilder resultBuilder) {
+    private void validateLog(InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
+            ValidationResultBuilder resultBuilder) {
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, resultBuilder);
-        awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, logsLocationBase, resultBuilder);
+
+        //TODO - need to figure out how to get LOGS_LOCATION_BASE value
+        //awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, resultBuilder);
     }
 
     private Set<Role> getAllMappedRoles(AmazonIdentityManagementClient iam, CloudFileSystemView cloudFileSystemView,

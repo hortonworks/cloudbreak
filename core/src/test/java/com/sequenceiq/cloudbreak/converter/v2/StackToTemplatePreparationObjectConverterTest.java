@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -54,7 +53,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -254,12 +252,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     private GrpcUmsClient grpcUmsClient;
 
     @Mock
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
-
-    @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @BeforeEach
@@ -307,11 +299,10 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .withAdminGroupName(ADMIN_GROUP_NAME)
                 .withCrn(TestConstants.CRN)
                 .build();
-        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(credentialConverter.convert(any(CredentialResponse.class))).thenReturn(credential);
-        when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
-        when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
+        when(awsMockAccountMappingService.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
+        when(awsMockAccountMappingService.getUserMappings(REGION, credential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(clusterService.getById(anyLong())).thenReturn(cluster);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());

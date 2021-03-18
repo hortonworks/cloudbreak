@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.identitymapping;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -11,10 +9,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 
 @Component
 public class AwsMockAccountMappingService {
@@ -28,11 +27,14 @@ public class AwsMockAccountMappingService {
 
     private final CloudPlatformConnectors cloudPlatformConnectors;
 
-    public AwsMockAccountMappingService(CloudPlatformConnectors cloudPlatformConnectors) {
+    private final CredentialToCloudCredentialConverter credentialConverter;
+
+    public AwsMockAccountMappingService(CloudPlatformConnectors cloudPlatformConnectors, CredentialToCloudCredentialConverter credentialConverter) {
         this.cloudPlatformConnectors = cloudPlatformConnectors;
+        this.credentialConverter = credentialConverter;
     }
 
-    public Map<String, String> getGroupMappings(String region, CloudCredential credential, String adminGroupName) {
+    public Map<String, String> getGroupMappings(String region, Credential credential, String adminGroupName) {
         String accountId = getAccountId(region, credential);
         if (StringUtils.isNotEmpty(adminGroupName)) {
             return replaceAccountId(getGroupMappings(adminGroupName), accountId);
@@ -42,14 +44,14 @@ public class AwsMockAccountMappingService {
         }
     }
 
-    public Map<String, String> getUserMappings(String region, CloudCredential credential) {
+    public Map<String, String> getUserMappings(String region, Credential credential) {
         String accountId = getAccountId(region, credential);
         return replaceAccountId(MOCK_IDBROKER_USER_MAPPINGS, accountId);
     }
 
-    private String getAccountId(String region, CloudCredential credential) {
-        IdentityService identityService = getIdentityService(AWS);
-        return identityService.getAccountId(region, credential);
+    private String getAccountId(String region, Credential credential) {
+        IdentityService identityService = getIdentityService(credential.cloudPlatform());
+        return identityService.getAccountId(region, credentialConverter.convert(credential));
     }
 
     private IdentityService getIdentityService(String platform) {

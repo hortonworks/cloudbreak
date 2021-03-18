@@ -21,6 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 
 @ExtendWith(MockitoExtension.class)
 class AwsMockAccountMappingServiceTest {
@@ -37,6 +40,9 @@ class AwsMockAccountMappingServiceTest {
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
+    private CredentialToCloudCredentialConverter credentialConverter;
+
+    @Mock
     private CloudCredential cloudCredential;
 
     @Mock
@@ -48,8 +54,12 @@ class AwsMockAccountMappingServiceTest {
     @InjectMocks
     private AwsMockAccountMappingService underTest;
 
+    private Credential credential;
+
     @BeforeEach
     void setUp() {
+        credential = Credential.builder().cloudPlatform(CloudPlatform.AWS.name()).build();
+        when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(cloudPlatformConnectors.get(any(Platform.class), any(Variant.class))).thenReturn(cloudConnector);
         when(cloudConnector.identityService()).thenReturn(identityService);
         when(identityService.getAccountId(REGION, cloudCredential)).thenReturn(ACCOUNT_ID);
@@ -57,7 +67,7 @@ class AwsMockAccountMappingServiceTest {
 
     @Test
     void testGetUserMappings() {
-        Map<String, String> userMappings = underTest.getUserMappings(REGION, cloudCredential);
+        Map<String, String> userMappings = underTest.getUserMappings(REGION, credential);
         assertThat(userMappings).isNotNull();
         AccountMappingSubject.ALL_SPECIAL_USERS.forEach(user -> assertThat(userMappings).contains(Map.entry(user, IAM_ROLE)));
         assertThat(userMappings).hasSize(AccountMappingSubject.ALL_SPECIAL_USERS.size());
@@ -65,14 +75,14 @@ class AwsMockAccountMappingServiceTest {
 
     @Test
     void testGetGroupMappingsWhenSuccess() {
-        Map<String, String> groupMappings = underTest.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME);
+        Map<String, String> groupMappings = underTest.getGroupMappings(REGION, credential, ADMIN_GROUP_NAME);
         assertThat(groupMappings).isNotNull();
         assertThat(groupMappings).containsOnly(Map.entry(ADMIN_GROUP_NAME, IAM_ROLE));
     }
 
     @Test
     void testGetGroupMappingsWhenAdminGroupIsMissing() {
-        assertThrows(CloudbreakServiceException.class, () -> underTest.getGroupMappings(REGION, cloudCredential, null));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.getGroupMappings(REGION, credential, null));
     }
 
 }

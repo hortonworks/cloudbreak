@@ -1,9 +1,5 @@
 package com.sequenceiq.datalake.service.validation.cloudstorage;
 
-import static com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource.MOCK;
-
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,8 +16,6 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
-import com.sequenceiq.common.api.telemetry.base.LoggingBase;
-import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.datalake.entity.Credential;
 import com.sequenceiq.datalake.service.validation.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
@@ -69,7 +63,8 @@ public class CloudStorageValidator {
             Credential credential = getCredential(environment);
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
-            ObjectStorageValidateRequest request = createObjectStorageValidateRequest(cloudCredential, cloudStorageRequest, environment);
+            ObjectStorageValidateRequest request = createObjectStorageValidateRequest(
+                    environment.getCloudPlatform(), cloudCredential, cloudStorageRequest);
             ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     cloudProviderServicesV4Endpoint.validateObjectStorage(request));
 
@@ -83,26 +78,13 @@ public class CloudStorageValidator {
         }
     }
 
-    private String getLogsLocationBase(DetailedEnvironmentResponse env) {
-        return Optional.ofNullable(env.getTelemetry())
-                .map(TelemetryResponse::getLogging)
-                .map(LoggingBase::getStorageLocation)
-                .orElse(null);
-    }
-
     private ObjectStorageValidateRequest createObjectStorageValidateRequest(
-            CloudCredential credential,
-            CloudStorageRequest cloudStorageRequest,
-            DetailedEnvironmentResponse environment) {
-        ObjectStorageValidateRequest.Builder result = ObjectStorageValidateRequest.builder()
-                .withCloudPlatform(environment.getCloudPlatform())
+            String cloudPlatform, CloudCredential credential, CloudStorageRequest cloudStorageRequest) {
+        return ObjectStorageValidateRequest.builder()
+                .withCloudPlatform(cloudPlatform)
                 .withCredential(credential)
                 .withCloudStorageRequest(cloudStorageRequest)
-                .withLogsLocationBase(getLogsLocationBase(environment));
-        if (environment.getIdBrokerMappingSource() == MOCK) {
-            result.withMockSettings(environment.getLocation().getName(), environment.getAdminGroupName());
-        }
-        return result.build();
+                .build();
     }
 
     private Credential getCredential(DetailedEnvironmentResponse environment) {

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
@@ -40,7 +39,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsVi
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
@@ -182,9 +180,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Override
     public TemplatePreparationObject convert(Stack source) {
@@ -331,22 +326,21 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             } else if (environment.getIdBrokerMappingSource() == IdBrokerMappingSource.MOCK && source.getCluster().getFileSystem() != null) {
                 Map<String, String> groupMappings;
                 Map<String, String> userMappings;
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
                 String virtualGroup = getMockVirtualGroup(virtualGroupRequest);
                 switch (source.getCloudPlatform()) {
                     case AWS:
-                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), cloudCredential, virtualGroup);
-                        userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), cloudCredential);
+                        groupMappings = awsMockAccountMappingService.getGroupMappings(source.getRegion(), credential, virtualGroup);
+                        userMappings = awsMockAccountMappingService.getUserMappings(source.getRegion(), credential);
                         break;
                     case AZURE:
                         groupMappings = azureMockAccountMappingService.getGroupMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential, virtualGroup);
+                                credential, virtualGroup);
                         userMappings = azureMockAccountMappingService.getUserMappings(AzureMockAccountMappingService.MSI_RESOURCE_GROUP_NAME,
-                                cloudCredential);
+                                credential);
                         break;
                     case GCP:
-                        groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getRegion(), cloudCredential, virtualGroup);
-                        userMappings = gcpMockAccountMappingService.getUserMappings(source.getRegion(), cloudCredential);
+                        groupMappings = gcpMockAccountMappingService.getGroupMappings(source.getRegion(), credential, virtualGroup);
+                        userMappings = gcpMockAccountMappingService.getUserMappings(source.getRegion(), credential);
                         break;
                     default:
                         return;

@@ -709,14 +709,6 @@ public class AzureClient {
         return handleAuthException(() -> getRoleAssignments().listByScope(scope));
     }
 
-    public List<RoleAssignmentInner> listRoleAssignmentsByScopeInner(String scope) {
-        List<RoleAssignmentInner> roleAssignmentInners = new ArrayList<>();
-        for (RoleAssignment ra : listRoleAssignmentsByScope(scope)) {
-            roleAssignmentInners.add(ra.inner());
-        }
-        return roleAssignmentInners;
-    }
-
     public PagedList<RoleAssignmentInner> listRoleAssignments() {
         return listRoleAssignmentsBySubscription(getCurrentSubscription().subscriptionId());
     }
