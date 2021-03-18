@@ -1,12 +1,12 @@
 {
-  "name": "7.2.9 - Data Mart for Google Cloud",
+  "name": "7.2.10 - Data Mart for Google Cloud",
   "description": "",
   "type": "DATAMART",
   "featureState": "PREVIEW",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.9 - Data Mart: Apache Impala, Hue"
+      "blueprintName": "7.2.10 - Data Mart: Apache Impala, Hue"
     },
     "instanceGroups": [
       {
