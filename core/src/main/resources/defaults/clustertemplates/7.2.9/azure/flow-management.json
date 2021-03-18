@@ -54,7 +54,7 @@
         "template": {
           "instanceType": "Standard_E4a_v4",
           "rootVolume": {
-            "size": 50
+            "size": 100
           },
           "attachedVolumes": [
             {

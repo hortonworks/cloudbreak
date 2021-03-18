@@ -55,7 +55,7 @@
         "template": {
           "instanceType": "e2-standard-4",
           "rootVolume": {
-            "size": 50
+            "size": 100
           },
           "attachedVolumes": [
             {
