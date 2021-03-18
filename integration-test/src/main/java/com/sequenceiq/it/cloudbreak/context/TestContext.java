@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.context;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
 import java.time.Duration;
@@ -72,8 +71,6 @@ public abstract class TestContext implements ApplicationContextAware {
     private static final String DESCRIPTION = "DESCRIPTION";
 
     private static final String TEST_METHOD_NAME = "TEST_METHOD_NAME";
-
-    private static final String INTERNAL_ACTOR_ACCESS_KEY = Base64.getEncoder().encodeToString(INTERNAL_ACTOR_CRN.getBytes());
 
     private ApplicationContext applicationContext;
 
@@ -410,26 +407,6 @@ public abstract class TestContext implements ApplicationContextAware {
                     .build().toString());
         }
         return this;
-    }
-
-    private CloudbreakUser createInternalActorForAccountIfNotExists(String tenantName) {
-        CloudbreakUser internalUser = cloudbreakActor.create(tenantName, "__internal__actor__");
-        if (clients.get(internalUser.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, internalUser);
-            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, internalUser);
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, internalUser);
-            SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, internalUser);
-            UmsClient umsClient = UmsClient.createProxyUmsClient(tracer);
-            RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, internalUser);
-            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
-                    RedbeamsClient.class, redbeamsClient,
-                    UmsClient.class, umsClient);
-            clients.put(internalUser.getAccessKey(), clientMap);
-        }
-        LOGGER.info(" Created and initialized internal user:: \nDisplay name: {} \nAccess key: {} \nSecret key: {} \nCrn: {} \nAdmin: {} ",
-                internalUser.getDisplayName(), internalUser.getAccessKey(), internalUser.getSecretKey(), internalUser.getCrn(), internalUser.getAdmin());
-        return internalUser;
     }
 
     private void initMicroserviceClientsForUMSAccountAdmin(CloudbreakUser accountAdmin) {
@@ -864,8 +841,7 @@ public abstract class TestContext implements ApplicationContextAware {
                 initMicroserviceClientsForUMSAccountAdmin(cloudbreakActor.getAdminByAccountId(accountId));
             }
         } else {
-            CloudbreakUser internalActorForAccount = createInternalActorForAccountIfNotExists(accountId);
-            accessKey = internalActorForAccount.getAccessKey();
+            accessKey = getActingUserAccessKey();
         }
         U microserviceClient = getMicroserviceClient(testDtoClass, accessKey);
         if (microserviceClient == null) {

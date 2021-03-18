@@ -19,7 +19,7 @@ public class FreeIpaSynchronizeAllUsersAction extends AbstractFreeIpaAction<Free
     protected FreeIpaUserSyncTestDto freeIpaAction(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", testDto.getEnvironmentCrn(), testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA sync request: %n"), testDto.getRequest());
-        SyncOperationStatus syncOperationStatus = client.getFreeIpaClient()
+        SyncOperationStatus syncOperationStatus = client.getFreeipaInternalCrnClient().withInternalCrn()
                 .getUserV1Endpoint()
                 .synchronizeAllUsers(testDto.getRequest());
         testDto.setOperationId(syncOperationStatus.getOperationId());

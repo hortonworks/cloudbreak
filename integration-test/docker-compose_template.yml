@@ -44,6 +44,7 @@ services:
       - MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
       - CLOUDBREAK_URL=cloudbreak:8080
       - ENVIRONMENT_URL=environment:8088
+      - FREEIPA_URL=freeipa:8080
       - SPRING_CONFIG_LOCATION=classpath:/application.yml,/it/it-application.yml
       - INTEGRATIONTEST_SUITEFILES
       - INTEGRATIONTEST_OPENSTACKV3CREDENTIAL_TENANTNAME

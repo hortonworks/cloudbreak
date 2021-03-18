@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.util.Collections;
 import java.util.Map;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -26,6 +27,7 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
     @Override
     public FreeIpaUserSyncTestDto valid() {
         getRequest().setEnvironments(Collections.singleton(getEnvironmentCrn()));
+        getRequest().setAccountId(Crn.fromString(getEnvironmentCrn()).getAccountId());
         return this;
     }
 

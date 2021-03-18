@@ -23,8 +23,13 @@ public class FreeIpaServer {
 
     private static final String WARNING_TEXT_FORMAT = "Following variable must be set whether as environment variables or (test) application.yaml: %s";
 
+    private static final int DEFAULT_FREEIPA_PORT = 8090;
+
     @Value("${integrationtest.freeipa.server}")
     private String server;
+
+    @Value("${freeipa.url:localhost:" + DEFAULT_FREEIPA_PORT + "}")
+    private String freeipaUrl;
 
     @Value("${freeipa.server.contextPath:/freeipa}")
     private String freeIpaRootContextPath;
@@ -60,6 +65,7 @@ public class FreeIpaServer {
         checkNonEmpty("integrationtest.user.privatekey", secretKey);
 
         testParameter.put(FreeIpaTest.FREEIPA_SERVER_ROOT, server + freeIpaRootContextPath);
+        testParameter.put(FreeIpaTest.FREEIPA_SERVER_INTERNAL_ROOT, "http://" + freeipaUrl + freeIpaRootContextPath);
         testParameter.put(FreeIpaTest.ACCESS_KEY, accessKey);
         testParameter.put(FreeIpaTest.SECRET_KEY, secretKey);
         testParameter.put(CloudbreakTest.USER_CRN, userCrn);
