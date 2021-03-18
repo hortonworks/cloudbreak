@@ -31,13 +31,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.retry.RetryableFlow;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
@@ -173,6 +173,7 @@ public class StackCommonService {
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        validateStackIsNotDataLake(stack, instanceIds);
         return stackOperationService.removeInstances(stack, workspaceId, instanceIds, forced, user);
     }
 
@@ -279,7 +280,20 @@ public class StackCommonService {
     public FlowIdentifier deleteInstanceInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, String instanceId, boolean forced) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        validateStackIsNotDataLake(stack, Set.of(instanceId));
         return stackOperationService.removeInstance(stack, workspaceId, instanceId, forced, user);
+    }
+
+    private void validateStackIsNotDataLake(Stack stack, Set<String> instanceIds) {
+        if (StackType.DATALAKE.equals(stack.getType())) {
+            if (instanceIds.size() == 1) {
+                throw new BadRequestException(String.format("%s is a node of a data lake cluster, therefore it's not allowed to delete it.",
+                        List.copyOf(instanceIds).get(0)));
+            } else {
+                throw new BadRequestException(String.format("%s are nodes of a data lake cluster, therefore it's not allowed to delete them.",
+                        String.join(", ", instanceIds)));
+            }
+        }
     }
 
     public FlowIdentifier changeImageInWorkspace(NameOrCrn nameOrCrn, Long organziationId, StackImageChangeV4Request stackImageChangeRequest) {
