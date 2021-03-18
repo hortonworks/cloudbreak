@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -43,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestCaseDescriptionMissingException;
@@ -91,6 +93,9 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
 
     @Inject
     private CloudbreakActor cloudbreakActor;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
 
     @BeforeMethod
     public void beforeTest(Method method, Object[] params) {
@@ -213,9 +218,12 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
     public void testParallelMultiTenantStacks(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(true)
+                .given(EnvironmentTestDto.class).withNetwork()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class).withEnvironment()
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

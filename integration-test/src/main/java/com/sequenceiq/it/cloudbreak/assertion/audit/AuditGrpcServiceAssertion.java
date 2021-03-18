@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.assertion.audit;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -82,16 +83,16 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
 
     private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, T testDto, OperationInfo operationInfo) {
         String eventName = operationInfo.getEventName();
-        String firstState = Objects.requireNonNull(operationInfo.getFirstState(), "First state is null for this flow audit log check");
-        String lastState = Objects.requireNonNull(operationInfo.getLastState(), "Last state is null for this flow audit log check");
+        Set<String> firstStates = Objects.requireNonNull(operationInfo.getFirstStates(), "First state is null for this flow audit log check");
+        Set<String> lastStates = Objects.requireNonNull(operationInfo.getLastStates(), "Last state is null for this flow audit log check");
         if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
             throw new TestFailException(eventName + " flow audit log must contain minimum 2 items but has " + flowEvents.size());
         }
-        if (flowEvents.stream().noneMatch(e -> firstState.equals(getFlowState(e)))) {
-            throw new TestFailException(eventName + " flow audit log must contain " + firstState);
+        if (flowEvents.stream().noneMatch(e -> firstStates.contains(getFlowState(e)))) {
+            throw new TestFailException(eventName + " flow audit log must contain " + firstStates);
         }
-        if (flowEvents.stream().noneMatch(e -> lastState.equals(getFlowState(e)))) {
-            throw new TestFailException(eventName + " flow audit log must contain " + lastState);
+        if (flowEvents.stream().noneMatch(e -> lastStates.contains(getFlowState(e)))) {
+            throw new TestFailException(eventName + " flow audit log must contain " + lastStates);
         }
         if (!flowEvents.stream().allMatch(e -> testDto.getCrn().equals(getCrn(e)))) {
             throw new TestFailException(eventName + " flow audit log must match with all crns");
