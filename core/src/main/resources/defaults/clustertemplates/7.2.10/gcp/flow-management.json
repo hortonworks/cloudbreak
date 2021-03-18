@@ -2,7 +2,7 @@
   "name": "7.2.10 - Flow Management Heavy Duty for Google Cloud",
   "description": "",
   "type": "FLOW_MANAGEMENT",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
