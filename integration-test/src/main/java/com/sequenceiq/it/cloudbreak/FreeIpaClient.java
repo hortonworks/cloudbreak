@@ -4,9 +4,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiKeyClient;
+import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
+import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
+import com.sequenceiq.freeipa.api.client.FreeipaInternalCrnClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -16,9 +21,9 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncStatusDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ldap.LdapTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
@@ -32,6 +37,8 @@ public class FreeIpaClient extends MicroserviceClient {
     private static String crn;
 
     private com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient;
+
+    private FreeipaInternalCrnClient freeipaInternalCrnClient;
 
     FreeIpaClient(String newId) {
         super(newId);
@@ -75,11 +82,20 @@ public class FreeIpaClient extends MicroserviceClient {
     public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         FreeIpaClient clientEntity = new FreeIpaClient();
         clientEntity.setActing(cloudbreakUser);
-        clientEntity.freeIpaClient = new FreeIpaApiKeyClient(
-                testParameter.get(FreeIpaTest.FREEIPA_SERVER_ROOT),
+        clientEntity.freeIpaClient = new FreeIpaApiKeyClient(testParameter.get(FreeIpaTest.FREEIPA_SERVER_ROOT),
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        clientEntity.freeipaInternalCrnClient = createFreeipaInternalClient(testParameter.get(FreeIpaTest.FREEIPA_SERVER_INTERNAL_ROOT));
         return clientEntity;
+    }
+
+    public static synchronized FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot) {
+        FreeIpaApiUserCrnClient freeIpaApiUserCrnClient = new FreeIpaApiUserCrnClientBuilder(serverRoot)
+                .withCertificateValidation(false)
+                .withIgnorePreValidation(true)
+                .withDebug(true)
+                .build();
+        return new FreeipaInternalCrnClient(freeIpaApiUserCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
     }
 
     public com.sequenceiq.freeipa.api.client.FreeIpaClient getFreeIpaClient() {
@@ -88,6 +104,14 @@ public class FreeIpaClient extends MicroserviceClient {
 
     public void setFreeIpaClient(com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient) {
         this.freeIpaClient = freeIpaClient;
+    }
+
+    public FreeipaInternalCrnClient getFreeipaInternalCrnClient() {
+        return freeipaInternalCrnClient;
+    }
+
+    public void setFreeipaInternalCrnClient(FreeipaInternalCrnClient freeipaInternalCrnClient) {
+        this.freeipaInternalCrnClient = freeipaInternalCrnClient;
     }
 
     @Override
