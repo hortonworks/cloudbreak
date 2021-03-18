@@ -10,7 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.cloudkms.v1.CloudKMS;
 import com.google.api.services.cloudkms.v1.CloudKMSScopes;
@@ -27,16 +28,14 @@ public class GcpCloudKMSFactory {
     @Inject
     private GcpCredentialFactory gcpCredentialFactory;
 
-    @Inject
-    private ApacheHttpTransport gcpApacheHttpTransport;
-
     public CloudKMS buildCloudKMS(CloudCredential cloudCredential) throws GeneralSecurityException, IOException {
-        GoogleCredential credential = gcpCredentialFactory.buildCredential(cloudCredential, gcpApacheHttpTransport);
+        HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+        GoogleCredential credential = gcpCredentialFactory.buildCredential(cloudCredential, httpTransport);
         if (credential.createScopedRequired()) {
             credential = credential.createScoped(CloudKMSScopes.all());
         }
 
-        return new CloudKMS.Builder(gcpApacheHttpTransport, jsonFactory, credential)
+        return new CloudKMS.Builder(httpTransport, jsonFactory, credential)
                 .setApplicationName(cloudCredential.getName())
                 .build();
     }
