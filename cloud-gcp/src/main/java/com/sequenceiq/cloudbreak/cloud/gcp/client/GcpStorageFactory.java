@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
-import com.google.api.client.http.apache.ApacheHttpTransport;
+import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.storage.Storage;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Service
-public class GcpStorageFactory {
+public class GcpStorageFactory extends GcpServiceFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStorageFactory.class);
 
@@ -26,14 +26,13 @@ public class GcpStorageFactory {
     private GcpCredentialFactory gcpCredentialFactory;
 
     @Inject
-    private ApacheHttpTransport gcpApacheHttpTransport;
+    private HttpTransport httpTransport;
 
     public Storage buildStorage(CloudCredential gcpCredential, String name) {
         try {
-            GoogleCredential credential = gcpCredentialFactory.buildCredential(gcpCredential, gcpApacheHttpTransport);
-            return new Storage.Builder(
-                    gcpApacheHttpTransport, jsonFactory, setHttpTimeout(credential)).setApplicationName(name)
-                    .setHttpRequestInitializer(setHttpTimeout(credential))
+            GoogleCredential credential = gcpCredentialFactory.buildCredential(gcpCredential, httpTransport);
+            return new Storage.Builder(httpTransport, jsonFactory, setHttpTimeout(requestInitializer(credential)))
+                    .setApplicationName(name)
                     .build();
         } catch (Exception e) {
             LOGGER.warn("Error occurred while building Google Storage access.", e);

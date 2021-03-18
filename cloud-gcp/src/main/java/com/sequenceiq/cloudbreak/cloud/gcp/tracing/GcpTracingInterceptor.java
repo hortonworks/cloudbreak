@@ -1,23 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.tracing;
 
+import java.io.IOException;
 import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
-import org.apache.http.RequestLine;
-import org.apache.http.StatusLine;
-import org.apache.http.protocol.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.http.HttpExecuteInterceptor;
+import com.google.api.client.http.HttpRequest;
+import com.google.api.client.http.HttpResponse;
+import com.google.api.client.http.HttpResponseInterceptor;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpServiceFactory;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 
@@ -27,7 +25,7 @@ import io.opentracing.Span;
 import io.opentracing.Tracer;
 
 @Component
-public class GcpTracingInterceptor implements HttpRequestInterceptor, HttpResponseInterceptor {
+public class GcpTracingInterceptor implements HttpExecuteInterceptor, HttpResponseInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpTracingInterceptor.class);
 
@@ -43,24 +41,24 @@ public class GcpTracingInterceptor implements HttpRequestInterceptor, HttpRespon
     private Tracer tracer;
 
     @Override
-    public void process(HttpRequest request, HttpContext context) {
+    public void intercept(HttpRequest request)  throws IOException {
         StackWalker stackWalker = StackWalker.getInstance();
         StringBuilder apiOperation = new StringBuilder();
         Benchmark.measure(() -> getApiOperationFromStackTrace(stackWalker, apiOperation),
                 LOGGER, "STACK WALKING TOOK: {}ms");
-        activateNewTracingSpan(request, context, apiOperation);
+        activateNewTracingSpan(request, apiOperation);
     }
 
     @Override
-    public void process(HttpResponse response, HttpContext context) {
+    public void interceptResponse(HttpResponse response) throws IOException {
         Scope scope = DATA.get().getLeft();
         Span span = DATA.get().getRight();
-        StatusLine statusLine = response.getStatusLine();
-        if (requestSucceeded(statusLine)) {
+        int statusCode = response.getStatusCode();
+        if (requestSucceeded(response.getStatusCode())) {
             span.setTag(TracingUtil.ERROR, false);
         } else {
             span.setTag(TracingUtil.ERROR, true);
-            span.log(Map.of(TracingUtil.RESPONSE_CODE, statusLine.getStatusCode(), TracingUtil.MESSAGE, statusLine.getReasonPhrase()));
+            span.log(Map.of(TracingUtil.RESPONSE_CODE, statusCode, TracingUtil.MESSAGE, response.getStatusMessage()));
         }
         span.finish();
         scope.close();
@@ -81,7 +79,9 @@ public class GcpTracingInterceptor implements HttpRequestInterceptor, HttpRespon
 
     private boolean isFirstGcpApiMethod(StringBuilder apiOperation, StackWalker.StackFrame stackFrame) {
         return stackFrame.getClassName().startsWith("com.sequenceiq.cloudbreak.cloud.gcp")
-                && !stackFrame.getClassName().contains("tracing") && apiOperation.length() == 0;
+                && !stackFrame.getClassName().equals(GcpTracingInterceptor.class.getName())
+                && !stackFrame.getClassName().equals(GcpServiceFactory.class.getName())
+                && apiOperation.length() == 0;
     }
 
     private String extractClassName(StackWalker.StackFrame stackFrame) {
@@ -90,32 +90,31 @@ public class GcpTracingInterceptor implements HttpRequestInterceptor, HttpRespon
                 "$");
     }
 
-    private void activateNewTracingSpan(HttpRequest request, HttpContext context, StringBuilder apiOperation) {
-        RequestLine requestLine = request.getRequestLine();
-        String operationName = createOperationName(context, apiOperation, requestLine);
-        Span span = initSpan(requestLine, operationName);
+    private void activateNewTracingSpan(HttpRequest request, StringBuilder apiOperation) {
+        String operationName = createOperationName(apiOperation, request);
+        Span span = initSpan(request, operationName);
         Scope scope = tracer.activateSpan(span);
         DATA.set(Pair.of(scope, span));
     }
 
-    private String createOperationName(HttpContext context, StringBuilder apiOperation, RequestLine requestLine) {
-        String hostName = ((HttpHost) context.getAttribute("http.target_host")).getHostName();
-        return "GCP - [" + requestLine.getMethod().toUpperCase() + "] " +
+    private String createOperationName(StringBuilder apiOperation, HttpRequest request) {
+        String hostName = request.getUrl().getHost();
+        return "GCP - [" + request.getRequestMethod().toUpperCase() + "] " +
                 apiOperation +
                 " (" + hostName + ')';
     }
 
-    private Span initSpan(RequestLine requestLine, String operationName) {
+    private Span initSpan(HttpRequest request, String operationName) {
         Span span = tracer.buildSpan(operationName)
                 .addReference(References.FOLLOWS_FROM, tracer.activeSpan() != null ? tracer.activeSpan().context() : null)
                 .start();
         span.setTag(TracingUtil.COMPONENT, JAVA_GCP_SDK);
-        span.setTag(TracingUtil.URL, requestLine.getUri());
-        span.setTag(TracingUtil.HTTP_METHOD, requestLine.getMethod());
+        span.setTag(TracingUtil.URL, request.getUrl().getHost());
+        span.setTag(TracingUtil.HTTP_METHOD, request.getRequestMethod().toUpperCase());
         return span;
     }
 
-    private boolean requestSucceeded(StatusLine statusLine) {
-        return statusLine.getStatusCode() >= MIN_OK_STATUS_CODE && statusLine.getStatusCode() < MAX_OK_STATUS_CODE;
+    private boolean requestSucceeded(int statusCode) {
+        return statusCode >= MIN_OK_STATUS_CODE && statusCode < MAX_OK_STATUS_CODE;
     }
 }
