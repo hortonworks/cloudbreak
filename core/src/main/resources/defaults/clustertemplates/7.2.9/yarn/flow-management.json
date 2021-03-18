@@ -44,7 +44,7 @@
         "recoveryMode": "MANUAL",
         "template": {
           "rootVolume": {
-            "size": 50
+            "size": 100
           },
           "yarn": {
             "cpus": 4,

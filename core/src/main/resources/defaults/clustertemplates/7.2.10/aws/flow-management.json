@@ -54,7 +54,7 @@
         "template": {
           "instanceType": "m5.xlarge",
           "rootVolume": {
-            "size": 50
+            "size": 100
           },
           "attachedVolumes": [
             {
