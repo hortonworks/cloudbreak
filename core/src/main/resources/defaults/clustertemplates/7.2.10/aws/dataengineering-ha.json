@@ -44,6 +44,9 @@
         "template": {
           "aws": {},
           "instanceType": "m5.4xlarge",
+          "rootVolume": {
+            "size": 150
+          },
           "attachedVolumes": [{
             "size": 150,
             "count": 1,

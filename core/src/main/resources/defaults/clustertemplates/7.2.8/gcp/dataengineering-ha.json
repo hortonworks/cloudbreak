@@ -18,11 +18,14 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 150,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -34,11 +37,14 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 150,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 2,
         "type": "CORE",
@@ -50,11 +56,14 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 150,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -66,11 +75,14 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 500,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -82,11 +94,14 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 150,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 0,
         "type": "CORE",
@@ -98,11 +113,14 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 100,
-              "type": "pd-standard"
+              "size": 150,
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "rootVolume": {
+            "size": 150
+          },
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 1,
         "type": "CORE",
