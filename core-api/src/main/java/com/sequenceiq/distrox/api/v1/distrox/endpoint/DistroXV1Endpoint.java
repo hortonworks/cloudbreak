@@ -65,6 +65,8 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
+import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
+import com.sequenceiq.common.api.node.status.response.SaltStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
@@ -409,4 +411,28 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
     CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@PathParam("crn") String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
+
+    @GET
+    @Path("report/{stackCrn}/metering")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_METERING_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getMeteringReport")
+    NodeStatusResponse getMeteringReport(@PathParam("stackCrn") String stackCrn);
+
+    @GET
+    @Path("report/{stackCrn}/network")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_NETWORK_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getNetworkReport")
+    NodeStatusResponse getNetworkReport(@PathParam("stackCrn") String stackCrn);
+
+    @GET
+    @Path("report/{stackCrn}/services")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_SERVICES_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getServicesReport")
+    NodeStatusResponse getServicesReport(@PathParam("stackCrn") String stackCrn);
+
+    @GET
+    @Path("report/{stackCrn}/salt")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_SALT_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getSaltReport")
+    SaltStatusResponse getSaltReport(@PathParam("stackCrn") String stackCrn);
 }

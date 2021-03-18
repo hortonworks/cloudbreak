@@ -34,7 +34,7 @@ public class SaltReportToNodeStatusResponseConverter {
                 .stream()
                 .collect(Collectors.toMap(
                         Entry::getKey,
-                        (entry) -> convertHealthStatus(entry.getValue().get("status")))));
+                        entry -> convertHealthStatus(entry.getValue().get("status")))));
         result.setTimestamp(minions.getTimestamp());
         return result;
     }

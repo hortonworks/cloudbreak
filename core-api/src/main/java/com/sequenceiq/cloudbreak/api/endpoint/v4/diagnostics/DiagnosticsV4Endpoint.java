@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCo
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
+import com.sequenceiq.common.api.node.status.response.SaltStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -88,4 +89,10 @@ public interface DiagnosticsV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_SERVICES_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getServicesReport")
     NodeStatusResponse getServicesReport(@PathParam("stackCrn") String stackCrn);
+
+    @GET
+    @Path("report/{stackCrn}/salt")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_SALT_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getSaltReport")
+    SaltStatusResponse getSaltReport(@PathParam("stackCrn") String stackCrn);
 }

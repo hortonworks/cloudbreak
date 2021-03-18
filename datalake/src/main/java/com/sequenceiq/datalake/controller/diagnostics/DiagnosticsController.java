@@ -67,20 +67,20 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     }
 
     @Override
-    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public NodeStatusResponse getMeteringReport(String stackCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public NodeStatusResponse getMeteringReport(@ResourceCrn String stackCrn) {
         return diagnosticsService.getMeteringReport(stackCrn);
     }
 
     @Override
-    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public NodeStatusResponse getNetworkReport(String stackCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public NodeStatusResponse getNetworkReport(@ResourceCrn String stackCrn) {
         return diagnosticsService.getNetworkReport(stackCrn);
     }
 
     @Override
-    @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
-    public NodeStatusResponse getServicesReport(String stackCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public NodeStatusResponse getServicesReport(@ResourceCrn String stackCrn) {
         return diagnosticsService.getServicesReport(stackCrn);
     }
 }
