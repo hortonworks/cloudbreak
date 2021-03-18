@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CDP_VERSION_7_2_9;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-
 import static java.util.Collections.singletonMap;
-
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -50,6 +49,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -317,6 +317,7 @@ public class ClusterHostServiceRunner {
             Set<Node> nodes)
             throws IOException, CloudbreakOrchestratorException {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
+        List<ClouderaManagerProduct> cdpProductDetails = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
@@ -333,7 +334,7 @@ public class ClusterHostServiceRunner {
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
         saveGatewayPillar(primaryGatewayConfig, cluster, stack, servicePillar, virtualGroupRequest,
-                connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
+                connector, kerberosConfig, serviceLocations, clouderaManagerRepo, cdpProductDetails);
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
@@ -382,7 +383,7 @@ public class ClusterHostServiceRunner {
             throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         DataBusCredential dataBusCredential = null;
-        if (StringUtils.isNotBlank(cluster.getDatabusCredential())) {
+        if (isNotBlank(cluster.getDatabusCredential())) {
             try {
                 dataBusCredential = new Json(cluster.getDatabusCredential()).get(DataBusCredential.class);
             } catch (IOException e) {
@@ -571,15 +572,26 @@ public class ClusterHostServiceRunner {
             VirtualGroupRequest virtualGroupRequest,
             ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
             Map<String, List<String>> serviceLocations,
-            ClouderaManagerRepo clouderaManagerRepo) throws IOException {
-        final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(
+            ClouderaManagerRepo clouderaManagerRepo,
+            List<ClouderaManagerProduct> cdpProductDetails) throws IOException {
+        boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(
                 clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
+
+        Optional<String> cdpVersionOpt = cdpProductDetails.stream()
+                .filter(product -> "CDH".equals(product.getName()))
+                .map(product -> StringUtils.substringBefore(product.getVersion(), "-"))
+                .findFirst();
+        boolean enableTokenGenApplication = false;
+        if (cdpVersionOpt.isPresent() && isVersionNewerOrEqualThanLimited(cdpVersionOpt.get(), CDP_VERSION_7_2_9)) {
+            enableTokenGenApplication = true;
+        }
 
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer);
+        gateway.put("enable_token_gen_application", enableTokenGenApplication);
         gateway.put("enable_ccmv2", stack.getTunnel().useCcmV2());
 
         // for cloudbreak upgradeability
@@ -684,7 +696,7 @@ public class ClusterHostServiceRunner {
     private List<String> getRangerFqdn(Cluster cluster, String primaryGatewayFqdn, List<String> rangerLocations) {
         if (rangerLocations.size() > 1) {
             // SDX HA has multiple ranger instances in different groups, in Knox we only want to expose the ones on the gateway.
-            InstanceGroup gatewayInstanceGroup =  instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(cluster.getStack().getId());
+            InstanceGroup gatewayInstanceGroup = instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(cluster.getStack().getId());
             String gatewayGroupName = gatewayInstanceGroup.getGroupName();
             List<String> hosts = rangerLocations.stream()
                     .filter(s -> s.contains(gatewayGroupName))

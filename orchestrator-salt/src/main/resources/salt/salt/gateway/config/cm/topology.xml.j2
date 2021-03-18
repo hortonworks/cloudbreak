@@ -811,4 +811,34 @@
         {%- endif %}
     {%- endif %}
 
+{%- if salt['pillar.get']('gateway:enable_token_gen_application') == True -%}
+    <service>
+      <role>KNOXTOKEN</role>
+      <param>
+         <name>knox.token.ttl</name>
+         <value>31540000000</value> <!-- 1 year -->
+      </param>
+      <param>
+         <name>knox.token.exp.server-managed</name>
+         <value>true</value>
+      </param>
+      <param>
+         <name>knox.token.audiences</name>
+         <value>cdp-proxy-token</value>
+      </param>
+      <param>
+         <name>knox.token.target.url</name>
+         <value>cdp-proxy-token</value>
+      </param>
+      <param>
+         <name>knox.token.client.data</name>
+         <value>homepage_url=homepage/home/</value>
+      </param>
+    </service>
+
+    <application>
+      <name>tokengen</name>
+    </application>
+{% endif %}
+
 </topology>
