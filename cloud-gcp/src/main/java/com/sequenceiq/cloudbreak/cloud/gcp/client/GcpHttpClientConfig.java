@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
-import org.apache.http.impl.client.DefaultHttpClient;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.api.client.http.apache.ApacheHttpTransport;
-import com.sequenceiq.cloudbreak.cloud.gcp.tracing.GcpTracingInterceptor;
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
+import com.google.api.client.http.HttpTransport;
 
 @Configuration
 public class GcpHttpClientConfig {
 
     @Bean
-    public ApacheHttpTransport gcpApacheHttpTransport(GcpTracingInterceptor gcpTracingInterceptor) {
-        DefaultHttpClient defaultHttpClient = ApacheHttpTransport.newDefaultHttpClient();
-        defaultHttpClient.addRequestInterceptor(gcpTracingInterceptor);
-        defaultHttpClient.addResponseInterceptor(gcpTracingInterceptor);
-        return new ApacheHttpTransport(defaultHttpClient);
+    public HttpTransport httpTransport() throws GeneralSecurityException, IOException {
+        return GoogleNetHttpTransport.newTrustedTransport();
     }
 }
