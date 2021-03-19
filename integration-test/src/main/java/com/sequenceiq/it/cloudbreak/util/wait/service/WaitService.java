@@ -28,6 +28,11 @@ public class WaitService<T extends WaitObject> {
             LOGGER.info("Waiting round {} and elapsed time {} ms", attempts, System.currentTimeMillis() - startTime);
             try {
                 statusChecker.refresh(t);
+                if (statusChecker.checkStatus(t)) {
+                    LOGGER.debug(statusChecker.successMessage(t));
+                    testContext.setStatuses(statusChecker.getStatuses(t));
+                    return Result.result(WaitResult.SUCCESS);
+                }
             } catch (Exception ex) {
                 LOGGER.debug("Exception occurred during refresh: {}", ex.getMessage(), ex);
                 failures++;
@@ -39,11 +44,6 @@ public class WaitService<T extends WaitObject> {
                     testContext.setStatuses(statusChecker.getStatuses(t));
                     return Result.exception(actual);
                 }
-            }
-            if (statusChecker.checkStatus(t)) {
-                LOGGER.debug(statusChecker.successMessage(t));
-                testContext.setStatuses(statusChecker.getStatuses(t));
-                return Result.result(WaitResult.SUCCESS);
             }
             sleep(interval, statusChecker.getStatuses(t));
             attempts++;
