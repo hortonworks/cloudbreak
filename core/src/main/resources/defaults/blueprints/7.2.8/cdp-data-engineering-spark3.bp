@@ -365,6 +365,7 @@
           "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
           "livy_for_spark3-GATEWAY-BASE",
           "livy_for_spark3-LIVY_SERVER-BASE",
+          "zookeeper-SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
@@ -384,7 +385,6 @@
           "spark3_on_yarn-GATEWAY-BASE",
           "livy_for_spark3-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER",
-          "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE"
         ]
       },
