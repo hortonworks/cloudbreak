@@ -24,6 +24,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
@@ -41,7 +44,10 @@ class FreeIpaServiceTest {
 
     private static final String OPERATION = "operation";
 
-    private static final String ENVCRN = "envcrn";
+    private static final String ENVCRN = Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
+            .setAccountId("acc")
+            .setResource("env")
+            .build().toString();
 
     @Mock
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
@@ -62,16 +68,18 @@ class FreeIpaServiceTest {
     @Test
     void getSyncOperationStatusSuccess() {
         SyncOperationStatus status = createStatus(SynchronizationStatus.COMPLETED, "nope");
-        when(userV1Endpoint.getSyncOperationStatus(OPERATION)).thenReturn(status);
-        SyncOperationStatus result = underTest.getSyncOperationStatus(ENVCRN, OPERATION);
+        when(userV1Endpoint.getSyncOperationStatusInternal(any(), eq(OPERATION))).thenReturn(status);
+        SyncOperationStatus result = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                underTest.getSyncOperationStatus(ENVCRN, OPERATION));
         assertThat(result).isEqualTo(status);
     }
 
     @Test
     void getSyncOperationStatusFailure() {
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
-        when(userV1Endpoint.getSyncOperationStatus(OPERATION)).thenThrow(new WebApplicationException("network error"));
-        assertThatThrownBy(() -> underTest.getSyncOperationStatus(ENVCRN, OPERATION)).isInstanceOf(FreeIpaOperationFailedException.class);
+        when(userV1Endpoint.getSyncOperationStatusInternal(any(), eq(OPERATION))).thenThrow(new WebApplicationException("network error"));
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                underTest.getSyncOperationStatus(ENVCRN, OPERATION))).isInstanceOf(FreeIpaOperationFailedException.class);
     }
 
     @Test
