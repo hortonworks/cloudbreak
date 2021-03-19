@@ -11,7 +11,7 @@ public class EnvironmentCreateAction extends AbstractEnvironmentAction {
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         Log.whenJson("Environment post request: ", testDto.getRequest());
         testDto.setResponse(
-                client.getEnvironmentClient()
+                client.getDefaultClient()
                         .environmentV1Endpoint()
                         .post(testDto.getRequest()));
 

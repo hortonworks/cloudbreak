@@ -37,7 +37,7 @@ public class RedbeamsWaitObject implements WaitObject {
     }
 
     public DatabaseServerV4Endpoint getEndpoint() {
-        return client.getEndpoints().databaseServerV4Endpoint();
+        return client.getDefaultClient().databaseServerV4Endpoint();
     }
 
     public String getCrn() {

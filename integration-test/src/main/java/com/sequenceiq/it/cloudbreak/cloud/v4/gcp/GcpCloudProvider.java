@@ -320,7 +320,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
             try {
                 List<ImageV4Response> images = cloudbreakClient
-                        .getCloudbreakClient()
+                        .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                                 CloudPlatform.GCP.name()).getCdhImages();

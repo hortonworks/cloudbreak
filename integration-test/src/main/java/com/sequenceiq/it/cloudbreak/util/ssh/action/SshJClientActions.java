@@ -36,7 +36,7 @@ public class SshJClientActions extends SshJClient {
         List<String> instanceIPs = new ArrayList<>();
 
         hostGroupNames.forEach(hostGroupName -> {
-            InstanceMetaDataV4Response instanceMetaDataV4Response = Objects.requireNonNull(sdxClient.getSdxClient().sdxEndpoint().getDetail(sdxName,
+            InstanceMetaDataV4Response instanceMetaDataV4Response = Objects.requireNonNull(sdxClient.getDefaultClient().sdxEndpoint().getDetail(sdxName,
                     new HashSet<>()).getStackV4Response().getInstanceGroups().stream().filter(instanceGroup -> instanceGroup.getName().equals(hostGroupName))
                     .findFirst().orElse(null)).getMetadata().stream().findFirst().orElse(null);
             assert instanceMetaDataV4Response != null;
@@ -52,7 +52,7 @@ public class SshJClientActions extends SshJClient {
     private List<String> getFreeIpaInstanceGroupIps(String environmentCrn, FreeIpaClient freeipaClient, boolean publicIp) {
         List<String> instanceIPs = new ArrayList<>();
 
-        freeipaClient.getFreeIpaClient().getFreeIpaV1Endpoint()
+        freeipaClient.getDefaultClient().getFreeIpaV1Endpoint()
                 .describe(environmentCrn).getInstanceGroups().stream()
                 .forEach(ig -> {
                     InstanceMetaDataResponse instanceMetaDataResponse = ig.getMetaData().stream().findFirst().orElse(null);

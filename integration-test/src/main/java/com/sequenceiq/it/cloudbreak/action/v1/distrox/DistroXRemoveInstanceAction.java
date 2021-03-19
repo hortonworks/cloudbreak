@@ -16,7 +16,7 @@ public class DistroXRemoveInstanceAction implements Action<DistroXTestDto, Cloud
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         if (testDto.getRemovableInstanceId().isPresent()) {
-            client.getCloudbreakClient()
+            client.getDefaultClient()
                     .distroXV1Endpoint()
                     .deleteInstanceByCrn(testDto.getCrn(), false, testDto.getRemovableInstanceId().get());
             return testDto;

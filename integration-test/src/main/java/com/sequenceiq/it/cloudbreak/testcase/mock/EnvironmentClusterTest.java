@@ -18,9 +18,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
-import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -76,24 +74,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is an environment and a database which in not attached to the environment",
-            when = "a cluster is created in the environment and with the non-attached database",
-            then = "the cluster create should succeed")
-    public void testClusterWithRdsWithoutEnvironment(MockedTestContext testContext) {
-        createDefaultRdsConfig(testContext);
-        testContext
-                .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.create())
-                .given(StackTestDto.class)
-                .withEnvironmentClass(EnvironmentTestDto.class)
-                .withCluster(setResources(testContext, testContext.get(RedbeamsDatabaseTestDto.class).getName(),
-                        null, null))
-                .when(stackTestClient.createV4())
-                .validate();
-    }
-
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
-    @Description(
             given = "there is an environment with a cluster in it",
             when = "a change credential request is sent for the environment",
             then = "the credential of the cluster should be changed too")
@@ -144,15 +124,6 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .when(stackTestClient.getV4())
                 .then(EnvironmentClusterTest::checkNewCredentialInStack)
                 .validate();
-    }
-
-    private ClusterTestDto setResources(MockedTestContext testContext, String rdsName, String ldapName, String proxyName) {
-        ClusterTestDto cluster = testContext.given(ClusterTestDto.class)
-                .valid();
-        if (rdsName != null) {
-            cluster.withProxyConfigName(proxyName);
-        }
-        return cluster;
     }
 
     private static StackTestDto checkNewCredentialInStack(TestContext testContext, StackTestDto stack, CloudbreakClient client) {

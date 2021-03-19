@@ -315,7 +315,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .select(ImageCatalogTestDto::getRequest, key(imgCatalogName))
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Request request = cloudbreakClient
-                            .getCloudbreakClient()
+                            .getDefaultClient()
                             .imageCatalogV4Endpoint()
                             .getRequest(cloudbreakClient.getWorkspaceId(), imgCatalogName);
                     entity.setRequest(request);
@@ -353,7 +353,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                     updateRequest.setUrl(IMG_CATALOG_URL);
 
                     ImageCatalogV4Response updateResponse = cloudbreakClient
-                            .getCloudbreakClient()
+                            .getDefaultClient()
                             .imageCatalogV4Endpoint()
                             .update(cloudbreakClient.getWorkspaceId(), updateRequest);
                     entity.setResponse(updateResponse);
@@ -382,7 +382,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                 .withName(CB_DEFAULT_IMG_CATALOG_NAME)
                 .when((testContext1, entity, cloudbreakClient) -> {
                     ImageCatalogV4Responses list = cloudbreakClient
-                            .getCloudbreakClient()
+                            .getDefaultClient()
                             .imageCatalogV4Endpoint()
                             .list(cloudbreakClient.getWorkspaceId());
                     return entity;

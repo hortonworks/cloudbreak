@@ -16,7 +16,7 @@ public class AuditUtil {
     }
 
     public static AuditEventV4Responses getAuditEvents(CloudbreakClient cloudbreakClient, String resourceType, Long id, String crn) {
-        AuditEventV4Endpoint endpoint = cloudbreakClient.getCloudbreakClient().auditV4Endpoint();
+        AuditEventV4Endpoint endpoint = cloudbreakClient.getDefaultClient().auditV4Endpoint();
         return endpoint.getAuditEvents(0L, resourceType, id, crn);
     }
 }

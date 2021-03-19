@@ -17,7 +17,7 @@ public class CredentialGetAction implements Action<CredentialTestDto, Environmen
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         Log.when(LOGGER, " Credential get request: " + testDto.getName());
         testDto.setResponse(
-                environmentClient.getEnvironmentClient()
+                environmentClient.getDefaultClient()
                         .credentialV1Endpoint()
                         .getByName(testDto.getName()));
         Log.whenJson(LOGGER, " Credential get successfully:\n", testDto.getResponse());

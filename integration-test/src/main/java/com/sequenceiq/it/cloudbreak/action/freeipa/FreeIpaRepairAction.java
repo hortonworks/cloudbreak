@@ -42,7 +42,7 @@ public class FreeIpaRepairAction implements Action<FreeIpaTestDto, FreeIpaClient
                 .collect(Collectors.toList());
         request.setInstanceIds(instanceIds);
         Log.whenJson(LOGGER, format(" FreeIPA repair request: %n"), request);
-        client.getFreeIpaClient()
+        client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .repairInstances(request);
         return testDto;

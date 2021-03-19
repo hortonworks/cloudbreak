@@ -22,7 +22,7 @@ public class FreeIpaUserSyncWaitObject extends FreeIpaWaitObject {
     @Override
     public void fetchData() {
         super.fetchData();
-        environmentUserSyncState = getClient().getFreeIpaClient().getUserV1Endpoint().getUserSyncState(getEnvironmentCrn());
+        environmentUserSyncState = getClient().getDefaultClient().getUserV1Endpoint().getUserSyncState(getEnvironmentCrn());
     }
 
     @Override

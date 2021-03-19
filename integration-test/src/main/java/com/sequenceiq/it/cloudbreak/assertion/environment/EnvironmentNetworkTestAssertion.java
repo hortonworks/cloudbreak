@@ -19,7 +19,7 @@ public class EnvironmentNetworkTestAssertion {
 
     public static Assertion<EnvironmentTestDto, EnvironmentClient> environmentContainsNeccessaryConfigs() {
         return (testContext, testDto, environmentClient) -> {
-            DetailedEnvironmentResponse environment = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(testDto.getName());
+            DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
             if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
                 containsRightNumberOfSubnetsOnAws(environment);
                 hasThreePrivateSubnet(environment);
@@ -110,7 +110,7 @@ public class EnvironmentNetworkTestAssertion {
 
     public static Assertion<EnvironmentTestDto, EnvironmentClient> environmentWithEndpointGatewayContainsNeccessaryConfigs(Set<String> subnetIds) {
         return (testContext, testDto, environmentClient) -> {
-            DetailedEnvironmentResponse environment = environmentClient.getEnvironmentClient().environmentV1Endpoint().getByName(testDto.getName());
+            DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
             isPublicEndpointAccessGatewayEnabled(environment);
             subnetIdsWerePropagatedCorrectly(environment, subnetIds);
             return testDto;

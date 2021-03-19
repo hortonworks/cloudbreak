@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceApiKeyClient;
+import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClientBuilder;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -24,7 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 
-public class EnvironmentClient extends MicroserviceClient {
+public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environment.client.EnvironmentClient, EnvironmentServiceCrnEndpoints> {
 
     public static final String ENVIRONMENT_CLIENT = "ENVIRONMENT_CLIENT";
 
@@ -42,10 +43,6 @@ public class EnvironmentClient extends MicroserviceClient {
 
     public static Function<IntegrationTestContext, EnvironmentClient> getTestContextEnvironmentClient(String key) {
         return testContext -> testContext.getContextParam(key, EnvironmentClient.class);
-    }
-
-    public static Function<IntegrationTestContext, EnvironmentClient> getTestContextEnvironmentClient() {
-        return getTestContextEnvironmentClient(ENVIRONMENT_CLIENT);
     }
 
     @Override
@@ -80,27 +77,22 @@ public class EnvironmentClient extends MicroserviceClient {
         return new EnvironmentInternalCrnClient(userCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
     }
 
-    public com.sequenceiq.environment.client.EnvironmentClient getEnvironmentClient() {
-        return environmentClient;
-    }
-
-    public void setEnvironmentClient(com.sequenceiq.environment.client.EnvironmentClient environmentClient) {
-        this.environmentClient = environmentClient;
-    }
-
-    public EnvironmentInternalCrnClient getEnvironmentInternalCrnClient() {
-        return environmentInternalCrnClient;
-    }
-
-    public void setEnvironmentInternalCrnClient(EnvironmentInternalCrnClient environmentInternalCrnClient) {
-        this.environmentInternalCrnClient = environmentInternalCrnClient;
-    }
-
     @Override
     public Set<String> supportedTestDtos() {
         return Set.of(EnvironmentTestDto.class.getSimpleName(),
                 EnvironmentClient.class.getSimpleName(),
                 ProxyTestDto.class.getSimpleName(),
                 CredentialTestDto.class.getSimpleName());
+    }
+
+    @Override
+    public com.sequenceiq.environment.client.EnvironmentClient getDefaultClient() {
+        return environmentClient;
+    }
+
+    @Override
+    public EnvironmentServiceCrnEndpoints getInternalClient(TestContext testContext) {
+        checkIfInternalClientAllowed(testContext);
+        return environmentInternalCrnClient.withInternalCrn();
     }
 }

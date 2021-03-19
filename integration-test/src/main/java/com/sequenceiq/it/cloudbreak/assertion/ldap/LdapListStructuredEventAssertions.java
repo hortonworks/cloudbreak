@@ -20,7 +20,7 @@ public class LdapListStructuredEventAssertions {
     private EventAssertionCommon eventAssertionCommon;
 
     public LdapTestDto checkCreateEvents(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("post-ldap"));
@@ -28,7 +28,7 @@ public class LdapListStructuredEventAssertions {
     }
 
     public LdapTestDto checkDeleteEvents(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkRestEvents(auditEvents, Collections.singletonList("delete-ldap"));

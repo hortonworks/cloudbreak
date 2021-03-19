@@ -137,7 +137,7 @@ public class EnvironmentListStructuredEventAssertions {
     private EventAssertionCommon eventAssertionCommon;
 
     public EnvironmentTestDto checkCreateEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_CREATE_FLOW_STATES);
@@ -147,7 +147,7 @@ public class EnvironmentListStructuredEventAssertions {
     }
 
     public EnvironmentTestDto checkDeleteEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_DELETE_FLOW_STATES);
@@ -157,7 +157,7 @@ public class EnvironmentListStructuredEventAssertions {
     }
 
     public EnvironmentTestDto checkStopEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_STOP_FLOW_STATES);
@@ -167,7 +167,7 @@ public class EnvironmentListStructuredEventAssertions {
     }
 
     public EnvironmentTestDto checkStartEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, ENV_START_FLOW_STATES);

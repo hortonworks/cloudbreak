@@ -99,7 +99,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     @Override
     public Collection<ImageCatalogV4Response> getAll(CloudbreakClient client) {
-        return client.getCloudbreakClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getResponses();
+        return client.getDefaultClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getResponses();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     @Override
     public void delete(TestContext testContext, ImageCatalogV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().imageCatalogV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
+            client.getDefaultClient().imageCatalogV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

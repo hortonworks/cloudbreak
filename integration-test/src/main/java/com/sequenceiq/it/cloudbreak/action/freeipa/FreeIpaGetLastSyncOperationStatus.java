@@ -19,7 +19,7 @@ public class FreeIpaGetLastSyncOperationStatus extends AbstractFreeIpaAction<Fre
     protected FreeIpaUserSyncTestDto freeIpaAction(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", testDto.getEnvironmentCrn(), testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA get last sync status request: %n"), testDto.getRequest());
-        SyncOperationStatus syncOperationStatus = client.getFreeIpaClient()
+        SyncOperationStatus syncOperationStatus = client.getDefaultClient()
                 .getUserV1Endpoint()
                 .getLastSyncOperationStatus(testDto.getEnvironmentCrn());
         testDto.setOperationId(syncOperationStatus.getOperationId());

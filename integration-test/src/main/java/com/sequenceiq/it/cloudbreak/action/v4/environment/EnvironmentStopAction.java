@@ -14,7 +14,7 @@ public class EnvironmentStopAction extends AbstractEnvironmentAction {
 
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        client.getEnvironmentClient()
+        client.getDefaultClient()
                 .environmentV1Endpoint()
                 .postStopByCrn(testDto.getResponse().getCrn());
         Log.when(LOGGER, "Environment stop action posted");

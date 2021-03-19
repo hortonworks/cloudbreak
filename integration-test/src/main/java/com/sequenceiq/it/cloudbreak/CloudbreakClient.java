@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
@@ -45,14 +46,12 @@ import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
 
-public class CloudbreakClient extends MicroserviceClient {
+public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbreak.client.CloudbreakClient, CloudbreakServiceCrnEndpoints> {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
     private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
 
     private static CloudbreakInternalCrnClient singletonCloudbreakInternalCrnClient;
-
-    private static String crn;
 
     private com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient;
 
@@ -83,16 +82,17 @@ public class CloudbreakClient extends MicroserviceClient {
         return (T) new CloudbreakWaitObject(this, name, map, testContext.getActingUserCrn().getAccountId());
     }
 
+    @Override
+    public com.sequenceiq.cloudbreak.client.CloudbreakClient getDefaultClient() {
+        return cloudbreakClient;
+    }
+
     public static synchronized com.sequenceiq.cloudbreak.client.CloudbreakClient getSingletonCloudbreakClient() {
         return singletonCloudbreakClient;
     }
 
     public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient(String key) {
         return testContext -> testContext.getContextParam(key, CloudbreakClient.class);
-    }
-
-    public static Function<IntegrationTestContext, CloudbreakClient> getTestContextCloudbreakClient() {
-        return getTestContextCloudbreakClient(CLOUDBREAK_CLIENT);
     }
 
     public static CloudbreakClient created() {
@@ -150,18 +150,6 @@ public class CloudbreakClient extends MicroserviceClient {
         return new CloudbreakInternalCrnClient(cbUserCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
     }
 
-    public com.sequenceiq.cloudbreak.client.CloudbreakClient getCloudbreakClient() {
-        return cloudbreakClient;
-    }
-
-    public CloudbreakInternalCrnClient getCloudbreakInternalCrnClient() {
-        return cloudbreakInternalCrnClient;
-    }
-
-    public void setCloudbreakClient(com.sequenceiq.cloudbreak.client.CloudbreakClient cloudbreakClient) {
-        this.cloudbreakClient = cloudbreakClient;
-    }
-
     public Long getWorkspaceId() {
         return workspaceId;
     }
@@ -193,6 +181,12 @@ public class CloudbreakClient extends MicroserviceClient {
                 CheckResourceRightTestDto.class.getSimpleName(),
                 RenewDistroXCertificateTestDto.class.getSimpleName(),
                 ImageCatalogTestDto.class.getSimpleName());
+    }
+
+    @Override
+    public CloudbreakServiceCrnEndpoints getInternalClient(TestContext testContext) {
+        checkIfInternalClientAllowed(testContext);
+        return cloudbreakInternalCrnClient.withInternalCrn();
     }
 }
 

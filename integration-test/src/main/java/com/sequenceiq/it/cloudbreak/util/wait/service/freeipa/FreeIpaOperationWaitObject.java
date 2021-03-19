@@ -26,7 +26,7 @@ public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
     public void fetchData() {
         super.fetchData();
         if (operationId != null) {
-            operationStatus = getClient().getFreeIpaClient().getOperationV1Endpoint().getOperationStatus(operationId);
+            operationStatus = getClient().getDefaultClient().getOperationV1Endpoint().getOperationStatus(operationId);
         }
     }
 

@@ -13,7 +13,7 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 public class SdxUtil {
 
     public List<String> getInstanceIds(AbstractSdxTestDto testDto, SdxClient sdxClient, String hostGroupName) {
-        List<InstanceGroupV4Response> instanceGroups = sdxClient.getSdxClient().sdxEndpoint().getDetail(testDto.getName(), new HashSet<>())
+        List<InstanceGroupV4Response> instanceGroups = sdxClient.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), new HashSet<>())
                 .getStackV4Response().getInstanceGroups();
         return InstanceUtil.getInstanceIds(instanceGroups, hostGroupName);
     }

@@ -19,7 +19,7 @@ public class FreeIpaDescribeAction implements Action<FreeIpaTestDto, FreeIpaClie
         Log.when(LOGGER, format(" FreeIPA crn: %s", testDto.getRequest().getEnvironmentCrn()));
         Log.whenJson(LOGGER, format(" FreeIPA get request:%n"), testDto.getRequest());
         testDto.setResponse(
-                client.getFreeIpaClient()
+                client.getDefaultClient()
                         .getFreeIpaV1Endpoint()
                         .describe(testDto.getRequest().getEnvironmentCrn()));
         Log.whenJson(LOGGER, format(" FreeIPA get successfully: %n"), testDto.getResponse());

@@ -52,11 +52,11 @@ public class CloudbreakWaitObject implements WaitObject {
     }
 
     public DistroXV1Endpoint getDistroxEndpoint() {
-        return client.getCloudbreakClient().distroXV1Endpoint();
+        return client.getDefaultClient().distroXV1Endpoint();
     }
 
     public StackV4Endpoint getStackEndpoint() {
-        return client.getCloudbreakClient().stackV4Endpoint();
+        return client.getDefaultClient().stackV4Endpoint();
     }
 
     public Long getWorkspaceId() {

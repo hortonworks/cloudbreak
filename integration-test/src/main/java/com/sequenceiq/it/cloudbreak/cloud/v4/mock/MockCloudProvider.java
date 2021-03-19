@@ -206,7 +206,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
         if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
             try {
                 List<ImageV4Response> images = cloudbreakClient
-                        .getCloudbreakClient()
+                        .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                                 CloudPlatform.MOCK.name()).getCdhImages();

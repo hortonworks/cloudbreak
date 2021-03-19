@@ -20,12 +20,10 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
 
-public class SdxClient extends MicroserviceClient {
+public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Void> {
     public static final String SDX_CLIENT = "SDX_CLIENT";
 
     private SdxServiceApiKeyEndpoints sdxClient;
-
-    private String name;
 
     SdxClient() {
         super(SDX_CLIENT);
@@ -42,12 +40,13 @@ public class SdxClient extends MicroserviceClient {
         return (W) new DatalakeWaitObject(this, entity.getName(), (SdxClusterStatusResponse) desiredStatuses.get("status"));
     }
 
-    public static Function<IntegrationTestContext, SdxClient> getTestContextSdxClient(String key) {
-        return testContext -> testContext.getContextParam(key, SdxClient.class);
+    @Override
+    public SdxServiceApiKeyEndpoints getDefaultClient() {
+        return sdxClient;
     }
 
-    public static Function<IntegrationTestContext, SdxClient> getTestContextSdxClient() {
-        return getTestContextSdxClient(SDX_CLIENT);
+    public static Function<IntegrationTestContext, SdxClient> getTestContextSdxClient(String key) {
+        return testContext -> testContext.getContextParam(key, SdxClient.class);
     }
 
     public static synchronized SdxClient createProxySdxClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
@@ -58,14 +57,6 @@ public class SdxClient extends MicroserviceClient {
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
-    }
-
-    public com.sequenceiq.sdx.client.SdxClient getSdxClient() {
-        return sdxClient;
-    }
-
-    public void setSdxClient(SdxServiceApiKeyEndpoints sdxClient) {
-        this.sdxClient = sdxClient;
     }
 
     @Override

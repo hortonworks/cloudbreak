@@ -17,7 +17,7 @@ public class RedbeamsDatabaseServerCreateAction implements Action<RedbeamsDataba
     public RedbeamsDatabaseServerTestDto action(TestContext testContext, RedbeamsDatabaseServerTestDto testDto, RedbeamsClient client) throws Exception {
         Log.whenJson(LOGGER, " Database register request:\n", testDto.getRequest());
         testDto.setResponse(
-                client.getEndpoints()
+                client.getDefaultClient()
                         .databaseServerV4Endpoint()
                         .create(testDto.getRequest()));
         Log.whenJson(LOGGER, " Database registered successfully:\n", testDto.getResponse());

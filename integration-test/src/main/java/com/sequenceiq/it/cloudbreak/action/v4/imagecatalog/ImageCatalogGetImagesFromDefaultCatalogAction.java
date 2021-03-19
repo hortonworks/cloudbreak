@@ -29,7 +29,7 @@ public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<Ima
         try {
             testDto.setResponseByProvider(
                     cloudbreakClient
-                            .getCloudbreakClient()
+                            .getDefaultClient()
                             .imageCatalogV4Endpoint()
                             .getImages(cloudbreakClient.getWorkspaceId(), null, platform.name())
             );

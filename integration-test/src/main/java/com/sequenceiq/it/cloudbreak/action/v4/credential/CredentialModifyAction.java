@@ -17,7 +17,7 @@ public class CredentialModifyAction implements Action<CredentialTestDto, Environ
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient cloudbreakClient) throws Exception {
         Log.whenJson(LOGGER, " Credential modifyV4 request:\n", testDto.getRequest());
         testDto.setResponse(
-                cloudbreakClient.getEnvironmentClient()
+                cloudbreakClient.getDefaultClient()
                         .credentialV1Endpoint()
                         .put(testDto.modifyRequest()));
         Log.whenJson(LOGGER, " Credential modified successfully:\n", testDto.getResponse());

@@ -18,7 +18,7 @@ public class FreeIpaCreateAction implements Action<FreeIpaTestDto, FreeIpaClient
     public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA post request:%n"), testDto.getRequest());
         testDto.setResponse(
-                client.getFreeIpaClient()
+                client.getDefaultClient()
                         .getFreeIpaV1Endpoint()
                         .create(testDto.getRequest()));
         Log.whenJson(LOGGER, format(" FreeIPA created  successfully:%n"), testDto.getResponse());

@@ -28,7 +28,6 @@ import org.testng.ITestResult;
 import org.testng.Reporter;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
-import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -401,10 +400,6 @@ public abstract class TestContext implements ApplicationContextAware {
                     UmsClient.class, umsClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
-            redbeamsClient.setEnvironmentCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT)
-                    .setAccountId("it")
-                    .setResource("test-environment")
-                    .build().toString());
         }
         return this;
     }

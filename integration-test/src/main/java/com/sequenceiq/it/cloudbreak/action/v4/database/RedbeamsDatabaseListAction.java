@@ -19,9 +19,9 @@ public class RedbeamsDatabaseListAction implements Action<RedbeamsDatabaseTestDt
 
     @Override
     public RedbeamsDatabaseTestDto action(TestContext testContext, RedbeamsDatabaseTestDto testDto, RedbeamsClient client) throws Exception {
-        Collection<DatabaseV4Response> responses = client.getEndpoints()
+        Collection<DatabaseV4Response> responses = client.getDefaultClient()
                 .databaseV4Endpoint()
-                .list(client.getEnvironmentCrn())
+                .list(testDto.getRequest().getEnvironmentCrn())
                 .getResponses();
         testDto.setResponses(responses.stream().collect(Collectors.toSet()));
         Log.whenJson(LOGGER, " Databases listed successfully:\n", testDto.getResponses());

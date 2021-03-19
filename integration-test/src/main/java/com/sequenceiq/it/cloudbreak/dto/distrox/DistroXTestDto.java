@@ -89,7 +89,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
-        DistroXV1Endpoint distroXV1Endpoint = client.getCloudbreakClient().distroXV1Endpoint();
+        DistroXV1Endpoint distroXV1Endpoint = client.getDefaultClient().distroXV1Endpoint();
         return distroXV1Endpoint.list(null, null).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -107,7 +107,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().distroXV1Endpoint().deleteByName(entity.getName(), true);
+            client.getDefaultClient().distroXV1Endpoint().deleteByName(entity.getName(), true);
             testContext.await(this, STACK_DELETED, key("wait-purge-distrox-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);

@@ -18,7 +18,7 @@ public class EnvironmentDeleteMultipleByCrnsAction extends AbstractEnvironmentAc
 
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
-        SimpleEnvironmentResponses delete = client.getEnvironmentClient()
+        SimpleEnvironmentResponses delete = client.getDefaultClient()
                 .environmentV1Endpoint()
                 .deleteMultipleByCrns(crns, true, false);
         testDto.setResponseSimpleEnvSet(delete.getResponses());

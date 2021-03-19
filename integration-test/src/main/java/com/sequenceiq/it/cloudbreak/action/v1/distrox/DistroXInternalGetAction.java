@@ -21,8 +21,7 @@ public class DistroXInternalGetAction implements Action<DistroXTestDto, Cloudbre
         String distroXCrn = testDto.getResponse().getCrn();
         Log.when(LOGGER, " Internal actor CRN used for distrox get request: " + distroXCrn);
         testDto.withInternalStackResponse(
-                client.getCloudbreakInternalCrnClient()
-                        .withInternalCrn()
+                client.getInternalClient(testContext)
                         .distroXInternalV1Endpoint()
                         .getByCrn(distroXCrn));
         Log.whenJson(LOGGER, "Internal actor CRN used for distrox, response:", testDto.getInternalStackResponse());

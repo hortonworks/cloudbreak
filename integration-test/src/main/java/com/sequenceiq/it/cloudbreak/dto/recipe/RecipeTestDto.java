@@ -87,7 +87,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     @Override
     public List<RecipeViewV4Response> getAll(CloudbreakClient client) {
-        RecipeV4Endpoint recipeV4Endpoint = client.getCloudbreakClient().recipeV4Endpoint();
+        RecipeV4Endpoint recipeV4Endpoint = client.getDefaultClient().recipeV4Endpoint();
         return recipeV4Endpoint.list(client.getWorkspaceId()).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
@@ -101,7 +101,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     @Override
     public void delete(TestContext testContext, RecipeViewV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().recipeV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
+            client.getDefaultClient().recipeV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

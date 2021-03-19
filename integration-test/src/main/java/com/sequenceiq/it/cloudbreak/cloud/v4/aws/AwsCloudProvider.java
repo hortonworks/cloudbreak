@@ -336,7 +336,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
             try {
                 List<ImageV4Response> images = cloudbreakClient
-                        .getCloudbreakClient()
+                        .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                                 CloudPlatform.AWS.name()).getCdhImages();

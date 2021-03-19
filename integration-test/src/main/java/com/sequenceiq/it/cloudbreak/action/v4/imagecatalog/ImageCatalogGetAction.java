@@ -27,7 +27,7 @@ public class ImageCatalogGetAction implements Action<ImageCatalogTestDto, Cloudb
         Log.when(LOGGER, "Get Imagecatalog by name: " + testDto.getRequest().getName());
         try {
             testDto.setResponse(
-                    cloudbreakClient.getCloudbreakClient().imageCatalogV4Endpoint().getByName(cloudbreakClient.getWorkspaceId(), testDto.getName(), withImages)
+                    cloudbreakClient.getDefaultClient().imageCatalogV4Endpoint().getByName(cloudbreakClient.getWorkspaceId(), testDto.getName(), withImages)
             );
             Log.whenJson(LOGGER, "Imagecatalog has been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {

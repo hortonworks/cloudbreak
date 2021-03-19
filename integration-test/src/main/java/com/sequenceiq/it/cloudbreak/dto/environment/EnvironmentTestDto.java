@@ -281,7 +281,7 @@ public class EnvironmentTestDto
 
     @Override
     public List<SimpleEnvironmentResponse> getAll(EnvironmentClient client) {
-        EnvironmentEndpoint environmentEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
+        EnvironmentEndpoint environmentEndpoint = client.getDefaultClient().environmentV1Endpoint();
         return new ArrayList<>(environmentEndpoint.list().getResponses()).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -316,7 +316,7 @@ public class EnvironmentTestDto
     @Override
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, EnvironmentClient client) {
         LOGGER.info("Delete resource with name: {}", entity.getName());
-        EnvironmentEndpoint credentialEndpoint = client.getEnvironmentClient().environmentV1Endpoint();
+        EnvironmentEndpoint credentialEndpoint = client.getDefaultClient().environmentV1Endpoint();
         credentialEndpoint.deleteByName(entity.getName(), true, false);
         setName(entity.getName());
         testContext.await(this, Map.of("status", ARCHIVED));

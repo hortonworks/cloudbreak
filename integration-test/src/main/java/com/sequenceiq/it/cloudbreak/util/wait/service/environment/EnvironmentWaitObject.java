@@ -32,7 +32,7 @@ public class EnvironmentWaitObject implements WaitObject {
     }
 
     public EnvironmentEndpoint getEndpoint() {
-        return client.getEnvironmentClient().environmentV1Endpoint();
+        return client.getDefaultClient().environmentV1Endpoint();
     }
 
     public String getCrn() {

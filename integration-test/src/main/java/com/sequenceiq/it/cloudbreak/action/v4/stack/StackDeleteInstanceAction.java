@@ -20,7 +20,7 @@ public class StackDeleteInstanceAction implements Action<StackTestDto, Cloudbrea
         String instanceId = testContext.getRequiredSelected(INSTANCE_ID);
         Log.when(LOGGER, " Stack delete instance request: " + testDto.getName() + " instance id: " + instanceId);
         Boolean forced = testContext.getSelected("forced");
-        client.getCloudbreakClient()
+        client.getDefaultClient()
                 .stackV4Endpoint()
                 .deleteInstance(client.getWorkspaceId(), testDto.getName(), forced != null && forced, instanceId,
                         testContext.getActingUserCrn().getAccountId());

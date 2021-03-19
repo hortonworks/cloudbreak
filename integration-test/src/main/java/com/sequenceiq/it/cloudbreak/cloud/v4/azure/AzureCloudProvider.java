@@ -359,7 +359,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         if (azureProperties.getBaseimage().getImageId() == null || azureProperties.getBaseimage().getImageId().isEmpty()) {
             try {
                 List<ImageV4Response> images = cloudbreakClient
-                        .getCloudbreakClient()
+                        .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                                 CloudPlatform.AZURE.name()).getCdhImages();

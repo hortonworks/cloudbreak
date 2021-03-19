@@ -18,7 +18,7 @@ public class ClusterTemplateGetAction implements Action<ClusterTemplateTestDto, 
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, " ClusterTemplateEntity get request: " + testDto.getName());
-        ClusterTemplateV4Response response = client.getCloudbreakClient()
+        ClusterTemplateV4Response response = client.getDefaultClient()
                 .clusterTemplateV4EndPoint()
                 .getByName(client.getWorkspaceId(), testDto.getName());
         testDto.setResponses(Sets.newHashSet(response));

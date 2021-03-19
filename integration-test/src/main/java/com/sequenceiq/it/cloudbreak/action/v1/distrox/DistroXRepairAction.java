@@ -32,10 +32,10 @@ public class DistroXRepairAction implements Action<DistroXTestDto, CloudbreakCli
         DistroXRepairV1Request distroXRepairV1Request = createRepairRequest();
         Log.when(LOGGER, format(" Starting repair on DistroX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " DistroX  repair request: ", distroXRepairV1Request);
-        client.getCloudbreakClient()
+        client.getDefaultClient()
                 .distroXV1Endpoint()
                 .repairClusterByName(testDto.getName(), distroXRepairV1Request);
-        StackV4Response stackV4Response = client.getCloudbreakClient()
+        StackV4Response stackV4Response = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);
