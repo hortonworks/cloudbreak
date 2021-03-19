@@ -86,6 +86,8 @@ public class UserSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncService.class);
 
+    private static final String COMPLETED_WITH_WARNINGS_MESSAGE = "Synchronization completed with warnings.";
+
     private enum LogEvent {
         FULL_USER_SYNC,
         PARTIAL_USER_SYNC,
@@ -190,7 +192,7 @@ public class UserSyncService {
                                 userSyncStatusService.save(userSyncStatus);
                             });
                         }
-                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userSyncFilter, fullSync);
+                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userSyncFilter);
                     }));
         }
 
@@ -220,15 +222,13 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-            boolean fullSync) {
+    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter, fullSync));
+            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter));
         } finally {
             MDCBuilder.removeOperationId();
         }
-
     }
 
     private void tryWithOperationCleanup(String operationId, String accountId, Runnable runnable) {
@@ -248,8 +248,8 @@ public class UserSyncService {
         }
     }
 
-    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-            boolean fullSync) {
+    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter) {
+        boolean fullSync = userSyncFilter.isFullSync();
         tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
 
@@ -263,13 +263,13 @@ public class UserSyncService {
             LOGGER.info("Starting {} for environments {} with operationId {} ...", logUserSyncEvent, environmentCrns, operationId);
 
             Map<String, Future<SyncStatusDetail>> statusFutures;
+            Multimap<String, String> warnings = ArrayListMultimap.create();
 
             if (userSyncFilter.getDeletedWorkloadUser().isEmpty()) {
                 LogEvent logRetrieveUmsEvent = fullSync ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
                 LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
                 Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProviderDispatcher
-                        .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userSyncFilter.getUserCrnFilter(),
-                                userSyncFilter.getMachineUserCrnFilter(), requestId);
+                        .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userSyncFilter, requestId, warnings::put);
                 LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
                 statusFutures = stacks.stream()
                         .collect(Collectors.toMap(Stack::getEnvironmentCrn,
@@ -289,13 +289,25 @@ public class UserSyncService {
                     SyncStatusDetail statusDetail = statusFuture.get();
                     switch (statusDetail.getStatus()) {
                         case COMPLETED:
-                            success.add(new SuccessDetails(envCrn));
+                            if (warnings.isEmpty()) {
+                                success.add(new SuccessDetails(envCrn));
+                            } else {
+                                failure.add(createFailureDetails(envCrn,
+                                        COMPLETED_WITH_WARNINGS_MESSAGE,
+                                        warnings));
+                            }
                             break;
                         case FAILED:
-                            failure.add(createFailureDetails(envCrn, statusDetail.getDetails(), statusDetail.getWarnings()));
+                            warnings.putAll(statusDetail.getWarnings());
+                            failure.add(createFailureDetails(envCrn,
+                                    statusDetail.getDetails(),
+                                    warnings));
                             break;
                         default:
-                            failure.add(createFailureDetails(envCrn, "Unexpected status: " + statusDetail.getStatus(), statusDetail.getWarnings()));
+                            warnings.putAll(statusDetail.getWarnings());
+                            failure.add(createFailureDetails(envCrn,
+                                    "Unexpected status: " + statusDetail.getStatus(),
+                                    warnings));
                             break;
                     }
                 } catch (InterruptedException | ExecutionException e) {
@@ -473,7 +485,7 @@ public class UserSyncService {
         if (warnings.isEmpty()) {
             return SyncStatusDetail.succeed(environmentCrn);
         } else {
-            return SyncStatusDetail.fail(environmentCrn, "Synchronization completed with warnings.", warnings);
+            return SyncStatusDetail.fail(environmentCrn, COMPLETED_WITH_WARNINGS_MESSAGE, warnings);
         }
     }
 

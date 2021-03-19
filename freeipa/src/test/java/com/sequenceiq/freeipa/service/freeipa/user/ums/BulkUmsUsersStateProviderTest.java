@@ -52,7 +52,7 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
         setupMocksForBulk();
 
         Map<String, UmsUsersState> umsUsersStateMap = underTest.get(
-                ACCOUNT_ID, List.of(ENVIRONMENT_CRN), Optional.empty());
+                testData.getAccountId(), List.of(testData.getEnvironmentCrn()), Optional.empty());
 
         verifyUmsUsersStateBuilderMap(umsUsersStateMap);
     }
@@ -60,20 +60,20 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
     private void setupMocksForBulk() {
         List<UserManagementProto.RightsCheck> expectedRightsChecks =
                 List.of(UserManagementProto.RightsCheck.newBuilder()
-                        .setResourceCrn(ENVIRONMENT_CRN)
+                        .setResourceCrn(testData.getEnvironmentCrn())
                         .addAllRight(UserSyncConstants.RIGHTS)
                         .build());
 
         UserManagementProto.GetUserSyncStateModelResponse.Builder builder =
                 UserManagementProto.GetUserSyncStateModelResponse.newBuilder();
 
-        builder.addAllGroup(testData.groups);
-        builder.addAllWorkloadAdministrationGroup(testData.allWags);
+        builder.addAllGroup(testData.getGroups());
+        builder.addAllWorkloadAdministrationGroup(testData.getAllWags());
         builder.addAllActor(Stream.concat(
-                testData.users.stream()
+                testData.getUsers().stream()
                         .map(u ->  {
-                            Map<String, Boolean> groupMembership = testData.memberCrnToGroupMembership.get(u.getCrn());
-                            Map<String, Boolean> wagMembership = testData.memberCrnToWagMembership.get(u.getCrn());
+                            Map<String, Boolean> groupMembership = testData.getMemberCrnToGroupMembership().get(u.getCrn());
+                            Map<String, Boolean> wagMembership = testData.getMemberCrnToWagMembership().get(u.getCrn());
                             return UserManagementProto.UserSyncActor.newBuilder()
                                     .setActorDetails(UserManagementProto.UserSyncActorDetails.newBuilder()
                                             .setCrn(u.getCrn())
@@ -84,26 +84,26 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                                             .build())
                                     .addRightsCheckResult(UserManagementProto.RightsCheckResult.newBuilder()
                                             .addAllHasRight(UserSyncConstants.RIGHTS.stream()
-                                                    .map(right -> testData.memberCrnToActorRights.get(u.getCrn()).get(right))
+                                                    .map(right -> testData.getMemberCrnToActorRights().get(u.getCrn()).get(right))
                                                     .collect(Collectors.toList()))
                                             .build())
-                                    .addAllGroupIndex(IntStream.range(0, testData.groups.size())
-                                            .filter(i -> groupMembership.get(testData.groups.get(i).getCrn()))
+                                    .addAllGroupIndex(IntStream.range(0, testData.getGroups().size())
+                                            .filter(i -> groupMembership.get(testData.getGroups().get(i).getCrn()))
                                             .boxed()
                                             .collect(Collectors.toList()))
-                                    .addAllWorkloadAdministrationGroupIndex(IntStream.range(0, testData.allWags.size())
+                                    .addAllWorkloadAdministrationGroupIndex(IntStream.range(0, testData.getAllWags().size())
                                             .filter(i -> wagMembership
-                                                    .get(testData.allWags.get(i).getWorkloadAdministrationGroupName()))
+                                                    .get(testData.getAllWags().get(i).getWorkloadAdministrationGroupName()))
                                             .boxed()
                                             .collect(Collectors.toList()))
                                     .setCredentials(toActorWorkloadCredentials(
-                                            testData.memberCrnToWorkloadCredentials.get(u.getCrn())))
+                                            testData.getMemberCrnToWorkloadCredentials().get(u.getCrn())))
                                     .build();
                         }),
-                testData.machineUsers.stream()
+                testData.getMachineUsers().stream()
                         .map(u -> {
-                            Map<String, Boolean> groupMembership = testData.memberCrnToGroupMembership.get(u.getCrn());
-                            Map<String, Boolean> wagMembership = testData.memberCrnToWagMembership.get(u.getCrn());
+                            Map<String, Boolean> groupMembership = testData.getMemberCrnToGroupMembership().get(u.getCrn());
+                            Map<String, Boolean> wagMembership = testData.getMemberCrnToWagMembership().get(u.getCrn());
                             return UserManagementProto.UserSyncActor.newBuilder()
                                     .setActorDetails(UserManagementProto.UserSyncActorDetails.newBuilder()
                                             .setCrn(u.getCrn())
@@ -114,26 +114,26 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                                             .build())
                                     .addRightsCheckResult(UserManagementProto.RightsCheckResult.newBuilder()
                                             .addAllHasRight(UserSyncConstants.RIGHTS.stream()
-                                                    .map(right -> testData.memberCrnToActorRights.get(u.getCrn()).get(right))
+                                                    .map(right -> testData.getMemberCrnToActorRights().get(u.getCrn()).get(right))
                                                     .collect(Collectors.toList()))
                                             .build())
-                                    .addAllGroupIndex(IntStream.range(0, testData.groups.size())
-                                            .filter(i -> groupMembership.get(testData.groups.get(i).getCrn()))
+                                    .addAllGroupIndex(IntStream.range(0, testData.getGroups().size())
+                                            .filter(i -> groupMembership.get(testData.getGroups().get(i).getCrn()))
                                             .boxed()
                                             .collect(Collectors.toList()))
-                                    .addAllWorkloadAdministrationGroupIndex(IntStream.range(0, testData.allWags.size())
+                                    .addAllWorkloadAdministrationGroupIndex(IntStream.range(0, testData.getAllWags().size())
                                             .filter(i -> wagMembership
-                                                    .get(testData.allWags.get(i).getWorkloadAdministrationGroupName()))
+                                                    .get(testData.getAllWags().get(i).getWorkloadAdministrationGroupName()))
                                             .boxed()
                                             .collect(Collectors.toList()))
                                     .setCredentials(toActorWorkloadCredentials(
-                                            testData.memberCrnToWorkloadCredentials.get(u.getCrn())))
+                                            testData.getMemberCrnToWorkloadCredentials().get(u.getCrn())))
                                     .build();
                         }))
                 .collect(Collectors.toList()));
 
         when(grpcUmsClient.getUserSyncStateModel(
-                eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), eq(expectedRightsChecks), any(Optional.class)))
+                eq(INTERNAL_ACTOR_CRN), eq(testData.getAccountId()), eq(expectedRightsChecks), any(Optional.class)))
                 .thenReturn(builder.build());
         setupServicePrincipals();
     }

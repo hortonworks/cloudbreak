@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
@@ -29,17 +29,13 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 @Component
 public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
-    @VisibleForTesting
-    static final boolean DONT_INCLUDE_INTERNAL_MACHINE_USERS = false;
-
-    @VisibleForTesting
-    static final boolean INCLUDE_WORKLOAD_MACHINE_USERS = true;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultUmsUsersStateProvider.class);
 
@@ -55,13 +51,23 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     @Inject
     private FmsUserConverter fmsUserConverter;
 
+    @Inject
+    private UserRetriever userRetriever;
+
+    @Inject
+    private MachineUserRetriever machineUserRetriever;
+
     public Map<String, UmsUsersState> get(
             String accountId, String actorCrn,
-            Collection<String> environmentCrns, Set<String> userCrns, Set<String> machineUserCrns,
-            Optional<String> requestIdOptional, boolean fullSync) {
-        List<UserManagementProto.User> users = getUsers(actorCrn, accountId, requestIdOptional, fullSync, userCrns);
+            Collection<String> environmentCrns, UserSyncRequestFilter userSyncRequestFilter,
+            Optional<String> requestIdOptional,
+            BiConsumer<String, String> warnings) {
+        boolean fullSync = userSyncRequestFilter.isFullSync();
+        List<UserManagementProto.User> users = userRetriever.getUsers(actorCrn, accountId, requestIdOptional, fullSync,
+                userSyncRequestFilter.getUserCrnFilter(), warnings);
         List<UserManagementProto.MachineUser> machineUsers =
-                getMachineUsers(actorCrn, accountId, requestIdOptional, fullSync, machineUserCrns);
+                machineUserRetriever.getMachineUsers(actorCrn, accountId, requestIdOptional, fullSync,
+                        userSyncRequestFilter.getMachineUserCrnFilter(), warnings);
 
         Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(
                 grpcUmsClient.listAllGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional));
@@ -152,35 +158,6 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                         }
                     }
                 });
-    }
-
-    private List<UserManagementProto.User> getUsers(
-            String actorCrn, String accountId,
-            Optional<String> requestIdOptional,
-            boolean fullSync, Set<String> userCrns) {
-        if (fullSync) {
-            return grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdOptional);
-        } else if (!userCrns.isEmpty()) {
-            return grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
-        } else {
-            return List.of();
-        }
-    }
-
-    private List<UserManagementProto.MachineUser> getMachineUsers(
-            String actorCrn, String accountId, Optional<String> requestIdOptional,
-            boolean fullSync, Set<String> machineUserCrns) {
-        if (fullSync) {
-            return grpcUmsClient.listAllMachineUsers(actorCrn, accountId,
-                    DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
-                    requestIdOptional);
-        } else if (!machineUserCrns.isEmpty()) {
-            return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns),
-                    DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
-                    requestIdOptional);
-        } else {
-            return List.of();
-        }
     }
 
     private EnvironmentAccessChecker createEnvironmentAccessChecker(String environmentCrn) {

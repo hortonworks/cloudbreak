@@ -1,6 +1,9 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncRequestFilter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
@@ -17,10 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -51,17 +58,27 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
     @SuppressFBWarnings
     private WorkloadCredentialConverter workloadCredentialConverter = new WorkloadCredentialConverter();
 
+    @Mock
+    private UserRetriever userRetriever;
+
+    @Mock
+    private MachineUserRetriever machineUserRetriever;
+
     @InjectMocks
     private DefaultUmsUsersStateProvider underTest;
 
     @Test
     void getEnvToUmsUsersStateMap() {
         setupMocks();
+        UserSyncRequestFilter requestFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
+        Multimap<String, String> warnings = ArrayListMultimap.create();
 
         Map<String, UmsUsersState> umsUsersStateMap = underTest.get(
-                ACCOUNT_ID, ACTOR_CRN, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), Optional.empty(), true);
+                testData.getAccountId(), testData.getActorCrn(), List.of(testData.getEnvironmentCrn()),
+                requestFilter, Optional.empty(), warnings::put);
 
         verifyUmsUsersStateBuilderMap(umsUsersStateMap);
+        assertTrue(warnings.isEmpty());
     }
 
     private void setupMocks() {
@@ -73,25 +90,24 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     authorizationRightChecksFactory.create(environmentCrn));
         }).when(environmentAccessCheckerFactory).create(anyString());
 
-        when(grpcUmsClient.listAllGroups(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class)))
-                .thenReturn(testData.groups);
+        when(grpcUmsClient.listAllGroups(eq(INTERNAL_ACTOR_CRN), eq(testData.getAccountId()), any(Optional.class)))
+                .thenReturn(testData.getGroups());
         when(grpcUmsClient.listWorkloadAdministrationGroups(eq(INTERNAL_ACTOR_CRN),
-                eq(ACCOUNT_ID), any(Optional.class)))
-                .thenReturn(testData.allWags);
+                eq(testData.getAccountId()), any(Optional.class)))
+                .thenReturn(testData.getAllWags());
 
 
-        when(grpcUmsClient.listAllUsers(eq(ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class)))
-                .thenReturn(testData.users);
+        when(userRetriever.getUsers(eq(testData.getActorCrn()), eq(testData.getAccountId()),
+                any(Optional.class), anyBoolean(), anySet(), any(BiConsumer.class)))
+                .thenReturn(testData.getUsers());
 
-        when(grpcUmsClient.listAllMachineUsers(eq(ACTOR_CRN), eq(ACCOUNT_ID),
-                eq(DefaultUmsUsersStateProvider.DONT_INCLUDE_INTERNAL_MACHINE_USERS),
-                eq(DefaultUmsUsersStateProvider.INCLUDE_WORKLOAD_MACHINE_USERS),
-                any(Optional.class)))
-                .thenReturn(testData.machineUsers);
+        when(machineUserRetriever.getMachineUsers(eq(testData.getActorCrn()), eq(testData.getAccountId()),
+                any(Optional.class), anyBoolean(), anySet(), any(BiConsumer.class)))
+                .thenReturn(testData.getMachineUsers());
 
         doAnswer(invocation -> {
             String crn = invocation.getArgument(1, String.class);
-            Map<String, Boolean> actorRights = testData.memberCrnToActorRights.get(crn);
+            Map<String, Boolean> actorRights = testData.getMemberCrnToActorRights().get(crn);
             return UserSyncConstants.RIGHTS.stream()
                     .map(right -> actorRights.get(right))
                     .collect(Collectors.toList());
@@ -99,16 +115,16 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(2, String.class);
-            return testData.memberCrnToGroupMembership.get(memberCrn).entrySet().stream()
+            return testData.getMemberCrnToGroupMembership().get(memberCrn).entrySet().stream()
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
         }).when(grpcUmsClient)
-                .listGroupsForMember(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), anyString(), any(Optional.class));
+                .listGroupsForMember(eq(INTERNAL_ACTOR_CRN), eq(testData.getAccountId()), anyString(), any(Optional.class));
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(1, String.class);
-            return testData.memberCrnToWagMembership.get(memberCrn).entrySet().stream()
+            return testData.getMemberCrnToWagMembership().get(memberCrn).entrySet().stream()
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
@@ -117,7 +133,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
 
         doAnswer(invocation -> workloadCredentialConverter
                 .toWorkloadCredential(
-                        testData.memberCrnToWorkloadCredentials.get(invocation.getArgument(0, String.class))))
+                        testData.getMemberCrnToWorkloadCredentials().get(invocation.getArgument(0, String.class))))
                 .when(umsCredentialProvider)
                 .getCredentials(anyString(), any(Optional.class));
 

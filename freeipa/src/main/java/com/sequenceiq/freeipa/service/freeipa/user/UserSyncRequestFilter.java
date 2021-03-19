@@ -14,10 +14,13 @@ public class UserSyncRequestFilter {
 
     private final Optional<String> deletedWorkloadUser;
 
+    private final boolean fullSync;
+
     public UserSyncRequestFilter(Set<String> userCrnFilter, Set<String> machineUserCrnFilter, Optional<String> deletedWorkloadUser) {
         this.userCrnFilter = ImmutableSet.copyOf(userCrnFilter);
         this.machineUserCrnFilter = ImmutableSet.copyOf(machineUserCrnFilter);
         this.deletedWorkloadUser = deletedWorkloadUser;
+        fullSync = userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
     }
 
     public static UserSyncRequestFilter newFullSync() {
@@ -25,7 +28,7 @@ public class UserSyncRequestFilter {
     }
 
     public boolean isFullSync() {
-        return userCrnFilter.isEmpty() && machineUserCrnFilter.isEmpty();
+        return fullSync;
     }
 
     public ImmutableSet<String> getUserCrnFilter() {
