@@ -54,7 +54,8 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
     public void testDataHubListFiltering(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_A);
         resourceCreator.createDefaultCredential(testContext);
-        resourceCreator.createDefaultEnvironment(testContext);
+        EnvironmentTestDto environment = resourceCreator.createDefaultEnvironment(testContext);
+        resourceCreator.createNewFreeIpa(testContext, environment);
         resourceCreator.createDefaultDataLake(testContext);
         DistroXTestDto datahubA = resourceCreator.createDefaultDataHubAndWaitAs(testContext, Optional.of(AuthUserKeys.USER_ACCOUNT_ADMIN));
 
