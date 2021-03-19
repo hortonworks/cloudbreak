@@ -57,11 +57,11 @@ public class ClouderaManagerStorageErrorMapper {
 
     private String awsError(CloudStorage cloudStorage) {
 
-        String instanceProfile = "";
+        String assumerInstanceProfile = "";
 
         for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
             if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                instanceProfile = cloudIdentity.getS3Identity().getInstanceProfile();
+                assumerInstanceProfile = cloudIdentity.getS3Identity().getInstanceProfile();
                 break;
             }
         }
@@ -76,40 +76,40 @@ public class ClouderaManagerStorageErrorMapper {
                         "This problem usually occurs due to cloud storage permission misconfiguration. " +
                         "Services on the cluster are using Data Access Role (%s) and Ranger Audit Role (%s) to write to the Ranger Audit location (%s), " +
                         "therefore please verify that these roles have write access to this location. " +
-                        "During Data Lake cluster creation, CDP Control Plane attaches Data Access Instance Profile (%s) to the IDBroker VM. " +
-                        "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Data Access Instance Profile (%s) " +
+                        "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile (%s) to the IDBroker Virtual Machine. " +
+                        "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile (%s) " +
                         "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
                         "Refer to Cloudera documentation at %s for the required rights.",
-                auditLocation, dataAccessRole, rangerAuditRole, auditLocation, instanceProfile, instanceProfile,
+                auditLocation, dataAccessRole, rangerAuditRole, auditLocation, assumerInstanceProfile, assumerInstanceProfile,
                 "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
     }
 
     private String azureError(CloudStorage cloudStorage) {
 
-        String managedIdentity = "";
+        String assumerIdentity = "";
 
         for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
             if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
-                managedIdentity = cloudIdentity.getAdlsGen2Identity().getManagedIdentity();
+                assumerIdentity = cloudIdentity.getAdlsGen2Identity().getManagedIdentity();
                 break;
             }
         }
 
         String auditLocation = getRangerAuditDir(cloudStorage);
         AccountMapping accountMapping = cloudStorage.getAccountMapping();
-        String dataAccessRole = accountMapping.getUserMappings().get("hive");
+        String dataAccessIdentity = accountMapping.getUserMappings().get("hive");
         // There is no ranger in the IDBroker mapping, so we can use solr
-        String rangerAuditRole = accountMapping.getUserMappings().get("solr");
+        String rangerAuditIdentity = accountMapping.getUserMappings().get("solr");
 
         return String.format("Services running on the cluster were unable to write to %s location. " +
                         "This problem usually occurs due to cloud storage permission misconfiguration. " +
                         "Services on the cluster are using Data Access Identity (%s) and Ranger Audit Identity (%s) to write to the " +
                         "Ranger Audit location (%s), therefore please verify that these roles have write access to this location. " +
-                        "During Data Lake cluster creation, CDP Control Plane attaches Data Access Assumer Identity (%s) to the IDBroker VM. " +
-                        "IDBroker will then use it to attach the other managed identities to the IDBroker VM, therefore Data Access Identity (%s) " +
+                        "During Data Lake cluster creation, CDP Control Plane attaches Assumer Identity (%s) to the IDBroker Virtual Machine. " +
+                        "IDBroker will then use it to attach the other managed identities to the IDBroker Virtual Machine, therefore Assumer Identity (%s) " +
                         "permissions must, at a minimum, allow to attach the Data Access Identity and Ranger Access Identity. " +
                         "Refer to Cloudera documentation at %s for the required rights.",
-                auditLocation, dataAccessRole, rangerAuditRole, auditLocation, managedIdentity, managedIdentity,
+                auditLocation, dataAccessIdentity, rangerAuditIdentity, auditLocation, assumerIdentity, assumerIdentity,
                 "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
     }
 
