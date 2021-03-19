@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -110,6 +111,22 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im2 = mock(InstanceMetaData.class);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenThrow(NotFoundException.class);
+        when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
+        when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
+        lenient().when(im2.getInstanceId()).thenReturn(INSTANCE_ID_2);
+
+        assertEquals(INSTANCE_ID_1, underTest.selectNewPrimaryGatewayInstanceId(stack, List.of(INSTANCE_ID_2)));
+
+        verify(gatewayConfigService).getPrimaryGatewayConfig(eq(stack));
+    }
+
+    @Test
+    void testGetNewPrimaryGatewayInstanceIdWhenPrimaryGwDoesNotRespond() throws Exception {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData im1 = mock(InstanceMetaData.class);
+        InstanceMetaData im2 = mock(InstanceMetaData.class);
+
+        when(hostOrchestrator.getFreeIpaMasterHostname(any())).thenThrow(CloudbreakOrchestratorFailedException.class);
         when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
         when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
         lenient().when(im2.getInstanceId()).thenReturn(INSTANCE_ID_2);
