@@ -240,6 +240,7 @@
           "hms-HIVEMETASTORE-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "spark3_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "zookeeper-SERVER-BASE",
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
@@ -256,7 +257,6 @@
           "hms-GATEWAY-BASE",
           "spark3_on_yarn-GATEWAY-BASE",
           "yarn-NODEMANAGER-WORKER",
-          "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE"
         ]
       },
