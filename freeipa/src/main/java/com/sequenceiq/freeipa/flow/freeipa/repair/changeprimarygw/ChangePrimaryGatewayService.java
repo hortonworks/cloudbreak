@@ -61,12 +61,9 @@ public class ChangePrimaryGatewayService {
                     newPrimaryGatewayInstanceId = assignNewPrimaryGatewayInstanceId(stack, repairInstanceIds);
                 }
             }
-        } catch (NotFoundException e) {
-            LOGGER.debug("No primary gateway found, searching for an different primary gateway");
+        } catch (NotFoundException | CloudbreakOrchestratorException e) {
+            LOGGER.debug("No primary gateway found, searching for a different primary gateway");
             newPrimaryGatewayInstanceId = assignNewPrimaryGatewayInstanceId(stack, repairInstanceIds);
-        } catch (CloudbreakOrchestratorException e) {
-            LOGGER.debug("The orchestrator failed to identify the primary gateway node", e);
-            throw new NotFoundException("No FreeIPA primary gateway could be selected", e);
         }
         LOGGER.debug("The new primary gateway will be {}", newPrimaryGatewayInstanceId);
         return newPrimaryGatewayInstanceId;
