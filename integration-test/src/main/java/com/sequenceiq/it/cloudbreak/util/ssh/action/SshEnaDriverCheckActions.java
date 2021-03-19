@@ -58,7 +58,7 @@ public class SshEnaDriverCheckActions extends SshJClient {
     }
 
     private InstanceMetaDataV4Response getInstanceMetadata(String name, CloudbreakClient cloudbreakClient, String group) {
-        InstanceMetaDataV4Response instanceMetaDataResponse = cloudbreakClient.getCloudbreakClient().distroXV1Endpoint()
+        InstanceMetaDataV4Response instanceMetaDataResponse = cloudbreakClient.getDefaultClient().distroXV1Endpoint()
                 .getByName(name, Collections.emptySet())
                 .getInstanceGroups()
                 .stream()

@@ -19,7 +19,7 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" SDX's environment: %s ", testDto.getRequest().getEnvironment()));
         Log.whenJson(LOGGER, " SDX sync request: ", testDto.getRequest());
-        client.getSdxClient()
+        client.getDefaultClient()
                 .sdxEndpoint()
                 .sync(testDto.getName());
         Log.when(LOGGER, " SDX sync have been initiated. ");

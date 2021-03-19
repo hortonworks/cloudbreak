@@ -15,8 +15,7 @@ public class EnvironmentInternalGetAction implements Action<EnvironmentTestDto, 
             throw new IllegalArgumentException("Environment get action with internal actor requires a Environment response first.");
         }
         testDto.setResponse(
-                environmentClient.getEnvironmentInternalCrnClient()
-                        .withInternalCrn()
+                environmentClient.getInternalClient(testContext)
                         .environmentV1Endpoint()
                         .getByCrn(testDto.getResponse().getCrn()));
         Log.whenJson("Environment get response with internal actor: ", testDto.getResponse());

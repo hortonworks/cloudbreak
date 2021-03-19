@@ -51,10 +51,10 @@ public class InstanceWaitObject implements WaitObject {
     public void fetchData() {
         try {
             instanceGroups = testContext.getMicroserviceClient(CloudbreakClient.class)
-                    .getCloudbreakClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
+                    .getDefaultClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
         } catch (NotFoundException e) {
             LOGGER.info("SDX '{}' instance groups are present for validation.", getName());
-            instanceGroups = testContext.getSdxClient().getSdxClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();
+            instanceGroups = testContext.getSdxClient().getDefaultClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();
         } catch (Exception e) {
             LOGGER.error("Instance groups cannot be determined, because of: {}", e.getMessage(), e);
             throw new TestFailException("Instance groups cannot be determined", e);

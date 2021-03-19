@@ -20,13 +20,13 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
         Log.when(LOGGER, "Create Imagecatalog with name: " + testDto.getRequest().getName());
         try {
             testDto.setResponse(
-                    client.getCloudbreakClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
+                    client.getDefaultClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest())
             );
             Log.whenJson(LOGGER, "Imagecatalog created successfully: ", testDto.getRequest());
         } catch (Exception e) {
             Log.when(LOGGER, "Cannot create Imagecatalog, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
-                    client.getCloudbreakClient().imageCatalogV4Endpoint()
+                    client.getDefaultClient().imageCatalogV4Endpoint()
                             .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE));
             Log.whenJson(LOGGER, "Imagecatalog fetched successfully: ", testDto.getRequest());
         }

@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 
 import io.opentracing.Tracer;
 
-public class UmsClient extends MicroserviceClient {
+public class UmsClient extends MicroserviceClient<GrpcUmsClient, Void> {
 
     public static final String UMS_CLIENT = "UMS_CLIENT";
 
@@ -46,16 +46,17 @@ public class UmsClient extends MicroserviceClient {
         throw new TestFailException("Wait object does not support by ums client");
     }
 
+    @Override
+    public GrpcUmsClient getDefaultClient() {
+        return umsClient;
+    }
+
     public static synchronized UmsClient createProxyUmsClient(Tracer tracer) {
         UmsClient clientEntity = new UmsClient();
         UmsClientConfig clientConfig = new UmsClientConfig();
         clientEntity.umsClient = GrpcUmsClient.createClient(
                 UmsChannelConfig.newManagedChannelWrapper("ums.thunderhead-dev.cloudera.com", 8982), clientConfig, tracer);
         return clientEntity;
-    }
-
-    public GrpcUmsClient getUmsClient() {
-        return umsClient;
     }
 
     @Override

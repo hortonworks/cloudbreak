@@ -21,7 +21,7 @@ public class FreeIpaDetachChildEnvironmentAction implements Action<FreeIpaChildE
     public FreeIpaChildEnvironmentTestDto action(TestContext testContext, FreeIpaChildEnvironmentTestDto testDto, FreeIpaClient client) throws Exception {
         DetachChildEnvironmentRequest request = convertRequest(testDto.getRequest());
         Log.whenJson(LOGGER, format(" FreeIPA detach child environment:%n"), request);
-        client.getFreeIpaClient()
+        client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .detachChildEnvironment(request);
         Log.when(LOGGER, " FreeIPA detached child environment successfully.");

@@ -20,12 +20,12 @@ public class SdxAutotlsCertRotationAction implements Action<SdxTestDto, SdxClien
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX autotls cert rotation request: ", certificatesRotationV4Request);
-        FlowIdentifier flowIdentifier = client.getSdxClient().sdxEndpoint()
+        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint()
                 .rotateAutoTlsCertificatesByName(testDto.getName(), new CertificatesRotationV4Request());
         testDto.setFlow("SDX autotls cert rotation", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getSdxClient().sdxEndpoint()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient().sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
         Log.whenJson(LOGGER, " SDX response after autotls cert rotation: ", detailedResponse);

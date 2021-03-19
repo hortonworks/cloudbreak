@@ -19,12 +19,12 @@ public class SdxForceDeleteInternalAction implements Action<SdxInternalTestDto, 
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
-        FlowIdentifier flowIdentifier = client.getSdxClient()
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .sdxEndpoint()
                 .delete(testDto.getName(), true);
         testDto.setFlow("SDX Internal force delete", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

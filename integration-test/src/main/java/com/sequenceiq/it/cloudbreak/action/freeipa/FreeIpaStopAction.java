@@ -18,7 +18,7 @@ public class FreeIpaStopAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
     protected FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getRequest().getEnvironmentCrn()));
         Log.whenJson(LOGGER, format(" FreeIPA stop request: %n"), testDto.getRequest());
-        client.getFreeIpaClient()
+        client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .stop(testDto.getRequest().getEnvironmentCrn());
         return testDto;

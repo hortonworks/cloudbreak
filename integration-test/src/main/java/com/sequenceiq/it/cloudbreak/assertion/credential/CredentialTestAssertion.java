@@ -22,7 +22,7 @@ public class CredentialTestAssertion {
 
     public Assertion<CredentialTestDto, EnvironmentClient> checkStructuredEvents() {
         return (testContext, entity, client) -> {
-            List<CDPStructuredEvent> auditEvents = client.getEnvironmentClient().structuredEventsV1Endpoint()
+            List<CDPStructuredEvent> auditEvents = client.getDefaultClient().structuredEventsV1Endpoint()
                     .getAuditEvents(entity.getCrn(), Collections.emptyList(), 0, 100);
             eventAssertionCommon.checkRestEvents(auditEvents, List.of("post-credential",
                     "put-credential",

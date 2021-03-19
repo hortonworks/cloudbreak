@@ -15,12 +15,12 @@ public class SdxDescribeAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX describe request: ", testDto.getRequest());
-        client.getSdxClient()
+        client.getDefaultClient()
                 .sdxEndpoint()
                 .get(testDto.getName());
-        Log.whenJson(LOGGER, " SDX describe response: ", client.getSdxClient().sdxEndpoint().get(testDto.getName()));
+        Log.whenJson(LOGGER, " SDX describe response: ", client.getDefaultClient().sdxEndpoint().get(testDto.getName()));
         return testDto;
     }
 }

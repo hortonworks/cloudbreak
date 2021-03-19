@@ -11,6 +11,7 @@ import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiKeyClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClient;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
+import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnEndpoint;
 import com.sequenceiq.freeipa.api.client.FreeipaInternalCrnClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
@@ -31,10 +32,8 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaOperationWa
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaUserSyncWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
 
-public class FreeIpaClient extends MicroserviceClient {
+public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api.client.FreeIpaClient, FreeIpaApiUserCrnEndpoint> {
     public static final String FREEIPA_CLIENT = "FREEIPA_CLIENT";
-
-    private static String crn;
 
     private com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient;
 
@@ -71,12 +70,13 @@ public class FreeIpaClient extends MicroserviceClient {
         }
     }
 
-    public static Function<IntegrationTestContext, FreeIpaClient> getTestContextFreeIpaClient(String key) {
-        return testContext -> testContext.getContextParam(key, FreeIpaClient.class);
+    @Override
+    public com.sequenceiq.freeipa.api.client.FreeIpaClient getDefaultClient() {
+        return freeIpaClient;
     }
 
-    public static Function<IntegrationTestContext, FreeIpaClient> getTestContextFreeIpaClient() {
-        return getTestContextFreeIpaClient(FREEIPA_CLIENT);
+    public static Function<IntegrationTestContext, FreeIpaClient> getTestContextFreeIpaClient(String key) {
+        return testContext -> testContext.getContextParam(key, FreeIpaClient.class);
     }
 
     public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
@@ -98,22 +98,6 @@ public class FreeIpaClient extends MicroserviceClient {
         return new FreeipaInternalCrnClient(freeIpaApiUserCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
     }
 
-    public com.sequenceiq.freeipa.api.client.FreeIpaClient getFreeIpaClient() {
-        return freeIpaClient;
-    }
-
-    public void setFreeIpaClient(com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient) {
-        this.freeIpaClient = freeIpaClient;
-    }
-
-    public FreeipaInternalCrnClient getFreeipaInternalCrnClient() {
-        return freeipaInternalCrnClient;
-    }
-
-    public void setFreeipaInternalCrnClient(FreeipaInternalCrnClient freeipaInternalCrnClient) {
-        this.freeipaInternalCrnClient = freeipaInternalCrnClient;
-    }
-
     @Override
     public Set<String> supportedTestDtos() {
         return Set.of(FreeIpaTestDto.class.getSimpleName(),
@@ -122,5 +106,11 @@ public class FreeIpaClient extends MicroserviceClient {
                 FreeIpaChildEnvironmentTestDto.class.getSimpleName(),
                 KerberosTestDto.class.getSimpleName(),
                 FreeIpaUserSyncStatusDto.class.getSimpleName());
+    }
+
+    @Override
+    public FreeIpaApiUserCrnEndpoint getInternalClient(TestContext testContext) {
+        checkIfInternalClientAllowed(testContext);
+        return freeipaInternalCrnClient.withInternalCrn();
     }
 }

@@ -28,7 +28,7 @@ public class BlueprintV4Action {
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint. "));
         blueprintEntity.setResponse(
-                client.getCloudbreakClient()
+                client.getDefaultClient()
                         .blueprintV4Endpoint()
                         .post(workspaceId, blueprintEntity.getRequest()));
 
@@ -45,7 +45,7 @@ public class BlueprintV4Action {
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint by Name. "));
         blueprintEntity.setResponse(
-                client.getCloudbreakClient()
+                client.getDefaultClient()
                         .blueprintV4Endpoint().getByName(workspaceId, blueprintEntity.getName()));
         Log.whenJson(" getByName "
                 .concat(blueprintEntity.getName())
@@ -60,10 +60,10 @@ public class BlueprintV4Action {
                 CloudbreakClient.class);
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" getByName all private blueprints. ");
-        Collection<BlueprintV4ViewResponse> blueprints = client.getCloudbreakClient().blueprintV4Endpoint()
+        Collection<BlueprintV4ViewResponse> blueprints = client.getDefaultClient().blueprintV4Endpoint()
                 .list(workspaceId, true).getResponses();
         Set<BlueprintV4Response> detailedBlueprints = blueprints.stream()
-                .map(bp -> client.getCloudbreakClient().blueprintV4Endpoint()
+                .map(bp -> client.getDefaultClient().blueprintV4Endpoint()
                         .getByName(workspaceId, bp.getName())).collect(Collectors.toSet());
         blueprintEntity.setResponses(detailedBlueprints);
     }
@@ -77,7 +77,7 @@ public class BlueprintV4Action {
         Log.log(" deleteByName "
                 .concat(blueprintEntity.getName())
                 .concat(" private blueprint with Name. "));
-        client.getCloudbreakClient().blueprintV4Endpoint().deleteByName(workspaceId, blueprintEntity.getName());
+        client.getDefaultClient().blueprintV4Endpoint().deleteByName(workspaceId, blueprintEntity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

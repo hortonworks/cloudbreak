@@ -13,7 +13,7 @@ public class RepositoryConfigsAction {
                 CloudbreakClient.class);
 
         repositoryConfigsEntity.setResponse(
-                client.getCloudbreakClient()
+                client.getDefaultClient()
                         .utilV4Endpoint()
                         .repositoryConfigValidationRequest(repositoryConfigsEntity.getRequest()));
     }

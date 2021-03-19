@@ -18,11 +18,11 @@ public class FreeIpaDeleteAction implements Action<FreeIpaTestDto, FreeIpaClient
     public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, String.format(" FreeIPA crn: %s", testDto.getRequest().getEnvironmentCrn()));
         Log.whenJson(LOGGER, format(" FreeIPA delete:%n"), testDto.getRequest());
-        client.getFreeIpaClient()
+        client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .delete(testDto.getRequest().getEnvironmentCrn(), false);
         testDto.setResponse(
-                client.getFreeIpaClient()
+                client.getDefaultClient()
                         .getFreeIpaV1Endpoint()
                         .describe(testDto.getRequest().getEnvironmentCrn())
         );

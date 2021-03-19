@@ -35,10 +35,10 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
         DistroXScaleV1Request scaleRequest = new DistroXScaleV1Request();
         scaleRequest.setGroup(hostGroup);
         scaleRequest.setDesiredCount(count);
-        FlowIdentifier flowIdentifier = client.getCloudbreakClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .putScalingByName(testDto.getName(), scaleRequest);
-        StackV4Response stackV4Response = client.getCloudbreakClient()
+        StackV4Response stackV4Response = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
         testDto.setFlow("Distrox scale", flowIdentifier);

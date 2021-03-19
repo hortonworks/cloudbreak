@@ -18,7 +18,7 @@ public class SdxRefreshInternalAction implements Action<SdxInternalTestDto, SdxC
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         testDto.setResponse(
-                client.getSdxClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
+                client.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
         );
         Log.whenJson(LOGGER, " SDX Internal get detail response: ", testDto.getResponse());
         return testDto;

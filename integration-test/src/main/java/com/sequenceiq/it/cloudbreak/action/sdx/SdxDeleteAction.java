@@ -19,13 +19,13 @@ public class SdxDeleteAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getSdxClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX delete request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getSdxClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .sdxEndpoint()
                 .delete(testDto.getName(), false);
         testDto.setFlow("SDX delete", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getSdxClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

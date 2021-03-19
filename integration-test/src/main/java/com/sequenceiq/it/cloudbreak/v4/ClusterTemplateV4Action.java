@@ -23,7 +23,7 @@ public class ClusterTemplateV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(String.format(" post %s cluster template. ", clusterTemplateV4Entity.getName()));
         clusterTemplateV4Entity.setResponse(
-                client.getCloudbreakClient()
+                client.getDefaultClient()
                         .clusterTemplateV4EndPoint()
                         .post(workspaceId, clusterTemplateV4Entity.getRequest()));
 
@@ -38,7 +38,7 @@ public class ClusterTemplateV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(String.format(" get %s cluster template by Name. ", clusterTemplateV4Entity.getName()));
         clusterTemplateV4Entity.setResponse(
-                client.getCloudbreakClient()
+                client.getDefaultClient()
                         .clusterTemplateV4EndPoint()
                         .getByName(workspaceId, clusterTemplateV4Entity.getName()));
         Log.whenJson(String.format(" get %s cluster template response: ", clusterTemplateV4Entity.getName()),
@@ -53,7 +53,7 @@ public class ClusterTemplateV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(" get all cluster templates. ");
         clusterTemplateV4Entity.setResponses(
-                ClusterTemplateUtil.getResponseFromViews(client.getCloudbreakClient()
+                ClusterTemplateUtil.getResponseFromViews(client.getDefaultClient()
                         .clusterTemplateV4EndPoint()
                         .list(workspaceId).getResponses()));
     }
@@ -66,7 +66,7 @@ public class ClusterTemplateV4Action {
         Long workspaceId = integrationTestContext.getContextParam(CloudbreakTest.WORKSPACE_ID, Long.class);
         Log.log(String.format(" delete %s cluster template with Name. ", clusterTemplateV4Entity.getName()));
 
-        client.getCloudbreakClient().clusterTemplateV4EndPoint().deleteByName(workspaceId, clusterTemplateV4Entity.getName());
+        client.getDefaultClient().clusterTemplateV4EndPoint().deleteByName(workspaceId, clusterTemplateV4Entity.getName());
     }
 
     public static void createInGiven(IntegrationTestContext integrationTestContext, Entity entity) {

@@ -128,7 +128,7 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     @Override
     public Collection<CredentialResponse> getAll(EnvironmentClient client) {
-        return client.getEnvironmentClient().credentialV1Endpoint().list().getResponses();
+        return client.getDefaultClient().credentialV1Endpoint().list().getResponses();
     }
 
     @Override
@@ -139,7 +139,7 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     @Override
     public void delete(TestContext testContext, CredentialResponse entity, EnvironmentClient client) {
         try {
-            client.getEnvironmentClient().credentialV1Endpoint().deleteByName(entity.getName());
+            client.getDefaultClient().credentialV1Endpoint().deleteByName(entity.getName());
             LOGGER.info("DELETE :: Credential with name: [{}] has been deleted successfully.", entity.getName());
         } catch (Exception e) {
             LOGGER.warn("DELETE :: Something went wrong during [{}] credential delete: {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);

@@ -38,7 +38,7 @@ public class DatalakeWaitObject implements WaitObject {
     }
 
     public SdxEndpoint getEndpoint() {
-        return client.getSdxClient().sdxEndpoint();
+        return client.getDefaultClient().sdxEndpoint();
     }
 
     @Override

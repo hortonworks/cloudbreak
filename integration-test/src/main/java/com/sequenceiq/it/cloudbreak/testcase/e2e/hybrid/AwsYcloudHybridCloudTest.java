@@ -210,7 +210,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .awaitForInstance(INSTANCES_HEALTHY)
                 .then((tc, dto, client) -> {
                     String environmentCrn = dto.getResponse().getEnvironmentCrn();
-                    com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = tc.getMicroserviceClient(FreeIpaClient.class).getFreeIpaClient();
+                    com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = tc.getMicroserviceClient(FreeIpaClient.class).getDefaultClient();
                     checkUserSyncState(environmentCrn, freeIpaClient);
 
                     String username = testContext.getActingUserCrn().getResource();

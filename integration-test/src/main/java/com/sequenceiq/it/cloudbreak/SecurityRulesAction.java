@@ -15,7 +15,7 @@ public class SecurityRulesAction {
         CloudbreakClient client = integrationTestContext.getContextParam(CloudbreakClient.CLOUDBREAK_CLIENT, CloudbreakClient.class);
 
         Log.log(" get Security Rules to");
-        securityRulesEntity.setResponse(client.getCloudbreakClient().utilV4Endpoint().getDefaultSecurityRules());
+        securityRulesEntity.setResponse(client.getDefaultClient().utilV4Endpoint().getDefaultSecurityRules());
         Log.whenJson(" get Security Rules response: ", securityRulesEntity.getResponse());
     }
 }

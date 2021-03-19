@@ -15,7 +15,7 @@ public class SdxRetryAction implements Action<SdxInternalTestDto, SdxClient> {
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient sdxClient)
             throws Exception {
-        sdxClient.getSdxClient().sdxEndpoint().retryByCrn(testDto.getCrn());
+        sdxClient.getDefaultClient().sdxEndpoint().retryByCrn(testDto.getCrn());
         return testDto;
     }
 }

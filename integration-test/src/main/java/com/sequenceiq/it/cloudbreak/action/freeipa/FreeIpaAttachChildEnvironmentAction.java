@@ -18,7 +18,7 @@ public class FreeIpaAttachChildEnvironmentAction implements Action<FreeIpaChildE
     @Override
     public FreeIpaChildEnvironmentTestDto action(TestContext testContext, FreeIpaChildEnvironmentTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA attach child environment:%n"), testDto.getRequest());
-        client.getFreeIpaClient()
+        client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .attachChildEnvironment(testDto.getRequest());
         Log.when(LOGGER, " FreeIPA attached child environment successfully.");

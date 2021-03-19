@@ -22,7 +22,7 @@ public class SdxUpgradeTestAssertion {
             request.setLockComponents(true);
             request.setDryRun(true);
             SdxUpgradeResponse upgradeResponse =
-                    sdxClient.getSdxClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
+                    sdxClient.getDefaultClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
             assertNotNull(upgradeResponse);
             assertTrue("Expected: " + reason + " Actual: " + upgradeResponse.getReason(), upgradeResponse.getReason().contains(reason));
             return entity;
@@ -35,7 +35,7 @@ public class SdxUpgradeTestAssertion {
             request.setLockComponents(true);
             request.setDryRun(true);
             SdxUpgradeResponse upgradeResponse =
-                    sdxClient.getSdxClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
+                    sdxClient.getDefaultClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
             assertNotNull(upgradeResponse);
             assertEquals("aaa778fc-7f17-4535-9021-515351df3691", upgradeResponse.getCurrent().getImageId());
             assertEquals(1583391600L, upgradeResponse.getCurrent().getCreated());

@@ -32,7 +32,7 @@ public class FreeIpaWaitObject implements WaitObject {
     }
 
     public FreeIpaV1Endpoint getEndpoint() {
-        return client.getFreeIpaClient().getFreeIpaV1Endpoint();
+        return client.getDefaultClient().getFreeIpaV1Endpoint();
     }
 
     protected FreeIpaClient getClient() {

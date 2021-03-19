@@ -227,7 +227,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public String getLatestBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform) {
         try {
             List<BaseImageV4Response> images = cloudbreakClient
-                    .getCloudbreakClient()
+                    .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             platform).getBaseImages();

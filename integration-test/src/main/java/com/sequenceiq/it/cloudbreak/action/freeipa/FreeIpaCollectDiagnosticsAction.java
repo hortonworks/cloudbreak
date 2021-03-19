@@ -17,11 +17,11 @@ public class FreeIpaCollectDiagnosticsAction implements Action<FreeIpaDiagnostic
     @Override
     public FreeIpaDiagnosticsTestDto action(TestContext testContext, FreeIpaDiagnosticsTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, " FreeIPA collect diagnostics request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getFreeIpaClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .getDiagnosticsEndpoint()
                 .collectDiagnostics(testDto.getRequest());
         testDto.setFlow("FreeIPA diagnostic collection", flowIdentifier);
-        Log.log(LOGGER, " FreeIPA name: %s", client.getFreeIpaClient().getFreeIpaV1Endpoint()
+        Log.log(LOGGER, " FreeIPA name: %s", client.getDefaultClient().getFreeIpaV1Endpoint()
                 .describe(testDto.getRequest().getEnvironmentCrn()).getName());
         return testDto;
     }

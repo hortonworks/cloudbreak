@@ -340,7 +340,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
-        SdxEndpoint sdxEndpoint = client.getSdxClient().sdxEndpoint();
+        SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
         return sdxEndpoint.list(null).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -359,7 +359,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public void delete(TestContext testContext, SdxClusterResponse entity, SdxClient client) {
         String sdxName = entity.getName();
         try {
-            client.getSdxClient().sdxEndpoint().delete(getName(), false);
+            client.getDefaultClient().sdxEndpoint().delete(getName(), false);
             testContext.await(this, Map.of("status", DELETED), key("wait-purge-sdx-" + getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);

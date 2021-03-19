@@ -18,7 +18,7 @@ public class SdxRefreshAction implements Action<SdxTestDto, SdxClient> {
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         testDto.setResponse(
-                client.getSdxClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
+                client.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet())
         );
         Log.whenJson(LOGGER, " SDX get detail response: ", testDto.getResponse());
         return testDto;

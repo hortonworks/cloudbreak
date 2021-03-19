@@ -66,7 +66,7 @@ public class FreeIpaListStructuredEventAssertions {
     private EventAssertionCommon eventAssertionCommon;
 
     public FreeIpaTestDto checkCreateEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, FREEIPA_CREATE_FLOW_STATES);
@@ -75,7 +75,7 @@ public class FreeIpaListStructuredEventAssertions {
     }
 
     public FreeIpaTestDto checkDeleteEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, FREEIPA_DELETE_FLOW_STATES);
@@ -84,7 +84,7 @@ public class FreeIpaListStructuredEventAssertions {
     }
 
     public FreeIpaTestDto checkStopEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, FREEIPA_STOP_FLOW_STATES);
@@ -93,7 +93,7 @@ public class FreeIpaListStructuredEventAssertions {
     }
 
     public FreeIpaTestDto checkStartEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
-        List<CDPStructuredEvent> auditEvents = client.getFreeIpaClient()
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient()
                 .structuredEventsV1Endpoint()
                 .getAuditEvents(testDto.getCrn(), Collections.emptyList(), 0, 100);
         eventAssertionCommon.checkFlowEvents(auditEvents, FREEIPA_START_FLOW_STATES);

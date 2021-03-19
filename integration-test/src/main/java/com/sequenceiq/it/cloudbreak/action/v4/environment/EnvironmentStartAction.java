@@ -15,7 +15,7 @@ public class EnvironmentStartAction extends AbstractEnvironmentAction {
 
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
-        client.getEnvironmentClient()
+        client.getDefaultClient()
                 .environmentV1Endpoint()
                 .postStartByCrn(testDto.getResponse().getCrn(), DataHubStartAction.START_ALL);
         Log.when(LOGGER, "Environment start action posted");

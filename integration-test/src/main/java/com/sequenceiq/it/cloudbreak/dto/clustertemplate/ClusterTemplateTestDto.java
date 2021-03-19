@@ -98,7 +98,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     @Override
     public Collection<ClusterTemplateV4Response> getAll(CloudbreakClient client) {
-        return ClusterTemplateUtil.getResponseFromViews(client.getCloudbreakClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId()).getResponses());
+        return ClusterTemplateUtil.getResponseFromViews(client.getDefaultClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId()).getResponses());
     }
 
     @Override
@@ -109,7 +109,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     @Override
     public void delete(TestContext testContext, ClusterTemplateV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().clusterTemplateV4EndPoint().deleteByName(client.getWorkspaceId(), entity.getName());
+            client.getDefaultClient().clusterTemplateV4EndPoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }
@@ -127,7 +127,7 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
 
     public Long count() {
         CloudbreakClient client = getTestContext().getMicroserviceClient(CloudbreakClient.class);
-        return (long) client.getCloudbreakClient()
+        return (long) client.getDefaultClient()
                 .clusterTemplateV4EndPoint()
                 .list(client.getWorkspaceId()).getResponses().size();
     }

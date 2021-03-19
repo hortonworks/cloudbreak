@@ -19,7 +19,7 @@ public final class DistroXExternalDatabaseAssertion extends BaseMicroserviceClie
             String extendedBlueprint = distroXTestDto.getResponse().getCluster().getExtendedBlueprintText();
             String databaseServerCrn = distroXTestDto.getResponse().getCluster().getDatabaseServerCrn();
             RedbeamsClient redbeamsClient = getClient(testContext, testContext.getActingUser(), RedbeamsClient.class);
-            DatabaseServerV4Response databaseServer = redbeamsClient.getEndpoints()
+            DatabaseServerV4Response databaseServer = redbeamsClient.getDefaultClient()
                     .databaseServerV4Endpoint()
                     .getByCrn(databaseServerCrn);
 

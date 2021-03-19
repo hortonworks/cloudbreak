@@ -371,7 +371,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
     }
 
     private ClusterTemplateTestDto clusterTemplateHasDeletedAlongTheEnvironment(ClusterTemplateTestDto entity, CloudbreakClient client, String templateName) {
-        client.getCloudbreakClient()
+        client.getDefaultClient()
                 .clusterTemplateV4EndPoint()
                 .listByEnv(client.getWorkspaceId(), entity.getResponse().getEnvironmentCrn())
                 .getResponses()

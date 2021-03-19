@@ -33,7 +33,7 @@ public class ClusterTemplateListAction implements Action<ClusterTemplateTestDto,
         boolean success = false;
         while (run && count < maxRetry) {
             try {
-                Collection<ClusterTemplateViewV4Response> responses = client.getCloudbreakClient()
+                Collection<ClusterTemplateViewV4Response> responses = client.getDefaultClient()
                         .clusterTemplateV4EndPoint()
                         .list(client.getWorkspaceId()).getResponses();
                 testDto.setResponses(ClusterTemplateUtil.getResponseFromViews(responses));

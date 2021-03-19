@@ -15,7 +15,7 @@ public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakC
 
     @Override
     public StackMatrixTestDto action(TestContext testContext, StackMatrixTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        testDto.setResponse(cloudbreakClient.getCloudbreakClient().utilV4Endpoint().getStackMatrix(null, testDto.getCloudPlatform().name()));
+        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().getStackMatrix(null, testDto.getCloudPlatform().name()));
         Log.whenJson(LOGGER, "Obtaining stack matrix response:\n", testDto.getResponse());
 
         return testDto;

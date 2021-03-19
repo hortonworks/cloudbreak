@@ -44,12 +44,12 @@ public class StackScalePostAction implements Action<StackTestDto, CloudbreakClie
         Log.when(LOGGER, String.format("Stack scale request on: %s. Hostgroup: %s, desiredCount: %d", testDto.getName(), request.getGroup(),
                 request.getDesiredCount()));
         Log.whenJson(LOGGER, " Stack scale request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getCloudbreakClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .stackV4Endpoint()
                 .putScaling(client.getWorkspaceId(), testDto.getName(), request,
                         testContext.getActingUserCrn().getAccountId());
         testDto.setFlow("Stack scale", flowIdentifier);
-        StackV4Response stackV4Response = client.getCloudbreakClient()
+        StackV4Response stackV4Response = client.getDefaultClient()
                 .stackV4Endpoint()
                 .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>(), testContext.getActingUserCrn().getAccountId());
         testDto.setResponse(stackV4Response);

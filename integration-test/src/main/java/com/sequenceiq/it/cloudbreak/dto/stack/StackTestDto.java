@@ -84,7 +84,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
-        StackV4Endpoint stackEndpoint = client.getCloudbreakClient().stackV4Endpoint();
+        StackV4Endpoint stackEndpoint = client.getDefaultClient().stackV4Endpoint();
         return stackEndpoint.list(client.getWorkspaceId(), null, false).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -102,7 +102,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getCloudbreakClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true,
+            client.getDefaultClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true,
                     Crn.fromString(entity.getCrn()).getAccountId());
             testContext.await(this, STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {

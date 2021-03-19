@@ -19,15 +19,13 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.redbeams.RedbeamsWaitObjec
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.client.RedbeamsApiKeyClient;
 
-public class RedbeamsClient extends MicroserviceClient {
+public class RedbeamsClient extends MicroserviceClient<com.sequenceiq.redbeams.client.RedbeamsClient, Void> {
 
     public static final String REDBEAMS_CLIENT = "REDBEAMS_CLIENT";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedbeamsClient.class);
 
-    private com.sequenceiq.redbeams.client.RedbeamsClient endpoints;
-
-    private String environmentCrn;
+    private com.sequenceiq.redbeams.client.RedbeamsClient redbeamsClient;
 
     private RedbeamsClient() {
         super(REDBEAMS_CLIENT);
@@ -36,23 +34,11 @@ public class RedbeamsClient extends MicroserviceClient {
     public static synchronized RedbeamsClient createProxyRedbeamsClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
         RedbeamsClient clientEntity = new RedbeamsClient();
         clientEntity.setActing(cloudbreakUser);
-        clientEntity.endpoints = new RedbeamsApiKeyClient(
+        clientEntity.redbeamsClient = new RedbeamsApiKeyClient(
                 testParameter.get(RedBeamsTest.REDBEAMS_SERVER_ROOT),
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         return clientEntity;
-    }
-
-    public com.sequenceiq.redbeams.client.RedbeamsClient getEndpoints() {
-        return endpoints;
-    }
-
-    public String getEnvironmentCrn() {
-        return environmentCrn;
-    }
-
-    public void setEnvironmentCrn(String environmentCrn) {
-        this.environmentCrn = environmentCrn;
     }
 
     @Override
@@ -65,6 +51,11 @@ public class RedbeamsClient extends MicroserviceClient {
     public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
             TestContext testContext) {
         return (W) new RedbeamsWaitObject(this, entity.getCrn(), (Status) desiredStatuses.get("status"));
+    }
+
+    @Override
+    public com.sequenceiq.redbeams.client.RedbeamsClient getDefaultClient() {
+        return redbeamsClient;
     }
 
     @Override
