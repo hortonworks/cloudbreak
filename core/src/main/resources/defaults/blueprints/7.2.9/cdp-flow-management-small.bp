@@ -137,8 +137,12 @@
                 "value": "-Xms8g"
               },
               {
-                "name": "add.internal.nifi.registry.client",
-                "value": "true"
+                "name": "nifi.registry.client.name",
+                "value": "Default NiFi Registry Client"
+              },
+              {
+                "name": "nifi.registry.client.url",
+                "value": "https://placeholder:18433"
               },
               {
                 "name": "rlimit_fds",
