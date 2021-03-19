@@ -4,12 +4,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.HashMap;
+
 import org.junit.Before;
 import org.junit.Test;
 
-import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
+import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 
 public class AllocateDatabaseServerV4RequestTest {
 
@@ -26,6 +28,7 @@ public class AllocateDatabaseServerV4RequestTest {
         assertEquals("myallocation", request.getName());
 
         request.setEnvironmentCrn("myenv");
+        request.setTags(new HashMap<>());
         assertEquals("myenv", request.getEnvironmentCrn());
 
         NetworkV4StackRequest network = new NetworkV4StackRequest();

@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -64,6 +67,9 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
 
     @ApiModelProperty(DatabaseServer.SSL_CONFIG)
     private SslConfigV4Request sslConfig;
+
+    @ApiModelProperty(DatabaseServer.TAGS)
+    private Map<String, String> tags = new HashMap<>();
 
     public String getName() {
         return name;
@@ -171,6 +177,14 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
         return aws;
     }
 
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    public void setTags(Map<String, String> tags) {
+        this.tags = tags;
+    }
+
     public AwsDBStackV4Parameters getAws() {
         return aws;
     }
@@ -187,6 +201,7 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
                 ", azure=" + azure +
                 ", gcp=" + gcp +
                 ", sslConfig=" + sslConfig +
+                ", tags=" + tags +
                 '}';
     }
 }

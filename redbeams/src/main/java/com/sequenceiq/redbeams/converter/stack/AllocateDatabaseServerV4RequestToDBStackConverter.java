@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -65,7 +64,6 @@ import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -167,7 +165,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
         dbStack.setResourceCrn(crnService.createCrn(dbStack));
-        dbStack.setTags(getTags(dbStack, source.getClusterCrn(), environment));
+        dbStack.setTags(getTags(dbStack, source, environment));
         dbStack.setSslConfig(getSslConfig(source, dbStack));
         return dbStack;
     }
@@ -266,10 +264,10 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
     }
 
-    private Json getTags(DBStack dbStack, String clusterCrn, DetailedEnvironmentResponse environment) {
+    private Json getTags(DBStack dbStack, AllocateDatabaseServerV4Request dbRequest, DetailedEnvironmentResponse environment) {
         boolean internalTenant = entitlementService.internalTenant(dbStack.getAccountId());
 
-        Map<String, String> resultTags = getUserTagsForCluster(clusterCrn);
+        Map<String, String> resultTags = getTags(dbRequest.getTags());
 
         CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder
                 .builder()
@@ -291,26 +289,8 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return new Json(new StackTags(resultTags, new HashMap<>(), defaultTags));
     }
 
-    private Map<String, String> getUserTagsForCluster(String clusterCrn) {
-        Crn crn = Crn.fromString(clusterCrn);
-        Map<String, String> userDefinedTags = new HashMap<>();
-        try {
-            switch (crn.getService()) {
-                case DATALAKE:
-                    SdxClusterResponse sdxCluster = sdxEndpoint.getByCrn(clusterCrn);
-                    userDefinedTags = sdxCluster.getTags();
-                    break;
-                case DATAHUB:
-                    StackV4Response distroxCluster = distroXV1Endpoint.getByCrn(clusterCrn, Set.of());
-                    userDefinedTags = distroxCluster.getTags().getUserDefined();
-                    break;
-                default:
-                    break;
-            }
-        } catch (javax.ws.rs.NotFoundException ignore) {
-            // ignored because of Integration Tests that do not create real cluster
-        }
-        return Objects.requireNonNullElse(userDefinedTags, new HashMap<>());
+    private Map<String, String> getTags(Map<String, String> tags) {
+        return Objects.requireNonNullElse(tags, new HashMap<>());
     }
 
     private void setRegion(DBStack dbStack, DetailedEnvironmentResponse environment) {

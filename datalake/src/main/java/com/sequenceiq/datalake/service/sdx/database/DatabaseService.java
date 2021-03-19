@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import static com.sequenceiq.datalake.service.TagUtil.getTags;
+
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -36,7 +39,6 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxDatabaseOperation;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -156,6 +158,7 @@ public class DatabaseService {
         req.setEnvironmentCrn(environmentCrn);
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(env.getCloudPlatform().toUpperCase(Locale.US));
         req.setDatabaseServer(getDatabaseServerRequest(cloudPlatform, sdxCluster));
+        req.setTags(getTags(sdxCluster.getTags()));
         req.setClusterCrn(sdxCluster.getCrn());
 
         String runtime = sdxCluster.getRuntime();

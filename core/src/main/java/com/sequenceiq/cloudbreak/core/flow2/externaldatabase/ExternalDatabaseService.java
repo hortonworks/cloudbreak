@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.BadRequestException;
@@ -14,7 +17,9 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
@@ -135,8 +140,24 @@ public class ExternalDatabaseService {
         req.setDatabaseServer(getDatabaseServerStackRequest(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US)), externalDatabase));
         if (cluster.getStack() != null) {
             req.setClusterCrn(cluster.getStack().getResourceCrn());
+            req.setTags(getUserDefinedTags(cluster.getStack()));
         }
         return req;
+    }
+
+    private Map<String, String> getUserDefinedTags(Stack stack) {
+        Map<String, String> userDefinedTags = new HashMap<>();
+        if (stack.getTags() != null) {
+            try {
+                StackTags stackTag = stack.getTags().get(StackTags.class);
+                if (stackTag != null) {
+                    userDefinedTags = stackTag.getUserDefinedTags();
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Stack related applications tags cannot be parsed, use default service type for metering.", e);
+            }
+        }
+        return Objects.requireNonNullElse(userDefinedTags, new HashMap<>());
     }
 
     private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase) {
