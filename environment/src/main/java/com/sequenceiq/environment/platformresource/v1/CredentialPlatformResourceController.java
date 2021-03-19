@@ -23,6 +23,8 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
@@ -396,6 +398,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
             commonPermissionCheckingUtils.checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_CREDENTIAL,
                     ThreadBasedUserCrnProvider.getUserCrn(), platformParameterService.getCredentialCrnByName(credentialName));
         } else if (!Strings.isNullOrEmpty(credentialCrn)) {
+            validateCredentialCrnPattern(credentialCrn);
             commonPermissionCheckingUtils.checkPermissionForUserOnResource(AuthorizationResourceAction.DESCRIBE_CREDENTIAL,
                     ThreadBasedUserCrnProvider.getUserCrn(), credentialCrn);
         } else {
@@ -403,4 +406,11 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         }
     }
 
+    private void validateCredentialCrnPattern(String credentialCrn) {
+        try {
+            Crn.safeFromString(credentialCrn);
+        } catch (CrnParseException e) {
+            throw new BadRequestException(String.format("The 'credentialCrn' field value is not a valid CRN: '%s'", e));
+        }
+    }
 }
