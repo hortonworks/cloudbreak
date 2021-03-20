@@ -114,6 +114,9 @@ class EntitlementServiceTest {
                 {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, false},
                 {"DATAHUB_AZURE_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::azureAutoScalingEnabled, true},
 
+                {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, false},
+                {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, true},
+
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 
