@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -262,16 +263,20 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
     }
 
     private void deleteNetwork(GcpContext context, AuthenticatedContext auth, Network network, String networkId) throws IOException {
-        CloudResource networkResource = createNamedResource(GCP_NETWORK, networkId);
-        try {
-            CloudResource deletedResource = gcpNetworkResourceBuilder.delete(context, auth, networkResource, network);
-            if (deletedResource != null) {
-                PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                        gcpSubnetResourceBuilder, auth, Collections.singletonList(deletedResource), context, true);
-                syncPollingScheduler.schedule(task);
+        if (StringUtils.isNotEmpty(networkId)) {
+            CloudResource networkResource = createNamedResource(GCP_NETWORK, networkId);
+            try {
+                CloudResource deletedResource = gcpNetworkResourceBuilder.delete(context, auth, networkResource, network);
+                if (deletedResource != null) {
+                    PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
+                            gcpSubnetResourceBuilder, auth, Collections.singletonList(deletedResource), context, true);
+                    syncPollingScheduler.schedule(task);
+                }
+            } catch (Exception e) {
+                LOGGER.debug("Skipping resource deletion: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.debug("Skipping resource deletion: {}", e.getMessage());
+        } else {
+            LOGGER.info("There is no network id in the deletion request, no need to delete network");
         }
     }
 

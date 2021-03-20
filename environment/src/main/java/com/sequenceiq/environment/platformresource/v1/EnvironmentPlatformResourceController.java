@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -68,6 +71,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String availabilityZone,
             CdpResourceType cdpResourceType) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -93,6 +97,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String availabilityZone,
             boolean availabilityZonesNeeded) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -116,6 +121,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String availabilityZone,
             String sharedProjectId) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -139,6 +145,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -161,6 +168,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -184,6 +192,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -207,6 +216,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String availabilityZone,
             String sharedProjectId) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -229,6 +239,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -252,6 +263,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String availabilityZone,
             AccessConfigTypeQueryParam accessConfigType) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -275,6 +287,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -297,6 +310,7 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
             String platformVariant,
             String availabilityZone) {
         String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
         PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
                 accountId,
                 environmentCrn,
@@ -316,5 +330,13 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
 
     private String getAccountId() {
         return ThreadBasedUserCrnProvider.getAccountId();
+    }
+
+    private void validateEnvironmentCrnPattern(String environmentCrn) {
+        try {
+            Crn.safeFromString(environmentCrn);
+        } catch (CrnParseException e) {
+            throw new BadRequestException(String.format("The 'environmentCrn' field value is not a valid CRN: '%s'", e));
+        }
     }
 }
