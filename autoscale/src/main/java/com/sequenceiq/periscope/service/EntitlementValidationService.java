@@ -26,6 +26,8 @@ public class EntitlementValidationService {
             entitled = entitlementService.awsAutoScalingEnabled(accountId);
         } else if ("AZURE".equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.azureAutoScalingEnabled(accountId);
+        } else if ("GCP".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.gcpAutoScalingEnabled(accountId);
         }
         return entitled;
     }
