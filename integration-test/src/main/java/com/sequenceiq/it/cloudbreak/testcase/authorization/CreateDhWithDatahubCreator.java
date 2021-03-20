@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
+import com.sequenceiq.it.cloudbreak.util.ResourceCreator;
 
 public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
 
@@ -64,6 +65,9 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
 
     @Inject
     private AuthorizationTestUtil authorizationTestUtil;
+
+    @Inject
+    private ResourceCreator resourceCreator;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -98,6 +102,8 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .validate();
 
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
+        EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
+        resourceCreator.createNewFreeIpa(testContext, environment);
         createDatalake(testContext);
 
         String recipe1Name = testContext
