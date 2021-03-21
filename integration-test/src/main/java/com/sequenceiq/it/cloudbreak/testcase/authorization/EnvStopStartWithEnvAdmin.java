@@ -33,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil;
+import com.sequenceiq.it.cloudbreak.util.ResourceCreator;
 
 public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
 
@@ -59,6 +60,9 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
 
     @Inject
     private AuthorizationTestUtil authorizationTestUtil;
+
+    @Inject
+    private ResourceCreator resourceCreator;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -96,6 +100,8 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .validate();
 
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
+        EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
+        resourceCreator.createNewFreeIpa(testContext, environment);
         createDatalake(testContext);
 
         testContext
@@ -116,8 +122,8 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .when(environmentTestClient.stop(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
                 .await(EnvironmentStatus.ENV_STOPPED, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.start(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
-                .await(EnvironmentStatus.AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
+                .when(environmentTestClient.start(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
+                .await(EnvironmentStatus.AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
