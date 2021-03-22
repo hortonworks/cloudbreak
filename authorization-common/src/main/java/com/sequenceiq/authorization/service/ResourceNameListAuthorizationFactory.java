@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
@@ -48,7 +49,7 @@ public class ResourceNameListAuthorizationFactory extends TypedAuthorizationFact
 
     private List<String> getNotNullResourceNames(Collection<String> resourceNames) {
         return resourceNames.stream()
-                .filter(not(String::isBlank))
+                .filter(not(StringUtils::isBlank))
                 .collect(toList());
     }
 
