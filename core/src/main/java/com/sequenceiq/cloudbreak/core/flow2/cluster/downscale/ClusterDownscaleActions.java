@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDownscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsSuccess;
@@ -161,12 +162,8 @@ public class ClusterDownscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterDownscaleService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterDownscaleEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                ClusterDownscaleFailedConclusionRequest request = new ClusterDownscaleFailedConclusionRequest(context.getStackView().getId());
+                sendEvent(context, request.selector(), request);
             }
         };
     }

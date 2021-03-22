@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
 
 import java.util.Map;
@@ -48,6 +47,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartServerAndAgentRe
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopClusterComponentsResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.kerberos.KeytabConfigurationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerRequest;
@@ -405,7 +405,8 @@ public class ClusterUpscaleActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView(), payload.getException());
-                sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
+                ClusterUpscaleFailedConclusionRequest request = new ClusterUpscaleFailedConclusionRequest(context.getStackView().getId());
+                sendEvent(context, request.selector(), request);
             }
         };
     }
