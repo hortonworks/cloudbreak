@@ -122,8 +122,8 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .when(environmentTestClient.stop(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
                 .await(EnvironmentStatus.ENV_STOPPED, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
                 .given(EnvironmentTestDto.class)
-                .when(environmentTestClient.start(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
-                .await(EnvironmentStatus.AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
+                .when(environmentTestClient.start(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
+                .await(EnvironmentStatus.AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_ADMIN_A)))
                 .validate();
 
         testCheckRightUtil(testContext, testContext.given(DistroXTestDto.class).getCrn());
