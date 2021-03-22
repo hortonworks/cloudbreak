@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @Component
 public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory<ClusterRepairTriggerEvent> {
@@ -100,6 +102,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private Queue<Selectable> createFlowTriggers(ClusterRepairTriggerEvent event, RepairConfig repairConfig) {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        flowTriggers.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
         if (repairConfig.getSinglePrimaryGateway().isPresent()) {
             Repair repair = repairConfig.getSinglePrimaryGateway().get();
             flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
@@ -120,6 +123,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             flowTriggers.add(upgradeEphemeralClustersEvent(event));
         }
         flowTriggers.add(rescheduleStatusCheckEvent(event));
+        flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
     }
 
