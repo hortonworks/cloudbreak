@@ -26,7 +26,7 @@ auth:
     cloudidentitymappinng.enable: true
     mediumdutysdx.enable: true
     upgrade.internalrepo.enable: true
-    hbase.cloudstorage.enable: true
+    hbase.cloudstorage.enable: false
     datalake.efs.enable: false
     datalake.customimage.enable: false
     differentdatahubversionthandatalake.enabled: true
