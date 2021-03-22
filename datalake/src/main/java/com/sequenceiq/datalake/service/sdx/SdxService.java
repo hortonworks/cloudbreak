@@ -36,15 +36,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4SpotParameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
@@ -53,11 +57,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
+import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -93,11 +99,14 @@ import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 
 @Service
 public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvider {
 
     public static final String MEDIUM_DUTY_REQUIRED_VERSION = "7.2.7";
+
+    public static final long WORKSPACE_ID_DEFAULT = 0L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -112,6 +121,12 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
+
+    @Inject
+    private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
+
+    @Inject
+    private ConverterUtil converterUtil;
 
     @Inject
     private DistroxService distroxService;
@@ -189,7 +204,7 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(0L, name, entries, accountId));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, name, entries, accountId));
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
@@ -205,6 +220,57 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         } else {
             throw notFound("SDX cluster", clusterCrn).get();
         }
+    }
+
+    public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, CloudPlatform cloudPlatform) {
+        if (imageSettingsV4Request == null) {
+            return null;
+        }
+
+        ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
+
+        try {
+            LOGGER.info("Calling cloudbreak to get image response for the given image catalog {} and image id {}",
+                    imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+            ImagesV4Response imagesV4Response = null;
+            try {
+                imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(
+                        WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+            } catch (Exception e) {
+                LOGGER.error("Sdx service fails to get image using image id", e);
+            }
+
+            if (imagesV4Response == null) {
+                return null;
+            }
+
+            for (ImageV4Response imageV4Response : imagesV4Response.getCdhImages()) {
+                // find the image can be used on the cloud platform of the environment
+                if (imageV4Response.getImageSetsByProvider() != null) {
+                    if (imageV4Response.getImageSetsByProvider().containsKey(cloudPlatform.name().toLowerCase())) {
+                        return imageV4Response;
+                    }
+                }
+            }
+
+            String errorMessage = String.format("SDX cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
+                    cloudPlatform.name(), imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
+                    imageSettingsV4Request.getId());
+            LOGGER.error(errorMessage);
+
+            return null;
+        } catch (javax.ws.rs.NotFoundException e) {
+            LOGGER.info("Sdx cluster not found on CB side", e);
+            return null;
+        }
+    }
+
+    public String getRuntimeVersionFromImageResponse(ImageV4Response imageV4Response) {
+        if (imageV4Response != null && imageV4Response.getStackDetails() != null) {
+            return imageV4Response.getStackDetails() != null ? imageV4Response.getStackDetails().getVersion() : null;
+        }
+
+        return null;
     }
 
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
@@ -230,13 +296,27 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         }
     }
 
+    public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxCustomClusterRequest sdxCustomClusterRequest) {
+        final Pair<SdxClusterRequest, ImageSettingsV4Request> convertedRequest = sdxCustomClusterRequest.convertToPair();
+
+        return createSdx(userCrn, name, convertedRequest.getLeft(), null, convertedRequest.getRight());
+    }
+
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request) {
+        return createSdx(userCrn, name, sdxClusterRequest, internalStackV4Request, null);
+    }
+
+    private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
+            final StackV4Request internalStackV4Request, final ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         DetailedEnvironmentResponse environment = getEnvironment(sdxClusterRequest.getEnvironment());
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
+        ImageV4Response imageV4Response = getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateEnv(environment);
+        validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         validateRazEnablement(sdxClusterRequest, environment);
         validateMediumDutySdxEnablement(sdxClusterRequest, environment);
         SdxCluster sdxCluster = new SdxCluster();
@@ -252,8 +332,6 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         sdxCluster.setSdxClusterServiceVersion(sdxClusterServiceVersion);
         setTagsSafe(sdxClusterRequest, sdxCluster);
 
-        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             validateCloudStorageRequest(sdxClusterRequest.getCloudStorage(), environment);
             String trimmedBaseLocation = StringUtils.stripEnd(sdxClusterRequest.getCloudStorage().getBaseLocation(), "/");
@@ -267,11 +345,11 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
             throw new BadRequestException("Cloud storage parameter is required.");
         }
 
-        String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request);
+        String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         sdxCluster.setRuntime(runtimeVersion);
         externalDatabaseConfigurer.configure(cloudPlatform, sdxClusterRequest.getExternalDatabase(), sdxCluster);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
-        StackV4Request stackRequest = getStackRequest(sdxClusterRequest, internalStackV4Request, cloudPlatform, runtimeVersion);
+        StackV4Request stackRequest = getStackRequest(sdxClusterRequest, internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
@@ -315,7 +393,7 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     }
 
     private StackV4Request getStackRequest(SdxClusterRequest sdxClusterRequest, StackV4Request internalStackV4Request, CloudPlatform cloudPlatform,
-            String runtimeVersion) {
+            String runtimeVersion, ImageSettingsV4Request imageSettingsV4Request) {
         if (internalStackV4Request == null) {
             StackV4Request stackRequest = cdpConfigService.getConfigForKey(
                     new CDPConfigKey(cloudPlatform, sdxClusterRequest.getClusterShape(), runtimeVersion));
@@ -326,6 +404,11 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
                         ", runtime version: " + runtimeVersion);
             }
             stackRequest.getCluster().setRangerRazEnabled(sdxClusterRequest.isEnableRangerRaz());
+
+            if (imageSettingsV4Request != null) {
+                stackRequest.setImage(imageSettingsV4Request);
+            }
+
             return stackRequest;
         } else {
             // We have provided a --ranger-raz-enabled flag in the CLI, but it will
@@ -336,8 +419,10 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
         }
     }
 
-    private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request) {
-        if (sdxClusterRequest.getRuntime() != null) {
+    private String getRuntime(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, ImageV4Response imageV4Response) {
+        if (imageV4Response != null) {
+            return getRuntimeVersionFromImageResponse(imageV4Response);
+        } else if (sdxClusterRequest.getRuntime() != null) {
             return sdxClusterRequest.getRuntime();
         } else if (stackV4Request != null) {
             return null;
@@ -361,13 +446,13 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
     }
 
     public FlowIdentifier sync(String name, String accountId) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.sync(0L, name, accountId));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, name, accountId));
     }
 
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
         ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.sync(0L, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
+                stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
     }
 
     protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
@@ -599,6 +684,37 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
                 });
     }
 
+    private void validateRuntimeAndImage(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment,
+            ImageSettingsV4Request imageSettingsV4Request, ImageV4Response imageV4Response) {
+        ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
+        CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
+
+        if (imageV4Response != null) {
+            boolean dataLakeCustomImageEnabled = entitlementService.dataLakeCustomImageEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
+
+            if (!dataLakeCustomImageEnabled) {
+                validationBuilder.error("Creating Data Lake with custom image is not enabled for this account.");
+            }
+
+            if (clusterRequest.getRuntime() != null) {
+                validationBuilder.error("SDX cluster request must not specify both runtime version and image at the same time because image " +
+                        "decides runtime version.");
+            }
+        } else if (imageSettingsV4Request != null && clusterRequest.getRuntime() == null) {
+            if (cloudPlatform.equals(CloudPlatform.MOCK)) {
+                clusterRequest.setRuntime(MEDIUM_DUTY_REQUIRED_VERSION);
+            } else {
+                validationBuilder.error("SDX cluster request has null runtime version and null image response. It cannot " +
+                        "determine the runtime version.");
+            }
+        }
+
+        ValidationResult validationResult = validationBuilder.build();
+        if (validationResult.hasError()) {
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+    }
+
     private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterShape clusterShape) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (stackv4Request != null) {
@@ -797,7 +913,7 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
 
     public void renewCertificate(SdxCluster sdxCluster, String userCrn) {
         ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
-            stackV4Endpoint.renewCertificate(0L, sdxCluster.getClusterName(), userCrn);
+            stackV4Endpoint.renewCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), userCrn);
         });
     }
 

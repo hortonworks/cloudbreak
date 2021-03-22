@@ -51,6 +51,7 @@ import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
@@ -105,6 +106,19 @@ public class SdxController implements SdxEndpoint {
         Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest, null);
         SdxCluster sdxCluster = result.getLeft();
         metricService.incrementMetricCounter(MetricType.EXTERNAL_SDX_REQUESTED, sdxCluster);
+        SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+        sdxClusterResponse.setName(sdxCluster.getClusterName());
+        sdxClusterResponse.setFlowIdentifier(result.getRight());
+        return sdxClusterResponse;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
+    public SdxClusterResponse create(String name, @Valid SdxCustomClusterRequest createSdxClusterRequest) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        Pair<SdxCluster, FlowIdentifier> result = sdxService.createSdx(userCrn, name, createSdxClusterRequest);
+        SdxCluster sdxCluster = result.getLeft();
+        metricService.incrementMetricCounter(MetricType.CUSTOM_SDX_REQUESTED, sdxCluster);
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setFlowIdentifier(result.getRight());

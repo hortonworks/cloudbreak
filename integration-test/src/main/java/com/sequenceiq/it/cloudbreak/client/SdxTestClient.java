@@ -9,16 +9,20 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectCMDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDetailedDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
@@ -30,6 +34,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDatalakeCertificateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.SdxRetryAction;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCMDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -46,6 +51,10 @@ public class SdxTestClient {
         return new SdxCreateInternalAction();
     }
 
+    public Action<SdxCustomTestDto, SdxClient> createCustom() {
+        return new SdxCreateCustomAction();
+    }
+
     public Action<SdxTestDto, SdxClient> delete() {
         return new SdxDeleteAction();
     }
@@ -58,8 +67,16 @@ public class SdxTestClient {
         return new SdxDeleteInternalAction();
     }
 
+    public Action<SdxCustomTestDto, SdxClient> deleteCustom() {
+        return new SdxDeleteCustomAction();
+    }
+
     public Action<SdxInternalTestDto, SdxClient> forceDeleteInternal() {
         return new SdxForceDeleteInternalAction();
+    }
+
+    public Action<SdxCustomTestDto, SdxClient> forceDeleteCustom() {
+        return new SdxForceDeleteCustomAction();
     }
 
     public Action<SdxTestDto, SdxClient> describe() {
@@ -88,6 +105,10 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> refreshInternal() {
         return new SdxRefreshInternalAction();
+    }
+
+    public Action<SdxCustomTestDto, SdxClient> refreshCustom() {
+        return new SdxRefreshCustomAction();
     }
 
     public Action<SdxTestDto, SdxClient> repair() {

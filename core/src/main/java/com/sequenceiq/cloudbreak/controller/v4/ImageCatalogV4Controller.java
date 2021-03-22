@@ -4,6 +4,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
@@ -145,6 +147,14 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, stackName, platform);
+        return converterUtil.convert(images, ImagesV4Response.class);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImagesV4Response getImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name, String imageId) throws Exception {
+        StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, name);
+        Images images = new Images(List.of(), List.of(statedImage.getImage()), Set.of());
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 }

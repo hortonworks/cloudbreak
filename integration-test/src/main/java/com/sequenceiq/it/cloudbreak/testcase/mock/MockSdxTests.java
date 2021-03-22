@@ -30,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -58,6 +59,35 @@ public class MockSdxTests extends AbstractMockTest {
         createDefaultEnvironmentWithNetwork(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "a valid SDX Custom Create request is sent",
+            then = "SDX should be available AND deletable"
+    )
+    public void testCustomSDXCanBeCreatedThenDeletedSuccessfully(MockedTestContext testContext) {
+        String sdxCustom = resourcePropertyProvider().getName();
+        String envKey = "sdxEnvKey";
+        String networkKey = "someNetwork";
+
+        testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
+                .given(envKey, EnvironmentTestDto.class)
+                .withNetwork(networkKey)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create(), key(envKey))
+                .await(EnvironmentStatus.AVAILABLE, key(envKey))
+                .given(sdxCustom, SdxCustomTestDto.class)
+                .withEnvironmentKey(key(envKey))
+                .when(sdxTestClient.createCustom(), key(sdxCustom))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxCustom))
+                .then((tc, testDto, client) -> sdxTestClient.deleteCustom().action(tc, testDto, client))
+                .await(SdxClusterStatusResponse.DELETED, key(sdxCustom))
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

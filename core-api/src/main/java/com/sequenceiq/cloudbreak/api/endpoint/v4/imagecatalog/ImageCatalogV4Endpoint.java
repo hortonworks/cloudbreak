@@ -116,4 +116,12 @@ public interface ImageCatalogV4Endpoint {
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByNameInWorkspace")
     ImagesV4Response getImagesByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("stackName") String stackName, @QueryParam("platform") String platform) throws Exception;
+
+    @GET
+    @Path("{name}/image")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImageByNameAndId")
+    ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("imageId") String imageId) throws Exception;
 }

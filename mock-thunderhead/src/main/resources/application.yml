@@ -28,7 +28,7 @@ auth:
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: true
     datalake.efs.enable: false
-    datalake.customimage.enable: false
+    datalake.customimage.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub.runtime.upgrade.enable: true

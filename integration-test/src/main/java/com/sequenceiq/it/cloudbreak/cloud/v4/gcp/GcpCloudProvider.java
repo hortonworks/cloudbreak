@@ -46,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTes
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -113,6 +114,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public SdxInternalTestDto sdxInternal(SdxInternalTestDto sdxInternal) {
         sdxInternal.getRequest().getStackV4Request().setNetwork(null);
         return sdxInternal;
+    }
+
+    @Override
+    public SdxCustomTestDto sdxCustom(SdxCustomTestDto sdxCustom) {
+        return sdxCustom;
     }
 
     @Override

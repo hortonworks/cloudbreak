@@ -9,6 +9,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +52,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -63,13 +70,16 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
@@ -91,7 +101,9 @@ import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @ExtendWith(MockitoExtension.class)
@@ -144,6 +156,15 @@ class SdxServiceTest {
     private StackV4Endpoint stackV4Endpoint;
 
     @Mock
+    private ImageCatalogV4Endpoint imageCatalogV4Endpoint;
+
+    @Mock
+    private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
+
+    @Mock
+    private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
+
+    @Mock
     private DistroxService distroxService;
 
     @Mock
@@ -163,6 +184,9 @@ class SdxServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private Image image;
 
     @InjectMocks
     private SdxService underTest;
@@ -859,7 +883,40 @@ class SdxServiceTest {
         assertEquals(expected, result);
     }
 
-    private void setSpot(SdxClusterRequest sdxClusterRequest) {
+    @Test
+    void testCreateSdxClusterWithCustomRequestContainsImageInfo() throws Exception {
+        ImageV4Response imageResponse = getImageResponse();
+        ImagesV4Response imagesV4Response = new ImagesV4Response();
+        imagesV4Response.setCdhImages(List.of(imageResponse));
+
+        when(entitlementService.dataLakeCustomImageEnabled(anyString())).thenReturn(true);
+        when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
+        when(cloudbreakServiceCrnEndpoints.imageCatalogV4Endpoint()).thenReturn(imageCatalogV4Endpoint);
+        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any())).thenReturn(imagesV4Response);
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        SdxCustomClusterRequest sdxClusterRequest = createSdxCustomClusterRequest(LIGHT_DUTY, "cdp-default", "imageId_1");
+        setSpot(sdxClusterRequest);
+        withCloudStorage(sdxClusterRequest);
+
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest);
+
+        SdxCluster createdSdxCluster = result.getLeft();
+        StackV4Request stackV4Request = JsonUtil.readValue(createdSdxCluster.getStackRequest(), StackV4Request.class);
+        assertNotNull(stackV4Request.getImage());
+        assertEquals("cdp-default", stackV4Request.getImage().getCatalog());
+        assertEquals("imageId_1", stackV4Request.getImage().getId());
+    }
+
+    private void setSpot(SdxClusterRequestBase sdxClusterRequest) {
         SdxAwsRequest aws = new SdxAwsRequest();
         SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
         spot.setPercentage(100);
@@ -868,11 +925,23 @@ class SdxServiceTest {
         sdxClusterRequest.setAws(aws);
     }
 
+    private ImageV4Response getImageResponse() {
+        Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
+        imageSetsByProvider.put("aws", null);
+        BaseStackDetailsV4Response stackDetails = new BaseStackDetailsV4Response();
+        stackDetails.setVersion("7.2.7");
+
+        ImageV4Response imageV4Response = new ImageV4Response();
+        imageV4Response.setImageSetsByProvider(imageSetsByProvider);
+        imageV4Response.setStackDetails(stackDetails);
+        return imageV4Response;
+    }
+
     private void mockCBCallForDistroXClusters(Set<StackViewV4Response> stackViews) {
         when(distroxService.getAttachedDistroXClusters(anyString())).thenReturn(stackViews);
     }
 
-    private void mockEnvironmentCall(SdxClusterRequest sdxClusterRequest, CloudPlatform cloudPlatform) {
+    private void mockEnvironmentCall(SdxClusterRequestBase sdxClusterRequest, CloudPlatform cloudPlatform) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
@@ -914,11 +983,25 @@ class SdxServiceTest {
         return sdxClusterRequest;
     }
 
-    private void withCloudStorage(SdxClusterRequest sdxClusterRequest) {
+    private void withCloudStorage(SdxClusterRequestBase sdxClusterRequest) {
         SdxCloudStorageRequest cloudStorage = new SdxCloudStorageRequest();
         cloudStorage.setFileSystemType(FileSystemType.S3);
         cloudStorage.setBaseLocation("s3a://some/dir/");
         cloudStorage.setS3(new S3CloudStorageV1Parameters());
         sdxClusterRequest.setCloudStorage(cloudStorage);
+    }
+
+    private SdxCustomClusterRequest createSdxCustomClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setCatalog(catalog);
+        imageSettingsV4Request.setId(imageId);
+
+        SdxCustomClusterRequest sdxClusterRequest = new SdxCustomClusterRequest();
+        sdxClusterRequest.setClusterShape(shape);
+        sdxClusterRequest.addTags(TAGS);
+        sdxClusterRequest.setEnvironment("envir");
+        sdxClusterRequest.setImageSettingsV4Request(imageSettingsV4Request);
+
+        return sdxClusterRequest;
     }
 }
