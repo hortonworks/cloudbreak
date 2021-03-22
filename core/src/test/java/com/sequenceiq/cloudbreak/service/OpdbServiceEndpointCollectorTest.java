@@ -4,12 +4,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -39,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
@@ -58,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 /**
@@ -89,10 +95,16 @@ public class OpdbServiceEndpointCollectorTest {
     private ExposedServiceListValidator exposedServiceListValidator;
 
     @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
     private ExposedServiceCollector exposedServiceCollector;
 
     @Mock
     private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
+
+    @Mock
+    private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
     @InjectMocks
     private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter =
@@ -153,6 +165,8 @@ public class OpdbServiceEndpointCollectorTest {
         when(exposedServiceCollector.getFullServiceListBasedOnList(any())).thenReturn(services);
         when(serviceEndpointCollectorVersionComparator.maxVersionSupported(any(), any())).thenReturn(true);
         when(serviceEndpointCollectorVersionComparator.minVersionSupported(any(), any())).thenReturn(true);
+        when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
+        when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         // Skip exposed service validation
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
         // Couldn't get all mocks wired up with the Spring autowiring working. So, this is a pared down
@@ -276,6 +290,11 @@ public class OpdbServiceEndpointCollectorTest {
         topology1.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Collections.singleton(topology1));
         cluster.getGateway().setGatewayType(gatewayType);
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        cluster.setWorkspace(workspace);
         return cluster;
     }
 }

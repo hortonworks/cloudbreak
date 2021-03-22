@@ -103,6 +103,10 @@ public class ExposedServiceCollector {
         return exposedServices.get("RESOURCEMANAGER_WEB");
     }
 
+    public String getKnoxServiceName() {
+        return "KNOX";
+    }
+
     public ExposedService getByName(String name) {
         return exposedServices.get(name);
     }
@@ -123,6 +127,7 @@ public class ExposedServiceCollector {
         return filterSupportedKnoxServices().stream()
                 .filter(exposedService ->
                         components.contains(exposedService.getServiceName())
+                                || exposedService.getServiceName().equalsIgnoreCase(getKnoxServiceName())
                                 || getClouderaManagerUIService().getServiceName().equals(exposedService.getServiceName())
                                 || getClouderaManagerService().getServiceName().equals(exposedService.getServiceName())
                                 // IMPALA_DEBUG_UI needs to be exposed under the same service name, but with different purpose

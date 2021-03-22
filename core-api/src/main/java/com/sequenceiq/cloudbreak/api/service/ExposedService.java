@@ -30,9 +30,13 @@ public class ExposedService {
 
     private boolean visibleForDatahub;
 
+    private String entitlement;
+
     private String minVersion;
 
     private String maxVersion;
+
+    private boolean withoutProxyPath;
 
     public String getName() {
         return name;
@@ -158,6 +162,22 @@ public class ExposedService {
         return maxVersion;
     }
 
+    public String getEntitlement() {
+        return entitlement;
+    }
+
+    public void setEntitlement(String entitlement) {
+        this.entitlement = entitlement;
+    }
+
+    public boolean isWithoutProxyPath() {
+        return withoutProxyPath;
+    }
+
+    public void setWithoutProxyPath(boolean withoutProxyPath) {
+        this.withoutProxyPath = withoutProxyPath;
+    }
+
     //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
@@ -181,6 +201,8 @@ public class ExposedService {
                 Objects.equals(port, that.port) &&
                 Objects.equals(minVersion, that.minVersion) &&
                 Objects.equals(maxVersion, that.maxVersion) &&
+                Objects.equals(entitlement, that.entitlement) &&
+                Objects.equals(withoutProxyPath, that.withoutProxyPath) &&
                 Objects.equals(tlsPort, that.tlsPort);
     }
     //CHECKSTYLE:ON
@@ -188,7 +210,8 @@ public class ExposedService {
     @Override
     public int hashCode() {
         return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort,
-                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion, maxVersion);
+                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion,
+                maxVersion, entitlement, withoutProxyPath);
     }
 
     @Override
@@ -208,6 +231,8 @@ public class ExposedService {
                 ", isVisibleForDatalake=" + visibleForDatalake +
                 ", minVersion=" + minVersion +
                 ", maxVersion=" + maxVersion +
+                ", entitlement=" + entitlement +
+                ", withoutProxyPath=" + withoutProxyPath +
                 '}';
     }
 }

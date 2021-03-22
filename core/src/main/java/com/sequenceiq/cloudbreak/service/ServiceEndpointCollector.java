@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -70,11 +71,17 @@ public class ServiceEndpointCollector {
     private ExposedServiceCollector exposedServiceCollector;
 
     @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
     private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
+
+    @Inject
+    private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
-        return getKnoxServices(blueprint);
+        return getKnoxServices(blueprint, entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName()));
     }
 
     public String getManagerServerUrl(Cluster cluster, String managerIp) {
@@ -103,7 +110,9 @@ public class ServiceEndpointCollector {
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             if (isNotEmpty(blueprintText)) {
                 BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-                Collection<ExposedService> knownExposedServices = getExposedServices(cluster.getBlueprint());
+                Collection<ExposedService> knownExposedServices = getExposedServices(
+                        cluster.getBlueprint(),
+                        entitlementService.getEntitlements(cluster.getWorkspace().getTenant().getName()));
                 Gateway gateway = cluster.getGateway();
                 Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
                 Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
@@ -248,7 +257,7 @@ public class ServiceEndpointCollector {
      * @param blueprint given blueprint
      * @return all visible exposed services for the given blueprint
      */
-    private Collection<ExposedService> getExposedServices(Blueprint blueprint) {
+    private Collection<ExposedService> getExposedServices(Blueprint blueprint, List<String> entitlements) {
         String blueprintText = blueprint.getBlueprintText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         List<String> components = processor.getAllComponents().stream().map(ServiceComponent::getComponent).collect(Collectors.toList());
@@ -256,14 +265,17 @@ public class ServiceEndpointCollector {
                 .stream()
                 .filter(ExposedService::isVisible)
                 .filter(e -> serviceEndpointCollectorVersionComparator
-                        .maxVersionSupported(processor.getCmVersion(), e.getMaxVersion()))
+                        .maxVersionSupported(processor.getVersion(), e.getMaxVersion()))
                 .filter(e -> serviceEndpointCollectorVersionComparator
-                        .minVersionSupported(processor.getCmVersion(), e.getMinVersion()))
+                        .minVersionSupported(processor.getVersion(), e.getMinVersion()))
+                .filter(e -> serviceEndpointCollectorEntitlementComparator
+                        .entitlementSupported(entitlements, e.getEntitlement()))
                 .collect(Collectors.toList());
     }
 
-    private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint) {
-        return ExposedServiceV4Response.fromExposedServices(getExposedServices(blueprint));
+    private Collection<ExposedServiceV4Response> getKnoxServices(Blueprint blueprint, List<String> entitlements) {
+        return ExposedServiceV4Response.fromExposedServices(
+                getExposedServices(blueprint, entitlements));
     }
 
     private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
@@ -326,7 +338,7 @@ public class ServiceEndpointCollector {
     private String getCmProxiedServiceUrlsForService(ExposedService exposedService, Gateway gateway, String topologyName, String managerIp, String clusterName) {
         String url = "";
         if (hasKnoxUrl(exposedService) && managerIp != null) {
-            url = getCmProxiedExposedServiceUrl(managerIp, gateway, topologyName, exposedService, clusterName);
+            url = getCmProxiedExposedServiceUrl(managerIp, exposedService, clusterName);
         }
         return url;
     }
@@ -385,7 +397,7 @@ public class ServiceEndpointCollector {
         List<String> urls) {
         String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
-        urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology));
+        urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology, !exposedService.isWithoutProxyPath()));
     }
 
     private void addImplaDebugUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
@@ -438,11 +450,11 @@ public class ServiceEndpointCollector {
     private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName,
             ExposedService exposedService, boolean api) {
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
-        return buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topology);
+        return buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topology, !exposedService.isWithoutProxyPath());
     }
 
-    private String getCmProxiedExposedServiceUrl(String managerIp, Gateway gateway, String topologyName, ExposedService exposedService, String clusterName) {
-        return buildCMProxyUrl(managerIp, gateway, exposedService.getKnoxUrl(), topologyName, clusterName);
+    private String getCmProxiedExposedServiceUrl(String managerIp, ExposedService exposedService, String clusterName) {
+        return buildCMProxyUrl(managerIp, exposedService.getKnoxUrl(), clusterName);
     }
 
     private String buildKnoxUrlWithProtocol(String protocol, String managerIp, ExposedService exposedService, boolean autoTlsEnabled) {
@@ -455,20 +467,24 @@ public class ServiceEndpointCollector {
         return String.format("%s://%s:%s", protocol, managerIp, port);
     }
 
-    private String buildCMProxyUrl(String managerIp, Gateway gateway, String knoxUrl, String topology, String clusterName) {
+    private String buildCMProxyUrl(String managerIp, String knoxUrl, String clusterName) {
         return new StringBuilder()
                 .append(managerIp.replaceAll("/home/", ""))
                 .append(knoxUrl.replaceAll("cluster-name", clusterName))
                 .toString();
     }
 
-    private String buildKnoxUrl(String managerIp, Gateway gateway, String knoxUrl, String topology) {
+    private String buildKnoxUrl(String managerIp, Gateway gateway, String knoxUrl, String topology, boolean useTopology) {
         String result;
         if (GatewayType.CENTRAL == gateway.getGatewayType()) {
             result = String.format("/%s/%s%s", gateway.getPath(), topology, knoxUrl);
         } else {
             if (gatewayListeningOnHttpsPort(gateway)) {
-                result = String.format("https://%s/%s/%s%s", managerIp, gateway.getPath(), topology, knoxUrl);
+                if (useTopology) {
+                    result = String.format("https://%s/%s/%s%s", managerIp, gateway.getPath(), topology, knoxUrl);
+                } else {
+                    result = String.format("https://%s/%s%s", managerIp, gateway.getPath(), knoxUrl);
+                }
             } else {
                 result = String.format("https://%s:%s/%s/%s%s", managerIp, gateway.getGatewayPort(), gateway.getPath(), topology, knoxUrl);
             }

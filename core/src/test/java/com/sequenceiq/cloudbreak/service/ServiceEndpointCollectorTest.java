@@ -7,10 +7,13 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -36,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
@@ -53,6 +57,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -92,6 +97,12 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private Workspace workspace;
 
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
+
     @Before
     public void setup() {
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
@@ -103,6 +114,8 @@ public class ServiceEndpointCollectorTest {
         when(exposedServiceCollector.getFullServiceListBasedOnList(anyList())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
         when(serviceEndpointCollectorVersionComparator.maxVersionSupported(any(), any())).thenReturn(true);
         when(serviceEndpointCollectorVersionComparator.minVersionSupported(any(), any())).thenReturn(true);
+        when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
+        when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
     }
 
     @Test
@@ -220,7 +233,6 @@ public class ServiceEndpointCollectorTest {
     @Test
     public void testGetKnoxServices() {
         mockBlueprintTextProcessor();
-
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
         assertEquals(2L, exposedServiceResponses.size());
 
@@ -251,6 +263,11 @@ public class ServiceEndpointCollectorTest {
     private void mockBlueprintTextProcessor() {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{\"Blueprints\":{}}");
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        blueprint.setWorkspace(workspace);
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
@@ -284,6 +301,11 @@ public class ServiceEndpointCollectorTest {
         cluster.setStack(stack);
         cluster.setGateway(gateway);
         Blueprint blueprint = new Blueprint();
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        cluster.setWorkspace(workspace);
         try {
             String testBlueprint = FileReaderUtils.readFileFromClasspath("/test/defaults/blueprints/hdp26-data-science-spark2-text.bp");
             blueprint.setBlueprintText(testBlueprint);
@@ -302,6 +324,11 @@ public class ServiceEndpointCollectorTest {
         topology2.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Sets.newHashSet(topology1, topology2));
         cluster.getGateway().setGatewayType(gatewayType);
+        Workspace workspace = new Workspace();
+        Tenant tenant = new Tenant();
+        tenant.setName("tenant");
+        workspace.setTenant(tenant);
+        cluster.setWorkspace(workspace);
         return cluster;
     }
 }

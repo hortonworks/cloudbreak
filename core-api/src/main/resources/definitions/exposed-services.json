@@ -639,6 +639,21 @@
       "apiIncluded": false,
       "visibleForDatalake": false,
       "visibleForDatahub": true
+    },
+    {
+      "name": "KNOX_TOKEN_INTEGRATOR",
+      "displayName": "Token Integration",
+      "serviceName": "KNOX",
+      "knoxService": "KNOX_TOKEN_INTEGRATOR",
+      "knoxUrl": "/homepage/home",
+      "ssoSupported": true,
+      "apiOnly": false,
+      "apiIncluded": false,
+      "entitlement": "OJDBC_TOKEN_DH",
+      "visibleForDatalake": true,
+      "visibleForDatahub": true,
+      "withoutProxyPath": true,
+      "minVersion": "7.2.9"
     }
   ]
 }
