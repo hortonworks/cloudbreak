@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksResult;
 import com.amazonaws.services.cloudformation.model.ResourceStatus;
@@ -69,6 +71,7 @@ class AwsCloudFormationErrorMessageProviderTest {
                         .withResourceStatus(ResourceStatus.CREATE_COMPLETE.toString())
                         .withResourceStatusReason("Created")
         ));
+        when(cfRetryClient.describeStackEvents(any(DescribeStackEventsRequest.class))).thenReturn(new DescribeStackEventsResult());
 
         String result = underTest.getErrorReason(credentialView, REGION, STACK_NAME, ResourceStatus.CREATE_FAILED);
 
@@ -89,6 +92,7 @@ class AwsCloudFormationErrorMessageProviderTest {
                         .withResourceStatusReason(resourceStatusReason)));
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(any(), eq(REGION), anyString()))
                 .thenReturn("Decoded auth error");
+        when(cfRetryClient.describeStackEvents(any(DescribeStackEventsRequest.class))).thenReturn(new DescribeStackEventsResult());
 
         String result = underTest.getErrorReason(credentialView, REGION, STACK_NAME, ResourceStatus.CREATE_FAILED);
 

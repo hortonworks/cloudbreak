@@ -5,6 +5,8 @@ import com.amazonaws.services.cloudformation.model.CreateStackRequest;
 import com.amazonaws.services.cloudformation.model.CreateStackResult;
 import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DeleteStackResult;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsRequest;
+import com.amazonaws.services.cloudformation.model.DescribeStackEventsResult;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourceResult;
 import com.amazonaws.services.cloudformation.model.DescribeStackResourcesRequest;
@@ -49,6 +51,10 @@ public class AmazonCloudFormationClient extends AmazonClient {
 
     public DescribeStackResourcesResult describeStackResources(DescribeStackResourcesRequest request) {
         return retry.testWith2SecDelayMax15Times(() -> client.describeStackResources(request));
+    }
+
+    public DescribeStackEventsResult describeStackEvents(DescribeStackEventsRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.describeStackEvents(request));
     }
 
     public UpdateStackResult updateStack(UpdateStackRequest request) {
