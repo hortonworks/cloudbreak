@@ -8,6 +8,7 @@ import javax.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
@@ -24,6 +25,12 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosCon
 @Service
 public class KerberosConfigService {
     private static final Logger LOGGER = LoggerFactory.getLogger(KerberosConfigService.class);
+
+    @Value("${cb.cm.datanode.secure.port:9866}")
+    private int secureDatanodePort;
+
+    @Value("${cb.cm.datanode.secure.https.port:9865}")
+    private int secureDatanodeHttpsPort;
 
     @Inject
     private KerberosConfigV1Endpoint kerberosConfigV1Endpoint;
@@ -77,6 +84,8 @@ public class KerberosConfigService {
                 .withType(KerberosType.valueOf(describeLdapConfigResponse.getType().name()))
                 .withUrl(describeLdapConfigResponse.getUrl())
                 .withVerifyKdcTrust(describeLdapConfigResponse.getVerifyKdcTrust())
+                .withDatanodeSecurePort(secureDatanodePort)
+                .withDatanodeSecureHttpsPort(secureDatanodeHttpsPort)
                 .build();
     }
 
