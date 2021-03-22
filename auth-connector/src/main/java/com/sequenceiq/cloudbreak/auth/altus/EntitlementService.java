@@ -208,24 +208,22 @@ public class EntitlementService {
     }
 
     public List<String> getEntitlements(String accountId) {
-        return getAccount(accountId).getEntitlementsList()
+        Account accountDetails = umsClient.getAccountDetails(
+                ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN,
+                accountId,
+                MDCUtils.getRequestId());
+        return accountDetails.getEntitlementsList()
                 .stream()
                 .map(e -> e.getEntitlementName().toUpperCase())
                 .collect(Collectors.toList());
     }
 
     private boolean isEntitlementRegistered(String accountId, Entitlement entitlement) {
-        Account accountDetails = umsClient.getAccountDetails(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
-        boolean entitled = accountDetails
-                .getEntitlementsList()
+        boolean entitled = getEntitlements(accountId)
                 .stream()
-                .map(e -> e.getEntitlementName().toUpperCase())
+                .map(e -> e.toUpperCase())
                 .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
         LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
         return entitled;
-    }
-
-    private Account getAccount(String accountId) {
-        return umsClient.getAccountDetails(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
     }
 }

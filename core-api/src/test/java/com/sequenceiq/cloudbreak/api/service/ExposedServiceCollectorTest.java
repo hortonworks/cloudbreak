@@ -126,7 +126,8 @@ class ExposedServiceCollectorTest {
                 "STREAMS_MESSAGING_MANAGER_SERVER",
                 "STREAMS_MESSAGING_MANAGER_UI",
                 "ZEPPELIN_SERVER",
-                "QUEUEMANAGER_WEBAPP");
+                "QUEUEMANAGER_WEBAPP",
+                "KNOX");
     }
 
     @Test
@@ -177,7 +178,8 @@ class ExposedServiceCollectorTest {
                 "WEBHDFS",
                 "YARNUIV2",
                 "ZEPPELIN",
-                "QUEUEMANAGER_WEBAPP");
+                "QUEUEMANAGER_WEBAPP",
+                "KNOX_TOKEN_INTEGRATOR");
     }
 
     @Test
@@ -303,14 +305,15 @@ class ExposedServiceCollectorTest {
     void getKnoxServicesForComponentsReturnsCMServicesAndForImpalaDebugUIAsWell() {
         underTest.init();
         Collection<ExposedService> components = underTest.knoxServicesForComponents(Set.of("ATLAS_SERVER", "IMPALAD"));
-        assertThat(components).hasSize(6);
+        assertThat(components).hasSize(7);
         assertThat(components.stream().map(ExposedService::getName)).containsExactlyInAnyOrder(
                 "ATLAS",
                 "ATLAS_API",
                 "CLOUDERA_MANAGER",
                 "CLOUDERA_MANAGER_UI",
                 "IMPALA",
-                "IMPALA_DEBUG_UI"
+                "IMPALA_DEBUG_UI",
+                "KNOX_TOKEN_INTEGRATOR"
         );
     }
 }
