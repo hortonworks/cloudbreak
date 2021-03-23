@@ -21,6 +21,8 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
 
     String getLastKnownFlowId();
 
+    void setLastKnownFlowId(String lastKnownFlowId);
+
     CloudbreakTestDto valid();
 
     String getName();

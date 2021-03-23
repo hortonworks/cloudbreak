@@ -193,7 +193,7 @@ public class GcpPlatformResources implements PlatformResources {
             properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
 
             Set<CloudSubnet> subnets = new HashSet<>();
-            if (subnetworkList != null && network.getSubnetworks() != null) {
+            if (subnetworkList != null && network.getSubnetworks() != null && subnetworkList.getItems() != null) {
                 for (Subnetwork subnetwork : subnetworkList.getItems()) {
                     if (network.getSubnetworks().contains(subnetwork.getSelfLink())) {
                         boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());

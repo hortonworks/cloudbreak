@@ -325,8 +325,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public void repairClusterByName(@ResourceName String name, @Valid DistroXRepairV1Request clusterRepairRequest) {
-        stackOperations.repairCluster(
+    public FlowIdentifier repairClusterByName(@ResourceName String name, @Valid DistroXRepairV1Request clusterRepairRequest) {
+        return stackOperations.repairCluster(
                 NameOrCrn.ofName(name),
                 workspaceService.getForCurrentUser().getId(),
                 clusterRepairRequestConverter.convert(clusterRepairRequest));
@@ -334,8 +334,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public void repairClusterByCrn(@ResourceCrn String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
-        stackOperations.repairCluster(
+    public FlowIdentifier repairClusterByCrn(@ResourceCrn String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
+        return stackOperations.repairCluster(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
                 clusterRepairRequestConverter.convert(clusterRepairRequest));
