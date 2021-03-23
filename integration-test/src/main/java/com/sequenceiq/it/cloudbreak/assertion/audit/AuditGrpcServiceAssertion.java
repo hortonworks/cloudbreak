@@ -3,10 +3,13 @@ package com.sequenceiq.it.cloudbreak.assertion.audit;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.audit.AuditProto;
@@ -22,47 +25,48 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C extends MicroserviceClient> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuditGrpcServiceAssertion.class);
+
     @Inject
     private AuditClient auditClient;
 
     public T create(TestContext testContext, T testDto, C client) {
-        List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
-                .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
-                .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getCreateOperationInfo());
+        OperationInfo operationInfo = getCreateOperationInfo();
+        executeAuditValidation(testContext, testDto, operationInfo);
         return testDto;
     }
 
     public T start(TestContext testContext, T testDto, C client) {
-        List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
-                .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
-                .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getStartOperationInfo());
+        OperationInfo operationInfo = getStartOperationInfo();
+        executeAuditValidation(testContext, testDto, operationInfo);
         return testDto;
     }
 
     public T stop(TestContext testContext, T testDto, C client) {
-        List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
-                .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
-                .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getStopOperationInfo());
+        OperationInfo operationInfo = getStopOperationInfo();
+        executeAuditValidation(testContext, testDto, operationInfo);
         return testDto;
     }
 
     public T delete(TestContext testContext, T testDto, C client) {
-        List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
-                .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
-                .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getDeleteOperationInfo());
+        OperationInfo operationInfo = getDeleteOperationInfo();
+        executeAuditValidation(testContext, testDto, operationInfo);
         return testDto;
     }
 
     public T modify(TestContext testContext, T testDto, C client) {
-        List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
-                .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
-                .eventSource(getService()).build());
-        validateEventList(cdpAuditEvents, testDto, getModifyOperationInfo());
+        OperationInfo operationInfo = getModifyOperationInfo();
+        executeAuditValidation(testContext, testDto, operationInfo);
         return testDto;
+    }
+
+    private void executeAuditValidation(TestContext testContext, T testDto, OperationInfo operationInfo) {
+        retry(operationInfo, () -> {
+            List<AuditProto.CdpAuditEvent> cdpAuditEvents = auditClient.listEvents(ListAuditEvent.builder()
+                    .actor(ActorCrn.builder().withActorCrn(testContext.getActingUserCrn().toString()).build())
+                    .eventSource(getService()).build());
+            validateEventList(cdpAuditEvents, testDto, operationInfo);
+        });
     }
 
     protected void validateEventList(List<AuditProto.CdpAuditEvent> cdpAuditEvents, T testDto, OperationInfo operationInfo) {
@@ -83,8 +87,8 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
 
     private void checkFlowEvents(List<AuditProto.CdpAuditEvent> flowEvents, T testDto, OperationInfo operationInfo) {
         String eventName = operationInfo.getEventName();
-        Set<String> firstStates = Objects.requireNonNull(operationInfo.getFirstStates(), "First state is null for this flow audit log check");
-        Set<String> lastStates = Objects.requireNonNull(operationInfo.getLastStates(), "Last state is null for this flow audit log check");
+        Set<String> firstStates = Objects.requireNonNull(operationInfo.getFirstStates(), "You should define the first state for the flow audit log check");
+        Set<String> lastStates = Objects.requireNonNull(operationInfo.getLastStates(), "You should define the last state for the flow audit log check");
         if (flowEvents.isEmpty() || (flowEvents.size() >= 2 && flowEvents.size() % 2 != 0)) {
             throw new TestFailException(eventName + " flow audit log must contain minimum 2 items but has " + flowEvents.size());
         }
@@ -178,4 +182,29 @@ public abstract class AuditGrpcServiceAssertion<T extends CloudbreakTestDto, C e
     }
 
     protected abstract Crn.Service getService();
+
+    private void retry(OperationInfo operationInfo, Runnable runnable) {
+        int maxRetry = 3;
+        int attempt = 0;
+        long waitingSec = 1;
+        boolean running = true;
+        while (running && attempt < maxRetry) {
+            try {
+                runnable.run();
+                running = false;
+            } catch (Exception e) {
+                attempt++;
+                LOGGER.info("Cannot validate the audit logs: {}, try the next attempt", operationInfo.getEventName(), e);
+                waiting(waitingSec);
+            }
+        }
+    }
+
+    private void waiting(long waitingSec) {
+        try {
+            TimeUnit.SECONDS.sleep(waitingSec);
+        } catch (InterruptedException e) {
+            LOGGER.error("Wait is interrupted", e);
+        }
+    }
 }
