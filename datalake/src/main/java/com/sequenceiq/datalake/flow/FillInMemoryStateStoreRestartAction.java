@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
@@ -15,6 +17,8 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 @Component("FillInMemoryStateStoreRestartAction")
 public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FillInMemoryStateStoreRestartAction.class);
+
     @Inject
     private SdxStatusService sdxStatusService;
 
@@ -27,6 +31,9 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
         SdxCluster sdxCluster = sdxService.getById(datalakePayload.getResourceId());
         sdxStatusService.updateInMemoryStateStore(sdxCluster);
         MDCBuilder.buildMdcContext(sdxCluster);
+        MDCBuilder.addFlowId(flowParameters.getFlowId());
+        LOGGER.debug("MDC context and InMemoryStateStore entry have been restored for flow: '{}', flow chain: '{}', event: '{}'", flowParameters.getFlowId(),
+                flowChainId, event);
         super.restart(flowParameters, flowChainId, event, payload);
     }
 }
