@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,9 +22,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProductBase;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
@@ -50,6 +49,9 @@ public class DistroXUpgradeAvailabilityService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private StackRuntimeVersionValidator stackRuntimeVersionValidator;
 
     public boolean isRuntimeUpgradeEnabled(String userCrn) {
         try {
@@ -105,7 +107,7 @@ public class DistroXUpgradeAvailabilityService {
             return candidates;
         }
         return stackViewService.findDatalakeViewByEnvironmentCrn(stack.getEnvironmentCrn())
-                .flatMap(datalakeView -> getCdhVersionFromClouderaManagerProducts(
+                .flatMap(datalakeView -> stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(
                         clusterComponentConfigProvider.getClouderaManagerProductDetails(datalakeView.getClusterView().getId())))
                 .map(datalakeVersion -> filterForDatalakeVersion(datalakeVersion, candidates))
                 .orElse(candidates);
@@ -113,13 +115,6 @@ public class DistroXUpgradeAvailabilityService {
 
     private List<ImageInfoV4Response> filterForDatalakeVersion(String datalakeVersion, List<ImageInfoV4Response> candidates) {
         return candidates.stream().filter(imageInfo -> imageInfo.getComponentVersions().getCdp().equals(datalakeVersion)).collect(Collectors.toList());
-    }
-
-    private Optional<String> getCdhVersionFromClouderaManagerProducts(List<? extends ClouderaManagerProductBase> products) {
-        return products.stream()
-                .filter(product -> "CDH".equals(product.getName()))
-                .map(product -> StringUtils.substringBefore(product.getVersion(), "-"))
-                .findFirst();
     }
 
     private void verifyRuntimeUpgradeEntitlement(String userCrn, UpgradeV4Request request) {
