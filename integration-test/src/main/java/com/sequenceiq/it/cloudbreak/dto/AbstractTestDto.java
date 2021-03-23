@@ -138,6 +138,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return lastKnownFlowId;
     }
 
+    @Override
     public void setLastKnownFlowId(String lastKnownFlowId) {
         this.lastKnownFlowId = lastKnownFlowId;
         this.lastKnownFlowChainId = null;

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXRepairV1Request;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -32,9 +33,10 @@ public class DistroXRepairAction implements Action<DistroXTestDto, CloudbreakCli
         DistroXRepairV1Request distroXRepairV1Request = createRepairRequest();
         Log.when(LOGGER, format(" Starting repair on DistroX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " DistroX  repair request: ", distroXRepairV1Request);
-        client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .repairClusterByName(testDto.getName(), distroXRepairV1Request);
+        testDto.setFlow("DistroX repair flow identifier", flowIdentifier);
         StackV4Response stackV4Response = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
