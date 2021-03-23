@@ -1,9 +1,7 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-
-import java.util.HashMap;
-import java.util.Map;
+import static com.sequenceiq.datalake.service.TagUtil.getTags;
 
 import javax.inject.Inject;
 
@@ -11,9 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -52,17 +47,5 @@ public class SdxClusterConverter {
         sdxClusterResponse.setCertExpirationState(sdxCluster.getCertExpirationState());
         sdxClusterResponse.setSdxClusterServiceVersion(sdxCluster.getSdxClusterServiceVersion());
         return sdxClusterResponse;
-    }
-
-    private Map<String, String> getTags(Json tag) {
-        try {
-            if (tag != null && tag.getValue() != null) {
-                return tag.get(new TypeReference<Map<String, String>>() { });
-            } else {
-                return new HashMap<>();
-            }
-        } catch (Exception e) {
-            throw new BadRequestException("Cannot convert tags", e);
-        }
     }
 }

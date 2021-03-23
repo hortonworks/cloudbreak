@@ -381,6 +381,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Test
     void conversionTestWhenRequestAndEnvironmentCloudPlatformsDiffer() {
         allocateRequest.setCloudPlatform(AWS_CLOUD_PLATFORM);
+        allocateRequest.setTags(new HashMap<>());
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(UNKNOWN_CLOUD_PLATFORM)
@@ -395,6 +396,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
     @Test
     void conversionTestWhenUnsupportedCloudPlatform() {
         allocateRequest.setCloudPlatform(CloudPlatform.YARN);
+        allocateRequest.setTags(new HashMap<>());
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
                 .withCloudPlatform(CloudPlatform.YARN.name())
@@ -439,6 +441,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         setupTagsResponse();
 
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
+        allocateRequest.setTags(new HashMap<>());
         allocateRequest.setClusterCrn(CLUSTER_CRN);
         allocateRequest.setSslConfig(sslConfigV4Request);
 
@@ -667,6 +670,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private void setupAllocateRequest(boolean provideOptionalFields) {
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
+        allocateRequest.setTags(Map.of("DistroXKey1", "DistroXValue1"));
         allocateRequest.setClusterCrn(CLUSTER_CRN);
         if (provideOptionalFields) {
             allocateRequest.setName("myallocation");
