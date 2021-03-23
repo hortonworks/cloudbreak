@@ -31,10 +31,6 @@ public class KerberosConfig {
 
     private String nameServers;
 
-    private int datanodeSecurePort;
-
-    private int datanodeSecureHttpsPort;
-
     public KerberosType getType() {
         return type;
     }
@@ -91,14 +87,6 @@ public class KerberosConfig {
         return nameServers;
     }
 
-    public int getDatanodeSecurePort() {
-        return datanodeSecurePort;
-    }
-
-    public int getDatanodeSecureHttpsPort() {
-        return datanodeSecureHttpsPort;
-    }
-
     public static final class KerberosConfigBuilder {
         private KerberosType type;
 
@@ -127,10 +115,6 @@ public class KerberosConfig {
         private String domain;
 
         private String nameServers;
-
-        private int datanodeSecurePort;
-
-        private int datanodeSecureHttpsPort;
 
         private KerberosConfigBuilder() {
         }
@@ -209,16 +193,6 @@ public class KerberosConfig {
             return this;
         }
 
-        public KerberosConfigBuilder withDatanodeSecurePort(int datanodeSecurePort) {
-            this.datanodeSecurePort = datanodeSecurePort;
-            return this;
-        }
-
-        public KerberosConfigBuilder withDatanodeSecureHttpsPort(int datanodeSecureHttpsPort) {
-            this.datanodeSecureHttpsPort = datanodeSecureHttpsPort;
-            return this;
-        }
-
         public KerberosConfig build() {
             KerberosConfig kerberosConfig = new KerberosConfig();
             kerberosConfig.type = type;
@@ -235,8 +209,6 @@ public class KerberosConfig {
             kerberosConfig.verifyKdcTrust = verifyKdcTrust;
             kerberosConfig.domain = domain;
             kerberosConfig.nameServers = nameServers;
-            kerberosConfig.datanodeSecurePort = datanodeSecurePort;
-            kerberosConfig.datanodeSecureHttpsPort = datanodeSecureHttpsPort;
             return kerberosConfig;
         }
     }
