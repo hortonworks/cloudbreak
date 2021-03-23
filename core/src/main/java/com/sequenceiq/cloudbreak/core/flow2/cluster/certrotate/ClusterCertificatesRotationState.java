@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum ClusterCertificatesRotationState implements FlowState {
     INIT_STATE,
@@ -11,4 +13,9 @@ public enum ClusterCertificatesRotationState implements FlowState {
     CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE,
     CLUSTER_CERTIFICATES_ROTATION_FAILED_STATE,
     FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }

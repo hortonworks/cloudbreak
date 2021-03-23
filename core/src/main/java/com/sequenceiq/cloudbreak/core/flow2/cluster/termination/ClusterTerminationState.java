@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum ClusterTerminationState implements FlowState {
     INIT_STATE,
@@ -12,5 +14,10 @@ public enum ClusterTerminationState implements FlowState {
     CLUSTER_TERMINATING_STATE,
     CLUSTER_TERMINATION_FINISH_STATE,
 
-    FINAL_STATE
+    FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }

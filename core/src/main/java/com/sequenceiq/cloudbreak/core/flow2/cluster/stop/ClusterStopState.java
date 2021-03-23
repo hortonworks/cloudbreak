@@ -14,7 +14,7 @@ public enum ClusterStopState implements FlowState {
 
     FINAL_STATE;
 
-    private Class<? extends DefaultRestartAction> restartAction = DefaultRestartAction.class;
+    private Class<? extends DefaultRestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     ClusterStopState() {
 

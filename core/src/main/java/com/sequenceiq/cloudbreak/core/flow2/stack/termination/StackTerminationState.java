@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum StackTerminationState implements FlowState {
     INIT_STATE,
@@ -25,5 +27,10 @@ public enum StackTerminationState implements FlowState {
     @Override
     public Class<? extends AbstractStackAction<?, ?, ?, ?>> action() {
         return action;
+    }
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
     }
 }

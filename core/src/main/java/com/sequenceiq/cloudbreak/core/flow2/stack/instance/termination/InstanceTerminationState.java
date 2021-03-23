@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.core.flow2.restart.InitializeMDCContextRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 enum InstanceTerminationState implements FlowState {
 
@@ -23,5 +25,10 @@ enum InstanceTerminationState implements FlowState {
     @Override
     public Class<? extends AbstractStackAction<?, ?, ?, ?>> action() {
         return action;
+    }
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return InitializeMDCContextRestartAction.class;
     }
 }

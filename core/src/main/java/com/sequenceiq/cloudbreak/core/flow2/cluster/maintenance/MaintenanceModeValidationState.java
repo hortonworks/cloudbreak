@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum MaintenanceModeValidationState implements FlowState {
 
@@ -11,5 +13,10 @@ public enum MaintenanceModeValidationState implements FlowState {
     VALIDATE_IMAGE_COMPATIBILITY_STATE,
     VALIDATION_FINISHED_STATE,
     VALIDATION_FAILED_STATE,
-    FINAL_STATE
+    FINAL_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }
