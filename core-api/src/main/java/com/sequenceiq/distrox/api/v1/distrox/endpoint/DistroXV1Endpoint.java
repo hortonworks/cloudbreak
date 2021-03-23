@@ -80,6 +80,8 @@ import com.sequenceiq.flow.api.model.FlowProgressResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 
 @RetryAndMetrics
 @Path("/v1/distrox")
@@ -228,13 +230,21 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/manual_repair")
     @ApiOperation(value = REPAIR_CLUSTER_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairDistroXV1ByName")
-    void repairClusterByName(@PathParam("name") String name, @Valid DistroXRepairV1Request clusterRepairRequest);
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
+        @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
+    })
+    FlowIdentifier repairClusterByName(@PathParam("name") String name, @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @POST
     @Path("crn/{crn}/manual_repair")
     @ApiOperation(value = REPAIR_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairDistroXV1ByCrn")
-    void repairClusterByCrn(@PathParam("crn") String crn, @Valid DistroXRepairV1Request clusterRepairRequest);
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
+            @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
+    })
+    FlowIdentifier repairClusterByCrn(@PathParam("crn") String crn, @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @GET
     @Path("name/{name}/cli_create")

@@ -980,24 +980,25 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, "Cloudbreak await for flow should be skipped because of previous error.");
-            return entity;
-        }
-        LOGGER.info(String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
-                Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
-        Log.await(LOGGER, String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
-                Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
-        try {
-            MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
-                    .getAccountId());
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient);
-        } catch (Exception e) {
-            if (runningParameter.isLogError()) {
-                LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", awaitEntity, awaitEntity.getName(), e.getMessage(), e);
-                Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of %s",
-                        awaitEntity, awaitEntity.getName(), e.getMessage()));
+        } else {
+            LOGGER.info(String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
+                    Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
+            Log.await(LOGGER, String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
+                    Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
+            try {
+                MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
+                        .getAccountId());
+                flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient);
+            } catch (Exception e) {
+                if (runningParameter.isLogError()) {
+                    LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", awaitEntity, awaitEntity.getName(), e.getMessage(), e);
+                    Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of %s",
+                            awaitEntity, awaitEntity.getName(), e.getMessage()));
+                }
+                getExceptionMap().put("Cloudbreak await for flow " + awaitEntity, e);
             }
-            getExceptionMap().put("Cloudbreak await for flow " + awaitEntity, e);
         }
+        entity.setLastKnownFlowId(null);
         return entity;
     }
 
