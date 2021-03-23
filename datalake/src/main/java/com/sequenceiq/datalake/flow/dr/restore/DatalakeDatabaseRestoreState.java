@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.restore;
 
+import com.sequenceiq.datalake.flow.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
@@ -16,7 +17,7 @@ public enum DatalakeDatabaseRestoreState implements FlowState {
     DATALAKE_RESTORE_FINISHED_STATE,
     FINAL_STATE;
 
-    private Class<? extends DefaultRestartAction> restartAction = DefaultRestartAction.class;
+    private Class<? extends DefaultRestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     DatalakeDatabaseRestoreState() {
     }
