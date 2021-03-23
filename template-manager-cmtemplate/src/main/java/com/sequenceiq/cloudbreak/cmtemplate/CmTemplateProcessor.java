@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -450,7 +451,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 && kerberosConfigOpt.isPresent()) {
             KerberosConfig kerberosConfig = kerberosConfigOpt.get();
             ApiConfigureForKerberosArguments apiConfigureForKerberosArguments = new ApiConfigureForKerberosArguments();
-            if (kerberosConfig.getDatanodeSecurePort() > 0 && kerberosConfig.getDatanodeSecureHttpsPort() > 0) {
+            if (shouldConfigureSecureDatanode(templatePreparationObject.getGeneralClusterConfigs(), kerberosConfig)) {
                 LOGGER.debug("Add Kerberos Datanode port config to CM template, web port: {}, https port: {}",
                         kerberosConfig.getDatanodeSecurePort(), kerberosConfig.getDatanodeSecureHttpsPort());
                 apiConfigureForKerberosArguments
@@ -459,6 +460,13 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
             }
             instantiator.setEnableKerberos(apiConfigureForKerberosArguments);
         }
+    }
+
+    private boolean shouldConfigureSecureDatanode(GeneralClusterConfigs generalClusterConfigs, KerberosConfig kerberosConfig) {
+        return generalClusterConfigs != null
+                && generalClusterConfigs.getAutoTlsEnabled()
+                && kerberosConfig.getDatanodeSecurePort() > 0
+                && kerberosConfig.getDatanodeSecureHttpsPort() > 0;
     }
 
     public void addVariables(List<ApiClusterTemplateVariable> vars) {
