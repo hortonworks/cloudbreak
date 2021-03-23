@@ -118,9 +118,15 @@ public class StackRuntimeVersionValidator {
                 .flatMap(this::getCdhVersionFromClouderaManagerProducts);
     }
 
-    private Optional<String> getCdhVersionFromClouderaManagerProducts(List<? extends ClouderaManagerProductBase> products) {
+    public Optional<String> getCdhVersionFromClouderaManagerProducts(List<? extends ClouderaManagerProductBase> products) {
         return products.stream()
                 .filter(product -> "CDH".equals(product.getName()))
+                .filter(product -> {
+                    if (product.getVersion() == null) {
+                        LOGGER.info("Cannot find the CDH's version in the request. We fallback to the default CDH version");
+                    }
+                    return product.getVersion() != null;
+                })
                 .map(product -> StringUtils.substringBefore(product.getVersion(), "-"))
                 .findFirst();
     }

@@ -16,6 +16,7 @@ import java.util.Optional;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -217,6 +218,24 @@ public class StackRuntimeVersionValidatorTest {
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
 
+    @Test
+    public void testGetCdhVersionFromClouderaManagerProductsIfNameAddedButVersionMissing() {
+
+        ClouderaManagerProduct cdhProduct = getCdhProduct();
+        Optional<String> actual = underTest.getCdhVersionFromClouderaManagerProducts(List.of(cdhProduct));
+
+        Assertions.assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    public void testGetCdhVersionFromClouderaManagerProductsIfNameAndVersionAdded() {
+
+        ClouderaManagerProduct cdhProduct = getCdhProduct("version");
+        Optional<String> actual = underTest.getCdhVersionFromClouderaManagerProducts(List.of(cdhProduct));
+
+        Assertions.assertFalse(actual.isEmpty());
+    }
+
     private StackView createDatalakeStack(Status status) throws IllegalAccessException {
         StackView stack = new StackView();
         stack.setType(StackType.DATALAKE);
@@ -235,6 +254,20 @@ public class StackRuntimeVersionValidatorTest {
         ClouderaManagerProduct product = new ClouderaManagerProduct();
         product.setName("CDH");
         product.setVersion(version + "-something");
+        return product;
+    }
+
+    private ClouderaManagerProduct getCdhProduct() {
+        ClouderaManagerProduct product = new ClouderaManagerProduct();
+        product.setName("CDH");
+        product.setVersion(null);
+        return product;
+    }
+
+    private ClouderaManagerProduct getProduct(String name, String version) {
+        ClouderaManagerProduct product = new ClouderaManagerProduct();
+        product.setName(name);
+        product.setVersion(version);
         return product;
     }
 

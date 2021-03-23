@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -62,6 +63,9 @@ class DistroXUpgradeAvailabilityServiceTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private StackRuntimeVersionValidator stackRuntimeVersionValidator;
 
     @InjectMocks
     private DistroXUpgradeAvailabilityService underTest;
@@ -182,10 +186,12 @@ class DistroXUpgradeAvailabilityServiceTest {
         ClouderaManagerProduct product = new ClouderaManagerProduct();
         product.setVersion("C");
         product.setName("CDH");
+        List<ClouderaManagerProduct> products = List.of(product);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
-        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(List.of(product));
+        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
+        when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("C"));
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
