@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.stop;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.InitializeMDCContextRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
@@ -11,7 +12,7 @@ public enum StackStopState implements FlowState {
     STOP_FINISHED_STATE,
     FINAL_STATE;
 
-    private Class<? extends DefaultRestartAction> restartAction = DefaultRestartAction.class;
+    private Class<? extends DefaultRestartAction> restartAction = InitializeMDCContextRestartAction.class;
 
     StackStopState() {
 

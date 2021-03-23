@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.core.flow2.restart.InitializeMDCContextRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum StackImageUpdateState implements FlowState {
     INIT_STATE,
@@ -27,5 +29,10 @@ public enum StackImageUpdateState implements FlowState {
     @Override
     public Class<? extends AbstractStackAction<?, ?, ?, ?>> action() {
         return action;
+    }
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return InitializeMDCContextRestartAction.class;
     }
 }

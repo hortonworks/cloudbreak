@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 
 public enum SaltUpdateState implements FlowState {
     INIT_STATE,
@@ -11,4 +13,9 @@ public enum SaltUpdateState implements FlowState {
     SALT_UPDATE_FINISHED_STATE,
     FINAL_STATE,
     SALT_UPDATE_FAILED_STATE;
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return FillInMemoryStateStoreRestartAction.class;
+    }
 }
