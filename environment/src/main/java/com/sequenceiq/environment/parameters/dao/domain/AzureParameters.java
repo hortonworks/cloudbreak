@@ -8,6 +8,7 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupCreation;
@@ -17,7 +18,7 @@ import com.sequenceiq.environment.parameters.dao.converter.ResourceGroupUsagePat
 
 @Entity
 @DiscriminatorValue("AZURE")
-public class AzureParameters extends BaseParameters {
+public class AzureParameters extends BaseParameters implements AccountIdAwareResource {
 
     @Column(name = "resource_group_name")
     private String resourceGroupName;

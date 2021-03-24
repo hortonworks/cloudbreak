@@ -28,6 +28,13 @@ public enum EnvironmentStatus {
     // If the user choosing create new option for the ssh key then we delete the ssh key on provider side
     PUBLICKEY_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS),
 
+    // If the user chooses to encrypt resources with CMK then we create required encryption resources which will be used to encrypt other resources
+    ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
+        .ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS),
+    // If the user chooses to encrypt resources with CMK then we delete encryption resources which are used to encrypt other resources
+    ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
+        .ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS),
+
     // Creating the FreeIPA resource for the environment
     FREEIPA_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS),
     // Deleting the FreeIPA resource for the environment
@@ -117,6 +124,7 @@ public enum EnvironmentStatus {
             UPDATE_INITIATED,
             NETWORK_CREATION_IN_PROGRESS,
             PUBLICKEY_CREATE_IN_PROGRESS,
+            ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
             FREEIPA_CREATION_IN_PROGRESS,
             AVAILABLE);
 
@@ -143,7 +151,8 @@ public enum EnvironmentStatus {
                 DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
                 DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
                 PUBLICKEY_DELETE_IN_PROGRESS,
-                EXPERIENCE_DELETE_IN_PROGRESS
+                EXPERIENCE_DELETE_IN_PROGRESS,
+                ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS
         ).contains(this);
     }
 

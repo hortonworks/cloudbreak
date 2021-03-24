@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.config;
 
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.CLUSTER_DEFINITION_DELETE_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENV_DELETE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENV_DELETE_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.FINAL_STATE;
@@ -16,6 +17,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_CLUSTER_DEFINITION_CLEANUP_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_IDBROKER_MAPPINGS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
@@ -46,7 +48,10 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(FREEIPA_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
             .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
 
-            .from(RDBMS_DELETE_STARTED_STATE).to(PUBLICKEY_DELETE_STARTED_STATE)
+            .from(RDBMS_DELETE_STARTED_STATE).to(ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE)
+            .event(START_ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_EVENT).defaultFailureEvent()
+
+            .from(ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE).to(PUBLICKEY_DELETE_STARTED_STATE)
             .event(START_PUBLICKEY_DELETE_EVENT).defaultFailureEvent()
 
             .from(PUBLICKEY_DELETE_STARTED_STATE).to(NETWORK_DELETE_STARTED_STATE)

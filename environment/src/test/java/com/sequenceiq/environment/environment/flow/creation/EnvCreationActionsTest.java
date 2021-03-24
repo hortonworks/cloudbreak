@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -178,6 +179,23 @@ class EnvCreationActionsTest {
     void publicKeyCreationActionTestHappyPath() {
         testCreationActionHappyPath(underTest::publickeyCreationAction, CREATE_PUBLICKEY_EVENT.selector(),
                 EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED);
+    }
+
+    @Test
+    void resourceEncryptionInitializationActionTestFailure() {
+        testFailure(underTest::resourceEncryptionInitializationAction);
+    }
+
+    @Test
+    void resourceEncryptionInitializationActionTestNoEnvironment() {
+        testNoEnvironment(underTest::resourceEncryptionInitializationAction, FAILED_ENV_CREATION_EVENT.selector());
+    }
+
+    @Test
+    void resourceEncryptionInitializationActionTestHappyPath() {
+        testCreationActionHappyPath(underTest::resourceEncryptionInitializationAction, INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
+                EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
     }
 
     private void testFailure(Supplier<Action<?, ?>> creationAction) {

@@ -25,6 +25,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_DAT
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STOP_FREEIPA_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED;
+
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -50,6 +53,7 @@ public class EnvironmentListStructuredEventAssertions {
             "ENVIRONMENT_CREATION_VALIDATION_STATE",
             "NETWORK_CREATION_STARTED_STATE",
             "PUBLICKEY_CREATION_STARTED_STATE",
+            "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE",
             "FREEIPA_CREATION_STARTED_STATE",
             "ENV_CREATION_FINISHED_STATE"
     );
@@ -63,6 +67,7 @@ public class EnvironmentListStructuredEventAssertions {
             ENVIRONMENT_VALIDATION_STARTED,
             ENVIRONMENT_NETWORK_CREATION_STARTED,
             ENVIRONMENT_PUBLICKEY_CREATION_STARTED,
+            ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED,
             ENVIRONMENT_FREEIPA_CREATION_STARTED,
             ENVIRONMENT_CREATION_FINISHED
     );
@@ -110,6 +115,7 @@ public class EnvironmentListStructuredEventAssertions {
             "INIT_STATE",
             "FREEIPA_DELETE_STARTED_STATE",
             "RDBMS_DELETE_STARTED_STATE",
+            "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE",
             "PUBLICKEY_DELETE_STARTED_STATE",
             "NETWORK_DELETE_STARTED_STATE",
             "IDBROKER_MAPPINGS_DELETE_STARTED_STATE",
@@ -130,7 +136,8 @@ public class EnvironmentListStructuredEventAssertions {
             ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED,
             ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED,
             ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED,
-            ENVIRONMENT_DELETION_FINISHED
+            ENVIRONMENT_DELETION_FINISHED,
+            ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED
     );
 
     @Inject

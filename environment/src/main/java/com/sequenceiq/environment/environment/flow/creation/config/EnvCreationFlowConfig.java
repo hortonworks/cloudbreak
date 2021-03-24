@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation.config;
 
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_CREATION_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_INITIALIZATION_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENV_CREATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENV_CREATION_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.FINAL_STATE;
@@ -14,6 +15,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
@@ -55,7 +57,12 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
 
-            .from(PUBLICKEY_CREATION_STARTED_STATE).to(FREEIPA_CREATION_STARTED_STATE)
+            .from(PUBLICKEY_CREATION_STARTED_STATE).to(ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE)
+            .event(START_ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_EVENT)
+            .failureState(ENV_CREATION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE).to(FREEIPA_CREATION_STARTED_STATE)
             .event(START_FREEIPA_CREATION_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()

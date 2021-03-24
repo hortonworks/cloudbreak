@@ -37,6 +37,9 @@ public enum EnvironmentStatus {
     PUBLICKEY_CREATE_IN_PROGRESS("Creating SSH Public key"),
     PUBLICKEY_DELETE_IN_PROGRESS("Deleting SSH Public key"),
 
+    ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS("Initializing Resource Encryption settings for environment"),
+    ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS("Deleting Resource Encryption settings of environment"),
+
     AVAILABLE("Available"),
     ARCHIVED("Archived"),
 
@@ -94,6 +97,7 @@ public enum EnvironmentStatus {
 
     private static final Set<EnvironmentStatus> NETWORK_CREATION_FINISHED_STATUSES = Set.of(
             PUBLICKEY_CREATE_IN_PROGRESS,
+            ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
             FREEIPA_CREATION_IN_PROGRESS,
             AVAILABLE
     );
@@ -130,6 +134,7 @@ public enum EnvironmentStatus {
             DELETE_INITIATED,
             NETWORK_DELETE_IN_PROGRESS,
             RDBMS_DELETE_IN_PROGRESS,
+            ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
             FREEIPA_DELETE_IN_PROGRESS,
             CLUSTER_DEFINITION_CLEANUP_PROGRESS,
             UMS_RESOURCE_DELETE_IN_PROGRESS,

@@ -31,6 +31,8 @@ class EnvironmentStatusTest {
                 { "CREATE_FAILED",                          EnvironmentStatus.CREATE_FAILED,                        false },
                 { "DELETE_FAILED",                          EnvironmentStatus.DELETE_FAILED,                        false },
                 { "UPDATE_FAILED",                          EnvironmentStatus.UPDATE_FAILED,                        false },
+                { "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS, false},
+                { "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, true},
         };
     }
     // CHECKSTYLE:ON
@@ -66,6 +68,8 @@ class EnvironmentStatusTest {
                 { "CREATE_FAILED",                          EnvironmentStatus.CREATE_FAILED,                        false },
                 { "DELETE_FAILED",                          EnvironmentStatus.DELETE_FAILED,                        false },
                 { "UPDATE_FAILED",                          EnvironmentStatus.UPDATE_FAILED,                        false },
+                { "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS, false},
+                { "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, false},
         };
     }
     // CHECKSTYLE:ON

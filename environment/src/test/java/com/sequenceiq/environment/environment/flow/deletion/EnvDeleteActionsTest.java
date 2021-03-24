@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.deletion;
 
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -193,6 +194,17 @@ class EnvDeleteActionsTest {
     @Test
     void publicKeyDeleteActionTestNoEnvironment() {
         testNoEnvironment(underTest::publickeyDeleteAction, DELETE_PUBLICKEY_EVENT.selector());
+    }
+
+    @Test
+    void resourceEncryptionDeleteActionTestNoEnvironment() {
+        testNoEnvironment(underTest::resourceEncryptionDeleteAction, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector());
+    }
+
+    @Test
+    void resourceEncryptionDeleteActionTestHappyPath() {
+        testDeleteActionHappyPath(underTest::resourceEncryptionDeleteAction, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
+                EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED);
     }
 
     private void testNoEnvironment(Supplier<Action<?, ?>> deleteAction, String selector) {
