@@ -80,6 +80,8 @@ public enum ResourceEvent {
     ENVIRONMENT_NETWORK_CREATION_FAILED("environment.network.creation.failed"),
     ENVIRONMENT_PUBLICKEY_CREATION_STARTED("environment.publickey.creation.started"),
     ENVIRONMENT_PUBLICKEY_CREATION_FAILED("environment.publickey.creation.failed"),
+    ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED("environment.resource.encryption.initialization.started"),
+    ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED("environment.resource.encryption.initialization.failed"),
     ENVIRONMENT_FREEIPA_CREATION_STARTED("environment.freeipa.creation.started"),
     ENVIRONMENT_FREEIPA_CREATION_FAILED("environment.freeipa.creation.failed"),
     ENVIRONMENT_CREATION_FINISHED("environment.creation.finished"),
@@ -97,6 +99,7 @@ public enum ResourceEvent {
     ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED("environment.ums.resource.deletion.started"),
     ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED("environment.datahubs.deletion.started"),
     ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED("environment.datalakes.deletion.started"),
+    ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED("environment.resource.encryption.deletion.started"),
     ENVIRONMENT_DELETION_FINISHED("environment.deletion.finished"),
     ENVIRONMENT_DELETION_FAILED("environment.deletion.failed"),
 

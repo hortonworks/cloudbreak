@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PUBLICKEY_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_EVENT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +35,7 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDelet
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withResourceName(environmentDto.getName())
                 .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(START_PUBLICKEY_DELETE_EVENT.selector())
+                .withSelector(START_ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_EVENT.selector())
                 .build();
         try {
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());

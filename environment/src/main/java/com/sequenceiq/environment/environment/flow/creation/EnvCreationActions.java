@@ -10,12 +10,15 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_NETWORK_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_NETWORK_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_NETWORK_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
@@ -74,7 +77,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    LOGGER.info("ENVIRONMENT_INITIALIZATION_STATE");
+                    LOGGER.info("Initialization of Environment has started. Current state is - ENVIRONMENT_INITIALIZATION_STATE");
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_INITIALIZATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
@@ -100,7 +103,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    LOGGER.info("ENVIRONMENT_CREATION_VALIDATION_STATE");
+                    LOGGER.info("Validation of Environment has started. Current state is - ENVIRONMENT_CREATION_VALIDATION_STATE");
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
@@ -126,7 +129,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    LOGGER.info("NETWORK_CREATION_STARTED_STATE");
+                    LOGGER.info("Creation of Network has started. Current state is - NETWORK_CREATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
@@ -152,7 +155,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    LOGGER.info("PUBLICKEY_CREATION_STARTED_STATE");
+                    LOGGER.info("Creation of PublicKey has started. Current state is - PUBLICKEY_CREATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
@@ -172,13 +175,42 @@ public class EnvCreationActions {
         };
     }
 
+    @Bean(name = "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE")
+    public Action<?, ?> resourceEncryptionInitializationAction() {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
+                    LOGGER.info("Initialization of resource encryption has started." +
+                        " Current state is - ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE");
+                    environment.setStatus(EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS);
+                    environment = environmentService.save(environment);
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
+                        ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
+                    sendEvent(context, INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(), environmentDto);
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                            payload.getResourceId(),
+                            payload.getResourceName(),
+                            null,
+                            payload.getResourceCrn());
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED,
+                        context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to create encryption resources for environment! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
+            }
+        };
+    }
+
     @Bean(name = "FREEIPA_CREATION_STARTED_STATE")
     public Action<?, ?> freeipaCreationAction() {
         return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
-                    LOGGER.info("FREEIPA_CREATION_STARTED_STATE");
+                    LOGGER.info("Creation of FreeIPA has started. Current state is - FREEIPA_CREATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);

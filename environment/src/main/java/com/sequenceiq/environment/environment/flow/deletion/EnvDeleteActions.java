@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion;
 
 import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_CLUSTER_DEFINITION_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_NETWORK_EVENT;
@@ -121,6 +122,26 @@ public class EnvDeleteActions {
                         .withId(payload.getResourceId())
                         .build();
                 sendEvent(context, DELETE_PUBLICKEY_EVENT.selector(), environmentDeletionDto);
+            }
+        };
+    }
+
+    @Bean(name = "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE")
+    public Action<?, ?> resourceEncryptionDeleteAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED,
+                                EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE);
+
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(), environmentDeletionDto);
             }
         };
     }

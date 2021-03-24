@@ -14,7 +14,8 @@ public enum EnvDeleteHandlerSelectors implements FlowEvent {
     DELETE_UMS_RESOURCE_EVENT,
     DELETE_DATAHUB_CLUSTERS_EVENT,
     DELETE_DATALAKE_CLUSTERS_EVENT,
-    DELETE_PUBLICKEY_EVENT;
+    DELETE_PUBLICKEY_EVENT,
+    DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 
     @Override
     public String event() {
