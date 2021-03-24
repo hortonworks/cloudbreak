@@ -62,23 +62,19 @@ public class ResourceAuthorizationService {
         boolean authzEntitled = isAuthorizationEntitlementRegistered();
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper(authzEntitled);
         getAuthorization(userCrn, proceedingJoinPoint, methodSignature).ifPresent(authorization -> {
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Resource authorization rule: {}", authorization.toString(rightMapper));
-            }
+            LOGGER.debug("Resource authorization rule: {}", authorization.toString(rightMapper));
             List<Boolean> rightCheckResults = checkWithUms(userCrn, requestId, authzEntitled, rightMapper, authorization);
             LOGGER.debug("Ums resource right check result: {}", rightCheckResults);
             Iterator<Boolean> iterator = rightCheckResults.iterator();
             authorization.evaluateAndGetFailed(iterator).ifPresentOrElse(failedAuthorization -> {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Resource authorization failed: {}", failedAuthorization.toString(rightMapper));
-                }
+                LOGGER.debug("Resource authorization failed: {}", failedAuthorization.toString(rightMapper));
                 if (authzEntitled) {
                     Map<String, Optional<String>> crnNameMap = resourceNameFactoryService.getNames(collectResourceCrns(failedAuthorization));
                     throw new AccessDeniedException(failedAuthorization.getAsFailureMessage(rightMapper, getNameOrDefault(crnNameMap)));
                 } else {
                     throw new AccessDeniedException(convertToLegacyFailureMeessage(userCrn, failedAuthorization, rightMapper));
                 }
-            }, () -> LOGGER.debug("Resource authorization was successfull."));
+            }, () -> LOGGER.debug("Resource authorization was successful."));
         });
     }
 
@@ -116,10 +112,11 @@ public class ResourceAuthorizationService {
     }
 
     private Optional<AuthorizationRule> getAuthorization(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
+        Function<AuthorizationFactory, Annotation> getAnnotation = authFactory -> methodSignature.getMethod().getAnnotation(authFactory.supportedAnnotation());
         List<Optional<AuthorizationRule>> authorizations = authorizationFactories
                 .stream()
-                .filter(a -> methodSignature.getMethod().isAnnotationPresent(a.supportedAnnotation()))
-                .map(a -> a.getAuthorization(methodSignature.getMethod().getAnnotation(a.supportedAnnotation()), userCrn, proceedingJoinPoint, methodSignature))
+                .filter(authFactory -> methodSignature.getMethod().isAnnotationPresent(authFactory.supportedAnnotation()))
+                .map(authFactory -> authFactory.getAuthorization(getAnnotation.apply(authFactory), userCrn, proceedingJoinPoint, methodSignature))
                 .collect(toList());
         return AllMatch.from(authorizations);
     }

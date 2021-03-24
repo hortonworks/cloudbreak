@@ -6,6 +6,8 @@ import javax.inject.Inject;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -16,6 +18,8 @@ import com.sequenceiq.authorization.service.model.HasRight;
 
 @Component
 public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<CheckPermissionByResourceCrn> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RequestPropertyAuthorizationFactory.class);
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -31,6 +35,7 @@ public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<Ch
             MethodSignature methodSignature) {
         String resourceCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
         AuthorizationResourceAction action = methodAnnotation.action();
+        LOGGER.debug("Getting authorization rule to authorize user [{}] for action [{}] over resource [{}]", userCrn, action, resourceCrn);
         return calcAuthorization(resourceCrn, action);
     }
 

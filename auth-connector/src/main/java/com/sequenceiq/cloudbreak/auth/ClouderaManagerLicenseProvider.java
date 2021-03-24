@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.cloudbreak.auth;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
@@ -7,8 +7,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
-import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
