@@ -1,4 +1,4 @@
-package com.sequenceiq.authorization.service;
+package com.sequenceiq.cloudbreak.auth;
 
 import java.util.regex.Pattern;
 
@@ -9,9 +9,6 @@ import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
-import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @Component
 public class PaywallCredentialPopulator {

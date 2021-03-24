@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -17,6 +19,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Component
 public class ResourceNameAuthorizationFactory extends TypedAuthorizationFactory<CheckPermissionByResourceName> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNameAuthorizationFactory.class);
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -29,6 +33,7 @@ public class ResourceNameAuthorizationFactory extends TypedAuthorizationFactory<
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         AuthorizationResourceAction action = methodAnnotation.action();
         String resourceName = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceName.class, String.class);
+        LOGGER.debug("Getting authorization rule to authorize user [{}] for action [{}] over resource [{}]", userCrn, action, resourceName);
         return calcAuthorization(resourceName, action);
     }
 

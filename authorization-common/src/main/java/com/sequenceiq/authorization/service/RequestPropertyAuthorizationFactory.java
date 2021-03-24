@@ -45,6 +45,8 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
     public Optional<AuthorizationRule> doGetAuthorization(CheckPermissionByRequestProperty methodAnnotation, String userCrn,
             ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Object requestObject = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, RequestObject.class, Object.class);
+        LOGGER.debug("Getting authorization rule to authorize user [{}] for action [{}] over property [{}] of request object.",
+                userCrn, methodAnnotation.action(), methodAnnotation.path());
         return calcAuthorization(requestObject, methodAnnotation);
     }
 
