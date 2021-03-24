@@ -54,7 +54,8 @@ public enum DatalakeStatusEnum {
                 || STACK_DELETED.equals(this)
                 || STACK_DELETION_IN_PROGRESS.equals(this)
                 || DELETE_REQUESTED.equals(this)
-                || DELETED.equals(this);
+                || DELETED.equals(this)
+                || DELETE_FAILED.equals(this);
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
