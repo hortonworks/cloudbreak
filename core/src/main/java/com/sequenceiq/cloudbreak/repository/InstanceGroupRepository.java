@@ -39,4 +39,7 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     @Query("SELECT i.instanceGroup FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
             + "AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceGroup> getPrimaryGatewayInstanceGroupByStackId(@Param("stackId") Long stackId);
+
+    @Query("SELECT i FROM InstanceGroup i JOIN FETCH i.template WHERE i.stack.id = :stackId")
+    Set<InstanceGroup> getByStackAndFetchTemplates(@Param("stackId") Long stackId);
 }

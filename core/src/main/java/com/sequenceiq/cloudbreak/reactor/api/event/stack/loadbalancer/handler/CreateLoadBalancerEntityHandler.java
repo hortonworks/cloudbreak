@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.SUBNET_ID;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.SubnetSelector;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoadBalancerEntityFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoadBalancerEntityRequest;
@@ -89,7 +89,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
                 enableEndpointGateway(stack, environment);
             }
 
-            Set<InstanceGroup> instanceGroups = instanceGroupService.findByStackId(stack.getId());
+            Set<InstanceGroup> instanceGroups = instanceGroupService.getByStackAndFetchTemplates(stack.getId());
             instanceGroups.forEach(ig -> ig.setTargetGroups(targetGroupPersistenceService.findByIntanceGroupId(ig.getId())));
             Set<LoadBalancer> existingLoadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
             stack.setInstanceGroups(instanceGroups);
