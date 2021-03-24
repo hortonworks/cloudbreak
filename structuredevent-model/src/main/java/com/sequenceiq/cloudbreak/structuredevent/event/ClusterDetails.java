@@ -57,6 +57,8 @@ public class ClusterDetails implements Serializable {
 
     private Long upSince;
 
+    private boolean razEnabled;
+
     public Long getId() {
         return id;
     }
@@ -215,5 +217,13 @@ public class ClusterDetails implements Serializable {
 
     public void setUpSince(Long upSince) {
         this.upSince = upSince;
+    }
+
+    public boolean isRazEnabled() {
+        return razEnabled;
+    }
+
+    public void setRazEnabled(boolean razEnabled) {
+        this.razEnabled = razEnabled;
     }
 }
