@@ -34,6 +34,30 @@ collector:
       skipAnonymization: true
       folderPrefix: conf{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
       compress: true{% endif %}
+    - path: /var/lib/cdp-nodestatus/report/services_report.json
+      label: nodestatus_services_report
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+      mandatory: true
+    - path: /var/lib/cdp-nodestatus/report/network_report.json
+      label: nodestatus_network_report
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+      mandatory: true
+    - path: /var/lib/cdp-nodestatus/report/metering_report.json
+      label: nodestatus_metering_report
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+      mandatory: true
+    - path: /var/lib/cdp-nodestatus/report/system_metrics_report.json
+      label: nodestatus_system_metrics_report
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+      mandatory: true
     - path: /var/lib/cdp-nodestatus/report/salt_report.json
       label: nodestatus_salt_report
       skipAnonymization: true

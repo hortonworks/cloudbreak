@@ -46,6 +46,24 @@ public class DiagnosticsCollectionActions {
         };
     }
 
+    @Bean(name = "DIAGNOSTICS_PREFLIGHT_CHECK_STATE")
+    public Action<?, ?> diagnosticsPreFlightCheckAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_PREFLIGHT_CHECK_STATE. resourceCrn: '{}'", resourceCrn);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(payload.getResourceId())
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.PREFLIGHT_CHECK_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
     @Bean(name = "DIAGNOSTICS_INIT_STATE")
     public Action<?, ?> diagnosticsInitAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {

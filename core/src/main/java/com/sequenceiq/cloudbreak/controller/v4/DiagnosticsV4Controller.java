@@ -20,15 +20,12 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
-import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.converter.VmLogsToVmLogsResponseConverter;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
-import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
-import com.sequenceiq.common.api.node.status.response.SaltStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -51,9 +48,6 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
 
     @Inject
     private VmLogsToVmLogsResponseConverter vmlogsConverter;
-
-    @Inject
-    private NodeStatusService nodeStatusService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "stackCrn", type = CRN, action = DESCRIBE_DATALAKE)
@@ -93,29 +87,5 @@ public class DiagnosticsV4Controller implements DiagnosticsV4Endpoint {
     @DisableCheckPermissions
     public List<String> getCmRoles(String stackCrn) {
         return clusterDiagnosticsService.getClusterComponents(stackCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public NodeStatusResponse getMeteringReport(@ResourceCrn String stackCrn) {
-        return nodeStatusService.getMeteringReport(stackCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public NodeStatusResponse getNetworkReport(@ResourceCrn String stackCrn) {
-        return nodeStatusService.getNetworkReport(stackCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public NodeStatusResponse getServicesReport(@ResourceCrn String stackCrn) {
-        return nodeStatusService.getServicesReport(stackCrn);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public SaltStatusResponse getSaltReport(@ResourceCrn String stackCrn) {
-        return nodeStatusService.getSaltReport(stackCrn);
     }
 }

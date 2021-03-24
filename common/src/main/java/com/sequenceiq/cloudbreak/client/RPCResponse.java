@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.client;
 
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -84,6 +87,16 @@ public class RPCResponse<R> {
 
     public void setTruncated(Boolean truncated) {
         this.truncated = truncated;
+    }
+
+    @JsonIgnore
+    public RPCMessage getFirstRpcMessage() {
+        return CollectionUtils.isNotEmpty(messages) ? messages.get(0) : null;
+    }
+
+    @JsonIgnore
+    public String getFirstTextMessage() {
+        return getFirstRpcMessage() != null ? getFirstRpcMessage().getMessage() : null;
     }
 
     @Override

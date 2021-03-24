@@ -1,23 +1,33 @@
 package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -25,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @Service
 public class DiagnosticsFlowService {
@@ -35,6 +46,9 @@ public class DiagnosticsFlowService {
     private StackService stackService;
 
     @Inject
+    private NodeStatusService nodeStatusService;
+
+    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -42,6 +56,32 @@ public class DiagnosticsFlowService {
 
     @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
+
+    @Inject
+    private CloudbreakEventService cloudbreakEventService;
+
+    public void nodeStatusNetworkReport(Long stackId) {
+        try {
+            RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getNetworkReport(stackId);
+            if (rpcResponse != null) {
+                LOGGER.debug("Diagnostics network report response: {}", rpcResponse.getFirstTextMessage());
+                if (rpcResponse.getResult() != null) {
+                    List<NodeStatusProto.NetworkDetails> nodesWithUnhealthyNetwork = rpcResponse.getResult().getNodesList().stream()
+                            .map(NodeStatusProto.NodeStatus::getNetworkDetails)
+                            .filter(this::isAnyNetworkHealthStatusIsNotOk)
+                            .collect(Collectors.toList());
+                    firePreFlightCheckEvents(stackId, "DataBus API accessibility",
+                            nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusAccessible);
+                    firePreFlightCheckEvents(stackId, "DataBus S3 API accessibility",
+                            nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
+                    firePreFlightCheckEvents(stackId, "'.cloudera.com' accessibility",
+                            nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getClouderaComAccessible);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Diagnostics network node status check failed (skipping): {}", e.getMessage());
+        }
+    }
 
     public Set<String> collectUnresponsiveNodes(Long stackId, Set<String> hosts, Set<String> hostGroups, Set<String> initialExcludeHosts)
             throws CloudbreakOrchestratorFailedException {
@@ -169,6 +209,52 @@ public class DiagnosticsFlowService {
 
     private boolean nodeHostFilterMatches(Node node, Set<String> hosts) {
         return hosts.contains(node.getHostname()) || hosts.contains(node.getPrivateIp()) || hosts.contains(node.getPublicIp());
+    }
+
+    private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
+            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
+        List<String> unhealthyNetworkHosts =
+                getUnhealthyHosts(networkNodes, NodeStatusProto.NetworkDetails::getDatabusAccessible);
+        List<String> eventMessageParameters = getPreFlightStatusParameters(checkType, unhealthyNetworkHosts);
+        String eventType = CollectionUtils.isEmpty(unhealthyNetworkHosts) ? UPDATE_IN_PROGRESS.name() : UPDATE_FAILED.name();
+        cloudbreakEventService.fireCloudbreakEvent(resourceId, eventType,
+                ResourceEvent.STACK_DIAGNOSTICS_PREFLIGHT_CHECK_FINISHED, eventMessageParameters);
+    }
+
+    private List<String> getPreFlightStatusParameters(String checkType, List<String> unhealthyNetworkHosts) {
+        List<String> result = new ArrayList<>();
+        if (CollectionUtils.isNotEmpty(unhealthyNetworkHosts)) {
+            result.add("WARNING - ");
+            result.add(checkType);
+            result.add(String.format("FAILED. The following hosts are affected: [%s]", StringUtils.join(unhealthyNetworkHosts, ", ")));
+            return result;
+        } else {
+            result.add("");
+            result.add(checkType);
+            result.add("OK");
+            return result;
+        }
+    }
+
+    private boolean isAnyNetworkHealthStatusIsNotOk(NodeStatusProto.NetworkDetails nd) {
+        return isAnyHealthStatusIsNotOk(nd.getDatabusAccessible(), nd.getDatabusS3Accessible(), nd.getClouderaComAccessible());
+    }
+
+    private boolean isAnyHealthStatusIsNotOk(NodeStatusProto.HealthStatus... healthStatuses) {
+        for (NodeStatusProto.HealthStatus healthStatus : healthStatuses) {
+            if (NodeStatusProto.HealthStatus.NOK.equals(healthStatus)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<String> getUnhealthyHosts(List<NodeStatusProto.NetworkDetails> networkNodes,
+            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
+        return networkNodes.stream()
+                .filter(nd -> NodeStatusProto.HealthStatus.NOK.equals(healthEvaluator.apply(nd)))
+                .map(NodeStatusProto.NetworkDetails::getHost)
+                .collect(Collectors.toList());
     }
 
 }

@@ -81,6 +81,30 @@ public class DiagnosticsCollectionActions {
         };
     }
 
+    @Bean(name = "DIAGNOSTICS_PREFLIGHT_CHECK_STATE")
+    public Action<?, ?> diagnosticsPreFlightCheckAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_PREFLIGHT_CHECK_STATE. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
+                        ResourceEvent.STACK_DIAGNOSTICS_PREFLIGHT_CHECK_RUNNING);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(resourceId)
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.PREFLIGHT_CHECK_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .withHosts(payload.getHosts())
+                        .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
     @Bean(name = "DIAGNOSTICS_INIT_STATE")
     public Action<?, ?> diagnosticsInitAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {

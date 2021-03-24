@@ -1,0 +1,459 @@
+syntax = "proto3";
+
+package cdp.telemetry;
+
+option java_package = "com.cloudera.thunderhead.telemetry.nodestatus";
+option java_outer_classname = "NodeStatusProto";
+option go_package = "com/cloudera/cdp/protobuf";
+
+// Node specific status for a CDP VM node.
+message NodeStatus {
+    // Status and common details of the node.
+    StatusDetails statusDetails = 1;
+    // Service status responses.
+    ServicesDetails servicesDetails = 2;
+    // Network status responses.
+    NetworkDetails networkDetails = 3;
+    // Network status responses.
+    MeteringDetails meteringDetails = 4;
+    // Network status responses.
+    SystemMetrics systemMetrics = 5;
+}
+
+// CDP node status report per nodes (VM).
+message NodeStatusReport {
+    // Node specific service status response.
+    repeated NodeStatus nodes = 1;
+    // Common cluster related data.
+    ClusterDetails clusterDetails = 2;
+    // Timestaamp of the service status report.
+    int64 timestamp = 3;
+}
+
+// Represents status of any kind of component.
+enum HealthStatus {
+    // Status of the component is unknown.
+    UNKNOWN = 0;
+    // Status is in good shape - like running.
+    OK = 1;
+    // Status is not in good shape - like not running.
+    NOK = 2;
+}
+
+// Status of a CDP service that runs on the VM nodes.
+message ServiceStatus {
+    // Name of the service.
+    string name = 1;
+    // Status of the service.
+    HealthStatus status = 2;
+}
+
+// Holds different service statuses based on the VM type.
+message ServicesDetails {
+    // Common service statuses.
+    repeated ServiceStatus services = 1;
+    // Infra service statuses for both FreeIPA and CM clusters.
+    repeated ServiceStatus infraServices = 2;
+    // Service statuses for CM clusters.
+    repeated ServiceStatus cmServices = 3;
+    // Service statuses for FreeIPA clusters.
+    repeated ServiceStatus freeipaServices = 4;
+    // Timestamp of service status report.
+    int64 timestamp = 5;
+}
+
+// Holds salt master health details .
+// Currently, only about the local master on the same node where nodestatus monitor is running.
+message SaltMasterHealth {
+    // Status responses of the salt master related services.
+    repeated ServiceStatus services = 1;
+    // Timestamp of the salt master health report.
+    int64 timestamp = 2;
+}
+
+// Holds salt minion health responses (gathered from salt ping responses).
+message SaltMinionsHealth {
+    // Node specific status response.
+    repeated StatusDetails pingResponses = 1;
+    // Timestamp of the salt minion health report.
+    int64 timestamp = 2;
+}
+
+// Holds both salt master and salt minions health data.
+message SaltHealthReport {
+    // Represents salt master health (salt services) response.
+    SaltMasterHealth master = 1;
+    // Represents salt minion health responses.
+    SaltMinionsHealth minions = 2;
+    // Timestam of the salt health report.
+    int64 timestamp = 3;
+}
+
+// Holds common node status fields
+message StatusDetails {
+    // CDP nodename / hostname.
+    string host = 1;
+    // Response status.
+    HealthStatus status = 2;
+    // Additional helper message for the status (optional).
+    string statusReson = 3;
+    // Timestaamp of the service statuses for the specific node.
+    int64 timestamp = 4;
+}
+
+// CDP billing related details.
+message MeteringDetails {
+    // Databus related configuration data.
+    map<string, string> databusDetails = 1;
+    // Heartbeat event related configuration data.
+    map<string, string> eventDetails = 2;
+    // First heartbeat event timestamp from the heartbeat event JSON file.
+    int64 firstHeartbeatEventTimestamp = 3;
+    // System boot time - can be useful to figure out from what time should the heartbeats generate data.
+    int64 systemBootTimestamp = 4;
+    // Number of lines in the heartbeat event JSON file.
+    int32 heartbeatEventCount = 5;
+    // Status of the heartbeat agent.
+    HealthStatus heartbeatAgentRunning = 6;
+    // Status (existence) of the generated heartbeat config.
+    HealthStatus heartbeatConfig = 7;
+    // Databus API availability.
+    HealthStatus databusReachable = 8;
+    // Databus status check result.
+    HealthStatus databusTestResponse = 9;
+    // Status (existence) of the generated heartbeat config.
+    HealthStatus loggingAgentConfig = 10;
+    // Status of the logging agent service.
+    HealthStatus loggingServiceRunning = 11;
+    // Timestamp of metering status report.
+    int64 timestamp = 12;
+}
+
+// CDP VM network related details.
+message NetworkDetails {
+    // CDP nodename / hostname.
+    string host = 1;
+    // CCM usage flag.
+    bool ccmEnabled = 2;
+    // List of DNS resolvers.
+    repeated string dnsResolvers = 3;
+    // Scanning host networks for neighbours (against Saltboot API).
+    bool neighbourScan = 4;
+    // Neighbours (addresses) on the host network.
+    repeated string neighbours = 5;
+    // Accessibility of the neighbours from the host network.
+    HealthStatus anyNeighboursAccessible = 6;
+    // Number of neighbours on the host network.
+    int32 numberOfNeighbours = 7;
+    // Timestamp of network status report.
+    int64 timestamp = 8;
+    // CCM address availability.
+    HealthStatus ccmAccessible = 9;
+    // Availability of .cloudera.com address.
+    HealthStatus clouderaComAccessible = 10;
+    // Databus API availability.
+    HealthStatus databusAccessible = 11;
+    // Databus S3 API availability.
+    HealthStatus databusS3Accessible = 12;
+}
+
+// System host metrics that is collected periodically by nodestatus monitor.
+message SystemMetrics {
+    // CPU related system metrics.
+    CpuMetrics cpu = 1;
+    // Disk related system metrics (e.g.: partitions and largest log folders).
+    DiskMetrics disk = 2;
+    // Memory (virtual/swap) related system metrics.
+    MemoryMetrics memory = 3;
+    // Network related metrics.
+    NetworkMetrics network = 4;
+    // Timestamp of the host metrics that shows when were the metrics collected last time.
+    int64 timestamp = 5;
+    // Common cluster related data (optional - can be filled from NodeStatusReport as well).
+    ClusterDetails clusterDetails = 6;
+}
+
+// Holds CPU related system metrics.
+message CpuMetrics {
+    // Number of CPUs.
+    int32 count = 1;
+    // Logical number of CPUs.
+    int32 logical_count = 2;
+    // Average load of CPUs - last 1 min, last 5 min and last 15 min.
+    repeated float load_avg = 3;
+    // Percentage(s) of the CPU's capacity.
+    CpuTimes times = 4;
+    // CPU stats (e.g.: interrupts, syscalls).
+    CpuStats stats = 5;
+    // CPU frequency.
+    CpuFrequency freq = 6;
+}
+
+// Holds CPU call statistics.
+message CpuStats {
+    // Number of context switches.
+    int64 ctx_switches = 1;
+    // Number of CPU interrupts.
+    int64 interrupts = 2;
+    // Number of CPU soft interrupts.
+    int64 soft_interrupts = 3;
+    // Number of syscalls.
+    int64 syscalls = 4;
+}
+
+// Holds CPU time statistics.
+message CpuTimes {
+    // CPU time that is not actively being used.
+    double idle = 1;
+    // CPU time used by processes - with lower priority than other tasks.
+    double nice = 2;
+    // CPU time used by the kernel.
+    double system = 3;
+    // CPU time used by user space processes.
+    double user = 4;
+}
+
+// Holds CPU frequency related data.
+message CpuFrequency {
+    // Current CPU frequency.
+    int64 current = 1;
+    // Minimum CPU frequency.
+    int64 min = 2;
+    // Maximum CPU frequency.
+    int64 max = 3;
+}
+
+// Disk related system metrics.
+message DiskMetrics {
+    // Disk partitions on the VM.
+    repeated DiskPartition partitions = 1;
+    // Top log files (based on file size) in /var/log folder.
+    repeated VmLog top_varlog = 2;
+    // Disk I/O related system metrics.
+    DiskIO io = 3;
+}
+
+// Holds data about a log file on the VM.
+message VmLog {
+    // Path of the log file.
+    string path = 1;
+    // Size of the log file.
+    string size = 2;
+}
+
+// Holds disk partition data.
+message DiskPartition {
+    // Usage of the disk partition.
+    DiskUsage usage = 1;
+    // The device path
+    string device = 2;
+    // Type of the filesystem
+    string fstype = 3;
+    // The maximum length a file name can have.
+    int32 maxfile = 4;
+    // The maximum length a path name (directory name and base filename together) can have.
+    int32 maxpath = 5;
+    // Mounted path for the disk partition.
+    string mountpoint = 6;
+    // Comma-separated string indicating different mount options for the drive/partition.
+    string opts = 7;
+}
+
+// Disk usage related metrics.
+message DiskUsage {
+    // Disk size (bytes) that is not in use.
+    int64 free = 1;
+    // Total amount of disk size (bytes).
+    int64 total = 2;
+    // Amount of disk size (bytes) that is in use.
+    int64 used = 3;
+    // Percentage of the disk size that is in use against the total disk size.
+    double percent = 4;
+}
+
+// Holds disk I/O (activity) related metrics.
+message DiskIO {
+    // Disk reads in bytes.
+    int64 read_bytes = 1;
+    // Number of disk read operations.
+    int64 read_count = 2;
+    // Time spent reading from disk (in milliseconds).
+    int64 read_time = 3;
+    // Disk writes in bytes.
+    int64 write_bytes = 4;
+    // Number of disk write operations.
+    int64 write_count = 5;
+    // Time spent writing to disk (in milliseconds).
+    int64 write_time = 6;
+}
+
+// Holds network related host metrics.
+message NetworkMetrics {
+    // Holds network connection states.
+    NetworkConnections connections = 1;
+    // Network I/O statistics.
+    NetworkIO io = 2;
+}
+
+// Holds network I/O (activity) related statistics.
+message NetworkIO {
+    // Number of bytes received.
+    int64 bytes_recv = 1;
+    // Number of bytes sent.
+    int64 bytes_sent = 2;
+    // Total number of incoming packets which were dropped
+    int64 dropin = 3;
+    // Total number of outgoing packets which were dropped
+    int64 dropout = 4;
+    // Total number of errors while receiving.
+    int64 errin = 5;
+    // Total number of errors while sending.
+    int64 errout = 6;
+    // Number of packets recieved.
+    int64 packets_recv = 7;
+    // Number of packets sent.
+    int64 packets_sent = 8;
+}
+
+// Holds TCP network connection states.
+message NetworkConnections {
+    // Waiting for connection request.
+    int32 LISTEN = 1;
+    // Represents a fully established connection.
+    int32 ESTABLISHED = 2;
+    // Waiting for ACK about the connection termination request has been sent.
+    int32 TIME_WAIT = 3;
+    // Waiting for the connection termination request (close request already happened).
+    int32 CLOSE_WAIT = 4;
+    // Represents no connection state at all.
+    int32 CLOSED = 5;
+    // Waiting acknowledgment after a connection request has been sent.
+    int32 SYN_SEND = 6;
+    // Acknowledgment recieved after the connection request. Waiting for final acknowledgment.
+    int32 SYN_RECEIVED = 7;
+    // Waiting for an acknowledgment of the connection termination request.
+    int32 FIN_WAIT_1 = 8;
+    // Waiting for a connection termination request. (If socket is not closed shortly, It can indicate an error in the coding of the remote application).
+    int32 FIN_WAIT_2 = 9;
+    // Waiting for an acknowledgment of the connection termination request.
+    int32 LAST_ACK = 10;
+}
+
+// Holds virtual/swap memory data.
+message MemoryMetrics {
+    // Represents virtual memory related data.
+    VirtualMemory virtual_memory = 1;
+    // Represents swap memory related data.
+    SwapMemory swap_memory = 2;
+}
+// Holds virtual memory related metrics.
+message VirtualMemory {
+    // Total (physical) RAM (bytes) - exclusive swap.
+    int64 total = 1;
+    // Abount of virtual memory in use.
+    int64 used = 2;
+    // Memory (bytes) that is not in use.
+    int64 free = 3;
+    // Percentage of the memory usage.
+    double percent = 4;
+    // Available memory (bytes) for starting new applications, without swapping.
+    int64 available = 5;
+    // Memory currently in use or very recently used (bytes).
+    int64 active = 6;
+    // Inactive virtual memory (bytes).
+    int64 inactive = 7;
+    // Memory used by kernel buffers.
+    int64 buffers = 8;
+    // Memory used by the page cache and slabs.
+    int64 cached = 9;
+    // Memory that may be simultaneously accessed by multiple processes (tmpfs).
+    int64 shared = 10;
+    // Combination of caches for kernel objects.
+    int64 slab = 11;
+}
+
+// Holds swap memory related metrics.
+message SwapMemory {
+    // Amount of swap memory (bytes) that is not used.
+    int64 free = 1;
+    // Percentage of swap memory (bytes) that is in use.
+    double percent = 2;
+    // Number of bytes the system has swapped in.
+    int64 sin = 3;
+    // Number of bytes the system has swapped out.
+    int64 sout = 4;
+    // Total amount of swap memory (bytes).
+    int64 total = 5;
+    // Amount of swam memory (bytes) that is in use.
+    int64 used = 6;
+}
+
+// Holds CM service related health status.
+message CmServiceHealthCheckEvent {
+    // Name of the CM service.
+    string serviceName = 1;
+    // Type of the CM service.
+    string serviceType = 2;
+    // Name of the health status check.
+    string name = 3;
+    // Health status.
+    string value = 4;
+    // Timestamp of the CM service health record.
+    int64 timestamp = 5;
+    // Common cluster related data (optional - can be filled from NodeStatusReport as well).
+    ClusterDetails clusterDetails = 6;
+}
+
+// Holds CM service related metric record.
+message CmServiceMetricEvent {
+    // Name of the CM service.
+    string serviceName = 1;
+    // Type of the CM service.
+    string serviceType = 2;
+    // Long name of the CM metric.
+    string longName = 3;
+    // Name of the CM metric.
+    string name = 4;
+    // Floating point value of the CM metric.
+    double value = 5;
+    // Timestamp of the CM service metric record.
+    int64 timestamp = 6;
+    // Common cluster related data (optional - can be filled from NodeStatusReport as well).
+    ClusterDetails clusterDetails = 7;
+}
+
+// Holds common cluster related data.
+message ClusterDetails {
+    // Resource crn of the cluster.
+    string crn = 1;
+    // Name of the cluster.
+    string name = 2;
+    // Cluster version - can be different per cluster shape.
+    string version = 3;
+    // Type of the cluster.
+    ClusterType type = 4;
+    // Cloud Platform of the cluster.
+    CloudPlatform platform = 5;
+
+    // Type of the cluster.
+    enum ClusterType {
+        // Workload type.
+        DATAHUB = 0;
+        // Datalake type.
+        DATALAKE = 1;
+        // FreeIpa type.
+        FREEIPA = 2;
+    }
+    // Cloloud platform types.
+    enum CloudPlatform {
+        UNKNOWN = 0;
+        // Amazon cloud platform.
+        AWS = 1;
+        // Azure cloud platform.
+        AZURE = 2;
+        // Google cloud platform.
+        GCP = 3;
+        // YCloud cloud platform.
+        YCLOUD = 4;
+    }
+}
