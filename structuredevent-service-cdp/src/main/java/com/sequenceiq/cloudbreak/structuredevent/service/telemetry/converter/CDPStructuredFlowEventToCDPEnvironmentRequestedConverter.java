@@ -56,7 +56,11 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
         if (srcEnvironmentDetails != null) {
             if (srcEnvironmentDetails.getRegions() != null) {
                 cdpEnvironmentDetails.setRegion(srcEnvironmentDetails.getRegions().stream()
-                        .map(Region::getName).filter(Objects::nonNull).sorted().distinct()
+                        .map(Region::getName)
+                        .filter(Objects::nonNull)
+                        .map(region -> region.toLowerCase().replace(" ", ""))
+                        .sorted()
+                        .distinct()
                         .collect(Collectors.joining(",")));
             }
 

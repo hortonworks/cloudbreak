@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,6 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.Environme
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
@@ -193,5 +197,29 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
 
         Assert.assertEquals(false,
                 environmentRequested.getEnvironmentDetails().getAzureDetails().getSingleResourceGroup());
+    }
+
+    @Test
+    public void testRegionNameConversion() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        Region region1 = new Region();
+        region1.setName("westus2");
+        Region region2 = new Region();
+        region2.setName("UK South");
+        Region region3 = new Region();
+        region3.setName("Invalid Region");
+
+        Set<Region> regions = new HashSet<>();
+        regions.add(region1);
+        regions.add(region2);
+        regions.add(region3);
+
+        when(environmentDetails.getRegions()).thenReturn(regions);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assert.assertEquals("invalidregion,uksouth,westus2", environmentRequested.getEnvironmentDetails().getRegion());
     }
 }
