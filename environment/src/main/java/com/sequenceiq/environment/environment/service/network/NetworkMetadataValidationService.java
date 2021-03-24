@@ -93,7 +93,7 @@ public class NetworkMetadataValidationService {
         Set<String> endpointGatewaySubnetAZs = endpointGatewaySubnetMetas.values().stream()
             .map(CloudSubnet::getAvailabilityZone)
             .collect(Collectors.toSet());
-        if (!subnetAZs.equals(endpointGatewaySubnetAZs)) {
+        if (!endpointGatewaySubnetAZs.containsAll(subnetAZs)) {
             throw new BadRequestException(String.format(UNMATCHED_AZ, subnetAZs));
         }
     }
@@ -108,7 +108,7 @@ public class NetworkMetadataValidationService {
             .filter(subnet -> !subnet.isPrivateSubnet())
             .map(CloudSubnet::getAvailabilityZone)
             .collect(Collectors.toSet());
-        if (!privateAZs.equals(publicAZs)) {
+        if (!publicAZs.containsAll(privateAZs)) {
             throw new BadRequestException(String.format(UNMATCHED_AZ, privateAZs));
         }
     }

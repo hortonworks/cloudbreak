@@ -62,8 +62,9 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
                 InstanceGroup instanceGroup = instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(stack.getId());
                 Optional<InstanceMetaData> instanceMetaDataOptional = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stack.getId());
                 if (instanceMetaDataOptional.isPresent()) {
-                    instanceGroup.setInstanceMetaData(Set.of(instanceMetaDataOptional.get()));
-                    stack.setInstanceGroups(Set.of(instanceGroup));
+                    stack.getInstanceGroups().stream()
+                        .filter(ig -> ig.getId().equals(instanceGroup.getId()))
+                        .forEach(ig -> ig.setInstanceMetaData(Set.of(instanceMetaDataOptional.get())));
                     LOGGER.debug("Registering load balancer public DNS entry");
                     boolean success = clusterPublicEndpointManagementService.provisionLoadBalancer(stack);
                     if (!success) {

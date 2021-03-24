@@ -83,6 +83,6 @@ public class StackLoadBalancerUpdateService {
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.LOAD_BALANCER_UPDATE_FAILED,
             "Load balancer creation failed failed " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_LB_UPDATE_FAILED);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_LB_UPDATE_FAILED, exception.getMessage());
     }
 }

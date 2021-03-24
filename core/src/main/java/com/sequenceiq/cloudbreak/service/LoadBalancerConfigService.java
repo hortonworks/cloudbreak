@@ -170,7 +170,7 @@ public class LoadBalancerConfigService {
         }
         Set<LoadBalancer> loadBalancers = new HashSet<>();
 
-        if ((loadBalancerFlagEnabled || isLoadBalancerEnabled(stack.getType(), environment)) && getSupportedPlatforms().contains(stack.getCloudPlatform())) {
+        if (isLoadBalancerEnabled(stack.getType(), stack.getCloudPlatform(), environment, loadBalancerFlagEnabled)) {
             if (!loadBalancerFlagEnabled) {
                 LOGGER.debug("Load balancers are enabled for data lake and data hub stacks.");
             } else {
@@ -240,9 +240,9 @@ public class LoadBalancerConfigService {
         return false;
     }
 
-    private boolean isLoadBalancerEnabled(StackType type, DetailedEnvironmentResponse environment) {
-        return environment != null &&
-            (isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment));
+    private boolean isLoadBalancerEnabled(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment, boolean flagEnabled) {
+        return getSupportedPlatforms().contains(cloudPlatform) &&
+            (flagEnabled || isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment));
     }
 
     private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {
