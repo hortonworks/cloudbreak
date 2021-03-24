@@ -13,3 +13,11 @@ logrotate-ipabackup:
     - user: root
     - group: root
     - mode: 644
+
+logrotate-pkidebug:
+  file.managed:
+    - name: /etc/logrotate.d/pkidebug
+    - source: salt://logrotate/conf/pkidebug
+    - user: root
+    - group: root
+    - mode: 644
