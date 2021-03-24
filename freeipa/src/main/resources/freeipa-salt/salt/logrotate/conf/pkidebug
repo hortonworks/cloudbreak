@@ -1,0 +1,10 @@
+/var/log/pki/pki-tomcat/ca/debug {
+    missingok
+    notifempty
+    copytruncate
+    daily
+    size 128M
+    rotate 6
+    su pkiuser pkiuser
+    nocompress
+}
