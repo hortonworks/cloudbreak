@@ -30,4 +30,16 @@ public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleReque
     public ClusterDownscaleDetails getDetails() {
         return details;
     }
+
+    @Override
+    public String toString() {
+        return "CollectDownscaleCandidatesRequest{" +
+                "stackId=" + getResourceId() +
+                ", hostGroupName=" + getHostGroupName() +
+                ", scalingAdjustment=" + scalingAdjustment +
+                ", details=" + details +
+                ", privateIds=" + privateIds +
+                '}';
+    }
+
 }
