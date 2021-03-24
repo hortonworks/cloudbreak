@@ -290,7 +290,8 @@
           },
           {
             "name": "hive_service_config_safety_valve",
-            "value": "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property>"
+            "value": "<property><name>fs.s3a.ssl.channel.mode</name><value>openssl</value></property><property><name>hive.txn.acid.dir.cache.duration</name><value>0</value></property>
+                        <property><name>hive.blobstore.supported.schemes</name><value>s3,s3a,s3n,abfs,gs</value></property>"
           }
         ],
         "roleConfigGroups": [
