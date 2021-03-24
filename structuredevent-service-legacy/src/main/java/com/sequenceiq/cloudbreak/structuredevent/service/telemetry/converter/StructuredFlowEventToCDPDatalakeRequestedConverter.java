@@ -20,6 +20,9 @@ public class StructuredFlowEventToCDPDatalakeRequestedConverter {
     @Inject
     private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
 
+    @Inject
+    private StructuredFlowEventToCDPDatalakeFeaturesConverter featuresConverter;
+
     public UsageProto.CDPDatalakeRequested convert(StructuredFlowEvent structuredFlowEvent) {
         if (structuredFlowEvent == null) {
             return null;
@@ -30,6 +33,8 @@ public class StructuredFlowEventToCDPDatalakeRequestedConverter {
         cdpDatalakeRequested.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
 
         cdpDatalakeRequested.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
+
+        cdpDatalakeRequested.setFeatures(featuresConverter.convert(structuredFlowEvent.getCluster()));
 
         UsageProto.CDPDatalakeRequested ret = cdpDatalakeRequested.build();
         LOGGER.debug("Converted CDPDatalakeRequested telemetry event: {}", ret);
