@@ -1,11 +1,5 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.environment;
 
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FAILED;
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED;
-import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
-
-import java.util.EnumSet;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -17,16 +11,15 @@ import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPStructuredFlowEventToCDPEnvironmentRequestedConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseMapper;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Component
-public class CDPEnvironmentRequestedLogger implements CDPTelemetryEventLogger {
+public class CDPEnvironmentLogger implements CDPTelemetryEventLogger {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CDPEnvironmentRequestedLogger.class);
-
-    private static final EnumSet<UsageProto.CDPEnvironmentStatus.Value> TRIGGER_CASES = EnumSet.of(CREATE_STARTED, CREATE_FINISHED, CREATE_FAILED);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CDPEnvironmentLogger.class);
 
     @Inject
     private UsageReporter usageReporter;
@@ -35,7 +28,10 @@ public class CDPEnvironmentRequestedLogger implements CDPTelemetryEventLogger {
     private EnvironmentUseCaseMapper environmentUseCaseMapper;
 
     @Inject
-    private CDPStructuredFlowEventToCDPEnvironmentRequestedConverter converter;
+    private CDPStructuredFlowEventToCDPEnvironmentRequestedConverter environmentRequestedConverter;
+
+    @Inject
+    private CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter statusChangedConverter;
 
     @Override
     public void log(CDPStructuredFlowEvent cdpStructuredFlowEvent) {
@@ -44,9 +40,12 @@ public class CDPEnvironmentRequestedLogger implements CDPTelemetryEventLogger {
         UsageProto.CDPEnvironmentStatus.Value useCase = environmentUseCaseMapper.useCase(flow);
         LOGGER.debug("Telemetry use case: {}", useCase);
 
-        if (cdpStructuredFlowEvent instanceof CDPEnvironmentStructuredFlowEvent && TRIGGER_CASES.contains(useCase)) {
+        if (cdpStructuredFlowEvent instanceof CDPEnvironmentStructuredFlowEvent &&
+                useCase != UsageProto.CDPEnvironmentStatus.Value.UNSET) {
             usageReporter.cdpEnvironmentRequested(
-                    converter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent));
+                    environmentRequestedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent));
+            usageReporter.cdpEnvironmentStatusChanged(
+                    statusChangedConverter.convert((CDPEnvironmentStructuredFlowEvent) cdpStructuredFlowEvent, useCase));
         }
     }
 }

@@ -9,16 +9,18 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatahubStatusChangedConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatalakeRequestedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.StructuredFlowEventToCDPDatalakeStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.LegacyTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseMapper;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Component
-public class ClusterStatusChangedLogger implements LegacyTelemetryEventLogger {
+public class ClusterLogger implements LegacyTelemetryEventLogger {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterStatusChangedLogger.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterLogger.class);
 
     @Inject
     private UsageReporter usageReporter;
@@ -27,10 +29,16 @@ public class ClusterStatusChangedLogger implements LegacyTelemetryEventLogger {
     private ClusterUseCaseMapper clusterUseCaseMapper;
 
     @Inject
-    private StructuredFlowEventToCDPDatalakeStatusChangedConverter datalakeConverter;
+    private StructuredFlowEventToCDPDatalakeRequestedConverter datalakeRequestedConverter;
 
     @Inject
-    private StructuredFlowEventToCDPDatahubStatusChangedConverter datahubConverter;
+    private StructuredFlowEventToCDPDatahubRequestedConverter datahubRequestedConverter;
+
+    @Inject
+    private StructuredFlowEventToCDPDatalakeStatusChangedConverter datalakeStatusChangedConverter;
+
+    @Inject
+    private StructuredFlowEventToCDPDatahubStatusChangedConverter datahubStatusChangedConverter;
 
     @Override
     public void log(StructuredFlowEvent structuredFlowEvent) {
@@ -44,10 +52,12 @@ public class ClusterStatusChangedLogger implements LegacyTelemetryEventLogger {
             if (resourceType != null) {
                 switch (resourceType) {
                     case "datalake":
-                        usageReporter.cdpDatalakeStatusChanged(datalakeConverter.convert(structuredFlowEvent, useCase));
+                        usageReporter.cdpDatalakeRequested(datalakeRequestedConverter.convert(structuredFlowEvent));
+                        usageReporter.cdpDatalakeStatusChanged(datalakeStatusChangedConverter.convert(structuredFlowEvent, useCase));
                         break;
                     case "datahub":
-                        usageReporter.cdpDatahubStatusChanged(datahubConverter.convert(structuredFlowEvent, useCase));
+                        usageReporter.cdpDatahubRequested(datahubRequestedConverter.convert(structuredFlowEvent));
+                        usageReporter.cdpDatahubStatusChanged(datahubStatusChangedConverter.convert(structuredFlowEvent, useCase));
                         break;
                     default:
                         LOGGER.debug("We are not sending usage report for {}", resourceType);
