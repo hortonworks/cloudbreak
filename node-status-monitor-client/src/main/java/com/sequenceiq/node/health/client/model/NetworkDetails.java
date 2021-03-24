@@ -19,6 +19,8 @@ public class NetworkDetails {
 
     private String host;
 
+    private Long timestamp;
+
     public HealthStatus getCcmAccessible() {
         return ccmAccessible;
     }
@@ -67,6 +69,14 @@ public class NetworkDetails {
         this.host = host;
     }
 
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
         return "NetworkDetails{" +
@@ -76,6 +86,7 @@ public class NetworkDetails {
                 ", databusAccessible=" + databusAccessible +
                 ", dnsResolvers=" + dnsResolvers +
                 ", host='" + host + '\'' +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }

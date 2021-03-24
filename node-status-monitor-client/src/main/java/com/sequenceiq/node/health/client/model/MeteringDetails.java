@@ -18,19 +18,21 @@ public class MeteringDetails {
     @JsonDeserialize(using = EventDetailsDeserializer.class)
     private EventDetails eventDetails;
 
-    private HealthStatus firstHeartbeatEventTimestamp;
-
     private HealthStatus heartbeatAgentRunning;
 
     private HealthStatus heartbeatConfig;
-
-    private HealthStatus heartbeatEventCount;
 
     private HealthStatus loggingAgentConfig;
 
     private HealthStatus loggingServiceRunning;
 
     private Long systemBootTimestamp;
+
+    private Long firstHeartbeatEventTimestamp;
+
+    private Integer heartbeatEventCount;
+
+    private Long timestamp;
 
     public DatabusDetails getDatabusDetails() {
         return databusDetails;
@@ -64,14 +66,6 @@ public class MeteringDetails {
         this.eventDetails = eventDetails;
     }
 
-    public HealthStatus getFirstHeartbeatEventTimestamp() {
-        return firstHeartbeatEventTimestamp;
-    }
-
-    public void setFirstHeartbeatEventTimestamp(HealthStatus firstHeartbeatEventTimestamp) {
-        this.firstHeartbeatEventTimestamp = firstHeartbeatEventTimestamp;
-    }
-
     public HealthStatus getHeartbeatAgentRunning() {
         return heartbeatAgentRunning;
     }
@@ -88,11 +82,11 @@ public class MeteringDetails {
         this.heartbeatConfig = heartbeatConfig;
     }
 
-    public HealthStatus getHeartbeatEventCount() {
+    public Integer getHeartbeatEventCount() {
         return heartbeatEventCount;
     }
 
-    public void setHeartbeatEventCount(HealthStatus heartbeatEventCount) {
+    public void setHeartbeatEventCount(Integer heartbeatEventCount) {
         this.heartbeatEventCount = heartbeatEventCount;
     }
 
@@ -120,6 +114,22 @@ public class MeteringDetails {
         this.systemBootTimestamp = systemBootTimestamp;
     }
 
+    public Long getFirstHeartbeatEventTimestamp() {
+        return firstHeartbeatEventTimestamp;
+    }
+
+    public void setFirstHeartbeatEventTimestamp(Long firstHeartbeatEventTimestamp) {
+        this.firstHeartbeatEventTimestamp = firstHeartbeatEventTimestamp;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Override
     public String toString() {
         return "MeteringDetails{" +
@@ -134,6 +144,7 @@ public class MeteringDetails {
                 ", loggingAgentConfig=" + loggingAgentConfig +
                 ", loggingServiceRunning=" + loggingServiceRunning +
                 ", systemBootTimestamp=" + systemBootTimestamp +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }
