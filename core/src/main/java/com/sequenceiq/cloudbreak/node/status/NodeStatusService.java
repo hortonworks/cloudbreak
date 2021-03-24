@@ -6,19 +6,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.converter.v4.node.status.HealthReportToNodeStatusResponseConverter;
-import com.sequenceiq.cloudbreak.converter.v4.node.status.SaltReportToNodeStatusResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
-import com.sequenceiq.common.api.node.status.response.SaltStatusResponse;
 import com.sequenceiq.node.health.client.CdpNodeStatusMonitorClient;
 import com.sequenceiq.node.health.client.CdpNodeStatusMonitorClientException;
-import com.sequenceiq.node.health.client.model.HealthReport;
-import com.sequenceiq.node.health.client.model.SaltReport;
 
 @Service
 public class NodeStatusService {
@@ -31,61 +26,64 @@ public class NodeStatusService {
     @Inject
     private CdpNodeStatusMonitorClientFactory factory;
 
-    @Inject
-    private HealthReportToNodeStatusResponseConverter converter;
-
-    @Inject
-    private SaltReportToNodeStatusResponseConverter saltConverter;
-
-    public NodeStatusResponse getMeteringReport(String stackCrn) {
-        Stack stack = stackService.getByCrn(stackCrn);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> getMeteringReport(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Retrieving metering report from the hosts of stack: {}", stackCrn);
+        LOGGER.debug("Retrieving metering report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
         try {
-            RPCResponse<HealthReport> response = client.nodeMeteringReport();
-            return converter.convert(response.getResult());
+            return client.nodeMeteringReport();
         } catch (CdpNodeStatusMonitorClientException e) {
             throw new CloudbreakServiceException("Could not get metering report from stack.");
         }
     }
 
-    public NodeStatusResponse getNetworkReport(String stackCrn) {
-        Stack stack = stackService.getByCrn(stackCrn);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> getNetworkReport(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Retrieving network report from the hosts of stack: {}", stackCrn);
+        LOGGER.debug("Retrieving network report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
         try {
-            RPCResponse<HealthReport> response = client.nodeNetworkReport();
-            return converter.convert(response.getResult());
+            return client.nodeNetworkReport();
         } catch (CdpNodeStatusMonitorClientException e) {
             throw new CloudbreakServiceException("Could not get network report from stack.");
         }
     }
 
-    public NodeStatusResponse getServicesReport(String stackCrn) {
-        Stack stack = stackService.getByCrn(stackCrn);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> getServicesReport(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Retrieving services report from the hosts of stack: {}", stackCrn);
+        LOGGER.debug("Retrieving services report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
         try {
-            RPCResponse<HealthReport> response = client.nodeServicesReport();
-            return converter.convert(response.getResult());
+            return client.nodeServicesReport();
         } catch (CdpNodeStatusMonitorClientException e) {
             throw new CloudbreakServiceException("Could not get services report from stack.");
         }
     }
 
-    public SaltStatusResponse getSaltReport(String stackCrn) {
-        Stack stack = stackService.getByCrn(stackCrn);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> getSystemMetrics(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Retrieving salt report from the hosts of stack: {}", stackCrn);
+        LOGGER.debug("Retrieving system metrics report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
         try {
-            RPCResponse<SaltReport> response = client.saltReport();
-            return saltConverter.convert(response.getResult());
+            return client.systemMetricsReport();
+        } catch (CdpNodeStatusMonitorClientException e) {
+            throw new CloudbreakServiceException("Could not get system metrics report from stack.");
+        }
+    }
+
+    public RPCResponse<NodeStatusProto.SaltHealthReport> getSaltReport(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("Retrieving salt report from the hosts of stack: {}", stack.getResourceCrn());
+        CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
+        try {
+            return client.saltReport();
         } catch (CdpNodeStatusMonitorClientException e) {
             throw new CloudbreakServiceException("Could not get salt report from stack.");
         }
     }
+
 }

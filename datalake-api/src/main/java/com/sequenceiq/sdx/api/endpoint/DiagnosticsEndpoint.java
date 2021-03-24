@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnostics
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
-import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.diagnostics.docs.DiagnosticsOperationDescriptions;
@@ -70,22 +69,4 @@ public interface DiagnosticsEndpoint {
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES,
             produces = MediaType.APPLICATION_JSON, nickname = "getSdxCmRoles")
     List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
-
-    @GET
-    @Path("report/{stackCrn}/metering")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_METERING_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getMeteringReport")
-    NodeStatusResponse getMeteringReport(@PathParam("stackCrn") String stackCrn);
-
-    @GET
-    @Path("report/{stackCrn}/network")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_NETWORK_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getNetworkReport")
-    NodeStatusResponse getNetworkReport(@PathParam("stackCrn") String stackCrn);
-
-    @GET
-    @Path("report/{stackCrn}/services")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = DiagnosticsOperationDescriptions.GET_SERVICES_REPORT, produces = MediaType.APPLICATION_JSON, nickname = "getServicesReport")
-    NodeStatusResponse getServicesReport(@PathParam("stackCrn") String stackCrn);
 }

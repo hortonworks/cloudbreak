@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
@@ -28,7 +29,6 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
-import com.sequenceiq.node.health.client.model.HealthReport;
 
 @Component
 public class FreeipaChecker {
@@ -96,11 +96,13 @@ public class FreeipaChecker {
         for (InstanceMetaData instanceMetaData : checkableInstances) {
             try {
                 LOGGER.debug("Fetching node health reports for instance: {}", instanceMetaData.getInstanceId());
-                RPCResponse<HealthReport> networkReportRPCResponse = checkedMeasure(() -> freeIpaNodeStatusService.nodeNetworkReport(stack, instanceMetaData),
-                        LOGGER, ":::Auto sync::: FreeIPA network report ran in {}ms");
+                RPCResponse<NodeStatusProto.NodeStatusReport> networkReportRPCResponse = checkedMeasure(
+                        () -> freeIpaNodeStatusService.nodeNetworkReport(stack, instanceMetaData), LOGGER,
+                        ":::Auto sync::: FreeIPA network report ran in {}ms");
                 logReportResult(instanceMetaData, networkReportRPCResponse, "network");
-                RPCResponse<HealthReport> servicesReportRPCResponse = checkedMeasure(() -> freeIpaNodeStatusService.nodeServicesReport(stack, instanceMetaData),
-                        LOGGER, ":::Auto sync::: FreeIPA services report ran in {}ms");
+                RPCResponse<NodeStatusProto.NodeStatusReport> servicesReportRPCResponse = checkedMeasure(
+                        () -> freeIpaNodeStatusService.nodeServicesReport(stack, instanceMetaData), LOGGER,
+                        ":::Auto sync::: FreeIPA services report ran in {}ms");
                 logReportResult(instanceMetaData, servicesReportRPCResponse, "services");
             } catch (Exception e) {
                 LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
@@ -108,18 +110,18 @@ public class FreeipaChecker {
         }
     }
 
-    private void logReportResult(InstanceMetaData instanceMetaData, RPCResponse<HealthReport> meteringReportRPCResponse, String reportType) {
-        if (isSuccessfulRequest(meteringReportRPCResponse)) {
-            LOGGER.info("FreeIPA " + reportType + " reports for instance: [{}], report: [{}]", instanceMetaData.getInstanceId(),
-                    meteringReportRPCResponse.getResult());
+    private void logReportResult(InstanceMetaData instanceMetaData, RPCResponse<NodeStatusProto.NodeStatusReport> nodeStatusRpcResponse, String reportType) {
+        if (isSuccessfulRequest(nodeStatusRpcResponse)) {
+            LOGGER.info("FreeIPA " + reportType + " reports for instance: [{}], report: [{}]",
+                    instanceMetaData.getInstanceId(), nodeStatusRpcResponse.getMessages().get(0));
         } else {
             LOGGER.info("Failed to get " + reportType + " reports for instance: [{}], reason: [{}]", instanceMetaData.getInstanceId(),
-                    meteringReportRPCResponse.getSummary());
+                    nodeStatusRpcResponse.getSummary());
         }
     }
 
     @NotNull
-    private Boolean isSuccessfulRequest(RPCResponse<HealthReport> response) {
+    private Boolean isSuccessfulRequest(RPCResponse<NodeStatusProto.NodeStatusReport> response) {
         return response.getMessages().stream()
                 .map(RPCMessage::getCode)
                 .filter(Objects::nonNull)

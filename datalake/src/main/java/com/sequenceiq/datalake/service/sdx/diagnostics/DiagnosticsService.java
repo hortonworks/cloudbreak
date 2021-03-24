@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
-import com.sequenceiq.common.api.node.status.response.NodeStatusResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -115,17 +114,5 @@ public class DiagnosticsService {
 
     public ListDiagnosticsCollectionResponse getDiagnosticsCollections(String crn) {
         return diagnosticsV4Endpoint.listCollections(crn);
-    }
-
-    public NodeStatusResponse getMeteringReport(String stackCrn) {
-        return diagnosticsV4Endpoint.getMeteringReport(stackCrn);
-    }
-
-    public NodeStatusResponse getNetworkReport(String stackCrn) {
-        return diagnosticsV4Endpoint.getNetworkReport(stackCrn);
-    }
-
-    public NodeStatusResponse getServicesReport(String stackCrn) {
-        return diagnosticsV4Endpoint.getServicesReport(stackCrn);
     }
 }

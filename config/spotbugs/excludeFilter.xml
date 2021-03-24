@@ -66,6 +66,9 @@
         <Package name="~com\.cloudera\.thunderhead\.service\.publicendpointmanagement.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.thunderhead\.telemetry\.nodestatus.*"/>
+    </Match>
+    <Match>
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>
