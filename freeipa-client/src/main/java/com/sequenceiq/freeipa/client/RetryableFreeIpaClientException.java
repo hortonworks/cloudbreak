@@ -38,6 +38,7 @@ public class RetryableFreeIpaClientException extends FreeIpaClientException {
 
     @Override
     public String toString() {
-        return super.toString() + System.lineSeparator() + "ExceptionForRestApi: "  + exceptionForRestApi.toString();
+        String exceptionForRestApiMsg = exceptionForRestApi == null ? "not set" : exceptionForRestApi.toString();
+        return super.toString() + System.lineSeparator() + "ExceptionForRestApi: " + exceptionForRestApiMsg;
     }
 }
