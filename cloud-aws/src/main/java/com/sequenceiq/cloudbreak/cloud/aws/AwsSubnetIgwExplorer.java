@@ -147,6 +147,8 @@ public class AwsSubnetIgwExplorer {
             } else {
                 LOGGER.warn("Unexpected exception while fetching firewall information. Skipping firewall IGW check.", e);
             }
+        } catch (Exception e) {
+            LOGGER.warn("Unexpected exception while fetching firewall information. Skipping firewall IGW check.", e);
         }
         return result;
     }

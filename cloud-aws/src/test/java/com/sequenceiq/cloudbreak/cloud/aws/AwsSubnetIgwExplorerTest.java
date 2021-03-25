@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.ec2.model.Route;
 import com.amazonaws.services.ec2.model.RouteTable;
 import com.amazonaws.services.ec2.model.RouteTableAssociation;
@@ -405,6 +406,19 @@ public class AwsSubnetIgwExplorerTest {
 
         boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(nfwClient, List.of(routeTable),
             subnets, SUBNET_ID, VPC_ID);
+
+        assertFalse(routableToInternet);
+    }
+
+    @Test
+    public void testHandleFirewallException() {
+        setupFirewallClientMocks();
+        List<RouteTable> routeTables = setupFirewallRoutes(true);
+
+        when(nfwClient.listFirewalls(any())).thenThrow(new SdkClientException("error"));
+
+        boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(nfwClient, routeTables,
+            createSubnets(null, null), SUBNET_ID, VPC_ID);
 
         assertFalse(routableToInternet);
     }
