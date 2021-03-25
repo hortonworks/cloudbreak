@@ -9,13 +9,16 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.periscope.api.AutoscaleApi;
-import com.sequenceiq.periscope.controller.EndpointConfig;
+import com.sequenceiq.periscope.config.EndpointConfig;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.Reader;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -29,6 +32,12 @@ public class SwaggerGenerator {
 
     @Autowired
     private EndpointConfig endpointConfig;
+
+    @MockBean
+    private ServerTracingDynamicFeature serverTracingDynamicFeature;
+
+    @MockBean
+    private ClientTracingFeature clientTracingFeature;
 
     @Test
     public void generateSwaggerJson() throws Exception {

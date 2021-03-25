@@ -80,6 +80,8 @@ cert:
   ignorePreValidation: false
 
 spring:
+  application:
+    name: Periscope
   cloud:
     consul:
       host: consul.service.consul

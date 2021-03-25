@@ -1,8 +1,9 @@
-package com.sequenceiq.periscope.controller;
+package com.sequenceiq.periscope.config;
 
 import java.io.IOException;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.periscope.api.AutoscaleApi;
+import com.sequenceiq.periscope.controller.DistroXAutoScaleClusterV1Controller;
+import com.sequenceiq.periscope.controller.HistoryController;
 import com.sequenceiq.periscope.controller.mapper.AccessDeniedExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.BadRequestExceptionMapper;
 import com.sequenceiq.periscope.controller.mapper.ConstraintViolationExceptionMapper;
@@ -32,6 +35,8 @@ import com.sequenceiq.periscope.controller.mapper.UnsupportedOperationFailedExce
 import com.sequenceiq.periscope.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.periscope.utils.FileReaderUtils;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+import io.opentracing.contrib.jaxrs2.server.ServerTracingDynamicFeature;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.config.SwaggerConfigLocator;
 import io.swagger.jaxrs.config.SwaggerContextService;
@@ -43,11 +48,19 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;
 
+    @Inject
+    private ServerTracingDynamicFeature serverTracingDynamicFeature;
+
+    @Inject
+    private ClientTracingFeature clientTracingFeature;
+
     @PostConstruct
     public void init() throws IOException {
         registerEndpoints();
         registerExceptionMappers();
         registerSwagger();
+        register(serverTracingDynamicFeature);
+        register(clientTracingFeature);
     }
 
     private void registerSwagger() throws IOException {

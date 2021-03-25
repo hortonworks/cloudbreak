@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.client.tracing.CmOkHttpTracingInterceptor;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -47,6 +48,9 @@ public class ClouderaManagerCommunicator {
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
 
+    @Inject
+    private CmOkHttpTracingInterceptor cmOkHttpTracingInterceptor;
+
     public Map<String, ApiConfig> getRoleConfigPropertiesFromCM(Cluster cluster, String serviceName,
             String roleGroupRef, Set roleConfigPropertyNames) {
         LOGGER.debug("Retrieving roleConfigProperties for cluster '{}', service '{}', roleGroupRef '{}'",
@@ -61,6 +65,7 @@ public class ClouderaManagerCommunicator {
         Map<String, ApiConfig> roleConfigProperties = requestLogging.logResponseTime(() -> {
             try {
                 ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
+                client.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
                 RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
 
                 return roleConfigGroupsResourceApi

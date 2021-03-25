@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service.configuration;
 
+import javax.inject.Inject;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +14,8 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 @Configuration
 public class CloudbreakClientConfiguration {
 
@@ -22,13 +26,18 @@ public class CloudbreakClientConfiguration {
     @Value("${cb.server.contextPath:/cb}")
     private String cbRootContextPath;
 
+    @Inject
+    private ClientTracingFeature clientTracingFeature;
+
     @Bean
     public CloudbreakServiceUserCrnClient cloudbreakClient() {
-        return new CloudbreakUserCrnClientBuilder(cloudbreakUrl + cbRootContextPath)
+        CloudbreakServiceUserCrnClient client = new CloudbreakUserCrnClientBuilder(cloudbreakUrl + cbRootContextPath)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)
                 .withDebug(true)
                 .build();
+        client.registerClientTracingFeature(clientTracingFeature);
+        return client;
     }
 
     @Bean
