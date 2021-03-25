@@ -6,6 +6,8 @@ import javax.ws.rs.client.WebTarget;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
+
 public abstract class AbstractUserCrnServiceClient<T extends AbstractUserCrnServiceEndpoint> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUserCrnServiceClient.class);
 
@@ -21,6 +23,10 @@ public abstract class AbstractUserCrnServiceClient<T extends AbstractUserCrnServ
 
     protected WebTarget getWebTarget() {
         return webTarget;
+    }
+
+    public void registerClientTracingFeature(ClientTracingFeature clientTracingFeature) {
+        webTarget.register(clientTracingFeature);
     }
 
     public abstract T withCrn(String crn);
