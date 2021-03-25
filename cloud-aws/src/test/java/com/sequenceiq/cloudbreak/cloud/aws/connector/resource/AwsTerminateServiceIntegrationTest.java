@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -162,7 +163,7 @@ public class AwsTerminateServiceIntegrationTest {
 
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cf);
-        when(retryService.testWith2SecDelayMax15Times(any())).thenThrow(new Retry.ActionFailedException("Fail no more"));
+        when(retryService.testWith2SecDelayMax15Times(any())).thenThrow(new NotFoundException("Stack not found"));
         when(awsClient.createAutoScalingClient(any(), any())).thenReturn(amazonAutoScalingClient);
 
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
