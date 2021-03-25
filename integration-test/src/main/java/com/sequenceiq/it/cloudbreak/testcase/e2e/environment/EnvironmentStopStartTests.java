@@ -55,7 +55,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         initializeDefaultBlueprints(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT, timeOut = 7200000)
+    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
             given = "there is a running cloudbreak",
             when = "create an attached SDX and Datahub",
@@ -74,12 +74,14 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withCreateFreeIpa(Boolean.TRUE)
                     .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-                .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
                 .given(SdxInternalTestDto.class)
                     .addTags(SDX_TAGS)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
+                .given(EnvironmentTestDto.class)
+                .await(EnvironmentStatus.AVAILABLE)
+                .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
+                .given(SdxInternalTestDto.class)
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(cloudProviderSideTagAssertion.verifyInternalSdxTags(SDX_TAGS))
                 .given("dx1", DistroXTestDto.class)
