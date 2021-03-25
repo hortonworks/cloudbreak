@@ -103,7 +103,7 @@ public class FreeIpaCleanupServiceTest {
         when(freeIpaV1Endpoint.internalCleanup(any(CleanupRequest.class), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
-        victim.cleanup(stack);
+        victim.cleanupButIp(stack);
 
         verify(freeIpaV1Endpoint).internalCleanup(any(), anyString());
     }
@@ -117,7 +117,7 @@ public class FreeIpaCleanupServiceTest {
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(false);
 
-        victim.cleanup(stack);
+        victim.cleanupButIp(stack);
 
         verifyNoMoreInteractions(freeIpaV1Endpoint);
     }
@@ -136,7 +136,7 @@ public class FreeIpaCleanupServiceTest {
         when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
-        victim.cleanup(stack);
+        victim.cleanupButIp(stack);
 
         CleanupRequest cleanupRequest = captor.getValue();
         assertEquals(STACK_NAME, cleanupRequest.getClusterName());
@@ -145,7 +145,7 @@ public class FreeIpaCleanupServiceTest {
         assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
                 cleanupRequest.getUsers());
         assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
-        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertTrue(cleanupRequest.getIps().isEmpty());
         assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
     }
 
@@ -164,7 +164,7 @@ public class FreeIpaCleanupServiceTest {
         Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, new Exception("message"));
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
-        assertThrows(FreeIpaOperationFailedException.class, () -> victim.cleanup(stack));
+        assertThrows(FreeIpaOperationFailedException.class, () -> victim.cleanupButIp(stack));
 
         CleanupRequest cleanupRequest = captor.getValue();
         assertEquals(STACK_NAME, cleanupRequest.getClusterName());
@@ -173,7 +173,7 @@ public class FreeIpaCleanupServiceTest {
         assertEquals(Set.of(KERBEROS_USER_PREFIX + stack.getName(), KEYTAB_USER_PREFIX + stack.getName(), LDAP_USER_PREFIX + stack.getName()),
                 cleanupRequest.getUsers());
         assertEquals(Set.of(ROLE_NAME_PREFIX + stack.getName()), cleanupRequest.getRoles());
-        assertEquals(Set.of("1.1.1.1", "1.1.1.2"), cleanupRequest.getIps());
+        assertTrue(cleanupRequest.getIps().isEmpty());
         assertEquals(Set.of("asdf", "qwer"), cleanupRequest.getHosts());
     }
 

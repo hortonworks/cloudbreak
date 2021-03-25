@@ -155,8 +155,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
 
     private void cleanUpFreeIpa(Stack stack, Map<String, InstanceMetaData> hostsToRemove) {
         try {
-            Set<String> ips = hostsToRemove.values().stream().map(InstanceMetaData::getPrivateIp).filter(StringUtils::isNotBlank).collect(Collectors.toSet());
-            freeIpaCleanupService.cleanupOnScale(stack, hostsToRemove.keySet(), ips);
+            freeIpaCleanupService.cleanupOnScale(stack, hostsToRemove.keySet(), Set.of());
         } catch (FreeIpaOperationFailedException | CloudbreakServiceException e) {
             LOGGER.warn("FreeIPA cleanup has failed during decommission, ignoring error", e);
         }

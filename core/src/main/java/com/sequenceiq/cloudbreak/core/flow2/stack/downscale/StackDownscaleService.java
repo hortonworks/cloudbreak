@@ -92,7 +92,7 @@ public class StackDownscaleService {
 
     private void cleanupDnsRecords(Stack stack, Collection<InstanceMetaData> instanceMetaDatas) {
         Set<String> fqdns = instanceMetadataProcessor.extractFqdn(instanceMetaDatas);
-        Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaDatas);
+        Set<String> ips = Set.of();
         try {
             LOGGER.info("Cleanup DNS records for FQDNS: {} and IPs {}", fqdns, ips);
             freeIpaCleanupService.cleanupDnsOnly(stack, fqdns, ips);
