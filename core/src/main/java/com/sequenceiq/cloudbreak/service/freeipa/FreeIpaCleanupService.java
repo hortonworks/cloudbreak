@@ -81,9 +81,9 @@ public class FreeIpaCleanupService {
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;
 
-    public void cleanup(Stack stack) {
+    public void cleanupButIp(Stack stack) {
         Set<String> hostNames = instanceMetadataProcessor.extractFqdn(stack);
-        Set<String> ips = instanceMetadataProcessor.extractIps(stack);
+        Set<String> ips = Set.of();
         LOGGER.info("Full cleanup invoked with hostnames {} and IPs {}", hostNames, ips);
         cleanup(stack, Set.of(), hostNames, ips);
     }

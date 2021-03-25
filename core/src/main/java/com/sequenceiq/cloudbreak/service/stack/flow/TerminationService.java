@@ -99,7 +99,7 @@ public class TerminationService {
 
     private void cleanupFreeIpa(Stack stack) {
         try {
-            freeIpaCleanupService.cleanup(stack);
+            freeIpaCleanupService.cleanupButIp(stack);
         } catch (Exception e) {
             LOGGER.warn("FreeIPA cleanup has failed during termination finalization, ignoring error", e);
         }
