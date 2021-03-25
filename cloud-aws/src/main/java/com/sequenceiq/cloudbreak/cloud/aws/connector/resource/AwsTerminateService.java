@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.AmazonServiceException.ErrorType;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -98,9 +100,12 @@ public class AwsTerminateService {
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         try {
             retryService.testWith2SecDelayMax15Times(() -> isStackExist(amazonCloudFormationClient, cFStackName, describeStacksRequest));
-        } catch (ActionFailedException ignored) {
-            LOGGER.debug("Stack not found with name: {}", cFStackName);
+        } catch (NotFoundException e) {
+            LOGGER.error("Couldnt get stack with name: {}, error: {}", cFStackName, e.getMessage());
             return;
+        } catch (ActionFailedException | AmazonServiceException e) {
+            LOGGER.error("Couldnt get stack with name: {}, error: {}", cFStackName, e.getMessage());
+            throw e;
         }
 
         resumeAutoScalingPolicies(ac, stack);
@@ -121,10 +126,12 @@ public class AwsTerminateService {
         try {
             cfRetryClient.describeStacks(describeStacksRequest);
         } catch (AmazonServiceException e) {
-            if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
+            if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
+                throw new NotFoundException(cFStackName + " does not exists");
+            } else if (ErrorType.Client.equals(e.getErrorType())) {
                 throw e;
             }
-            throw new ActionFailedException("Stack not exists");
+            throw new ActionFailedException(e.getMessage());
         }
         return Boolean.TRUE;
     }
