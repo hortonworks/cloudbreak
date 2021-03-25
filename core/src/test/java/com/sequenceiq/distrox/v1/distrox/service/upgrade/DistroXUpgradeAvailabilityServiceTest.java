@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
@@ -13,6 +14,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -39,7 +41,7 @@ import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 
 @ExtendWith(MockitoExtension.class)
-class DistroXUpgradeAvailabilityServiceTest {
+public class DistroXUpgradeAvailabilityServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
 
@@ -197,6 +199,59 @@ class DistroXUpgradeAvailabilityServiceTest {
 
         assertEquals(1, result.getUpgradeCandidates().size());
         assertTrue(result.getUpgradeCandidates().stream().anyMatch(img -> img.getCreated() == 9L && "C".equals(img.getComponentVersions().getCdp())));
+    }
+
+    @Test
+    @DisplayName("this test simulates when the Data Lake and Data Hub version is the same (7.1.0)"
+            + "and no upgrade options are available with this version.")
+    public void testCheckForUpgradeWhenDataLakeAndDataHubIsOnTheSameVersionAndPatchUpgradeIsAvailable() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        response.setUpgradeCandidates(List.of());
+        Stack stackWithEnv = new Stack();
+        stackWithEnv.setEnvironmentCrn("envcrn");
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
+        when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+
+        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
+
+        assertEquals(0, result.getUpgradeCandidates().size());
+        assertNull(result.getReason());
+    }
+
+    @Test
+    @DisplayName("this test simulates when the Data Lake and Data Hub version is the same (7.1.0)"
+            + "and the only upgrade options for Data Hub is newer than the DL (7.2.0,7.3.0,7.4.0). this will be filtered"
+            + "since the upgrade options are newer than the Data Lake. Data Lake upgrade shall be suggested")
+    public void testCheckForUpgradeWhenDataLakeAndDataHubIsOnTheSameVersionAndNoUpgradeIsAvailable() {
+        UpgradeV4Request request = new UpgradeV4Request();
+        UpgradeV4Response response = new UpgradeV4Response();
+        ImageInfoV4Response image1 = createImageResponse(2L, "7.2.0");
+        ImageInfoV4Response image2 = createImageResponse(8L, "7.3.0");
+        ImageInfoV4Response image3 = createImageResponse(6L, "7.4.0");
+        response.setUpgradeCandidates(List.of(image1, image2, image3));
+        Stack stackWithEnv = new Stack();
+        stackWithEnv.setEnvironmentCrn("envcrn");
+        StackView stackView = new StackView();
+        ClusterView clusterView = new ClusterView();
+        clusterView.setId(1L);
+        ReflectionTestUtils.setField(stackView, "cluster", clusterView);
+        ClouderaManagerProduct product = new ClouderaManagerProduct();
+        product.setVersion("7.1.0");
+        product.setName("CDH");
+        List<ClouderaManagerProduct> products = List.of(product);
+        when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
+        when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
+        when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
+        when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("7.1.0"));
+
+        UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
+
+        String expectedMessage = "Data Hub can only be upgraded to the same version as the Data Lake (7.1.0). "
+                + "To upgrade your Data Hub, please upgrade your Data Lake first.";
+        assertEquals(0, result.getUpgradeCandidates().size());
+        assertEquals(expectedMessage, result.getReason());
     }
 
     private ImageInfoV4Response createImageResponse(long creation, String cdp) {
