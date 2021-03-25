@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -67,13 +68,13 @@ public class DistroXUpgradeAvailabilityService {
         verifyRuntimeUpgradeEntitlement(userCrn, request);
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         UpgradeV4Response response = stackOperations.checkForClusterUpgrade(stack, workspaceId, request);
-        List<ImageInfoV4Response> filteredCandidates = filterCandidates(stack, request, response.getUpgradeCandidates());
+        List<ImageInfoV4Response> filteredCandidates = filterCandidates(stack, request, response);
         response.setUpgradeCandidates(filteredCandidates);
         return response;
     }
 
-    private List<ImageInfoV4Response> filterCandidates(Stack stack, UpgradeV4Request request, List<ImageInfoV4Response> candidates) {
-        List<ImageInfoV4Response> filteredCandidates = filterForDatalakeVersion(stack, candidates);
+    private List<ImageInfoV4Response> filterCandidates(Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
+        List<ImageInfoV4Response> filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
         if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
             if (LATEST_ONLY == request.getShowAvailableImages()) {
                 filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
@@ -102,15 +103,25 @@ public class DistroXUpgradeAvailabilityService {
         return filteredCandidates;
     }
 
-    private List<ImageInfoV4Response> filterForDatalakeVersion(Stack stack, List<ImageInfoV4Response> candidates) {
-        if (CollectionUtils.isEmpty(candidates)) {
-            return candidates;
+    private List<ImageInfoV4Response> filterForDatalakeVersion(Stack stack, UpgradeV4Response upgradeV4Response) {
+        List<ImageInfoV4Response> candidates = upgradeV4Response.getUpgradeCandidates();
+        List<ImageInfoV4Response> result = candidates;
+        if (CollectionUtils.isNotEmpty(candidates)) {
+            Optional<StackView> datalakeViewOpt = stackViewService.findDatalakeViewByEnvironmentCrn(stack.getEnvironmentCrn());
+            if (datalakeViewOpt.isPresent()) {
+                Optional<String> datalakeVersionOpt = stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(
+                        clusterComponentConfigProvider.getClouderaManagerProductDetails(datalakeViewOpt.get().getClusterView().getId()));
+                if (datalakeVersionOpt.isPresent()) {
+                    String dlVersion = datalakeVersionOpt.get();
+                    result = filterForDatalakeVersion(dlVersion, candidates);
+                    if (result.isEmpty() && !candidates.isEmpty()) {
+                        upgradeV4Response.setReason(String.format("Data Hub can only be upgraded to the same version as the Data Lake (%s)."
+                                + " To upgrade your Data Hub, please upgrade your Data Lake first.", dlVersion));
+                    }
+                }
+            }
         }
-        return stackViewService.findDatalakeViewByEnvironmentCrn(stack.getEnvironmentCrn())
-                .flatMap(datalakeView -> stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(
-                        clusterComponentConfigProvider.getClouderaManagerProductDetails(datalakeView.getClusterView().getId())))
-                .map(datalakeVersion -> filterForDatalakeVersion(datalakeVersion, candidates))
-                .orElse(candidates);
+        return result;
     }
 
     private List<ImageInfoV4Response> filterForDatalakeVersion(String datalakeVersion, List<ImageInfoV4Response> candidates) {
