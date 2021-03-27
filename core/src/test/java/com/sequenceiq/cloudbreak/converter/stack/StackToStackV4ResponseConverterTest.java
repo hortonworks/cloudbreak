@@ -14,12 +14,12 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 
@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.PlacementSettin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.authentication.StackAuthenticationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.customdomain.CustomDomainSettingsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
@@ -55,12 +56,10 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -90,13 +89,10 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     private ProviderParameterCalculator providerParameterCalculator;
 
     @Mock
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Mock
-    private StackService stackService;
-
-    @Mock
     private ServiceEndpointCollector serviceEndpointCollector;
+
+    @Mock
+    private DatalakeService datalakeService;
 
     private CredentialResponse credentialResponse;
 
@@ -109,9 +105,11 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
         when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
-        DatalakeResources datalakeResources = new DatalakeResources();
-        datalakeResources.setName("name");
-        when(datalakeResourcesService.findById(anyLong())).thenReturn(Optional.of(datalakeResources));
+        Mockito.doAnswer(answer  -> {
+            StackV4Response result = answer.getArgument(1, StackV4Response.class);
+            result.setSharedService(new SharedServiceV4Response());
+            return null;
+        }).when(datalakeService).addSharedServiceResponse(any(Stack.class), any(StackV4Response.class));
         when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(new ArrayList());
         credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred-name");

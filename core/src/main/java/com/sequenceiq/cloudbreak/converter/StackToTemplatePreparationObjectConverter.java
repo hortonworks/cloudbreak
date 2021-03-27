@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.sharedservice.SharedServiceConfigsViewProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -44,7 +43,6 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -57,7 +55,6 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -68,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMapping
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -110,13 +108,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Inject
-    private SharedServiceConfigsViewProvider sharedServiceConfigProvider;
-
-    @Inject
     private BlueprintViewProvider blueprintViewProvider;
-
-    @Inject
-    private DatalakeResourcesService datalakeResourcesService;
 
     @Inject
     private CredentialConverter credentialConverter;
@@ -181,6 +173,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private DatalakeService datalakeService;
+
     @Override
     public TemplatePreparationObject convert(Stack source) {
         try {
@@ -195,7 +190,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             ClouderaManagerRepo cm = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
             List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(credential, source, fileSystem);
-            Optional<DatalakeResources> dataLakeResource = getDataLakeResource(source);
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
@@ -234,7 +228,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withProductDetails(cm, products)
                     .withExposedServices(views)
                     .withDefaultTags(getStackTags(source))
-                    .withSharedServiceConfigs(sharedServiceConfigProvider.createSharedServiceConfigs(source, dataLakeResource))
+                    .withSharedServiceConfigs(datalakeService.createSharedServiceConfigs(source))
                     .withStackType(source.getType())
                     .withVirtualGroupView(virtualGroupRequest);
 
@@ -284,13 +278,6 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             envCrnForVirtualGroups = environment.getParentEnvironmentCrn();
         }
         return envCrnForVirtualGroups;
-    }
-
-    private Optional<DatalakeResources> getDataLakeResource(Stack source) {
-        if (source.getDatalakeResourceId() != null) {
-            return datalakeResourcesService.findById(source.getDatalakeResourceId());
-        }
-        return Optional.empty();
     }
 
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(Credential credential, Stack source, FileSystem fileSystem) throws IOException {

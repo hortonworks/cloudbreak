@@ -52966,6 +52966,1259 @@ public final class UsageProto {
 
   }
 
+  public interface CDPDatalakeFeaturesOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDatalakeFeatures)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Ranger Authorization feature tracking
+     * </pre>
+     *
+     * <code>.usage.CDPRaz raz = 1;</code>
+     */
+    boolean hasRaz();
+    /**
+     * <pre>
+     * Ranger Authorization feature tracking
+     * </pre>
+     *
+     * <code>.usage.CDPRaz raz = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz getRaz();
+    /**
+     * <pre>
+     * Ranger Authorization feature tracking
+     * </pre>
+     *
+     * <code>.usage.CDPRaz raz = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder getRazOrBuilder();
+  }
+  /**
+   * Protobuf type {@code usage.CDPDatalakeFeatures}
+   */
+  public  static final class CDPDatalakeFeatures extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDatalakeFeatures)
+      CDPDatalakeFeaturesOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDatalakeFeatures.newBuilder() to construct.
+    private CDPDatalakeFeatures(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDatalakeFeatures() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDatalakeFeatures(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder subBuilder = null;
+              if (raz_ != null) {
+                subBuilder = raz_.toBuilder();
+              }
+              raz_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(raz_);
+                raz_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatalakeFeatures_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatalakeFeatures_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder.class);
+    }
+
+    public static final int RAZ_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz raz_;
+    /**
+     * <pre>
+     * Ranger Authorization feature tracking
+     * </pre>
+     *
+     * <code>.usage.CDPRaz raz = 1;</code>
+     */
+    public boolean hasRaz() {
+      return raz_ != null;
+    }
+    /**
+     * <pre>
+     * Ranger Authorization feature tracking
+     * </pre>
+     *
+     * <code>.usage.CDPRaz raz = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz getRaz() {
+      return raz_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.getDefaultInstance() : raz_;
+    }
+    /**
+     * <pre>
+     * Ranger Authorization feature tracking
+     * </pre>
+     *
+     * <code>.usage.CDPRaz raz = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder getRazOrBuilder() {
+      return getRaz();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (raz_ != null) {
+        output.writeMessage(1, getRaz());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (raz_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getRaz());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures) obj;
+
+      boolean result = true;
+      result = result && (hasRaz() == other.hasRaz());
+      if (hasRaz()) {
+        result = result && getRaz()
+            .equals(other.getRaz());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasRaz()) {
+        hash = (37 * hash) + RAZ_FIELD_NUMBER;
+        hash = (53 * hash) + getRaz().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code usage.CDPDatalakeFeatures}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDatalakeFeatures)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatalakeFeatures_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatalakeFeatures_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (razBuilder_ == null) {
+          raz_ = null;
+        } else {
+          raz_ = null;
+          razBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDatalakeFeatures_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures(this);
+        if (razBuilder_ == null) {
+          result.raz_ = raz_;
+        } else {
+          result.raz_ = razBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance()) return this;
+        if (other.hasRaz()) {
+          mergeRaz(other.getRaz());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz raz_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder> razBuilder_;
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public boolean hasRaz() {
+        return razBuilder_ != null || raz_ != null;
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz getRaz() {
+        if (razBuilder_ == null) {
+          return raz_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.getDefaultInstance() : raz_;
+        } else {
+          return razBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public Builder setRaz(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz value) {
+        if (razBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          raz_ = value;
+          onChanged();
+        } else {
+          razBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public Builder setRaz(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder builderForValue) {
+        if (razBuilder_ == null) {
+          raz_ = builderForValue.build();
+          onChanged();
+        } else {
+          razBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public Builder mergeRaz(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz value) {
+        if (razBuilder_ == null) {
+          if (raz_ != null) {
+            raz_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.newBuilder(raz_).mergeFrom(value).buildPartial();
+          } else {
+            raz_ = value;
+          }
+          onChanged();
+        } else {
+          razBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public Builder clearRaz() {
+        if (razBuilder_ == null) {
+          raz_ = null;
+          onChanged();
+        } else {
+          raz_ = null;
+          razBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder getRazBuilder() {
+        
+        onChanged();
+        return getRazFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder getRazOrBuilder() {
+        if (razBuilder_ != null) {
+          return razBuilder_.getMessageOrBuilder();
+        } else {
+          return raz_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.getDefaultInstance() : raz_;
+        }
+      }
+      /**
+       * <pre>
+       * Ranger Authorization feature tracking
+       * </pre>
+       *
+       * <code>.usage.CDPRaz raz = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder> 
+          getRazFieldBuilder() {
+        if (razBuilder_ == null) {
+          razBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder>(
+                  getRaz(),
+                  getParentForChildren(),
+                  isClean());
+          raz_ = null;
+        }
+        return razBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDatalakeFeatures)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDatalakeFeatures)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDatalakeFeatures>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDatalakeFeatures>() {
+      @java.lang.Override
+      public CDPDatalakeFeatures parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDatalakeFeatures(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDatalakeFeatures> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDatalakeFeatures> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPRazOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPRaz)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Status whether RAZ is enabled for this cluster ot not
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * Status whether RAZ is enabled for this cluster ot not
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+  }
+  /**
+   * Protobuf type {@code usage.CDPRaz}
+   */
+  public  static final class CDPRaz extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPRaz)
+      CDPRazOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPRaz.newBuilder() to construct.
+    private CDPRaz(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPRaz() {
+      status_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPRaz(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              status_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPRaz_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPRaz_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder.class);
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private volatile java.lang.Object status_;
+    /**
+     * <pre>
+     * Status whether RAZ is enabled for this cluster ot not
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Status whether RAZ is enabled for this cluster ot not
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz) obj;
+
+      boolean result = true;
+      result = result && getStatus()
+          .equals(other.getStatus());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code usage.CDPRaz}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPRaz)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRazOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPRaz_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPRaz_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        status_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPRaz_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz(this);
+        result.status_ = status_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz.getDefaultInstance()) return this;
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * Status whether RAZ is enabled for this cluster ot not
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status whether RAZ is enabled for this cluster ot not
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Status whether RAZ is enabled for this cluster ot not
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status whether RAZ is enabled for this cluster ot not
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public Builder clearStatus() {
+        
+        status_ = getDefaultInstance().getStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Status whether RAZ is enabled for this cluster ot not
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPRaz)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPRaz)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPRaz>
+        PARSER = new com.google.protobuf.AbstractParser<CDPRaz>() {
+      @java.lang.Override
+      public CDPRaz parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPRaz(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPRaz> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPRaz> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPRaz getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CDPDatalakeRequestedOrBuilder extends
       // @@protoc_insertion_point(interface_extends:usage.CDPDatalakeRequested)
       com.google.protobuf.MessageOrBuilder {
@@ -53015,7 +54268,7 @@ public final class UsageProto {
 
     /**
      * <pre>
-     * Details for Datalake
+     * Cluster details for Datalake
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53023,7 +54276,7 @@ public final class UsageProto {
     boolean hasClusterDetails();
     /**
      * <pre>
-     * Details for Datalake
+     * Cluster details for Datalake
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53031,12 +54284,37 @@ public final class UsageProto {
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails();
     /**
      * <pre>
-     * Details for Datalake
+     * Cluster details for Datalake
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+     */
+    boolean hasFeatures();
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getFeatures();
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder getFeaturesOrBuilder();
   }
   /**
    * <pre>
@@ -53110,6 +54388,19 @@ public final class UsageProto {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(clusterDetails_);
                 clusterDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder subBuilder = null;
+              if (features_ != null) {
+                subBuilder = features_.toBuilder();
+              }
+              features_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(features_);
+                features_ = subBuilder.buildPartial();
               }
 
               break;
@@ -53225,7 +54516,7 @@ public final class UsageProto {
     private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails clusterDetails_;
     /**
      * <pre>
-     * Details for Datalake
+     * Cluster details for Datalake
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53235,7 +54526,7 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Details for Datalake
+     * Cluster details for Datalake
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53245,13 +54536,46 @@ public final class UsageProto {
     }
     /**
      * <pre>
-     * Details for Datalake
+     * Cluster details for Datalake
      * </pre>
      *
      * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
      */
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
+    }
+
+    public static final int FEATURES_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures features_;
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+     */
+    public boolean hasFeatures() {
+      return features_ != null;
+    }
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getFeatures() {
+      return features_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance() : features_;
+    }
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder getFeaturesOrBuilder() {
+      return getFeatures();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -53277,6 +54601,9 @@ public final class UsageProto {
       if (clusterDetails_ != null) {
         output.writeMessage(3, getClusterDetails());
       }
+      if (features_ != null) {
+        output.writeMessage(4, getFeatures());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -53296,6 +54623,10 @@ public final class UsageProto {
       if (clusterDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getClusterDetails());
+      }
+      if (features_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getFeatures());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -53325,6 +54656,11 @@ public final class UsageProto {
         result = result && getClusterDetails()
             .equals(other.getClusterDetails());
       }
+      result = result && (hasFeatures() == other.hasFeatures());
+      if (hasFeatures()) {
+        result = result && getFeatures()
+            .equals(other.getFeatures());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -53345,6 +54681,10 @@ public final class UsageProto {
       if (hasClusterDetails()) {
         hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getClusterDetails().hashCode();
+      }
+      if (hasFeatures()) {
+        hash = (37 * hash) + FEATURES_FIELD_NUMBER;
+        hash = (53 * hash) + getFeatures().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -53497,6 +54837,12 @@ public final class UsageProto {
           clusterDetails_ = null;
           clusterDetailsBuilder_ = null;
         }
+        if (featuresBuilder_ == null) {
+          features_ = null;
+        } else {
+          features_ = null;
+          featuresBuilder_ = null;
+        }
         return this;
       }
 
@@ -53533,6 +54879,11 @@ public final class UsageProto {
           result.clusterDetails_ = clusterDetails_;
         } else {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
+        }
+        if (featuresBuilder_ == null) {
+          result.features_ = features_;
+        } else {
+          result.features_ = featuresBuilder_.build();
         }
         onBuilt();
         return result;
@@ -53591,6 +54942,9 @@ public final class UsageProto {
         }
         if (other.hasClusterDetails()) {
           mergeClusterDetails(other.getClusterDetails());
+        }
+        if (other.hasFeatures()) {
+          mergeFeatures(other.getFeatures());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -53868,7 +55222,7 @@ public final class UsageProto {
           com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53878,7 +55232,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53892,7 +55246,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53912,7 +55266,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53930,7 +55284,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53952,7 +55306,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53970,7 +55324,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53982,7 +55336,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -53997,7 +55351,7 @@ public final class UsageProto {
       }
       /**
        * <pre>
-       * Details for Datalake
+       * Cluster details for Datalake
        * </pre>
        *
        * <code>.usage.CDPClusterDetails clusterDetails = 3;</code>
@@ -54014,6 +55368,159 @@ public final class UsageProto {
           clusterDetails_ = null;
         }
         return clusterDetailsBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures features_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder> featuresBuilder_;
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public boolean hasFeatures() {
+        return featuresBuilder_ != null || features_ != null;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getFeatures() {
+        if (featuresBuilder_ == null) {
+          return features_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance() : features_;
+        } else {
+          return featuresBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public Builder setFeatures(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures value) {
+        if (featuresBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          features_ = value;
+          onChanged();
+        } else {
+          featuresBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public Builder setFeatures(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder builderForValue) {
+        if (featuresBuilder_ == null) {
+          features_ = builderForValue.build();
+          onChanged();
+        } else {
+          featuresBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public Builder mergeFeatures(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures value) {
+        if (featuresBuilder_ == null) {
+          if (features_ != null) {
+            features_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.newBuilder(features_).mergeFrom(value).buildPartial();
+          } else {
+            features_ = value;
+          }
+          onChanged();
+        } else {
+          featuresBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public Builder clearFeatures() {
+        if (featuresBuilder_ == null) {
+          features_ = null;
+          onChanged();
+        } else {
+          features_ = null;
+          featuresBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder getFeaturesBuilder() {
+        
+        onChanged();
+        return getFeaturesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder getFeaturesOrBuilder() {
+        if (featuresBuilder_ != null) {
+          return featuresBuilder_.getMessageOrBuilder();
+        } else {
+          return features_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance() : features_;
+        }
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder> 
+          getFeaturesFieldBuilder() {
+        if (featuresBuilder_ == null) {
+          featuresBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder>(
+                  getFeatures(),
+                  getParentForChildren(),
+                  isClean());
+          features_ = null;
+        }
+        return featuresBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -61565,6 +63072,16 @@ public final class UsageProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_CDPStatusDetails_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDatalakeFeatures_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDatalakeFeatures_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPRaz_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPRaz_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_CDPDatalakeRequested_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -61848,43 +63365,46 @@ public final class UsageProto {
       "ils\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStatus\030" +
       "\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n\021st" +
       "ackStatusReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004" +
-      " \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"\226\001\n\024CD" +
-      "PDatalakeRequested\0224\n\020operationDetails\030\001" +
-      " \001(\0132\032.usage.CDPOperationDetails\022\026\n\016envi" +
-      "ronmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\013" +
-      "2\030.usage.CDPClusterDetails\"\344\001\n\030CDPDatala" +
-      "keStatusChanged\0224\n\020operationDetails\030\001 \001(" +
-      "\0132\032.usage.CDPOperationDetails\0220\n\toldStat" +
-      "us\030\002 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
-      "0\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClusterSta" +
-      "tus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.usage" +
-      ".CDPStatusDetails\"\225\001\n\023CDPDatahubRequeste" +
-      "d\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPO" +
-      "perationDetails\022\026\n\016environmentCrn\030\002 \001(\t\022" +
-      "0\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClust" +
-      "erDetails\"\343\001\n\027CDPDatahubStatusChanged\0224\n" +
-      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
-      "tionDetails\0220\n\toldStatus\030\002 \001(\0162\035.usage.C" +
-      "DPClusterStatus.Value\0220\n\tnewStatus\030\003 \001(\016" +
-      "2\035.usage.CDPClusterStatus.Value\022.\n\rstatu" +
-      "sDetails\030\004 \001(\0132\027.usage.CDPStatusDetails\"" +
-      "y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016det" +
-      "ailedStatus\030\002 \001(\t\022\036\n\026clusterCreationStar" +
-      "ted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030\004 \001" +
-      "(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operationDetai" +
-      "ls\030\001 \001(\0132\032.usage.CDPOperationDetails\022*\n\013" +
-      "syncDetails\030\002 \001(\0132\025.usage.CDPSyncDetails" +
-      "\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClus" +
-      "terDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
-      "e.CDPStatusDetails\"\324\001\n\016CDPDatahubSync\0224\n" +
-      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
-      "tionDetails\022*\n\013syncDetails\030\002 \001(\0132\025.usage" +
-      ".CDPSyncDetails\0220\n\016clusterDetails\030\003 \001(\0132" +
-      "\030.usage.CDPClusterDetails\022.\n\rstatusDetai" +
-      "ls\030\004 \001(\0132\027.usage.CDPStatusDetailsBV\n-com" +
-      ".cloudera.thunderhead.service.common.usa" +
-      "geB\nUsageProtoZ\031com/cloudera/cdp/protobu" +
-      "fb\006proto3"
+      " \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023CDP" +
+      "DatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage.CD" +
+      "PRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPDa" +
+      "talakeRequested\0224\n\020operationDetails\030\001 \001(" +
+      "\0132\032.usage.CDPOperationDetails\022\026\n\016environ" +
+      "mentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030." +
+      "usage.CDPClusterDetails\022,\n\010features\030\004 \001(" +
+      "\0132\032.usage.CDPDatalakeFeatures\"\344\001\n\030CDPDat" +
+      "alakeStatusChanged\0224\n\020operationDetails\030\001" +
+      " \001(\0132\032.usage.CDPOperationDetails\0220\n\toldS" +
+      "tatus\030\002 \001(\0162\035.usage.CDPClusterStatus.Val" +
+      "ue\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPCluster" +
+      "Status.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.us" +
+      "age.CDPStatusDetails\"\225\001\n\023CDPDatahubReque" +
+      "sted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
+      "DPOperationDetails\022\026\n\016environmentCrn\030\002 \001" +
+      "(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPCl" +
+      "usterDetails\"\343\001\n\027CDPDatahubStatusChanged" +
+      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
+      "erationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usag" +
+      "e.CDPClusterStatus.Value\0220\n\tnewStatus\030\003 " +
+      "\001(\0162\035.usage.CDPClusterStatus.Value\022.\n\rst" +
+      "atusDetails\030\004 \001(\0132\027.usage.CDPStatusDetai" +
+      "ls\"y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016" +
+      "detailedStatus\030\002 \001(\t\022\036\n\026clusterCreationS" +
+      "tarted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030" +
+      "\004 \001(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operationDe" +
+      "tails\030\001 \001(\0132\032.usage.CDPOperationDetails\022" +
+      "*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSyncDeta" +
+      "ils\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPC" +
+      "lusterDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.u" +
+      "sage.CDPStatusDetails\"\324\001\n\016CDPDatahubSync" +
+      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
+      "erationDetails\022*\n\013syncDetails\030\002 \001(\0132\025.us" +
+      "age.CDPSyncDetails\0220\n\016clusterDetails\030\003 \001" +
+      "(\0132\030.usage.CDPClusterDetails\022.\n\rstatusDe" +
+      "tails\030\004 \001(\0132\027.usage.CDPStatusDetailsBV\n-" +
+      "com.cloudera.thunderhead.service.common." +
+      "usageB\nUsageProtoZ\031com/cloudera/cdp/prot" +
+      "obufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -62156,44 +63676,56 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPStatusDetails_descriptor,
         new java.lang.String[] { "StackStatus", "StackDetailedStatus", "StackStatusReason", "ClusterStatus", "ClusterStatusReason", });
-    internal_static_usage_CDPDatalakeRequested_descriptor =
+    internal_static_usage_CDPDatalakeFeatures_descriptor =
       getDescriptor().getMessageTypes().get(43);
+    internal_static_usage_CDPDatalakeFeatures_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDatalakeFeatures_descriptor,
+        new java.lang.String[] { "Raz", });
+    internal_static_usage_CDPRaz_descriptor =
+      getDescriptor().getMessageTypes().get(44);
+    internal_static_usage_CDPRaz_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPRaz_descriptor,
+        new java.lang.String[] { "Status", });
+    internal_static_usage_CDPDatalakeRequested_descriptor =
+      getDescriptor().getMessageTypes().get(45);
     internal_static_usage_CDPDatalakeRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeRequested_descriptor,
-        new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", });
+        new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", "Features", });
     internal_static_usage_CDPDatalakeStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(44);
+      getDescriptor().getMessageTypes().get(46);
     internal_static_usage_CDPDatalakeStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeStatusChanged_descriptor,
         new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
     internal_static_usage_CDPDatahubRequested_descriptor =
-      getDescriptor().getMessageTypes().get(45);
+      getDescriptor().getMessageTypes().get(47);
     internal_static_usage_CDPDatahubRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubRequested_descriptor,
         new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "ClusterDetails", });
     internal_static_usage_CDPDatahubStatusChanged_descriptor =
-      getDescriptor().getMessageTypes().get(46);
+      getDescriptor().getMessageTypes().get(48);
     internal_static_usage_CDPDatahubStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubStatusChanged_descriptor,
         new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
     internal_static_usage_CDPSyncDetails_descriptor =
-      getDescriptor().getMessageTypes().get(47);
+      getDescriptor().getMessageTypes().get(49);
     internal_static_usage_CDPSyncDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPSyncDetails_descriptor,
         new java.lang.String[] { "Status", "DetailedStatus", "ClusterCreationStarted", "ClusterCreationFinished", });
     internal_static_usage_CDPDatalakeSync_descriptor =
-      getDescriptor().getMessageTypes().get(48);
+      getDescriptor().getMessageTypes().get(50);
     internal_static_usage_CDPDatalakeSync_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeSync_descriptor,
         new java.lang.String[] { "OperationDetails", "SyncDetails", "ClusterDetails", "StatusDetails", });
     internal_static_usage_CDPDatahubSync_descriptor =
-      getDescriptor().getMessageTypes().get(49);
+      getDescriptor().getMessageTypes().get(51);
     internal_static_usage_CDPDatahubSync_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubSync_descriptor,

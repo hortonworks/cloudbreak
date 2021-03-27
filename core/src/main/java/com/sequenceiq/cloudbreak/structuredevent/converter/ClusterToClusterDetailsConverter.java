@@ -27,6 +27,7 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setCreationStarted(source.getCreationStarted());
         clusterDetails.setCreationFinished(source.getCreationFinished());
         clusterDetails.setUpSince(source.getUpSince());
+        clusterDetails.setRazEnabled(source.isRangerRazEnabled());
         convertGatewayProperties(clusterDetails, source.getGateway());
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
         addDatabaseInfo(clusterDetails, source);

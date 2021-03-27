@@ -825,14 +825,26 @@ message CDPStatusDetails {
   string clusterStatusReason = 5;
 }
 
+message CDPDatalakeFeatures {
+  // Ranger Authorization feature tracking
+  CDPRaz raz = 1;
+}
+
+message CDPRaz {
+  // Status whether RAZ is enabled for this cluster ot not
+  string status = 1;
+}
+
 // Generated when Datalake creation has been requested or finished
 message CDPDatalakeRequested {
   // Operation metadata
   CDPOperationDetails operationDetails = 1;
   // Environment Crn
   string environmentCrn = 2;
-  // Details for Datalake
+  // Cluster details for Datalake
   CDPClusterDetails clusterDetails = 3;
+  // Feature tracking for DL
+  CDPDatalakeFeatures features = 4;
 }
 
 // Generated when Datalake status has changed

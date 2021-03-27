@@ -5,9 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-
 import static java.util.Collections.singletonMap;
-
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -67,7 +65,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.Telemetry
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.DatalakeResources;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -96,12 +93,12 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
-import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -175,9 +172,6 @@ public class ClusterHostServiceRunner {
     private BlueprintService blueprintService;
 
     @Inject
-    private DatalakeResourcesService datalakeResourcesService;
-
-    @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
@@ -227,6 +221,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private CsdParcelDecorator csdParcelDecorator;
+
+    @Inject
+    private DatalakeService datalakeService;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
@@ -551,17 +548,13 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Long datalakeResourceId = stack.getDatalakeResourceId();
-        if (datalakeResourceId != null) {
-            Optional<DatalakeResources> datalakeResource = datalakeResourcesService.findById(datalakeResourceId);
-            if (datalakeResource.isPresent() && datalakeResource.get().getDatalakeStackId() != null) {
-                Long datalakeStackId = datalakeResource.get().getDatalakeStackId();
-                Stack dataLakeStack = stackService.getByIdWithListsInTransaction(datalakeStackId);
-                String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-                List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-                servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                        singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
-            }
+        Optional<Stack> datahubStackOptional = datalakeService.getDatalakeStackByDatahubStack(stack);
+        if (datahubStackOptional.isPresent()) {
+            Stack dataLakeStack = datahubStackOptional.get();
+            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
+            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
         }
     }
 

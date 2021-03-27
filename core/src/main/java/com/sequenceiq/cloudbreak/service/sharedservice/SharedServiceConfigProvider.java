@@ -86,6 +86,7 @@ public class SharedServiceConfigProvider {
         if (datalakeResource.isPresent()) {
             DatalakeResources datalakeResources = datalakeResource.get();
             publicStack.setDatalakeResourceId(datalakeResources.getId());
+            publicStack.setDatalakeCrn(stackService.get(datalakeResources.getDatalakeStackId()).getResourceCrn());
             StackInputs stackInputs = publicStack.getInputs().get(StackInputs.class);
             stackInputs.setDatalakeInputs(new HashMap<>());
             stackInputs.setFixInputs(new HashMap<>());
