@@ -71,9 +71,9 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
             putIfValueNotNull(map, AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, sp.getMaxPrice());
         });
         if (encryption != null) {
-            putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryption.getType());
-            putIfValueNotNull(map, AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, encryption != null &&
-                    encryption.getType() != EncryptionType.NONE);
+            EncryptionType encryptionType = encryption.getType();
+            putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryptionType);
+            putIfValueNotNull(map, AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, encryptionType != null && encryptionType != EncryptionType.NONE);
         }
 
         putIfValueNotNull(map, AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, Optional.ofNullable(placementGroup)
@@ -127,4 +127,5 @@ public class AwsInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
             placementGroup.setStrategy(AwsPlacementGroupStrategy.NONE);
         }
     }
+
 }

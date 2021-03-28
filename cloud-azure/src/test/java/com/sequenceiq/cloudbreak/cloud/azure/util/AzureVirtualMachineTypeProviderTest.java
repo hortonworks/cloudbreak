@@ -1,13 +1,18 @@
 package com.sequenceiq.cloudbreak.cloud.azure.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -24,7 +29,12 @@ public class AzureVirtualMachineTypeProviderTest {
 
     private static final String STANDARD_D15_V2 = "Standard_D15_v2";
 
-    private AzureVirtualMachineTypeProvider underTest = new AzureVirtualMachineTypeProvider();
+    private AzureVirtualMachineTypeProvider underTest;
+
+    @BeforeEach
+    void setUp() {
+        underTest = new AzureVirtualMachineTypeProvider();
+    }
 
     @Test
     public void testGetVmTypesShouldReturnsTheAvailableVmTypes() {
@@ -33,24 +43,24 @@ public class AzureVirtualMachineTypeProviderTest {
 
         Set<String> actual = underTest.getVmTypes(azureStackView);
 
-        Assert.assertEquals(4, actual.size());
-        Assert.assertTrue(actual.contains(STANDARD_DS_V2));
-        Assert.assertTrue(actual.contains(STANDARD_D3_V2));
-        Assert.assertTrue(actual.contains(STANDARD_E16A_V3));
-        Assert.assertTrue(actual.contains(STANDARD_D15_V2));
+        assertEquals(4, actual.size());
+        assertTrue(actual.contains(STANDARD_DS_V2));
+        assertTrue(actual.contains(STANDARD_D3_V2));
+        assertTrue(actual.contains(STANDARD_E16A_V3));
+        assertTrue(actual.contains(STANDARD_D15_V2));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetVmTypesShouldThrowExceptionWhenAFlavourIsMissing() {
         Map<String, List<AzureInstanceView>> instanceGroups = createInstanceGroupsWithAMissingFlavour();
         AzureStackView azureStackView = createAzureStackView(instanceGroups);
 
-        underTest.getVmTypes(azureStackView);
+        assertThrows(IllegalArgumentException.class, () -> underTest.getVmTypes(azureStackView));
     }
 
     private AzureStackView createAzureStackView(Map<String, List<AzureInstanceView>> instanceGroups) {
-        AzureStackView azureStackView = Mockito.mock(AzureStackView.class);
-        Mockito.when(azureStackView.getGroups()).thenReturn(instanceGroups);
+        AzureStackView azureStackView = mock(AzureStackView.class);
+        when(azureStackView.getGroups()).thenReturn(instanceGroups);
         return azureStackView;
     }
 
@@ -80,7 +90,7 @@ public class AzureVirtualMachineTypeProviderTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavour, groupName, null,
                 Collections.emptyList(), null, Collections.emptyMap(), null, null);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null);
-        return new AzureInstanceView(null, 0, cloudInstance, null, null, null,
-                null, null, false, null, 0, null, null);
+        return AzureInstanceView.builder(cloudInstance).build();
     }
+
 }

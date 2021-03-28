@@ -293,16 +293,17 @@
                    }
                  },
                  {
-                   "apiVersion": "2018-04-01",
+                   "apiVersion": "2019-07-01",
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
                     <#if instance.managedIdentity?? && instance.managedIdentity?has_content>
                     "identity": {
                         "type": "userAssigned",
-                        "identityIds": [
-                            "${instance.managedIdentity}"
-                        ]
+                        "userAssignedIdentities": {
+                            "${instance.managedIdentity}": {
+                            }
+                        }
                      },
                     </#if>
                    "dependsOn": [
@@ -358,6 +359,11 @@
                            "osDisk" : {
                                "diskSizeGB": "${instance.rootVolumeSize}",
                                "managedDisk": {
+                                    <#if instance.managedDiskEncryptionWithCustomKeyEnabled>
+                                    "diskEncryptionSet": {
+                                        "id": "${instance.diskEncryptionSetId}"
+                                    },
+                                    </#if>
                                     "storageAccountType": "${instance.attachedDiskStorageType}"
                                },
                                "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",

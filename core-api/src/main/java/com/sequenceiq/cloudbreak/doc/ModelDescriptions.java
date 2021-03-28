@@ -84,6 +84,7 @@ public class ModelDescriptions {
         public static final String ENCRYPTION_KEY = "encryption key for vm";
         public static final String ENCRYPTED = "should encrypt the vm";
         public static final String ENCRYPTION_METHOD = "encryption method for the key (RAW|RSA)";
+        public static final String DISK_ENCRYPTION_SET_ID = "disk encryption set Resource ID";
         public static final String SECRET_PARAMETERS = "cloud specific secret parameters for template";
     }
 

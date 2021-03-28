@@ -21,6 +21,10 @@ public class AwsInstanceTemplate extends InstanceTemplate {
      *     </ul>
      * </p>
      *
+     * If enabled, the encryption key to use is determined by {@link #VOLUME_ENCRYPTION_KEY_TYPE} and {@link #VOLUME_ENCRYPTION_KEY_ID}.
+     *
+     * @see #VOLUME_ENCRYPTION_KEY_ID
+     * @see #VOLUME_ENCRYPTION_KEY_TYPE
      * @see #putParameter(String, Object)
      * @see Boolean#parseBoolean(String)
      */
