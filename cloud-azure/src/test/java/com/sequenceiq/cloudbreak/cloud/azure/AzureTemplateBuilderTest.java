@@ -2,20 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static java.util.Collections.emptyList;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,14 +22,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
@@ -66,16 +62,17 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
+import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
 
-@RunWith(Parameterized.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureTemplateBuilderTest {
-
-    private static final String V16 = "1.16";
 
     private static final String USER_ID = "horton@hortonworks.com";
 
@@ -92,6 +89,8 @@ public class AzureTemplateBuilderTest {
     private static final int ROOT_VOLUME_SIZE = 50;
 
     private static final Map<String, Boolean> ACCELERATED_NETWORK_SUPPORT = Map.of("m1.medium", false);
+
+    private static final String FIELD_ARM_TEMPLATE_PATH = "armTemplatePath";
 
     @Mock
     private AzureUtils azureUtils;
@@ -142,16 +141,7 @@ public class AzureTemplateBuilderTest {
 
     private final Map<String, String> tags = new HashMap<>();
 
-    private final String templatePath;
-
-    private final Map<String, String> defaultTags = new HashMap<>();
-
-    public AzureTemplateBuilderTest(String templatePath) {
-        this.templatePath = templatePath;
-    }
-
-    @Parameters(name = "{0}")
-    public static Iterable<?> getTemplatesPath() {
+    public static Iterable<?> templatesPathDataProvider() {
         List<String> templates = Lists.newArrayList(LATEST_TEMPLATE_PATH);
         File[] templateFiles = new File(AzureTemplateBuilderTest.class.getClassLoader().getResource("templates").getPath()).listFiles();
         List<String> olderTemplates = Arrays.stream(templateFiles).map(file -> {
@@ -162,16 +152,14 @@ public class AzureTemplateBuilderTest {
         return templates;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        initMocks(this);
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
         ReflectionTestUtils.setField(azureTemplateBuilder, "freemarkerConfiguration", configuration);
-        ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplatePath", templatePath);
         ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters.ftl");
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, CORE_CUSTOM_DATA,
@@ -206,13 +194,15 @@ public class AzureTemplateBuilderTest {
 
         azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
                 ImmutableMap.of("existingSubnet", 100L));
-        reset(azureUtils);
         when(customVMImageNameProvider.getImageNameFromConnectionString(anyString())).thenCallRealMethod();
     }
 
-    @Test
-    public void buildNoPublicIpFirewallWithTags() throws IOException {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildNoPublicIpFirewallWithTags(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -242,10 +232,13 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"testtagkey2\": \"testtagvalue2\""));
     }
 
-    @Test
-    public void buildNoPublicIpNoFirewallButExistingNetwork() {
-        assumeTrue(isTemplateVersionGreaterOrEqualThan1165());
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildNoPublicIpNoFirewallButExistingNetwork(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan1165(templatePath));
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
@@ -276,9 +269,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("existingNetworkName"));
     }
 
-    @Test
-    public void buildNoPublicIpButFirewall() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildNoPublicIpButFirewall(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -306,9 +302,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("networkSecurityGroups"));
     }
 
-    @Test
-    public void buildWithPublicIpAndFirewall() throws IOException {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithPublicIpAndFirewall(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> false);
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -340,9 +339,12 @@ public class AzureTemplateBuilderTest {
         return new String(Base64.encodeBase64(String.format("%s", data).getBytes()));
     }
 
-    @Test
-    public void buildWithInstanceGroupTypeCore() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithInstanceGroupTypeCore(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -368,9 +370,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
-    @Test
-    public void buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithInstanceGroupTypeCoreShouldNotContainsGatewayCustomData(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -396,9 +401,12 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
-    @Test
-    public void buildWithInstanceGroupTypeGateway() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithInstanceGroupTypeGateway(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -424,9 +432,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
-    @Test
-    public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithInstanceGroupTypeGatewayShouldNotContainsCoreCustomData(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -452,9 +463,12 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
-    @Test
-    public void buildWithInstanceGroupTypeGatewayAndCore() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithInstanceGroupTypeGatewayAndCore(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -483,9 +497,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
-    @Test
-    public void buildTestResourceGroupName() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestResourceGroupName(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -513,9 +530,12 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("resourceGroupName"));
     }
 
-    @Test
-    public void buildTestExistingVNETName() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestExistingVNETName(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
@@ -549,9 +569,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("existingResourceGroup"));
     }
 
-    @Test
-    public void buildTestExistingSubnetNameNotInTemplate() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestExistingSubnetNameNotInTemplate(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -579,9 +602,12 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("existingSubnetName"));
     }
 
-    @Test
-    public void buildTestVirtualNetworkNamePrefix() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestVirtualNetworkNamePrefix(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -609,9 +635,12 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("virtualNetworkNamePrefix"));
     }
 
-    @Test
-    public void buildTestSubnet1Prefix() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestSubnet1Prefix(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -639,10 +668,14 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("subnet1Prefix"));
     }
 
-    @Test
-    public void buildTestDisksFor1xVersions() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestDisksFor1xVersions(String templatePath) {
         //GIVEN
-        assumeFalse(isTemplateVersionGreaterOrEqualThan1165());
+        assumeFalse(isTemplateVersionGreaterOrEqualThan1165(templatePath));
+
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -667,13 +700,16 @@ public class AzureTemplateBuilderTest {
                         AzureInstanceTemplateOperation.PROVISION);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("[concat('datadisk', 'm0', '0')]"));
-        assertThat(templateString, containsString("[concat('datadisk', 'm0', '1')]"));
+        assertThat(templateString).contains("[concat('datadisk', 'm0', '0')]");
+        assertThat(templateString).contains("[concat('datadisk', 'm0', '1')]");
     }
 
-    @Test
-    public void buildTestDisksOnAllVersionsAndVerifyOsDisks() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestDisksOnAllVersionsAndVerifyOsDisks(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -701,10 +737,14 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
     }
 
-    @Test
-    public void buildTestDisksWhenTheVersion210OrGreater() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestDisksWhenTheVersion210OrGreater(String templatePath) {
         //GIVEN
-        assumeTrue(isTemplateVersionGreaterOrEqualThan("2.10.0.0"));
+        assumeTrue(isTemplateVersionGreaterOrEqualThan2100(templatePath));
+
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -733,9 +773,12 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("[concat('datadisk', 'm0', '1')]"));
     }
 
-    @Test
-    public void buildTestAvailabilitySetInTemplate() {
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestAvailabilitySetInTemplate(String templatePath) {
         //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -777,22 +820,212 @@ public class AzureTemplateBuilderTest {
         assertFalse(templateString.contains("'Microsoft.Compute/availabilitySets', 'core-as'"));
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestWithVmVersion(String templatePath) {
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan2100(templatePath));
+
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet("testSubnet"));
+        when(azureUtils.isPrivateIp(any())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION);
+
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).contains("                   \"apiVersion\": \"2019-07-01\",\n" +
+                "                   \"type\": \"Microsoft.Compute/virtualMachines\",\n");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestWithNoManagedIdentity(String templatePath) {
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet("testSubnet"));
+        when(azureUtils.isPrivateIp(any())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION);
+
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("\"identity\": {");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestWithManagedIdentityGiven(String templatePath) {
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan2100(templatePath));
+
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet("testSubnet"));
+        when(azureUtils.isPrivateIp(any())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        CloudAdlsGen2View cloudAdlsGen2View = new CloudAdlsGen2View(CloudIdentityType.LOG);
+        cloudAdlsGen2View.setManagedIdentity("myIdentity");
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE,
+                Optional.of(cloudAdlsGen2View)));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION);
+
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).contains("\"identity\": {");
+        assertThat(templateString).contains("\"type\": \"userAssigned\",");
+        assertThat(templateString).contains("                        \"userAssignedIdentities\": {\n" +
+                "                            \"myIdentity\": {\n" +
+                "                            }\n" +
+                "                        }\n");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestWithNoDiskEncryptionSetId(String templatePath) {
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet("testSubnet"));
+        when(azureUtils.isPrivateIp(any())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION);
+
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).doesNotContain("\"diskEncryptionSet\": {");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildTestWithDiskEncryptionSetIdGiven(String templatePath) {
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan2100(templatePath));
+
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet("testSubnet"));
+        when(azureUtils.isPrivateIp(any())).thenReturn(false);
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        instance.getTemplate().putParameter(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
+        instance.getTemplate().putParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, "myDES");
+
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION);
+
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString).contains("\"diskEncryptionSet\": {");
+        assertThat(templateString).contains("\"id\": \"myDES\"");
+    }
+
+    private boolean isTemplateVersionGreaterOrEqualThan2100(String templatePath) {
+        return isTemplateVersionGreaterOrEqualThan(templatePath, "2.10.0.0");
+    }
+
     private CloudCredential cloudCredential() {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("projectId", "siq-haas");
         return new CloudCredential("crn", "test", parameters, false);
     }
 
-    private boolean isTemplateVersionGreaterOrEqualThan1165() {
-        return isTemplateVersionGreaterOrEqualThan("1.16.5.0");
+    private boolean isTemplateVersionGreaterOrEqualThan1165(String templatePath) {
+        return isTemplateVersionGreaterOrEqualThan(templatePath, "1.16.5.0");
     }
 
-    private boolean isTemplateVersionGreaterOrEqualThan(String version) {
+    private boolean isTemplateVersionGreaterOrEqualThan(String templatePath, String version) {
         if (LATEST_TEMPLATE_PATH.equals(templatePath)) {
             return true;
         }
-        String[] splittedName = templatePath.split("-");
-        String templateVersion = splittedName[splittedName.length - 1].replaceAll("\\.ftl", "");
+        String[] splitName = templatePath.split("-");
+        String templateVersion = splitName[splitName.length - 1].replaceAll("\\.ftl", "");
         return Version.versionCompare(templateVersion, version) > -1;
     }
+
 }

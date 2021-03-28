@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -60,12 +61,35 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     private InstanceGroupV1ToInstanceGroupV4Converter underTest;
 
     @Test
-    void convertToAwsWithoutSecurityGroupsHappyPathTest() {
+    void convertToAwsWithoutEnvironmentHappyPathTest() {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
-        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
 
         List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, null);
+
+        assertThat(results).hasSameSizeAs(instanceGroups);
+
+        InstanceGroupV4Request first = results.get(0);
+
+        assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
+        assertThat(first.getName()).isEqualTo(INSTANCE_GROUP_NAME);
+        assertThat(first.getNodeCount()).isEqualTo(NODE_COUNT_1);
+        assertThat(first.getRecipeNames()).isEqualTo(RECIPE_NAMES);
+        assertThat(first.getRecoveryMode()).isEqualTo(RecoveryMode.AUTO);
+        assertThat(first.getTemplate()).isNull();
+        assertThat(first.getType()).isEqualTo(InstanceGroupType.CORE);
+    }
+
+    @Test
+    void convertToAwsWithEnvironmentWithoutSecurityGroupsHappyPathTest() {
+        when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
+        DetailedEnvironmentResponse environment = prepareEnvironment(false, null, null, null);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+        Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(InstanceGroupType.CORE);
+
+        List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+
         assertThat(results).hasSameSizeAs(instanceGroups);
 
         InstanceGroupV4Request first = results.get(0);
@@ -105,15 +129,17 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     void createSecurityGroupFromEnvironmentTestForConvertTo(String testCaseName, InstanceGroupType instanceGroupType, boolean environmentSet,
             boolean securityAccessSet, String cidr, String defaultSecurityGroupId, String securityGroupIdKnox, boolean securityGroupExpected,
             boolean cidrExpected, Set<String> expectedSecurityGroups) {
-
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V1_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V4_PARAMETERS);
-        when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
         DetailedEnvironmentResponse environment = environmentSet
                 ? prepareEnvironment(securityAccessSet, cidr, defaultSecurityGroupId, securityGroupIdKnox)
                 : null;
+        if (environmentSet) {
+            when(instanceTemplateConverter.convert(any(InstanceTemplateV1Request.class), eq(environment))).thenReturn(INSTANCE_TEMPLATE_V4_REQUEST);
+        }
         Set<InstanceGroupV1Request> instanceGroups = prepareInstanceGroupV1Requests(instanceGroupType);
 
         List<InstanceGroupV4Request> results = underTest.convertTo(instanceGroups, environment);
+
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV4Request first = results.get(0);
 
@@ -139,9 +165,9 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(InstanceGroupType.CORE);
 
         Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
-        assertThat(results).hasSameSizeAs(instanceGroups);
 
-        InstanceGroupV1Request first = results.stream().findFirst().get();
+        assertThat(results).hasSameSizeAs(instanceGroups);
+        InstanceGroupV1Request first = results.iterator().next();
 
         assertThat(first.getAws()).isEqualTo(AWS_INSTANCE_GROUP_V1_PARAMETERS);
         assertThat(first.getCloudPlatform()).isEqualTo(CloudPlatform.AWS);
@@ -157,16 +183,9 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     // CHECKSTYLE:OFF
     static Object[][] securityAccessDataProviderForConvertFrom() {
         return new Object[][] {
-                // Testcase name                       InstanceGroupType          EnvironmentSet   SecurityAccessSet   CIDR         defaultSecurityGroupId  securityGroupIdKnox
-                { "No Environment set",                InstanceGroupType.CORE,    false,           false,              null,        null,                   null},
-                { "No SecurityAccess set",             InstanceGroupType.CORE,    true,            false,              null,        null,                   null},
-                { "SecurityAccess w/ null props",      InstanceGroupType.CORE,    true,            true,               null,        null,                   null},
-                { "SecurityAccess w/ empty cidr",      InstanceGroupType.CORE,    true,            true,               "",          null,                   null},
-                { "SecurityAccess w/ empty group Ids", InstanceGroupType.CORE,    true,            true,               null,        "",                     ""},
-                { "Core group Id",                     InstanceGroupType.CORE,    true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2},
-                { "Gateway group Id",                  InstanceGroupType.GATEWAY, true,            true,               null,        SECURITY_GROUP1,        SECURITY_GROUP2},
-                { "CIDR and SG uses SG",               InstanceGroupType.CORE,    true,            true,               "0.0.0.0/0", SECURITY_GROUP1,        SECURITY_GROUP2},
-                { "CIDR",                              InstanceGroupType.CORE,    true,            true,               "0.0.0.0/0", null,                   null},
+                // Testcase name        InstanceGroupType
+                { "Core group Id",      InstanceGroupType.CORE},
+                { "Gateway group Id",   InstanceGroupType.GATEWAY},
 
         };
     }
@@ -175,20 +194,16 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("securityAccessDataProviderForConvertFrom")
-    void createSecurityGroupFromEnvironmentTestForConvertFrom(String testCaseName, InstanceGroupType instanceGroupType, boolean environmentSet,
-            boolean securityAccessSet, String cidr, String defaultSecurityGroupId, String securityGroupIdKnox) {
-
+    void createSecurityGroupFromEnvironmentTestForConvertFrom(String testCaseName, InstanceGroupType instanceGroupType) {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V4_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V1_PARAMETERS);
         when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
 
-        DetailedEnvironmentResponse environment = environmentSet
-                ? prepareEnvironment(securityAccessSet, cidr, defaultSecurityGroupId, securityGroupIdKnox)
-                : null;
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(instanceGroupType);
 
         Set<InstanceGroupV1Request> results = underTest.convertFrom(instanceGroups);
+
         assertThat(results).hasSameSizeAs(instanceGroups);
-        InstanceGroupV1Request first = results.stream().findFirst().get();
+        InstanceGroupV1Request first = results.iterator().next();
 
         assertThat(first.getType()).isEqualTo(instanceGroupType);
     }

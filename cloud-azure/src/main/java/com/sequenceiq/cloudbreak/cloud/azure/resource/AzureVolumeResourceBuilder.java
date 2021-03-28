@@ -37,8 +37,10 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
 import com.sequenceiq.cloudbreak.cloud.azure.service.AzureResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -146,7 +148,6 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         LOGGER.info("Create volumes on provider");
         AzureClient client = getAzureClient(auth);
 
-
         Map<String, List<VolumeSetAttributes.Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
@@ -156,6 +157,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         String region = cloudContext.getLocation().getRegion().getRegionName();
+        String diskEncryptionSetId = getDiskEncryptionSetId(group);
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
             VolumeSetAttributes volumeSet = getVolumeSetAttributes(resource);
@@ -166,7 +168,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                         if (result == null) {
                             result = client.createManagedDisk(
                                     volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, cloudStack.getTags());
+                                            volume.getType()), region, resourceGroupName, cloudStack.getTags(), diskEncryptionSetId);
                         } else {
                             LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
                         }
@@ -190,6 +192,12 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 })
                 .map(copyResourceWithNewStatus(CommonStatus.CREATED))
                 .collect(toList());
+    }
+
+    private String getDiskEncryptionSetId(Group group) {
+        CloudInstance cloudInstance = group.getReferenceInstanceConfiguration();
+        AzureInstanceView azureInstanceView = AzureInstanceView.builder(cloudInstance).build();
+        return azureInstanceView.isManagedDiskEncryptionWithCustomKeyEnabled() ? azureInstanceView.getDiskEncryptionSetId() : null;
     }
 
     private Function<CloudResource, CloudResource> copyResourceWithNewStatus(CommonStatus status) {

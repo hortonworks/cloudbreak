@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.PagedList;
@@ -32,12 +33,14 @@ import com.microsoft.azure.management.compute.CachingTypes;
 import com.microsoft.azure.management.compute.Disk;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
+import com.microsoft.azure.management.compute.Encryption;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.implementation.DiskInner;
 import com.microsoft.azure.management.graphrbac.RoleAssignment;
 import com.microsoft.azure.management.graphrbac.RoleAssignments;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
@@ -63,6 +66,7 @@ import com.microsoft.azure.management.resources.Subscription;
 import com.microsoft.azure.management.resources.fluentcore.arm.AvailabilityZoneId;
 import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
+import com.microsoft.azure.management.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.ProvisioningState;
 import com.microsoft.azure.management.storage.StorageAccount;
@@ -284,16 +288,30 @@ public class AzureClient {
         }
     }
 
-    public Disk createManagedDisk(String diskName, int diskSize, AzureDiskType diskType, String region, String resourceGroupName, Map<String, String> tags) {
+    public Disk createManagedDisk(String diskName, int diskSize, AzureDiskType diskType, String region, String resourceGroupName, Map<String, String> tags,
+            String diskEncryptionSetId) {
         LOGGER.debug("create managed disk with name={}", diskName);
-        return azure.disks().define(diskName)
+        Disk.DefinitionStages.WithCreate withCreate = azure.disks().define(diskName)
                 .withRegion(Region.findByLabelOrName(region))
                 .withExistingResourceGroup(resourceGroupName)
                 .withData()
                 .withSizeInGB(diskSize)
                 .withTags(tags)
-                .withSku(convertAzureDiskTypeToDiskSkuTypes(diskType))
-                .create();
+                .withSku(convertAzureDiskTypeToDiskSkuTypes(diskType));
+        setupDiskEncryptionWithDesIfNeeded(diskEncryptionSetId, withCreate);
+        return withCreate.create();
+    }
+
+    @VisibleForTesting
+    void setupDiskEncryptionWithDesIfNeeded(String diskEncryptionSetId, Disk.DefinitionStages.WithCreate withCreate) {
+        if (!Strings.isNullOrEmpty(diskEncryptionSetId)) {
+            // This is nasty. The DES setter is not exposed in WithCreate, so have to rely on the direct tweaking of the underlying DiskInner.
+            Encryption encryption = new Encryption();
+            encryption.withDiskEncryptionSetId(diskEncryptionSetId);
+            // WithCreate is actually a DiskImpl instance, but that type is not visible.
+            DiskInner inner = (DiskInner) ((IndexableRefreshableWrapperImpl) withCreate).inner();
+            inner.withEncryption(encryption);
+        }
     }
 
     public void attachDiskToVm(Disk disk, VirtualMachine vm) {

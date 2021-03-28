@@ -38,7 +38,7 @@ public class InstanceTemplate extends DynamicModel {
      * when {@link #VOLUME_ENCRYPTION_KEY_TYPE} equals {@code "CUSTOM"}. Its value will be ignored otherwise.
      *
      * <p>
-     *     When set, the value shall be a {@link String} containing the ID of the customer-managed encryption key in a cloud provider specific syntax.
+     *     When set, the value shall be a nonempty {@link String} containing the ID of the customer-managed encryption key in a cloud provider specific syntax.
      * </p>
      *
      * @see #VOLUME_ENCRYPTION_KEY_TYPE

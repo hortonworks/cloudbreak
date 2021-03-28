@@ -48,7 +48,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setType(source.getType());
         response.setCloudPlatform(source.getCloudPlatform());
         response.setName(source.getName());
-        response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
+        response.setTemplate(getIfNotNull(source.getTemplate(), environment, instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));
         response.setRecipeNames(source.getRecipeNames());

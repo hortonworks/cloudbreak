@@ -195,7 +195,24 @@ class AwsVolumeResourceBuilderTest {
     }
 
     @Test
-    void buildTestWhenAttachedVolumesOnlyAndEncryptionWithDefaultKey() throws Exception {
+    void buildTestWhenAttachedVolumesOnlyAndIneffectiveEncryptionWithDefaultKey() throws Exception {
+        Group group = createGroup(List.of(createVolume(TYPE_GP2)),
+                Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, false),
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())));
+
+        setUpTaskExecutors();
+        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
+
+        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+
+        List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
+        verifyVolumes(volumes, "/dev/xvdb");
+        verifyCreateVolumeRequest(null, false, null);
+    }
+
+    @Test
+    void buildTestWhenAttachedVolumesOnlyAndEffectiveEncryptionWithDefaultKey() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name())));
@@ -212,7 +229,25 @@ class AwsVolumeResourceBuilderTest {
     }
 
     @Test
-    void buildTestWhenAttachedVolumesOnlyAndEncryptionWithCustomKey() throws Exception {
+    void buildTestWhenAttachedVolumesOnlyAndEncryptionWithIneffectiveCustomKey() throws Exception {
+        Group group = createGroup(List.of(createVolume(TYPE_GP2)),
+                Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()),
+                        entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, ENCRYPTION_KEY_ARN)));
+
+        setUpTaskExecutors();
+        when(amazonEC2Client.createVolume(isA(CreateVolumeRequest.class))).thenReturn(createCreateVolumeResult());
+
+        List<CloudResource> result = underTest.build(awsContext, PRIVATE_ID, authenticatedContext, group,
+                List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2)))), cloudStack);
+
+        List<VolumeSetAttributes.Volume> volumes = verifyResultAndGetVolumes(result);
+        verifyVolumes(volumes, "/dev/xvdb");
+        verifyCreateVolumeRequest(null, true, null);
+    }
+
+    @Test
+    void buildTestWhenAttachedVolumesOnlyAndEncryptionWithEffectiveCustomKey() throws Exception {
         Group group = createGroup(List.of(createVolume(TYPE_GP2)),
                 Map.ofEntries(entry(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true),
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name()),

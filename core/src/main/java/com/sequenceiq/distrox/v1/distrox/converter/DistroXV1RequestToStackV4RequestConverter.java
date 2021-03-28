@@ -19,9 +19,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.plac
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -32,7 +32,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
@@ -97,7 +96,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setSharedService(sdxConverter.getSharedService(sdxClusterResponse));
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
-        request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
+        request.setTelemetry(getTelemetryRequest(environment, sdxClusterResponse));
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
@@ -125,46 +124,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     }
 
-    public StackV4Request convertAsTemplate(DistroXV1Request source) {
-        StackV4Request request = new StackV4Request();
-        DetailedEnvironmentResponse environment = null;
-        if (source.getEnvironmentName() != null) {
-            environment = environmentClientService.getByName(source.getEnvironmentName());
-            if (environment != null) {
-                if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-                    throw new BadRequestException(String.format("Environment state is %s instead of AVAILABLE", environment.getEnvironmentStatus()));
-                }
-                request.setCloudPlatform(getCloudPlatform(environment));
-                request.setEnvironmentCrn(environment.getCrn());
-            }
-        }
-        SdxClusterResponse sdxClusterResponse = getSdxClusterResponse(environment);
-        request.setName(source.getName());
-        request.setType(StackType.WORKLOAD);
-        request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
-        request.setCluster(getIfNotNull(source, clusterConverter::convert));
-        DetailedEnvironmentResponse environmentRef = environment;
-        request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), instanceGroups -> instanceGroupConverter.convertTo(instanceGroups, environmentRef)));
-        if (environment != null) {
-            request.setNetwork(getNetwork(source.getNetwork(), environment));
-        }
-        request.setAws(getIfNotNull(source.getAws(), stackParameterConverter::convert));
-        request.setAzure(getIfNotNull(source.getAzure(), stackParameterConverter::convert));
-        request.setGcp(getIfNotNull(source.getGcp(), stackParameterConverter::convert));
-        request.setYarn(getYarnProperties(source, environment));
-        request.setInputs(source.getInputs());
-        request.setTags(getIfNotNull(source.getTags(), this::getTags));
-        request.setSharedService(getIfNotNull(sdxClusterResponse, sdx -> sdxConverter.getSharedServiceV4Request(sdx)));
-        request.setTimeToLive(source.getTimeToLive());
-        request.setTelemetry(getTelemetryRequest(source, environment, sdxClusterResponse));
-        request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
-        request.setEnableLoadBalancer(source.isEnableLoadBalancer());
-        checkMultipleGatewayNodes(source);
-        return request;
-    }
-
-    private TelemetryRequest getTelemetryRequest(DistroXV1Request source, DetailedEnvironmentResponse environment,
-            SdxClusterResponse sdxClusterResponse) {
+    private TelemetryRequest getTelemetryRequest(DetailedEnvironmentResponse environment, SdxClusterResponse sdxClusterResponse) {
         TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
         return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse);
     }
@@ -196,7 +156,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
                 || !environment.getNetwork().getSubnetIds().contains(subnetId))) {
             LOGGER.info("The given subnet id [{}] is not attached to the Environment [{}]. Network request: [{}]", subnetId, environment, network);
             throw new BadRequestException(String.format("The given subnet id (%s) is not attached to the Environment (%s)",
-                    subnetId, environment.getName()));
+                    subnetId, environment == null ? null : environment.getName()));
         }
     }
 
@@ -214,7 +174,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         DistroXV1Request request = new DistroXV1Request();
         request.setName(source.getName());
         if (source.getEnvironmentCrn() != null) {
-            getEnvironmentName(source.getEnvironmentCrn()).ifPresent(envName -> request.setEnvironmentName(envName));
+            getEnvironmentName(source.getEnvironmentCrn()).ifPresent(request::setEnvironmentName);
         }
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source.getCluster(), clusterConverter::convert));
