@@ -20,4 +20,8 @@ public class SubnetTest {
     protected CloudSubnet getPrivateCloudSubnet(String id, String availabilityZone) {
         return new CloudSubnet(id, "name", availabilityZone, "cidr", true, false, false, SubnetType.PRIVATE);
     }
+
+    protected CloudSubnet getRoutableToInternetCloudSubnet(String id, String availabilityZone) {
+        return new CloudSubnet(id, "name", availabilityZone, "cidr", false, true, true, SubnetType.PRIVATE, true);
+    }
 }

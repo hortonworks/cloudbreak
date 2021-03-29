@@ -221,7 +221,7 @@ public class LoadBalancerConfigService {
         return isSelectedSubnetAvailableAndRequestedType(network, envNetwork, false);
     }
 
-    private boolean isSelectedSubnetAvailableAndRequestedType(Network network, EnvironmentNetworkResponse envNetwork, boolean privateType) {
+    private boolean isSelectedSubnetAvailableAndRequestedType(Network network, EnvironmentNetworkResponse envNetwork, boolean requestPrivate) {
         if (network != null) {
             Json attributes = network.getAttributes();
             Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
@@ -230,8 +230,9 @@ public class LoadBalancerConfigService {
                 LOGGER.debug("Found selected stack subnet {}", subnetId);
                 Optional<CloudSubnet> selectedSubnet = subnetSelector.findSubnetById(envNetwork.getSubnetMetas(), subnetId);
                 if (selectedSubnet.isPresent()) {
-                    LOGGER.debug("Subnet {} type {}", subnetId, selectedSubnet.get().isPrivateSubnet() ? "private" : "public");
-                    return privateType == selectedSubnet.get().isPrivateSubnet();
+                    boolean privateSubnet = selectedSubnet.get().isPrivateSubnet() && !selectedSubnet.get().isRoutableToInternet();
+                    LOGGER.debug("Subnet {} type {}", subnetId, privateSubnet ? "private" : "public");
+                    return requestPrivate == privateSubnet;
                 }
             }
         }

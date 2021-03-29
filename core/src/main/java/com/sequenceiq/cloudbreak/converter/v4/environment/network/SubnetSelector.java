@@ -51,7 +51,7 @@ public class SubnetSelector {
                     subnetsToParse = source.getGatewayEndpointSubnetMetas();
                 }
                 Map<String, CloudSubnet> publicSubnetMetas = subnetsToParse.entrySet().stream()
-                    .filter(entry -> !entry.getValue().isPrivateSubnet())
+                    .filter(entry -> !entry.getValue().isPrivateSubnet() || entry.getValue().isRoutableToInternet())
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
                 endpointGatewayCloudSubnet = chooseSubnet(null, publicSubnetMetas, selectedAZ, false);

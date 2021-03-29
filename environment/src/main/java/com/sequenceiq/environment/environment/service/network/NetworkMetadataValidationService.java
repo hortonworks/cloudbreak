@@ -105,7 +105,7 @@ public class NetworkMetadataValidationService {
             .map(CloudSubnet::getAvailabilityZone)
             .collect(Collectors.toSet());
         Set<String> publicAZs = subnetMetas.values().stream()
-            .filter(subnet -> !subnet.isPrivateSubnet())
+            .filter(subnet -> subnet.isRoutableToInternet())
             .map(CloudSubnet::getAvailabilityZone)
             .collect(Collectors.toSet());
         if (!privateAZs.equals(publicAZs)) {

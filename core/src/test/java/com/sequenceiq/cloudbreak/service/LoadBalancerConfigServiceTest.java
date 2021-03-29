@@ -179,6 +179,23 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     }
 
     @Test
+    public void testCreateLoadBalancerForDataLakeInternetRoutableSubnets() {
+        Stack stack = createStack(StackType.DATALAKE, PUBLIC_ID_1);
+        CloudSubnet subnet = getRoutableToInternetCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
+            assertEquals(1, loadBalancers.size());
+            assertEquals(LoadBalancerType.PUBLIC, loadBalancers.iterator().next().getType());
+        });
+    }
+
+    @Test
     public void testCreateLoadBalancerForDatahubWithDatalakeEntitlement() {
         Stack stack = createStack(StackType.WORKLOAD, PRIVATE_ID_1);
         DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1), false);

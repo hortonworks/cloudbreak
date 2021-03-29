@@ -104,6 +104,36 @@ public class SubnetSelectorTest extends SubnetTest {
         assert subnet.isEmpty();
     }
 
+    @Test
+    public void testChooseEndpointGatewaySubnetFromEndpointSubnetstRoutableToInternet() {
+        EnvironmentNetworkResponse source = setupResponse();
+        source.setSubnetMetas(Map.of("key", getCloudSubnet(AZ_1)));
+        source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
+        source.setGatewayEndpointSubnetMetas(Map.of("public-key", getRoutableToInternetCloudSubnet(PRIVATE_ID_1, AZ_1)));
+
+        Optional<CloudSubnet> subnet =
+            underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1);
+
+        assert subnet.isPresent();
+        assertEquals(PRIVATE_ID_1, subnet.get().getId());
+    }
+
+    @Test
+    public void testChooseEndpointGatewaySubnetFromEnvironmentSubnetstRoutableToInternet() {
+        EnvironmentNetworkResponse source = setupResponse();
+        source.setSubnetMetas(Map.of(
+            "key1", getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1),
+            "key2", getRoutableToInternetCloudSubnet(PUBLIC_ID_1, AZ_1)
+        ));
+        source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
+
+        Optional<CloudSubnet> subnet =
+            underTest.chooseSubnetForEndpointGateway(source, PRIVATE_ID_1);
+
+        assert subnet.isPresent();
+        assertEquals(PUBLIC_ID_1, subnet.get().getId());
+    }
+
     private CloudSubnet getCloudSubnet(String availabilityZone) {
         return new CloudSubnet(PRIVATE_ID_1, "name", availabilityZone, "cidr");
     }
