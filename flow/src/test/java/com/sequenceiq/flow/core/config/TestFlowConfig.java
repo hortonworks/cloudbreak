@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
+import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public class TestFlowConfig extends AbstractFlowConfiguration<TestFlowConfig.TestFlowState, TestFlowConfig.TestFlowEvent>
         implements RetryableFlowConfiguration<TestFlowConfig.TestFlowEvent> {
@@ -61,6 +63,11 @@ public class TestFlowConfig extends AbstractFlowConfiguration<TestFlowConfig.Tes
         TEST_STATE,
         TEST_FINISHED_STATE,
         FINAL_STATE;
+
+        @Override
+        public Class<? extends RestartAction> restartAction() {
+            return DefaultRestartAction.class;
+        }
     }
 
     public enum TestFlowEvent implements FlowEvent {

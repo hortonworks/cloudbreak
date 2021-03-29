@@ -3,6 +3,8 @@ package com.sequenceiq.flow.core;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.sequenceiq.flow.core.restart.DefaultRestartAction;
+
 public class StateConverterAdapterTest {
     private final StateConverterAdapter<TestState> stateConverterAdapter = new StateConverterAdapter<>(TestState.class);
 
@@ -13,6 +15,11 @@ public class StateConverterAdapterTest {
     }
 
     private enum TestState implements FlowState {
-        TEST_STATE
+        TEST_STATE;
+
+        @Override
+        public Class<? extends RestartAction> restartAction() {
+            return DefaultRestartAction.class;
+        }
     }
 }

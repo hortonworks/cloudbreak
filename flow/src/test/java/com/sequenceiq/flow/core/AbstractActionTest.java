@@ -32,6 +32,7 @@ import org.springframework.statemachine.config.common.annotation.ObjectPostProce
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -137,6 +138,11 @@ public class AbstractActionTest {
         @Override
         public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
             return TestAction.class;
+        }
+
+        @Override
+        public Class<? extends RestartAction> restartAction() {
+            return DefaultRestartAction.class;
         }
     }
 

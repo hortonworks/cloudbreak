@@ -29,10 +29,12 @@ import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowFinalizeAction;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.FlowEdgeConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.AbstractFlowConfigurationTest.TestFlowConfiguration.NotAcceptedException;
+import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
 public class AbstractFlowConfigurationTest {
 
@@ -135,6 +137,11 @@ public class AbstractFlowConfigurationTest {
         @Override
         public Class<? extends AbstractAction<?, ?, ?, ?>> action() {
             return FlowFinalizeAction.class;
+        }
+
+        @Override
+        public Class<? extends RestartAction> restartAction() {
+            return DefaultRestartAction.class;
         }
     }
 

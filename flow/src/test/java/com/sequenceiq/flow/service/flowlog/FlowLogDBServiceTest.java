@@ -41,7 +41,9 @@ import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
+import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -305,6 +307,10 @@ public class FlowLogDBServiceTest {
             return null;
         }
 
+        @Override
+        public Class<? extends RestartAction> restartAction() {
+            return DefaultRestartAction.class;
+        }
     }
 
     public static class MockFlowEvent implements FlowEvent {
