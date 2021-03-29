@@ -196,6 +196,9 @@ dependencies {
     compile project(':secret-engine')
     compile project(':client-cm')
     compile project(':authorization-common')
+    compile(project(":audit-connector")) {
+         transitive = false
+    }
 }
 
 test {

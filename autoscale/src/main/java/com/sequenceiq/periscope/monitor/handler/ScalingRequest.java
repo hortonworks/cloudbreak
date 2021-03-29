@@ -27,6 +27,7 @@ import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
+import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 
@@ -68,6 +69,9 @@ public class ScalingRequest implements Runnable {
 
     @Inject
     private CloudbreakMessagesService messagesService;
+
+    @Inject
+    private AuditService auditService;
 
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, List<String> decommissionNodeIds) {
         this.cluster = cluster;
@@ -193,6 +197,8 @@ public class ScalingRequest implements Runnable {
         History history = historyService.createEntry(scalingStatus,
                 StringUtils.left(statusReason, STATUSREASON_MAX_LENGTH), totalNodes, adjustmentCount, policy);
         notificationSender.sendHistoryUpdateNotification(history, cluster);
+        auditService.auditAutoscaleServiceEvent(scalingStatus, statusReason, cluster.getStackCrn(),
+                cluster.getClusterPertain().getTenant(), System.currentTimeMillis());
     }
 
     private String getMessageForCBStatus(String cbMessage) {
