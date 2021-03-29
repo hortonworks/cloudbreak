@@ -14,6 +14,10 @@ import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
+/**
+ * Please consider using a different, service specific one which sets the MdcContext
+ * See: FillInMemoryStateStoreRestartAction or InitializeMDCContextRestartAction
+ */
 @Component("DefaultRestartAction")
 public class DefaultRestartAction implements RestartAction {
 

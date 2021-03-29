@@ -538,5 +538,10 @@ public class Flow2HandlerTest {
         public String name() {
             return null;
         }
+
+        @Override
+        public Class<? extends RestartAction> restartAction() {
+            return DefaultRestartAction.class;
+        }
     }
 }
