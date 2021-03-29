@@ -38,6 +38,8 @@ public class CloudbreakNotification extends CloudbreakNotificationBase {
 
     private String tenantName;
 
+    private Boolean subscriptionRequired;
+
     private JsonNode payload;
 
     private String payloadType;
@@ -181,5 +183,13 @@ public class CloudbreakNotification extends CloudbreakNotificationBase {
 
     public void setTenantName(String tenantName) {
         this.tenantName = tenantName;
+    }
+
+    public Boolean getSubscriptionRequired() {
+        return subscriptionRequired;
+    }
+
+    public void setSubscriptionRequired(Boolean subscriptionRequired) {
+        this.subscriptionRequired = subscriptionRequired;
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -20,6 +22,9 @@ public class NotificationAssemblingService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
+    @Inject
+    private EntitlementService entitlementsService;
+
     public Notification<CloudbreakNotification> createNotification(CloudbreakNotification notification) {
         return new Notification<>(notification);
     }
@@ -29,6 +34,12 @@ public class NotificationAssemblingService {
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage(), messageArgs));
+        String accountId = getAccountId();
+        if (accountId != null) {
+            notification.setSubscriptionRequired(
+                entitlementsService.isEntitledFor(accountId, Entitlement.PERSONAL_VIEW_CB_BY_RIGHT)
+            );
+        }
         notification.setTenantName(getAccountId());
         notification.setUserId(ThreadBasedUserCrnProvider.getUserCrn());
         if (payload != null) {
@@ -42,6 +53,12 @@ public class NotificationAssemblingService {
         Notification<CloudbreakNotification> n = createNotification(resourceEvent, messageArgs, payload);
         n.getNotification().setTenantName(getTenantName(userId));
         n.getNotification().setUserId(userId);
+        String accountId = getTenantName(userId);
+        if (accountId != null) {
+            n.getNotification().setSubscriptionRequired(
+                    entitlementsService.isEntitledFor(accountId, Entitlement.PERSONAL_VIEW_CB_BY_RIGHT)
+            );
+        }
         return n;
     }
 
