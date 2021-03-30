@@ -11,4 +11,10 @@ commands:{% if telemetry.databusEndpoint %}
   - "cdp-nodestatus collect --databus-url {{ telemetry.databusEndpoint }}"{% else %}
   - "cdp-nodestatus collect"{% endif%}
 firstSleep: 660
-sleepTime: 3600
+sleepTime: 3600{% if telemetry.cdpTelemetryVersion > 4 %}
+saltPing:
+  enabled: false
+  firstSleep: 120
+  sleepTime: 1200
+saltPingCacheEvictSeconds: 20
+{% endif %}
