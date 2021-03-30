@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -66,6 +68,6 @@ public class EnvironmentStatusUpdateService {
         environment.setStatus(environmentStatus);
         Environment env = environmentService.save(environment);
         EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-        eventService.sendEventAndNotification(environmentDto, env.getCreator(), resourceEvent);
+        eventService.sendEventAndNotification(environmentDto, env.getCreator(), resourceEvent, Set.of(environmentStatus));
     }
 }
