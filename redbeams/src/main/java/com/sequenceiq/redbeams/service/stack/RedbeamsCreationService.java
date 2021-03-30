@@ -54,7 +54,8 @@ public class RedbeamsCreationService {
             throw new BadRequestException("A stack for this database server already exists in the environment");
         }
 
-        Optional<DatabaseServerConfig> optionalDBServerConfig = databaseServerConfigService.getByClusterCrn(clusterCrn);
+        Optional<DatabaseServerConfig> optionalDBServerConfig =
+                databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(dbStack.getEnvironmentId(), clusterCrn);
 
         DBStack savedDbStack;
         boolean startFlow = false;

@@ -19,7 +19,7 @@ import com.sequenceiq.authorization.service.model.HasRight;
 @Component
 public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<CheckPermissionByResourceCrn> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RequestPropertyAuthorizationFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCrnAthorizationFactory.class);
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;

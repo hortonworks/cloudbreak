@@ -116,7 +116,7 @@ class RedbeamsCreationServiceTest {
         Crn crn = Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312");
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
         when(dbStackService.save(dbStack)).thenReturn(dbStack);
-        when(databaseServerConfigService.getByClusterCrn(CLUSTER_CRN)).thenReturn(Optional.empty());
+        when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.empty());
 
         DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN);
         assertThat(launchedStack).isEqualTo(dbStack);
@@ -153,7 +153,7 @@ class RedbeamsCreationServiceTest {
     @Test
     public void testShouldNotLaunchDatabaseServerWhenDatabaseServerConfigIsAvailable() {
         when(dbStackService.findByNameAndEnvironmentCrn(DB_STACK_NAME, ENVIRONMENT_CRN)).thenReturn(Optional.empty());
-        when(databaseServerConfigService.getByClusterCrn(CLUSTER_CRN)).thenReturn(Optional.of(databaseServerConfig));
+        when(databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.of(databaseServerConfig));
         when(databaseServerConfig.getDbStack()).thenReturn(Optional.of(dbStack));
 
         DBStack launchedStack = underTest.launchDatabaseServer(dbStack, CLUSTER_CRN);

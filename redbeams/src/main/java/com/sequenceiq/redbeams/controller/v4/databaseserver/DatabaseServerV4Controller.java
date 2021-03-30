@@ -100,6 +100,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
+    @DisableCheckPermissions
+    public DatabaseServerV4Response getByClusterCrn(@TenantAwareParam String environmentCrn, String clusterCrn) {
+        DatabaseServerConfig server = databaseServerConfigService.getByClusterCrn(environmentCrn, clusterCrn);
+        return converterUtil.convert(server, DatabaseServerV4Response.class);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATABASE_SERVER)
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         MDCBuilder.addEnvironmentCrn(request.getEnvironmentCrn());
