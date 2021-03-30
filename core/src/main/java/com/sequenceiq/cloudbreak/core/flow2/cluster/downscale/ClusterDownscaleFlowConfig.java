@@ -32,16 +32,51 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     private static final List<Transition<ClusterDownscaleState, ClusterDownscaleEvent>> TRANSITIONS =
             new Builder<ClusterDownscaleState, ClusterDownscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
-                    .from(INIT_STATE).to(COLLECT_CANDIDATES_STATE).event(DECOMMISSION_EVENT).noFailureEvent()
-                    .from(COLLECT_CANDIDATES_STATE).to(DECOMMISSION_STATE).event(COLLECT_CANDIDATES_FINISHED_EVENT)
-                        .failureEvent(COLLECT_CANDIDATES_FAILED_EVENT)
-                    .from(DECOMMISSION_STATE).to(REMOVE_HOSTS_FROM_ORCHESTRATION_STATE).event(DECOMMISSION_FINISHED_EVENT)
-                        .failureState(DECOMISSION_FAILED_STATE).failureEvent(DECOMMISSION_FAILED_EVENT)
-                    .from(REMOVE_HOSTS_FROM_ORCHESTRATION_STATE).to(UPDATE_INSTANCE_METADATA_STATE).event(REMOVE_HOSTS_FROM_ORCHESTRATOR_FINISHED)
-                        .failureState(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE).failureEvent(REMOVE_HOSTS_FROM_ORCHESTRATOR_FAILED)
-                    .from(DECOMISSION_FAILED_STATE).to(CLUSTER_DOWNSCALE_FAILED_STATE).event(FAILURE_EVENT).defaultFailureEvent()
-                    .from(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE).to(CLUSTER_DOWNSCALE_FAILED_STATE).event(FAILURE_EVENT).defaultFailureEvent()
-                    .from(UPDATE_INSTANCE_METADATA_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).defaultFailureEvent()
+
+                    .from(INIT_STATE)
+                    .to(COLLECT_CANDIDATES_STATE)
+                    .event(DECOMMISSION_EVENT)
+                    .noFailureEvent()
+
+                    .from(COLLECT_CANDIDATES_STATE)
+                    .to(DECOMMISSION_STATE)
+                    .event(COLLECT_CANDIDATES_FINISHED_EVENT)
+                    .failureEvent(COLLECT_CANDIDATES_FAILED_EVENT)
+
+                    // pathway #1 when candidates can be collected
+                    .from(DECOMMISSION_STATE)
+                    .to(REMOVE_HOSTS_FROM_ORCHESTRATION_STATE)
+                    .event(DECOMMISSION_FINISHED_EVENT)
+                    .failureState(DECOMISSION_FAILED_STATE)
+                    .failureEvent(DECOMMISSION_FAILED_EVENT)
+
+                    // pathway #2 when unable to find candidates for dowscaling
+                    .from(DECOMMISSION_STATE)
+                    .to(UPDATE_INSTANCE_METADATA_STATE)
+                    .event(REMOVE_HOSTS_FROM_ORCHESTRATOR_FINISHED)
+                    .failureState(DECOMISSION_FAILED_STATE)
+                    .failureEvent(DECOMMISSION_FAILED_EVENT)
+
+                    .from(REMOVE_HOSTS_FROM_ORCHESTRATION_STATE)
+                    .to(UPDATE_INSTANCE_METADATA_STATE)
+                    .event(REMOVE_HOSTS_FROM_ORCHESTRATOR_FINISHED)
+                    .failureState(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE)
+                    .failureEvent(REMOVE_HOSTS_FROM_ORCHESTRATOR_FAILED)
+
+                    .from(DECOMISSION_FAILED_STATE)
+                    .to(CLUSTER_DOWNSCALE_FAILED_STATE)
+                    .event(FAILURE_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_STATE)
+                    .to(CLUSTER_DOWNSCALE_FAILED_STATE)
+                    .event(FAILURE_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(UPDATE_INSTANCE_METADATA_STATE)
+                    .to(FINAL_STATE).event(FINALIZED_EVENT)
+                    .defaultFailureEvent()
+
                     .build();
 
     private static final FlowEdgeConfig<ClusterDownscaleState, ClusterDownscaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,

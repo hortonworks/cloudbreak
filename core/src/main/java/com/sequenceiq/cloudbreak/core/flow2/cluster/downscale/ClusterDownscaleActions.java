@@ -1,15 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.FAILURE_EVENT;
+import static java.util.Collections.emptySet;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
@@ -39,13 +41,19 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
 public class ClusterDownscaleActions {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDownscaleActions.class);
+
     private static final String REPAIR = "REPAIR";
 
-    @Inject
     private ClusterDownscaleService clusterDownscaleService;
 
-    @Inject
     private StackService stackService;
+
+    public ClusterDownscaleActions(ClusterDownscaleService clusterDownscaleService, StackService stackService) {
+        this.clusterDownscaleService = clusterDownscaleService;
+        this.stackService = stackService;
+    }
 
     @Bean(name = "COLLECT_CANDIDATES_STATE")
     public Action<?, ?> collectCandidatesAction() {
@@ -69,15 +77,23 @@ public class ClusterDownscaleActions {
             @Override
             protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) {
                 variables.put(ContextKeys.PRIVATE_IDS, payload.getPrivateIds());
-                Boolean repair = (Boolean) variables.get(REPAIR);
-                Stack stack = stackService.getByIdWithListsInTransaction(context.getStackId());
                 Selectable event;
-                DecommissionRequest decommissionRequest =
-                        new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(), payload.getRequest().getDetails());
-                if (repair && stack.hasCustomHostname()) {
-                    event = new DecommissionResult(decommissionRequest, getHostNamesForPrivateIds(payload.getPrivateIds(), stack));
+                if (isPayloadContainsAnyPrivateId(payload)) {
+                    Boolean repair = (Boolean) variables.get(REPAIR);
+                    Stack stack = stackService.getByIdWithListsInTransaction(context.getStackId());
+                    DecommissionRequest decommissionRequest =
+                            new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(),
+                                    payload.getRequest().getDetails());
+                    if (repair && stack.hasCustomHostname()) {
+                        LOGGER.debug("Cluster decommission state identified that the current action is a repair, hence we're going that way from now.");
+                        event = new DecommissionResult(decommissionRequest, getHostNamesForPrivateIds(payload.getPrivateIds(), stack));
+                    } else {
+                        event = decommissionRequest;
+                    }
                 } else {
-                    event = decommissionRequest;
+                    LOGGER.info("Handler wasn't able to collect any candidate [stackId:{}, host group name: {}] for downscaling, therefore we're handling " +
+                            "it as a success (since nothing to decommission)", context.getStackId(), payload.getHostGroupName());
+                    event = new RemoveHostsSuccess(context.getStackId(), payload.getHostGroupName(), emptySet());
                 }
                 sendEvent(context, event.selector(), event);
             }
@@ -100,7 +116,11 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<>(RemoveHostsSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, RemoveHostsSuccess payload, Map<Object, Object> variables) {
-                clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), payload.getHostGroupName());
+                if (isEmpty(payload.getHostNames())) {
+                    clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), null);
+                } else {
+                    clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), payload.getHostGroupName());
+                }
                 sendEvent(context);
             }
 
@@ -157,4 +177,9 @@ public class ClusterDownscaleActions {
             return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
+
+    private boolean isPayloadContainsAnyPrivateId(CollectDownscaleCandidatesResult payload) {
+        return !isEmpty(payload.getPrivateIds());
+    }
+
 }

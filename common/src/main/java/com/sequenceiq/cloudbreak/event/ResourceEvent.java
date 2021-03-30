@@ -292,6 +292,7 @@ public enum ResourceEvent {
     CLUSTER_STOP_FAILED("cluster.stop.failed"),
     CLUSTER_SCALING_DOWN("cluster.scaling.down"),
     CLUSTER_SCALED_DOWN("cluster.scaled.down"),
+    CLUSTER_SCALED_DOWN_NONE("cluster.scaled.down.none"),
     CLUSTER_SCALING_FAILED("cluster.scaling.failed"),
     CLUSTER_STOP_MANAGEMENT_SERVER_STARTED("cluster.stop.management.server.started"),
     CLUSTER_STOP_COMPONENTS_STARTED("cluster.stop.components.started"),
