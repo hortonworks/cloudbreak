@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -7,10 +9,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Suppliers;
@@ -37,7 +42,10 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Component
 public class TemplateValidator {
+
     public static final String GROUP_NAME_ID_BROKER = "idbroker";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateValidator.class);
 
     @Inject
     private CloudParameterService cloudParameterService;
@@ -48,14 +56,25 @@ public class TemplateValidator {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Value("${cb.doc.urls.supportedInstanceTypes:https://www.cloudera.com/products/pricing/cdp-public-cloud-service-rates.html}")
+    private String supportedVmTypesDocPageLink;
+
     private final Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
     private final Supplier<Map<Platform, PlatformParameters>> platformParameters =
             Suppliers.memoize(() -> cloudParameterService.getPlatformParameters());
 
+    @PostConstruct
+    private void postConstructChecks() {
+        if (isEmpty(supportedVmTypesDocPageLink)) {
+            LOGGER.warn("The documentation link for the supported instance types has not filled hence we're unable to provide it" +
+                    " for the customer in the case of an invalid request!");
+        }
+    }
+
     public void validate(Credential credential, InstanceGroup instanceGroup, Stack stack,
-        CdpResourceType stackType, Optional<User> user, ValidationResult.ValidationResultBuilder validationBuilder) {
+            CdpResourceType stackType, Optional<User> user, ValidationResult.ValidationResultBuilder validationBuilder) {
         Template value = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential, user),
@@ -64,7 +83,7 @@ public class TemplateValidator {
                 stackType,
                 new HashMap<>());
 
-        if (StringUtils.isEmpty(value.getInstanceType())) {
+        if (isEmpty(value.getInstanceType())) {
             validateCustomInstanceType(value, validationBuilder);
         } else {
             VmType vmType = null;
@@ -79,11 +98,7 @@ public class TemplateValidator {
                     }
                 }
                 if (vmType == null) {
-                    validationBuilder.error(
-                            String.format("The '%s' instance type isn't supported by '%s' platform",
-                                    value.getInstanceType(),
-                                    platform.value()));
-
+                    validationBuilder.error(getInvalidVmTypeErrorMessage(value.getInstanceType(), platform.value()));
                 }
             }
 
@@ -202,4 +217,13 @@ public class TemplateValidator {
     private boolean needToCheckVolume(VolumeParameterType volumeParameterType, Object value) {
         return volumeParameterType != VolumeParameterType.EPHEMERAL || value != null;
     }
+
+    private String getInvalidVmTypeErrorMessage(String instanceType, String platform) {
+        String baseMsg = "Our platform currently not supporting the '%s' instance type for '%s'.";
+        if (isEmpty(supportedVmTypesDocPageLink)) {
+            return String.format(baseMsg, instanceType, platform);
+        }
+        return String.format("%s You can find the supported types here: %s", baseMsg, instanceType, platform, supportedVmTypesDocPageLink);
+    }
+
 }
