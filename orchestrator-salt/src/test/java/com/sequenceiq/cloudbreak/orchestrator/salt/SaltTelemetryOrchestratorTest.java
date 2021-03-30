@@ -35,6 +35,8 @@ class SaltTelemetryOrchestratorTest {
 
     private static final int MAX_TELEMETRY_STOP_RETRY = 5;
 
+    private static final int MAX_NODESTATUS_COLLECT_RETRY = 3;
+
     private static final int MAX_DIAGNOSTICS_COLLECTION_RETRY = 360;
 
     private final ExitCriteria exitCriteria = Mockito.mock(ExitCriteria.class);
@@ -64,7 +66,7 @@ class SaltTelemetryOrchestratorTest {
     };
 
     private SaltTelemetryOrchestrator underTest = new SaltTelemetryOrchestrator(exitCriteria, saltService, saltRunner,
-            MAX_TELEMETRY_STOP_RETRY, MAX_DIAGNOSTICS_COLLECTION_RETRY);
+            MAX_TELEMETRY_STOP_RETRY, MAX_NODESTATUS_COLLECT_RETRY, MAX_DIAGNOSTICS_COLLECTION_RETRY);
 
     @BeforeEach
     void setupTest() throws CloudbreakOrchestratorFailedException {

@@ -47,6 +47,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REFRESH_PARCEL_REPOS_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREFLIGHT_CHECK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
@@ -81,6 +82,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINALIZE_CLUSTER_INSTALL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INSTALLING_CLUSTER_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREFLIGHT_CHECK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_DATALAKE_RESOURCE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_EXTENDED_TEMPLATE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREPARE_PROXY_CONFIG_STATE;
@@ -149,9 +151,13 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .event(CONFIGURE_KEYTABS_FINISHED_EVENT)
                     .failureEvent(CONFIGURE_KEYTABS_FAILED_EVENT)
             .from(STARTING_CLUSTER_MANAGER_SERVICES_STATE)
-                    .to(STARTING_CLUSTER_MANAGER_STATE)
+                    .to(PREFLIGHT_CHECK_STATE)
                     .event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
+            .from(PREFLIGHT_CHECK_STATE)
+                    .to(STARTING_CLUSTER_MANAGER_STATE)
+                    .event(PREFLIGHT_CHECK_FINISHED_EVENT)
+                    .defaultFailureEvent()
             .from(STARTING_CLUSTER_MANAGER_STATE)
                     .to(CONFIGURE_LDAP_SSO_STATE)
                     .event(START_AMBARI_FINISHED_EVENT)

@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 
 @Service
 public class DiagnosticsFlowService {
@@ -60,6 +62,12 @@ public class DiagnosticsFlowService {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
+    @Inject
+    private AltusDatabusConfiguration altusDatabusConfiguration;
+
+    @Inject
+    private DataBusEndpointProvider dataBusEndpointProvider;
+
     public void nodeStatusNetworkReport(Long stackId) {
         try {
             RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getNetworkReport(stackId);
@@ -70,16 +78,39 @@ public class DiagnosticsFlowService {
                             .map(NodeStatusProto.NodeStatus::getNetworkDetails)
                             .filter(this::isAnyNetworkHealthStatusIsNotOk)
                             .collect(Collectors.toList());
-                    firePreFlightCheckEvents(stackId, "DataBus API accessibility",
-                            nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusAccessible);
-                    firePreFlightCheckEvents(stackId, "DataBus S3 API accessibility",
-                            nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
+                    String globalDatabusEndpoint = altusDatabusConfiguration.getAltusDatabusEndpoint();
+                    // TODO: handle CNAME endpoint based on account id
+                    String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(globalDatabusEndpoint, false);
+                    if (StringUtils.isNotBlank(databusEndpoint)) {
+                        firePreFlightCheckEvents(stackId, String.format("DataBus API ('%s') accessibility", databusEndpoint),
+                                nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusAccessible);
+                    }
+                    String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
+                    if (StringUtils.isNotBlank(databusS3Endpoint)) {
+                        firePreFlightCheckEvents(stackId, String.format("DataBus S3 API '%s' accessibility", databusS3Endpoint),
+                                nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
+                    }
                     firePreFlightCheckEvents(stackId, "'.cloudera.com' accessibility",
                             nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getClouderaComAccessible);
                 }
             }
         } catch (Exception e) {
             LOGGER.debug("Diagnostics network node status check failed (skipping): {}", e.getMessage());
+        }
+    }
+
+    public void collectNodeStatusTelemetry(Long stackId) throws CloudbreakOrchestratorFailedException {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
+        Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, new HashSet<>(), new HashSet<>());
+        ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
+        if (allNodes.isEmpty()) {
+            LOGGER.debug("Nodestatus telemetry collection has been skipped. (no target minions)");
+        } else {
+            telemetryOrchestrator.executeNodeStatusCollection(gatewayConfigs, allNodes, exitModel);
         }
     }
 
@@ -249,6 +280,7 @@ public class DiagnosticsFlowService {
         return false;
     }
 
+    // TODO: handle UNKNOWN status ?
     private List<String> getUnhealthyHosts(List<NodeStatusProto.NetworkDetails> networkNodes,
             Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
         return networkNodes.stream()

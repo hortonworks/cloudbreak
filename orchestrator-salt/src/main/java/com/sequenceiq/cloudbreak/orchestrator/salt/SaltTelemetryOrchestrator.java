@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
@@ -40,6 +41,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     public static final String FILECOLLECTOR_CLEANUP = "filecollector.cleanup";
 
+    public static final String NODESTATUS_COLLECT = "nodestatus.collect";
+
     private static final String FLUENT_AGENT_STOP = "fluent.agent-stop";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltTelemetryOrchestrator.class);
@@ -52,15 +55,19 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private final int maxTelemetryStopRetry;
 
+    private final int maxNodeStatusCollectRetry;
+
     private final int maxDiagnosticsCollectionRetry;
 
     public SaltTelemetryOrchestrator(ExitCriteria exitCriteria, SaltService saltService, SaltRunner saltRunner,
             @Value("${cb.max.salt.new.service.telemetry.stop.retry:5}") int maxTelemetryStopRetry,
+            @Value("${cb.max.salt.new.service.telemetry.nodestatus.collect.retry:3}") int maxNodeStatusCollectRetry,
             @Value("${cb.max.salt.new.service.diagnostics.collection.retry:360}") int maxDiagnosticsCollectionRetry) {
         this.exitCriteria = exitCriteria;
         this.saltService = saltService;
         this.saltRunner = saltRunner;
         this.maxTelemetryStopRetry = maxTelemetryStopRetry;
+        this.maxNodeStatusCollectRetry = maxNodeStatusCollectRetry;
         this.maxDiagnosticsCollectionRetry = maxDiagnosticsCollectionRetry;
     }
 
@@ -116,6 +123,13 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     }
 
     @Override
+    public void executeNodeStatusCollection(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        runSimpleSaltState(allGateways, nodes, exitModel, NODESTATUS_COLLECT, "Error occurred during nodestatus telemetry collect.",
+                maxNodeStatusCollectRetry, false);
+    }
+
+    @Override
     public Set<Node> collectUnresponsiveNodes(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException  {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
@@ -134,6 +148,21 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         }
     }
 
+    private void runSimpleSaltState(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel,
+            String saltState, String errorMessage, int retryCount, boolean retryOnFail) throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
+        Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            StateRunner stateRunner = new StateRunner(targetHostnames, nodes, saltState);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner, retryOnFail);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, retryCount, false);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.debug(errorMessage, e);
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
     //CHECKSTYLE:OFF
     private void runSaltState(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel, String saltState, String errorMessage, int retryCount, boolean retryOnFail)
@@ -147,7 +176,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, retryCount, false);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
-            LOGGER.info(errorMessage, e);
+            LOGGER.debug(errorMessage, e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

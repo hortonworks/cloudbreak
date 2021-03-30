@@ -73,6 +73,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReg
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyRegistrationSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
@@ -258,11 +260,27 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "STARTING_CLUSTER_MANAGER_STATE")
-    public Action<?, ?> startingAmbariAction() {
+    @Bean(name = "PREFLIGHT_CHECK_STATE")
+    public Action<?, ?> preFlightCheckAction() {
         return new AbstractClusterAction<>(StartClusterManagerServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, StartClusterManagerServicesSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(ClusterViewContext context, StartClusterManagerServicesSuccess payload, Map<Object, Object> variables) throws Exception {
+                LOGGER.debug("Starting pre-flight checks for stack with id: {}", context.getStackId());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new PreFlightCheckRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "STARTING_CLUSTER_MANAGER_STATE")
+    public Action<?, ?> startingAmbariAction() {
+        return new AbstractClusterAction<>(PreFlightCheckSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, PreFlightCheckSuccess payload, Map<Object, Object> variables) {
                 clusterCreationService.startingClusterManager(context.getStackId());
                 sendEvent(context);
             }

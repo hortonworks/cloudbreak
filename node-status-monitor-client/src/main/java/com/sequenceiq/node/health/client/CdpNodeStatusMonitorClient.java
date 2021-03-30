@@ -78,6 +78,10 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
         return invoke("node salt health check", "/api/v1/salt", saltHealthBuilderFunction());
     }
 
+    public RPCResponse<NodeStatusProto.SaltHealthReport> saltPing() throws CdpNodeStatusMonitorClientException {
+        return invoke("node salt ping", "/api/v1/salt/ping", saltHealthBuilderFunction());
+    }
+
     private <T> RPCResponse<T> invoke(String name, String path, Function<String, T> buildProtoFunction)
             throws CdpNodeStatusMonitorClientException {
         Builder builder = rpcTarget.path(path)
