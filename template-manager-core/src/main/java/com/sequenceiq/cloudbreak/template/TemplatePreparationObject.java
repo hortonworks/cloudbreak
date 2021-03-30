@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.domain.CustomConfigs;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -62,6 +63,8 @@ public class TemplatePreparationObject {
     private final Optional<LdapView> ldapConfig;
 
     private final Optional<SharedServiceConfigsView> sharedServiceConfigs;
+
+    private final Optional<CustomConfigs> customConfigs;
 
     private final Optional<BaseFileSystemConfigurationsView> fileSystemView;
 
@@ -106,6 +109,7 @@ public class TemplatePreparationObject {
         blueprintView = builder.blueprintView;
         generalClusterConfigs = builder.generalClusterConfigs;
         sharedServiceConfigs = builder.sharedServiceConfigs;
+        customConfigs = builder.customConfigs;
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
         accountMappingView = builder.accountMappingView;
@@ -129,6 +133,10 @@ public class TemplatePreparationObject {
 
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public Optional<CustomConfigs> getCustomConfigs() {
+        return customConfigs;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -242,6 +250,8 @@ public class TemplatePreparationObject {
         private Optional<KerberosConfig> kerberosConfig = Optional.empty();
 
         private Optional<SharedServiceConfigsView> sharedServiceConfigs = Optional.empty();
+
+        private Optional<CustomConfigs> customConfigs = Optional.empty();
 
         private GeneralClusterConfigs generalClusterConfigs;
 
@@ -364,6 +374,11 @@ public class TemplatePreparationObject {
 
         public Builder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
             sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
+            return this;
+        }
+
+        public Builder withCustomConfigs(CustomConfigs customConfigs) {
+            this.customConfigs = Optional.ofNullable(customConfigs);
             return this;
         }
 

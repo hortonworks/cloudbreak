@@ -60,6 +60,7 @@ auth:
     aws:
       disk:
         EncryptionWithCMK.enable: true
+    datahub.customconfigs.enable: true
     cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true

@@ -15,6 +15,7 @@ dependencies {
     compile project(':secret-engine')
     compile project(':core-api')
     compile project(':workspace')
+    compile project(':custom-configs')
 
     compile group: 'org.hibernate.javax.persistence',   name: 'hibernate-jpa-2.1-api',  version: '1.0.0.Final'
     compile group: 'org.springframework.data',          name: 'spring-data-envers',     version: springDataJpaFrameworkVersion

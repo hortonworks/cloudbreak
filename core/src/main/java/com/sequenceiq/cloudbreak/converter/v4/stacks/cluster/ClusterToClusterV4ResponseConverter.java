@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -93,6 +94,7 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setWorkspace(getConversionService().convert(source.getWorkspace(), WorkspaceResourceV4Response.class));
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintV4Response.class));
         clusterResponse.setExtendedBlueprintText(getExtendedBlueprintText(source));
+        clusterResponse.setCustomConfigsName(getIfNotNull(source.getCustomConfigs(), configs -> configs.getName()));
         convertDpSecrets(source, clusterResponse);
         clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(source.getStack()));
         clusterResponse.setServerFqdn(source.getFqdn());

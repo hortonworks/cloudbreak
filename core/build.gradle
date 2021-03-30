@@ -256,8 +256,8 @@ dependencies {
   compile project(':cluster-dns-connector')
   compile project(':cluster-proxy')
   compile project(':status-checker')
+  compile project(':custom-configs')
   compile project(':node-status-monitor-client')
-
   implementation project(":notification-sender")
 
   runtime project(':orchestrator-salt')

@@ -37,6 +37,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.domain.CustomConfigs;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -78,6 +79,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Blueprint blueprint;
+
+    @ManyToOne
+    private CustomConfigs customConfigs;
 
     @Column(nullable = false)
     private String name;
@@ -295,6 +299,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setBlueprint(Blueprint blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public CustomConfigs getCustomConfigs() {
+        return customConfigs;
+    }
+
+    public void setCustomConfigs(CustomConfigs customConfigs) {
+        this.customConfigs = customConfigs;
     }
 
     public String getName() {

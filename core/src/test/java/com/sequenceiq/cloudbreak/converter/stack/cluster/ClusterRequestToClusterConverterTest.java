@@ -93,7 +93,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
-                "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
+                "extendedBlueprintText", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigs"));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",
-                "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy"));
+                "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "configStrategy", "customConfigs"));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "fileSystem", "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "configStrategy",
-                "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn"));
+                "extendedBlueprintText", "gateway", "environmentCrn", "variant", "description", "databaseServerCrn", "fqdn", "customConfigs"));
         assertNull(result.getGateway());
     }
 

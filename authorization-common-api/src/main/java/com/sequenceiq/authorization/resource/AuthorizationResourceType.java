@@ -8,6 +8,7 @@ public enum AuthorizationResourceType {
     IMAGE_CATALOG,
     CLUSTER_DEFINITION,
     CLUSTER_TEMPLATE,
+    CUSTOM_CONFIGS,
     DATABASE,
     DATABASE_SERVER,
     RECIPE,

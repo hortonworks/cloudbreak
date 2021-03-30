@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CustomConfigs;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -430,6 +431,10 @@ public class ClusterService {
 
     public Set<Cluster> findByBlueprint(Blueprint blueprint) {
         return repository.findByBlueprint(blueprint);
+    }
+
+    public Set<Cluster> findByCustomConfigs(CustomConfigs customConfigs) {
+        return repository.findByCustomConfigs(customConfigs);
     }
 
     public List<Cluster> findByStatuses(Collection<Status> statuses) {

@@ -61,6 +61,7 @@ public class EndpointConfig extends ResourceConfig {
             AuditEventV4Controller.class,
             BlueprintV4Controller.class,
             BlueprintUtilV4Controller.class,
+            CustomConfigsV4Controller.class,
             EventV4Controller.class,
             ClusterTemplateV4Controller.class,
             DatabaseV4Controller.class,
