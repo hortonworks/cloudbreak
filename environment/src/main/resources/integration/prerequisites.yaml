@@ -1,0 +1,65 @@
+swagger: '2.0'
+info:
+  description: |
+    This is a sample API for getting the minimal permission by Cloud and Experiences
+  version: 1.0.0
+  title: Environment Prerequisites
+  contact:
+    email: rdoktorics@cloudera.com
+paths:
+  /prerequisites:
+    get:
+      tags:
+        - getprerequisites
+      summary: Get prerequisites by cloudplatform
+      description: Returns the Cloud related minimal permission
+      operationId: getPrerequisitesByCloudPlatform
+      produces:
+        - application/json
+      parameters:
+        - name: cloudPlatform
+          in: query
+          required: true
+          type: string
+      responses:
+        200:
+          description: successful operation
+          schema:
+            $ref: '#/definitions/PrerequisitesV1Response'
+definitions:
+  PrerequisitesV1Response:
+    type: object
+    properties:
+      aws:
+        description: AWS specific credential prerequisites.
+        $ref: '#/definitions/AwsCredentialPrerequisites'
+      azure:
+        description: Azure specific credential prerequisites.
+        $ref: '#/definitions/AzureCredentialPrerequisites'
+  AwsCredentialPrerequisites:
+    type: object
+    required:
+      - policy
+    properties:
+      policy:
+        type: string
+        description: AWS specific policy which is base64 encoded.
+      cloudformationTemplate:
+        type: string
+        description: AWS specific cloudformation template to provision the policy.
+  AzureCredentialPrerequisites:
+    type: object
+    required:
+      - policy
+    properties:
+      policy:
+        type: string
+        description: Azure specific policy which is base64 encoded.
+      armTemplate:
+        type: string
+        description: Azure specific resource manager template to provision the policy.
+host: localhost
+basePath: /
+schemes:
+  - https
+  - http
