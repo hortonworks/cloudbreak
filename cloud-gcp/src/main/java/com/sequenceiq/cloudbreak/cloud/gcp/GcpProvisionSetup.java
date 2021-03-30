@@ -62,6 +62,8 @@ public class GcpProvisionSetup implements Setup {
 
     private static final int SLEEPTIME = 20;
 
+    private static final int NOT_FOUND = 404;
+
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
@@ -86,8 +88,10 @@ public class GcpProvisionSetup implements Setup {
                 bucket.setLocation(authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
                 bucket.setStorageClass("STANDARD");
                 try {
-                    Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
-                    ins.execute();
+                    if (!bucketExist(storage, bucketName)) {
+                        Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
+                        ins.execute();
+                    }
                 } catch (GoogleJsonResponseException ex) {
                     if (ex.getStatusCode() != HttpStatus.SC_CONFLICT) {
                         String msg = String.format("Failed to create bucket with name '%s':", bucketName);
@@ -129,6 +133,29 @@ public class GcpProvisionSetup implements Setup {
             LOGGER.warn(msg, e);
             throw new CloudConnectorException(msg, e);
         }
+    }
+
+    private boolean bucketExist(Storage storage, String bucketName) {
+        boolean existingBucket;
+        try {
+            storage.buckets().get(bucketName).execute();
+            existingBucket = true;
+        } catch (GoogleJsonResponseException ex) {
+            existingBucket = false;
+            if (ex.getStatusCode() == NOT_FOUND) {
+                LOGGER.warn("Bucket {} does not exist on provider side so we will create it: {}",
+                        bucketName, ex.getMessage());
+            } else {
+                LOGGER.warn("We were not able to get the bucket from Google side with name {} with exception {}. "
+                                + "We do not stop the provisioning process because the customer probably dont give us storage.get permission.",
+                        bucketName, ex.getMessage());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Unexpected error occurred when we tried to get bucket {} from Google side: {}",
+                    bucketName, e.getMessage());
+            existingBucket = true;
+        }
+        return existingBucket;
     }
 
     public void copyImage(
