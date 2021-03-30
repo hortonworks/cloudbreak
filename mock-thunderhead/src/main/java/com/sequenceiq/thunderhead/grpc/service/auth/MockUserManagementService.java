@@ -13,6 +13,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -253,8 +256,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.freeipa.ha.repair.enable}")
     private boolean enableFreeIpaHaRepair;
 
-    @Value("${auth.mock.cloudstoragevalidation.enable}")
+    @Value("${auth.mock.cloudstoragevalidation.enable.global}")
     private boolean enableCloudStorageValidation;
+
+    @Value("${auth.mock.cloudstoragevalidation.enable.aws}")
+    private boolean enableAwsCloudStorageValidation;
+
+    @Value("${auth.mock.cloudstoragevalidation.enable.azure}")
+    private boolean enableAzureCloudStorageValidation;
+
+    @Value("${auth.mock.cloudstoragevalidation.enable.gcp}")
+    private boolean enableGcpCloudStorageValidation;
 
     @Value("${auth.mock.runtime.upgrade.enable}")
     private boolean runtimeUpgradeEnabled;
@@ -580,6 +592,15 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableCloudStorageValidation) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));
+        }
+        if (enableAwsCloudStorageValidation) {
+            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_AWS));
+        }
+        if (enableAzureCloudStorageValidation) {
+            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_AZURE));
+        }
+        if (enableGcpCloudStorageValidation) {
+            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_GCP));
         }
         if (runtimeUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RUNTIME_UPGRADE));

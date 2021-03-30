@@ -16,7 +16,11 @@ auth:
     freeipa:
       ha:
         repair.enable: true
-    cloudstoragevalidation.enable: true
+    cloudstoragevalidation.enable:
+      global: true
+      aws: true
+      azure: false
+      gcp: false
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
     raz.enable: true
