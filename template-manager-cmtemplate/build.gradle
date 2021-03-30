@@ -16,6 +16,7 @@ dependencies {
   implementation project(":cluster-api")
   implementation project(":template-manager-core")
 
+
   implementation group: "xerces",                        name: "xercesImpl",                     version: xerces
 
   implementation(group: "com.cloudera.api.swagger",      name: "cloudera-manager-api-swagger",   version: cmClientVersion) {

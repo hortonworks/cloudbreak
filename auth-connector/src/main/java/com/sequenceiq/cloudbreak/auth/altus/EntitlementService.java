@@ -32,6 +32,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
@@ -321,6 +322,10 @@ public class EntitlementService {
 
     public boolean isAWSDiskEncryptionWithCMKEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK);
+    }
+
+    public boolean datahubCustomConfigsEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATAHUB_CUSTOM_CONFIGS);
     }
 
     public boolean isDiagnosticsEnabled(String accountId) {

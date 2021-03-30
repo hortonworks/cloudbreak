@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
+import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 public class CmTemplateProcessorTest {
@@ -588,6 +589,95 @@ public class CmTemplateProcessorTest {
         verifyHostInfo(hosts, "hostGroup2", "host2_2", null);
         verifyHostInfo(hosts, "hostGroup3", "host3_1", null);
         verifyHostInfo(hosts, "hostGroup3", "host3_2", "/rack3_2");
+    }
+
+    @Test
+    public void testIfCustomServiceConfigsAreMerged() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        // config not present in template
+        List<ApiClusterTemplateConfig> sparkConfigs = List.of(
+                new ApiClusterTemplateConfig().name("spark_drive_log_persist_to_dfs").value("false")
+        );
+        // config present in template
+        List<ApiClusterTemplateConfig> hiveConfigs = List.of(
+                new ApiClusterTemplateConfig().name("tez_auto_reducer_parallelism").value("true"),
+                new ApiClusterTemplateConfig().name("hive_service_config_safety_valve")
+                        .value("<property><name>hive_server2_tez_session_lifetime</name><value>30m</value></property>")
+        );
+        ApiClusterTemplateService spark = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "SPARK_ON_YARN".equals(service.getServiceType()))
+                .findFirst().get();
+        ApiClusterTemplateService hive = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "HIVE_ON_TEZ".equals(service.getServiceType()))
+                .findFirst().get();
+        List<ApiClusterTemplateConfig> existingSparkConfigs = spark.getServiceConfigs();
+        List<ApiClusterTemplateConfig> existingHiveConfigs = hive.getServiceConfigs();
+        underTest.mergeCustomServiceConfigs(spark, sparkConfigs);
+        underTest.mergeCustomServiceConfigs(hive, hiveConfigs);
+        assertEquals(spark.getServiceConfigs().size(), (existingSparkConfigs == null ? 0 : existingSparkConfigs.size()) + sparkConfigs.size());
+        assertEquals(hive.getServiceConfigs().size(), existingHiveConfigs.size());
+        assertTrue(existingHiveConfigs.get(2).getValue().endsWith("<property><name>hive_server2_tez_session_lifetime</name><value>30m</value></property>"));
+    }
+
+    @Test
+    public void testIfCustomRoleConfigsAreMerged() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        // present in cluster template/blueprint
+        List<ApiClusterTemplateConfig> hs2RoleConfigs = List.of(new ApiClusterTemplateConfig().name("hiveserver2_mv_files_thread").value("30"));
+        List<ApiClusterTemplateRoleConfigGroup> hs2Rcg = List.of(new ApiClusterTemplateRoleConfigGroup().roleType("hiveserver2").configs(hs2RoleConfigs));
+        // not present in cluster template/blueprint
+        List<ApiClusterTemplateConfig> gatewayRoleConfigs = List.of(new ApiClusterTemplateConfig().name("hive_client_java_heapsize").value("6442450944"));
+        List<ApiClusterTemplateRoleConfigGroup> gatewayRcg = List.of(new ApiClusterTemplateRoleConfigGroup().roleType("gateway").configs(gatewayRoleConfigs));
+
+        ApiClusterTemplateService hive = underTest.getTemplate().getServices()
+                .stream()
+                .filter(service -> "HIVE_ON_TEZ".equals(service.getServiceType()))
+                .findFirst().get();
+
+        List<ApiClusterTemplateConfig> existingGatewayConfigs = hive.getRoleConfigGroups().get(0).getConfigs();
+        List<ApiClusterTemplateConfig> existingHs2Configs = hive.getRoleConfigGroups().get(1).getConfigs();
+
+        underTest.mergeCustomRoleConfigs(hive, hs2Rcg);
+        underTest.mergeCustomRoleConfigs(hive, gatewayRcg);
+
+        assertEquals(existingHs2Configs.size(), hive.getRoleConfigGroups().get(1).getConfigs().size());
+        assertEquals((existingGatewayConfigs == null
+                ? 0
+                : existingGatewayConfigs.size()) + gatewayRoleConfigs.size(), hive.getRoleConfigGroups().get(0).getConfigs().size());
+    }
+
+    @Test
+    void testIfCustomServiceConfigsMapIsRetrievedCorrectly() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        Map<String, List<ApiClusterTemplateConfig>> expectedMap = new HashMap<>();
+        Set<CustomConfigurationPropertyView> configs = Set.of(new CustomConfigurationPropertyView("property1", "value1", null, "service1"),
+                new CustomConfigurationPropertyView("property2", "value2", "role1", "service2"),
+                new CustomConfigurationPropertyView("property3", "value3", null, "service3"));
+        expectedMap.put("service1", List.of(new ApiClusterTemplateConfig().name("property1").value("value1")));
+        expectedMap.put("service3", List.of(new ApiClusterTemplateConfig().name("property3").value("value3")));
+        assertEquals(expectedMap, underTest.getCustomServiceConfigsMap(configs));
+    }
+
+    @Test
+    void testIfCustomRoleConfigsMapIsRetrievedCorrectly() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/de-ha.bp"));
+        Map<String, List<ApiClusterTemplateRoleConfigGroup>> expectedMap = new HashMap<>();
+        Set<CustomConfigurationPropertyView> configs = Set.of(new CustomConfigurationPropertyView("property3", "value3", "role3", "service2"),
+                new CustomConfigurationPropertyView("property2", "value2", "role2", "service1"),
+                new CustomConfigurationPropertyView("property4", "value4", null, "service1"));
+        expectedMap.put("service2", List.of(new ApiClusterTemplateRoleConfigGroup()
+                .roleType("role3")
+                .addConfigsItem(new ApiClusterTemplateConfig()
+                .name("property3")
+                .value("value3"))));
+        expectedMap.put("service1", List.of(new ApiClusterTemplateRoleConfigGroup()
+                .roleType("role2")
+                .addConfigsItem(new ApiClusterTemplateConfig()
+                .name("property2")
+                .value("value2"))));
+        assertEquals(expectedMap, underTest.getCustomRoleConfigsMap(configs));
     }
 
     private Map<String, String> hostAttributes(String hostname, boolean withRackId, String rackId) {

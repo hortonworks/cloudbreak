@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
+import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -62,6 +63,8 @@ public class TemplatePreparationObject {
     private final Optional<LdapView> ldapConfig;
 
     private final Optional<SharedServiceConfigsView> sharedServiceConfigs;
+
+    private final Optional<CustomConfigurationsView> customConfigurationsView;
 
     private final Optional<BaseFileSystemConfigurationsView> fileSystemView;
 
@@ -106,6 +109,7 @@ public class TemplatePreparationObject {
         blueprintView = builder.blueprintView;
         generalClusterConfigs = builder.generalClusterConfigs;
         sharedServiceConfigs = builder.sharedServiceConfigs;
+        customConfigurationsView = builder.customConfigurationsView;
         customInputs = builder.customInputs;
         fixInputs = builder.fixInputs;
         accountMappingView = builder.accountMappingView;
@@ -129,6 +133,10 @@ public class TemplatePreparationObject {
 
     public CloudPlatform getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public Optional<CustomConfigurationsView> getCustomConfigurationsView() {
+        return customConfigurationsView;
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -242,6 +250,8 @@ public class TemplatePreparationObject {
         private Optional<KerberosConfig> kerberosConfig = Optional.empty();
 
         private Optional<SharedServiceConfigsView> sharedServiceConfigs = Optional.empty();
+
+        private Optional<CustomConfigurationsView> customConfigurationsView = Optional.empty();
 
         private GeneralClusterConfigs generalClusterConfigs;
 
@@ -364,6 +374,11 @@ public class TemplatePreparationObject {
 
         public Builder withSharedServiceConfigs(SharedServiceConfigsView sharedServiceConfigsView) {
             sharedServiceConfigs = Optional.ofNullable(sharedServiceConfigsView);
+            return this;
+        }
+
+        public Builder withCustomConfigurationsView(CustomConfigurationsView customConfigurationsView) {
+            this.customConfigurationsView = Optional.ofNullable(customConfigurationsView);
             return this;
         }
 

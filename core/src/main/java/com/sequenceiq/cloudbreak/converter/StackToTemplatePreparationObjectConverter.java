@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -49,14 +50,17 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.exception.CustomConfigurationsRuntimeVersionException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
@@ -77,6 +81,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProv
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
+import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -110,6 +115,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Inject
+    private CustomConfigurationsViewProvider customConfigurationsViewProvider;
+
+    @Inject
     private BlueprintViewProvider blueprintViewProvider;
 
     @Inject
@@ -132,6 +140,9 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
 
     @Inject
     private GcpMockAccountMappingService gcpMockAccountMappingService;
+
+    @Inject
+    private CustomConfigurationsService customConfigurationsService;
 
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
@@ -222,6 +233,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
                     .withRdsSslCertificateFilePath(dbCertificateProvider.getSslCertsFilePath())
                     .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
                     .withIdBroker(idbroker)
+                    .withCustomConfigurationsView(getCustomConfigurationsView(source, cluster))
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
                     .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
@@ -306,6 +318,18 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         String region = source.getRegion();
         String availabilityZone = source.getAvailabilityZone();
         builder.withPlacementView(new PlacementView(region, availabilityZone));
+    }
+
+    private CustomConfigurationsView getCustomConfigurationsView(Stack source, Cluster cluster) {
+        CustomConfigurationsView customConfigurationsView = null;
+        if (StackType.WORKLOAD.equals(source.getType()) && source.getCluster().getCustomConfigurations() != null) {
+            customConfigurationsView = customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurationsService
+                    .getByNameOrCrn(NameOrCrn.ofCrn(clusterService.findOneWithCustomConfigurations(cluster.getId()).getCustomConfigurations().getCrn())));
+            if (customConfigurationsView.getRuntimeVersion() != null && !source.getStackVersion().equals(customConfigurationsView.getRuntimeVersion())) {
+                throw new CustomConfigurationsRuntimeVersionException("Custom Configurations runtime version mismatch!");
+            }
+        }
+        return customConfigurationsView;
     }
 
     private void decorateBuilderWithAccountMapping(Stack source, DetailedEnvironmentResponse environment, Credential credential, Builder builder,

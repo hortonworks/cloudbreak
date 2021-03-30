@@ -41,6 +41,9 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
     private CmTemplateConfigInjectorProcessor cmTemplateConfigInjectorProcessor;
 
     @Inject
+    private CustomConfigurationsInjectorProcessor customConfigurationsInjectorProcessor;
+
+    @Inject
     private CmHostGroupRoleConfigProviderProcessor cmHostGroupRoleConfigProviderProcessor;
 
     public ApiClusterTemplate getCmTemplate(TemplatePreparationObject source, Map<String, List<Map<String, String>>> hostGroupMappings,
@@ -84,6 +87,7 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
         cmTemplateComponentConfigProviderProcessor.process(processor, source);
         cmTemplateConfigInjectorProcessor.process(processor, source);
         cmHostGroupRoleConfigProviderProcessor.process(processor, source);
+        customConfigurationsInjectorProcessor.process(processor, source);
         processor.setDisplayName(source.getGeneralClusterConfigs().getClusterName());
     }
 
@@ -113,5 +117,4 @@ public class CentralCmTemplateUpdater implements BlueprintUpdater {
     private String parseDistroVersion(String longVersion) {
         return longVersion.split("-")[0];
     }
-
 }

@@ -65,6 +65,9 @@ public class DistroXClusterV1Request implements Serializable {
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.FALSE;
 
+    @ApiModelProperty(StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
+    private String customConfigurationsName;
+
     public String getUserName() {
         return userName;
     }
@@ -135,5 +138,13 @@ public class DistroXClusterV1Request implements Serializable {
 
     public void setValidateBlueprint(Boolean validateBlueprint) {
         this.validateBlueprint = validateBlueprint;
+    }
+
+    public String getCustomConfigurationsName() {
+        return customConfigurationsName;
+    }
+
+    public void setCustomConfigurationsName(String customConfigurationsName) {
+        this.customConfigurationsName = customConfigurationsName;
     }
 }

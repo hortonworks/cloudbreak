@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster;
 
 import static com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil.anonymize;
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -97,6 +98,8 @@ public class ClusterToClusterV4ResponseConverter extends AbstractConversionServi
         clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(source.getStack()));
         clusterResponse.setServerFqdn(source.getFqdn());
         clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerAddress));
+        clusterResponse.setCustomConfigurationsName(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getName()));
+        clusterResponse.setCustomConfigurationsCrn(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getCrn()));
         clusterResponse.setDatabaseServerCrn(source.getDatabaseServerCrn());
         clusterResponse.setRangerRazEnabled(source.isRangerRazEnabled());
         clusterResponse.setCertExpirationState(source.getCertExpirationState());

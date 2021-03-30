@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConve
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
@@ -68,12 +70,15 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
+import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
+import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.environment.tag.AccountTagClientService;
@@ -91,6 +96,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProv
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
+import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.TestConstants;
@@ -145,6 +151,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     private PostgresConfigService postgresConfigService;
 
     @Mock
+    private SdxClientService sdxClientService;
+
+    @Mock
     private RedbeamsDbCertificateProvider dbCertificateProvider;
 
     @Mock
@@ -155,6 +164,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
+
+    @Mock
+    private CustomConfigurationsViewProvider customConfigurationsViewProvider;
 
     @Mock
     private Stack stackMock;
@@ -187,6 +199,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     private LdapConfigService ldapConfigService;
 
     @Mock
+    private CustomConfigurationsService customConfigurationsService;
+
+    @Mock
     private KerberosConfigService kerberosConfigService;
 
     @Mock
@@ -212,6 +227,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private StackUtil stackUtil;
+
+    @Mock
+    private CustomConfigurations customConfigurations;
 
     @Mock
     private VirtualGroupService virtualGroupService;
@@ -287,7 +305,10 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackInputs.get(StackInputs.class)).thenReturn(null);
         when(stackMock.getEnvironmentCrn()).thenReturn(TestConstants.CRN);
         when(stackMock.getCluster()).thenReturn(sourceCluster);
+        when(sourceCluster.getCustomConfigurations()).thenReturn(customConfigurations);
+        when(customConfigurations.getCrn()).thenReturn("test-custom-configs-crn");
         when(stackMock.getResourceCrn()).thenReturn("crn:cdp:datahub:us-west-1:account:cluster:cluster");
+        when(clusterService.findOneWithCustomConfigurations(anyLong())).thenReturn(sourceCluster);
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
         when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(null);
@@ -308,6 +329,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(clusterService.getById(anyLong())).thenReturn(cluster);
+        when(customConfigurationsService.getByNameOrCrn(any(NameOrCrn.class))).thenReturn(customConfigurations);
         when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
         when(resourceService.getAllByStackId(anyLong())).thenReturn(Collections.EMPTY_LIST);
         IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster);
@@ -429,6 +451,26 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getGeneralClusterConfigs()).isEqualTo(expected);
+    }
+
+    @Test
+    public void testConvertWhenCustomConfigsProvidedThenItShouldBeInvoked() {
+        CustomConfigurationsView expected = mock(CustomConfigurationsView.class);
+        when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
+        when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result.getCustomConfigurationsView().isPresent()).isTrue();
+        assertThat(result.getCustomConfigurationsView()).isEqualTo(Optional.of(expected));
+        verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);
+    }
+
+    @Test
+    public void testConvertWhenClusterHasNoCustomConfigsThenOptionalShouldBeEmpty() {
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result.getCustomConfigurationsView().isPresent()).isFalse();
     }
 
     @Test

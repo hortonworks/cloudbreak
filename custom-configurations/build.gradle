@@ -1,0 +1,28 @@
+apply plugin: 'java'
+
+repositories {
+  mavenCentral()
+  mavenLocal()
+}
+
+dependencies {
+  compile project(':common')
+  compile project(':authorization-common')
+  compile project(':custom-configurations-api')
+
+  compile group: 'org.springframework.data',        name: 'spring-data-jpa',              version: springDataJpaFrameworkVersion
+  compile group: 'org.springframework.boot',        name: 'spring-boot-starter-web',      version: springBootVersion
+  compile group: 'org.springframework.boot',        name: 'spring-boot-starter-security', version: springBootVersion
+
+  runtimeOnly group: 'org.postgresql', name: 'postgresql', version: postgreSQLVersion
+
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter',      version: springBootVersion
+  testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
+  testImplementation group: 'org.junit.jupiter',        name: 'junit-jupiter-api',        version: junitJupiterVersion
+  testImplementation group: 'org.mockito',              name: 'mockito-core',             version: mockitoVersion
+  testRuntimeOnly    group: 'org.junit.jupiter',        name: 'junit-jupiter-engine'
+}
+
+test {
+  useJUnitPlatform()
+}

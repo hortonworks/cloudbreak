@@ -29,6 +29,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
@@ -430,6 +431,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.aws.disk.EncryptionWithCMK.enable}")
     private boolean enableAWSDiskEncryptionWithCMK;
 
+    @Value("${auth.mock.datahub.customconfigs.enable}")
+    private boolean datahubCustomConfigsEnabled;
+
     @Value("${auth.mock.user.sync.credentials.update.optimization.enable}")
     private boolean userSyncCredentialsUpdateOptimizationEnabled;
 
@@ -798,6 +802,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAWSDiskEncryptionWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK));
+        }
+        if (datahubCustomConfigsEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_DATAHUB_CUSTOM_CONFIGS));
         }
         if (userSyncCredentialsUpdateOptimizationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION));

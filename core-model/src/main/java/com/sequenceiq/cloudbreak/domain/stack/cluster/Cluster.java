@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -78,6 +79,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @ManyToOne
     private Blueprint blueprint;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private CustomConfigurations customConfigurations;
 
     @Column(nullable = false)
     private String name;
@@ -804,6 +808,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setEmbeddedDatabaseOnAttachedDisk(Boolean embeddedDatabaseOnAttachedDisk) {
         this.embeddedDatabaseOnAttachedDisk = embeddedDatabaseOnAttachedDisk;
+    }
+
+    public CustomConfigurations getCustomConfigurations() {
+        return customConfigurations;
+    }
+
+    public void setCustomConfigurations(CustomConfigurations customConfigurations) {
+        this.customConfigurations = customConfigurations;
     }
 
     @Override

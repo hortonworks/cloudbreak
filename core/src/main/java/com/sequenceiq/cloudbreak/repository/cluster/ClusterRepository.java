@@ -15,6 +15,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -39,6 +40,11 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     Set<Cluster> findAllWithNoWorkspace();
 
     Set<Cluster> findByBlueprint(Blueprint blueprint);
+
+    Set<Cluster> findByCustomConfigurations(CustomConfigurations customConfigurations);
+
+    @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.customConfigurations WHERE c.id = :id")
+    Optional<Cluster> findOneWithCustomConfigurations(@Param("id") Long id);
 
     @Query("SELECT c FROM Cluster c INNER JOIN c.rdsConfigs rc WHERE rc.id= :id AND c.status != 'DELETE_COMPLETED'")
     Set<Cluster> findByRdsConfig(@Param("id") Long rdsConfigId);

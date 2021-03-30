@@ -78,6 +78,9 @@ public class ClusterV4Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
+    @ApiModelProperty(StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
+    private String customConfigurationsName;
+
     @ApiModelProperty(ClusterModelDescription.ENABLE_RANGER_RAZ)
     private boolean rangerRazEnabled;
 
@@ -183,6 +186,14 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setBlueprintName(String blueprintName) {
         this.blueprintName = blueprintName;
+    }
+
+    public String getCustomConfigurationsName() {
+        return customConfigurationsName;
+    }
+
+    public void setCustomConfigurationsName(String customConfigurationsName) {
+        this.customConfigurationsName = customConfigurationsName;
     }
 
     public Boolean getValidateBlueprint() {
