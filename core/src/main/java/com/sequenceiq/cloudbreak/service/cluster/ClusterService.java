@@ -373,10 +373,12 @@ public class ClusterService {
                 .filter(instanceMetaData -> SERVICES_RUNNING.equals(instanceMetaData.getInstanceStatus()))
                 .map(instanceMetaData -> {
                     ClusterManagerState clusterManagerState = hostStatuses.get(hostName(instanceMetaData.getDiscoveryFQDN()));
-                    InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
-                            SERVICES_HEALTHY : SERVICES_UNHEALTHY;
-                    instanceMetaData.setInstanceStatus(newState);
-                    instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
+                    if (clusterManagerState != null) {
+                        InstanceStatus newState = ClusterManagerStatus.HEALTHY.equals(clusterManagerState.getClusterManagerStatus()) ?
+                                SERVICES_HEALTHY : SERVICES_UNHEALTHY;
+                        instanceMetaData.setInstanceStatus(newState);
+                        instanceMetaData.setStatusReason(clusterManagerState.getStatusReason());
+                    }
                     return instanceMetaData;
                 }).collect(Collectors.toList());
     }
