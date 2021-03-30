@@ -252,6 +252,9 @@ public class MockUserManagementServiceTest {
                 {"enableAWSDiskEncryptionWithCMK false", "enableAWSDiskEncryptionWithCMK", false, "CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", false},
                 {"enableAWSDiskEncryptionWithCMK true", "enableAWSDiskEncryptionWithCMK", true, "CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", true},
 
+                {"datahubCustomConfigsEnabled false", "datahubCustomConfigsEnabled", false, "CDP_DATAHUB_CUSTOM_CONFIGS", false},
+                {"datahubCustomConfigsEnabled true", "datahubCustomConfigsEnabled", true, "CDP_DATAHUB_CUSTOM_CONFIGS", true},
+
                 {"userSyncCredentialsUpdateOptimizationEnabled false", "userSyncCredentialsUpdateOptimizationEnabled", false,
                         "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
                 {"userSyncCredentialsUpdateOptimizationEnabled true", "userSyncCredentialsUpdateOptimizationEnabled", true,

@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterHostAttributes;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -72,6 +73,7 @@ import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.processor.configuration.HostgroupConfigurations;
 import com.sequenceiq.cloudbreak.template.processor.configuration.SiteConfigurations;
+import com.sequenceiq.cloudbreak.template.views.CustomConfigurationPropertyView;
 
 public class CmTemplateProcessor implements BlueprintTextProcessor {
 
@@ -501,6 +503,105 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         setServiceConfigs(service, configMap.values());
     }
 
+    private List<CustomConfigurationPropertyView> getCustomServiceConfigs(Set<CustomConfigurationPropertyView> configs) {
+        return configs.stream()
+                .filter(config -> config.getRoleType() == null)
+                .collect(Collectors.toList());
+    }
+
+    public Map<String, List<ApiClusterTemplateConfig>> getCustomServiceConfigsMap(Set<CustomConfigurationPropertyView> configProperties) {
+        Map<String, List<ApiClusterTemplateConfig>> serviceConfigsMap = new HashMap<>();
+        List<CustomConfigurationPropertyView> serviceConfigs = getCustomServiceConfigs(configProperties);
+        serviceConfigs.forEach(serviceConfig -> {
+            serviceConfigsMap.computeIfAbsent(serviceConfig.getServiceType(), k -> new ArrayList<>());
+            serviceConfigsMap.get(serviceConfig.getServiceType()).add(new ApiClusterTemplateConfig()
+                    .name(serviceConfig.getName()).value(serviceConfig.getValue()));
+        });
+        return serviceConfigsMap;
+    }
+
+    private List<CustomConfigurationPropertyView> getCustomRoleConfigs(Set<CustomConfigurationPropertyView> configs) {
+        return configs.stream()
+                .filter(config -> config.getRoleType() != null)
+                .collect(Collectors.toList());
+    }
+
+    private Optional<ApiClusterTemplateRoleConfigGroup> filterRCGsByRoleType(List<ApiClusterTemplateRoleConfigGroup> roleConfigs, String roleType) {
+        return roleConfigs.stream().filter(rcg -> roleType.equalsIgnoreCase(rcg.getRoleType())).findFirst();
+    }
+
+    public Map<String, List<ApiClusterTemplateRoleConfigGroup>> getCustomRoleConfigsMap(Set<CustomConfigurationPropertyView> configProperties) {
+        Map<String, List<ApiClusterTemplateRoleConfigGroup>> roleConfigsMap = new HashMap<>();
+        List<CustomConfigurationPropertyView> roleConfigGroups = getCustomRoleConfigs(configProperties);
+        roleConfigGroups.forEach(roleConfigProperty -> {
+            String name = roleConfigProperty.getName();
+            String value = roleConfigProperty.getValue();
+            String service = roleConfigProperty.getServiceType();
+            String role = roleConfigProperty.getRoleType();
+            roleConfigsMap.computeIfAbsent(service, k -> new ArrayList<>());
+            Optional<ApiClusterTemplateRoleConfigGroup> roleConfigGroup = filterRCGsByRoleType(roleConfigsMap.get(service), role);
+            if (roleConfigGroup.isPresent()) {
+                roleConfigGroup.get().getConfigs().add(new ApiClusterTemplateConfig().name(name).value(value));
+            } else {
+                ApiClusterTemplateRoleConfigGroup roleToAdd =
+                        new ApiClusterTemplateRoleConfigGroup().roleType(role)
+                                .addConfigsItem(new ApiClusterTemplateConfig().name(name).value(value));
+                roleConfigsMap.get(service).add(roleToAdd);
+            }
+        });
+        return roleConfigsMap;
+    }
+
+    public void mergeCustomServiceConfigs(ApiClusterTemplateService service, List<ApiClusterTemplateConfig> newCustomServiceConfigs) {
+        if (newCustomServiceConfigs.isEmpty()) {
+            return;
+        } else if (service.getServiceConfigs() == null) {
+            setServiceConfigs(service, newCustomServiceConfigs);
+        } else {
+            setServiceConfigs(service, mergeCustomConfigs(service.getServiceConfigs(), newCustomServiceConfigs));
+        }
+    }
+
+    public void mergeCustomRoleConfigs(ApiClusterTemplateService service, List<ApiClusterTemplateRoleConfigGroup> newCustomRoleConfigGroups) {
+        if (newCustomRoleConfigGroups.isEmpty()) {
+            return;
+        }
+        List<ApiClusterTemplateRoleConfigGroup> currentRoleConfigs = service.getRoleConfigGroups();
+        newCustomRoleConfigGroups.forEach(newCustomRoleConfigGroup -> {
+            Optional<ApiClusterTemplateRoleConfigGroup> configIfExists = currentRoleConfigs.stream()
+                    .filter(currentConfig -> currentConfig.getRoleType().equalsIgnoreCase(newCustomRoleConfigGroup.getRoleType()))
+                    .findFirst();
+            if (configIfExists.isEmpty()) {
+                throw new NotFoundException("Role " + newCustomRoleConfigGroup.getRoleType() + " does not exist for service " + service.getServiceType());
+            }
+            if (configIfExists.get().getConfigs() == null) {
+                setRoleConfigs(configIfExists.get(), newCustomRoleConfigGroup.getConfigs());
+            } else {
+                List<ApiClusterTemplateConfig> mergedConfigs = mergeCustomConfigs(configIfExists.get().getConfigs(), newCustomRoleConfigGroup.getConfigs());
+                setRoleConfigs(configIfExists.get(), mergedConfigs);
+            }
+        });
+    }
+
+    public List<ApiClusterTemplateConfig> mergeCustomConfigs(List<ApiClusterTemplateConfig> currentConfigs, List<ApiClusterTemplateConfig> newCustomConfigs) {
+        newCustomConfigs.forEach(config -> {
+            Optional<ApiClusterTemplateConfig> configIfExists = currentConfigs.stream()
+                    .filter(currentConfig -> currentConfig.getName().equalsIgnoreCase(config.getName()))
+                    .findFirst();
+            if (configIfExists.isPresent()) {
+                if (config.getName().endsWith("_safety_valve")) {
+                    String currentValue = configIfExists.get().getValue();
+                    String valueToBeAppended = config.getValue();
+                    config.setValue(currentValue + '\n' + valueToBeAppended);
+                }
+                currentConfigs.set(currentConfigs.indexOf(configIfExists.get()), config);
+            } else {
+                currentConfigs.add(config);
+            }
+        });
+        return currentConfigs;
+    }
+
     private void chooseApiClusterTemplateConfig(Map<String, ApiClusterTemplateConfig> existingConfigs, ApiClusterTemplateConfig newConfig) {
         String configName = newConfig.getName();
         ApiClusterTemplateConfig existingApiClusterTemplateConfig = existingConfigs.get(configName);
@@ -510,7 +611,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 String oldConfigValue = existingApiClusterTemplateConfig.getValue();
                 String newConfigValue = newConfig.getValue();
 
-                // By CB-1452 append the bp config at the end of generated config to give precendece to it. Add a newline in between for it to be safe
+                // By CB-1452 append the bp config at the end of generated config to give precedence to it. Add a newline in between for it to be safe
                 // with property file safety valves and command line safety valves.
                 newConfig.setValue(newConfigValue + '\n' + oldConfigValue);
             } else {

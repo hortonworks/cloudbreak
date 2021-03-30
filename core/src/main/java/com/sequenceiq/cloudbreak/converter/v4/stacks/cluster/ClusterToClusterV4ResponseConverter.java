@@ -113,6 +113,8 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(source.getStack()));
         clusterResponse.setServerFqdn(source.getFqdn());
         clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerAddress));
+        clusterResponse.setCustomConfigurationsName(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getName()));
+        clusterResponse.setCustomConfigurationsCrn(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getCrn()));
         clusterResponse.setDatabaseServerCrn(source.getDatabaseServerCrn());
         clusterResponse.setRangerRazEnabled(source.isRangerRazEnabled());
         clusterResponse.setCertExpirationState(source.getCertExpirationState());

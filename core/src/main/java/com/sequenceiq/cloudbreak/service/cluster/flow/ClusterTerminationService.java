@@ -76,6 +76,7 @@ public class ClusterTerminationService {
             deleteFileSystemResources(stackId, fs, force);
         }
         cluster.setBlueprint(null);
+        cluster.setCustomConfigurations(null);
         cluster.setStatus(DELETE_COMPLETED);
         cluster.setFileSystem(null);
         transactionService.required(() -> {

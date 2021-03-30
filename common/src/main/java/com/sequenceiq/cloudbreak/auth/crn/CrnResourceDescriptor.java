@@ -21,6 +21,7 @@ public enum CrnResourceDescriptor {
     // cloudbreak (datahub) service
     CLUSTER_DEF(Crn.ResourceType.CLUSTER_DEFINITION, Crn.Service.DATAHUB),
     CLUSTER_TEMPLATE(Crn.ResourceType.CLUSTER_TEMPLATE, Crn.Service.DATAHUB),
+    CUSTOM_CONFIGURATIONS(Crn.ResourceType.CUSTOM_CONFIGURATIONS, Crn.Service.DATAHUB),
     DATAHUB(Crn.ResourceType.CLUSTER, Crn.Service.DATAHUB),
     IMAGE_CATALOG(Crn.ResourceType.IMAGE_CATALOG, Crn.Service.DATAHUB),
     RECIPE(Crn.ResourceType.RECIPE, Crn.Service.DATAHUB),

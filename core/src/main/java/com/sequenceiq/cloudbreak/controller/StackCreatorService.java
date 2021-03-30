@@ -238,9 +238,7 @@ public class StackCreatorService {
                 }
                 stack.setUseCcm(environment.getTunnel().useCcm());
                 stack.setTunnel(environment.getTunnel());
-
                 if (stackRequest.getCluster() != null) {
-
                     measure(() -> setStackType(stack, blueprint),
                         LOGGER,
                         "Set stacktype for stack object took {} ms");

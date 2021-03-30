@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.controller.v4.CloudProviderServicesV4Controller
 import com.sequenceiq.cloudbreak.controller.v4.CloudbreakInfoV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CustomImageCatalogV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.CustomConfigurationsV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseConfigV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatalakeV4Controller;
@@ -62,6 +63,7 @@ public class EndpointConfig extends ResourceConfig {
             AuditEventV4Controller.class,
             BlueprintV4Controller.class,
             BlueprintUtilV4Controller.class,
+            CustomConfigurationsV4Controller.class,
             EventV4Controller.class,
             ClusterTemplateV4Controller.class,
             DatabaseV4Controller.class,

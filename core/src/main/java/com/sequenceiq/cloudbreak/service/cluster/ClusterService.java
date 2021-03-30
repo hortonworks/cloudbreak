@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -430,6 +431,10 @@ public class ClusterService {
         return repository.findByBlueprint(blueprint);
     }
 
+    public Set<Cluster> findByCustomConfigurations(CustomConfigurations customConfigurations) {
+        return repository.findByCustomConfigurations(customConfigurations);
+    }
+
     public List<Cluster> findByStatuses(Collection<Status> statuses) {
         return repository.findByStatuses(statuses);
     }
@@ -440,6 +445,10 @@ public class ClusterService {
 
     public Optional<Cluster> findOneWithLists(Long id) {
         return repository.findOneWithLists(id);
+    }
+
+    public Cluster findOneWithCustomConfigurations(Long id) {
+        return repository.findOneWithCustomConfigurations(id).orElseThrow(notFound("Cluster", id));
     }
 
     public Optional<Cluster> findById(Long clusterId) {
