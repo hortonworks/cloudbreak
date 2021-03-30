@@ -13,6 +13,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -118,6 +121,18 @@ public class EntitlementService {
 
     public boolean cloudStorageValidationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION);
+    }
+
+    public boolean awsCloudStorageValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION_AWS);
+    }
+
+    public boolean azureCloudStorageValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION_AZURE);
+    }
+
+    public boolean gcpCloudStorageValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION_GCP);
     }
 
     public boolean razEnabled(String accountId) {
