@@ -1032,4 +1032,52 @@ public class StackToCloudStackConverterTest {
         assertTrue(externalCloudLoadBalancer.isPresent());
     }
 
+    @Test
+    public void testConvertWithTerminatedInstances() {
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        Set<InstanceGroup> instanceGroups = Set.of(instanceGroup);
+
+        Template template = new Template();
+        template.setVolumeTemplates(Sets.newHashSet());
+
+        InstanceMetaData metaData = new InstanceMetaData();
+        String fqdnParsedName = "test1-m-1-20180605095019";
+        metaData.setId(1L);
+        metaData.setDiscoveryFQDN(String.format("%s.project.id", fqdnParsedName));
+        metaData.setSubnetId(TEST_STRING_ID);
+        metaData.setInstanceName(TEST_NAME);
+        Set<InstanceMetaData> notDeletedMetas = Set.of(metaData);
+        InstanceMetaData terminatedMetaData = new InstanceMetaData();
+        String termiantedFqdnParsedName = "test1-m-1-20200401095019";
+        terminatedMetaData.setId(2L);
+        terminatedMetaData.setDiscoveryFQDN(String.format("%s.project.id", termiantedFqdnParsedName));
+        terminatedMetaData.setSubnetId(TEST_STRING_ID);
+        terminatedMetaData.setInstanceName("terminated-" + TEST_NAME);
+        Set<InstanceMetaData> deletedMetas = Set.of(terminatedMetaData);
+
+        when(instanceGroup.getTemplate()).thenReturn(template);
+        when(instanceGroup.getNotDeletedInstanceMetaDataSet()).thenReturn(notDeletedMetas);
+        when(instanceGroup.getDeletedInstanceMetaDataSet()).thenReturn(deletedMetas);
+        when(instanceGroup.getStack()).thenReturn(stack);
+        when(stack.getInstanceGroupsAsList()).thenReturn(new ArrayList<>(instanceGroups));
+
+        CloudStack result = underTest.convert(stack);
+
+        assertEquals(1L, result.getGroups().size());
+        assertEquals(1L, result.getGroups().get(0).getInstances().size());
+        assertEquals(1L, result.getGroups().get(0).getDeletedInstances().size());
+        assertEquals(fqdnParsedName,
+            result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
+        assertEquals(metaData.getSubnetId(),
+            result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));
+        assertEquals(metaData.getInstanceName(),
+            result.getGroups().get(0).getInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+        assertEquals(termiantedFqdnParsedName,
+            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.DISCOVERY_NAME));
+        assertEquals(terminatedMetaData.getSubnetId(),
+            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.SUBNET_ID));
+        assertEquals(terminatedMetaData.getInstanceName(),
+            result.getGroups().get(0).getDeletedInstances().get(0).getParameters().get(CloudInstance.INSTANCE_NAME));
+    }
+
 }

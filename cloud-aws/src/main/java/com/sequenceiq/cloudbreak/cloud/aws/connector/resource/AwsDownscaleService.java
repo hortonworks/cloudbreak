@@ -73,6 +73,7 @@ public class AwsDownscaleService {
             AwsCredentialView credentialView = new AwsCredentialView(auth.getCloudCredential());
             AuthenticatedContextView authenticatedContextView = new AuthenticatedContextView(auth);
             String regionName = authenticatedContextView.getRegion();
+            LOGGER.debug("Calling deleteCloudWatchAlarmsForSystemFailures from AwsDownscaleService");
             awsCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView, instanceIds);
 
             List<CloudResource> resourcesToDownscale = resources.stream()

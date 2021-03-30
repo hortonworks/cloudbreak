@@ -76,7 +76,8 @@ public class AwsTerminateService {
         AmazonEc2Client amazonEC2Client = authenticatedContextView.getAmazonEC2Client();
         AmazonCloudFormationClient amazonCloudFormationClient = awsClient.createCloudFormationClient(credentialView, regionName);
 
-        awsCloudWatchService.deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView);
+        LOGGER.debug("Calling deleteCloudWatchAlarmsForSystemFailures from AwsTerminateService");
+        awsCloudWatchService.deleteAllCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView);
         waitAndDeleteCloudformationStack(ac, stack, resources, amazonCloudFormationClient);
         awsComputeResourceService.deleteComputeResources(ac, stack, resources);
         deleteKeyPair(ac, stack, amazonEC2Client, credentialView, regionName);

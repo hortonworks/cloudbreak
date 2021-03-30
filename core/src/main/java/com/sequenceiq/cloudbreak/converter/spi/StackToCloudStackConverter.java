@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_GROUP_USAGE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.DELETE_REQUESTED;
+import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
@@ -262,7 +263,8 @@ public class StackToCloudStackConverter {
                                         instanceAuthentication.getLoginUserName(),
                                         instanceAuthentication.getPublicKey(),
                                         getRootVolumeSize(instanceGroup),
-                                        cloudFileSystemView)
+                                        cloudFileSystemView,
+                                        buildDeletedCloudInstances(stackAuthentication, deleteRequests, instanceGroup))
                         );
                     }
                 }
@@ -307,6 +309,16 @@ public class StackToCloudStackConverter {
         // existing instances
         for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
             InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
+            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status));
+        }
+        return instances;
+    }
+
+    private List<CloudInstance> buildDeletedCloudInstances(StackAuthentication stackAuthentication, Collection<String> deleteRequests,
+            InstanceGroup instanceGroup) {
+        List<CloudInstance> instances = new ArrayList<>();
+        for (InstanceMetaData metaData : instanceGroup.getDeletedInstanceMetaDataSet()) {
+            InstanceStatus status = TERMINATED;
             instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status));
         }
         return instances;
