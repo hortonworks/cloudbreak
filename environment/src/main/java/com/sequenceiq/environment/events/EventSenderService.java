@@ -3,6 +3,9 @@ package com.sequenceiq.environment.events;
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static java.lang.String.format;
 
+import java.util.Collection;
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,12 +55,23 @@ public class EventSenderService {
     }
 
     public void sendEventAndNotification(EnvironmentDto environmentDto, String userCrn, ResourceEvent resourceEvent) {
-        SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
-        sendEventAndNotificationWithPayload(environmentDto, userCrn, resourceEvent, simpleResponse);
+        sendEventAndNotification(environmentDto, userCrn, resourceEvent, new HashSet<>());
     }
 
-    public void sendEventAndNotificationWithPayload(AccountAwareResource resource, String userCrn, ResourceEvent resourceEvent, Object payload) {
-        CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload);
+    public void sendEventAndNotification(EnvironmentDto environmentDto, String userCrn, ResourceEvent resourceEvent,
+        Collection<?> messageArgs) {
+        SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
+        sendEventAndNotificationWithPayload(environmentDto, userCrn, resourceEvent, simpleResponse, messageArgs);
+    }
+
+    public void sendEventAndNotificationWithPayload(AccountAwareResource resource, String userCrn, ResourceEvent resourceEvent,
+        Object payload) {
+        sendEventAndNotificationWithPayload(resource, userCrn, resourceEvent, payload, new HashSet<>());
+    }
+
+    public void sendEventAndNotificationWithPayload(AccountAwareResource resource, String userCrn, ResourceEvent resourceEvent, Object payload,
+        Collection<?> messageArgs) {
+        CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
         notificationService.send(resourceEvent, payload, userCrn);
     }
@@ -68,7 +82,8 @@ public class EventSenderService {
         notificationService.send(resourceEvent, payload, userCrn);
     }
 
-    private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload) {
+    private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
+        Collection<?> messageArgs) {
         String resourceType = resource.getClass().getSimpleName().toLowerCase();
         String resourceCrn = resource.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(
@@ -85,7 +100,7 @@ public class EventSenderService {
                 resourceCrn,
                 resourceEvent.name());
         CDPStructuredNotificationDetails notificationDetails = getNotificationDetails(resourceEvent, resourceCrn, resourceType, payload);
-        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage());
+        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), messageArgs);
         return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), message);
     }
 
