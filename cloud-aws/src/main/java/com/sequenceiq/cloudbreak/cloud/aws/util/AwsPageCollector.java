@@ -10,11 +10,7 @@ import java.util.function.Function;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.RouteTable;
-import com.amazonaws.services.networkfirewall.model.FirewallMetadata;
-import com.amazonaws.services.networkfirewall.model.ListFirewallsRequest;
-import com.amazonaws.services.networkfirewall.model.ListFirewallsResult;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
 
 public class AwsPageCollector {
     private AwsPageCollector() {
@@ -26,14 +22,6 @@ public class AwsPageCollector {
                 DescribeRouteTablesResult::getNextToken,
                 DescribeRouteTablesRequest::setNextToken);
         return routeTableList;
-    }
-
-    public static List<FirewallMetadata> getAllFirewallMetadata(AmazonNetworkFirewallClient nfwClient, ListFirewallsRequest request) {
-        List<FirewallMetadata> firewallMetadataList = collectPages(nfwClient::listFirewalls, request,
-                ListFirewallsResult::getFirewalls,
-                ListFirewallsResult::getNextToken,
-                ListFirewallsRequest::setNextToken);
-        return firewallMetadataList;
     }
 
     public static <S, P, R> List<S> collectPages(Function<P, R> resultProvider, P request, Function<R, List<S>> listFromResultGetter,
