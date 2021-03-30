@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonNetworkFirewallClient;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsListener;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.loadbalancer.AwsLoadBalancerScheme;
@@ -104,9 +103,6 @@ public class AwsLaunchServiceLoadBalancerTest {
 
     @Mock
     private AmazonEc2Client amazonEC2Client;
-
-    @Mock
-    private AmazonNetworkFirewallClient amazonNfwClient;
 
     @Mock
     private AwsSubnetIgwExplorer awsSubnetIgwExplorer;
@@ -208,7 +204,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Test
     public void testConvertLoadBalancerNewPrivate() {
         // Returning false - private subnet
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString(), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
 
         AwsLoadBalancer awsLoadBalancer = setupAndRunConvertLoadBalancer(List.of(), LoadBalancerType.PRIVATE, PRIVATE_ID_1);
@@ -228,7 +224,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Test
     public void testConvertLoadBalancerExistingPrivate() {
         // Returning false - private subnet
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString(), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         PowerMockito.mockStatic(AwsPageCollector.class);
         PowerMockito.when(AwsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
@@ -252,7 +248,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Test
     public void testConvertLoadBalancerNewPublic() {
         // Returning true - public subnet
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString(), anyString())).thenReturn(true);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString())).thenReturn(true);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         PowerMockito.mockStatic(AwsPageCollector.class);
         PowerMockito.when(AwsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
@@ -274,7 +270,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Test
     public void testConvertLoadBalancerExistingPublic() {
         // Returning true - public subnet
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString(), anyString())).thenReturn(true);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString())).thenReturn(true);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         PowerMockito.mockStatic(AwsPageCollector.class);
         PowerMockito.when(AwsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
@@ -298,7 +294,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Test
     public void testConvertLoadBalancerMismatchedTypes() {
         // Returning false - private subnet
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString(), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         PowerMockito.mockStatic(AwsPageCollector.class);
         PowerMockito.when(AwsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
@@ -308,7 +304,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         assertNull(awsLoadBalancer);
 
         // Returning true - public subnet
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString(), anyString())).thenReturn(true);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), anyString())).thenReturn(true);
 
         awsLoadBalancer = setupAndRunConvertLoadBalancer(List.of(), LoadBalancerType.PRIVATE, PRIVATE_ID_1);
 
@@ -324,7 +320,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
@@ -336,7 +332,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
         verify(cfClient, times(2)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(4)).getStackResourceSummaries();
     }
 
@@ -349,7 +345,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PUBLIC_ID_1), anyString())).thenReturn(true);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PUBLIC_ID_1), any())).thenReturn(true);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC));
         when(result.getStackResourceSummaries())
@@ -361,7 +357,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
         verify(cfClient, times(2)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(4)).getStackResourceSummaries();
     }
 
@@ -374,8 +370,8 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PUBLIC_ID_1), anyString())).thenReturn(true);
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PUBLIC_ID_1), any())).thenReturn(true);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
@@ -387,7 +383,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null);
 
         verify(cfClient, times(2)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(2)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(2)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(5)).getStackResourceSummaries();
     }
 
@@ -397,8 +393,8 @@ public class AwsLaunchServiceLoadBalancerTest {
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, PUBLIC_ID_1);
         Network network = createNetwork(PRIVATE_ID_1, PUBLIC_ID_1);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PUBLIC_ID_1), anyString())).thenReturn(false);
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(true);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PUBLIC_ID_1), any())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(true);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE));
 
@@ -407,7 +403,7 @@ public class AwsLaunchServiceLoadBalancerTest {
                 underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(0)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(2)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(2)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(0)).getStackResourceSummaries();
         assert exception.getMessage().startsWith("Can not create all requested AWS load balancers.");
     }
@@ -424,7 +420,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         firstUpdateSummaries.remove(TG_INDEX);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
@@ -438,7 +434,7 @@ public class AwsLaunchServiceLoadBalancerTest {
                 underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
         assertEquals(expectedError, exception.getMessage());
     }
@@ -456,7 +452,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         tgSummary.setPhysicalResourceId(null);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
@@ -470,7 +466,7 @@ public class AwsLaunchServiceLoadBalancerTest {
                 underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
         assertEquals(expectedError, exception.getMessage());
     }
@@ -487,7 +483,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         firstUpdateSummaries.remove(LB_INDEX);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
@@ -501,7 +497,7 @@ public class AwsLaunchServiceLoadBalancerTest {
                 underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
         assertEquals(expectedError, exception.getMessage());
     }
@@ -519,7 +515,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         lbSummary.setPhysicalResourceId(null);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
@@ -533,7 +529,7 @@ public class AwsLaunchServiceLoadBalancerTest {
                 underTest.updateCloudformationWithLoadBalancers(ac, cloudStack, null, null));
 
         verify(cfClient, times(1)).updateStack(any());
-        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString(), anyString());
+        verify(awsSubnetIgwExplorer, times(1)).isRoutableToInternet(any(), any(), any(), anyString());
         verify(result, times(2)).getStackResourceSummaries();
         assertEquals(expectedError, exception.getMessage());
     }
@@ -563,7 +559,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> firstUpdateSummaries = createFirstUpdateSummaries(types);
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
@@ -590,7 +586,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
         secondUpdateSummaries.get(LB_INDEX).setResourceStatus(ResourceStatus.CREATE_FAILED);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, types);
         when(result.getStackResourceSummaries())
@@ -617,7 +613,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
         secondUpdateSummaries.get(LIS_INDEX).setResourceStatus(ResourceStatus.CREATE_FAILED);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
@@ -644,7 +640,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         List<StackResourceSummary> secondUpdateSummaries = createFullSummaries(types);
         secondUpdateSummaries.get(TG_INDEX).setResourceStatus(ResourceStatus.CREATE_FAILED);
 
-        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), any(), eq(PRIVATE_ID_1), anyString())).thenReturn(false);
+        when(awsSubnetIgwExplorer.isRoutableToInternet(any(), any(), eq(PRIVATE_ID_1), any())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(new DescribeSubnetsResult());
         setupMocksForUpdate(awsNetworkView, network, instances, Set.of(LoadBalancerType.PRIVATE));
         when(result.getStackResourceSummaries())
@@ -735,7 +731,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         PowerMockito.when(AwsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
 
         return underTest.convertLoadBalancer(createCloudLoadBalancer(type), instances, awsNetworkView, amazonEC2Client,
-            amazonNfwClient, existingLoadBalancers);
+            existingLoadBalancers);
     }
 
     private AwsNetworkView createNetworkView(String subnetId, String endpointGatewaSubnetId) {
