@@ -38,12 +38,14 @@ import com.sequenceiq.cloudbreak.converter.util.CloudStorageValidationUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClouderaManagerRepositoryV4RequestToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
+import com.sequenceiq.cloudbreak.domain.CustomConfigs;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.cloudbreak.service.CustomConfigsService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -59,6 +61,9 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private CustomConfigsService customConfigsService;
 
     @Inject
     private WorkspaceService workspaceService;
@@ -81,6 +86,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
         cluster.setExecutorType(source.getExecutorType());
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
+        cluster.setCustomConfigs(getCustomConfigs(source.getCustomConfigsName()));
         convertGateway(source, cluster);
         if (cloudStorageValidationUtil.isCloudStorageConfigured(source.getCloudStorage())) {
             FileSystem fileSystem = cloudStorageConverter.requestToFileSystem(source.getCloudStorage());
@@ -198,6 +204,14 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
             }
         }
         return blueprint;
+    }
+
+    private CustomConfigs getCustomConfigs(String customConfigsName) {
+        CustomConfigs customConfigs = null;
+        if (!StringUtils.isEmpty(customConfigsName)) {
+            customConfigs = customConfigsService.getByName(customConfigsName, ThreadBasedUserCrnProvider.getAccountId());
+        }
+        return customConfigs;
     }
 
     private void updateDatabases(ClusterV4Request source, Cluster cluster, Workspace workspace) {

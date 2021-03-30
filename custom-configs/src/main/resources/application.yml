@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    password:
+    url: jdbc:postgresql://localhost:5432/cbdb
+    username: postgres
+  jpa:
+    hibernate:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+validation:
+  filename: 'all-services.json'
+  minversion: '7.2.8'
