@@ -130,6 +130,12 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 .collect(Collectors.toSet());
     }
 
+    public Set<InstanceMetaData> getDeletedInstanceMetaDataSet() {
+        return instanceMetaData.stream()
+            .filter(metaData -> metaData.isTerminated() || metaData.isDeletedOnProvider())
+            .collect(Collectors.toSet());
+    }
+
     public Set<InstanceMetaData> getReachableInstanceMetaDataSet() {
         return instanceMetaData.stream()
                 .filter(InstanceMetaData::isReachable)

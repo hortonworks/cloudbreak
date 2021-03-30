@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,24 +34,32 @@ public class Group extends DynamicModel {
 
     private final Optional<CloudFileSystemView> identity;
 
+    private final List<CloudInstance> deletedInstances;
+
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
             InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey,
             int rootVolumeSize, Optional<CloudFileSystemView> identity) {
-        this.name = name;
-        this.type = type;
-        this.instances = ImmutableList.copyOf(instances);
-        this.security = security;
-        this.skeleton = Optional.ofNullable(skeleton);
-        this.instanceAuthentication = instanceAuthentication;
-        this.publicKey = publicKey;
-        this.loginUserName = loginUserName;
-        this.rootVolumeSize = rootVolumeSize;
-        this.identity = identity;
+        this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
+            rootVolumeSize, identity, new ArrayList<>());
+    }
+
+    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey,
+            int rootVolumeSize, Optional<CloudFileSystemView> identity, List<CloudInstance> deletedInstances) {
+        this(name, type, instances, security, skeleton, new HashMap<>(), instanceAuthentication, loginUserName, publicKey,
+            rootVolumeSize, identity, deletedInstances);
     }
 
     public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
             Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
             String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity) {
+        this(name, type, instances, security, skeleton, parameters, instanceAuthentication, loginUserName, publicKey,
+            rootVolumeSize, identity, new ArrayList<>());
+    }
+
+    public Group(String name, InstanceGroupType type, Collection<CloudInstance> instances, Security security, CloudInstance skeleton,
+            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName,
+            String publicKey, int rootVolumeSize, Optional<CloudFileSystemView> identity, List<CloudInstance> deletedInstances) {
         super(parameters);
         this.name = name;
         this.type = type;
@@ -61,6 +71,7 @@ public class Group extends DynamicModel {
         this.loginUserName = loginUserName;
         this.rootVolumeSize = rootVolumeSize;
         this.identity = identity;
+        this.deletedInstances = deletedInstances;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -114,6 +125,10 @@ public class Group extends DynamicModel {
         return identity;
     }
 
+    public List<CloudInstance> getDeletedInstances() {
+        return deletedInstances;
+    }
+
     @Override
     public String toString() {
         return "Group{"
@@ -125,6 +140,7 @@ public class Group extends DynamicModel {
                 + ", loginUserName='" + loginUserName + '\''
                 + ", instanceAuthentication=" + instanceAuthentication
                 + ", skeleton=" + skeleton
+                + ", deletedInstances=" + deletedInstances
                 + '}';
     }
 }

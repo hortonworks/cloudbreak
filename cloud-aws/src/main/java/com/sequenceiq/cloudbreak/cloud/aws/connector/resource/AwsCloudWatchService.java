@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -74,35 +75,51 @@ public class AwsCloudWatchService {
         });
     }
 
-    public void deleteCloudWatchAlarmsForSystemFailures(CloudStack stack, String regionName, AwsCredentialView credentialView) {
+    public void deleteAllCloudWatchAlarmsForSystemFailures(CloudStack stack, String regionName, AwsCredentialView credentialView) {
         List<String> instanceIds = stack.getGroups().stream()
                 .flatMap(group -> group.getInstances().stream())
                 .map(CloudInstance::getInstanceId)
                 .collect(Collectors.toList());
+        LOGGER.info("Found ids for running instances: [{}]. Cloudwatch alarms for these instances will be deleted.", instanceIds);
+        List<String> deletedInstanceIds = stack.getGroups().stream()
+            .flatMap(group -> group.getDeletedInstances().stream())
+            .map(CloudInstance::getInstanceId)
+            .collect(Collectors.toList());
+        LOGGER.info("Found ids for deleted instances: [{}]. Deletion will be attempted on the cloudwatch alarms for these instances.", deletedInstanceIds);
+        instanceIds.addAll(deletedInstanceIds);
         deleteCloudWatchAlarmsForSystemFailures(stack, regionName, credentialView, instanceIds);
     }
 
     public void deleteCloudWatchAlarmsForSystemFailures(CloudStack stack, String regionName, AwsCredentialView credentialView, List<String> instanceIds) {
-        List<String> instanceIdsFromStack = stack.getGroups().stream()
+        if (instanceIds == null || instanceIds.isEmpty()) {
+            LOGGER.warn("No instance ids provided for cloudwatch alarm deletion. No alarms will be deleted.");
+        } else {
+            LOGGER.info("Deleting alarms for instance ids [{}]", instanceIds);
+            List<String> instanceIdsFromStack = stack.getGroups().stream()
                 .flatMap(group -> group.getInstances().stream())
                 .map(CloudInstance::getInstanceId)
                 .collect(Collectors.toList());
-        List<String> instanceIdsNotInStack = instanceIds.stream()
+            List<String> instanceIdsNotInStack = instanceIds.stream()
                 .filter(instanceId -> !instanceIdsFromStack.contains(instanceId))
                 .collect(Collectors.toList());
-        if (!instanceIdsNotInStack.isEmpty()) {
-            LOGGER.warn("Instance IDs [{}] are not part of cloud stack {}, these instances may have already been deleted on the cloud provider side.",
-                    instanceIdsFromStack, stack);
+            if (!instanceIdsNotInStack.isEmpty()) {
+                LOGGER.warn("Instance IDs [{}] are not part of cloud stack {}, these instances may have already been deleted on the cloud provider side.",
+                    instanceIdsNotInStack, stack);
+            }
+            deleteCloudWatchAlarmsForSystemFailures(regionName, credentialView, instanceIds);
         }
-        deleteCloudWatchAlarmsForSystemFailures(regionName, credentialView, instanceIds);
     }
 
     private void deleteCloudWatchAlarmsForSystemFailures(String regionName, AwsCredentialView credentialView, List<String> instanceIds) {
+        // The list of alarms received may be longer than 100 items, but alarms can only be deleted in batches of max
+        // size 100. To work around this, break the instanceIds list into chunks no greater than 100, and process each
+        // chunk. See https://docs.aws.amazon.com/AmazonCloudWatch/latest/APIReference/API_DeleteAlarms.html
         final AtomicInteger counter = new AtomicInteger(0);
-        instanceIds.stream()
+        Map<Integer, List<String>> grouping = instanceIds.stream()
                 .map(instanceId -> instanceId + alarmSuffix)
-                .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / maxBatchsize))
-                .values()
+                .collect(Collectors.groupingBy(s -> counter.getAndIncrement() / maxBatchsize));
+        LOGGER.debug("Batched cloudwatch alarm delete requests: {}", grouping);
+        grouping.values()
                 .stream()
                 .flatMap(alarmNames -> getExistingCloudWatchAlarms(regionName, credentialView, alarmNames))
                 .filter(alarmNames -> !alarmNames.isEmpty())
@@ -113,6 +130,7 @@ public class AwsCloudWatchService {
         Stream<List<String>> filteredAlarmNamesStream;
         AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
 
+        LOGGER.info("Searching for cloudwatch alarms [{}]", alarmNames);
         try {
             DescribeAlarmsRequest request = new DescribeAlarmsRequest().withAlarmNames(alarmNames).withMaxRecords(maxBatchsize);
             List<String> filteredAlarmNames = amazonCloudWatchClient.describeAlarms(request).getMetricAlarms().stream()
@@ -129,11 +147,12 @@ public class AwsCloudWatchService {
     }
 
     private void deleteCloudWatchAlarms(String regionName, AwsCredentialView credentialView, List<String> alarmNames) {
+        LOGGER.info("Attempting to delete cloudwatch alarms [{}]", alarmNames);
         try {
             DeleteAlarmsRequest deleteAlarmsRequest = new DeleteAlarmsRequest().withAlarmNames(alarmNames);
             AmazonCloudWatchClient amazonCloudWatchClient = awsClient.createCloudWatchClient(credentialView, regionName);
             amazonCloudWatchClient.deleteAlarms(deleteAlarmsRequest);
-            LOGGER.debug("Deleted cloudwatch alarms [{}]", alarmNames);
+            LOGGER.info("Deleted cloudwatch alarms [{}]", alarmNames);
         } catch (AmazonCloudWatchException acwe) {
             LOGGER.error("Unable to delete cloudwatch alarms [{}]: {}", alarmNames, acwe.getLocalizedMessage());
             throw new CloudConnectorException("Unable to delete cloud watch alarms: " + acwe.getLocalizedMessage(), acwe);
