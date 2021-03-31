@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredRestCallEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -39,8 +38,6 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> implements LegacyStructuredEventService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredEventDBService.class);
-
-    private static final String STRUCTURED_EVENT_MDC_NAME = "structuredEventType";
 
     @Inject
     private ConversionService conversionService;
@@ -56,10 +53,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public void create(StructuredEvent structuredEvent) {
-        if (!(structuredEvent instanceof StructuredSyncEvent)) {
-            StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
-            create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
-        }
+        StructuredEventEntity structuredEventEntityEntity = conversionService.convert(structuredEvent, StructuredEventEntity.class);
+        create(structuredEventEntityEntity, structuredEventEntityEntity.getWorkspace(), null);
     }
 
     @Override
@@ -70,9 +65,13 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, Workspace workspace, User user) {
-        resource.setWorkspace(workspace);
-        LOGGER.info("Stored StructuredEvent type: {}, payload: {}", resource.getEventType().name(), resource.getStructuredEventJson().getValue());
-        return repository().save(resource);
+        if (resource != null && resource.getEventType() == StructuredEventType.NOTIFICATION) {
+            resource.setWorkspace(workspace);
+            LOGGER.info("Stored StructuredEvent type: {}, payload: {}", resource.getEventType().name(), resource.getStructuredEventJson().getValue());
+            return repository().save(resource);
+        } else {
+            return null;
+        }
     }
 
     public boolean isEnabled() {
