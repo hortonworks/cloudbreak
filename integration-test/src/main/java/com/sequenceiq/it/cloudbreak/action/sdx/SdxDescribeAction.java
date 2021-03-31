@@ -1,5 +1,9 @@
 package com.sequenceiq.it.cloudbreak.action.sdx;
 
+import static java.lang.String.format;
+
+import java.util.Collections;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +19,13 @@ public class SdxDescribeAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
-        Log.whenJson(LOGGER, " SDX describe request: ", testDto.getRequest());
-        client.getDefaultClient()
+        Log.when(LOGGER, format(" SDX environment Crn: %s ", testDto.getRequest().getEnvironment()));
+        Log.whenJson(LOGGER, " SDX get details request: ", testDto.getRequest());
+        testDto.setResponse(client.getDefaultClient()
                 .sdxEndpoint()
-                .get(testDto.getName());
-        Log.whenJson(LOGGER, " SDX describe response: ", client.getDefaultClient().sdxEndpoint().get(testDto.getName()));
+                .getDetail(testDto.getName(), Collections.emptySet()));
+        Log.whenJson(LOGGER, " SDX get details response: ", testDto.getResponse());
+        Log.when(LOGGER, format(" SDX Crn: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }

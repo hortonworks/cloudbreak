@@ -250,8 +250,8 @@ integrationtest:
           - "%s - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
     cloudstorage:
       s3:
-        instanceProfile:
-      baseLocation:
+        instanceProfile: "arn:aws:iam::1234567890:instance-profile/mock.testing.instance.profile"
+      baseLocation: "s3a://mock-test"
       fileSystemType: S3
 
   cleanup:

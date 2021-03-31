@@ -23,10 +23,10 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
 import com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyType;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
@@ -143,6 +143,25 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Set user Workload password.
+     *
+     * @param actorCrn  the CRN of the actor
+     * @param userCrn   the CRN of the user
+     * @param requestId an optional request Id
+     * @return the workload credentials associated with this user CRN
+     */
+    public UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadPassword(String actorCrn, String userCrn, String password,
+            Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        String workloadUserName = getUserDetails(actorCrn, userCrn, requestId).getWorkloadUsername();
+        LOGGER.debug("Setting workload password for user {} with workload name {}", userCrn, workloadUserName);
+        UserManagementProto.SetActorWorkloadCredentialsResponse response = client.setActorWorkloadPassword(RequestIdUtil.getOrGenerate(requestId), userCrn,
+                password);
+        LOGGER.debug("Workload password has been set for user {} with workload name {}", userCrn, workloadUserName);
+        return response;
+    }
+
+    /**
      * Retrieves user Workload Credentials.
      *
      * @param actorCrn  the CRN of the actor
@@ -150,10 +169,10 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the workload credentials associated with this user CRN
      */
-    public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
+    public UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
         LOGGER.debug("Getting workload credentials for user {}", userCrn);
-        GetActorWorkloadCredentialsResponse response = client.getActorWorkloadCredentials(RequestIdUtil.getOrGenerate(requestId), userCrn);
+        UserManagementProto.GetActorWorkloadCredentialsResponse response = client.getActorWorkloadCredentials(RequestIdUtil.getOrGenerate(requestId), userCrn);
         LOGGER.debug("Got workload credentials for user {}", userCrn);
         return response;
     }

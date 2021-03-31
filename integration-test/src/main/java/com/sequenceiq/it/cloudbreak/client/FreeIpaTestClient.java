@@ -19,9 +19,11 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersInGroupAction
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSetPasswordAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStartAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersInternalAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaUsedImagesAction;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
@@ -64,12 +66,20 @@ public class FreeIpaTestClient {
         return new FreeIpaStopAction();
     }
 
-    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> syncAll() {
-        return new FreeIpaSynchronizeAllUsersAction();
+    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> syncAllInternal() {
+        return new FreeIpaSynchronizeAllUsersInternalAction();
     }
 
     public Action<FreeIpaUserSyncTestDto, FreeIpaClient> getLastSyncOperationStatus() {
         return new FreeIpaGetLastSyncOperationStatus();
+    }
+
+    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> setPassword(Set<String> environmentCrns, String newPassword) {
+        return new FreeIpaSetPasswordAction(environmentCrns, newPassword);
+    }
+
+    public Action<FreeIpaUserSyncTestDto, FreeIpaClient> syncAll() {
+        return new FreeIpaSynchronizeAllUsersAction();
     }
 
     public Action<FreeIpaTestDto, FreeIpaClient> repair(InstanceMetadataType instanceMetadataType) {

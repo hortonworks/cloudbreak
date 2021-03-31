@@ -134,7 +134,7 @@ dependencies {
   }
   compile group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
   compile group: 'com.github.spotbugs',           name: 'spotbugs-annotations',           version: '4.2.0'
-  compile (group: 'com.cloudera.api.swagger',           name: 'cloudera-manager-api-swagger',version: cmClientVersion) {
+  compile (group: 'com.cloudera.api.swagger',     name: 'cloudera-manager-api-swagger',   version: cmClientVersion) {
     transitive = false
   }
   compile (group: 'com.hierynomus',                name: 'sshj',                           version: '0.27.0') {
