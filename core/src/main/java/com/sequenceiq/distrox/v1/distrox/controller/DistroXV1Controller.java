@@ -35,6 +35,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.FilterParam;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -155,6 +157,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByRequestProperty(path = "allRecipes", type = NAME_LIST, action = DESCRIBE_RECIPE)
     public StackV4Response post(@Valid @RequestObject DistroXV1Request request) {
         return distroxService.post(request);
+    }
+
+    @Override
+    @InternalOnly
+    public StackV4Response postInternal(@AccountId String accountId, @Valid DistroXV1Request request) {
+        return post(request);
     }
 
     @Override
