@@ -19,6 +19,10 @@ public class ModelDescriptions {
     public static final String START_TIME = "Start time for the time interval of the diagnostic collection request.";
     public static final String END_TIME = "END time for the time interval of the diagnostic collection request.";
     public static final String DESTINATION = "Destination for the diagnostic collection request.";
+    public static final String GROUPS = "Groups to check for.";
+    public static final String USERS = "Users to check for.";
+    public static final String GROUP = "Group to check for.";
+    public static final String RESULT = "Result of the check.";
 
     private ModelDescriptions() {
     }

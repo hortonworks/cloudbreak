@@ -1,43 +1,53 @@
 package com.sequenceiq.freeipa.controller;
 
-import javax.inject.Inject;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.freeipa.api.v1.freeipa.test.model.ClientTestBaseV1Response.resultOf;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import javax.inject.Inject;
+import javax.validation.Valid;
+
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
+import com.sequenceiq.authorization.annotation.RequestObject;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.freeipa.api.v1.freeipa.test.ClientTestV1Endpoint;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
-import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckGroupsV1Request;
+import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckUsersInGroupV1Request;
+import com.sequenceiq.freeipa.api.v1.freeipa.test.model.CheckUsersV1Request;
+import com.sequenceiq.freeipa.api.v1.freeipa.test.model.ClientTestBaseV1Response;
+import com.sequenceiq.freeipa.service.client.FreeipaClientTestService;
+
 @Controller
-@DisableCheckPermissions
 public class ClientTestV1Controller implements ClientTestV1Endpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClientTestV1Controller.class);
-
     @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
+    private FreeipaClientTestService freeipaClientTestService;
+
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    @Override
+    public String userShow(Long stackId, String userName) {
+        return freeipaClientTestService.userShow(stackId, userName);
+    }
 
     @Override
-    public String userShow(Long id, String name) {
-        FreeIpaClient freeIpaClient;
-        try {
-            freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(id);
-        } catch (Exception e) {
-            LOGGER.error("Error creating FreeIpaClient", e);
-            return "FAILED TO CREATE CLIENT";
-        }
+    @CheckPermissionByRequestProperty(type = CRN, action = DESCRIBE_ENVIRONMENT, path = "environmentCrn")
+    public ClientTestBaseV1Response checkUsers(@RequestObject @Valid CheckUsersV1Request checkUsersRequest) {
+        return resultOf(freeipaClientTestService.checkUsers(checkUsersRequest.getEnvironmentCrn(), checkUsersRequest.getUsers()));
+    }
 
-        try {
-            User user = freeIpaClient.userShow(name);
-            LOGGER.info("Groups: {}", user.getMemberOfGroup());
-            LOGGER.info("Success: {}", user);
-        } catch (Exception e) {
-            LOGGER.error("Error showing user {}", name, e);
-            return "FAILED TO SHOW USER";
-        }
-        return "END";
+    @Override
+    @CheckPermissionByRequestProperty(type = CRN, action = DESCRIBE_ENVIRONMENT, path = "environmentCrn")
+    public ClientTestBaseV1Response checkGroups(@RequestObject @Valid CheckGroupsV1Request checkGroupsRequest) {
+        return resultOf(freeipaClientTestService.checkGroups(checkGroupsRequest.getEnvironmentCrn(), checkGroupsRequest.getGroups()));
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(type = CRN, action = DESCRIBE_ENVIRONMENT, path = "environmentCrn")
+    public ClientTestBaseV1Response checkUsersInGroup(@RequestObject @Valid CheckUsersInGroupV1Request checkUsersInGroupRequest) {
+        return resultOf(freeipaClientTestService.checkUsersInGroup(checkUsersInGroupRequest.getEnvironmentCrn(),
+                checkUsersInGroupRequest.getUsers(), checkUsersInGroupRequest.getGroup()));
     }
 }
