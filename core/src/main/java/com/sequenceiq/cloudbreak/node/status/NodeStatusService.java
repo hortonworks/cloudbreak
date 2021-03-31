@@ -27,7 +27,7 @@ public class NodeStatusService {
     private CdpNodeStatusMonitorClientFactory factory;
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> getMeteringReport(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Stack stack = stackService.getByIdWithGatewayInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Retrieving metering report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
@@ -39,7 +39,7 @@ public class NodeStatusService {
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> getNetworkReport(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Stack stack = stackService.getByIdWithGatewayInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Retrieving network report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
@@ -51,7 +51,7 @@ public class NodeStatusService {
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> getServicesReport(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Stack stack = stackService.getByIdWithGatewayInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Retrieving services report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
@@ -63,7 +63,7 @@ public class NodeStatusService {
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> getSystemMetrics(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Stack stack = stackService.getByIdWithGatewayInTransaction(stackId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Retrieving system metrics report from the hosts of stack: {}", stack.getResourceCrn());
         CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance());
