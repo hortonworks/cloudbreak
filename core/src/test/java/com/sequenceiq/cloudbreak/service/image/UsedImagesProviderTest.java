@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 @ExtendWith(MockitoExtension.class)
 class UsedImagesProviderTest {
 
+    private static final int THRESHOLD_IN_DAYS = 180;
+
     @Mock
     private StackService stackService;
 
@@ -27,19 +29,19 @@ class UsedImagesProviderTest {
 
     @Test
     void testEmpty() {
-        when(stackService.getImagesOfAliveStacks()).thenReturn(List.of());
+        when(stackService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of());
 
-        final UsedImagesListV4Response result = underTest.getUsedImages();
+        final UsedImagesListV4Response result = underTest.getUsedImages(THRESHOLD_IN_DAYS);
 
         assertThat(result.getUsedImages()).isEmpty();
     }
 
     @Test
     void testSingleImage() {
-        when(stackService.getImagesOfAliveStacks()).thenReturn(List.of(
+        when(stackService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of(
                 createImage("aws-image")));
 
-        final UsedImagesListV4Response result = underTest.getUsedImages();
+        final UsedImagesListV4Response result = underTest.getUsedImages(THRESHOLD_IN_DAYS);
 
         assertThat(result.getUsedImages())
                 .hasSize(1)
@@ -49,12 +51,12 @@ class UsedImagesProviderTest {
 
     @Test
     void testMultipleImages() {
-        when(stackService.getImagesOfAliveStacks()).thenReturn(List.of(
+        when(stackService.getImagesOfAliveStacks(THRESHOLD_IN_DAYS)).thenReturn(List.of(
                 createImage("aws-image"),
                 createImage("aws-image"),
                 createImage("azure-image")));
 
-        final UsedImagesListV4Response result = underTest.getUsedImages();
+        final UsedImagesListV4Response result = underTest.getUsedImages(THRESHOLD_IN_DAYS);
 
         assertThat(result.getUsedImages())
                 .hasSize(2)

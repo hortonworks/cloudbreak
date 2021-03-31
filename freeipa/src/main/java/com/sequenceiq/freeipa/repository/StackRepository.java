@@ -98,6 +98,6 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     List<ResourceCrnAndNameView> findNamesByResourceCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
             @Param("accountId") String accountId);
 
-    @Query("SELECT i FROM Stack s INNER JOIN s.image i WHERE s.terminated = -1")
-    List<ImageEntity> findImagesOfAliveStacks();
+    @Query("SELECT i FROM Stack s JOIN s.image i WHERE (s.terminated = -1 OR s.terminated >= :thresholdTimestamp)")
+    List<ImageEntity> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
 }

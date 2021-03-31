@@ -97,5 +97,5 @@ public interface UtilV4Endpoint {
     @Path("used_images")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedImages")
-    UsedImagesListV4Response usedImages();
+    UsedImagesListV4Response usedImages(@QueryParam("thresholdInDays") Integer thresholdInDays);
 }

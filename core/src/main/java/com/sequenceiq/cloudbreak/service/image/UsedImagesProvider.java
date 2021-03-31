@@ -13,10 +13,10 @@ public class UsedImagesProvider {
     @Inject
     private StackService stackService;
 
-    public UsedImagesListV4Response getUsedImages() {
+    public UsedImagesListV4Response getUsedImages(Integer thresholdInDays) {
         final UsedImagesListV4Response usedImages = new UsedImagesListV4Response();
 
-        stackService.getImagesOfAliveStacks()
+        stackService.getImagesOfAliveStacks(thresholdInDays)
                 .forEach(usedImages::addImage);
 
         return usedImages;

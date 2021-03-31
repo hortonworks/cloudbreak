@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -7,12 +9,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -26,6 +30,9 @@ import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
 public class StackService implements ResourceCrnAndNameProvider {
+
+    @VisibleForTesting
+    Supplier<LocalDateTime> nowSupplier = LocalDateTime::now;
 
     @Inject
     private StackRepository stackRepository;
@@ -162,7 +169,10 @@ public class StackService implements ResourceCrnAndNameProvider {
         return EnumSet.of(Crn.ResourceType.FREEIPA, Crn.ResourceType.ENVIRONMENT);
     }
 
-    public List<ImageEntity> getImagesOfAliveStacks() {
-        return stackRepository.findImagesOfAliveStacks();
+    public List<ImageEntity> getImagesOfAliveStacks(Integer thresholdInDays) {
+        final LocalDateTime thresholdDate = nowSupplier.get()
+                .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
+        final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
+        return stackRepository.findImagesOfAliveStacks(thresholdTimestamp);
     }
 }

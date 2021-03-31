@@ -17,7 +17,7 @@ public class UtilV1Controller implements UtilV1Endpoint {
 
     @Override
     @InternalOnly
-    public UsedImagesListV1Response usedImages() {
-        return usedImagesProvider.getUsedImages();
+    public UsedImagesListV1Response usedImages(Integer thresholdInDays) {
+        return usedImagesProvider.getUsedImages(thresholdInDays);
     }
 }
