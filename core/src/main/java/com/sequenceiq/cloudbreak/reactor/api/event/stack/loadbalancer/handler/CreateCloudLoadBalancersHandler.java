@@ -15,9 +15,16 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -44,6 +51,12 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
+    @Inject
+    private PollTaskFactory statusCheckFactory;
+
+    @Inject
+    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
 
     @Override
     public String selector() {
@@ -81,6 +94,15 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             LOGGER.debug("Initiating cloud load balancer creation");
             List<CloudResourceStatus> resourceStatus = connector.resources().launchLoadBalancers(ac, updatedCloudStack, persistenceNotifier);
+
+            LOGGER.debug("Waiting for cloud load balancers to be fully created");
+            List<CloudResource> resources = ResourceLists.transform(resourceStatus);
+            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
+            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
+            if (!task.completed(statePollerResult)) {
+                syncPollingScheduler.schedule(task);
+            }
+
             if (resourceStatus.stream().anyMatch(CloudResourceStatus::isFailed)) {
                 Set<String> names = resourceStatus.stream()
                     .filter(CloudResourceStatus::isFailed)

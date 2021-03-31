@@ -259,6 +259,7 @@ public class StackLoadBalancerUpdateActions {
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
                 .withUserId(stack.getCreator().getUserId())
+                .withUserName(stack.getCreator().getUserName())
                 .withAccountId(stack.getWorkspace().getId())
                 .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
