@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -104,6 +105,12 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "postDistroXV1")
     StackV4Response post(@Valid DistroXV1Request request);
+
+    @POST
+    @Path("internal")
+    @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "postDistroXInternalV1")
+    StackV4Response postInternal(@AccountId @QueryParam("accountId") String accountId, @Valid DistroXV1Request request);
 
     @GET
     @Path("name/{name}")
