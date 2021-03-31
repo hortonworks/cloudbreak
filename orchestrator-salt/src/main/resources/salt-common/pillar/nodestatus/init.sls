@@ -1,0 +1,3 @@
+nodestatus:
+  serverUsername:
+  serverPassword:

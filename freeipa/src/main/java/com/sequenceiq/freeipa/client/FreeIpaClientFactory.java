@@ -49,12 +49,8 @@ public abstract class FreeIpaClientFactory<T> {
         return client;
     }
 
-    public T getClientWithBasicAuth(Stack stack, InstanceMetaData instance)
+    public T getClientWithBasicAuth(Stack stack, InstanceMetaData instance, Optional<String> username, Optional<String> password)
             throws FreeIpaClientException, MalformedURLException {
-        //TODO get username/password from stack object
-        Optional<String> username = Optional.empty();
-        Optional<String> password = Optional.empty();
-
         T client;
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             client = buildClientForClusterProxy(stack, instance, username, password);

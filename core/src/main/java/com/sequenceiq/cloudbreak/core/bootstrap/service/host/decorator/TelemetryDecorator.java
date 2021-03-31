@@ -39,6 +39,8 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringAuthConfig;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
+import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
+import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -90,6 +92,8 @@ public class TelemetryDecorator {
 
     private final MonitoringConfigService monitoringConfigService;
 
+    private final NodeStatusConfigService nodeStatusConfigService;
+
     private final TelemetryCommonConfigService telemetryCommonConfigService;
 
     private final AltusMachineUserService altusMachineUserService;
@@ -104,6 +108,7 @@ public class TelemetryDecorator {
             FluentConfigService fluentConfigService,
             MeteringConfigService meteringConfigService,
             MonitoringConfigService monitoringConfigService,
+            NodeStatusConfigService nodeStatusConfigService,
             TelemetryCommonConfigService telemetryCommonConfigService,
             AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
@@ -114,6 +119,7 @@ public class TelemetryDecorator {
         this.fluentConfigService = fluentConfigService;
         this.meteringConfigService = meteringConfigService;
         this.monitoringConfigService = monitoringConfigService;
+        this.nodeStatusConfigService = nodeStatusConfigService;
         this.telemetryCommonConfigService = telemetryCommonConfigService;
         this.altusMachineUserService = altusMachineUserService;
         this.vmLogsService = vmLogsService;
@@ -175,6 +181,7 @@ public class TelemetryDecorator {
         }
         setupMetering(servicePillar, stack, serviceType, meteringEnabled);
         setupMonitoring(servicePillar, stack, clusterDetails);
+        setupNodeStatusMonitor(servicePillar, stack);
         return servicePillar;
     }
 
@@ -237,6 +244,18 @@ public class TelemetryDecorator {
             servicePillar.put("metering",
                     new SaltPillarProperties("/metering/init.sls", singletonMap("metering", meteringConfig)));
         }
+    }
+
+    private void setupNodeStatusMonitor(Map<String, SaltPillarProperties> servicePillar, Stack stack) {
+        char[] passwordInput = null;
+        if (StringUtils.isNotBlank(stack.getCluster().getCdpNodeStatusMonitorPassword())) {
+            passwordInput = stack.getCluster().getCdpNodeStatusMonitorPassword().toCharArray();
+        }
+        NodeStatusConfigView nodeStatusConfigView = nodeStatusConfigService
+                .createNodeStatusConfig(stack.getCluster().getCdpNodeStatusMonitorUser(), passwordInput);
+        Map<String, Object> nodeStatusConfig = nodeStatusConfigView.toMap();
+        servicePillar.put("nodestatus",
+                new SaltPillarProperties("/nodestatus/init.sls", singletonMap("nodestatus", nodeStatusConfig)));
     }
 
     private String getDatalakeCrn(Telemetry telemetry, String defaultClusterCrn) {

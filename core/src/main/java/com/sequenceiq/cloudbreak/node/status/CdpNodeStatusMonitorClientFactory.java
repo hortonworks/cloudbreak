@@ -32,7 +32,7 @@ public class CdpNodeStatusMonitorClientFactory {
     private boolean restDebug;
 
     @Value("${cb.nodestatus.connectionTimeoutMs}")
-    private int connetionTimeoutMillis;
+    private int connectionTimeoutMillis;
 
     @Value("${cb.nodestatus.readTimeoutMs}")
     private int readTimeoutMillis;
@@ -47,20 +47,16 @@ public class CdpNodeStatusMonitorClientFactory {
     private ClusterProxyConfiguration clusterProxyConfiguration;
 
     public CdpNodeStatusMonitorClient getClient(Stack stack, InstanceMetaData instance) {
-        CdpNodeStatusMonitorClient client;
-        if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
-            client = buildClientForClusterProxy(stack, instance, Optional.empty(), Optional.empty());
+        final Optional<String> username;
+        final Optional<String> password;
+        if (stack.getCluster() != null
+                && StringUtils.isNoneEmpty(stack.getCluster().getCdpNodeStatusMonitorUser(), stack.getCluster().getCdpNodeStatusMonitorPassword())) {
+            username = Optional.of(stack.getCluster().getCdpNodeStatusMonitorUser());
+            password = Optional.of(stack.getCluster().getCdpNodeStatusMonitorPassword());
         } else {
-            client = buildClientForDirectConnect(stack, instance, Optional.empty(), Optional.empty());
+            username = Optional.empty();
+            password = Optional.empty();
         }
-        return client;
-    }
-
-    public CdpNodeStatusMonitorClient getClientWithBasicAuth(Stack stack, InstanceMetaData instance) {
-        //TODO get username/password from stack object
-        Optional<String> username = Optional.empty();
-        Optional<String> password = Optional.empty();
-
         CdpNodeStatusMonitorClient client;
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             client = buildClientForClusterProxy(stack, instance, username, password);
@@ -92,7 +88,7 @@ public class CdpNodeStatusMonitorClientFactory {
         Client restClient;
         try {
             restClient = RestClientUtil.createClient(clientConfig.getServerCert(), clientConfig.getClientCert(), clientConfig.getClientKey(),
-                    connetionTimeoutMillis, readTimeoutMillis, restDebug);
+                    connectionTimeoutMillis, readTimeoutMillis, restDebug);
         } catch (Exception e) {
             throw new CloudbreakServiceException("Unable to create client for node status checks", e);
         }
@@ -131,7 +127,7 @@ public class CdpNodeStatusMonitorClientFactory {
     private Map<String, String> clusterProxyHeaders() {
         return Map.of(
                 "Proxy-Ignore-Auth", "true",
-                "Proxy-With-Timeout", Integer.toString(connetionTimeoutMillis)
+                "Proxy-With-Timeout", Integer.toString(connectionTimeoutMillis)
         );
     }
 }

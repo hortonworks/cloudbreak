@@ -1,6 +1,7 @@
 package com.sequenceiq.node.health.client;
 
 import java.net.URL;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,7 +16,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.Response.Status.Family;
 
-import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,19 +38,20 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
     private final RpcListener listener;
 
-    private final Optional<String> username;
-
-    private final Optional<String> password;
-
     public CdpNodeStatusMonitorClient(Client restClient, URL url, Map<String, String> headers, RpcListener listener, Optional<String> username,
             Optional<String> password) {
         this.restClient = restClient;
         this.headers = new MultivaluedHashMap<>(headers);
         this.listener = listener;
-        this.username = username;
-        this.password = password;
-
+        addBasicAuthHeader(username, password);
         rpcTarget = restClient.target(url.toString());
+    }
+
+    private void addBasicAuthHeader(Optional<String> username, Optional<String> password) {
+        if (username.isPresent() && password.isPresent()) {
+            String base64AuthStr = Base64.getEncoder().encodeToString(String.format("%s:%s", username.get(), password.get()).getBytes());
+            this.headers.add("Authorization", "Basic " + base64AuthStr);
+        }
     }
 
     @Override
@@ -83,10 +84,6 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
         Builder builder = rpcTarget.path(path)
                 .request()
                 .headers(headers);
-        if (username.isPresent() && password.isPresent()) {
-            builder.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_USERNAME, username.get());
-            builder.property(HttpAuthenticationFeature.HTTP_AUTHENTICATION_BASIC_PASSWORD, password.get());
-        }
         try (Response response = builder.get()) {
             bufferResponseEntity(response);
             processRpcListener(response);
@@ -95,7 +92,7 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
         } catch (CdpNodeStatusMonitorClientException e) {
             throw e;
         } catch (Throwable throwable) {
-            String message = String.format("Invoke FreeIPA health check failed: %s", throwable.getLocalizedMessage());
+            String message = String.format("Invoke FreeIPA node status check failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
             throw new CdpNodeStatusMonitorClientException(message, throwable);
         }
