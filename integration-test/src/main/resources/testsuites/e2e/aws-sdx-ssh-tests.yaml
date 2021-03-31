@@ -1,0 +1,5 @@
+name: "aws-sdx-ssh-tests"
+tests:
+  - name: "aws_sdx_ssh_e2e_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.InternalSdxSshAndCmAccessTest

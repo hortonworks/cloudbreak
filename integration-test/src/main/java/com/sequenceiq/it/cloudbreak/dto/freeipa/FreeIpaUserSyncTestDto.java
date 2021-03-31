@@ -4,8 +4,10 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -41,6 +43,10 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
 
     public void setOperationId(String operationId) {
         this.operationId = operationId;
+    }
+
+    public SetPasswordRequest setPassword(Set<String> environmentCrns, String newPassword) {
+        return new SetPasswordRequest(environmentCrns, newPassword);
     }
 
     public FreeIpaUserSyncTestDto await(OperationState operationState) {

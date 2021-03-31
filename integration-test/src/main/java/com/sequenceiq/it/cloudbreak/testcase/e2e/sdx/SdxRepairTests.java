@@ -26,7 +26,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxRepairTests extends PreconditionSdxE2ETest {
@@ -42,9 +41,6 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
-
-    @Inject
-    private SshJUtil sshJUtil;
 
     @Inject
     private SdxUtil sdxUtil;

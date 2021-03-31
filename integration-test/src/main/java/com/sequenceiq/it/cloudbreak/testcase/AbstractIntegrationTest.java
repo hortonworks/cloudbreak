@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -10,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -38,15 +40,16 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIntegrationTest.class);
+
+    private final Map<String, InstanceStatus> instancesHealthy = InstanceUtil.getHealthySDXInstances();
 
     @Inject
     private CredentialTestClient credentialTestClient;
@@ -102,6 +105,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         return environmentTestClient;
     }
 
+    protected Map<String, InstanceStatus> getSdxInstancesHealthyState() {
+        return instancesHealthy;
+    }
+
     protected void createImageValidationSourceCatalog(TestContext testContext, String url, String name) {
         testContext.given(ImageCatalogTestDto.class)
                 .withUrl(url)
@@ -154,15 +161,13 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDatalake(TestContext testContext) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
         testContext
                 .given(SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
-                .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withCloudStorage(getCloudStorageRequest(testContext))
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForInstance(getSdxInstancesHealthyState())
+                .when(sdxTestClient.describeInternal())
                 .validate();
     }
 
@@ -288,12 +293,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {
         String storage = resourcePropertyProvider().getName();
         testContext.given(storage, SdxCloudStorageTestDto.class);
-
         SdxCloudStorageTestDto cloudStorage = testContext.getCloudProvider().cloudStorage(testContext.get(storage));
         if (cloudStorage == null) {
             throw new IllegalArgumentException("SDX Cloud Storage does not exist!");
         }
-
         return cloudStorage.getRequest();
     }
 }

@@ -9,7 +9,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 @ConfigurationProperties(prefix = "integrationtest")
 public class CommonClusterManagerProperties {
 
-    private final ClouderaManager cm = new ClouderaManager();
+    private final ClouderaManager clouderamanager = new ClouderaManager();
 
     private String runtimeVersion;
 
@@ -21,7 +21,7 @@ public class CommonClusterManagerProperties {
 
     private String internalDistroXBlueprintName;
 
-    private UpgradeProperties upgradeProperties = new UpgradeProperties();
+    private UpgradeProperties upgrade = new UpgradeProperties();
 
     public String getRuntimeVersion() {
         return runtimeVersion;
@@ -56,7 +56,7 @@ public class CommonClusterManagerProperties {
     }
 
     public ClouderaManager getClouderaManager() {
-        return cm;
+        return clouderamanager;
     }
 
     public String getInternalDistroXBlueprintName() {
@@ -68,7 +68,7 @@ public class CommonClusterManagerProperties {
     }
 
     public UpgradeProperties getUpgrade() {
-        return upgradeProperties;
+        return upgrade;
     }
 
     public static class ClouderaManager {

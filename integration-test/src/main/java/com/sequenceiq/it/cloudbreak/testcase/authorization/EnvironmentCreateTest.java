@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.assertion.util.CheckRightTrueAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.client.UtilTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -49,6 +50,9 @@ public class EnvironmentCreateTest extends AbstractMockTest {
 
     @Inject
     private UtilTestClient utilTestClient;
+
+    @Inject
+    private UmsTestClient umsTestClient;
 
     @Inject
     private CloudbreakActor cloudbreakActor;
@@ -92,9 +96,9 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withDatahubCreator()
-                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .withEnvironmentUser()
-                .when(environmentTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();

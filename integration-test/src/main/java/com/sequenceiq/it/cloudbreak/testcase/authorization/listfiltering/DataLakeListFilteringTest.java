@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -29,6 +30,9 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
+    private UmsTestClient umsTestClient;
+
+    @Inject
     private ResourceCreator resourceCreator;
 
     @Override
@@ -42,7 +46,7 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(ImageCatalogTestDto.class.getSimpleName())
                 .withSharedResourceUser()
-                .when(environmentTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
                 .validate();
     }
 
@@ -72,13 +76,13 @@ public class DataLakeListFilteringTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(environmentTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
                 .validate();
 
         testContext.given(UmsTestDto.class)
                 .assignTarget(environmentB.getName())
                 .withEnvironmentUser()
-                .when(environmentTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A))
                 .validate();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, dataLakeA.getName(), dataLakeB.getName());

@@ -45,7 +45,7 @@ public class FreeIpaSyncTest extends AbstractMockTest {
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.syncAll())
+                .when(freeIpaTestClient.syncAllInternal())
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.delete())

@@ -2,16 +2,19 @@ package com.sequenceiq.it.cloudbreak.dto.ums;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.ums.AssignResourceRequest;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 
 @Prototype
-public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, UmsTestDto, UmsClient> {
+public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManagementProto.User, UmsTestDto, UmsClient> {
 
     private static final String UMS = "UMS";
 
@@ -91,5 +94,15 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, Object, U
     @Override
     public UmsTestDto when(Action<UmsTestDto, UmsClient> action) {
         return getTestContext().when((UmsTestDto) this, UmsClient.class, action, emptyRunningParameter());
+    }
+
+    @Override
+    public UmsTestDto then(Assertion<UmsTestDto, UmsClient> assertion) {
+        return then(assertion, emptyRunningParameter());
+    }
+
+    @Override
+    public UmsTestDto then(Assertion<UmsTestDto, UmsClient> assertion, RunningParameter runningParameter) {
+        return getTestContext().then((UmsTestDto) this, UmsClient.class, assertion, runningParameter);
     }
 }

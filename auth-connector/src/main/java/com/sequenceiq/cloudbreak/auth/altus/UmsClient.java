@@ -14,14 +14,12 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Actor;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
@@ -515,17 +513,41 @@ public class UmsClient {
     }
 
     /**
+     * Wraps a call to setActorWorkloadPassword.
+     *
+     * @param requestId the request ID for the request
+     * @param userCrn   the user CRN
+     * @param password  the new Workload password
+     * @return the ActorWorkloadCredentialsResponse
+     */
+    public UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadPassword(String requestId, String userCrn, String password) {
+        checkNotNull(requestId);
+        checkNotNull(userCrn);
+        checkNotNull(password);
+        UserManagementProto.SetActorWorkloadCredentialsResponse response = newStub(requestId).setActorWorkloadCredentials(
+                UserManagementProto.SetActorWorkloadCredentialsRequest.newBuilder()
+                .setActorCrn(userCrn)
+                .setPassword(password)
+                .build()
+        );
+        response.getAllFields().forEach((key, value) -> {
+            LOGGER.info("Workload '{}' credential value is '{}' after password update.", key, value);
+        });
+        return response;
+    }
+
+    /**
      * Wraps a call to getActorWorkloadCredentials.
      *
      * @param requestId the request ID for the request
      * @param userCrn   the user CRN
      * @return the ActorWorkloadCredentialsResponse
      */
-    public GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String requestId, String userCrn) {
+    public UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String requestId, String userCrn) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         return newStub(requestId).getActorWorkloadCredentials(
-                GetActorWorkloadCredentialsRequest.newBuilder()
+                UserManagementProto.GetActorWorkloadCredentialsRequest.newBuilder()
                         .setActorCrn(userCrn)
                         .build()
         );

@@ -4,6 +4,7 @@ import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.MockNetworkV1Parameters;
@@ -63,6 +65,8 @@ public class MockCloudProvider extends AbstractCloudProvider {
     private static final String DEFAULT_BLUEPRINT_CDH_VERSION = "7.0.2";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockCloudProvider.class);
+
+    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
 
     @Value("${mock.infrastructure.host:localhost}")
     private String mockInfrastructureHost;
@@ -362,21 +366,31 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     @Override
     public SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage) {
-        return cloudStorage;
+        return cloudStorage
+                .withFileSystemType(getFileSystemType())
+                .withBaseLocation(getBaseLocation())
+                .withS3(s3CloudStorageParameters());
+    }
+
+    public S3CloudStorageV1Parameters s3CloudStorageParameters() {
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        s3CloudStorageV1Parameters.setInstanceProfile(mockProperties.getCloudStorage().getS3().getInstanceProfile());
+        return s3CloudStorageV1Parameters;
     }
 
     @Override
     public FileSystemType getFileSystemType() {
-        return null;
+        S3CloudStorageV1Parameters s3CloudStorageV1Parameters = new S3CloudStorageV1Parameters();
+        return s3CloudStorageV1Parameters.getType();
     }
 
     @Override
     public String getBaseLocation() {
-        return null;
+        return String.join("/", mockProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
     public String getInstanceProfile() {
-        return null;
+        return mockProperties.getCloudStorage().getS3().getInstanceProfile();
     }
 
     private MockNetworkV1Parameters distroXNetworkParameters() {
