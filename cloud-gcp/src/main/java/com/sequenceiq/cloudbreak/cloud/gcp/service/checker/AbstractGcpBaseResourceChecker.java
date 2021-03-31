@@ -30,25 +30,53 @@ public abstract class AbstractGcpBaseResourceChecker {
     }
 
     protected void exceptionHandler(GoogleJsonResponseException ex, String name, ResourceType resourceType) {
-        throwIfNull(ex, () -> new IllegalArgumentException("Unable to handle exception due to: " + GoogleJsonResponseException.class.getSimpleName()
-                + " should not be null!"));
-        GoogleJsonError jsonError = ex.getDetails();
-        LOGGER.debug("{} contains the following {}: {}",
-                GoogleJsonResponseException.class.getSimpleName(),  GoogleJsonError.class.getSimpleName(), jsonError != null ? jsonError.toString() : "null");
+        GoogleJsonError jsonError = getGoogleJsonError(ex);
         if (jsonError != null) {
             if (jsonError.get(HTTP_CODE_KEY) != null && jsonError.get(HTTP_CODE_KEY).equals(HttpStatus.SC_NOT_FOUND)) {
                 LOGGER.info("Resource {} not found: {}", resourceType, name);
             } else {
-                LOGGER.warn("Unable to uncover the error code of {}! {}: {}",
-                        GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName(), jsonError);
-                throw new GcpResourceException(ex.getDetails().getMessage(), ex);
+                throw extractedPermissionIssue(ex, jsonError);
             }
         } else {
-            String msg = String.format("Unable to uncover the detailed information of %s since %s does not contains the details!",
-                    GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName());
-            LOGGER.warn(msg, ex);
-            throw new GcpResourceException(ex.getMessage(), ex);
+            throw extractIfNoJson(ex);
         }
     }
 
+    protected GcpResourceException exceptionHandlerWithThrow(GoogleJsonResponseException ex, String name, ResourceType resourceType) {
+        GoogleJsonError jsonError = getGoogleJsonError(ex);
+        if (jsonError != null) {
+            if (jsonError.get(HTTP_CODE_KEY) != null && jsonError.get(HTTP_CODE_KEY).equals(HttpStatus.SC_NOT_FOUND)) {
+                LOGGER.info("Resource {} not found: {}", resourceType, name);
+                return new GcpResourceException(ex.getDetails().getMessage(), ex);
+            } else {
+                return extractedPermissionIssue(ex, jsonError);
+            }
+        } else {
+            return extractIfNoJson(ex);
+        }
+    }
+
+    private GcpResourceException extractedPermissionIssue(GoogleJsonResponseException ex, GoogleJsonError jsonError) {
+        LOGGER.warn("Unable to uncover the error code of {}! {}: {}",
+                GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName(), jsonError);
+        return new GcpResourceException(ex.getDetails().getMessage());
+    }
+
+    private GoogleJsonError getGoogleJsonError(GoogleJsonResponseException ex) {
+        throwIfNull(ex, () -> new IllegalArgumentException("Unable to handle exception due to: "
+                + GoogleJsonResponseException.class.getSimpleName()
+                + " should not be null!"));
+        GoogleJsonError jsonError = ex.getDetails();
+        LOGGER.debug("{} contains the following {}: {}",
+                GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName(),
+                jsonError != null ? jsonError.toString() : "null");
+        return jsonError;
+    }
+
+    private GcpResourceException extractIfNoJson(GoogleJsonResponseException ex) {
+        String msg = String.format("Unable to uncover the detailed information of %s since %s does not contains the details!",
+                GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName());
+        LOGGER.warn(msg, ex);
+        return new GcpResourceException(ex.getMessage(), ex);
+    }
 }
