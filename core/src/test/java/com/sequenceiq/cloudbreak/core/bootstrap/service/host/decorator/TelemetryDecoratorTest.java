@@ -43,6 +43,8 @@ import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfigView;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
+import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
+import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -65,6 +67,9 @@ public class TelemetryDecoratorTest {
 
     @Mock
     private AltusMachineUserService altusMachineUserService;
+
+    @Mock
+    private NodeStatusConfigService nodeStatusConfigService;
 
     @Mock
     private TelemetryCommonConfigService telemetryCommonConfigService;
@@ -93,8 +98,8 @@ public class TelemetryDecoratorTest {
                 .willReturn(Optional.of(altusCredential));
         given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
         underTest = new TelemetryDecorator(databusConfigService, fluentConfigService,
-                meteringConfigService, monitoringConfigService, telemetryCommonConfigService, altusMachineUserService, vmLogsService,
-                entitlementService, dataBusEndpointProvider, "1.0.0");
+                meteringConfigService, monitoringConfigService, nodeStatusConfigService, telemetryCommonConfigService,
+                altusMachineUserService, vmLogsService, entitlementService, dataBusEndpointProvider, "1.0.0");
     }
 
     @Test
@@ -197,6 +202,10 @@ public class TelemetryDecoratorTest {
                 .withEnabled(true)
                 .withClusterDetails(clusterDetails)
                 .build();
+        NodeStatusConfigView nodeStatusConfigView = new NodeStatusConfigView.Builder()
+                .withServerUsername("admin")
+                .withServerPassword("admin".toCharArray())
+                .build();
         DatabusConfigView dataConfigView = new DatabusConfigView.Builder()
                 .build();
         TelemetryCommonConfigView telemetryCommonConfigView = new TelemetryCommonConfigView.Builder()
@@ -204,7 +213,7 @@ public class TelemetryDecoratorTest {
                 .build();
         MeteringConfigView meteringConfigView = new MeteringConfigView.Builder().build();
         mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView,
-                monitoringConfigView, telemetryCommonConfigView);
+                monitoringConfigView, nodeStatusConfigView, telemetryCommonConfigView);
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
                 createStack(), new Telemetry());
@@ -280,12 +289,12 @@ public class TelemetryDecoratorTest {
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
             MeteringConfigView meteringConfigView) {
         mockConfigServiceResults(databusConfigView, fluentConfigView, meteringConfigView,
-                new MonitoringConfigView.Builder().build(), new TelemetryCommonConfigView.Builder().build());
+                new MonitoringConfigView.Builder().build(), new NodeStatusConfigView.Builder().build(), new TelemetryCommonConfigView.Builder().build());
     }
 
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,
             MeteringConfigView meteringConfigView, MonitoringConfigView monitoringConfigView,
-            TelemetryCommonConfigView telemetryCommonConfigView) {
+            NodeStatusConfigView nodeStatusConfigView, TelemetryCommonConfigView telemetryCommonConfigView) {
         given(dataBusEndpointProvider.getDataBusEndpoint(isNull(), anyBoolean())).willReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
         given(databusConfigService.createDatabusConfigs(anyString(), any(), isNull(), anyString()))
                 .willReturn(databusConfigView);
@@ -296,6 +305,7 @@ public class TelemetryDecoratorTest {
                 anyString(), anyString())).willReturn(meteringConfigView);
         given(monitoringConfigService.createMonitoringConfig(any(), any()))
                 .willReturn(monitoringConfigView);
+        given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull())).willReturn(nodeStatusConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),
                 anyString(), anyString(), anyString(), anyString()))
                 .willReturn(telemetryCommonConfigView);

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.entity;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
@@ -117,6 +118,14 @@ public class Stack implements AccountAwareResource {
     @Convert(converter = SecretToString.class)
     @SecretValue
     private Secret databusCredential = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret cdpNodeStatusMonitorUser = Secret.EMPTY;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret cdpNodeStatusMonitorPassword = Secret.EMPTY;
 
     private String template;
 
@@ -323,6 +332,22 @@ public class Stack implements AccountAwareResource {
 
     public void setDatabusCredential(String databusCredential) {
         this.databusCredential = new Secret(databusCredential);
+    }
+
+    public String getCdpNodeStatusMonitorUser() {
+        return getIfNotNull(cdpNodeStatusMonitorUser, Secret::getRaw);
+    }
+
+    public void setCdpNodeStatusMonitorUser(String cdpNodeStatusMonitorUser) {
+        this.cdpNodeStatusMonitorUser = new Secret(cdpNodeStatusMonitorUser);
+    }
+
+    public String getCdpNodeStatusMonitorPassword() {
+        return getIfNotNull(cdpNodeStatusMonitorPassword, Secret::getRaw);
+    }
+
+    public void setCdpNodeStatusMonitorPassword(String cdpNodeStatusMonitorPassword) {
+        this.cdpNodeStatusMonitorPassword = new Secret(cdpNodeStatusMonitorPassword);
     }
 
     public String getOwner() {

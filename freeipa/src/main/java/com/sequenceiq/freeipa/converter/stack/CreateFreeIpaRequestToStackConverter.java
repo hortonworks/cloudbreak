@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
+import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -125,6 +127,8 @@ public class CreateFreeIpaRequestToStackConverter {
         } else {
             stack.setBackup(backupConverter.convert(source.getTelemetry()));
         }
+        stack.setCdpNodeStatusMonitorUser(UUID.randomUUID().toString());
+        stack.setCdpNodeStatusMonitorPassword(PasswordUtil.generatePassword());
         decorateStackWithTunnelAndCcm(stack, source);
         updateOwnerRelatedFields(source, accountId, ownerFuture, userCrn, stack);
         extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack);

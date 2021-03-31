@@ -5,7 +5,7 @@ server:
   folder: /var/lib/cdp-nodestatus/report{% if nodestatus.serverUsername and nodestatus.serverPassword %}
   auth:
     username: {{ nodestatus.serverUsername }}
-    password: {{ nodestatus.serverPassword }}
+    password: {{ nodestatus.serverPassword | sha256 }}
     hash: sha256{% endif %}
 commands:{% if telemetry.databusEndpoint %}
   - "cdp-nodestatus collect --databus-url {{ telemetry.databusEndpoint }}"{% else %}

@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.net.MalformedURLException;
+import java.util.Optional;
+
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,7 +28,7 @@ public class FreeIpaNodeStatusService {
     private FreeIpaNodeStatusClientFactory freeIpaNodeStatusClientFactory;
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeNetworkReport(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        try (CdpNodeStatusMonitorClient client = freeIpaNodeStatusClientFactory.getClient(stack, instance)) {
+        try (CdpNodeStatusMonitorClient client = getClient(stack, instance)) {
             LOGGER.debug("Fetching network report for instance: {}", instance.getInstanceId());
             return client.nodeNetworkReport();
         } catch (FreeIpaClientException e) {
@@ -36,7 +40,7 @@ public class FreeIpaNodeStatusService {
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeServicesReport(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        try (CdpNodeStatusMonitorClient client = freeIpaNodeStatusClientFactory.getClient(stack, instance)) {
+        try (CdpNodeStatusMonitorClient client = getClient(stack, instance)) {
             LOGGER.debug("Fetching services report for instance: {}", instance.getInstanceId());
             return client.nodeServicesReport();
         } catch (FreeIpaClientException e) {
@@ -48,7 +52,7 @@ public class FreeIpaNodeStatusService {
     }
 
     public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
-        try (CdpNodeStatusMonitorClient client = freeIpaNodeStatusClientFactory.getClient(stack, instance)) {
+        try (CdpNodeStatusMonitorClient client = getClient(stack, instance)) {
             LOGGER.debug("Fetching salt report for instance: {}", instance.getInstanceId());
             return client.saltReport();
         } catch (FreeIpaClientException e) {
@@ -57,5 +61,18 @@ public class FreeIpaNodeStatusService {
             LOGGER.error("Getting FreeIPA node services report failed", e);
             throw new RetryableFreeIpaClientException("Getting FreeIPA node services report failed", e);
         }
+    }
+
+    private CdpNodeStatusMonitorClient getClient(Stack stack, InstanceMetaData instance) throws MalformedURLException, FreeIpaClientException {
+        final Optional<String> username;
+        final Optional<String> password;
+        if (StringUtils.isNoneEmpty(stack.getCdpNodeStatusMonitorUser(), stack.getCdpNodeStatusMonitorPassword())) {
+            username = Optional.of(stack.getCdpNodeStatusMonitorUser());
+            password = Optional.of(stack.getCdpNodeStatusMonitorPassword());
+        } else {
+            username = Optional.empty();
+            password = Optional.empty();
+        }
+        return freeIpaNodeStatusClientFactory.getClientWithBasicAuth(stack, instance, username, password);
     }
 }

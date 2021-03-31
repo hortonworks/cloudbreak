@@ -7,6 +7,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +26,8 @@ import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
+import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
+import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -43,6 +46,9 @@ public class TelemetryConfigService {
 
     @Inject
     private DatabusConfigService databusConfigService;
+
+    @Inject
+    private NodeStatusConfigService nodeStatusConfigService;
 
     @Inject
     private TelemetryCommonConfigService telemetryCommonConfigService;
@@ -69,6 +75,7 @@ public class TelemetryConfigService {
             servicePillarConfig.putAll(getTelemetryCommonPillarConfig(stack, telemetry, databusEndpoint));
             servicePillarConfig.putAll(getFluentPillarConfig(stack, telemetry, databusEnabled));
             servicePillarConfig.putAll(getDatabusPillarConfig(stack, databusEndpoint, databusEnabled));
+            servicePillarConfig.putAll(getCdpNodeStatusPillarConfig(stack));
             return servicePillarConfig;
         } else {
             return Map.of();
@@ -122,5 +129,15 @@ public class TelemetryConfigService {
                 .withVersion(version)
                 .build();
         return fluentConfigService.createFluentConfigs(clusterDetails, databusEnabled, false, telemetry);
+    }
+
+    private Map<String, ? extends SaltPillarProperties> getCdpNodeStatusPillarConfig(Stack stack) {
+        char[] passwordInput = null;
+        if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
+            passwordInput = stack.getCdpNodeStatusMonitorPassword().toCharArray();
+        }
+        NodeStatusConfigView nodeStatusConfigs = nodeStatusConfigService.createNodeStatusConfig(stack.getCdpNodeStatusMonitorUser(), passwordInput);
+        return Map.of("nodestatus",
+                new SaltPillarProperties("/nodestatus/init.sls", Collections.singletonMap("nodestatus", nodeStatusConfigs.toMap())));
     }
 }

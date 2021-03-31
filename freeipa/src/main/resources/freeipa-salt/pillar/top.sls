@@ -4,6 +4,7 @@ base:
     - tags
     - databus
     - fluent
+    - nodestatus
     - discovery
     - proxy.proxy
     - freeipa

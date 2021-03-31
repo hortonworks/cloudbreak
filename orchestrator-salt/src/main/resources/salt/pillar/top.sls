@@ -14,6 +14,7 @@ base:
     - proxy.proxy
     - telemetry.init
     - databus
+    - nodestatus
     - cloudera-manager.csd
     - cloudera-manager.settings
     - fluent
