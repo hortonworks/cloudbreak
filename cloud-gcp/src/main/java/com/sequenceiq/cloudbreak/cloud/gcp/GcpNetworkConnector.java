@@ -149,21 +149,25 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         String projectId = GcpStackUtil.getProjectId(credential);
         Subnetwork subnet = null;
         try {
-            SubnetworkList ownProjectSubnets = compute.subnetworks().list(projectId, region).execute();
-            Set<Subnetwork> collect = new HashSet<>();
-            if (ownProjectSubnets.getItems() != null) {
-                collect = ownProjectSubnets.getItems()
-                        .stream()
-                        .filter(e -> e.getName().equals(subnetId) || e.getId().toString().equals(subnetId))
-                        .collect(Collectors.toSet());
-            }
-            if (collect.isEmpty() && !Strings.isNullOrEmpty(sharedProjectId)) {
-                subnet = compute.subnetworks().get(sharedProjectId, region, subnetId).execute();
-            } else {
+            if (Strings.isNullOrEmpty(sharedProjectId)) {
+                LOGGER.info("We will query the subnets from the {} project in the {} region (NOT Shared VPC scenario)",
+                        projectId, region);
+                SubnetworkList ownProjectSubnets = compute.subnetworks().list(projectId, region).execute();
+                Set<Subnetwork> collect = new HashSet<>();
+                if (ownProjectSubnets.getItems() != null) {
+                    collect = ownProjectSubnets.getItems()
+                            .stream()
+                            .filter(e -> e.getName().equals(subnetId) || e.getId().toString().equals(subnetId))
+                            .collect(Collectors.toSet());
+                }
                 subnet = collect
                         .stream()
                         .findFirst()
                         .orElse(null);
+            } else {
+                LOGGER.info("We will query the subnet from the {} project in the {} region (Shared VPC scenario)",
+                        sharedProjectId, region);
+                subnet = compute.subnetworks().get(sharedProjectId, region, subnetId).execute();
             }
             if (subnet == null) {
                 throw new GcpResourceException(String.format("Subnet with id %s did not found.", subnetId));
@@ -172,8 +176,10 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
         } catch (TokenResponseException e) {
             throw getMissingServiceAccountKeyError(e, projectId);
+        } catch (GoogleJsonResponseException e) {
+            throw exceptionHandlerWithThrow(e, subnetId, GCP_NETWORK);
         } catch (IOException e) {
-            throw new GcpResourceException("Describe subnets failed due to IO exception", GCP_NETWORK, subnetId);
+            throw new GcpResourceException("Describe subnets failed due to IO exception" + e.getMessage(), GCP_NETWORK, subnetId);
         }
     }
 
