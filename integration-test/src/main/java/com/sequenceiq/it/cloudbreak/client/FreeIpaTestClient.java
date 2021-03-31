@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.client;
 
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -11,6 +13,9 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindGroupsAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersInGroupAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
@@ -77,5 +82,17 @@ public class FreeIpaTestClient {
 
     public Action<FreeipaUsedImagesTestDto, FreeIpaClient> usedImages() {
         return new FreeipaUsedImagesAction();
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> findUsers(Set<String> users) {
+        return new FreeIpaFindUsersAction(users);
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> findGroups(Set<String> groups) {
+        return new FreeIpaFindGroupsAction(groups);
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> findUsersInGroup(Set<String> users, String group) {
+        return new FreeIpaFindUsersInGroupAction(users, group);
     }
 }
