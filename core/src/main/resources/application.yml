@@ -670,7 +670,7 @@ cb:
     readTimeoutMs: 5000
 
   loadBalancer:
-    supportedPlatforms: AWS
+    supportedPlatforms: AWS,YARN
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
