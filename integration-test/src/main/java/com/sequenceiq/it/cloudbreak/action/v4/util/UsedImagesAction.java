@@ -10,7 +10,7 @@ public class UsedImagesAction implements Action<UsedImagesTestDto, CloudbreakCli
 
     @Override
     public UsedImagesTestDto action(TestContext testContext, UsedImagesTestDto testDto, CloudbreakClient client) throws Exception {
-        final UsedImagesListV4Response usedImages = client.getInternalClient(testContext).utilV4Endpoint().usedImages();
+        final UsedImagesListV4Response usedImages = client.getInternalClient(testContext).utilV4Endpoint().usedImages(null);
         testDto.setResponse(usedImages);
         return testDto;
     }

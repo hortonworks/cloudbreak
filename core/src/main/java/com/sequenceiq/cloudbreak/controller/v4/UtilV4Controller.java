@@ -137,7 +137,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     @InternalOnly
-    public UsedImagesListV4Response usedImages() {
-        return usedImagesProvider.getUsedImages();
+    public UsedImagesListV4Response usedImages(Integer thresholdInDays) {
+        return usedImagesProvider.getUsedImages(thresholdInDays);
     }
 }

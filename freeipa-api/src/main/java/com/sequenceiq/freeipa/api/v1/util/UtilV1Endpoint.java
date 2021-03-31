@@ -4,6 +4,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -23,6 +24,5 @@ public interface UtilV1Endpoint {
     @Path("used_images")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilDescriptions.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedImagesV1")
-    UsedImagesListV1Response usedImages();
+    UsedImagesListV1Response usedImages(@QueryParam("thresholdInDays") Integer thresholdInDays);
 }
-

@@ -10,7 +10,7 @@ public class FreeipaUsedImagesAction implements Action<FreeipaUsedImagesTestDto,
 
     @Override
     public FreeipaUsedImagesTestDto action(TestContext testContext, FreeipaUsedImagesTestDto testDto, FreeIpaClient client) throws Exception {
-        final UsedImagesListV1Response usedImages = client.getInternalClient(testContext).utilV1Endpoint().usedImages();
+        final UsedImagesListV1Response usedImages = client.getInternalClient(testContext).utilV1Endpoint().usedImages(null);
         testDto.setResponse(usedImages);
         return testDto;
     }

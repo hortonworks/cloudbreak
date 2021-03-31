@@ -8,7 +8,9 @@ import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -20,6 +22,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -30,9 +33,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.service.ResourceNameProvider;
+import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -130,6 +134,9 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     private static final String SSH_USER_CB = "cloudbreak";
+
+    @VisibleForTesting
+    Supplier<LocalDateTime> nowSupplier = LocalDateTime::now;
 
     @Inject
     private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
@@ -679,13 +686,17 @@ public class StackService implements ResourceIdProvider, ResourceNameProvider {
         return stackRepository.findAllAliveWithInstanceGroups();
     }
 
-    public List<Image> getImagesOfAliveStacks() {
-        return stackRepository.findImagesOfAliveStacks().stream()
-                .map(image -> {
+    public List<Image> getImagesOfAliveStacks(Integer thresholdInDays) {
+        final LocalDateTime thresholdDate = nowSupplier.get()
+                .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
+        final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
+        return stackRepository.findImagesOfAliveStacks(thresholdTimestamp).stream()
+                .map(stackImageView -> {
                     try {
-                        return image.get(Image.class);
+                        return stackImageView.getImage().get(Image.class);
                     } catch (IOException e) {
-                        final String message = "Could not deserialize image from string " + image.getValue();
+                        final String message =
+                                String.format("Could not deserialize image for stack %d from %s", stackImageView.getId(), stackImageView.getImage());
                         LOGGER.error(message, e);
                         throw new IllegalStateException(message, e);
                     }

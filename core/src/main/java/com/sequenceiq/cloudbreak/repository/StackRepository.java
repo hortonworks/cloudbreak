@@ -18,12 +18,12 @@ import com.sequenceiq.authorization.service.list.AuthorizationResource;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
+import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
@@ -113,9 +113,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<Stack> findAllAliveWithInstanceGroups();
 
-    @Query("SELECT im.image FROM Stack s LEFT JOIN s.instanceGroups ig LEFT JOIN ig.instanceMetaData im "
-            + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null) AND im.image is not null")
-    List<Json> findImagesOfAliveStacks();
+    @Query("SELECT DISTINCT s.id as id, im.image as image FROM Stack s JOIN s.instanceGroups ig JOIN ig.instanceMetaData im "
+            + "WHERE (s.terminated = null OR s.terminated >= :thresholdTimestamp) AND (s.type is not 'TEMPLATE' OR s.type is null) AND im.image is not null")
+    List<StackImageView> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
 
     @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
             + "WHERE s.stackStatus.status IN :statuses AND (s.type is not 'TEMPLATE' OR s.type is null)")

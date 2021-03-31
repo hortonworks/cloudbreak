@@ -6,6 +6,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +34,8 @@ class StackServiceTest {
 
     private static final String ACCOUNT_ID = "account:id";
 
+    private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
+
     @InjectMocks
     private StackService underTest;
 
@@ -48,6 +52,8 @@ class StackServiceTest {
         stack = new Stack();
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME);
+
+        underTest.nowSupplier = () -> MOCK_NOW;
     }
 
     @Test
@@ -140,5 +146,22 @@ class StackServiceTest {
         assertThrows(NotFoundException.class, () -> underTest.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID));
         verify(stackRepository).findByEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
         verify(stackRepository).findByChildEnvironmentCrnAndAccountIdWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+    }
+
+    @Test
+    void getImagesOfAliveStacksWithNoThresholdShouldCallRepositoryWithCurrentTimestamp() {
+        underTest.getImagesOfAliveStacks(null);
+
+        verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW).getTime());
+    }
+
+    @Test
+    void getImagesOfAliveStacksWithThresholdShouldCallRepositoryWithModifiedTimestamp() {
+        final int thresholdInDays = 180;
+        final LocalDateTime thresholdTime = MOCK_NOW.minusDays(thresholdInDays);
+
+        underTest.getImagesOfAliveStacks(thresholdInDays);
+
+        verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(thresholdTime).getTime());
     }
 }

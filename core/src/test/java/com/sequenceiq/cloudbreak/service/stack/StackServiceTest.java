@@ -8,17 +8,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -37,6 +41,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -45,8 +50,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -81,6 +86,8 @@ public class StackServiceTest {
     private static final String STACK_NAME = "name";
 
     private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found";
+
+    private static final LocalDateTime MOCK_NOW = LocalDateTime.of(1969, 4, 1, 4, 20);
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -171,6 +178,11 @@ public class StackServiceTest {
 
     @Mock
     private TargetGroupPersistenceService targetGroupPersistenceService;
+
+    @Before
+    public void setUp() {
+        underTest.nowSupplier = () -> MOCK_NOW;
+    }
 
     @Test
     public void testWhenStackCouldNotFindByItsIdThenExceptionWouldThrown() {
@@ -299,19 +311,43 @@ public class StackServiceTest {
 
     @Test
     public void testGetImagesOfAliveStacksWithValidImage() {
-        when(stackRepository.findImagesOfAliveStacks())
-                .thenReturn(List.of(new Json("{\"imageName\":\"mockimage/hdc-hdp--1710161226.tar.gz\"}")));
+        long thresholdTimestamp = Timestamp.valueOf(MOCK_NOW).getTime();
+        doReturn(List.of(createStackImageView("{\"imageName\":\"mockimage/hdc-hdp--1710161226.tar.gz\"}")))
+                .when(stackRepository).findImagesOfAliveStacks(thresholdTimestamp);
 
-        final List<Image> result = underTest.getImagesOfAliveStacks();
+        final List<Image> result = underTest.getImagesOfAliveStacks(0);
 
         assertEquals("mockimage/hdc-hdp--1710161226.tar.gz", result.get(0).getImageName());
     }
 
     @Test
     public void testGetImagesOfAliveStacksWithInvalidImage() {
-        when(stackRepository.findImagesOfAliveStacks())
-                .thenReturn(List.of(new Json("[]")));
+        long thresholdTimestamp = Timestamp.valueOf(MOCK_NOW).getTime();
+        doReturn(List.of(createStackImageView("[]")))
+                .when(stackRepository).findImagesOfAliveStacks(thresholdTimestamp);
 
-        assertThrows("Could not deserialize image from string []", IllegalStateException.class, () -> underTest.getImagesOfAliveStacks());
+        assertThrows("Could not deserialize image from string []", IllegalStateException.class, () -> underTest.getImagesOfAliveStacks(0));
+    }
+
+    @Test
+    public void testGetImagesOfAliveStacksWithNullThresholdInDays() {
+        underTest.getImagesOfAliveStacks(null);
+
+        verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW).getTime());
+    }
+
+    @Test
+    public void testGetImagesOfAliveStacksWithThreshold() {
+        final int thresholdInDays = 10;
+
+        underTest.getImagesOfAliveStacks(thresholdInDays);
+
+        verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(MOCK_NOW.minusDays(thresholdInDays)).getTime());
+    }
+
+    private StackImageView createStackImageView(String json) {
+        final StackImageView stackImageView = mock(StackImageView.class);
+        when(stackImageView.getImage()).thenReturn(new Json(json));
+        return stackImageView;
     }
 }
