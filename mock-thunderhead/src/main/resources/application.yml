@@ -40,6 +40,7 @@ auth:
     ccmv2.enable: false
     environment.experience.deletion.enable: true
     endpointgateway.enable: false
+    endpointgateway.skip.validation: false
     cm.sync.command.poller.enable: true
     user.sync.credentials.update.optimization.enable: true
     azure:

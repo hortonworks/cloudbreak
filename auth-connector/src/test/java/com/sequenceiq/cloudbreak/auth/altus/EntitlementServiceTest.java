@@ -132,7 +132,10 @@ class EntitlementServiceTest {
                 {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
                         (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, false},
                 {"CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION",
-                        (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, true}
+                        (EntitlementCheckFunction) EntitlementService::usersyncCredentialsUpdateOptimizationEnabled, true},
+
+                {"CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", (EntitlementCheckFunction) EntitlementService::endpointGatewaySkipValidation, false},
+                {"CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", (EntitlementCheckFunction) EntitlementService::endpointGatewaySkipValidation, true}
         };
     }
 

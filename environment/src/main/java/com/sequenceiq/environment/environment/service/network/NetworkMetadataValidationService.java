@@ -54,13 +54,18 @@ public class NetworkMetadataValidationService {
     }
 
     private Map<String, CloudSubnet> removePrivateSubnets(Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
-        LOGGER.debug("Removing any private subnets from the provided endpoint gateway list because they won't be used.");
-        if (endpointGatewaySubnetMetas == null || endpointGatewaySubnetMetas.isEmpty()) {
-            return Map.of();
+        if (entitlementService.endpointGatewaySkipValidation(ThreadBasedUserCrnProvider.getAccountId())) {
+            LOGGER.debug("Endpoint gateway subnet type validation is disabled. Accepting provided subnets");
+            return endpointGatewaySubnetMetas;
+        } else {
+            LOGGER.debug("Removing any private subnets from the provided endpoint gateway list because they won't be used.");
+            if (endpointGatewaySubnetMetas == null || endpointGatewaySubnetMetas.isEmpty()) {
+                return Map.of();
+            }
+            return endpointGatewaySubnetMetas.entrySet().stream()
+                .filter(entry -> !entry.getValue().isPrivateSubnet())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         }
-        return endpointGatewaySubnetMetas.entrySet().stream()
-            .filter(entry -> !entry.getValue().isPrivateSubnet() || entry.getValue().isRoutableToInternet())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private void validateSubnetsIfProvided(Environment environment, Map<String, CloudSubnet> subnetMetas,

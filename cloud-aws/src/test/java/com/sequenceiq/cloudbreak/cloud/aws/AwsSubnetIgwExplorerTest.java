@@ -1,21 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static com.sequenceiq.cloudbreak.cloud.aws.AwsSubnetIgwExplorer.ENDPOINT_GATEWAY_OVERRIDE_KEY;
-import static com.sequenceiq.cloudbreak.cloud.aws.AwsSubnetIgwExplorer.ENDPOINT_GATEWAY_OVERRIDE_VALUE;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 
 import com.amazonaws.services.ec2.model.Route;
 import com.amazonaws.services.ec2.model.RouteTable;
 import com.amazonaws.services.ec2.model.RouteTableAssociation;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.Tag;
 
 public class AwsSubnetIgwExplorerTest {
 
@@ -271,106 +266,5 @@ public class AwsSubnetIgwExplorerTest {
         boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(routeTables, SUBNET_ID, VPC_ID);
 
         assertTrue(hasInternetGateway);
-    }
-
-    @Test
-    public void testInternetRoutableWithIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setGatewayId(GATEWAY_ID);
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
-
-        boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(List.of(routeTable),
-            createSubnets(null, null), SUBNET_ID, VPC_ID);
-
-        assertTrue(routableToInternet);
-    }
-
-    @Test
-    public void testInternetRoutableWithoutIgw() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
-
-        boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(List.of(routeTable),
-            createSubnets(null, null), SUBNET_ID, VPC_ID);
-
-        assertFalse(routableToInternet);
-    }
-
-    @Test
-    public void testEndpointGatewayTagOverride() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
-        List<Subnet> subnets = createSubnets(ENDPOINT_GATEWAY_OVERRIDE_KEY, ENDPOINT_GATEWAY_OVERRIDE_VALUE);
-
-        boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(List.of(routeTable),
-            subnets, SUBNET_ID, VPC_ID);
-
-        assertTrue(routableToInternet);
-    }
-
-    @Test
-    public void testEndpointGatewayTagOverrideBadValue() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
-
-        List<Subnet> subnets = createSubnets(ENDPOINT_GATEWAY_OVERRIDE_KEY, "something else");
-
-        boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(List.of(routeTable),
-            subnets, SUBNET_ID, VPC_ID);
-
-        assertFalse(routableToInternet);
-    }
-
-    @Test
-    public void testEndpointGatewayTagNonOverrideTag() {
-        RouteTable routeTable = new RouteTable().withVpcId(VPC_ID);
-        Route route = new Route();
-        route.setDestinationCidrBlock(OPEN_CIDR_BLOCK);
-        routeTable.setRoutes(List.of(route));
-        RouteTableAssociation routeTableAssociation = new RouteTableAssociation();
-        routeTableAssociation.setSubnetId(SUBNET_ID);
-        routeTable.setAssociations(List.of(routeTableAssociation));
-
-        List<Subnet> subnets = createSubnets("another tag", ENDPOINT_GATEWAY_OVERRIDE_VALUE);
-
-        boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(List.of(routeTable),
-            subnets, SUBNET_ID, VPC_ID);
-
-        assertFalse(routableToInternet);
-    }
-
-    private List<Subnet> createSubnets(String tagKey, String tagValue) {
-        Subnet subnet = new Subnet();
-        subnet.setSubnetId(SUBNET_ID);
-        subnet.setVpcId(VPC_ID);
-
-        if (StringUtils.isNotEmpty(tagKey) && StringUtils.isNotEmpty(tagValue)) {
-            Tag tag = new Tag();
-            tag.setKey(tagKey);
-            tag.setValue(tagValue);
-            subnet.setTags(List.of(tag));
-        }
-
-        return List.of(subnet);
     }
 }

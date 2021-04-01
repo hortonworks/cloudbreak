@@ -19,6 +19,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
@@ -350,6 +351,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.user.sync.credentials.update.optimization.enable}")
     private boolean userSyncCredentialsUpdateOptimizationEnabled;
 
+    @Value("${auth.mock.endpointgateway.skip.validation}")
+    private boolean endpointGatewaySkipValidation;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -664,6 +668,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (userSyncCredentialsUpdateOptimizationEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION));
+        }
+        if (endpointGatewaySkipValidation) {
+            builder.addEntitlements(createEntitlement(CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

@@ -44,7 +44,8 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         result.setOutboundInternetTraffic(source.getOutboundInternetTraffic());
         result.setNetworkCidrs(source.getNetworkCidrs());
         Map<String, Object> attributes = new HashMap<>();
-        Optional<CloudSubnet> cloudSubnet = subnetSelector.chooseSubnet(source.getPreferedSubnetId(), source.getSubnetMetas(), availabilityZone, true);
+        Optional<CloudSubnet> cloudSubnet = subnetSelector.chooseSubnet(source.getPreferedSubnetId(), source.getSubnetMetas(),
+            availabilityZone, SelectionFallbackStrategy.ALLOW_FALLBACK);
         if (cloudSubnet.isEmpty()) {
             throw new BadRequestException("No subnet for the given availability zone: " + availabilityZone);
         }

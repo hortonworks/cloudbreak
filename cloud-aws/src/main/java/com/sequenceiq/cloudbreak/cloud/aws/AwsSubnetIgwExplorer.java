@@ -11,8 +11,6 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.model.Route;
 import com.amazonaws.services.ec2.model.RouteTable;
-import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.Tag;
 
 @Component
 public class AwsSubnetIgwExplorer {
@@ -73,36 +71,5 @@ public class AwsSubnetIgwExplorer {
                         route.getGatewayId().startsWith(IGW_PREFIX) &&
                         OPEN_CIDR_BLOCK.equals(route.getDestinationCidrBlock()))
                 .findFirst();
-    }
-
-    public boolean isRoutableToInternet(List<RouteTable> routeTables, List<Subnet> awsSubnets, String subnetId, String vpcId) {
-        boolean result = false;
-        if (StringUtils.isNotEmpty(subnetId)) {
-            LOGGER.info("Checking if subnet {} has the {} override tag.", subnetId, ENDPOINT_GATEWAY_OVERRIDE_KEY);
-            result = isEndpointGatewayOverrideTagSet(awsSubnets, subnetId);
-            if (!result) {
-                LOGGER.info("{} tag not set. Checking if subnet has internet gateway explicitly defined in route table.", ENDPOINT_GATEWAY_OVERRIDE_KEY);
-                result = hasInternetGatewayOfSubnet(routeTables, subnetId, vpcId);
-            }
-            if (!result) {
-                LOGGER.info("No route to internet found for subnet {}. Subnet cannot be used for Public Endpoint Gateway.", subnetId);
-            }
-        } else {
-            LOGGER.info("No subnet id provided. Skipping internet routing check.");
-        }
-        return result;
-    }
-
-    private boolean isEndpointGatewayOverrideTagSet(List<Subnet> awsSubnets, String subnetId) {
-        List<Tag> tags = awsSubnets.stream()
-            .filter(subnet -> subnetId.equalsIgnoreCase(subnet.getSubnetId()))
-            .flatMap(subnet -> subnet.getTags().stream())
-            .collect(Collectors.toList());
-        LOGGER.debug("Found tags {} for subnet {}", tags, subnetId);
-        return tags.stream()
-            .anyMatch(tag ->
-                ENDPOINT_GATEWAY_OVERRIDE_KEY.equalsIgnoreCase(tag.getKey()) &&
-                    ENDPOINT_GATEWAY_OVERRIDE_VALUE.equalsIgnoreCase(tag.getValue())
-            );
     }
 }

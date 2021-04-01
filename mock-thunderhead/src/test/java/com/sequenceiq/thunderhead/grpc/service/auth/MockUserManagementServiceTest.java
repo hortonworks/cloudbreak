@@ -247,6 +247,9 @@ public class MockUserManagementServiceTest {
                         "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", false},
                 {"userSyncCredentialsUpdateOptimizationEnabled true", "userSyncCredentialsUpdateOptimizationEnabled", true,
                         "CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION", true},
+
+                {"endpointGatewaySkipValidation false", "endpointGatewaySkipValidation", false, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", false},
+                {"endpointGatewaySkipValidation true", "endpointGatewaySkipValidation", true, "CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", true},
         };
     }
 

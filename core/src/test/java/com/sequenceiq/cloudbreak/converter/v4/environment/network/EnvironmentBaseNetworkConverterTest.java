@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 
 import java.util.Collections;
 import java.util.Map;
@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID;
 import com.sequenceiq.cloudbreak.core.network.SubnetTest;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -62,7 +61,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
     public void testConvertToLegacyNetworkWhenSubnetNotFound() {
         EnvironmentNetworkResponse source = new EnvironmentNetworkResponse();
         source.setSubnetMetas(Map.of("key", getCloudSubnet("any")));
-        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), anyBoolean())).thenReturn(Optional.empty());
+        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.empty());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convertToLegacyNetwork(source, EU_AZ))
@@ -77,7 +76,8 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         EnvironmentNetworkResponse source = setupResponse();
         source.setSubnetMetas(metas);
 
-        when(subnetSelector.chooseSubnet(any(), eq(metas), eq(EU_AZ), eq(true))).thenReturn(Optional.of(subnet));
+        when(subnetSelector.chooseSubnet(any(), eq(metas), eq(EU_AZ), eq(SelectionFallbackStrategy.ALLOW_FALLBACK)))
+            .thenReturn(Optional.of(subnet));
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
@@ -97,7 +97,8 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         source.setGatewayEndpointSubnetMetas(Map.of("public-key", publicSubnet));
 
-        when(subnetSelector.chooseSubnet(any(), eq(source.getSubnetMetas()), eq(AZ_1), eq(true))).thenReturn(Optional.of(privateSubnet));
+        when(subnetSelector.chooseSubnet(any(), eq(source.getSubnetMetas()), eq(AZ_1), eq(SelectionFallbackStrategy.ALLOW_FALLBACK)))
+            .thenReturn(Optional.of(privateSubnet));
         when(subnetSelector.chooseSubnetForEndpointGateway(eq(source), eq(privateSubnet.getId()))).thenReturn(Optional.of(publicSubnet));
         when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
 
@@ -117,7 +118,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         source.setGatewayEndpointSubnetMetas(Map.of("private-key", privateSubnet));
 
-        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), anyBoolean())).thenReturn(Optional.of(privateSubnet));
+        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.of(privateSubnet));
         when(subnetSelector.chooseSubnetForEndpointGateway(any(), anyString())).thenReturn(Optional.empty());
         when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
 
@@ -136,7 +137,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
         source.setGatewayEndpointSubnetMetas(Map.of("public-key", publicSubnet));
 
-        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), anyBoolean())).thenReturn(Optional.of(privateSubnet));
+        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.of(privateSubnet));
         when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(false);
 
         Network[] network = new Network[1];
@@ -156,7 +157,7 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
         source.setGatewayEndpointSubnetMetas(Map.of("public-key", publicSubnet));
 
-        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), anyBoolean())).thenReturn(Optional.of(privateSubnet));
+        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.of(privateSubnet));
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
