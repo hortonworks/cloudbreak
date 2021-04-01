@@ -170,14 +170,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         if (Objects.nonNull(names) && !names.isEmpty()) {
             clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
         } else {
-            List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
             Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
-            Optional<String> runtimeVersion = sdxClusters.stream()
-                    .map(SdxClusterResponse::getRuntime)
-                    .filter(e -> !Strings.isNullOrEmpty(e))
-                    .findFirst();
             Set<String> namesByEnv = clusterTemplateService
-                    .findAllByEnvironment(workspaceId, environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null))
+                    .findAllByEnvironment(workspaceId, environmentCrn, cloudPlatformByCrn.orElse(null), null)
                     .stream()
                     .filter(e -> !ResourceStatus.DEFAULT.equals(e.getStatus()))
                     .map(ClusterTemplateView::getName)

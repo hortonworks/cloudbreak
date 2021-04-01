@@ -15,9 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
@@ -56,25 +53,12 @@ public class EnvironmentResourceDeletionService {
 
     public void deleteClusterDefinitionsOnCloudbreak(String environmentCrn) {
         try {
-            Set<String> names = getNonDefaultClusterDefinitionNamesInEnvironment(environmentCrn);
-            if (!names.isEmpty()) {
-                clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, names, null, environmentCrn);
-            } else {
-                LOGGER.info("Cannot find any Cluster Definition for the environment");
-            }
+            clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, new HashSet<>(), null, environmentCrn);
         } catch (WebApplicationException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         } catch (ProcessingException | UnableToDeleteClusterDefinitionException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         }
-    }
-
-    private Set<String> getNonDefaultClusterDefinitionNamesInEnvironment(String environmentCrn) {
-        ClusterTemplateViewV4Responses responses = doAsInternalActor(() -> clusterTemplateV4Endpoint.listByEnv(TEMP_WORKSPACE_ID, environmentCrn));
-        return responses.getResponses().stream()
-                .filter(e -> ResourceStatus.USER_MANAGED.equals(e.getStatus()))
-                .map(ClusterTemplateViewV4Response::getName)
-                .collect(Collectors.toSet());
     }
 
     public Set<String> getAttachedSdxClusterCrns(Environment environment) {
