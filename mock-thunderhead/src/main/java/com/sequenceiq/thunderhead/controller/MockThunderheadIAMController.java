@@ -23,4 +23,13 @@ public class MockThunderheadIAMController {
         return new ArrayList<>();
     }
 
+    @PostMapping("/iam/listUsers")
+    public List<String> listUsers(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        return new ArrayList<>();
+    }
+
+    @PostMapping("/iam/listMachineUsers")
+    public List<String> listMachineUsers(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
+        return new ArrayList<>();
+    }
 }
