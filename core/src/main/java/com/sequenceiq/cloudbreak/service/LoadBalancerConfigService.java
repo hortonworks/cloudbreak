@@ -115,12 +115,29 @@ public class LoadBalancerConfigService {
         return name.toString();
     }
 
+    @SuppressWarnings("checkstyle:MagicNumber")
     public Set<TargetGroupPortPair> getTargetGroupPortPairs(TargetGroup targetGroup) {
         switch (targetGroup.getType()) {
             case KNOX:
                 return Set.of(new TargetGroupPortPair(Integer.parseInt(httpsPort), Integer.parseInt(knoxServicePort)));
+            case CM:
+                return Set.of(new TargetGroupPortPair(7180, 7180),
+                        new TargetGroupPortPair(7183, 7183),
+                        new TargetGroupPortPair(7182, 7182),
+                        new TargetGroupPortPair(7184, 7184),
+                        new TargetGroupPortPair(10110, 10110),
+                        new TargetGroupPortPair(9000, 9000),
+                        new TargetGroupPortPair(8086, 8086),
+                        new TargetGroupPortPair(8087, 8087),
+                        new TargetGroupPortPair(8091, 8091),
+                        new TargetGroupPortPair(9091, 9091),
+                        new TargetGroupPortPair(8083, 8083),
+                        new TargetGroupPortPair(9995, 9995),
+                        new TargetGroupPortPair(9994, 9994),
+                        new TargetGroupPortPair(9997, 9997),
+                        new TargetGroupPortPair(9996, 9996));
             default:
-                return null;
+                return Set.of();
         }
     }
 
@@ -225,6 +242,7 @@ public class LoadBalancerConfigService {
                 .collect(Collectors.toSet());
     }
 
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
         if (dryRun) {
             LOGGER.info("Checking if load balancers are enabled and configurable for stack {}", stack.getName());
@@ -240,26 +258,33 @@ public class LoadBalancerConfigService {
                 LOGGER.debug("Load balancer is explicitly defined for the stack.");
             }
             Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
-            if (knoxTargetGroup.isPresent()) {
-                if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
-                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
-                } else {
-                    LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
-                }
-                if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
-                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
-                } else {
-                    LOGGER.debug("External load balancer creation is disabled.");
-                }
-            } else {
-                LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
-            }
+            setupLoadBalancerForTarget(stack, environment, dryRun, loadBalancers, knoxTargetGroup);
 
             // TODO CB-9368 - create target group for CM instances
+            Optional<TargetGroup> cmTargetGroups = setupCMTargetGroups(stack, dryRun);
+            setupLoadBalancerForTarget(stack, environment, dryRun, loadBalancers, cmTargetGroups);
         }
 
         LOGGER.debug("Adding {} load balancers for stack {}", loadBalancers.size(), stack.getName());
         return loadBalancers;
+    }
+
+    private void setupLoadBalancerForTarget(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, Set<LoadBalancer> loadBalancers,
+            Optional<TargetGroup> targetGroup) {
+        if (targetGroup.isPresent()) {
+            if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
+                setupLoadBalancer(dryRun, stack, loadBalancers, targetGroup.get(), LoadBalancerType.PRIVATE);
+            } else {
+                LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
+            }
+            if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork())) {
+                setupLoadBalancer(dryRun, stack, loadBalancers, targetGroup.get(), LoadBalancerType.PUBLIC);
+            } else {
+                LOGGER.debug("External load balancer creation is disabled.");
+            }
+        } else {
+            LOGGER.debug("No Knox instance groups found. If load balancer creation is enabled, Knox routing in the load balancer will be skipped.");
+        }
     }
 
     private void setupLoadBalancer(boolean dryRun, Stack stack, Set<LoadBalancer> loadBalancers, TargetGroup knoxTargetGroup,
@@ -354,6 +379,10 @@ public class LoadBalancerConfigService {
                 isNetworkUsingPublicSubnet(network, envNetwork);
     }
 
+    private boolean shouldCreateExternalCMLoadBalancer(Network network, EnvironmentNetworkResponse envNetwork) {
+        return isEndpointGatewayEnabled(envNetwork) || isNetworkUsingPublicSubnet(network, envNetwork);
+    }
+
     private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
         boolean result =  network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED;
         if (result) {
@@ -377,6 +406,28 @@ public class LoadBalancerConfigService {
             LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
             knoxTargetGroup = new TargetGroup();
             knoxTargetGroup.setType(TargetGroupType.KNOX);
+            knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
+            if (!dryRun) {
+                LOGGER.debug("Adding target group to Knox gateway instances groups.");
+                TargetGroup finalKnoxTargetGroup = knoxTargetGroup;
+                knoxGatewayInstanceGroups.forEach(ig -> ig.addTargetGroup(finalKnoxTargetGroup));
+            } else {
+                LOGGER.debug("Dry run, skipping instance group/target group linkage.");
+            }
+        }
+        return Optional.ofNullable(knoxTargetGroup);
+    }
+
+    private Optional<TargetGroup> setupCMTargetGroups(Stack stack, boolean dryRun) {
+        TargetGroup knoxTargetGroup = null;
+        Set<String> knoxGatewayGroupNames = getKnoxGatewayGroups(stack);
+        Set<InstanceGroup> knoxGatewayInstanceGroups = stack.getInstanceGroups().stream()
+                .filter(ig -> knoxGatewayGroupNames.contains(ig.getGroupName()))
+                .collect(Collectors.toSet());
+        if (!knoxGatewayInstanceGroups.isEmpty()) {
+            LOGGER.info("Knox gateway instance found; enabling Knox load balancer configuration.");
+            knoxTargetGroup = new TargetGroup();
+            knoxTargetGroup.setType(TargetGroupType.CM);
             knoxTargetGroup.setInstanceGroups(knoxGatewayInstanceGroups);
             if (!dryRun) {
                 LOGGER.debug("Adding target group to Knox gateway instances groups.");

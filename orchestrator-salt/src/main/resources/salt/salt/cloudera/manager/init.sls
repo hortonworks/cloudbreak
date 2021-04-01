@@ -42,25 +42,39 @@ add_settings_file_to_cfm_server_args:
     - unless: grep "CMF_SERVER_ARGS=\"-i /etc/cloudera-scm-server/cm.settings\"" /etc/default/cloudera-scm-server
 {% endif %}
 
-enable_cm_ha:
-  file.append:
-    - name: /etc/default/cloudera-scm-server
-    - text: export CMF_JAVA_OPTS="$CMF_JAVA_OPTS -Dcom.cloudera.cmf.haMode=true"
+#enable_cm_ha:
+#  file.append:
+#    - name: /etc/default/cloudera-scm-server
+#    - text: export CMF_JAVA_OPTS="$CMF_JAVA_OPTS -Dcom.cloudera.cmf.haMode=true"
 
-/opt/salt/scripts/enable_cm_ha.sh:
-  file.managed:
-    - makedirs: True
-    - source: salt://cloudera/manager/scripts/enable_cm_ha.sh.j2
-    - template: jinja
-    - mode: 755
-
-enable_cm_ha:
-  cmd.run:
-    - name: /opt/salt/scripts/enable_cm_ha.sh
-    - require:
-        - file: /opt/salt/scripts/enable_cm_ha.sh  2>&1 | tee -a /var/log/cm-setup-ha.log && exit ${PIPESTATUS[0]}
-        - cmd: run_generate_agent_tokens
-    - shell: /bin/bash
+#stop_server_ha:
+#  service.running:
+#    - enable: false
+#    - name: cloudera-scm-server
+#    - require:
+#        - cmd: enable_cm_ha_cmd
+#
+#start_server_ha:
+#  service.running:
+#    - enable: True
+#    - name: cloudera-scm-server
+#    - require:
+#        - cmd: run_generate_agent_tokens
+#
+#/opt/salt/scripts/enable_cm_ha.sh:
+#  file.managed:
+#    - makedirs: True
+#    - source: salt://cloudera/manager/scripts/enable_cm_ha.sh.j2
+#    - template: jinja
+#    - mode: 755
+#
+#enable_cm_ha_cmd:
+#  cmd.run:
+#    - name: /opt/salt/scripts/enable_cm_ha.sh  2>&1 | tee -a /var/log/cm-setup-ha.log && exit ${PIPESTATUS[0]}
+#    - require:
+#        - file: /opt/salt/scripts/enable_cm_ha.sh
+#        - cmd: start_server_ha
+#    - shell: /bin/bash
 
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
@@ -158,6 +172,7 @@ disable_phone_home:
     - show_changes: True
     - append_if_not_found: True
 
+{% if 'cm_primary' in grains.get('roles', []) %}
 /opt/salt/scripts/cm_generate_agent_tokens.sh:
   file.managed:
     - makedirs: True
@@ -171,4 +186,5 @@ run_generate_agent_tokens:
     - require:
         - file: /opt/salt/scripts/cm_generate_agent_tokens.sh
         - cmd: run_autotls_setup
+{% endif %}
 {% endif %}

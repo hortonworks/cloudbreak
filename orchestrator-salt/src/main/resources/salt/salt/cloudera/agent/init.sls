@@ -1,6 +1,8 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- set manager_server_fqdn = salt['pillar.get']('hosts')[metadata.server_address]['fqdn'] %}
+{%- set loadbalancer_url = salt['pillar.get']('cloudera-manager:communication:loadbalancer_url') %}
+{%- set primary_gateway = salt['pillar.get']('cloudera-manager:communication:primary_fqdn') %}
 
 install-cloudera-manager-agent:
   pkg.installed:
@@ -34,8 +36,8 @@ replace_server_host:
   file.replace:
     - name: /etc/cloudera-scm-agent/config.ini
     - pattern: "server_host=.*"
-    - repl: "server_host={{ manager_server_fqdn }}"
-    - unless: grep 'server_host={{ manager_server_fqdn }}' /etc/cloudera-scm-agent/config.ini
+    - repl: "server_host={{ primary_gateway }}"
+    - unless: grep 'server_host={{ primary_gateway }}' /etc/cloudera-scm-agent/config.ini
 
 {% if cloudera_manager.communication.autotls_enabled == True %}
 
@@ -78,4 +80,3 @@ set_service_uids:
     - require:
         - file: /opt/cloudera/cm-agent/service/inituids
 {% endif %}
-

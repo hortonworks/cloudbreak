@@ -722,11 +722,11 @@ clusterProxy:
 
 gateway:
   cert:
-    generation.enabled: false
+    generation.enabled: true
     polling:
       attempt: 50
       intervall: 10
-    base.domain.name: cloudera.com
+    base.domain.name: dev.cldr.work
 
 notification:
   urls: http://localhost:3000/notifications

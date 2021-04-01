@@ -24,6 +24,7 @@ replace-db-connection-url:
 
 # We need to restart the CM if the frontend URL has been changed (e.g. switching to PEM based DNS name)
 
+{% if 'cm_primary' in grains.get('roles', []) %}
 {% if salt['pillar.get']('gateway:userfacingfqdn') is defined and salt['pillar.get']('gateway:userfacingfqdn')|length > 1 %}
 update_frontend_url_of_cm:
   file.replace:
@@ -42,6 +43,7 @@ restart_cm_after_fronted_url_change:
     - watch:
       - file: update_frontend_url_of_cm
 {% endif %}
+{% endif %}
 
 {% if salt['pillar.get']('cloudera-manager:mgmt_service_directories') is defined and salt['pillar.get']('cloudera-manager:mgmt_service_directories')|length > 0 %}
 {%- for dir in salt['pillar.get']('cloudera-manager:mgmt_service_directories') %}
@@ -58,6 +60,7 @@ ensure_owners_{{ dir }}:
 {%- endfor %}
 {% endif %}
 
+{% if 'cm_primary' in grains.get('roles', []) %}
 start_server:
   service.running:
     - enable: True
@@ -65,4 +68,5 @@ start_server:
 {% if "ipa_member" in grains.get('roles', []) %}
     - require:
         - pkg: ipa_packages_install
+{% endif %}
 {% endif %}

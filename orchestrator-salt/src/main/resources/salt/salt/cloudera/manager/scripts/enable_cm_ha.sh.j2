@@ -1,4 +1,4 @@
-{%- set cm_password = salt['pillar.get']('gateway')['username'] %}
+{%- set cm_username = salt['pillar.get']('gateway')['username'] %}
 {%- set cm_password = salt['pillar.get']('gateway')['password'] %}
 
 #!/bin/bash
@@ -10,13 +10,14 @@
 #salt $(hostname -f) pillar.get gateway:mastersecret
 set -ex
 echo "hi steve"
+sleep 100
 CM_USERNAME={{ cm_username }}
 CM_PASSWORD={{ cm_password }}
 echo $CM_USERNAME
 
 # change 'Cloudera Manager Hostname Override'
 curl -k -i -u $CM_USERNAME:$CM_PASSWORD \
-    -X PUT "http://localhost:7183/api/v42/cm/config" \
+    -X PUT "https://localhost:7183/api/v42/cm/config" \
     -H "accept: application/json" -H "Content-Type: application/json" \
     -d "{\"items\": [{\"name\": \"cm_host_name\", \"value\": \"localhost\"}]}"
 
@@ -26,5 +27,6 @@ curl -k -i -u $CM_USERNAME:$CM_PASSWORD \
     -H "accept: application/json" -H "Content-Type: application/json" \
     -d "{\"items\": [{\"name\": \"need_agent_hostname_validation\", \"value\": \"false\"}]}"
 
+sleep 10
 echo done
 

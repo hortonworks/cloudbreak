@@ -299,6 +299,10 @@
     "label": "generate_agent_token"
   },
   {
+    "path": "/var/log/cm-setup-ha.log",
+    "label": "setup_cm_ha"
+  },
+  {
     "path": "/var/log/ccmv2-inverting-proxy-agent.log",
     "label": "ccmv2_inverting_proxy_agent"
   }
