@@ -27,9 +27,11 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
             + "LEFT JOIN FETCH c.stackTemplate s "
             + "WHERE (s.environmentCrn= :environmentCrn OR c.status = 'DEFAULT') "
             + "AND c.status <> 'DEFAULT_DELETED' "
+            + "AND c.workspace.id= :workspaceId "
             + "AND ((c.cloudPlatform = :cloudPlatform AND :cloudPlatform IS NOT NULL) OR (:cloudPlatform IS NULL)) "
             + "AND ((c.clouderaRuntimeVersion = :runtime AND :runtime IS NOT NULL) OR (:runtime IS NULL))")
     Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(
+            @Param("workspaceId") Long workspaceId,
             @Param("environmentCrn") String environmentCrn,
             @Param("cloudPlatform") String cloudPlatform,
             @Param("runtime") String runtime);
