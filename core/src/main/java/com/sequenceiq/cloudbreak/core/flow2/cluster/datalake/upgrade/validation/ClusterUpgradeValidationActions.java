@@ -142,7 +142,7 @@ public class ClusterUpgradeValidationActions {
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeValidationFailureEvent payload, Map<Object, Object> variables) {
                 String errorMessage = payload.getException().getMessage();
                 Long resourceId = payload.getResourceId();
-                LOGGER.error("Cluster upgrade validation failed with validation error: {}", errorMessage);
+                LOGGER.debug("Cluster upgrade validation failed with validation error: {}", errorMessage);
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_UPGRADE_VALIDATION_FAILED,
                         Collections.singletonList(errorMessage));
                 sendEvent(context, HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), payload);

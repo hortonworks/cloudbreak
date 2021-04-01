@@ -22,7 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.authorization.service.PaywallCredentialPopulator;
+import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -78,7 +78,7 @@ public class ParcelSizeServiceTest {
 
         long actual = underTest.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
 
-        assertEquals(5859374L, actual);
+        assertEquals(2929687L, actual);
         verify(restClientFactory).getOrCreateDefault();
         verify(parcelUrlProvider).getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
         verify(paywallCredentialPopulator, times(3)).populateWebTarget(any(), eq(webTarget));

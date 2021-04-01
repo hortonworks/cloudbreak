@@ -21,6 +21,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DiskSpaceValidationServiceTest {
@@ -81,7 +84,7 @@ public class DiskSpaceValidationServiceTest {
 
     @Test
     public void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() throws CloudbreakException {
-        when(parcelSizeService.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(900000L);
+        when(parcelSizeService.getAllParcelSize(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack)).thenReturn(9000L);
 
         underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
 
@@ -95,7 +98,7 @@ public class DiskSpaceValidationServiceTest {
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
             underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
         });
-        assertEquals("There is not enough free space on the following nodes to perform upgrade operation: [host1]. The required free space is: 898 MB",
+        assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 2.2 GB, host2: 3.1 GB",
                 exception.getMessage());
 
         verifyMocks();
@@ -108,7 +111,7 @@ public class DiskSpaceValidationServiceTest {
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
             underTest.validateFreeSpaceForUpgrade(stack, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
         });
-        assertEquals("There is not enough free space on the following nodes to perform upgrade operation: [host1, host2]. The required free space is: 1.7 GB",
+        assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 4.2 GB, host2: 5.8 GB",
                 exception.getMessage());
 
         verifyMocks();
@@ -124,13 +127,34 @@ public class DiskSpaceValidationServiceTest {
 
     private Map<String, String> createFreeSpaceByNodesMap() {
         return Map.of(
-                "host1", "910000",
-                "host2", "1700000");
+                "host1", "91000",
+                "host2", "170000");
     }
 
     private Stack createStack() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        stack.setInstanceGroups(createInstanceGroups());
         return stack;
+    }
+
+    private Set<InstanceGroup> createInstanceGroups() {
+        return Set.of(
+                createInstanceGroup(InstanceGroupType.CORE, "host1"),
+                createInstanceGroup(InstanceGroupType.GATEWAY, "host2")
+        );
+    }
+
+    private InstanceGroup createInstanceGroup(InstanceGroupType instanceGroupType, String hostname) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceGroupType(instanceGroupType);
+        instanceGroup.setInstanceMetaData(Collections.singleton(createInstanceMetaData(hostname)));
+        return instanceGroup;
+    }
+
+    private InstanceMetaData createInstanceMetaData(String hostname) {
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN(hostname);
+        return instanceMetaData;
     }
 }

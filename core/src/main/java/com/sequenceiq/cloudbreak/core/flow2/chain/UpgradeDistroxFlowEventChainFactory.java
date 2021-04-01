@@ -41,7 +41,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDistroxFlowEventChainFactory.class);
 
-    @Value("${cb.upgrade.validation.enabled:true}")
+    @Value("${cb.upgrade.validation.distrox.enabled}")
     private boolean upgradeValidationEnabled;
 
     @Inject
