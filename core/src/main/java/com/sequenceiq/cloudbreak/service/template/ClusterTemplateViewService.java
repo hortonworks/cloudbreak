@@ -37,7 +37,8 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
         return repository.findAllActive(workspaceId);
     }
 
-    public Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(String environmentCrn, String cloudPlatform, String runtime) {
-        return repository.findAllUserManagedAndDefaultByEnvironmentCrn(environmentCrn, cloudPlatform, runtime);
+    public Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(Long workspaceId, String environmentCrn,
+        String cloudPlatform, String runtime) {
+        return repository.findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime);
     }
 }

@@ -112,7 +112,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                 .filter(e -> !Strings.isNullOrEmpty(e))
                 .findFirst();
         Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService
-                .findAllUserManagedAndDefaultByEnvironmentCrn(environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null));
+                .findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null));
         Set<ClusterTemplateViewV4Response> result = converterUtil.convertAllAsSet(clusterTemplateViews, ClusterTemplateViewV4Response.class);
         return new ClusterTemplateViewV4Responses(result);
     }
@@ -177,7 +177,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                     .filter(e -> !Strings.isNullOrEmpty(e))
                     .findFirst();
             Set<String> namesByEnv = clusterTemplateService
-                    .findAllByEnvironment(environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null))
+                    .findAllByEnvironment(workspaceId, environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null))
                     .stream()
                     .filter(e -> !ResourceStatus.DEFAULT.equals(e.getStatus()))
                     .map(ClusterTemplateView::getName)
