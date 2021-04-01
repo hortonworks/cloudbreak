@@ -88,6 +88,15 @@ public interface CloudConnector<R> extends CloudPlatformAware {
     NetworkConnector networkConnector();
 
     /**
+     *  Access to the {@link EncryptionResources} object.
+     *
+     *  @return the {@link EncryptionResources} object
+     */
+    default EncryptionResources encryptionResources() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
      * Giving back a valid provider display name. (because of CB-5013)
      *
      * @return the string object

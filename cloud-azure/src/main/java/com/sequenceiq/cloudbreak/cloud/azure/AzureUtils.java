@@ -76,6 +76,8 @@ public class AzureUtils {
 
     private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 5;
 
+    private static final int DISK_ENCRYPTION_SET_LENGTH = 80;
+
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -136,6 +138,11 @@ public class AzureUtils {
 
     public String generateResourceGroupNameByNameAndId(String name, String id) {
         return Splitter.fixedLength(maxResourceNameLength - id.length())
+                .splitToList(name).get(0) + id;
+    }
+
+    public String generateDESNameByNameAndId(String name, String id) {
+        return Splitter.fixedLength(DISK_ENCRYPTION_SET_LENGTH - id.length())
                 .splitToList(name).get(0) + id;
     }
 

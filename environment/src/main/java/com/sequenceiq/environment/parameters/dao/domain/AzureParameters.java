@@ -36,6 +36,9 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
     @SecretValue
     private Secret encryptionKeyUrl = Secret.EMPTY;
 
+    @Column(name = "disk_encryption_set_id")
+    private String diskEncryptionSetId;
+
     public String getResourceGroupName() {
         return resourceGroupName;
     }
@@ -70,5 +73,13 @@ public class AzureParameters extends BaseParameters implements AccountIdAwareRes
 
     public void setEncryptionKeyUrl(String encryptionKeyUrl) {
         this.encryptionKeyUrl = new Secret(encryptionKeyUrl);
+    }
+
+    public String getDiskEncryptionSetId() {
+        return diskEncryptionSetId;
+    }
+
+    public void setDiskEncryptionSetId(String diskEncryptionSetId) {
+        this.diskEncryptionSetId = diskEncryptionSetId;
     }
 }
