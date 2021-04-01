@@ -41,6 +41,7 @@ public class NetworkMetadataValidationServiceTest extends NetworkTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
+        when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
     }
 
     @Test
@@ -62,7 +63,7 @@ public class NetworkMetadataValidationServiceTest extends NetworkTest {
     }
 
     @Test
-    public void testWithEndpointGatewayRemovePrivateSubnets() {
+    public void testWithEndpointGatewayRemovePrivateSubnetsValidationEnabled() {
         EnvironmentDto environmentDto = createEnvironmentDto();
         Environment environment = createEnvironment(createNetwork());
 
@@ -78,6 +79,26 @@ public class NetworkMetadataValidationServiceTest extends NetworkTest {
 
         assertEquals(2, subnetResult.size());
         assertEquals(Set.of(PUBLIC_ID_1, PUBLIC_ID_2), subnetResult.keySet());
+    }
+
+    @Test
+    public void testWithEndpointGatewayRemovePrivateSubnetsValidationDisabled() {
+        EnvironmentDto environmentDto = createEnvironmentDto();
+        Environment environment = createEnvironment(createNetwork());
+
+        Map<String, CloudSubnet> subnets = createDefaultPrivateSubnets();
+        Map<String, CloudSubnet> endpointGatewaySubnets = createDefaultPublicSubnets();
+        endpointGatewaySubnets.putAll(createDefaultPrivateSubnets());
+
+        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(subnets);
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(endpointGatewaySubnets);
+        when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(true);
+
+        Map<String, CloudSubnet> subnetResult =
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEndpointGatewaySubnetMetadata(environment, environmentDto));
+
+        assertEquals(4, subnetResult.size());
+        assertEquals(Set.of(ID_1, ID_2, PUBLIC_ID_1, PUBLIC_ID_2), subnetResult.keySet());
     }
 
     @Test
@@ -147,23 +168,5 @@ public class NetworkMetadataValidationServiceTest extends NetworkTest {
 
         assertNull(subnetResult);
         assertEquals(PublicEndpointAccessGateway.DISABLED, environmentDto.getNetwork().getPublicEndpointAccessGateway());
-    }
-
-    @Test
-    public void testWithEndpointGatewayAndFirewallRouting() {
-        EnvironmentDto environmentDto = createEnvironmentDto();
-        Environment environment = createEnvironment(createNetwork());
-
-        Map<String, CloudSubnet> subnets = createDefaultPrivateSubnets();
-        Map<String, CloudSubnet> endpointGatewaySubnets = createPrivateSubnetsWithInternetRouting();
-
-        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(subnets);
-        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(endpointGatewaySubnets);
-
-        Map<String, CloudSubnet> subnetResult =
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEndpointGatewaySubnetMetadata(environment, environmentDto));
-
-        assertEquals(2, subnetResult.size());
-        assertEquals(Set.of(ID_1, ID_2), subnetResult.keySet());
     }
 }

@@ -410,10 +410,7 @@ public class AwsPlatformResources implements PlatformResources {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
             boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOfSubnet(describeRouteTablesResult, subnet.getSubnetId(), subnet.getVpcId());
-            boolean routableToInternet = awsSubnetIgwExplorer.isRoutableToInternet(describeRouteTablesResult, awsSubnets,
-                subnet.getSubnetId(), subnet.getVpcId());
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
-            LOGGER.info("The subnet {} routableToInternet value is '{}'", subnet, routableToInternet);
             Optional<String> subnetName = getName(subnet.getTags());
             subnets.add(
                     new CloudSubnet(
@@ -424,8 +421,7 @@ public class AwsPlatformResources implements PlatformResources {
                             !hasInternetGateway,
                             subnet.getMapPublicIpOnLaunch(),
                             hasInternetGateway,
-                            hasInternetGateway ? PUBLIC : PRIVATE,
-                            routableToInternet)
+                            hasInternetGateway ? PUBLIC : PRIVATE)
             );
         }
         return subnets;
