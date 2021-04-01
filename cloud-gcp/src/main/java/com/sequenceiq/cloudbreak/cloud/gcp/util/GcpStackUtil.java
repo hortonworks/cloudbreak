@@ -79,6 +79,8 @@ public final class GcpStackUtil {
 
     private static final String NO_FIREWALL_RULES = "noFirewallRules";
 
+    private static final int CLIENT_HTTP_TIMEOUT_IN_MILLISECONDS = 3 * 60000;
+
     private GcpStackUtil() {
     }
 
@@ -212,9 +214,14 @@ public final class GcpStackUtil {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new Builder(
-                    httpTransport, JSON_FACTORY, null).setApplicationName(name)
-                    .setHttpRequestInitializer(credential)
+            return new Builder(httpTransport, JSON_FACTORY, request -> {
+                        credential.initialize(request);
+                        //3 minutes timeout for storage API calls based on Google code example:
+                        // https://developers.google.com/api-client-library/java/google-api-java-client/errors
+                        request.setConnectTimeout(CLIENT_HTTP_TIMEOUT_IN_MILLISECONDS);
+                        request.setReadTimeout(CLIENT_HTTP_TIMEOUT_IN_MILLISECONDS);
+                    })
+                    .setApplicationName(name)
                     .build();
         } catch (Exception e) {
             LOGGER.error("Error occurred while building Google Storage access.", e);
