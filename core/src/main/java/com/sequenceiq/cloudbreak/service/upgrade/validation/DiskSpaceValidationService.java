@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -32,6 +33,10 @@ public class DiskSpaceValidationService {
 
     private static final long GB_IN_KB = 1048576;
 
+    private static final double GATEWAY_NODE_PARCEL_SIZE_MULTIPLIER = 3.5;
+
+    private static final double PARCEL_SIZE_MULTIPLIER = 2.5;
+
     @Inject
     private GatewayConfigService gatewayConfigService;
 
@@ -48,20 +53,15 @@ public class DiskSpaceValidationService {
     private ParcelSizeService parcelSizeService;
 
     public void validateFreeSpaceForUpgrade(Stack stack, String imageCatalogUrl, String imageCatalogName, String imageId) throws CloudbreakException {
-        long requiredFreeSpace = parcelSizeService.getAllParcelSize(imageCatalogUrl, imageCatalogName, imageId, stack);
+        long parcelSize = parcelSizeService.getAllParcelSize(imageCatalogUrl, imageCatalogName, imageId, stack);
         Map<String, String> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
-        LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", requiredFreeSpace, freeDiskSpaceByNodes);
-        Set<String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, requiredFreeSpace);
+        LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", parcelSize, freeDiskSpaceByNodes);
+        Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, parcelSize, stack.getGatewayInstanceMetadata());
         if (!notEligibleNodes.isEmpty()) {
-            throw new UpgradeValidationFailedException(
-                    String.format("There is not enough free space on the following nodes to perform upgrade operation: %s. The required free space is: %s",
-                            notEligibleNodes, formatRequiredSpace(requiredFreeSpace)));
+            throw new UpgradeValidationFailedException(String.format(
+                    "There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: %s",
+                    formatFreeSpaceByNodes(notEligibleNodes)));
         }
-    }
-
-    private String formatRequiredSpace(long requiredFreeSpace) {
-        return requiredFreeSpace >= GB_IN_KB ? new DecimalFormat("#.#").format(requiredFreeSpace / (double) GB_IN_KB) + " GB"
-                : (requiredFreeSpace / DIVIDER_TO_MB) + " MB";
     }
 
     private Map<String, String> getFreeDiskSpaceByNodes(Stack stack) {
@@ -71,11 +71,36 @@ public class DiskSpaceValidationService {
         return hostOrchestrator.getFreeDiskSpaceByNodes(nodes, gatewayConfigs);
     }
 
-    private Set<String> getNotEligibleNodes(Map<String, String> freeDiskSpaceByNodes, long requiredFreeSpace) {
+    private Map<String, String> getNotEligibleNodes(Map<String, String> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetaData> gatewayInstances) {
+        Map<String, Long> nodesByRequiredFreeSpace = getNodesByRequiredFreeSpace(freeDiskSpaceByNodes, parcelSize, gatewayInstances);
+        return nodesByRequiredFreeSpace.entrySet().stream()
+                .filter(node -> node.getValue() > Double.parseDouble(freeDiskSpaceByNodes.get(node.getKey())))
+                .collect(Collectors.toMap(Map.Entry::getKey, node -> formatRequiredSpace(node.getValue())));
+    }
+
+    private Map<String, Long> getNodesByRequiredFreeSpace(Map<String, String> freeDiskSpaceByNodes, long parcelSize,
+            List<InstanceMetaData> gatewayInstances) {
         return freeDiskSpaceByNodes.entrySet()
                 .stream()
-                .filter(node -> Long.parseLong(node.getValue()) < requiredFreeSpace)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toMap(Map.Entry::getKey, map -> getRequiresFreeSpace(parcelSize, gatewayInstances, map.getKey())));
+    }
+
+    private long getRequiresFreeSpace(long parcelSize, List<InstanceMetaData> gatewayInstances, String hostname) {
+        return (long) (parcelSize * (isGatewayInstance(hostname, gatewayInstances) ? GATEWAY_NODE_PARCEL_SIZE_MULTIPLIER : PARCEL_SIZE_MULTIPLIER));
+    }
+
+    private boolean isGatewayInstance(String hostname, List<InstanceMetaData> gatewayInstances) {
+        return gatewayInstances.stream().anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals(hostname));
+    }
+
+    private String formatRequiredSpace(double requiredFreeSpace) {
+        return requiredFreeSpace >= GB_IN_KB ? new DecimalFormat("#.#").format(requiredFreeSpace / (double) GB_IN_KB) + " GB"
+                : (requiredFreeSpace / DIVIDER_TO_MB) + " MB";
+    }
+
+    private String formatFreeSpaceByNodes(Map<String, String> notEligibleNodes) {
+        return notEligibleNodes.entrySet().stream()
+                .map(map -> map.getKey().concat(": ").concat(map.getValue()))
+                .collect(Collectors.joining(", "));
     }
 }

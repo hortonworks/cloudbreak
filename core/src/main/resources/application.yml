@@ -680,7 +680,10 @@ cb:
 
   upgrade:
     validation:
-      enabled: true
+      distrox:
+        enabled: false
+      sdx:
+        enabled: false
 
 clusterProxy:
   url: http://localhost:10180/cluster-proxy

@@ -46,10 +46,6 @@ public class ClusterUpgradeValidationFlowConfig extends AbstractFlowConfiguratio
                     .event(FINALIZE_CLUSTER_UPGRADE_VALIDATION_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CLUSTER_UPGRADE_VALIDATION_FAILED_STATE).to(FINAL_STATE)
-                    .event(FINALIZE_CLUSTER_UPGRADE_VALIDATION_EVENT)
-                    .defaultFailureEvent()
-
                     .build();
 
     private static final FlowEdgeConfig<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE,

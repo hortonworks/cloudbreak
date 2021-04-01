@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.authorization.service.PaywallCredentialPopulator;
+import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -24,8 +24,6 @@ class ParcelSizeService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParcelSizeService.class);
 
     private static final long DIVIDER_TO_KB = 1024L;
-
-    private static final int PARCEL_SIZE_MULTIPLIER = 2;
 
     @Inject
     private RestClientFactory restClientFactory;
@@ -81,7 +79,7 @@ class ParcelSizeService {
     }
 
     private long getRequiredFreeSpace(Map<String, Long> parcelsBySize) {
-        return (addParcelSize(parcelsBySize) / DIVIDER_TO_KB) * PARCEL_SIZE_MULTIPLIER;
+        return addParcelSize(parcelsBySize) / DIVIDER_TO_KB;
     }
 
     private long addParcelSize(Map<String, Long> parcelsBySize) {
