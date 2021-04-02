@@ -258,11 +258,11 @@
              {% if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>RANGER</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
              </param>
              <param>
                  <name>RANGERUI</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enableStickySession=true;noFallback=true;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
              {% if 'YARNUIV2' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
@@ -278,7 +278,7 @@
              {% if 'SOLR' in exposed and 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>SOLR</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enableStickySession=true;noFallback=true;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
              {% if 'JOBHISTORYUI' in exposed and 'JOBHISTORY' in salt['pillar.get']('gateway:location') -%}
