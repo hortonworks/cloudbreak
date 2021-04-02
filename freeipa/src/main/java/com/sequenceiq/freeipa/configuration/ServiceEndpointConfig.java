@@ -39,6 +39,15 @@ public class ServiceEndpointConfig {
     @Value("${freeipa.sdx.server.contextPath:/dl}")
     private String sdxRootContextPath;
 
+    @Value("${freeipa.cloudbreak.url}")
+    private String cloudbreakUrl;
+
+    @Value("${freeipa.cloudbreak.contextPath}")
+    private String cbRootContextPath;
+
+    @Value("${freeipa.cloudbreak.serviceId:}")
+    private String cloudbreakServiceId;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -58,5 +67,10 @@ public class ServiceEndpointConfig {
     @Bean
     public String sdxServerUrl() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveUrl(sdxServiceUrl + sdxRootContextPath, "http", sdxServiceId);
+    }
+
+    @Bean
+    public String cloudbreakServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
     }
 }

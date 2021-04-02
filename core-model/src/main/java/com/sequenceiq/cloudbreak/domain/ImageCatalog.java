@@ -28,7 +28,7 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "url", nullable = false)
+    @Column(name = "url")
     private String imageCatalogUrl;
 
     @Column(columnDefinition = "boolean default false")

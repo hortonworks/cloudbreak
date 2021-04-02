@@ -119,9 +119,14 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     @Inject
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
-    @Override
-    public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
-        Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
+    public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId, boolean customCatalogsOnly) {
+
+        Set<ImageCatalog> imageCatalogs = null;
+        if (customCatalogsOnly) {
+            imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNull(workspaceId, false);
+        } else {
+            imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNotNull(workspaceId, false);
+        }
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         if (legacyCatalogEnabled) {
             imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
@@ -129,13 +134,31 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalogs;
     }
 
-    public List<ResourceWithId> findAsAuthorizationResorcesInWorkspace(Long workspaceId) {
-        return imageCatalogRepository.findAsAuthorizationResourcesInWorkspace(workspaceId);
+    @Override
+    public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
+        return findAllByWorkspaceId(workspaceId, false);
     }
 
-    public Set<ImageCatalog> findAllByIdsWithDefaults(Iterable<Long> ids) {
+    public List<ResourceWithId> findAsAuthorizationResorcesInWorkspace(Long workspaceId, boolean customCatalogsOnly) {
+        if (customCatalogsOnly) {
+            return imageCatalogRepository.findCustomAsAuthorizationResourcesInWorkspace(workspaceId);
+        } else {
+            return imageCatalogRepository.findAsAuthorizationResourcesInWorkspace(workspaceId);
+        }
+    }
+
+    public Set<ImageCatalog> findAllByIdsWithDefaults(Iterable<Long> ids, boolean customCatalogsOnly) {
         Set<ImageCatalog> imageCatalogs = Sets.newLinkedHashSet(imageCatalogRepository.findAllById(ids));
-        imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+
+        // FIXME: We need to clean up this part
+        // In contrast with the method name, this will only return the default catalog if the customCatalogsOnly
+        // parameter is false. Right now this is intentional, but as soon as the support for JSON based custom catalogs
+        // is gone, we'll have to clean up things like this.
+        if (customCatalogsOnly) {
+            imageCatalogs.removeIf(imageCatalog -> !StringUtils.isEmpty(imageCatalog.getImageCatalogUrl()));
+        } else {
+            imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+        }
         if (legacyCatalogEnabled) {
             imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
         }
@@ -179,7 +202,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog findByResourceCrn(String resourceCrn) {
-        return imageCatalogRepository.findByResourceCrnAndArchivedFalse(resourceCrn).orElseThrow(notFound("ImageCatalog", resourceCrn));
+        return imageCatalogRepository.findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(resourceCrn)
+                .orElseThrow(notFound("ImageCatalog", resourceCrn));
     }
 
     public Images getImagesByCatalogName(Long workspaceId, String catalogName, String stackName, String platform) throws CloudbreakImageCatalogException {

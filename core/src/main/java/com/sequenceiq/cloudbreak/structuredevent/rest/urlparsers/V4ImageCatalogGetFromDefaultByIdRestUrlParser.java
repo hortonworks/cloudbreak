@@ -58,5 +58,4 @@ public class V4ImageCatalogGetFromDefaultByIdRestUrlParser extends LegacyRestUrl
     protected String getResourceEvent(Matcher matcher) {
         return null;
     }
-
 }

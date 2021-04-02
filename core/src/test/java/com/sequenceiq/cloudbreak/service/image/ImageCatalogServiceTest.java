@@ -680,13 +680,13 @@ public class ImageCatalogServiceTest {
         when(userProfileService.getOrCreate(user)).thenReturn(mock(UserProfile.class));
 
         ImageCatalog catalog = getImageCatalog();
-        when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
+        when(imageCatalogRepository.findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
         when(imageCatalogRepository.findByNameAndWorkspaceId(catalog.getName(), catalog.getWorkspace().getId())).thenReturn(Optional.of(catalog));
 
         ImageCatalog result = underTest.delete(NameOrCrn.ofCrn(catalog.getResourceCrn()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
-        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
+        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(anyString());
         verify(imageCatalogRepository, times(1)).save(any(ImageCatalog.class));
         verify(imageCatalogRepository, times(1)).save(catalog);
     }
@@ -706,13 +706,13 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
         ImageCatalog catalog = getImageCatalog();
-        when(imageCatalogRepository.findByResourceCrnAndArchivedFalse(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
+        when(imageCatalogRepository.findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(catalog.getResourceCrn())).thenReturn(Optional.of(catalog));
 
         ImageCatalog result = underTest.get(NameOrCrn.ofCrn(catalog.getResourceCrn()), catalog.getWorkspace().getId());
 
         assertEquals(catalog, result);
-        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(anyString());
-        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalse(catalog.getResourceCrn());
+        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(anyString());
+        verify(imageCatalogRepository, times(1)).findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(catalog.getResourceCrn());
     }
 
     @Test
