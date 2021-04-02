@@ -165,7 +165,7 @@
             {% if 'HIVE' in exposed and 'HIVESERVER2' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>HIVE</name>
-                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                <value>enableStickySession=true;noFallback=true;enableLoadBalancing=true</value>
             </param>
             {%- endif %}
             {% if 'LIVYSERVER_API' in exposed and 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
@@ -195,7 +195,7 @@
             {% if 'RANGER' in exposed and 'RANGER_ADMIN' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>RANGER</name>
-                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                <value>enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
             </param>
             {%- endif %}
             {% if 'YARNUIV2' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
@@ -219,7 +219,7 @@
             {% if 'SOLR' in exposed and 'SOLR_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>SOLR</name>
-                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                <value>enableStickySession=false;noFallback=false;enableLoadBalancing=true</value>
             </param>
             {%- endif %}
             {% if 'IMPALA' in exposed and 'IMPALAD' in salt['pillar.get']('gateway:location') -%}
@@ -237,7 +237,7 @@
             {% if 'AVATICA' in exposed and 'PHOENIX_QUERY_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>AVATICA</name>
-                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+                 <value>enableStickySession=true;noFallback=true;enableLoadBalancing=true</value>
              </param>
              {%- endif %}
             {% if 'NIFI-REGISTRY-REST' in exposed and 'NIFI_REGISTRY_SERVER' in salt['pillar.get']('gateway:location') -%}
