@@ -162,26 +162,26 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
-    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public ImagesV4Response createImageInCatalog(Long workspaceId, @ResourceName String name, @RequestObject ImageEntryV4Request request) {
         return null;
     }
 
     @Override
-    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public ImagesV4Response updateImageInCatalog(Long workspaceId, @ResourceName String name, String imageId, @RequestObject ImageEntryV4Request request) {
         return null;
     }
 
     @Override
-    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public ImagesV4Response deleteImageFromCatalog(Long workspaceId, @ResourceName String name, String imageId) {
         return null;
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
-    public ImagesV4Response getImageFromDefaultById(Long workspaceId, String imageId) throws Exception {
+    @DisableCheckPermissions
+    public ImagesV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
         return null;
     }
 }

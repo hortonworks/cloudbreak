@@ -157,11 +157,11 @@ public interface ImageCatalogV4Endpoint {
             @PathParam("imageId") String imageId);
 
     @GET
-    @Path("image")
+    @Path("image/{imageId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT_BY_ID, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefaultById")
     ImagesV4Response getImageFromDefaultById(@PathParam("workspaceId") Long workspaceId,
-            @QueryParam("imageId") String imageId) throws Exception;
+            @PathParam("imageId") String imageId) throws Exception;
 
 }
