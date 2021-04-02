@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -138,14 +139,16 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @DisableCheckPermissions
-    public ImagesV4Response getImages(Long workspaceId, String stackName, String platform) throws Exception {
+    public ImagesV4Response getImages(Long workspaceId, String stackName, String platform,
+        String runtimeVersion, String imageType) throws Exception {
         Images images = imageCatalogService.getImagesFromDefault(workspaceId, stackName, platform, Collections.emptySet());
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
-    public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform) throws Exception {
+    public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform,
+        String runtimeVersion, String imageType) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, stackName, platform);
         return converterUtil.convert(images, ImagesV4Response.class);
     }
@@ -156,5 +159,29 @@ public class ImageCatalogV4Controller extends NotificationController implements 
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, name);
         Images images = new Images(List.of(), List.of(statedImage.getImage()), Set.of());
         return converterUtil.convert(images, ImagesV4Response.class);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    public ImagesV4Response createImageInCatalog(Long workspaceId, @ResourceName String name, @RequestObject ImageEntryV4Request request) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    public ImagesV4Response updateImageInCatalog(Long workspaceId, @ResourceName String name, String imageId, @RequestObject ImageEntryV4Request request) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "crn", type = CRN, action = EDIT_IMAGE_CATALOG)
+    public ImagesV4Response deleteImageFromCatalog(Long workspaceId, @ResourceName String name, String imageId) {
+        return null;
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImagesV4Response getImageFromDefaultById(Long workspaceId, String imageId) throws Exception {
+        return null;
     }
 }

@@ -18,6 +18,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
@@ -107,7 +108,10 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesInWorkspace")
     ImagesV4Response getImages(@PathParam("workspaceId") Long workspaceId,
-            @QueryParam("stackName") String stackName, @QueryParam("platform") String platform) throws Exception;
+            @QueryParam("stackName") String stackName,
+            @QueryParam("platform") String platform,
+            @QueryParam("runtimeVersion") String runtimeVersion,
+            @QueryParam("imageType") String imageType) throws Exception;
 
     @GET
     @Path("{name}/images")
@@ -115,7 +119,10 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGES_BY_NAME, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImagesByNameInWorkspace")
     ImagesV4Response getImagesByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("stackName") String stackName, @QueryParam("platform") String platform) throws Exception;
+            @QueryParam("stackName") String stackName,
+            @QueryParam("platform") String platform,
+            @QueryParam("runtimeVersion") String runtimeVersion,
+            @QueryParam("imageType") String imageType) throws Exception;
 
     @GET
     @Path("{name}/image")
@@ -124,4 +131,37 @@ public interface ImageCatalogV4Endpoint {
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageByNameAndId")
     ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("imageId") String imageId) throws Exception;
+
+    @POST
+    @Path("{name}/image")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_CATALOG, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "createImageInCatalog")
+    ImagesV4Response createImageInCatalog(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @Valid ImageEntryV4Request request);
+
+    @PUT
+    @Path("{name}/image/{imageId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.UPDATE_IN_CATALOG, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "updateImageInCatalog")
+    ImagesV4Response updateImageInCatalog(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @PathParam("imageId") String imageId, @Valid ImageEntryV4Request request);
+
+    @DELETE
+    @Path("{name}/image/{imageId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.DELETE_FROM_CATALOG, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "deleteImageFromCatalog")
+    ImagesV4Response deleteImageFromCatalog(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @PathParam("imageId") String imageId);
+
+    @GET
+    @Path("image")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT_BY_ID, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefaultById")
+    ImagesV4Response getImageFromDefaultById(@PathParam("workspaceId") Long workspaceId,
+            @QueryParam("imageId") String imageId) throws Exception;
+
 }
