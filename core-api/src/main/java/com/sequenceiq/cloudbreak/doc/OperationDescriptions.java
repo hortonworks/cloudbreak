@@ -158,6 +158,7 @@ public class OperationDescriptions {
         public static final String GET_BY_IMAGE_CATALOG_NAME = "retrieve imagecatalog request by imagecatalog name";
         public static final String GET_IMAGES_BY_NAME = "determines available images for the given stack or platform"
                 + "from the given imagecatalog name";
+        public static final String GET_IMAGE_BY_ID = "determines the image for the image UUID using a default imagecatalog name";
         public static final String GET_IMAGE_BY_NAME_AND_ID = "determines the image for the image UUID"
                 + "from the given imagecatalog name";
         public static final String GET_IMAGES = "determines available images for the given stack or platform"

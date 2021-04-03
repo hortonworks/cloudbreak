@@ -234,8 +234,12 @@ public class SdxService implements ResourceIdProvider, ResourceCrnAndNameProvide
                     imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
             ImagesV4Response imagesV4Response = null;
             try {
-                imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(
-                        WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+                if (Strings.isBlank(imageSettingsV4Request.getCatalog())) {
+                    imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId());
+                } else {
+                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(
+                            WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+                }
             } catch (Exception e) {
                 LOGGER.error("Sdx service fails to get image using image id", e);
             }
