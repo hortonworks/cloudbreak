@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Optional;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -55,6 +56,11 @@ public class FreeIpaConverter {
                                     .withMaxPrice(spotParameters.getMaxPrice())
                                     .build())
                             .build()));
+            FreeIpaImageRequest image = request.getImage();
+            if (image != null) {
+                builder.withImageCatalog(image.getCatalog());
+                builder.withImageId(image.getId());
+            }
         }
         return builder.build();
     }

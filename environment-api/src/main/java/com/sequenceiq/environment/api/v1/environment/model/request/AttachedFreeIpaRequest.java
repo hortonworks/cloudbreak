@@ -33,6 +33,9 @@ public class AttachedFreeIpaRequest {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_GCP_PARAMETERS)
     private GcpFreeIpaParameters gcp;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE)
+    private FreeIpaImageRequest image;
+
     public Boolean getCreate() {
         return create;
     }
@@ -65,6 +68,7 @@ public class AttachedFreeIpaRequest {
                 ", aws=" + aws +
                 ", azure=" + azure +
                 ", gcp=" + gcp +
+                ", image=" + image +
                 '}';
     }
 
@@ -82,5 +86,13 @@ public class AttachedFreeIpaRequest {
 
     public void setGcp(GcpFreeIpaParameters gcp) {
         this.gcp = gcp;
+    }
+
+    public FreeIpaImageRequest getImage() {
+        return image;
+    }
+
+    public void setImage(FreeIpaImageRequest image) {
+        this.image = image;
     }
 }

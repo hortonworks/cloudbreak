@@ -115,6 +115,9 @@ public class EnvironmentModelDescription {
     public static final String FREEIPA_AWS_SPOT_PARAMETERS = "Aws spot instance related parameters.";
     public static final String FREEIPA_AWS_SPOT_PERCENTAGE = "Percentage of spot instances launched in FreeIpa instance group";
     public static final String FREEIPA_AWS_SPOT_MAX_PRICE = "Max price per hour of spot instances launched in FreeIpa instance group";
+    public static final String FREEIPA_IMAGE = "Image parameters for FreeIpa instance creation.";
+    public static final String FREEIPA_IMAGE_CATALOG = "Image catalog for FreeIpa instance creation.";
+    public static final String FREEIPA_IMAGE_ID = "Image ID for FreeIpa instance creation.";
 
     public static final String PROXYCONFIG_NAME = "Name of the proxyconfig of the environment.";
     public static final String PROXYCONFIG_RESPONSE = "ProxyConfig attached to the environment.";
