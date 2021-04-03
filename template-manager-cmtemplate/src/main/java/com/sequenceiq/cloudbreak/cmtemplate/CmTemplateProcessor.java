@@ -60,10 +60,8 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -360,7 +358,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private boolean isYarnNodemanager(Set<ServiceComponent> serviceComponents) {
         return serviceComponents.stream().anyMatch(sc -> YarnRoles.YARN.equalsIgnoreCase(sc.getService())
-                && YarnRoles.NODEMANAGER.equalsIgnoreCase(sc.getComponent()));
+            && YarnRoles.NODEMANAGER.equalsIgnoreCase(sc.getComponent()));
     }
 
     private Set<String> collectComponents(Set<ServiceComponent> serviceComponentSet) {
@@ -446,27 +444,10 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
                 && CMRepositoryVersionUtil.isIgnorePropertyValidationSupportedViaBlueprint(cmRepoDetails)) {
             instantiator.setLenient(Boolean.TRUE);
         }
-        Optional<KerberosConfig> kerberosConfigOpt = templatePreparationObject.getKerberosConfig();
         if (Objects.nonNull(cmRepoDetails) && CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(cmRepoDetails)
-                && kerberosConfigOpt.isPresent()) {
-            KerberosConfig kerberosConfig = kerberosConfigOpt.get();
-            ApiConfigureForKerberosArguments apiConfigureForKerberosArguments = new ApiConfigureForKerberosArguments();
-            if (shouldConfigureSecureDatanode(templatePreparationObject.getGeneralClusterConfigs(), kerberosConfig)) {
-                LOGGER.debug("Add Kerberos Datanode port config to CM template, web port: {}, https port: {}",
-                        kerberosConfig.getDatanodeSecurePort(), kerberosConfig.getDatanodeSecureHttpsPort());
-                apiConfigureForKerberosArguments
-                        .datanodeTransceiverPort(BigDecimal.valueOf(kerberosConfig.getDatanodeSecurePort()))
-                        .datanodeWebPort(BigDecimal.valueOf(kerberosConfig.getDatanodeSecureHttpsPort()));
-            }
-            instantiator.setEnableKerberos(apiConfigureForKerberosArguments);
+                && templatePreparationObject.getKerberosConfig().isPresent()) {
+            instantiator.setEnableKerberos(new ApiConfigureForKerberosArguments());
         }
-    }
-
-    private boolean shouldConfigureSecureDatanode(GeneralClusterConfigs generalClusterConfigs, KerberosConfig kerberosConfig) {
-        return generalClusterConfigs != null
-                && generalClusterConfigs.getAutoTlsEnabled()
-                && kerberosConfig.getDatanodeSecurePort() > 0
-                && kerberosConfig.getDatanodeSecureHttpsPort() > 0;
     }
 
     public void addVariables(List<ApiClusterTemplateVariable> vars) {
