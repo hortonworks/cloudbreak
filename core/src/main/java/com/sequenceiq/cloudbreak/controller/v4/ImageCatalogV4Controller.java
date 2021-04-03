@@ -151,6 +151,14 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    @DisableCheckPermissions
+    public ImagesV4Response getImageByImageId(Long workspaceId, String imageId) throws Exception {
+        StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, "");
+        Images images = new Images(List.of(), List.of(statedImage.getImage()), Set.of());
+        return converterUtil.convert(images, ImagesV4Response.class);
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImagesV4Response getImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name, String imageId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, name);

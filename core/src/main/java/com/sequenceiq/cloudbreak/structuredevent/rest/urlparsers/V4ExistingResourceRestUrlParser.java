@@ -23,7 +23,7 @@ public class V4ExistingResourceRestUrlParser extends LegacyRestUrlParser {
             "v4/\\d+/(audits/.*"
             + "|blueprints/recommendation"
             + "|blueprints_util/.*"
-            + "|image_catalogs/images"
+            + "|image_catalogs/image(s\\b|\\b)"
             + "|connectors/[a-z_]+"
             + "|file_systems/[a-z_]+)");
 
