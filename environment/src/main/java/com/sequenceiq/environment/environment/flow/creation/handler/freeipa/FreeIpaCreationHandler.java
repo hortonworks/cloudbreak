@@ -19,6 +19,7 @@ import java.util.Set;
 
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -225,6 +226,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         setTelemetry(environment, createFreeIpaRequest);
         setBackup(environment, createFreeIpaRequest);
         setTags(environment, createFreeIpaRequest);
+        setImage(environment, createFreeIpaRequest);
+
         SecurityGroupRequest securityGroupRequest = null;
         if (environment.getSecurityAccess() != null) {
             securityGroupRequest = createSecurityGroupRequest(environment.getSecurityAccess());
@@ -365,6 +368,22 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withSelector(FINISH_ENV_CREATION_EVENT.selector())
                 .build();
+    }
+
+    private void setImage(EnvironmentDto environment, CreateFreeIpaRequest createFreeIpaRequest) {
+        if (environment.getFreeIpaCreation() != null) {
+            String imageCatalog = environment.getFreeIpaCreation().getImageCatalog();
+            String imageId = environment.getFreeIpaCreation().getImageId();
+            if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageId)) {
+                LOGGER.info("FreeIPA creation with a pre-defined image catalog and image id: '{}', '{}'", imageCatalog, imageId);
+                ImageSettingsRequest imageSettings = new ImageSettingsRequest();
+                imageSettings.setCatalog(imageCatalog);
+                imageSettings.setId(imageId);
+                createFreeIpaRequest.setImage(imageSettings);
+            } else {
+                LOGGER.info("FreeIPA creation without pre-defined image settings. FreeIpa serivce is going to handle default settings.");
+            }
+        }
     }
 
     @Override

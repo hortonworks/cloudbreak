@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -78,6 +79,10 @@ public class FreeIpaCreationHandlerTest {
     private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
 
     private static final Set<PollingResult> UNSUCCESSFUL_POLLING_RESULTS = Set.of(PollingResult.FAILURE, PollingResult.EXIT, PollingResult.TIMEOUT);
+
+    private static final String IMAGE_CATALOG = "image catalog";
+
+    private static final String IMAGE_ID = "image id";
 
     @Mock
     private EventSender eventSender;
@@ -267,6 +272,95 @@ public class FreeIpaCreationHandlerTest {
                     assertEquals(spotMaxPrice, spotParameters.getMaxPrice());
                     assertEquals(spotPercentage, spotParameters.getPercentage());
                 });
+    }
+
+    @Test
+    public void testImageCatalogAndImageIdParemetersArePopulated() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setImageId(IMAGE_ID);
+        environmentDto.getFreeIpaCreation().setImageCatalog(IMAGE_CATALOG);
+
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertEquals(IMAGE_CATALOG, freeIpaRequest.getImage().getCatalog());
+        assertEquals(IMAGE_ID, freeIpaRequest.getImage().getId());
+    }
+
+    @Test
+    public void testFreeIpaImageIsNullInCaseOfMissingImageCatalog() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setImageId(IMAGE_ID);
+        environmentDto.getFreeIpaCreation().setImageCatalog(null);
+
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertNull(freeIpaRequest.getImage());
+        assertNull(freeIpaRequest.getImage());
+    }
+
+    @Test
+    public void testFreeIpaImageIsNullInCaseOfMissingImageId() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setImageId(null);
+        environmentDto.getFreeIpaCreation().setImageCatalog(IMAGE_CATALOG);
+
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertNull(freeIpaRequest.getImage());
     }
 
     private EnvironmentDto aYarnEnvironmentDtoWithParentEnvironment() {

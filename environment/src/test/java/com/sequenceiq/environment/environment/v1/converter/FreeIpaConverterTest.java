@@ -4,15 +4,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 
 public class FreeIpaConverterTest {
+
+    private static final String IMAGE_CATALOG = "image catalog";
+
+    private static final String IMAGE_ID = "image id";
 
     private FreeIpaConverter underTest;
 
@@ -66,4 +72,50 @@ public class FreeIpaConverterTest {
         assertEquals(0.9, result.getAws().getSpot().getMaxPrice());
     }
 
+    @Test
+    public void testConvertWithImage() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setImage(aFreeIpaImage(IMAGE_CATALOG, IMAGE_ID));
+        // WHEN
+        FreeIpaCreationDto result = underTest.convert(request);
+        // THEN
+        assertEquals(IMAGE_CATALOG, result.getImageCatalog());
+        assertEquals(IMAGE_ID, result.getImageId());
+    }
+
+    @Test
+    public void testConvertWithoutImage() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setImage(null);
+        // WHEN
+        FreeIpaCreationDto result = underTest.convert(request);
+        // THEN
+        assertNull(result.getImageCatalog());
+        assertNull(result.getImageId());
+    }
+
+    @Test
+    public void testConvertWithoutImageIdAndImageCatalog() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setImage(aFreeIpaImage(null, null));
+        // WHEN
+        FreeIpaCreationDto result = underTest.convert(request);
+        // THEN
+        assertNull(result.getImageCatalog());
+        assertNull(result.getImageId());
+    }
+
+    private FreeIpaImageRequest aFreeIpaImage(String catalog, String id) {
+        FreeIpaImageRequest request = new FreeIpaImageRequest();
+        request.setId(id);
+        request.setCatalog(catalog);
+
+        return  request;
+    }
 }
