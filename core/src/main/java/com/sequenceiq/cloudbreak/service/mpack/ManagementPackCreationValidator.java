@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.service.mpack;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.inject.Inject;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.controller.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.controller.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.Validator;
 import com.sequenceiq.cloudbreak.domain.ManagementPack;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 
 @Component
 public class ManagementPackCreationValidator implements Validator<ManagementPack> {
@@ -33,6 +36,9 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
 
     private Client client;
 
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
+
     @PostConstruct
     public void init() {
         client = RestClientUtil.get(new ConfigKey(true, false, false));
@@ -42,7 +48,9 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
     public ValidationResult validate(ManagementPack subject) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         WebTarget target = client.target(subject.getMpackUrl());
-        try (Response response = target.request().head()) {
+        Invocation.Builder request = target.request();
+        addAuthorizationHeader(request);
+        try (Response response = request.head()) {
             if (response.getStatusInfo() != null) {
                 if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
                     resultBuilder.error(String.format("The URL is invalid! Response code was ['%s'].", response.getStatus()));
@@ -57,6 +65,12 @@ public class ManagementPackCreationValidator implements Validator<ManagementPack
             }
         }
         return resultBuilder.build();
+    }
+
+    private void addAuthorizationHeader(Invocation.Builder request) {
+        if (paywallCredentialService.paywallCredentialAvailable()) {
+            request.header("Authorization", String.format("Basic %s", paywallCredentialService.getBasicAuthorizationEncoded()));
+        }
     }
 
     private boolean isMediaTypeValid(MediaType mediaType) {

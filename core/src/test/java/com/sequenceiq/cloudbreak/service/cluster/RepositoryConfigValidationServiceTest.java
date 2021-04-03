@@ -1,19 +1,25 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -21,6 +27,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
 import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RepositoryConfigValidationServiceTest {
@@ -30,11 +37,18 @@ public class RepositoryConfigValidationServiceTest {
     @Mock
     private UrlAccessValidationService urlAccessValidationService;
 
+    @Mock
+    private PaywallCredentialService paywallCredentialService;
+
     @InjectMocks
     private RepositoryConfigValidationService underTest;
 
+    @Captor
+    private ArgumentCaptor<Map<String, Object>> headerCaptor;
+
     @Before
     public void setUp() {
+        when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(false);
     }
 
     @Test
@@ -67,11 +81,11 @@ public class RepositoryConfigValidationServiceTest {
         String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariBaseUrl(ambariBaseUrl);
-        when(urlAccessValidationService.isAccessible(anyString())).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(anyString(), any())).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(urlAccessValidationService, times(1)).isAccessible(anyString());
+        verify(urlAccessValidationService, times(1)).isAccessible(anyString(), any());
         assertTrue(result.getAmbariBaseUrl());
         assertNull(result.getAmbariGpgKeyUrl());
         assertNull(result.getVersionDefinitionFileUrl());
@@ -87,13 +101,13 @@ public class RepositoryConfigValidationServiceTest {
         request.setAmbariBaseUrl(ambariBaseUrl);
         String rpmRepoDataTarget = ambariBaseUrl + RPM_REPO_REPODATA_PATH;
         String debRepoDataTarget = ambariBaseUrl + "/dists/Ambari/InRelease";
-        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
-        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget, null)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget, null)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture(), any());
         List<String> arguments = argumentCaptor.getAllValues();
         assertTrue(arguments.contains(rpmRepoDataTarget));
         assertTrue(arguments.contains(debRepoDataTarget));
@@ -105,14 +119,14 @@ public class RepositoryConfigValidationServiceTest {
         String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariBaseUrl(ambariBaseUrl);
-        when(urlAccessValidationService.isAccessible(anyString())).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(anyString(), any())).thenReturn(false);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
         String rpmRepoDataTarget = ambariBaseUrl + RPM_REPO_REPODATA_PATH;
         String debRepoDataTarget = ambariBaseUrl + "/dists/Ambari/InRelease";
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture(), any());
         List<String> arguments = argumentCaptor.getAllValues();
         assertTrue(arguments.contains(rpmRepoDataTarget));
         assertTrue(arguments.contains(debRepoDataTarget));
@@ -124,11 +138,11 @@ public class RepositoryConfigValidationServiceTest {
         String ambariGpgKeyUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
-        when(urlAccessValidationService.isAccessible(ambariGpgKeyUrl)).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(ambariGpgKeyUrl, null)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(urlAccessValidationService, times(1)).isAccessible(ambariGpgKeyUrl);
+        verify(urlAccessValidationService, times(1)).isAccessible(ambariGpgKeyUrl, null);
         assertTrue(result.getAmbariGpgKeyUrl());
     }
 
@@ -137,11 +151,11 @@ public class RepositoryConfigValidationServiceTest {
         String ambariGpgKeyUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
-        when(urlAccessValidationService.isAccessible(ambariGpgKeyUrl)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(ambariGpgKeyUrl, null)).thenReturn(false);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(urlAccessValidationService, times(1)).isAccessible(ambariGpgKeyUrl);
+        verify(urlAccessValidationService, times(1)).isAccessible(ambariGpgKeyUrl, null);
         assertFalse(result.getAmbariGpgKeyUrl());
     }
 
@@ -151,11 +165,11 @@ public class RepositoryConfigValidationServiceTest {
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setStackBaseURL(stackBaseUrl);
         String rpmRepoDataTarget = stackBaseUrl + RPM_REPO_REPODATA_PATH;
-        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget, null)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(urlAccessValidationService, times(1)).isAccessible(rpmRepoDataTarget);
+        verify(urlAccessValidationService, times(1)).isAccessible(rpmRepoDataTarget, null);
         assertTrue(result.getStackBaseURL());
     }
 
@@ -166,13 +180,13 @@ public class RepositoryConfigValidationServiceTest {
         String debRepoDataTarget = stackBaseUrl + "/dists/HDP/InRelease";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setStackBaseURL(stackBaseUrl);
-        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
-        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget, null)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget, null)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture(), any());
         List<String> arguments = argumentCaptor.getAllValues();
         assertTrue(arguments.contains(rpmRepoDataTarget));
         assertTrue(arguments.contains(debRepoDataTarget));
@@ -184,12 +198,12 @@ public class RepositoryConfigValidationServiceTest {
         String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.5.5.0";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setStackBaseURL(stackBaseUrl);
-        when(urlAccessValidationService.isAccessible(anyString())).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(anyString(), any())).thenReturn(false);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture(), any());
         List<String> arguments = argumentCaptor.getAllValues();
         String rpmRepoDataTarget = stackBaseUrl + RPM_REPO_REPODATA_PATH;
         String debRepoDataTarget = stackBaseUrl + "/dists/HDP/InRelease";
@@ -204,11 +218,11 @@ public class RepositoryConfigValidationServiceTest {
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setUtilsBaseURL(hdpUtilsBaseUrl);
         String rpmRepoDataTarget = hdpUtilsBaseUrl + RPM_REPO_REPODATA_PATH;
-        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget, null)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
-        verify(urlAccessValidationService, times(1)).isAccessible(rpmRepoDataTarget);
+        verify(urlAccessValidationService, times(1)).isAccessible(rpmRepoDataTarget, null);
         assertTrue(result.getUtilsBaseURL());
     }
 
@@ -219,13 +233,13 @@ public class RepositoryConfigValidationServiceTest {
         String debRepoDataTarget = utilsBaseUrl + "/dists/HDP-UTILS/InRelease";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setUtilsBaseURL(utilsBaseUrl);
-        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
-        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(true);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget, null)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget, null)).thenReturn(true);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture(), any());
         List<String> arguments = argumentCaptor.getAllValues();
         assertTrue(arguments.contains(rpmRepoDataTarget));
         assertTrue(arguments.contains(debRepoDataTarget));
@@ -239,16 +253,37 @@ public class RepositoryConfigValidationServiceTest {
         String debRepoDataTarget = utilsBaseUrl + "/dists/HDP-UTILS/InRelease";
         RepoConfigValidationRequest request = new RepoConfigValidationRequest();
         request.setUtilsBaseURL(utilsBaseUrl);
-        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget)).thenReturn(false);
-        when(urlAccessValidationService.isAccessible(debRepoDataTarget)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(rpmRepoDataTarget, null)).thenReturn(false);
+        when(urlAccessValidationService.isAccessible(debRepoDataTarget, null)).thenReturn(false);
 
         RepoConfigValidationResponse result = underTest.validate(request);
 
         ArgumentCaptor<String> argumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture());
+        verify(urlAccessValidationService, times(2)).isAccessible(argumentCaptor.capture(), any());
         List<String> arguments = argumentCaptor.getAllValues();
         assertTrue(arguments.contains(rpmRepoDataTarget));
         assertTrue(arguments.contains(debRepoDataTarget));
         assertFalse(result.getUtilsBaseURL());
     }
+
+    @Test
+    public void testValidateForMpack() {
+        String mpackUrl = "https://archive.cloudera.com/p/HDF/centos7/3.x/updates/3.5.1.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.5.1.0-17.tar.gz";
+        RepoConfigValidationRequest request = new RepoConfigValidationRequest();
+        request.setMpackUrl(mpackUrl);
+        when(urlAccessValidationService.isAccessible(eq(mpackUrl), anyMap())).thenReturn(true);
+        when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(true);
+
+        RepoConfigValidationResponse result = underTest.validate(request);
+
+        ArgumentCaptor<String> urlCaptor = ArgumentCaptor.forClass(String.class);
+        verify(urlAccessValidationService, times(1)).isAccessible(urlCaptor.capture(), headerCaptor.capture());
+        String urlValue = urlCaptor.getValue();
+        Map<String, Object> headerValue = headerCaptor.getValue();
+        assertTrue(result.getMpackUrl());
+        assertEquals(mpackUrl, urlValue);
+        assertTrue(headerValue.containsKey("Authorization"));
+        assertTrue(headerValue.get("Authorization").toString().startsWith("Basic"));
+    }
+
 }

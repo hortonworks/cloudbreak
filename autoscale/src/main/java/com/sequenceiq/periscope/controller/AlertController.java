@@ -30,7 +30,7 @@ import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AlertService;
-import com.sequenceiq.periscope.service.DateService;
+import com.sequenceiq.periscope.service.TimeAlertEvaluator;
 
 @Component
 public class AlertController implements AlertEndpoint {
@@ -57,7 +57,7 @@ public class AlertController implements AlertEndpoint {
     private PrometheusAlertResponseConverter prometheusAlertResponseConverter;
 
     @Inject
-    private DateService dateService;
+    private TimeAlertEvaluator timeAlertEvaluator;
 
     @Override
     public MetricAlertResponse createMetricAlerts(Long clusterId, MetricAlertRequest json) {
@@ -112,7 +112,7 @@ public class AlertController implements AlertEndpoint {
 
     @Override
     public Boolean validateCronExpression(Long clusterId, TimeAlertValidationRequest json) throws ParseException {
-        dateService.validateCronExpression(json.getCronExpression());
+        timeAlertEvaluator.validateCronExpression(json.getCronExpression());
         return true;
     }
 
@@ -146,7 +146,7 @@ public class AlertController implements AlertEndpoint {
 
     private TimeAlert validateTimeAlert(TimeAlertRequest json) throws ParseException {
         TimeAlert alert = timeAlertRequestConverter.convert(json);
-        dateService.validateCronExpression(alert.getCron());
+        timeAlertEvaluator.validateCronExpression(alert.getCron());
         return alert;
     }
 

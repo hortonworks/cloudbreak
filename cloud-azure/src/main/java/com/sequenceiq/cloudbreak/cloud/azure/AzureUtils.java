@@ -356,4 +356,10 @@ public class AzureUtils {
             throw new CloudbreakServiceException("Can't delete managed disks: " + failedToDeleteManagedDisks);
         }
     }
+
+    public String getImageNameFromConnectionString(String connectionString) {
+        int begin = connectionString.lastIndexOf('/') + 1;
+        int end = connectionString.contains("?") ? connectionString.indexOf('?') : connectionString.length();
+        return connectionString.substring(begin, end);
+    }
 }

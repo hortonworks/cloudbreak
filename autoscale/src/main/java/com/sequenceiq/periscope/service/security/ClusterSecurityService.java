@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.service.security;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
@@ -16,6 +18,8 @@ import com.sequenceiq.periscope.model.AmbariStack;
 @Service
 public class ClusterSecurityService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterSecurityService.class);
+
     @Inject
     private CloudbreakClient cloudbreakClient;
 
@@ -25,9 +29,10 @@ public class ClusterSecurityService {
     public boolean hasAccess(PeriscopeUser user, Ambari ambari, Long stackId) {
         try {
             return hasAccess(user.getId(), user.getAccount(), ambari.getHost(), stackId);
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException e) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
+            LOGGER.debug("hasAccess request failed, falling back to 'true'", e);
             return true;
         }
     }

@@ -22,11 +22,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.regions.RegionUtils;
@@ -56,13 +58,16 @@ import com.amazonaws.services.kms.AWSKMS;
 import com.amazonaws.services.kms.model.AliasListEntry;
 import com.amazonaws.services.kms.model.DescribeKeyRequest;
 import com.amazonaws.services.kms.model.DescribeKeyResult;
+import com.amazonaws.services.kms.model.KeyMetadata;
 import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
@@ -106,6 +111,8 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
+    public static final String QUERY_FAILED_MESSAGE = "Could not get encryption keys from Amazon: ";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformResources.class);
 
     private static final int UNAUTHORIZED = 403;
@@ -334,8 +341,10 @@ public class AwsPlatformResources implements PlatformResources {
 
         DescribeRegionsResult describeRegionsResult = describeRegionsResult(ec2Client);
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
-
-        for (com.amazonaws.services.ec2.model.Region awsRegion : describeRegionsResult.getRegions()) {
+        List<com.amazonaws.services.ec2.model.Region> awsRegions = describeRegionsResult.getRegions().stream()
+                .filter(awsEc2Region -> RegionUtils.getRegion(awsEc2Region.getRegionName()) != null)
+                .collect(Collectors.toList());
+        for (com.amazonaws.services.ec2.model.Region awsRegion : awsRegions) {
             if (region == null || Strings.isNullOrEmpty(region.value()) || awsRegion.getRegionName().equals(region.value())) {
                 DescribeAvailabilityZonesResult describeAvailabilityZonesResult = describeAvailabilityZonesResult(ec2Client, awsRegion);
 
@@ -489,54 +498,40 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        String queryFailedMessage = "Could not get encryption keys from Amazon: ";
-
         CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(new HashSet<>());
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
-        AWSKMS client = awsClient.createAWSKMS(awsCredentialView, region.value());
+        AWSKMS kmsClient = awsClient.createAWSKMS(awsCredentialView, region.value());
+
+        if (!CollectionUtils.isEmpty(filters) && StringUtils.isNoneEmpty(filters.get(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY))) {
+            CloudEncryptionKey encryptionKey = describeCustomCloudEncryptionKey(kmsClient, filters.get(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY), "");
+            if (encryptionKey != null) {
+                cloudEncryptionKeys.getCloudEncryptionKeys().add(encryptionKey);
+            }
+        } else {
+            Set<CloudEncryptionKey> listedKmsKeys = listKmsKeys(kmsClient);
+            cloudEncryptionKeys.getCloudEncryptionKeys().addAll(listedKmsKeys);
+        }
+
+        return cloudEncryptionKeys;
+    }
+
+    private Set<CloudEncryptionKey> listKmsKeys(AWSKMS kmsClient) {
+        Set<CloudEncryptionKey> cloudEncryptionKeys = new HashSet<>();
         try {
             ListKeysRequest listKeysRequest = new ListKeysRequest();
-            ListKeysResult listKeysResult = client.listKeys(listKeysRequest);
-            ListAliasesResult listAliasesResult = client.listAliases(new ListAliasesRequest());
+            ListKeysResult listKeysResult = kmsClient.listKeys(listKeysRequest);
+            ListAliasesResult listAliasesResult = kmsClient.listAliases(new ListAliasesRequest());
 
             for (AliasListEntry keyListEntry : listAliasesResult.getAliases()) {
-                try {
                     listKeysResult.getKeys().stream()
                         .filter(item -> item.getKeyId().equals(keyListEntry.getTargetKeyId())).findFirst()
                         .ifPresent(item -> {
-                            DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(item.getKeyId());
-                            DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
-                            Map<String, Object> meta = new HashMap<>();
-                            meta.put("aWSAccountId", describeKeyResult.getKeyMetadata().getAWSAccountId());
-                            meta.put("creationDate", describeKeyResult.getKeyMetadata().getCreationDate());
-                            meta.put("enabled", describeKeyResult.getKeyMetadata().getEnabled());
-                            meta.put("expirationModel", describeKeyResult.getKeyMetadata().getExpirationModel());
-                            meta.put("keyManager", describeKeyResult.getKeyMetadata().getKeyManager());
-                            meta.put("keyState", describeKeyResult.getKeyMetadata().getKeyState());
-                            meta.put("keyUsage", describeKeyResult.getKeyMetadata().getKeyUsage());
-                            meta.put("origin", describeKeyResult.getKeyMetadata().getOrigin());
-                            meta.put("validTo", describeKeyResult.getKeyMetadata().getValidTo());
-
-                            if (!CloudConstants.AWS.equalsIgnoreCase(describeKeyResult.getKeyMetadata().getKeyManager())) {
-                                CloudEncryptionKey key = new CloudEncryptionKey(
-                                        item.getKeyArn(),
-                                        describeKeyResult.getKeyMetadata().getKeyId(),
-                                        describeKeyResult.getKeyMetadata().getDescription(),
-                                        keyListEntry.getAliasName().replace("alias/", ""),
-                                        meta);
-                                cloudEncryptionKeys.getCloudEncryptionKeys().add(key);
+                            String aliasName = keyListEntry.getAliasName().replace("alias/", "");
+                            CloudEncryptionKey key = describeCustomCloudEncryptionKey(kmsClient, item.getKeyId(), aliasName);
+                            if (key != null) {
+                                cloudEncryptionKeys.add(key);
                             }
                     });
-                } catch (AmazonServiceException e) {
-                    if (e.getStatusCode() == UNAUTHORIZED) {
-                        String policyMessage = "Could not get encryption keys because the user does not have enough permission.";
-                        LOGGER.warn(policyMessage + e);
-                    } else {
-                        LOGGER.warn(queryFailedMessage, e);
-                    }
-                } catch (Exception e) {
-                    LOGGER.warn(queryFailedMessage, e);
-                }
             }
         } catch (AmazonServiceException ase) {
             if (ase.getStatusCode() == UNAUTHORIZED) {
@@ -544,13 +539,56 @@ public class AwsPlatformResources implements PlatformResources {
                 LOGGER.warn(policyMessage + ase);
                 throw new CloudConnectorException(policyMessage, ase);
             } else {
-                LOGGER.warn(queryFailedMessage, ase);
-                throw new CloudConnectorException(queryFailedMessage + ase.getMessage(), ase);
+                LOGGER.warn(QUERY_FAILED_MESSAGE, ase);
+                throw new CloudConnectorException(QUERY_FAILED_MESSAGE + ase.getMessage(), ase);
             }
+        } catch (CloudConnectorException cce) {
+            throw cce;
         } catch (Exception e) {
-            LOGGER.warn(queryFailedMessage, e);
-            throw new CloudConnectorException(queryFailedMessage + e.getMessage(), e);
+            LOGGER.warn(QUERY_FAILED_MESSAGE, e);
+            throw new CloudConnectorException(QUERY_FAILED_MESSAGE + e.getMessage(), e);
         }
         return cloudEncryptionKeys;
+    }
+
+    private CloudEncryptionKey describeCustomCloudEncryptionKey(AWSKMS client, String keyId, String aliasName) {
+        CloudEncryptionKey result = null;
+        try {
+            DescribeKeyRequest describeKeyRequest = new DescribeKeyRequest().withKeyId(keyId);
+            DescribeKeyResult describeKeyResult = client.describeKey(describeKeyRequest);
+            Map<String, Object> meta = new HashMap<>();
+            KeyMetadata keyMetadata = describeKeyResult.getKeyMetadata();
+            meta.put("aWSAccountId", keyMetadata.getAWSAccountId());
+            meta.put("creationDate", keyMetadata.getCreationDate());
+            meta.put("enabled", keyMetadata.getEnabled());
+            meta.put("expirationModel", keyMetadata.getExpirationModel());
+            meta.put("keyManager", keyMetadata.getKeyManager());
+            meta.put("keyState", keyMetadata.getKeyState());
+            meta.put("keyUsage", keyMetadata.getKeyUsage());
+            meta.put("origin", keyMetadata.getOrigin());
+            meta.put("validTo", keyMetadata.getValidTo());
+
+            if (!CloudConstants.AWS.equalsIgnoreCase(keyMetadata.getKeyManager())) {
+                result = new CloudEncryptionKey(
+                        keyMetadata.getArn(),
+                        keyMetadata.getKeyId(),
+                        keyMetadata.getDescription(),
+                        aliasName,
+                        meta);
+            }
+        } catch (NotFoundException nfe) {
+            return result;
+        } catch (AmazonServiceException e) {
+            String logMessage = QUERY_FAILED_MESSAGE;
+            if (e.getStatusCode() == UNAUTHORIZED) {
+                logMessage = String.format("Could not get encryption keys because the user does not have permissions to read '%s' '%s'.", keyId, aliasName);
+            }
+            LOGGER.warn(logMessage, e);
+            throw new CloudConnectorException(logMessage, e);
+        } catch (Exception e) {
+            LOGGER.warn(QUERY_FAILED_MESSAGE, e);
+            throw new CloudConnectorException(QUERY_FAILED_MESSAGE, e);
+        }
+        return result;
     }
 }

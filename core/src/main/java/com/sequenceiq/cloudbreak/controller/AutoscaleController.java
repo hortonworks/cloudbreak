@@ -9,6 +9,8 @@ import javax.transaction.Transactional.TxType;
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.autoscale.AutoscaleEndpoint;
@@ -37,6 +39,8 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 @Transactional(TxType.NEVER)
 public class AutoscaleController implements AutoscaleEndpoint {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AutoscaleController.class);
+
     @Inject
     private StackService stackService;
 
@@ -63,6 +67,8 @@ public class AutoscaleController implements AutoscaleEndpoint {
 
     @Override
     public Response putStack(Long id, String owner, @Valid UpdateStackJson updateRequest) {
+        LOGGER.info("Autoscale requested stack update for stack id '{}', with status request '{}' and adjustment: '{}'", id, updateRequest.getStatus(),
+                updateRequest.getInstanceGroupAdjustment());
         setupIdentityForAutoscale(id, owner);
         return stackCommonService.putInDefaultWorkspace(id, updateRequest);
     }
@@ -74,6 +80,8 @@ public class AutoscaleController implements AutoscaleEndpoint {
 
     @Override
     public Response putCluster(Long stackId, String owner, @Valid UpdateClusterJson updateRequest) {
+        LOGGER.info("Autoscale requested cluster update for stack id '{}', with status request '{}' and adjustment: '{}'", stackId, updateRequest.getStatus(),
+                updateRequest.getHostGroupAdjustment());
         setupIdentityForAutoscale(stackId, owner);
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);

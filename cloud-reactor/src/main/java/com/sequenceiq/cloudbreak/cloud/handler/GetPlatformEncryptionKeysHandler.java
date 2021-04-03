@@ -45,6 +45,7 @@ public class GetPlatformEncryptionKeysHandler implements CloudPlatformEventHandl
             request.getResult().onNext(getPlatformEncryptionKeysResult);
             LOGGER.info("Query platform encryption keys types finished.");
         } catch (Exception e) {
+            LOGGER.warn("Failed to get encryption keys from the cloud provider", e);
             request.getResult().onNext(new GetPlatformEncryptionKeysResult(e.getMessage(), e, request));
         }
     }

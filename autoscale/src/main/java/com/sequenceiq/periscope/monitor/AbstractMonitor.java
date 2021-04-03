@@ -40,11 +40,12 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
                 LOGGER.info("Succesfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
                 rejectedThreadService.remove(evaluatorContext.getData());
                 monitored.setLastEvaluated(System.currentTimeMillis());
-                save(monitored);
-            } catch (RejectedExecutionException ignore) {
-
+                updateLastEvaluated(monitored);
+            } catch (RejectedExecutionException e) {
+                LOGGER.warn("Execution rejected", e);
             }
         }
+        LOGGER.info("Job finished: {}, monitored: {}", context.getJobDetail().getKey(), monitoredData.size());
     }
 
     void evalContext(JobExecutionContext context) {
@@ -64,7 +65,7 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
 
     protected abstract List<M> getMonitored();
 
-    protected abstract M save(M monitored);
+    protected abstract void updateLastEvaluated(M monitored);
 
     protected RejectedThreadService getRejectedThreadService() {
         return rejectedThreadService;

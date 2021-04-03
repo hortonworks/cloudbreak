@@ -57,8 +57,8 @@ public class StackCollectorService {
                                 executorServiceWithRegistry.submitIfAbsent(clusterCreationEvaluator, stack.getStackId());
                                 LOGGER.info("Succesfully submitted, the stack id: {}.", stack.getStackId());
                                 rejectedThreadService.remove(stack);
-                            } catch (RejectedExecutionException ignore) {
-
+                            } catch (RejectedExecutionException e) {
+                                LOGGER.warn("Execution rejected", e);
                             }
                         } else {
                             LOGGER.info("Could not find Ambari for stack: {} (ID:{})", stack.getName(), stack.getStackId());

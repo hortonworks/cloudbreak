@@ -61,4 +61,14 @@ public class MetricAlert extends BaseAlert {
     public void setAlertState(AlertState alertState) {
         this.alertState = alertState;
     }
+
+    @Override
+    public String toString() {
+        return "MetricAlert{"
+                + "definitionName='" + definitionName + '\''
+                + ", definitionLabel='" + definitionLabel + '\''
+                + ", period=" + period
+                + ", alertState=" + alertState
+                + "} " + super.toString();
+    }
 }

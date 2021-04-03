@@ -184,6 +184,9 @@ public class InstanceMetadataUpdaterTest {
 
     @Test
     public void testMultipleStackComponents() throws Exception {
+        InstanceMetadataUpdater.Package emptyPackage = new InstanceMetadataUpdater.Package();
+        emptyPackage.setName("stack");
+        emptyPackage.setPkgName(Lists.newArrayList("emptystack"));
         InstanceMetadataUpdater.Package package1 = new InstanceMetadataUpdater.Package();
         package1.setName("stack");
         package1.setPkgName(Lists.newArrayList("stack1"));
@@ -195,6 +198,7 @@ public class InstanceMetadataUpdaterTest {
         package3.setPkgName(Lists.newArrayList("stack3"));
 
         Map<String, String> packageMap = Maps.newHashMap();
+        packageMap.put("emptystack", "");
         packageMap.put("stack1", "1");
         packageMap.put("stack2", "2");
         packageMap.put("stack3", "3");
@@ -203,7 +207,7 @@ public class InstanceMetadataUpdaterTest {
         hostPackageMap.put("instanceId", packageMap);
         when(hostOrchestrator.getPackageVersionsFromAllHosts(any(GatewayConfig.class), any())).thenReturn(hostPackageMap);
 
-        underTest.setPackages(Lists.newArrayList(package1, package2, package3));
+        underTest.setPackages(Lists.newArrayList(emptyPackage, package1, package2, package3));
         underTest.updatePackageVersionsOnAllInstances(createStack());
         ArgumentCaptor<InstanceMetaData> captor = ArgumentCaptor.forClass(InstanceMetaData.class);
         verify(instanceMetaDataRepository, times(2)).save(captor.capture());

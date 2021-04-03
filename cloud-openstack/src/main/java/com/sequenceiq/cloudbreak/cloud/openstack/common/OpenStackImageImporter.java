@@ -33,7 +33,7 @@ public class OpenStackImageImporter {
 
         String importLocation = openStackImageImportTaskParameters.getImportLocation(name);
         LOGGER.info("Import OpenStack image from: {}", importLocation);
-        if (!urlAccessValidationService.isAccessible(importLocation)) {
+        if (!urlAccessValidationService.isAccessible(importLocation, null)) {
             throw new CloudConnectorException(String.format("OpenStack image '%s' is not accessible, therefore it cannot be imported automatically",
                     importLocation));
         }

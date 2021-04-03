@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -75,7 +76,16 @@ public class AmbariClusterUpgradeService {
                 credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(cluster));
                 servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
                 if (ambariRepo != null) {
-                    servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
+                    Json blueprint = new Json(cluster.getBlueprint().getBlueprintText());
+                    servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap(
+                            "repo", Map.of(
+                                    "baseUrl", ambariRepo.getBaseUrl(),
+                                    "gpgKeyUrl", ambariRepo.getGpgKeyUrl(),
+                                    "predefined", ambariRepo.getPredefined(),
+                                    "version", ambariRepo.getVersion(),
+                                    "stack_version", blueprint.getValue("Blueprints.stack_version"),
+                                    "stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase()
+                            )))));
                 }
                 SaltConfig pillar = new SaltConfig(servicePillar);
                 hostOrchestrator.upgradeAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);

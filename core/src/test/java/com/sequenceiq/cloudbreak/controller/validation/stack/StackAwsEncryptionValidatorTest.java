@@ -109,7 +109,7 @@ public class StackAwsEncryptionValidatorTest {
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenTemplateParametersHasTypeKeyAndItsTypeIsEncryptionTypeWithNoneValueThenThereIsNoEncryptionKeyCheck() {
+    public void testValidateEncryptionKeyWhenTemplateParametersHasTypeKeyAndItsTypeIsEncryptionTypeWithNoValueThenThereIsNoEncryptionKeyCheck() {
         parameters.put(TYPE, EncryptionType.NONE);
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
 
@@ -121,40 +121,29 @@ public class StackAwsEncryptionValidatorTest {
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenEncryptionKeysCouldNotBeRetrievedThenThereIsNoEncryptionKeyCheck() {
+    public void testValidateEncryptionKeyWhenEncryptionKeysCouldNotBeRetrievedThenValidationMustFail() {
+        String aCustomEncryptionKey = "aCustomEncryptionKey";
         parameters.put(TYPE, EncryptionType.CUSTOM);
+        parameters.put(KEY, aCustomEncryptionKey);
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
         when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(null);
 
         ValidationResult result = underTest.validate(subject);
 
-        assertTrue(result.getErrors().isEmpty());
+        assertFalse(result.getErrors().isEmpty());
+        assertEquals(1, result.getErrors().size());
+        String expectedValidationMsg = String.format("The provided encryption key '%s' could not be described from the provider side.", aCustomEncryptionKey);
+        assertEquals(expectedValidationMsg, result.getErrors().get(0));
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenThereIsNoReturningEncryptionKeyFromControllerThenThereIsNoEncryptionKeyCheck() {
+    public void testValidateEncryptionKeyWhenRequestDoesNotContainsKeyThenValidationErrorShouldComeBack() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
         when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
-        when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(new PlatformEncryptionKeysResponse());
-
-        ValidationResult result = underTest.validate(subject);
-
-        assertTrue(result.getErrors().isEmpty());
-        verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
-        verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
-    }
-
-    @Test
-    public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsButDoesNotContainsKeyEntryThenValidationErrorShouldComeBack() {
-        parameters.put(TYPE, EncryptionType.CUSTOM);
-        PlatformEncryptionKeysResponse encryptionKeysResponse = createPlatformEncryptionKeysResponseWithoutNameValue();
-        when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
-        when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
-        when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(encryptionKeysResponse);
 
         ValidationResult result = underTest.validate(subject);
 
@@ -162,14 +151,15 @@ public class StackAwsEncryptionValidatorTest {
         assertEquals(1, result.getErrors().size());
         assertEquals("There is no encryption key provided but CUSTOM type is given for encryption.", result.getErrors().get(0));
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
-        verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
+        verify(parameterV1Controller, times(0)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsAndContainsKeyEntryButItsValueIsNotInTheListedKeysThenValidationErrorShouldComeBack() {
+    public void testValidateEncryptionKeyWhenContainsKeyEntryButItDoesNotExistOnProviderSideThenValidationErrorShouldComeBack() {
+        String anInvalidEncryptionKey = "some invalid value which does not exists in the listed encryption keys";
         parameters.put(TYPE, EncryptionType.CUSTOM);
-        parameters.put(KEY, "some invalid value which does not exists in the listed encryption keys");
-        PlatformEncryptionKeysResponse encryptionKeysResponse = createPlatformEncryptionKeysResponseWithoutNameValue();
+        parameters.put(KEY, anInvalidEncryptionKey);
+        PlatformEncryptionKeysResponse encryptionKeysResponse = new PlatformEncryptionKeysResponse();
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
         when(credentialService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(new Credential());
         when(parameterV1Controller.getEncryptionKeys(any(PlatformResourceRequestJson.class))).thenReturn(encryptionKeysResponse);
@@ -178,13 +168,15 @@ public class StackAwsEncryptionValidatorTest {
 
         assertFalse(result.getErrors().isEmpty());
         assertEquals(1, result.getErrors().size());
-        assertEquals("The provided encryption key does not exists in the given region's encryption key list for this credential.", result.getErrors().get(0));
+        String expectedMsg = String.format("The provided encryption key '%s' does not exists in the given region's encryption key list for this credential.",
+                anInvalidEncryptionKey);
+        assertEquals(expectedMsg, result.getErrors().get(0));
         verify(credentialService, times(1)).getByNameForWorkspaceId(any(), anyLong());
         verify(parameterV1Controller, times(1)).getEncryptionKeys(any(PlatformResourceRequestJson.class));
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenEncryptionKeysAreExistsAndContainsKeyEntryAndItsValueIsInTheListedKeysThenEverythingShouldGoFine() {
+    public void testValidateEncryptionKeyWhenEncryptionKeysExistAndContainsKeyEntryAndItsValueIsInTheListedKeysThenEverythingShouldGoFine() {
         parameters.put(TYPE, EncryptionType.CUSTOM);
         parameters.put(KEY, TEST_ENCRYPTION_KEY);
         PlatformEncryptionKeysResponse encryptionKeysResponse = createPlatformEncryptionKeysResponseWithNameValue();

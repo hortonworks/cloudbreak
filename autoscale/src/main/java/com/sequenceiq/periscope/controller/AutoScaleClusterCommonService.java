@@ -136,8 +136,13 @@ public class AutoScaleClusterCommonService {
                 cluster = clusterService.create(cluster, user, ambariStack, PENDING);
             } else {
                 AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
-                cluster = clusterId == null ? clusterService.create(cluster, user, resolvedAmbari, RUNNING)
-                        : clusterService.update(clusterId, resolvedAmbari, cluster.isAutoscalingEnabled());
+                if (clusterId == null) {
+                    LOGGER.info("Creating cluster as clusterId is null for user [id: {}]: {}", user.getId(), cluster);
+                    clusterService.create(cluster, user, resolvedAmbari, RUNNING);
+                } else {
+                    LOGGER.info("Updating cluster [id: {}] for user [id: {}]: {}", clusterId, user.getId(), cluster);
+                    clusterService.update(clusterId, resolvedAmbari, cluster.isAutoscalingEnabled());
+                }
             }
             createHistoryAndNotification(cluster);
             return createClusterJsonResponse(cluster);

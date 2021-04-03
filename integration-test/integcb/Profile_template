@@ -6,3 +6,5 @@ export UAA_DEFAULT_USER_PW=cloudbreak
 export REMOVE_CONTAINER=
 export CB_ENABLEDPLATFORMS=AZURE,AWS,GCP,OPENSTACK,YARN,MOCK
 export POSTGRES_PASSWORD=amazingpassword
+export CB_PAYWALL_USERNAME=paywall_user
+export CB_PAYWALL_PASSWORD=paywall_pwd

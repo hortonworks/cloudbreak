@@ -7,13 +7,12 @@ listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
-  - name: "gcp prewarm image edw edwetl"
+  - name: "gcp HDP315 base image edw analyitcs"
     preserveOrder: true
     parameters:
-      clusterName: gcp-prewarm-edwetl
+      clusterName: gcp-prewarm-edwanalytics
       provider: gcp
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: hdp
+      blueprintName: "HDP 3.1.5 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
       instancegroupName: worker
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests
@@ -23,13 +22,12 @@ tests:
           - testStopCluster
           - testStartCluster
           - testTerminateCluster
-  - name: "gcp prewarm image datascience with disc encryption"
+  - name: "gcp HDP315 base image datascience with disc encryption"
     preserveOrder: true
     parameters:
       clusterName: encrypted-gcp-prewarm-datasci
       provider: gcp
-      blueprintName: "Data Science: Apache Spark 2, Apache Zeppelin"
-      image: hdp
+      blueprintName: "HDP 3.1.5 - Data Science: Apache Spark 2, Apache Zeppelin"
       instancegroupName: worker
     classes:
     - name: com.sequenceiq.it.cloudbreak.EncryptedClusterTests

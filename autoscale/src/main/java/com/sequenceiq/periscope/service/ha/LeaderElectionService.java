@@ -46,7 +46,8 @@ public class LeaderElectionService {
 
     private static final long LEADER_TASK_DELAY = 1000L;
 
-    private static final long STACK_COLLECTOR_PERIOD = 10000L;
+    @Value("${periscope.stack.collection.period}")
+    private Long stackCollectionPeriod;
 
     @Value("${periscope.ha.heartbeat.threshold:60000}")
     private Integer heartbeatThresholdRate;
@@ -95,7 +96,7 @@ public class LeaderElectionService {
                         LOGGER.error("Error happend during fetching stacks", e);
                     }
                 }
-            }, 0L, STACK_COLLECTOR_PERIOD);
+            }, 0L, stackCollectionPeriod);
         }
     }
 
@@ -135,7 +136,7 @@ public class LeaderElectionService {
                             LOGGER.error("Error happend during fetching cluster allocating them to nodes", e);
                         }
                     }
-                }, LEADER_TASK_DELAY, STACK_COLLECTOR_PERIOD);
+                }, LEADER_TASK_DELAY, stackCollectionPeriod);
             }
         }
     }

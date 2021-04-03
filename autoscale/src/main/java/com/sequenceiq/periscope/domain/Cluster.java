@@ -70,7 +70,7 @@ public class Cluster implements Monitored {
     @Column(name = "cb_stack_id")
     private Long stackId;
 
-    @Column(name = "last_scaling_activity")
+    @Column(name = "last_scaling_activity", updatable = false)
     private volatile long lastScalingActivity;
 
     @Column(name = "autoscaling_enabled")
@@ -78,7 +78,7 @@ public class Cluster implements Monitored {
 
     private String periscopeNodeId;
 
-    @Column(name = "lastevaulated")
+    @Column(name = "lastevaulated", updatable = false)
     private long lastEvaluated;
 
     public Cluster() {
@@ -261,6 +261,23 @@ public class Cluster implements Monitored {
     public void setLastEvaluated(long lastEvaluated) {
         this.lastEvaluated = lastEvaluated;
     }
+
+    @Override
+    public String toString() {
+        return "Cluster{"
+                + "id=" + id
+                + ", state=" + state
+                + ", minSize=" + minSize
+                + ", maxSize=" + maxSize
+                + ", coolDown=" + coolDown
+                + ", stackId=" + stackId
+                + ", lastScalingActivity=" + lastScalingActivity
+                + ", autoscalingEnabled=" + autoscalingEnabled
+                + ", periscopeNodeId='" + periscopeNodeId + '\''
+                + ", lastEvaluated=" + lastEvaluated
+                + '}';
+    }
+
 }
 
 

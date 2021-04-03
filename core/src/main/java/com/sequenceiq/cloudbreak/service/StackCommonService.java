@@ -179,9 +179,6 @@ public class StackCommonService implements StackEndpoint {
     }
 
     public Response putInDefaultWorkspace(Long id, UpdateStackJson updateRequest) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(restRequestThreadLocalService.getRequestedWorkspaceId(),
-                WorkspaceResource.STACK, Action.WRITE, user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
         return put(stack, updateRequest);
@@ -286,8 +283,10 @@ public class StackCommonService implements StackEndpoint {
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
             validateHardLimits(scalingAdjustment);
-            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent(), user);
+            stackService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
         }
+        LOGGER.info("Stack update has been initiated name: '{}' with status: '{}' and adjustment: '{}'", stack.getName(), updateRequest.getStatus(),
+                updateRequest.getInstanceGroupAdjustment());
         return Response.status(Status.NO_CONTENT).build();
     }
 

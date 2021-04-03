@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -9,12 +12,16 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.repositoryconfig.RepoConfigValidationResponse;
 import com.sequenceiq.cloudbreak.common.service.url.UrlAccessValidationService;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 
 @Service
 public class RepositoryConfigValidationService {
 
     @Inject
     private UrlAccessValidationService urlAccessValidationService;
+
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
 
     public RepoConfigValidationResponse validate(RepoConfigValidationRequest request) {
         RepoConfigValidationResponse result = new RepoConfigValidationResponse();
@@ -71,6 +78,11 @@ public class RepositoryConfigValidationService {
             String ext = baseUrl.endsWith("/") ? urlExtension : '/' + urlExtension;
             url += ext;
         }
-        return urlAccessValidationService.isAccessible(url);
+        Map<String, Object> headers = null;
+        if (paywallCredentialService.paywallCredentialAvailable()) {
+            headers = new HashMap<>();
+            headers.put("Authorization", String.format("Basic %s", paywallCredentialService.getBasicAuthorizationEncoded()));
+        }
+        return urlAccessValidationService.isAccessible(url, headers);
     }
 }

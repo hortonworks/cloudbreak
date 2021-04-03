@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.ManagementPack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 import com.sequenceiq.cloudbreak.service.mpack.ManagementPackService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -33,6 +34,9 @@ public class ManagementPackDetailsToManagementPackComponentConverter
     @Inject
     private RestRequestThreadLocalService restRequestThreadLocalService;
 
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
+
     @Override
     public ManagementPackComponent convert(ManagementPackDetails source) {
         ManagementPackComponent mpack = new ManagementPackComponent();
@@ -41,7 +45,7 @@ public class ManagementPackDetailsToManagementPackComponentConverter
             Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             ManagementPack dmpack = managementPackService.getByNameForWorkspace(source.getName(), workspace);
             mpack.setName(source.getName());
-            mpack.setMpackUrl(dmpack.getMpackUrl());
+            mpack.setMpackUrl(getMpackUrl(dmpack.getMpackUrl()));
             mpack.setStackDefault(false);
             mpack.setPreInstalled(false);
             mpack.setForce(dmpack.isForce());
@@ -53,5 +57,11 @@ public class ManagementPackDetailsToManagementPackComponentConverter
             throw new BadRequestException("Mpack name cannot be empty!");
         }
         return mpack;
+    }
+
+    public String getMpackUrl(String url) {
+        return paywallCredentialService.paywallCredentialAvailable()
+                ? paywallCredentialService.addCredentialForUrl(url)
+                : url;
     }
 }

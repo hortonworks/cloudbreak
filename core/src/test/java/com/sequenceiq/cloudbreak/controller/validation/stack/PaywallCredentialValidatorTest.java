@@ -57,7 +57,7 @@ public class PaywallCredentialValidatorTest {
         AmbariRepoDetailsJson ambariRepoDetails = createAmbariRepoDetails(AMBARI_275, PROTECTED_URL);
         ClusterRequest clusterRequest = createClusterRequest(stackDetails, ambariRepoDetails);
 
-        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL, true)));
+        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL)));
         when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(true);
         when(defaultAmbariRepoService.getEntries()).thenReturn(Map.of(AMBARI_275, createAmbariInfo(AMBARI_275, PROTECTED_URL, true)));
 
@@ -73,7 +73,7 @@ public class PaywallCredentialValidatorTest {
     public void testValidateCredentialShouldNotThrowExceptionWhenTheClusterProtectedAndCredentialsArePresentAndOnlyTheStackInfoAvailable() {
         ClusterRequest clusterRequest = createClusterRequest(null, null);
 
-        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL, true)));
+        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL)));
         when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(true);
 
         underTest.validateCredential(clusterRequest, HDP_STACK, HDP_315);
@@ -90,7 +90,7 @@ public class PaywallCredentialValidatorTest {
         AmbariRepoDetailsJson ambariRepoDetails = createAmbariRepoDetails(AMBARI_275, PROTECTED_URL);
         ClusterRequest clusterRequest = createClusterRequest(stackDetails, ambariRepoDetails);
 
-        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL, true)));
+        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL)));
         when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(false);
         when(defaultAmbariRepoService.getEntries()).thenReturn(Map.of(AMBARI_275, createAmbariInfo(AMBARI_275, PROTECTED_URL, true)));
 
@@ -106,7 +106,7 @@ public class PaywallCredentialValidatorTest {
     public void testValidateCredentialShouldThrowExceptionWhenTheClusterProtectedAndCredentialsAreNotPresentAndOnlyTheStackInfoAvailable() {
         ClusterRequest clusterRequest = createClusterRequest(null, null);
 
-        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL, true)));
+        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL)));
         when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(false);
 
         underTest.validateCredential(clusterRequest, HDP_STACK, HDP_315);
@@ -123,7 +123,7 @@ public class PaywallCredentialValidatorTest {
         AmbariRepoDetailsJson ambariRepoDetails = createAmbariRepoDetails(AMBARI_275, PROTECTED_URL);
         ClusterRequest clusterRequest = createClusterRequest(stackDetails, ambariRepoDetails);
 
-        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL, false)));
+        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL)));
         when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(false);
         when(defaultAmbariRepoService.getEntries()).thenReturn(Map.of(AMBARI_275, createAmbariInfo(AMBARI_275, PROTECTED_URL, false)));
 
@@ -132,21 +132,6 @@ public class PaywallCredentialValidatorTest {
         verify(defaultHDPEntries).getEntries();
         verify(paywallCredentialService).paywallCredentialAvailable();
         verify(defaultAmbariRepoService).getEntries();
-        verifyZeroInteractions(defaultHDFEntries);
-    }
-
-    @Test
-    public void testValidateCredentialShouldNotThrowExceptionWhenTheClusterNotProtectedAndCredentialsAreNotPresentAndOnlyTheStackInfoAvailable() {
-        ClusterRequest clusterRequest = createClusterRequest(null, null);
-
-        when(defaultHDPEntries.getEntries()).thenReturn(Map.of(HDP_315, createStackInfo(HDP_315, PROTECTED_URL, false)));
-        when(paywallCredentialService.paywallCredentialAvailable()).thenReturn(false);
-
-        underTest.validateCredential(clusterRequest, HDP_STACK, HDP_315);
-
-        verify(defaultHDPEntries).getEntries();
-        verify(paywallCredentialService).paywallCredentialAvailable();
-        verifyZeroInteractions(defaultAmbariRepoService);
         verifyZeroInteractions(defaultHDFEntries);
     }
 
@@ -171,11 +156,10 @@ public class PaywallCredentialValidatorTest {
         return clusterRequest;
     }
 
-    private DefaultHDPInfo createStackInfo(String version, String url, boolean paywallProtected) {
+    private DefaultHDPInfo createStackInfo(String version, String url) {
         DefaultHDPInfo stackInfo = new DefaultHDPInfo();
         stackInfo.setVersion(version);
         stackInfo.setRepo(createRepoDetails(url));
-        stackInfo.setPaywallProtected(paywallProtected);
         return stackInfo;
     }
 

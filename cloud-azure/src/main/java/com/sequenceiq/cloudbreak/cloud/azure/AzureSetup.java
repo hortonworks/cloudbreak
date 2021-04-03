@@ -99,8 +99,9 @@ public class AzureSetup implements Setup {
         armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region,
                 armStorage.isEncrytionNeeded(stack.getParameters()), stack.getTags());
         client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER);
-        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
-            client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
+        String imageName = azureUtils.getImageNameFromConnectionString(image.getImageName());
+        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, imageName)) {
+            client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName(), imageName);
         }
     }
 
@@ -111,8 +112,9 @@ public class AzureSetup implements Setup {
 
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), stack);
+        String imageName = azureUtils.getImageNameFromConnectionString(image.getImageName());
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, image.getImageName());
+            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
                 if (AzureUtils.hasManagedDisk(stack)) {
                     String customImageId = armStorage.getCustomImageId(client, ac, stack);
@@ -253,18 +255,14 @@ public class AzureSetup implements Setup {
         }
     }
 
-    private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String image) {
+    private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String imageName) {
         List<ListBlobItem> listBlobItems = client.listBlobInStorage(resourceGroupName, storageName, IMAGES_CONTAINER);
         for (ListBlobItem listBlobItem : listBlobItems) {
-            if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {
+            if (azureUtils.getImageNameFromConnectionString(listBlobItem.getUri().getPath()).equals(imageName)) {
                 return true;
             }
         }
         return false;
-    }
-
-    private String getNameFromConnectionString(String connection) {
-        return connection.split("/")[connection.split("/").length - 1];
     }
 
 }

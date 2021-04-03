@@ -34,6 +34,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -117,6 +118,8 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+
+import groovyx.net.http.HttpResponseException;
 
 @Service
 public class ClusterService {
@@ -371,12 +374,25 @@ public class ClusterService {
             return null;
         }
 
-        String stackRepositoryJson = ambariClient.getLatestStackRepositoryAsJson(cluster.getName(), osType, stackRepoId);
-        if (stackRepositoryJson == null) {
-            throw new BadRequestException(String.format("Stack Repository response coming from Ambari server was null "
-                    + "for cluster '%s' and repo url '%s'.", cluster.getName(), stackRepoId));
+        try {
+            String stackRepositoryJson = ambariClient.getLatestStackRepositoryAsJson(cluster.getName(), osType, stackRepoId);
+            if (stackRepositoryJson == null) {
+                throw new BadRequestException(String.format("Stack Repository response coming from Ambari server was null "
+                        + "for cluster '%s' and repo url '%s'.", cluster.getName(), stackRepoId));
+            }
+            return stackRepositoryJson;
+        } catch (Exception e) {
+            LOGGER.error("Failed to get latest stack repository. osType: '{}'.", osType, e);
+            // this instanceof is necessary because the groovy client hides somehow the HttpResponseException
+            // see https://jira.cloudera.com/browse/CB-10444 for more information
+            if (e instanceof HttpResponseException) {
+                HttpResponseException cast = HttpResponseException.class.cast(e);
+                if (cast.getResponse().getStatus() == HttpStatus.SC_NOT_FOUND) {
+                    throw new BadRequestException(String.format("The specified osType '%s' is wrong. Message: %s", osType, cast.getMessage()));
+                }
+            }
+            throw e;
         }
-        return stackRepositoryJson;
     }
 
     public void updateHosts(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
@@ -550,6 +566,10 @@ public class ClusterService {
     }
 
     private void validateRepair(Stack stack, HostMetadata hostMetadata) {
+        if (isGateway(hostMetadata)
+                && (Objects.isNull(stack.getCustomDomain()) || Objects.isNull(stack.getCustomHostname()))) {
+            throw new BadRequestException("Ambari server failure cannot be repaired without custom domain and hostname!");
+        }
         if (isGateway(hostMetadata) && !isMultipleGateway(stack)) {
             throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
         }
@@ -1091,7 +1111,7 @@ public class ClusterService {
 
         StackRepoDetails hdpRepo = clusterComponentConfigProvider.getStackRepoDetails(clusterId);
 
-        Map<String, String> stack = Optional.ofNullable(hdpRepo.getStack()).orElseGet(HashMap::new);
+        Map<String, String> stack = new HashMap<>();
         stack.put(REPO_ID_TAG, ambariStackDetails.getStackRepoId());
         stack.put(ambariStackDetails.getOsType(), ambariStackDetails.getStackBaseURL());
         stack.put(REPOSITORY_VERSION, ambariStackDetails.getRepositoryVersion());
@@ -1099,7 +1119,7 @@ public class ClusterService {
         stack.put(CUSTOM_VDF_REPO_KEY, ambariStackDetails.getVersionDefinitionFileUrl());
         hdpRepo.setStack(stack);
 
-        Map<String, String> util = Optional.ofNullable(hdpRepo.getUtil()).orElseGet(HashMap::new);
+        Map<String, String> util = new HashMap<>();
         util.put(REPO_ID_TAG, ambariStackDetails.getUtilsRepoId());
         util.put(ambariStackDetails.getOsType(), ambariStackDetails.getUtilsBaseURL());
         hdpRepo.setUtil(util);

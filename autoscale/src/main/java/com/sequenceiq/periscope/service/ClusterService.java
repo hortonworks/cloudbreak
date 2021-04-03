@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.service.TransactionService;
+import com.sequenceiq.cloudbreak.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
 import com.sequenceiq.periscope.domain.Ambari;
@@ -57,6 +59,9 @@ public class ClusterService {
 
     @Inject
     private FailedNodeRepository failedNodeRepository;
+
+    @Inject
+    private TransactionService transactionService;
 
     public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         return create(new Cluster(), user, stack, clusterState);
@@ -128,12 +133,43 @@ public class ClusterService {
         return clusterRepository.save(cluster);
     }
 
+    public void updateLastEvaluated(Cluster cluster) {
+        try {
+            transactionService.required(() -> {
+                LOGGER.debug("Updating last evaluated for cluster (id: {}) with value {}",
+                        cluster.getId(), cluster.getLastEvaluated());
+                clusterRepository.updateLastEvaluated(cluster.getId(), cluster.getLastEvaluated());
+                LOGGER.debug("Update last evaluated for cluster (id: {}) with value {} finished successfully",
+                        cluster.getId(), cluster.getLastEvaluated());
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            LOGGER.error("Unable to set lastEvaluated column", e);
+        }
+    }
+
+    public void updateLastScalingActivity(Cluster cluster) {
+        try {
+            transactionService.required(() -> {
+                LOGGER.debug("Updating last scaling activity timestamp for cluster (id: {}) with value {}",
+                        cluster.getId(), cluster.getLastScalingActivity());
+                clusterRepository.updateClusterLastScalingActivity(cluster.getId(), cluster.getLastScalingActivity());
+                LOGGER.debug("Update last scaling activity timestamp for cluster (id: {}) with value {} finished successfully",
+                        cluster.getId(), cluster.getLastScalingActivity());
+                return null;
+            });
+        } catch (TransactionExecutionException e) {
+            LOGGER.error("Unable to set lastScalingActivity column", e);
+        }
+    }
+
     public Cluster findById(Long clusterId) {
         return clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
     }
 
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
+        cleanupTimeAlerts(cluster);
         List<FailedNode> failedNodes = failedNodeRepository.findByClusterId(clusterId);
         failedNodeRepository.deleteAll(failedNodes);
         clusterRepository.delete(cluster);
@@ -141,11 +177,18 @@ public class ClusterService {
     }
 
     public Cluster updateScalingConfiguration(Long clusterId, ScalingConfigurationRequest scalingConfiguration) {
+        LOGGER.info("Update scaling configuration operation has been triggered for cluster with id {} "
+                        + "- min: {}, max: {}, coolDown: {}", clusterId, scalingConfiguration.getMinSize(),
+                scalingConfiguration.getMaxSize(), scalingConfiguration.getCoolDown());
         Cluster cluster = findById(clusterId);
         cluster.setMinSize(scalingConfiguration.getMinSize());
         cluster.setMaxSize(scalingConfiguration.getMaxSize());
         cluster.setCoolDown(scalingConfiguration.getCoolDown());
-        return save(cluster);
+        save(cluster);
+        LOGGER.info("Update scaling configuration operation has been finished for cluster with id {} "
+                        + "- min: {}, max: {}, coolDown: {}", clusterId, scalingConfiguration.getMinSize(),
+                scalingConfiguration.getMaxSize(), scalingConfiguration.getCoolDown());
+        return cluster;
     }
 
     public ScalingConfigurationRequest getScalingConfiguration(Long clusterId) {
@@ -202,6 +245,11 @@ public class ClusterService {
         if (clusterForTheSameStackAndAmbari) {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
         }
+    }
+
+    private void cleanupTimeAlerts(Cluster cluster) {
+        cluster.getTimeAlerts()
+                .forEach(timeAlert -> alertService.cleanupTimeAlert(timeAlert.getId()));
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {

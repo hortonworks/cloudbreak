@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.common.service.url;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -29,12 +33,14 @@ public class UrlAccessValidationService {
         client = RestClientUtil.get(new ConfigKey(true, false, false));
     }
 
-    public boolean isAccessible(String url) {
+    public boolean isAccessible(String url, Map<String, Object> headers) {
         LOGGER.info("Validation of url access: {}", url);
         boolean result = false;
         try {
             WebTarget target = client.target(url);
-            try (Response response = target.request().head()) {
+            Invocation.Builder request = target.request();
+            addHeaders(request, headers);
+            try (Response response = request.head()) {
                 if (HttpStatus.OK.value() == response.getStatus()) {
                     result = true;
                 }
@@ -43,5 +49,10 @@ public class UrlAccessValidationService {
             LOGGER.info("The following URL is not reachable by Cloudbreak: '{}', reason: {}", url, ex.getMessage());
         }
         return result;
+    }
+
+    private void addHeaders(Invocation.Builder request, Map<String, Object> headers) {
+        MultivaluedHashMap<String, Object> convertedMap = headers == null ? null : new MultivaluedHashMap<>(headers);
+        request.headers(convertedMap);
     }
 }

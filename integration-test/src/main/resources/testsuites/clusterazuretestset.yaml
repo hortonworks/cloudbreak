@@ -7,13 +7,12 @@ listeners:
   - com.sequenceiq.it.cloudbreak.newway.listener.FirstLastTestExecutionBehaviour
   - com.sequenceiq.it.cloudbreak.newway.listener.StructuredEventsReporterOnFailingCluster
 tests:
-  - name: "azure prewarm image edwetl"
+  - name: "azure HDP315 base image edw analytics"
     preserveOrder: true
     parameters:
-      clusterName: azure-prewarm-edwetl
+      clusterName: azure-prewarm-edwanalytics
       provider: azure
-      blueprintName: "EDW-ETL: Apache Hive, Apache Spark 2"
-      image: hdp
+      blueprintName: "HDP 3.1.5 - EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin"
       instancegroupName: worker
     classes:
       - name: com.sequenceiq.it.cloudbreak.ClusterTests

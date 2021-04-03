@@ -24,6 +24,7 @@ public class RejectedThreadService {
     private final Map<Long, RejectedThread> rejectedThreads = new ConcurrentHashMap<>();
 
     public RejectedThread save(RejectedThread rejectedThread) {
+        LOGGER.warn("Thread was rejected: {}", rejectedThread);
         rejectedThreads.put(rejectedThread.getId(), rejectedThread);
         return rejectedThread;
     }

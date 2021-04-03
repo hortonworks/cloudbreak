@@ -67,15 +67,12 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getStackId());
             hostNames = getHostNamesForPrivateIds(request, stack);
-            Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
-            Set<String> decommissionedHostNames;
-            if (skipAmbariDecomission(request, hostsToRemove)) {
-                decommissionedHostNames = hostNames;
-            } else {
+            if (!skipAmbariDecomission(request, hostNames)) {
+                Map<String, HostMetadata> hostsToRemove = ambariDecommissioner.collectHostsToRemove(stack, hostGroupName, hostNames);
                 executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
-                decommissionedHostNames = ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
+                ambariDecommissioner.decommissionAmbariNodes(stack, hostsToRemove);
             }
-            result = new DecommissionResult(request, decommissionedHostNames);
+            result = new DecommissionResult(request, hostNames);
         } catch (DecommissionException e) {
             result = new DecommissionResult(e.getMessage(), e, request, hostNames, DECOMMISSION_ERROR_PHASE);
         } catch (Exception e) {
@@ -84,8 +81,8 @@ public class DecommissionHandler implements ReactorEventHandler<DecommissionRequ
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private boolean skipAmbariDecomission(DecommissionRequest request, Map<String, HostMetadata> hostsToRemove) {
-        return hostsToRemove.isEmpty() || request.getDetails() != null && request.getDetails().isForced();
+    private boolean skipAmbariDecomission(DecommissionRequest request, Set<String> hostNames) {
+        return hostNames.isEmpty() || request.getDetails() != null && request.getDetails().isForced();
     }
 
     private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.credential;
 
 import static java.util.Collections.singletonMap;
 
+import java.util.Base64;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -45,6 +46,10 @@ public class PaywallCredentialService {
 
     public void getPaywallCredential(Map<String, SaltPillarProperties> servicePillar) {
         servicePillar.put("paywall", new SaltPillarProperties("/hdp/paywall.sls", singletonMap("paywall", createCredential())));
+    }
+
+    public String getBasicAuthorizationEncoded() {
+        return Base64.getEncoder().encodeToString(String.format("%s:%s", paywallUserName, paywallPassword).getBytes());
     }
 
     private Map<String, String> createCredential() {

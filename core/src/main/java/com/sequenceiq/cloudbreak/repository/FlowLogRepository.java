@@ -49,8 +49,8 @@ public interface FlowLogRepository extends DisabledBaseRepository<FlowLog, Long>
     Set<FlowLog> findAllUnassigned();
 
     @Modifying
-    @Query("DELETE FROM FlowLog fl WHERE fl.stackId IN ( SELECT st.id FROM Stack st WHERE st.stackStatus.status = 'DELETE_COMPLETED')")
-    int purgeTerminatedStackLogs();
+    @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE")
+    int purgeFinalizedFlowLogs();
 
     @Modifying
     @Query("UPDATE FlowLog fl SET fl.stateStatus = :stateStatus WHERE fl.id = :id")

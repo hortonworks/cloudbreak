@@ -56,6 +56,9 @@ public class AzureStorage {
     @Inject
     private SkuTypeResolver skuTypeResolver;
 
+    @Inject
+    private AzureUtils azureUtils;
+
     public ArmAttachedStorageOption getArmAttachedStorageOption(Map<String, String> parameters) {
         String attachedStorageOption = parameters.get("attachedStorageOption");
         if (Strings.isNullOrEmpty(attachedStorageOption)) {
@@ -68,17 +71,18 @@ public class AzureStorage {
         return getCustomImageId(client, ac, stack, stack.getImage().getImageName());
     }
 
-    public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack, String imageName) {
+    public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack, String image) {
         String imageResourceGroupName = getImageResourceGroupName(ac.getCloudContext(), stack);
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), stack);
+        String imageName = azureUtils.getImageNameFromConnectionString(image);
         String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, imageName);
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        return getCustomImageId(imageBlobUri, imageResourceGroupName, region, client);
+        return getCustomImageId(imageBlobUri, imageName, imageResourceGroupName, region, client);
     }
 
-    private String getCustomImageId(String vhd, String imageResourceGroupName, String region, AzureClient client) {
-        String customImageId = client.getCustomImageId(imageResourceGroupName, vhd, region);
+    private String getCustomImageId(String vhdUri, String vhdName, String imageResourceGroupName, String region, AzureClient client) {
+        String customImageId = client.getCustomImageId(imageResourceGroupName, vhdUri, vhdName, region);
         LOGGER.info("custom image id: {}", customImageId);
         return customImageId;
     }

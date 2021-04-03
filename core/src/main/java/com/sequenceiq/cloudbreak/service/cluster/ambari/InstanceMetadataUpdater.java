@@ -254,6 +254,7 @@ public class InstanceMetadataUpdater {
         // Map<host, Map<name, version>
         Map<String, Map<String, String>> packageVersionsByNameByHost = new HashMap<>();
         for (Entry<String, Map<String, String>> entry : packageVersionsByPkgNameByHost.entrySet()) {
+            removeEmptyStack(stackTypedPackages, entry);
             removeDuplicateStack(stackTypedPackages, entry);
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
@@ -264,12 +265,25 @@ public class InstanceMetadataUpdater {
         return packageVersionsByNameByHost;
     }
 
+    private void removeEmptyStack(ArrayList<String> stackTypedPackages, Entry<String, Map<String, String>> entry) {
+        if (!CollectionUtils.isEmpty(stackTypedPackages)) {
+            Set<String> keySet = entry.getValue().keySet();
+            for (String stackTypedPackage : stackTypedPackages) {
+                if (keySet.contains(stackTypedPackage)) {
+                    if (StringUtils.isEmpty(entry.getValue().get(stackTypedPackage))) {
+                        entry.getValue().remove(stackTypedPackage);
+                        LOGGER.info("Remove empty stack type: {}", stackTypedPackage);
+                    }
+                }
+            }
+        }
+    }
+
     private void removeDuplicateStack(ArrayList<String> stackTypedPackages, Entry<String, Map<String, String>> entry) {
         if (!CollectionUtils.isEmpty(stackTypedPackages)) {
             int found = 0;
             Set<String> keySet = entry.getValue().keySet();
             for (String stackTypedPackage : stackTypedPackages) {
-
                 if (keySet.contains(stackTypedPackage)) {
                     found++;
                     if (found > 1) {

@@ -690,8 +690,7 @@ public class StackService {
         }
     }
 
-    public void updateNodeCount(Stack stack, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
-        permissionCheckingUtils.checkPermissionByWorkspaceIdForUser(stack.getWorkspace().getId(), WorkspaceResource.STACK, Action.WRITE, user);
+    public void updateNodeCount(Stack stack, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent) {
         try {
             transactionService.required(() -> {
                 Stack stackWithLists = getByIdWithLists(stack.getId());

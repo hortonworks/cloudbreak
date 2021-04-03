@@ -71,6 +71,9 @@ public class AlertService {
     @Inject
     private AmbariRequestLogging ambariRequestLogging;
 
+    @Inject
+    private TimeAlertEvaluator timeAlertEvaluator;
+
     public MetricAlert createMetricAlert(Long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findById(clusterId);
         validateNewAlert(cluster, alert);
@@ -78,6 +81,7 @@ public class AlertService {
         MetricAlert metricAlert = (MetricAlert) save(alert);
         cluster.addMetricAlert(metricAlert);
         clusterService.save(cluster);
+        LOGGER.info("Metric alert [id: {}, name: {}] was created for cluster [id: {}]: {}", alert.getId(), alert.getName(), clusterId, alert);
         return metricAlert;
     }
 
@@ -92,7 +96,9 @@ public class AlertService {
             alert.setPeriod(metricAlert.getPeriod());
             alert.setDescription(metricAlert.getDescription());
             alert.setAlertState(metricAlert.getAlertState());
-            return metricAlertRepository.save(alert);
+            alert = metricAlertRepository.save(alert);
+            LOGGER.info("Metric alert [id: {}, name: {}] was updated for cluster [id: {}]: {}", alert.getId(), alert.getName(), clusterId, alert);
+            return alert;
         } else {
             throw new BadRequestException(String.format("The metric alert with id %s does not exist", alertId));
         }
@@ -102,6 +108,7 @@ public class AlertService {
         Cluster cluster = clusterService.findById(clusterId);
         cluster.setMetricAlerts(removeMetricAlert(cluster, alertId));
         clusterService.save(cluster);
+        LOGGER.info("Metric alert [id: {}] was deleted for cluster [id: {}]", alertId, clusterId);
     }
 
     public Set<MetricAlert> getMetricAlerts(Long clusterId) {
@@ -142,6 +149,11 @@ public class AlertService {
         Cluster cluster = clusterService.findById(clusterId);
         cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
         clusterService.save(cluster);
+        cleanupTimeAlert(alertId);
+    }
+
+    public void cleanupTimeAlert(Long alertId) {
+        timeAlertEvaluator.cleanupAlert(alertId);
     }
 
     public PrometheusAlert createPrometheusAlert(Long clusterId, PrometheusAlert alert) {

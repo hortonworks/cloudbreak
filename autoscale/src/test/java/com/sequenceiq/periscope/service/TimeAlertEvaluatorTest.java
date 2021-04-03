@@ -17,13 +17,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.periscope.domain.TimeAlert;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DateServiceTest {
+public class TimeAlertEvaluatorTest {
 
     @Mock
     private DateTimeService dateTimeService;
 
     @InjectMocks
-    private DateService underTest;
+    private TimeAlertEvaluator underTest;
 
     @Before
     public void setUp() {
@@ -39,7 +39,7 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
         when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(0L, timeZone);
         assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
@@ -52,7 +52,7 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
         when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(1L, timeZone);
         assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
@@ -65,7 +65,7 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
         when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(2L, timeZone);
         assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
@@ -79,7 +79,7 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
         when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(3L, timeZone);
         assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
@@ -92,7 +92,7 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
         when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(4L, timeZone);
         assertFalse(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
@@ -106,7 +106,7 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
         when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(5L, timeZone);
         assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
@@ -119,14 +119,57 @@ public class DateServiceTest {
 
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentZonedTime);
         when(dateTimeService.getZonedDateTime(currentZonedTime.toInstant(), timeZone)).thenReturn(currentZonedTime);
-        TimeAlert timeAlert = createTimeAlert(timeZone);
+        TimeAlert timeAlert = createTimeAlert(6L, timeZone);
         assertTrue(underTest.isTrigger(timeAlert, monitorUpdateRate));
     }
 
-    private TimeAlert createTimeAlert(String timeZone) {
+    @Test
+    public void testIsTriggerWhenFirstEvaluationBeforeTimeAndSecondOneAfterDesiredTimeMoreThanTheDefaultMonitorUpdateRate() {
+        long defaultMonitorUpdateRate = 10000L;
+        String cronExpression = "0 20 14 * * *";
+        ZoneId zone = ZoneId.systemDefault();
+        String timeZone = zone.getId();
+        TimeAlert timeAlert = createTimeAlert(7L, timeZone, cronExpression);
+
+        ZonedDateTime currentTime = ZonedDateTime.of(2017, 12, 19, 14, 19, 59, 753564, zone.normalized());
+        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
+        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentTime);
+        assertFalse(underTest.isTrigger(timeAlert, defaultMonitorUpdateRate));
+
+        currentTime = ZonedDateTime.of(2017, 12, 19, 14, 20, 11, 253564, zone.normalized());
+        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
+        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentTime);
+        assertTrue(underTest.isTrigger(timeAlert, defaultMonitorUpdateRate));
+    }
+
+    @Test
+    public void testIsTriggerWhenAllEvaluationsBeforeDesiredTime() {
+        long defaultMonitorUpdateRate = 10000L;
+        String cronExpression = "0 20 14 * * *";
+        ZoneId zone = ZoneId.systemDefault();
+        String timeZone = zone.getId();
+        TimeAlert timeAlert = createTimeAlert(7L, timeZone, cronExpression);
+
+        ZonedDateTime currentTime = ZonedDateTime.of(2017, 12, 19, 14, 19, 46, 753564, zone.normalized());
+        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
+        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentTime);
+        assertFalse(underTest.isTrigger(timeAlert, defaultMonitorUpdateRate));
+
+        currentTime = ZonedDateTime.of(2017, 12, 19, 14, 19, 59, 253564, zone.normalized());
+        when(dateTimeService.getDefaultZonedDateTime()).thenReturn(currentTime);
+        when(dateTimeService.getZonedDateTime(currentTime.toInstant(), timeZone)).thenReturn(currentTime);
+        assertFalse(underTest.isTrigger(timeAlert, defaultMonitorUpdateRate));
+    }
+
+    private TimeAlert createTimeAlert(long id, String timeZone) {
+        return createTimeAlert(id, timeZone, "0 0 12 * * ?");
+    }
+
+    private TimeAlert createTimeAlert(long id, String timeZone, String cronExpression) {
         TimeAlert testTime = new TimeAlert();
+        testTime.setId(id);
         testTime.setName("testAlert");
-        testTime.setCron("0 0 12 * * ?");
+        testTime.setCron(cronExpression);
         testTime.setTimeZone(timeZone);
         return testTime;
     }

@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.service;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +13,7 @@ import com.sequenceiq.periscope.repository.ScalingPolicyRepository;
 
 @Service
 public class ScalingService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScalingService.class);
 
     @Autowired
     private ClusterService clusterService;
@@ -27,16 +30,22 @@ public class ScalingService {
         ScalingPolicy scalingPolicy = policyRepository.save(policy);
         alert.setScalingPolicy(scalingPolicy);
         alertService.save(alert);
+        LOGGER.info("Scaling policy [name: {}] was created for cluster [id: {}] attached to the alert [id: {}, name: {}]: {}",
+                scalingPolicy.getName(), clusterId, alertId, alert.getName(), scalingPolicy);
         return scalingPolicy;
     }
 
     public ScalingPolicy updatePolicy(Long clusterId, Long policyId, ScalingPolicy scalingPolicy) {
+        LOGGER.info("Updating scaling policy [id: {}] operation has been triggered for cluster [id: {}]", policyId, clusterId);
         ScalingPolicy policy = getScalingPolicy(clusterId, policyId);
         policy.setName(scalingPolicy.getName());
         policy.setHostGroup(scalingPolicy.getHostGroup());
         policy.setAdjustmentType(scalingPolicy.getAdjustmentType());
         policy.setScalingAdjustment(scalingPolicy.getScalingAdjustment());
-        return policyRepository.save(policy);
+        policy = policyRepository.save(policy);
+        LOGGER.info("Scaling policy [name: {}] was updated for cluster [id: {}] attached to the alert [id: {}, name: {}]: {}",
+                scalingPolicy.getName(), clusterId, policy.getAlertId(), policy.getAlert().getName(), scalingPolicy);
+        return policy;
     }
 
     public void deletePolicy(Long clusterId, Long policyId) {
@@ -46,6 +55,8 @@ public class ScalingService {
         policy.setAlert(null);
         policyRepository.delete(policy);
         alertService.save(alert);
+        LOGGER.info("Scaling policy [name: {}] was deleted for cluster [id: {}] and detached from the alert [id: {}, name: {}]: {}",
+                policy.getName(), clusterId, alert.getId(), alert.getName(), policy);
     }
 
     public List<ScalingPolicy> getPolicies(Long clusterId) {

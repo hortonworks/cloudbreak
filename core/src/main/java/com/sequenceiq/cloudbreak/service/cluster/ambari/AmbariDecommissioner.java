@@ -201,7 +201,7 @@ public class AmbariDecommissioner {
         return hostsToRemove;
     }
 
-    public Set<String> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove) throws IOException, URISyntaxException {
+    public void decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove) throws IOException, URISyntaxException {
         LOGGER.info("Decommission ambari nodes: {}", hostsToRemove);
         AmbariClient ambariClient = getAmbariClient(stack);
         Map<String, HostStatus> hostStatusMap = ambariClientRetryer.getHostsStatuses(ambariClient, new ArrayList<>(hostsToRemove.keySet()));
@@ -237,7 +237,6 @@ public class AmbariDecommissioner {
         }
 
         LOGGER.info("Deleted hosts are: {}", deletedHosts);
-        return deletedHosts;
     }
 
     private AmbariClient getAmbariClient(Stack stack) {
@@ -326,26 +325,30 @@ public class AmbariDecommissioner {
                 List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
                 Map<String, Integer> decommissionRequests = decommissionComponents(ambariClient, hostList, hostStatusMap);
                 if (!decommissionRequests.isEmpty()) {
+                    LOGGER.info("Wait for Ambari decommission progress, decommission requests: ({})", decommissionRequests);
                     pollingResult =
                             ambariOperationService.waitForOperations(stack, ambariClient, decommissionRequests, DECOMMISSION_AMBARI_PROGRESS_STATE).getLeft();
                 }
                 if (!isSuccess(pollingResult)) {
+                    LOGGER.warn("Polling failed, '{}' could not be decommissioned, polling result: '{}'", NODEMANAGER, pollingResult);
                     Map<String, HostStatus> statuses = ambariClientRetryer.getHostComponentStatuses(ambariClient, hostList, List.of(NODEMANAGER));
                     throw new DecommissionException("Nodemanager could not be decommissioned on hosts, current states " + statuses);
                 }
                 pollingResult = waitForDataNodeDecommission(stack, ambariClient, hostList, hostStatusMap);
                 if (!isSuccess(pollingResult)) {
+                    LOGGER.warn("Polling failed, '{}' could not be decommissioned, polling result: '{}'", DATANODE, pollingResult);
                     Map<String, HostStatus> statuses = ambariClientRetryer.getHostComponentStatuses(ambariClient, hostList, List.of(DATANODE));
                     throw new DecommissionException("Datanode could not be decommissioned on hosts, current states " + statuses);
                 }
-
                 pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, hostStatusMap);
                 if (!isSuccess(pollingResult)) {
+                    LOGGER.warn("Polling failed, '{}' could not be decommissioned, polling result: '{}'", HBASE_REGIONSERVER, pollingResult);
                     Map<String, HostStatus> statuses = ambariClientRetryer.getHostComponentStatuses(ambariClient, hostList, List.of(HBASE_REGIONSERVER));
                     throw new DecommissionException("HBASE region server could not be decommissioned on hosts, current states " + statuses);
                 }
                 pollingResult = stopHadoopComponents(stack, ambariClient, hostList, hostStatusMap);
                 if (!isSuccess(pollingResult)) {
+                    LOGGER.warn("Polling failed, services could not be stopped on the cluster.");
                     throw new DecommissionException("Hadoop components could not be stop on hosts");
                 }
                 ambariDeleteHostsService.deleteHostsButFirstQueryThemFromAmbari(ambariClient, hostList);
@@ -356,7 +359,7 @@ public class AmbariDecommissioner {
         } catch (Exception e) {
             throw new DecommissionException(e);
         }
-        LOGGER.info("Decomissioned hosts: {}", result);
+        LOGGER.info("Decommissioned hosts: {}", result);
         return result;
     }
 
@@ -600,6 +603,7 @@ public class AmbariDecommissioner {
 
     private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient, Collection<String> hosts,
             Map<String, HostStatus> hostStatusMap) {
+        LOGGER.info("Waiting for '{}' decommission on hosts: {}", DATANODE, hosts);
         if (hosts.stream().noneMatch(hn -> hostStatusMap.get(hn).getHostComponentsStatuses().keySet().contains(DATANODE))) {
             return SUCCESS;
         }
@@ -611,6 +615,7 @@ public class AmbariDecommissioner {
 
     private PollingResult waitForRegionServerDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts,
             Map<String, HostStatus> hostStatusMap) {
+        LOGGER.info("Waiting for '{}' decommission on hosts: {}", HBASE_REGIONSERVER, hosts);
         if (COMPONENTS_NEED_TO_DECOMMISSION.get(HBASE_REGIONSERVER) == null
                 || hosts.stream().noneMatch(hn -> hostStatusMap.get(hn).getHostComponentsStatuses().keySet().contains(HBASE_REGIONSERVER))) {
             return SUCCESS;
@@ -702,6 +707,7 @@ public class AmbariDecommissioner {
     }
 
     private PollingResult stopHadoopComponents(Stack stack, AmbariClient ambariClient, List<String> hosts, Map<String, HostStatus> hostStatusMap) {
+        LOGGER.info("Stopping services on hosts: {}", hosts);
         try {
             hosts = hosts.stream()
                     .filter(hn -> !hostStatusMap.get(hn).getHostComponentsStatuses().isEmpty()).collect(Collectors.toList());

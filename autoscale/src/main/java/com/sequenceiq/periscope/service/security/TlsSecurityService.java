@@ -4,6 +4,8 @@ package com.sequenceiq.periscope.service.security;
 import javax.inject.Inject;
 
 import org.bouncycastle.util.encoders.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +18,8 @@ import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 
 @Service
 public class TlsSecurityService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
 
     @Inject
     private CloudbreakClient cloudbreakClient;
@@ -46,7 +50,8 @@ public class TlsSecurityService {
     private SecurityConfig getSecurityConfigSilently(Cluster cluster) {
         try {
             return securityConfigRepository.findByClusterId(cluster.getId());
-        } catch (AccessDeniedException ignore) {
+        } catch (AccessDeniedException e) {
+            LOGGER.warn("Access is denied during securityConfigRepository.findByClusterId call", e);
             return null;
         }
     }

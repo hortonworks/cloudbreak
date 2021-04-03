@@ -67,4 +67,12 @@ public class HostGroupAdjustmentJson implements JsonEntity {
     public void setForced(Boolean forced) {
         this.forced = forced;
     }
+
+    @Override
+    public String toString() {
+        return "HostGroupAdjustmentJson{"
+                + "hostGroup='" + hostGroup + '\''
+                + ", scalingAdjustment=" + scalingAdjustment
+                + '}';
+    }
 }

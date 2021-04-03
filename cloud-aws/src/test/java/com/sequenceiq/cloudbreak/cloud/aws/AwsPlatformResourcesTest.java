@@ -3,12 +3,15 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
@@ -46,17 +49,23 @@ import com.amazonaws.services.kms.model.ListAliasesRequest;
 import com.amazonaws.services.kms.model.ListAliasesResult;
 import com.amazonaws.services.kms.model.ListKeysRequest;
 import com.amazonaws.services.kms.model.ListKeysResult;
+import com.amazonaws.services.kms.model.NotFoundException;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsPlatformResourcesTest {
+    private static final String EU_CENTRAL_1 = "eu-central-1";
+
+    private static final String UNSUPPORTED_REGION = "unsupported-region";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -101,17 +110,17 @@ public class AwsPlatformResourcesTest {
     public void setUp() {
         Mockito.reset(awsClient);
 
-        when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn("eu-central-1");
+        when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(EU_CENTRAL_1);
         when(awsClient.createAccess(any(CloudCredential.class))).thenReturn(amazonEC2Client);
         when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResult);
         when(amazonEC2Client.describeAvailabilityZones(any(DescribeAvailabilityZonesRequest.class))).thenReturn(describeAvailabilityZonesResult);
         when(describeRegionsResult.getRegions()).thenReturn(Collections.singletonList(region));
         when(describeAvailabilityZonesResult.getAvailabilityZones()).thenReturn(Collections.singletonList(availabilityZone));
         when(availabilityZone.getZoneName()).thenReturn("eu-central-1a");
-        when(region.getRegionName()).thenReturn("eu-central-1");
+        when(region.getRegionName()).thenReturn(EU_CENTRAL_1);
 
         ReflectionTestUtils.setField(underTest, "vmTypes",
-                Collections.singletonMap(region("eu-central-1"), Collections.singleton(VmType.vmType("m5.2xlarge"))));
+                Collections.singletonMap(region(EU_CENTRAL_1), Collections.singleton(VmType.vmType("m5.2xlarge"))));
     }
 
     @Test
@@ -126,7 +135,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles because the user does not have enough permission.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), new HashMap<>());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), new HashMap<>());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -144,7 +153,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles from Amazon: Amazon problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -160,7 +169,7 @@ public class AwsPlatformResourcesTest {
         thrown.expectMessage("Could not get instance profile roles from Amazon: BadRequestException problem.");
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertEquals(0L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -181,7 +190,7 @@ public class AwsPlatformResourcesTest {
         when(amazonCFClient.listInstanceProfiles()).thenReturn(listInstanceProfilesResult);
 
         CloudAccessConfigs cloudAccessConfigs =
-                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+                underTest.accessConfigs(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertEquals(4L, cloudAccessConfigs.getCloudAccessConfigs().size());
     }
@@ -223,10 +232,80 @@ public class AwsPlatformResourcesTest {
     }
 
     @Test
+    public void collectEncryptionKeyWithKeyIdWhenWeGetBackInfoThenItShouldReturnListWithSingleElement() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenReturn(describeKeyResult);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+
+        CloudEncryptionKeys cloudEncryptionKeys =
+                underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Assert.assertEquals(1L, cloudEncryptionKeys.getCloudEncryptionKeys().size());
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenNoKMSKeyCouldBeFoundWithKeyIdThenItShouldReturnEmptyList() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(NotFoundException.class);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+
+        CloudEncryptionKeys cloudEncryptionKeys =
+                underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Assert.assertTrue(cloudEncryptionKeys.getCloudEncryptionKeys().isEmpty());
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenUserDoNotHaveAccessToKMSKeyWithKeyIdThenItShouldThrowCCE() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        AmazonServiceException awsException = Mockito.mock(AmazonServiceException.class);
+        when(awsException.getStatusCode()).thenReturn(403);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(awsException);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("Could not get encryption keys because the user does not have permissions to read");
+
+        underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
+    public void collectEncryptionKeyWithKeyIdWhenClientFailCallWithAmazonServiceExceptionThenItShouldThrowCCE() {
+        DescribeKeyResult describeKeyResult = new DescribeKeyResult();
+        describeKeyResult.setKeyMetadata(new KeyMetadata());
+
+        when(awsClient.createAWSKMS(any(AwsCredentialView.class), anyString())).thenReturn(awskmsClient);
+        when(awskmsClient.describeKey(any(DescribeKeyRequest.class))).thenThrow(AmazonServiceException.class);
+        Map<String, String> filters = Map.of(GetPlatformEncryptionKeysRequest.KEY_ID_FILTER_KEY, "aKeyId");
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("Could not get encryption keys from Amazon:");
+
+        underTest.encryptionKeys(new CloudCredential(1L, "aws-credential"), region("London"), filters);
+
+        Mockito.verify(awskmsClient, times(1)).describeKey(any(DescribeKeyRequest.class));
+        Mockito.verifyNoMoreInteractions(awskmsClient);
+    }
+
+    @Test
     public void testVirtualMachinesDisabledTypesEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
     }
@@ -235,7 +314,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesDisabledTypesContainsEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList(""));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertEquals("m5.2xlarge", result.getCloudVmResponses().get("eu-central-1a").iterator().next().value());
     }
@@ -244,7 +323,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesOkStartWith() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
     }
@@ -253,9 +332,47 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesOkFullMatch() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5.2xlarge"));
 
-        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region("eu-central-1"), Collections.emptyMap());
+        CloudVmTypes result = underTest.virtualMachines(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
 
         Assert.assertTrue(result.getCloudVmResponses().get("eu-central-1a").isEmpty());
+    }
+
+    @Test
+    public void testRegionsWhenAllRegionsAreSupported() {
+        // GIVEN in setUp()
+        // WHEN
+        CloudRegions actualRegions = underTest.regions(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
+        // THEN
+        Assert.assertEquals(1, actualRegions.getCloudRegions().size());
+        Assert.assertTrue(actualRegions.getCloudRegions().keySet().stream().anyMatch(r -> r.getRegionName().equals(EU_CENTRAL_1)));
+    }
+
+    @Test
+    public void testRegionsWhenUnsupportedRegionShouldBeFilteredOut() {
+        // GIVEN
+        Region supportedRegion = new Region();
+        supportedRegion.setRegionName(EU_CENTRAL_1);
+        Region unsupportedRegion = new Region();
+        unsupportedRegion.setRegionName(UNSUPPORTED_REGION);
+        when(describeRegionsResult.getRegions()).thenReturn(List.of(supportedRegion, unsupportedRegion));
+        // WHEN
+        CloudRegions actualRegions = underTest.regions(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
+        // THEN
+        Assert.assertEquals(1, actualRegions.getCloudRegions().size());
+        Assert.assertTrue(actualRegions.getCloudRegions().keySet().stream().anyMatch(r -> r.getRegionName().equals(EU_CENTRAL_1)));
+        Assert.assertFalse(actualRegions.getCloudRegions().keySet().stream().anyMatch(r -> r.getRegionName().equals(UNSUPPORTED_REGION)));
+    }
+
+    @Test
+    public void testRegionsWhenAllRegionsAreUnsupported() {
+        // GIVEN
+        Region unsupportedRegion = new Region();
+        unsupportedRegion.setRegionName(UNSUPPORTED_REGION);
+        when(describeRegionsResult.getRegions()).thenReturn(List.of(unsupportedRegion));
+        // WHEN
+        CloudRegions actualRegions = underTest.regions(new CloudCredential(1L, "aws-credential"), region(EU_CENTRAL_1), Collections.emptyMap());
+        // THEN
+        Assert.assertEquals(0, actualRegions.getCloudRegions().size());
     }
 
     private InstanceProfile instanceProfile(int i) {

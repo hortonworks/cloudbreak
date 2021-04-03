@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.mpack.ManagementPackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ManagementPackComponent;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 
 @Component
 public class StackRepoDetailsToStackRepoDetailsJsonConverter
@@ -34,6 +35,9 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
 
     @Inject
     private ConversionService conversionService;
+
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
 
     @Override
     public AmbariStackDetailsJson convert(StackRepoDetails source) {
@@ -78,8 +82,14 @@ public class StackRepoDetailsToStackRepoDetailsJsonConverter
                     mp, ManagementPackDetails.class)).collect(Collectors.toList());
             ambariStackDetailsJson.setMpacks(mpacks);
             Optional<ManagementPackComponent> stackDefaultMpack = source.getMpacks().stream().filter(ManagementPackComponent::isStackDefault).findFirst();
-            stackDefaultMpack.ifPresent(mp -> ambariStackDetailsJson.setMpackUrl(mp.getMpackUrl()));
+            stackDefaultMpack.ifPresent(mp -> ambariStackDetailsJson.setMpackUrl(getMpackUrl(mp.getMpackUrl())));
         }
         return ambariStackDetailsJson;
+    }
+
+    private String getMpackUrl(String url) {
+        return paywallCredentialService.paywallCredentialAvailable()
+                ? paywallCredentialService.addCredentialForUrl(url)
+                : url;
     }
 }
