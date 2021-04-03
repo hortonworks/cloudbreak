@@ -34,10 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResizeRecommendation;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig.KerberosConfigBuilder;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -85,8 +82,8 @@ public class CmTemplateProcessorTest {
         underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-existing-conf.bp"));
         List<ApiClusterTemplateConfig> configs = new ArrayList<>();
         configs.add(new ApiClusterTemplateConfig()
-                .name("hive_service_config_safety_valve")
-                .value("<property><name>testkey</name><value>testvalue</value></property>"));
+                            .name("hive_service_config_safety_valve")
+                            .value("<property><name>testkey</name><value>testvalue</value></property>"));
 
         underTest.addServiceConfigs("HIVE", List.of("GATEWAY", "HIVEMETASTORE"), configs);
 
@@ -97,8 +94,8 @@ public class CmTemplateProcessorTest {
         assertTrue(serviceConfigs.get(0).getValue().startsWith("<property><name>testkey</name><value>testvalue</value></property>"));
         assertTrue(serviceConfigs.get(0).getValue().endsWith(
                 "<property><name>hive.metastore.server.filter.enabled</name><value>true</value></property> " +
-                        "<property><name>hive.metastore.filter.hook</name>" +
-                        "<value>org.apache.hadoop.hive.ql.security.authorization.plugin.metastore.HiveMetaStoreAuthorizer</value></property>"));
+                "<property><name>hive.metastore.filter.hook</name>" +
+                "<value>org.apache.hadoop.hive.ql.security.authorization.plugin.metastore.HiveMetaStoreAuthorizer</value></property>"));
         assertTrue(serviceConfigs.get(0).getValue().contains("\n"));
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = new HashMap<>();
@@ -265,64 +262,6 @@ public class CmTemplateProcessorTest {
 
         ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
         assertEquals("kusztom", instantiator.getClusterName());
-    }
-
-    @Test
-    public void testAddInstantiatorWithBaseRolesAndSecureDataNodSettings() {
-        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
-        ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
-        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_8.getVersion());
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setClusterName("cluster");
-        generalClusterConfigs.setAutoTlsEnabled(true);
-        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig()
-                .withDatanodeSecurePort(5001)
-                .withDatanodeSecureHttpsPort(5000).build();
-        Builder tpoBuilder = new Builder()
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .withKerberosConfig(kerberosConfig);
-        TemplatePreparationObject templatePreparationObject = tpoBuilder.build();
-
-        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject, "test-sdx");
-
-        ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
-        List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
-        List<String> refNames = roleConfigGroups.stream().map(ApiClusterTemplateRoleConfigGroupInfo::getRcgRefName).collect(Collectors.toList());
-
-        assertEquals(2, refNames.size());
-        assertTrue(refNames.containsAll(List.of("yarn-NODEMANAGER-BASE", "hdfs-DATANODE-BASE")));
-        assertEquals("cluster", instantiator.getClusterName());
-        assertEquals(5000L, instantiator.getEnableKerberos().getDatanodeWebPort().longValue());
-        assertEquals(5001L, instantiator.getEnableKerberos().getDatanodeTransceiverPort().longValue());
-    }
-
-    @Test
-    public void testAddInstantiatorWithBaseRolesAndWithoutAutoTls() {
-        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager.bp"));
-        ClouderaManagerRepo clouderaManagerRepoDetails = new ClouderaManagerRepo();
-        clouderaManagerRepoDetails.setVersion(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_6_3_0.getVersion());
-        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
-        generalClusterConfigs.setClusterName("cluster");
-        generalClusterConfigs.setAutoTlsEnabled(false);
-        KerberosConfig kerberosConfig = KerberosConfigBuilder.aKerberosConfig()
-                .withDatanodeSecurePort(5001)
-                .withDatanodeSecureHttpsPort(5000).build();
-        Builder tpoBuilder = new Builder()
-                .withGeneralClusterConfigs(generalClusterConfigs)
-                .withKerberosConfig(kerberosConfig);
-        TemplatePreparationObject templatePreparationObject = tpoBuilder.build();
-
-        underTest.addInstantiator(clouderaManagerRepoDetails, templatePreparationObject, "test-sdx");
-
-        ApiClusterTemplateInstantiator instantiator = underTest.getTemplate().getInstantiator();
-        List<ApiClusterTemplateRoleConfigGroupInfo> roleConfigGroups = instantiator.getRoleConfigGroups();
-        List<String> refNames = roleConfigGroups.stream().map(ApiClusterTemplateRoleConfigGroupInfo::getRcgRefName).collect(Collectors.toList());
-
-        assertEquals(2, refNames.size());
-        assertTrue(refNames.containsAll(List.of("yarn-NODEMANAGER-BASE", "hdfs-DATANODE-BASE")));
-        assertEquals("cluster", instantiator.getClusterName());
-        assertNull(instantiator.getEnableKerberos().getDatanodeWebPort());
-        assertNull(instantiator.getEnableKerberos().getDatanodeTransceiverPort());
     }
 
     @Test
