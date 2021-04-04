@@ -22,23 +22,27 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 public interface ImageCatalogRepository extends WorkspaceResourceRepository<ImageCatalog, Long> {
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(i.id, i.resourceCrn) FROM ImageCatalog i " +
-            "WHERE i.workspace.id = :workspaceId AND i.archived = false")
+            "WHERE i.workspace.id = :workspaceId AND i.archived = false AND i.imageCatalogUrl is not null")
     List<AuthorizationResource> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
 
-    Set<ImageCatalog> findAllByWorkspaceIdAndArchived(Long workspaceId, boolean archived);
+    Set<ImageCatalog> findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNotNull(Long workspaceId, boolean archived);
 
-    @Query("SELECT i.resourceCrn FROM ImageCatalog i WHERE i.workspace.tenant.name = :tenantId AND i.name IN (:names)")
+    @Query("SELECT i.resourceCrn FROM ImageCatalog i " +
+            "WHERE i.workspace.tenant.name = :tenantId AND i.name IN (:names) AND i.imageCatalogUrl is not null")
     List<String> findAllResourceCrnsByNamesAndTenantId(@Param("names") Collection<String> names, @Param("tenantId") String tenantId);
 
-    @Query("SELECT i.resourceCrn FROM ImageCatalog i WHERE i.workspace.tenant.name = :tenantId AND i.name = :name")
+    @Query("SELECT i.resourceCrn FROM ImageCatalog i " +
+            "WHERE i.workspace.tenant.name = :tenantId AND i.name = :name AND i.imageCatalogUrl is not null")
     Optional<String> findResourceCrnByNameAndTenantId(@Param("name") String name, @Param("tenantId") String tenantId);
 
-    @Query("SELECT i.name as name, i.resourceCrn as crn FROM ImageCatalog i WHERE i.workspace.tenant.name = :tenantId AND i.resourceCrn IN (:resourceCrns)")
+    @Query("SELECT i.name as name, i.resourceCrn as crn FROM ImageCatalog i " +
+            "WHERE i.workspace.tenant.name = :tenantId AND i.resourceCrn IN (:resourceCrns) AND i.imageCatalogUrl is not null")
     List<ResourceCrnAndNameView> findResourceNamesByCrnAndTenantId(@Param("resourceCrns") Collection<String> resourceCrns, @Param("tenantId") String tenantId);
 
-    @Query("SELECT i.resourceCrn FROM ImageCatalog i WHERE i.workspace.tenant.name = :tenantId")
+    @Query("SELECT i.resourceCrn FROM ImageCatalog i " +
+            "WHERE i.workspace.tenant.name = :tenantId AND i.imageCatalogUrl is not nul")
     List<String> findAllResourceCrnsByTenantId(@Param("tenantId") String tenantId);
 
-    Optional<ImageCatalog> findByResourceCrnAndArchivedFalse(String resourceCrn);
+    Optional<ImageCatalog> findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(String resourceCrn);
 
 }

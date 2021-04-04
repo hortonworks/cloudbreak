@@ -121,7 +121,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     @Override
     public Set<ImageCatalog> findAllByWorkspaceId(Long workspaceId) {
-        Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchived(workspaceId, false);
+        Set<ImageCatalog> imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNotNull(workspaceId, false);
         imageCatalogs.add(getCloudbreakDefaultImageCatalog());
         if (legacyCatalogEnabled) {
             imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
@@ -179,7 +179,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public ImageCatalog findByResourceCrn(String resourceCrn) {
-        return imageCatalogRepository.findByResourceCrnAndArchivedFalse(resourceCrn).orElseThrow(notFound("ImageCatalog", resourceCrn));
+        return imageCatalogRepository.findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(resourceCrn).orElseThrow(notFound("ImageCatalog", resourceCrn));
     }
 
     public Images getImagesByCatalogName(Long workspaceId, String catalogName, String stackName, String platform) throws CloudbreakImageCatalogException {

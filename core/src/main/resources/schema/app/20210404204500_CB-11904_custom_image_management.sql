@@ -1,28 +1,6 @@
 -- // CB-11904 Custom image management
 -- Migration SQL that makes the change goes here.
 
-CREATE SEQUENCE IF NOT EXISTS customimagecatalog_id_seq START WITH 1
-                                          INCREMENT BY 1
-                                          NO MINVALUE
-                                          NO MAXVALUE
-                                          CACHE 1;
-
-CREATE TABLE IF NOT EXISTS customimagecatalog (
-    id bigint PRIMARY KEY DEFAULT nextval('customimagecatalog_id_seq'),
-    resourcecrn VARCHAR(255),
-    creator VARCHAR(255),
-    created int8 NOT NULL DEFAULT (date_part('epoch'::text, now()) * 1000::double precision),
-    account character varying(255) NOT NULL,
-    owner character varying(255) NOT NULL,
-    workspace_id int8 NOT NULL,
-    name character varying(255) NOT NULL,
-    description TEXT
-);
-
-ALTER TABLE customimagecatalog
-    ADD CONSTRAINT customimagecatalogname_in_workspace_unique UNIQUE (name, workspace_id),
-    ADD CONSTRAINT fk_customimagecatalog_workspace FOREIGN KEY (workspace_id) REFERENCES workspace(id);
-
 CREATE SEQUENCE IF NOT EXISTS customimage_id_seq START WITH 1
                                           INCREMENT BY 1
                                           NO MINVALUE
@@ -31,7 +9,7 @@ CREATE SEQUENCE IF NOT EXISTS customimage_id_seq START WITH 1
 
 CREATE TABLE IF NOT EXISTS customimage (
     id bigint PRIMARY KEY DEFAULT nextval('customimage_id_seq'),
-    customimagecatalog_id bigint NOT NULL,
+    imagecatalog_id bigint NOT NULL,
     resourcecrn VARCHAR(255),
     creator VARCHAR(255),
     created int8 NOT NULL DEFAULT (date_part('epoch'::text, now()) * 1000::double precision),
@@ -43,8 +21,8 @@ CREATE TABLE IF NOT EXISTS customimage (
 );
 
 ALTER TABLE customimage
-    ADD CONSTRAINT customimagename_in_customimagecatalog_unique UNIQUE (name, customimagecatalog_id),
-    ADD CONSTRAINT fk_customimage_customimagecatalog FOREIGN KEY (customimagecatalog_id) REFERENCES customimagecatalog(id);
+    ADD CONSTRAINT customimagename_in_imagecatalog_unique UNIQUE (name, imagecatalog_id),
+    ADD CONSTRAINT fk_customimage_imagecatalog FOREIGN KEY (imagecatalog_id) REFERENCES imagecatalog(id);
 
 CREATE SEQUENCE IF NOT EXISTS vmimage_id_seq START WITH 1
                                           INCREMENT BY 1
@@ -71,5 +49,3 @@ DROP TABLE IF EXISTS vmimage;
 DROP SEQUENCE IF EXISTS vmimage_id_seq;
 DROP TABLE IF EXISTS customimage;
 DROP SEQUENCE IF EXISTS customimage_id_seq;
-DROP TABLE IF EXISTS customimagecatalog;
-DROP SEQUENCE IF EXISTS customimagecatalog_id_seq;

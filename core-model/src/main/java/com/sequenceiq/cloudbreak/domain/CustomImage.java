@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"customImageCatalog_id", "name", "resourceCrn"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"imageCatalog_id", "name", "resourceCrn"}))
 public class CustomImage implements ProvisionEntity {
 
     @Id
@@ -34,7 +34,7 @@ public class CustomImage implements ProvisionEntity {
     private String description;
 
     @ManyToOne
-    private CustomImageCatalog customImageCatalog;
+    private ImageCatalog imageCatalog;
 
     @Column(nullable = false)
     private String resourceCrn;
@@ -82,12 +82,12 @@ public class CustomImage implements ProvisionEntity {
         this.description = description;
     }
 
-    public CustomImageCatalog getCustomImageCatalog() {
-        return customImageCatalog;
+    public ImageCatalog getImageCatalog() {
+        return imageCatalog;
     }
 
-    public void setCustomImageCatalog(CustomImageCatalog customImageCatalog) {
-        this.customImageCatalog = customImageCatalog;
+    public void setImageCatalog(ImageCatalog imageCatalog) {
+        this.imageCatalog = imageCatalog;
     }
 
     public String getResourceCrn() {
