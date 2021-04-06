@@ -31,7 +31,7 @@ public class ImageCatalogGetImagesFromDefaultCatalogAction implements Action<Ima
                     cloudbreakClient
                             .getDefaultClient()
                             .imageCatalogV4Endpoint()
-                            .getImages(cloudbreakClient.getWorkspaceId(), null, platform.name())
+                            .getImages(cloudbreakClient.getWorkspaceId(), null, platform.name(), null, null)
             );
             Log.whenJson(LOGGER, "images have been fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {
