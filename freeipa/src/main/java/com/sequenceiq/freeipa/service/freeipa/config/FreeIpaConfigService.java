@@ -72,6 +72,7 @@ public class FreeIpaConfigService {
                 .withHosts(hosts)
                 .withBackupConfig(determineAndSetBackup(stack))
                 .withCcmv2Enabled(stack.getTunnel().useCcmV2())
+                .withCidrBlocks(stack.getNetwork().getNetworkCidrs())
                 .build();
     }
 

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -52,6 +54,8 @@ public class FreeIpaConfigServiceTest {
     private static final String REVERSE_ZONE = "117.10.in-addr.arpa.";
 
     private static final String PRIVATE_IP = "10.117.0.69";
+
+    private static final String CIDR = "10.0.0.0/24";
 
     private Multimap<String, String> subnetWithCidr;
 
@@ -104,6 +108,9 @@ public class FreeIpaConfigServiceTest {
         stack.setCloudPlatform(CloudPlatform.AWS.name());
         stack.setBackup(backup);
         stack.setEnvironmentCrn("envcrn");
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
 
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
         when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
@@ -131,5 +138,6 @@ public class FreeIpaConfigServiceTest {
         assertEquals(backupLocation, freeIpaConfigView.getBackup().getLocation());
         assertEquals(CloudPlatform.AWS.name(), freeIpaConfigView.getBackup().getPlatform());
         assertEquals(expectedHosts, freeIpaConfigView.getHosts());
+        assertEquals(List.of(CIDR), freeIpaConfigView.getCidrBlocks());
     }
 }

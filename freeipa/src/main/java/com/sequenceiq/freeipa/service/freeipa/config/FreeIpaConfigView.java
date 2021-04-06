@@ -1,22 +1,19 @@
 package com.sequenceiq.freeipa.service.freeipa.config;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 
 public class FreeIpaConfigView {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaConfigView.class);
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
@@ -42,6 +39,8 @@ public class FreeIpaConfigView {
 
     private final boolean ccmv2Enabled;
 
+    private final List<String> cidrBlocks;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -55,6 +54,7 @@ public class FreeIpaConfigView {
         this.hosts = builder.hosts;
         this.backup = builder.backup;
         this.ccmv2Enabled = builder.ccmv2Enabled;
+        this.cidrBlocks = builder.cidrBlocks;
     }
 
     public String getRealm() {
@@ -97,6 +97,10 @@ public class FreeIpaConfigView {
         return backup;
     }
 
+    public List<String> getCidrBlocks() {
+        return cidrBlocks;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -115,6 +119,7 @@ public class FreeIpaConfigView {
         if (CollectionUtils.isNotEmpty(this.hosts)) {
             map.put("hosts", this.hosts);
         }
+        map.put("cidrBlocks", cidrBlocks);
         return map;
     }
 
@@ -141,6 +146,8 @@ public class FreeIpaConfigView {
         private FreeIpaBackupConfigView backup;
 
         private boolean ccmv2Enabled;
+
+        private List<String> cidrBlocks;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -198,6 +205,11 @@ public class FreeIpaConfigView {
 
         public Builder withCcmv2Enabled(boolean ccmv2Enabled) {
             this.ccmv2Enabled = ccmv2Enabled;
+            return this;
+        }
+
+        public Builder withCidrBlocks(List<String> cidrBlocks) {
+            this.cidrBlocks = cidrBlocks;
             return this;
         }
     }
