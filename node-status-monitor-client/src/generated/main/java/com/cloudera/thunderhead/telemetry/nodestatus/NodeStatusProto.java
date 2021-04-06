@@ -12674,6 +12674,91 @@ public final class NodeStatusProto {
      * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusS3Accessible();
+
+    /**
+     * <pre>
+     * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     */
+    int getS3AccessibleValue();
+    /**
+     * <pre>
+     * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible();
+
+    /**
+     * <pre>
+     * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     */
+    int getAdlsV2AccessibleValue();
+    /**
+     * <pre>
+     * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible();
+
+    /**
+     * <pre>
+     * GCS endpoint (storage.googleapis.com) availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     */
+    int getGcsAccessibleValue();
+    /**
+     * <pre>
+     * GCS endpoint (storage.googleapis.com) availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible();
+
+    /**
+     * <pre>
+     * AWS Security Token Service endpoint availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     */
+    int getStsAccessibleValue();
+    /**
+     * <pre>
+     * AWS Security Token Service endpoint availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible();
+
+    /**
+     * <pre>
+     * Azure management endpoint - management.azure.com availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     */
+    int getAzureManagementAccessibleValue();
+    /**
+     * <pre>
+     * Azure management endpoint - management.azure.com availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible();
   }
   /**
    * <pre>
@@ -12704,6 +12789,11 @@ public final class NodeStatusProto {
       clouderaComAccessible_ = 0;
       databusAccessible_ = 0;
       databusS3Accessible_ = 0;
+      s3Accessible_ = 0;
+      adlsV2Accessible_ = 0;
+      gcsAccessible_ = 0;
+      stsAccessible_ = 0;
+      azureManagementAccessible_ = 0;
     }
 
     @java.lang.Override
@@ -12802,6 +12892,36 @@ public final class NodeStatusProto {
               int rawValue = input.readEnum();
 
               databusS3Accessible_ = rawValue;
+              break;
+            }
+            case 104: {
+              int rawValue = input.readEnum();
+
+              s3Accessible_ = rawValue;
+              break;
+            }
+            case 112: {
+              int rawValue = input.readEnum();
+
+              adlsV2Accessible_ = rawValue;
+              break;
+            }
+            case 120: {
+              int rawValue = input.readEnum();
+
+              gcsAccessible_ = rawValue;
+              break;
+            }
+            case 128: {
+              int rawValue = input.readEnum();
+
+              stsAccessible_ = rawValue;
+              break;
+            }
+            case 136: {
+              int rawValue = input.readEnum();
+
+              azureManagementAccessible_ = rawValue;
               break;
             }
             default: {
@@ -13152,6 +13272,131 @@ public final class NodeStatusProto {
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
     }
 
+    public static final int S3ACCESSIBLE_FIELD_NUMBER = 13;
+    private int s3Accessible_;
+    /**
+     * <pre>
+     * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     */
+    public int getS3AccessibleValue() {
+      return s3Accessible_;
+    }
+    /**
+     * <pre>
+     * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(s3Accessible_);
+      return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+    }
+
+    public static final int ADLSV2ACCESSIBLE_FIELD_NUMBER = 14;
+    private int adlsV2Accessible_;
+    /**
+     * <pre>
+     * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     */
+    public int getAdlsV2AccessibleValue() {
+      return adlsV2Accessible_;
+    }
+    /**
+     * <pre>
+     * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(adlsV2Accessible_);
+      return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+    }
+
+    public static final int GCSACCESSIBLE_FIELD_NUMBER = 15;
+    private int gcsAccessible_;
+    /**
+     * <pre>
+     * GCS endpoint (storage.googleapis.com) availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     */
+    public int getGcsAccessibleValue() {
+      return gcsAccessible_;
+    }
+    /**
+     * <pre>
+     * GCS endpoint (storage.googleapis.com) availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(gcsAccessible_);
+      return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+    }
+
+    public static final int STSACCESSIBLE_FIELD_NUMBER = 16;
+    private int stsAccessible_;
+    /**
+     * <pre>
+     * AWS Security Token Service endpoint availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     */
+    public int getStsAccessibleValue() {
+      return stsAccessible_;
+    }
+    /**
+     * <pre>
+     * AWS Security Token Service endpoint availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(stsAccessible_);
+      return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+    }
+
+    public static final int AZUREMANAGEMENTACCESSIBLE_FIELD_NUMBER = 17;
+    private int azureManagementAccessible_;
+    /**
+     * <pre>
+     * Azure management endpoint - management.azure.com availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     */
+    public int getAzureManagementAccessibleValue() {
+      return azureManagementAccessible_;
+    }
+    /**
+     * <pre>
+     * Azure management endpoint - management.azure.com availability.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(azureManagementAccessible_);
+      return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -13201,6 +13446,21 @@ public final class NodeStatusProto {
       }
       if (databusS3Accessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(12, databusS3Accessible_);
+      }
+      if (s3Accessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(13, s3Accessible_);
+      }
+      if (adlsV2Accessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(14, adlsV2Accessible_);
+      }
+      if (gcsAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(15, gcsAccessible_);
+      }
+      if (stsAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(16, stsAccessible_);
+      }
+      if (azureManagementAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        output.writeEnum(17, azureManagementAccessible_);
       }
       unknownFields.writeTo(output);
     }
@@ -13266,6 +13526,26 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(12, databusS3Accessible_);
       }
+      if (s3Accessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(13, s3Accessible_);
+      }
+      if (adlsV2Accessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(14, adlsV2Accessible_);
+      }
+      if (gcsAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(15, gcsAccessible_);
+      }
+      if (stsAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(16, stsAccessible_);
+      }
+      if (azureManagementAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(17, azureManagementAccessible_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -13301,6 +13581,11 @@ public final class NodeStatusProto {
       result = result && clouderaComAccessible_ == other.clouderaComAccessible_;
       result = result && databusAccessible_ == other.databusAccessible_;
       result = result && databusS3Accessible_ == other.databusS3Accessible_;
+      result = result && s3Accessible_ == other.s3Accessible_;
+      result = result && adlsV2Accessible_ == other.adlsV2Accessible_;
+      result = result && gcsAccessible_ == other.gcsAccessible_;
+      result = result && stsAccessible_ == other.stsAccessible_;
+      result = result && azureManagementAccessible_ == other.azureManagementAccessible_;
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -13343,6 +13628,16 @@ public final class NodeStatusProto {
       hash = (53 * hash) + databusAccessible_;
       hash = (37 * hash) + DATABUSS3ACCESSIBLE_FIELD_NUMBER;
       hash = (53 * hash) + databusS3Accessible_;
+      hash = (37 * hash) + S3ACCESSIBLE_FIELD_NUMBER;
+      hash = (53 * hash) + s3Accessible_;
+      hash = (37 * hash) + ADLSV2ACCESSIBLE_FIELD_NUMBER;
+      hash = (53 * hash) + adlsV2Accessible_;
+      hash = (37 * hash) + GCSACCESSIBLE_FIELD_NUMBER;
+      hash = (53 * hash) + gcsAccessible_;
+      hash = (37 * hash) + STSACCESSIBLE_FIELD_NUMBER;
+      hash = (53 * hash) + stsAccessible_;
+      hash = (37 * hash) + AZUREMANAGEMENTACCESSIBLE_FIELD_NUMBER;
+      hash = (53 * hash) + azureManagementAccessible_;
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -13504,6 +13799,16 @@ public final class NodeStatusProto {
 
         databusS3Accessible_ = 0;
 
+        s3Accessible_ = 0;
+
+        adlsV2Accessible_ = 0;
+
+        gcsAccessible_ = 0;
+
+        stsAccessible_ = 0;
+
+        azureManagementAccessible_ = 0;
+
         return this;
       }
 
@@ -13552,6 +13857,11 @@ public final class NodeStatusProto {
         result.clouderaComAccessible_ = clouderaComAccessible_;
         result.databusAccessible_ = databusAccessible_;
         result.databusS3Accessible_ = databusS3Accessible_;
+        result.s3Accessible_ = s3Accessible_;
+        result.adlsV2Accessible_ = adlsV2Accessible_;
+        result.gcsAccessible_ = gcsAccessible_;
+        result.stsAccessible_ = stsAccessible_;
+        result.azureManagementAccessible_ = azureManagementAccessible_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -13651,6 +13961,21 @@ public final class NodeStatusProto {
         }
         if (other.databusS3Accessible_ != 0) {
           setDatabusS3AccessibleValue(other.getDatabusS3AccessibleValue());
+        }
+        if (other.s3Accessible_ != 0) {
+          setS3AccessibleValue(other.getS3AccessibleValue());
+        }
+        if (other.adlsV2Accessible_ != 0) {
+          setAdlsV2AccessibleValue(other.getAdlsV2AccessibleValue());
+        }
+        if (other.gcsAccessible_ != 0) {
+          setGcsAccessibleValue(other.getGcsAccessibleValue());
+        }
+        if (other.stsAccessible_ != 0) {
+          setStsAccessibleValue(other.getStsAccessibleValue());
+        }
+        if (other.azureManagementAccessible_ != 0) {
+          setAzureManagementAccessibleValue(other.getAzureManagementAccessibleValue());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -14504,6 +14829,331 @@ public final class NodeStatusProto {
       public Builder clearDatabusS3Accessible() {
         
         databusS3Accessible_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int s3Accessible_ = 0;
+      /**
+       * <pre>
+       * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       */
+      public int getS3AccessibleValue() {
+        return s3Accessible_;
+      }
+      /**
+       * <pre>
+       * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       */
+      public Builder setS3AccessibleValue(int value) {
+        s3Accessible_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(s3Accessible_);
+        return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       */
+      public Builder setS3Accessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        s3Accessible_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * AWS S3 endpoint availability (endpoint is produced by metadata service: s3.&lt;region&gt;.&lt;domain&gt;).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       */
+      public Builder clearS3Accessible() {
+        
+        s3Accessible_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int adlsV2Accessible_ = 0;
+      /**
+       * <pre>
+       * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       */
+      public int getAdlsV2AccessibleValue() {
+        return adlsV2Accessible_;
+      }
+      /**
+       * <pre>
+       * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       */
+      public Builder setAdlsV2AccessibleValue(int value) {
+        adlsV2Accessible_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(adlsV2Accessible_);
+        return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       */
+      public Builder setAdlsV2Accessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        adlsV2Accessible_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * ADLS v2 (ABFS) endpoint availability (&lt;azure_storage_account&gt;.dfs.core.windows.net).
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       */
+      public Builder clearAdlsV2Accessible() {
+        
+        adlsV2Accessible_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int gcsAccessible_ = 0;
+      /**
+       * <pre>
+       * GCS endpoint (storage.googleapis.com) availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       */
+      public int getGcsAccessibleValue() {
+        return gcsAccessible_;
+      }
+      /**
+       * <pre>
+       * GCS endpoint (storage.googleapis.com) availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       */
+      public Builder setGcsAccessibleValue(int value) {
+        gcsAccessible_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * GCS endpoint (storage.googleapis.com) availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(gcsAccessible_);
+        return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * GCS endpoint (storage.googleapis.com) availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       */
+      public Builder setGcsAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        gcsAccessible_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * GCS endpoint (storage.googleapis.com) availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       */
+      public Builder clearGcsAccessible() {
+        
+        gcsAccessible_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int stsAccessible_ = 0;
+      /**
+       * <pre>
+       * AWS Security Token Service endpoint availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       */
+      public int getStsAccessibleValue() {
+        return stsAccessible_;
+      }
+      /**
+       * <pre>
+       * AWS Security Token Service endpoint availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       */
+      public Builder setStsAccessibleValue(int value) {
+        stsAccessible_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * AWS Security Token Service endpoint availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(stsAccessible_);
+        return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * AWS Security Token Service endpoint availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       */
+      public Builder setStsAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        stsAccessible_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * AWS Security Token Service endpoint availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       */
+      public Builder clearStsAccessible() {
+        
+        stsAccessible_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int azureManagementAccessible_ = 0;
+      /**
+       * <pre>
+       * Azure management endpoint - management.azure.com availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       */
+      public int getAzureManagementAccessibleValue() {
+        return azureManagementAccessible_;
+      }
+      /**
+       * <pre>
+       * Azure management endpoint - management.azure.com availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       */
+      public Builder setAzureManagementAccessibleValue(int value) {
+        azureManagementAccessible_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Azure management endpoint - management.azure.com availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(azureManagementAccessible_);
+        return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Azure management endpoint - management.azure.com availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       */
+      public Builder setAzureManagementAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        azureManagementAccessible_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Azure management endpoint - management.azure.com availability.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       */
+      public Builder clearAzureManagementAccessible() {
+        
+        azureManagementAccessible_ = 0;
         onChanged();
         return this;
       }
@@ -36899,7 +37549,7 @@ public final class NodeStatusProto {
       "dp.telemetry.HealthStatus\022\021\n\ttimestamp\030\014" +
       " \001(\003\0325\n\023DatabusDetailsEntry\022\013\n\003key\030\001 \001(\t" +
       "\022\r\n\005value\030\002 \001(\t:\0028\001\0323\n\021EventDetailsEntry" +
-      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\302\003\n\016Net" +
+      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\324\005\n\016Net" +
       "workDetails\022\014\n\004host\030\001 \001(\t\022\022\n\nccmEnabled\030" +
       "\002 \001(\010\022\024\n\014dnsResolvers\030\003 \003(\t\022\025\n\rneighbour" +
       "Scan\030\004 \001(\010\022\022\n\nneighbours\030\005 \003(\t\022<\n\027anyNei" +
@@ -36911,80 +37561,87 @@ public final class NodeStatusProto {
       "ealthStatus\0226\n\021databusAccessible\030\013 \001(\0162\033" +
       ".cdp.telemetry.HealthStatus\0228\n\023databusS3" +
       "Accessible\030\014 \001(\0162\033.cdp.telemetry.HealthS" +
-      "tatus\"\211\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001(\0132\031.c" +
-      "dp.telemetry.CpuMetrics\022(\n\004disk\030\002 \001(\0132\032." +
-      "cdp.telemetry.DiskMetrics\022,\n\006memory\030\003 \001(" +
-      "\0132\034.cdp.telemetry.MemoryMetrics\022.\n\007netwo" +
-      "rk\030\004 \001(\0132\035.cdp.telemetry.NetworkMetrics\022" +
-      "\021\n\ttimestamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001" +
-      "(\0132\035.cdp.telemetry.ClusterDetails\"\277\001\n\nCp" +
-      "uMetrics\022\r\n\005count\030\001 \001(\005\022\025\n\rlogical_count" +
-      "\030\002 \001(\005\022\020\n\010load_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132" +
-      "\027.cdp.telemetry.CpuTimes\022&\n\005stats\030\005 \001(\0132" +
-      "\027.cdp.telemetry.CpuStats\022)\n\004freq\030\006 \001(\0132\033" +
-      ".cdp.telemetry.CpuFrequency\"_\n\010CpuStats\022" +
-      "\024\n\014ctx_switches\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(" +
-      "\003\022\027\n\017soft_interrupts\030\003 \001(\003\022\020\n\010syscalls\030\004" +
-      " \001(\003\"D\n\010CpuTimes\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002" +
-      " \001(\001\022\016\n\006system\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014Cp" +
-      "uFrequency\022\017\n\007current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003" +
-      "\022\013\n\003max\030\003 \001(\003\"\214\001\n\013DiskMetrics\0220\n\npartiti" +
-      "ons\030\001 \003(\0132\034.cdp.telemetry.DiskPartition\022" +
-      "(\n\ntop_varlog\030\002 \003(\0132\024.cdp.telemetry.VmLo" +
-      "g\022!\n\002io\030\003 \001(\0132\025.cdp.telemetry.DiskIO\"#\n\005" +
-      "VmLog\022\014\n\004path\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDi" +
-      "skPartition\022\'\n\005usage\030\001 \001(\0132\030.cdp.telemet" +
-      "ry.DiskUsage\022\016\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003" +
-      " \001(\t\022\017\n\007maxfile\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022" +
-      "\n\nmountpoint\030\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDisk" +
-      "Usage\022\014\n\004free\030\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004us" +
-      "ed\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\n" +
-      "read_bytes\030\001 \001(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\t" +
-      "read_time\030\003 \001(\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013" +
-      "write_count\030\005 \001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n" +
-      "\016NetworkMetrics\0226\n\013connections\030\001 \001(\0132!.c" +
-      "dp.telemetry.NetworkConnections\022$\n\002io\030\002 " +
-      "\001(\0132\030.cdp.telemetry.NetworkIO\"\237\001\n\tNetwor" +
-      "kIO\022\022\n\nbytes_recv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 " +
-      "\001(\003\022\016\n\006dropin\030\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005" +
-      "errin\030\005 \001(\003\022\016\n\006errout\030\006 \001(\003\022\024\n\014packets_r" +
-      "ecv\030\007 \001(\003\022\024\n\014packets_sent\030\010 \001(\003\"\322\001\n\022Netw" +
-      "orkConnections\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABL" +
-      "ISHED\030\002 \001(\005\022\021\n\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_" +
-      "WAIT\030\004 \001(\005\022\016\n\006CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006" +
-      " \001(\005\022\024\n\014SYN_RECEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1" +
-      "\030\010 \001(\005\022\022\n\nFIN_WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n" +
-      " \001(\005\"u\n\rMemoryMetrics\0224\n\016virtual_memory\030" +
-      "\001 \001(\0132\034.cdp.telemetry.VirtualMemory\022.\n\013s" +
-      "wap_memory\030\002 \001(\0132\031.cdp.telemetry.SwapMem" +
-      "ory\"\277\001\n\rVirtualMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004" +
-      "used\030\002 \001(\003\022\014\n\004free\030\003 \001(\003\022\017\n\007percent\030\004 \001(" +
-      "\001\022\021\n\tavailable\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010" +
-      "inactive\030\007 \001(\003\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cache" +
-      "d\030\t \001(\003\022\016\n\006shared\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n" +
-      "\nSwapMemory\022\014\n\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001" +
-      "(\001\022\013\n\003sin\030\003 \001(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005" +
-      " \001(\003\022\014\n\004used\030\006 \001(\003\"\254\001\n\031CmServiceHealthCh" +
-      "eckEvent\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013service" +
-      "Type\030\002 \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022" +
-      "\021\n\ttimestamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001" +
-      "(\0132\035.cdp.telemetry.ClusterDetails\"\271\001\n\024Cm" +
-      "ServiceMetricEvent\022\023\n\013serviceName\030\001 \001(\t\022" +
-      "\023\n\013serviceType\030\002 \001(\t\022\020\n\010longName\030\003 \001(\t\022\014" +
-      "\n\004name\030\004 \001(\t\022\r\n\005value\030\005 \001(\001\022\021\n\ttimestamp" +
-      "\030\006 \001(\003\0225\n\016clusterDetails\030\007 \001(\0132\035.cdp.tel" +
-      "emetry.ClusterDetails\"\262\002\n\016ClusterDetails" +
-      "\022\013\n\003crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003" +
-      " \001(\t\0227\n\004type\030\004 \001(\0162).cdp.telemetry.Clust" +
-      "erDetails.ClusterType\022=\n\010platform\030\005 \001(\0162" +
-      "+.cdp.telemetry.ClusterDetails.CloudPlat" +
-      "form\"5\n\013ClusterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATA" +
-      "LAKE\020\001\022\013\n\007FREEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007" +
-      "UNKNOWN\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n" +
-      "\n\006YCLOUD\020\004*,\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022" +
-      "\006\n\002OK\020\001\022\007\n\003NOK\020\002B[\n-com.cloudera.thunder" +
-      "head.telemetry.nodestatusB\017NodeStatusPro" +
-      "toZ\031com/cloudera/cdp/protobufb\006proto3"
+      "tatus\0221\n\014s3Accessible\030\r \001(\0162\033.cdp.teleme" +
+      "try.HealthStatus\0225\n\020adlsV2Accessible\030\016 \001" +
+      "(\0162\033.cdp.telemetry.HealthStatus\0222\n\rgcsAc" +
+      "cessible\030\017 \001(\0162\033.cdp.telemetry.HealthSta" +
+      "tus\0222\n\rstsAccessible\030\020 \001(\0162\033.cdp.telemet" +
+      "ry.HealthStatus\022>\n\031azureManagementAccess" +
+      "ible\030\021 \001(\0162\033.cdp.telemetry.HealthStatus\"" +
+      "\211\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001(\0132\031.cdp.tel" +
+      "emetry.CpuMetrics\022(\n\004disk\030\002 \001(\0132\032.cdp.te" +
+      "lemetry.DiskMetrics\022,\n\006memory\030\003 \001(\0132\034.cd" +
+      "p.telemetry.MemoryMetrics\022.\n\007network\030\004 \001" +
+      "(\0132\035.cdp.telemetry.NetworkMetrics\022\021\n\ttim" +
+      "estamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035.c" +
+      "dp.telemetry.ClusterDetails\"\277\001\n\nCpuMetri" +
+      "cs\022\r\n\005count\030\001 \001(\005\022\025\n\rlogical_count\030\002 \001(\005" +
+      "\022\020\n\010load_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp." +
+      "telemetry.CpuTimes\022&\n\005stats\030\005 \001(\0132\027.cdp." +
+      "telemetry.CpuStats\022)\n\004freq\030\006 \001(\0132\033.cdp.t" +
+      "elemetry.CpuFrequency\"_\n\010CpuStats\022\024\n\014ctx" +
+      "_switches\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017s" +
+      "oft_interrupts\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D" +
+      "\n\010CpuTimes\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016" +
+      "\n\006system\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequ" +
+      "ency\022\017\n\007current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003ma" +
+      "x\030\003 \001(\003\"\214\001\n\013DiskMetrics\0220\n\npartitions\030\001 " +
+      "\003(\0132\034.cdp.telemetry.DiskPartition\022(\n\ntop" +
+      "_varlog\030\002 \003(\0132\024.cdp.telemetry.VmLog\022!\n\002i" +
+      "o\030\003 \001(\0132\025.cdp.telemetry.DiskIO\"#\n\005VmLog\022" +
+      "\014\n\004path\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPart" +
+      "ition\022\'\n\005usage\030\001 \001(\0132\030.cdp.telemetry.Dis" +
+      "kUsage\022\016\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017" +
+      "\n\007maxfile\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmoun" +
+      "tpoint\030\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022" +
+      "\014\n\004free\030\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001" +
+      "(\003\022\017\n\007percent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_b" +
+      "ytes\030\001 \001(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\tread_t" +
+      "ime\030\003 \001(\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013write_" +
+      "count\030\005 \001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n\016Netwo" +
+      "rkMetrics\0226\n\013connections\030\001 \001(\0132!.cdp.tel" +
+      "emetry.NetworkConnections\022$\n\002io\030\002 \001(\0132\030." +
+      "cdp.telemetry.NetworkIO\"\237\001\n\tNetworkIO\022\022\n" +
+      "\nbytes_recv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n" +
+      "\006dropin\030\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030" +
+      "\005 \001(\003\022\016\n\006errout\030\006 \001(\003\022\024\n\014packets_recv\030\007 " +
+      "\001(\003\022\024\n\014packets_sent\030\010 \001(\003\"\322\001\n\022NetworkCon" +
+      "nections\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030" +
+      "\002 \001(\005\022\021\n\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004" +
+      " \001(\005\022\016\n\006CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024" +
+      "\n\014SYN_RECEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005" +
+      "\022\022\n\nFIN_WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u" +
+      "\n\rMemoryMetrics\0224\n\016virtual_memory\030\001 \001(\0132" +
+      "\034.cdp.telemetry.VirtualMemory\022.\n\013swap_me" +
+      "mory\030\002 \001(\0132\031.cdp.telemetry.SwapMemory\"\277\001" +
+      "\n\rVirtualMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002" +
+      " \001(\003\022\014\n\004free\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\ta" +
+      "vailable\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010inacti" +
+      "ve\030\007 \001(\003\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cached\030\t \001(" +
+      "\003\022\016\n\006shared\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapM" +
+      "emory\022\014\n\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003" +
+      "sin\030\003 \001(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014" +
+      "\n\004used\030\006 \001(\003\"\254\001\n\031CmServiceHealthCheckEve" +
+      "nt\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013serviceType\030\002" +
+      " \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022\021\n\ttim" +
+      "estamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035.c" +
+      "dp.telemetry.ClusterDetails\"\271\001\n\024CmServic" +
+      "eMetricEvent\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013ser" +
+      "viceType\030\002 \001(\t\022\020\n\010longName\030\003 \001(\t\022\014\n\004name" +
+      "\030\004 \001(\t\022\r\n\005value\030\005 \001(\001\022\021\n\ttimestamp\030\006 \001(\003" +
+      "\0225\n\016clusterDetails\030\007 \001(\0132\035.cdp.telemetry" +
+      ".ClusterDetails\"\262\002\n\016ClusterDetails\022\013\n\003cr" +
+      "n\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227" +
+      "\n\004type\030\004 \001(\0162).cdp.telemetry.ClusterDeta" +
+      "ils.ClusterType\022=\n\010platform\030\005 \001(\0162+.cdp." +
+      "telemetry.ClusterDetails.CloudPlatform\"5" +
+      "\n\013ClusterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001" +
+      "\022\013\n\007FREEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOW" +
+      "N\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLO" +
+      "UD\020\004*,\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020" +
+      "\001\022\007\n\003NOK\020\002B[\n-com.cloudera.thunderhead.t" +
+      "elemetry.nodestatusB\017NodeStatusProtoZ\031co" +
+      "m/cloudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -37069,7 +37726,7 @@ public final class NodeStatusProto {
     internal_static_cdp_telemetry_NetworkDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkDetails_descriptor,
-        new java.lang.String[] { "Host", "CcmEnabled", "DnsResolvers", "NeighbourScan", "Neighbours", "AnyNeighboursAccessible", "NumberOfNeighbours", "Timestamp", "CcmAccessible", "ClouderaComAccessible", "DatabusAccessible", "DatabusS3Accessible", });
+        new java.lang.String[] { "Host", "CcmEnabled", "DnsResolvers", "NeighbourScan", "Neighbours", "AnyNeighboursAccessible", "NumberOfNeighbours", "Timestamp", "CcmAccessible", "ClouderaComAccessible", "DatabusAccessible", "DatabusS3Accessible", "S3Accessible", "AdlsV2Accessible", "GcsAccessible", "StsAccessible", "AzureManagementAccessible", });
     internal_static_cdp_telemetry_SystemMetrics_descriptor =
       getDescriptor().getMessageTypes().get(10);
     internal_static_cdp_telemetry_SystemMetrics_fieldAccessorTable = new

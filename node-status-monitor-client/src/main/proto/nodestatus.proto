@@ -155,6 +155,16 @@ message NetworkDetails {
     HealthStatus databusAccessible = 11;
     // Databus S3 API availability.
     HealthStatus databusS3Accessible = 12;
+    // AWS S3 endpoint availability (endpoint is produced by metadata service: s3.<region>.<domain>).
+    HealthStatus s3Accessible = 13;
+    // ADLS v2 (ABFS) endpoint availability (<azure_storage_account>.dfs.core.windows.net).
+    HealthStatus adlsV2Accessible = 14;
+    // GCS endpoint (storage.googleapis.com) availability.
+    HealthStatus gcsAccessible = 15;
+    // AWS Security Token Service endpoint availability.
+    HealthStatus stsAccessible = 16;
+    // Azure management endpoint - management.azure.com availability.
+    HealthStatus azureManagementAccessible = 17;
 }
 
 // System host metrics that is collected periodically by nodestatus monitor.

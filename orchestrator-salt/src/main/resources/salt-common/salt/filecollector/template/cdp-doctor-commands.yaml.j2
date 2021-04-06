@@ -1,5 +1,10 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'filecollector/settings.sls' import filecollector with context %}
+{% if telemetry.cdpTelemetryVersion > 6 %}
+{% if telemetry.platform == "AWS" or telemetry.platform == "AZURE" or telemetry.platform == "GCP" %}
+{% set network_params = "--skip-scan-neighbours --cloud-provider " + telemetry.platform %}
+{% else %}{% set network_params = "--skip-scan-neighbours" %}{% endif %}
+{% else %}{% set network_params = "" %}{% endif %}
 commands:
     - command: ps aux
       output: /tmp/doctor_ps_aux.txt
@@ -20,7 +25,7 @@ commands:
       output: /tmp/doctor_r_nslookup_output.txt
     - command: nslookup $(hostname -f)
       output: /tmp/doctor_f_nslookup_output.txt
-    - command: cdp-doctor network status
+    - command: cdp-doctor network status {{network_params}}
       output: /tmp/doctor_network.txt
     - command: cdp-doctor service status
       output: /tmp/doctor_services.txt{% if filecollector.clusterType == "FREEIPA" %}
