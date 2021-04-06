@@ -35,7 +35,7 @@ public abstract class AbstractGcpBaseResourceChecker {
             if (jsonError.get(HTTP_CODE_KEY) != null && jsonError.get(HTTP_CODE_KEY).equals(HttpStatus.SC_NOT_FOUND)) {
                 LOGGER.info("Resource {} not found: {}", resourceType, name);
             } else {
-                throw extractedPermissionIssue(ex, jsonError);
+                throw extractedGcloudError(ex, jsonError);
             }
         } else {
             throw extractIfNoJson(ex);
@@ -49,16 +49,19 @@ public abstract class AbstractGcpBaseResourceChecker {
                 LOGGER.info("Resource {} not found: {}", resourceType, name);
                 return new GcpResourceException(ex.getDetails().getMessage(), ex);
             } else {
-                return extractedPermissionIssue(ex, jsonError);
+                return extractedGcloudError(ex, jsonError);
             }
         } else {
             return extractIfNoJson(ex);
         }
     }
 
-    private GcpResourceException extractedPermissionIssue(GoogleJsonResponseException ex, GoogleJsonError jsonError) {
-        LOGGER.warn("Unable to uncover the error code of {}! {}: {}",
-                GoogleJsonResponseException.class.getSimpleName(), GoogleJsonError.class.getSimpleName(), jsonError);
+    private GcpResourceException extractedGcloudError(GoogleJsonResponseException ex, GoogleJsonError jsonError) {
+        LOGGER.warn("Unable to cover the error code of {}! {}: {} with json error {}",
+                GoogleJsonResponseException.class.getSimpleName(),
+                GoogleJsonError.class.getSimpleName(),
+                ex.getMessage(),
+                jsonError);
         return new GcpResourceException(ex.getDetails().getMessage());
     }
 

@@ -95,6 +95,8 @@ public class GcpPlatformResources implements PlatformResources {
 
     private static final int TEN = 10;
 
+    private static final int DEFAULT_PAGE_SIZE = 50;
+
     @Value("${cb.gcp.default.vmtype:n2-highcpu-8}")
     private String gcpVmDefault;
 
@@ -474,17 +476,21 @@ public class GcpPlatformResources implements PlatformResources {
         String projectId = GcpStackUtil.getProjectId(cloudCredential);
         Set<CloudAccessConfig> collect = new HashSet<>();
         try {
-            ListServiceAccountsResponse listServiceAccountsResponse = iam
+            Iam.Projects.ServiceAccounts.List listServiceAccountEmailsRequest = iam
                     .projects()
                     .serviceAccounts()
                     .list("projects/" + projectId)
-                    .execute();
-
-            collect = listServiceAccountsResponse
-                    .getAccounts()
-                    .stream()
-                    .map(e -> new CloudAccessConfig(e.getName(), e.getEmail(), new HashMap<>()))
-                    .collect(Collectors.toSet());
+                    .setPageSize(DEFAULT_PAGE_SIZE);
+            ListServiceAccountsResponse response;
+            do {
+                response = listServiceAccountEmailsRequest.execute();
+                collect = response
+                        .getAccounts()
+                        .stream()
+                        .map(e -> new CloudAccessConfig(e.getName(), e.getEmail(), new HashMap<>()))
+                        .collect(Collectors.toSet());
+                listServiceAccountEmailsRequest.setPageToken(response.getNextPageToken());
+            } while (response.getNextPageToken() != null);
             return new CloudAccessConfigs(collect);
         } catch (Exception ex) {
             return new CloudAccessConfigs(collect);
