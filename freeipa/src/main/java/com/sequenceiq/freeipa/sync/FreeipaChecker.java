@@ -113,7 +113,7 @@ public class FreeipaChecker {
     private void logReportResult(InstanceMetaData instanceMetaData, RPCResponse<NodeStatusProto.NodeStatusReport> nodeStatusRpcResponse, String reportType) {
         if (isSuccessfulRequest(nodeStatusRpcResponse)) {
             LOGGER.info("FreeIPA " + reportType + " reports for instance: [{}], report: [{}]",
-                    instanceMetaData.getInstanceId(), nodeStatusRpcResponse.getMessages().get(0));
+                    instanceMetaData.getInstanceId(), nodeStatusRpcResponse.getFirstTextMessage());
         } else {
             LOGGER.info("Failed to get " + reportType + " reports for instance: [{}], reason: [{}]", instanceMetaData.getInstanceId(),
                     nodeStatusRpcResponse.getSummary());
