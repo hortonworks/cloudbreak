@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENV_STOPPED;
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_FAILED;
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.STOP_FREEIPA_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -140,7 +143,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .await(Status.STOPPED)
                 // await stopped env
                 .given(EnvironmentTestDto.class)
-                .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL)
+                .await(ENV_STOPPED, POLLING_INTERVAL)
                 .when(environmentTestClient.start())
                 // await started freeipa
                 .given(FreeIpaTestDto.class)
@@ -166,6 +169,39 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .then(environmentListStructuredEventAssertions::checkStopEvents)
                 .then(environmentListStructuredEventAssertions::checkStartEvents)
                 .then(environmentListStructuredEventAssertions::checkDeleteEvents)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "create an env with freeipa",
+            then = "stop the env, but failed and start it successfully. After this, do the same but with start")
+    public void testStopStartEnvironmentWithStopFailed(MockedTestContext testContext) {
+        testContext
+                .given(EnvironmentNetworkTestDto.class)
+                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(AVAILABLE)
+                .mockSpi().stopInstances().post().thenReturn("error", 400, 1)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.stop())
+                .await(STOP_FREEIPA_FAILED)
+                .when(environmentTestClient.start())
+                .await(EnvironmentStatus.AVAILABLE)
+                //do the same with start
+                .given(FreeIpaTestDto.class)
+                .mockSpi().startInstances().post().thenReturn("error", 400, 1)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.stop())
+                .await(ENV_STOPPED)
+                .when(environmentTestClient.start())
+                .await(START_FREEIPA_FAILED)
+                .when(environmentTestClient.stop())
+                .await(ENV_STOPPED)
                 .validate();
     }
 }

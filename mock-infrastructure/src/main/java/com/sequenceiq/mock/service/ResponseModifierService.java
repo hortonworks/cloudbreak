@@ -8,6 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,8 @@ import com.sequenceiq.mock.spi.MockResponse;
 @Service
 public class ResponseModifierService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseModifierService.class);
+
     private final Map<String, List<MockResponse>> responses = new ConcurrentHashMap<>();
 
     private final Map<String, Integer> called = new ConcurrentHashMap<>();
@@ -35,8 +39,14 @@ public class ResponseModifierService {
 
     public void addResponse(MockResponse mockResponse) {
         String responseKey = mockResponse.getHttpMethod().toLowerCase() + "_" + mockResponse.getPath();
+        LOGGER.info("New mock response for: {}", mockResponse);
         List<MockResponse> mockResponses = responses.computeIfAbsent(responseKey, key -> new ArrayList<>());
         mockResponses.add(mockResponse);
+    }
+
+    public void clearResponse(MockResponse mockResponse) {
+        String responseKey = mockResponse.getHttpMethod().toLowerCase() + "_" + mockResponse.getPath();
+        responses.remove(responseKey);
     }
 
     public List<MockResponse> getResponse(String path) {
@@ -69,6 +79,7 @@ public class ResponseModifierService {
     public <T> T evaluateResponse(String path, Class<?> returnType, CheckedSupplier<T, Throwable> defaultResponse) throws Throwable {
         List<MockResponse> mockResponses = responses.get(path);
         if (CollectionUtils.isEmpty(mockResponses)) {
+            LOGGER.debug("Cannot find mock response, call the default. Path: {}", path);
             return defaultResponse.get();
         }
         MockResponse mockResponse = mockResponses.get(0);

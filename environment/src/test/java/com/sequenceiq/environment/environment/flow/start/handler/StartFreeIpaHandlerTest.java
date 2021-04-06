@@ -10,9 +10,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -60,6 +64,12 @@ class StartFreeIpaHandlerTest {
     @Mock
     private Event.Headers mockEventHeaders;
 
+    @Captor
+    private ArgumentCaptor<EnvStartEvent> envStartEventCaptor;
+
+    @Captor
+    private ArgumentCaptor<EnvStartFailedEvent> envStartFailedEventCaptor;
+
     private StartFreeIpaHandler underTest;
 
     @BeforeEach
@@ -73,6 +83,20 @@ class StartFreeIpaHandlerTest {
         when(mockEnvironmentDtoEvent.getHeaders()).thenReturn(mockEventHeaders);
 
         underTest = new StartFreeIpaHandler(mockEventSender, mockFreeIpaPollerService, mockFreeIpaService);
+    }
+
+    @Test
+    public void shouldStopFreeipaButStatusIsNull() {
+        String envCrn = "someCrnValue";
+        EnvironmentDto environmentDto = createEnvironmentDto();
+        environmentDto.setResourceCrn(envCrn);
+        Event<EnvironmentStartDto> environmentDtoEvent = Event.wrap(mockEnvironmentDto);
+
+        when(mockFreeIpaService.describe(envCrn)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
+
+        underTest.accept(environmentDtoEvent);
+
+        verifyEnvStartFailedEvent(environmentDtoEvent, "FreeIPA status is unpredictable, env start will be interrupted.");
     }
 
     @Test
@@ -106,6 +130,61 @@ class StartFreeIpaHandlerTest {
         verify(mockEventSender, times(1)).sendEvent(startEventCaptor.capture(), eq(mockEventHeaders));
         EnvStartEvent envStartEvent = startEventCaptor.getValue();
         assertThat(envStartEvent.selector()).isEqualTo(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"AVAILABLE", "MAINTENANCE_MODE_ENABLED", "START_IN_PROGRESS"})
+    public void shouldSkipStartFreeipaInstanceWhenStatusAvaialbleOrStartInrogress(Status status) {
+        String envCrn = "someCrnValue";
+        EnvironmentDto environmentDto = createEnvironmentDto();
+        environmentDto.setResourceCrn(envCrn);
+        Event<EnvironmentStartDto> environmentDtoEvent = Event.wrap(mockEnvironmentDto);
+
+        when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(status);
+        when(mockFreeIpaService.describe(envCrn)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(mockFreeIpaPollerService, never()).stopAttachedFreeipaInstances(environmentDto.getId(), envCrn);
+        verifyEnvStartEvent(environmentDtoEvent);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = {"STOPPED", "STOP_FAILED", "START_FAILED", "AVAILABLE", "START_IN_PROGRESS", "MAINTENANCE_MODE_ENABLED"},
+            mode = EnumSource.Mode.EXCLUDE)
+    public void shouldThrowErrorWhenUnstartable(Status status) {
+        String envCrn = "someCrnValue";
+        EnvironmentDto environmentDto = createEnvironmentDto();
+        environmentDto.setResourceCrn(envCrn);
+        Event<EnvironmentStartDto> environmentDtoEvent = Event.wrap(mockEnvironmentDto);
+
+        when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(status);
+        when(mockFreeIpaService.describe(envCrn)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
+
+        underTest.accept(environmentDtoEvent);
+
+        verifyEnvStartFailedEvent(environmentDtoEvent, "FreeIPA is not in a valid state to start! Current state is: " + status);
+    }
+
+    private EnvironmentDto createEnvironmentDto() {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setId(123L);
+        environmentDto.setName("name");
+        return environmentDto;
+    }
+
+    private void verifyEnvStartEvent(Event<EnvironmentStartDto> environmentDtoEvent) {
+        verify(mockEventSender).sendEvent(envStartEventCaptor.capture(), eq(environmentDtoEvent.getHeaders()));
+        Assertions.assertThat(envStartEventCaptor.getValue())
+                .returns(EnvStartStateSelectors.ENV_START_DATALAKE_EVENT.selector(), EnvStartEvent::selector);
+    }
+
+    private void verifyEnvStartFailedEvent(Event<EnvironmentStartDto> environmentDtoEvent, String message) {
+        verify(mockEventSender).sendEvent(envStartFailedEventCaptor.capture(), eq(environmentDtoEvent.getHeaders()));
+        Assertions.assertThat(envStartFailedEventCaptor.getValue())
+                .returns(EnvStartStateSelectors.FAILED_ENV_START_EVENT.selector(), EnvStartFailedEvent::selector)
+                .returns(EnvironmentStatus.START_FREEIPA_FAILED, EnvStartFailedEvent::getEnvironmentStatus)
+                .returns(message, event -> event.getException().getMessage());
     }
 
 }
