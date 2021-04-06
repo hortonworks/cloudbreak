@@ -70,7 +70,7 @@ public class OperationService {
         operation.setSuccessList(List.copyOf(success));
         operation.setFailureList(List.copyOf(failure));
         operation.setEndTime(System.currentTimeMillis());
-        LOGGER.info("Operation completed: {}", operation);
+        LOGGER.info("Operation completed: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operationRepository.save(operation);
     }
 
@@ -82,7 +82,7 @@ public class OperationService {
         operation.setEndTime(System.currentTimeMillis());
         operation.setSuccessList(List.copyOf(success));
         operation.setFailureList(List.copyOf(failure));
-        LOGGER.warn("Operation failed: {}", operation);
+        LOGGER.warn("Operation failed: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operationRepository.save(operation);
     }
 
@@ -125,7 +125,7 @@ public class OperationService {
         operation.setStatus(OperationState.REJECTED);
         operation.setEndTime(System.currentTimeMillis());
         operation.setError(reason);
-        LOGGER.warn("Operation rejected: {}", operation);
+        LOGGER.warn("Operation rejected: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
         return operation;
     }
 }
