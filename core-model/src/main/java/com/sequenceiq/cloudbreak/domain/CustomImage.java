@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
@@ -16,7 +17,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"imageCatalog_id", "name", "resourceCrn"}))
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"resourceCrn"}),
+        @UniqueConstraint(columnNames = {"imagecatalog_id", "name"})
+})
 public class CustomImage implements ProvisionEntity {
 
     @Id
@@ -34,6 +38,7 @@ public class CustomImage implements ProvisionEntity {
     private String description;
 
     @ManyToOne
+    @JoinColumn(name = "imagecatalog_id")
     private ImageCatalog imageCatalog;
 
     @Column(nullable = false)

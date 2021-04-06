@@ -5,13 +5,14 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"customImage_id", "region"}))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"customimage_id", "region"}))
 public class VmImage implements ProvisionEntity {
 
     @Id
@@ -24,6 +25,7 @@ public class VmImage implements ProvisionEntity {
     private Long created = System.currentTimeMillis();
 
     @ManyToOne
+    @JoinColumn(name = "customimage_id")
     private CustomImage customImage;
 
     @Column(nullable = false)

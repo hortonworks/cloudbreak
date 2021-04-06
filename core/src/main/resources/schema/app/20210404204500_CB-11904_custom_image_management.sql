@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS customimage (
 
 ALTER TABLE customimage
     ADD CONSTRAINT customimagename_in_imagecatalog_unique UNIQUE (name, imagecatalog_id),
+    ADD CONSTRAINT customimageresourcecrn_unique UNIQUE (resourcecrn),
     ADD CONSTRAINT fk_customimage_imagecatalog FOREIGN KEY (imagecatalog_id) REFERENCES imagecatalog(id);
 
 CREATE SEQUENCE IF NOT EXISTS vmimage_id_seq START WITH 1
