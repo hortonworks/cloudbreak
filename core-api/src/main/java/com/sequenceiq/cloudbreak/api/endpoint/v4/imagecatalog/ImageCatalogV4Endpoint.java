@@ -42,7 +42,7 @@ public interface ImageCatalogV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.LIST_BY_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
             nickname = "listImageCatalogsByWorkspace")
-    ImageCatalogV4Responses list(@PathParam("workspaceId") Long workspaceId);
+    ImageCatalogV4Responses list(@PathParam("workspaceId") Long workspaceId, @QueryParam("custom") boolean customCatalogsOnly);
 
     @GET
     @Path("name/{name}")

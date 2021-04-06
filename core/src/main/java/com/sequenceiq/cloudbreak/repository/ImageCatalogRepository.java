@@ -25,6 +25,12 @@ public interface ImageCatalogRepository extends WorkspaceResourceRepository<Imag
             "WHERE i.workspace.id = :workspaceId AND i.archived = false AND i.imageCatalogUrl is not null")
     List<AuthorizationResource> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
 
+    @Query("SELECT new com.sequenceiq.authorization.service.list.AuthorizationResource(i.id, i.resourceCrn) FROM ImageCatalog i " +
+            "WHERE i.workspace.id = :workspaceId AND i.archived = false AND i.imageCatalogUrl is null")
+    List<AuthorizationResource> findCustomAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
+
+    Set<ImageCatalog> findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNull(Long workspaceId, boolean archived);
+
     Set<ImageCatalog> findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNotNull(Long workspaceId, boolean archived);
 
     @Query("SELECT i.resourceCrn FROM ImageCatalog i " +

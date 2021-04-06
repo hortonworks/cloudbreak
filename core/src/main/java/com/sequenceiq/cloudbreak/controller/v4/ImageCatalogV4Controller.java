@@ -59,8 +59,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
-    public ImageCatalogV4Responses list(Long workspaceId) {
-        Set<ImageCatalog> allByWorkspaceId = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
+    public ImageCatalogV4Responses list(Long workspaceId, boolean customCatalogsOnly) {
+        Set<ImageCatalog> allByWorkspaceId = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, customCatalogsOnly);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(allByWorkspaceId, ImageCatalogV4Response.class));
     }
 
