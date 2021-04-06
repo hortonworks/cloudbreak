@@ -28,6 +28,11 @@ public class ConfigureController {
         responseModifierService.addResponse(mockResponse);
     }
 
+    @PostMapping("/configure/clear")
+    public void configureClear(@RequestBody MockResponse mockResponse) {
+        responseModifierService.clearResponse(mockResponse);
+    }
+
     @GetMapping("/{mockUuid}/profile/{profile}/{times}")
     public void configure(@PathVariable("mockUuid") String mockUuid, @PathVariable("profile") String profile, @PathVariable("times") int times) {
         if (!clouderaManagerStoreService.exists(mockUuid)) {

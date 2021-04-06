@@ -43,12 +43,18 @@ public class StopFreeIpaHandler extends EventSenderAwareHandler<EnvironmentDto> 
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             if (Strings.isNullOrEmpty(environmentDto.getParentEnvironmentCrn())) {
-                freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
-                    if (freeIpa.getStatus() != null && !freeIpa.getStatus().isStoppable()) {
+                freeIpaService.describe(environmentDto.getResourceCrn()).ifPresentOrElse(freeIpa -> {
+                    if (freeIpa.getStatus() == null) {
+                        throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, env stop will be interrupted.");
+                    } else if (freeIpa.getStatus().isStoppedPhase() || freeIpa.getStatus().isStopInProgressPhase()) {
+                        LOGGER.info("Stop has already been triggered continuing without new stop trigger. FreeIPA status: {}", freeIpa.getStatus());
+                    } else if (!freeIpa.getStatus().isStoppable()) {
                         throw new FreeIpaOperationFailedException("FreeIPA is not in a stoppable state! Current state is: " + freeIpa.getStatus().name());
+                    } else {
+                        LOGGER.info("FreeIPA will be stopped.");
+                        freeIpaPollerService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
                     }
-                });
-                freeIpaPollerService.stopAttachedFreeipaInstances(environmentDto.getId(), environmentDto.getResourceCrn());
+                }, () -> LOGGER.info("FreeIPA cannot be found by environment crn"));
             }
             EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                     .withSelector(EnvStopStateSelectors.FINISH_ENV_STOP_EVENT.selector())

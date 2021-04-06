@@ -104,6 +104,6 @@ public class EnvironmentWaitObject implements WaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        return desiredStatus.equals(CREATE_FAILED);
+        return desiredStatus.isFailed();
     }
 }

@@ -39,6 +39,14 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
         return (SpiWithMockUuid.CloudMetadataStatuses<T>) EndpointProxyFactory.create(SpiWithMockUuid.CloudMetadataStatuses.class, testDto, mockedTestContext);
     }
 
+    public SpiWithMockUuid.StartInstances<T> startInstances() {
+        return (SpiWithMockUuid.StartInstances<T>) EndpointProxyFactory.create(SpiWithMockUuid.StartInstances.class, testDto, mockedTestContext);
+    }
+
+    public SpiWithMockUuid.StopInstances<T> stopInstances() {
+        return (SpiWithMockUuid.StopInstances<T>) EndpointProxyFactory.create(SpiWithMockUuid.StopInstances.class, testDto, mockedTestContext);
+    }
+
     public Spi.RegisterPublicKey<T> registerPublicKey() {
         return (Spi.RegisterPublicKey<T>) EndpointProxyFactory.create(Spi.RegisterPublicKey.class, testDto, mockedTestContext);
     }
@@ -87,6 +95,16 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
         }
 
         interface Launch<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            DefaultResponseConfigure<T, List<CloudVmInstanceStatus>> post();
+        }
+
+        @MockUri(url = "/start_instances")
+        interface StartInstances<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            DefaultResponseConfigure<T, List<CloudVmInstanceStatus>> post();
+        }
+
+        @MockUri(url = "/stop_instances")
+        interface StopInstances<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
             DefaultResponseConfigure<T, List<CloudVmInstanceStatus>> post();
         }
     }

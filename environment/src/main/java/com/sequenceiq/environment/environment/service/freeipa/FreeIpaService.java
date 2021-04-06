@@ -155,6 +155,7 @@ public class FreeIpaService {
 
     void startFreeIpa(String environmentCrn) {
         try {
+            LOGGER.info("Starting freeipa");
             freeIpaV1Endpoint.start(environmentCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
@@ -165,6 +166,7 @@ public class FreeIpaService {
 
     void stopFreeIpa(String environmentCrn) {
         try {
+            LOGGER.info("Stopping freeipa");
             freeIpaV1Endpoint.stop(environmentCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

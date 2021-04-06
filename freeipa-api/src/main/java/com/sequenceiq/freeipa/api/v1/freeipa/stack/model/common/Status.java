@@ -46,9 +46,15 @@ public enum Status {
     public static final Collection<Status> FREEIPA_UNREACHABLE_STATUSES = List.of(REQUESTED, UNREACHABLE, STOPPED, DELETED_ON_PROVIDER_SIDE,
             DELETE_IN_PROGRESS, DELETE_COMPLETED);
 
-    public static final Collection<Status> FREEIPA_STOPPABLE_STATUSES = List.of(AVAILABLE, STOP_FAILED);
+    public static final Collection<Status> FREEIPA_STOPPABLE_STATUSES = List.of(AVAILABLE, STOP_FAILED, START_FAILED);
 
-    public static final Collection<Status> FREEIPA_STARTABLE_STATUSES = List.of(STOPPED, START_FAILED);
+    public static final Collection<Status> FREEIPA_STARTABLE_STATUSES = List.of(STOPPED, STOP_FAILED, START_FAILED);
+
+    public static final Collection<Status> FREEIPA_START_IN_PROGRESS_STATUSES = List.of(START_IN_PROGRESS);
+
+    public static final Collection<Status> FREEIPA_STOP_IN_PROGRESS_STATUSES = List.of(STOP_IN_PROGRESS);
+
+    public static final Collection<Status> FREEIPA_STOPPED_STATUSES = List.of(STOPPED);
 
     public boolean isRemovableStatus() {
         return REMOVABLE_STATUSES.contains(this);
@@ -70,10 +76,6 @@ public enum Status {
         return DELETE_IN_PROGRESS.equals(this);
     }
 
-    public boolean isStopPhaseActive() {
-        return name().contains("STOP");
-    }
-
     public boolean isFreeIpaUnreachableStatus() {
         return FREEIPA_UNREACHABLE_STATUSES.contains(this);
     }
@@ -84,5 +86,17 @@ public enum Status {
 
     public Boolean isStartable() {
         return FREEIPA_STARTABLE_STATUSES.contains(this);
+    }
+
+    public Boolean isStartInProgressPhase() {
+        return FREEIPA_START_IN_PROGRESS_STATUSES.contains(this);
+    }
+
+    public Boolean isStopInProgressPhase() {
+        return FREEIPA_STOP_IN_PROGRESS_STATUSES.contains(this);
+    }
+
+    public Boolean isStoppedPhase() {
+        return FREEIPA_STOPPED_STATUSES.contains(this);
     }
 }

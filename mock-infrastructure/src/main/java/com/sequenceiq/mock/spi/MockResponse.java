@@ -71,4 +71,17 @@ public class MockResponse {
     public void setClss(String clss) {
         this.clss = clss;
     }
+
+    @Override
+    public String toString() {
+        return "MockResponse{" +
+                "response=" + response +
+                ", message='" + message + '\'' +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", path='" + path + '\'' +
+                ", times=" + times +
+                ", statusCode=" + statusCode +
+                ", clss='" + clss + '\'' +
+                '}';
+    }
 }
