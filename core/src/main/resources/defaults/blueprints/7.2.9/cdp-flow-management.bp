@@ -269,6 +269,14 @@
               {
                 "name": "xml.authorizers.userGroupProvider.composite-configurable-user-group-provider.property.User Group Provider 2",
                 "value": "shell-user-group-provider"
+              },
+              {
+                "name": "xml.providers.flowPersistenceProvider.file-provider.enabled",
+                "value": "false"
+              },
+              {
+                "name": "xml.providers.flowPersistenceProvider.database-provider.enabled",
+                "value": "true"
               }
             ]
           }
