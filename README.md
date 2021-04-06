@@ -5,6 +5,39 @@
 [![Build Pulls](https://img.shields.io/docker/pulls/hortonworks/cloudbreak.svg)](https://hub.docker.com/r/hortonworks/cloudbreak/)
 [![Licence](https://img.shields.io/github/license/hortonworks/cloudbreak.svg)](https://github.com/hortonworks/cloudbreak/blob/fix-readme/LICENSE)
 
+- [Local Development Setup](#local-development-setup)
+    * [Cloudbreak Deployer](#cloudbreak-deployer)
+        + [Cloudbreak service ports](#cloudbreak-service-ports)
+        + [Linux difference](#linux-difference)
+    * [IDEA](#idea)
+        + [Check out the Cloudbreak repository](#check-out-the-cloudbreak-repository)
+        + [Project settings in IDEA](#project-settings-in-idea)
+        + [Import project](#import-project)
+        + [Running Cloudbreak in IDEA](#running-cloudbreak-in-idea)
+        + [Configure Before launch task](#configure-before-launch-task)
+        + [Running Periscope in IDEA](#running-periscope-in-idea)
+        + [Running Datalake in IDEA](#running-datalake-in-idea)
+        + [Running FreeIPA in IDEA](#running-freeipa-in-idea)
+        + [Running Redbeams in IDEA](#running-redbeams-in-idea)
+        + [Running the Environment service in IDEA](#running-the-environment-service-in-idea)
+        + [Running Thunderhead Mock in IDEA](#running-thunderhead-mock-in-idea)
+    * [Command line](#command-line)
+        + [Running Cloudbreak from the Command Line](#running-cloudbreak-from-the-command-line)
+        + [Running Periscope from the Command Line](#running-periscope-from-the-command-line)
+        + [Running Datalake from the Command Line](#running-datalake-from-the-command-line)
+        + [Running FreeIPA from the Command Line](#running-freeipa-from-the-command-line)
+        + [Running Redbeams from the Command Line](#running-redbeams-from-the-command-line)
+        + [Running the Environment service from the Command Line](#running-the-environment-service-from-the-command-line)
+        + [Running Thunderhead Mock from the Command Line](#running-thunderhead-mock-from-the-command-line)
+    * [Database development](#database-development)
+    * [Building](#building)
+    * [How to reach CM UI directly(not through Knox)](#how-to-reach-cm-ui-directly-not-through-knox-)
+- [How to contribute](#how-to-contribute)
+    * [Appearance](#appearance)
+    * [Coding guidelines](#coding-guidelines)
+    * [Catching up](#catching-up)
+    * [Additional info](#additional-info)
+
 * Documentation: https://docs.cloudera.com/management-console/cloud/index.html
 
 # Local Development Setup
@@ -538,7 +571,7 @@ For example: `https://tb-nt-local.tb-local.xcu2-8y8x.workload-dev.cloudera.com/c
 > Be aware of that this routing mechanism is based on cookies, so if you have problems to reach the CM UI directly especially when you reached any service through Knox previously then the deletion of cookies could solve your issues.
 
 
-## How to contribute
+# How to contribute
 
 I would like to start by the warm welcome if you would like to contribute to our project, making our - and from the point of contribution, it's yours also - goals closer. 
 
@@ -547,15 +580,15 @@ We're happy for having your helpful intention to make this project greater than 
 When you would like to make a contribution you can do that by opening pull request against the desired version, but along with some very suggested guidelines not just for the sake of understandability but for having a properly combined request.
 
 
-### Appearance
+## Appearance
 
-First of all, let's start with the appearance.
-As we speak (or writing) we don't enforce any formal requirements to the pull request message by any kind of tool, but we have a strongly recommended guidelines for that which would be the following:
+First, let's start with the appearance.
+At the time of this writing, we don't enforce any formal requirements to the pull request message by any kind of tool, but we have the following strongly recommended guidelines:
 
-- if your commit message/jira description can fit into a Twitter message then probably, it is too short, and might not be clear what is the intention there
+- if your commit message/jira description fits into a Twitter message then probably, it is too short, and might not be clear what is the intention there
 - if it contains words like: fix or handle then probably you should consider some rewording, but of course, sometimes it is acceptable
 - if your commit fixes something obvious, e.g, a compile error, then of course you don’t need to write a long description about why it is a good idea to fix a compile error
-- compared to a 200-1000 lines of code change (which is the size of our average commit), adding a few more lines into the commit message/jira description is just a super small effort but would make a huge difference
+- compared to a 200-1000 lines of code change (which is the size of our average commit), adding a few more lines into the commit message/jira description is just a tiny effort but would make a huge difference
 
 We were talking about what we should avoid, but let's see a few good examples, which helps the reviewer to understand the purpose of that commit:
 
@@ -568,13 +601,17 @@ We were talking about what we should avoid, but let's see a few good examples, w
 [https://github.com/hortonworks/cloudbreak/commit/f50f5c8f38941db958eac27c663ae00ecba7b0f5](url)
 
 
-### Catching up
+## Coding guidelines
+
+- If you introduce a new Cloud SDK or API for a feature, please ensure that the newly introduced API calls **are supported in every region** and if not then search for an alternative solution. It is often the case that the cloud providers gradually introduce their new services.
+
+## Catching up
 
 When you're working on your precious change on your beloved branch and all of a sudden you face the issue of getting your branch drop behind from the desired/initial branch where you would like to open your future pull request, our way of catching up is [rebasing](https://git-scm.com/docs/git-rebase).
 
 If you're experiencing this quite common then the good practice would be fetching and rebasing the initial branch multiple times in a day because there are periods of times when dozens of changes are landing on different branches. I agree, sometimes (especially when someone is working on a huge change) continuously rebasing our branch could be could really be a pain in the bottom, but this practice ensures that we're submitting our commits in proper order and way.
 
-In addition please do not merge branches together if you can solve your problem with rebasing, and even if you think that your change would have no impact on the codebase or the actual collection of functionalities **- if you're not from our team or don't have written permission from one of our team members - please never ever push directly anything to the master branch normally and especially not by force.** 
+In addition, please do not merge branches together if you can solve your problem with rebasing, and even if you think that your change would have no impact on the codebase, or the actual collection of functionalities **- if you're not from our team or don't have written permission from one of our team members - please never ever push directly anything to the master branch normally and especially not by force.** 
 
 
 
