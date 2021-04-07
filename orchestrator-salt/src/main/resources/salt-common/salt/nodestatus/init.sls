@@ -1,5 +1,5 @@
-{%- from 'telemetry/settings.sls' import telemetry with context %}
-{% if telemetry.cdpTelemetryVersion > 2 %}
+{%- from 'nodestatus/settings.sls' import nodestatus with context %}
+{% if nodestatus.collectAvailable %}
 /opt/cdp-telemetry/conf/nodestatus-monitor.yaml:
    file.managed:
     - source: salt://nodestatus/template/nodestatus-monitor.yaml.j2
