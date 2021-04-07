@@ -17,8 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
@@ -75,35 +78,35 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     private BlueprintService blueprintService;
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
-    public void putStack(String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
-    public void putCluster(String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public void putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         clusterCommonService.put(crn, updateRequest);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_WRITE)
-    public void decommissionInstancesForClusterCrn(String clusterCrn, Long workspaceId,
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public void decommissionInstancesForClusterCrn(@ResourceCrn String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
         stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), workspaceId,
                 new HashSet(instanceIds), forced);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public AutoscaleStackV4Response getAutoscaleClusterByCrn(String crn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public AutoscaleStackV4Response getAutoscaleClusterByCrn(@ResourceCrn String crn) {
         Stack stack = stackService.getByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(stack, AutoscaleStackV4Response.class);
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
-    public AutoscaleStackV4Response getAutoscaleClusterByName(String name) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public AutoscaleStackV4Response getAutoscaleClusterByName(@ResourceName String name) {
         Stack stack = stackService.getByNameInWorkspace(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(stack, AutoscaleStackV4Response.class);
     }
@@ -175,7 +178,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DATAHUB_READ)
+    @DisableCheckPermissions
+    @PreAuthorize("hasRole('AUTOSCALE')")
     public AutoscaleRecommendationV4Response getRecommendation(Long workspaceId, String blueprintName) {
         AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
 
