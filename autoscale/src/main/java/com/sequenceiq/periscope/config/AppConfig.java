@@ -18,6 +18,7 @@ import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -41,6 +42,12 @@ public class AppConfig implements AsyncConfigurer {
 
     @Value("${periscope.threadpool.queue.size:1000}")
     private int queueCapacity;
+
+    @Value("${periscope.async.threadpool.core.size:20}")
+    private int asyncCorePoolSize;
+
+    @Value("${periscope.async.threadpool.max.size:50}")
+    private int asyncMaxPoolSize;
 
     @Value("${rest.debug}")
     private boolean restDebug;
@@ -67,7 +74,7 @@ public class AppConfig implements AsyncConfigurer {
     @Bean
     public SchedulerFactoryBean schedulerFactoryBean() {
         SchedulerFactoryBean scheduler = new SchedulerFactoryBean();
-        scheduler.setTaskExecutor(getAsyncExecutor());
+        scheduler.setTaskExecutor(getScheduledExecutor());
         scheduler.setAutoStartup(true);
         scheduler.setJobFactory(new SimpleJobFactory());
         return scheduler;
@@ -83,14 +90,24 @@ public class AppConfig implements AsyncConfigurer {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
-    @Override
-    public Executor getAsyncExecutor() {
+    public Executor getScheduledExecutor() {
         try {
             return getThreadPoolExecutorFactoryBean().getObject();
         } catch (RuntimeException e) {
             LOGGER.error("Error creating task executor.", e);
         }
         return null;
+    }
+
+    @Override
+    public Executor getAsyncExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(asyncCorePoolSize);
+        executor.setMaxPoolSize(asyncMaxPoolSize);
+        executor.setQueueCapacity(queueCapacity);
+        executor.setThreadNamePrefix("async-");
+        executor.initialize();
+        return executor;
     }
 
     @Override
