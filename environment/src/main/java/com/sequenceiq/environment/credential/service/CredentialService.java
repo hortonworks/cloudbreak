@@ -127,11 +127,23 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     public Credential getByCrnForAccountId(String crn, String accountId, CredentialType type) {
-        return extractCredential(getOptionalByCrnForAccountId(crn, accountId, type), crn);
+        return getByCrnForAccountId(crn, accountId, type, false);
+    }
+
+    public Credential getByCrnForAccountId(String crn, String accountId, CredentialType type, boolean queryArchived) {
+        return extractCredential(getOptionalByCrnForAccountId(crn, accountId, type, queryArchived), crn);
     }
 
     public Optional<Credential> getOptionalByCrnForAccountId(String crn, String accountId, CredentialType type) {
-        return repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type);
+        return getOptionalByCrnForAccountId(crn, accountId, type, false);
+    }
+
+    public Optional<Credential> getOptionalByCrnForAccountId(String crn, String accountId, CredentialType type, boolean queryArchived) {
+        Optional<Credential> credential = repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type, false);
+        if (queryArchived && credential.isEmpty()) {
+            credential = repository.findByCrnAndAccountId(crn, accountId, getEnabledPlatforms(), type, true);
+        }
+        return credential;
     }
 
     public Credential extractCredential(Optional<Credential> credential, String resourceIdentifier) {
@@ -295,8 +307,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
         return repository.findByNameAndAccountId(name, accountId, cloudPlatforms, type);
     }
 
-    Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms, CredentialType type) {
-        return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms, type);
+    Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms,
+        CredentialType type) {
+        return repository.findByCrnAndAccountId(crn, accountId, cloudPlatforms, type, false);
     }
 
     Credential save(Credential credential) {

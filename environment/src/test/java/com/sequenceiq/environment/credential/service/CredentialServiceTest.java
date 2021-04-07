@@ -184,13 +184,13 @@ class CredentialServiceTest {
 
     @Test
     void testGetByCrnForAccountIdHasResult() {
-        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.of(CREDENTIAL));
+        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any(), anyBoolean())).thenReturn(Optional.of(CREDENTIAL));
         assertEquals(CREDENTIAL, credentialServiceUnderTest.getByCrnForAccountId("123", ACCOUNT_ID, ENVIRONMENT));
     }
 
     @Test
     void testGetByCrnForAccountIdEmpty() {
-        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any())).thenReturn(Optional.empty());
+        when(repository.findByCrnAndAccountId(any(), any(), anyCollection(), any(), anyBoolean())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> credentialServiceUnderTest.getByCrnForAccountId("123", ACCOUNT_ID, ENVIRONMENT));
     }
 

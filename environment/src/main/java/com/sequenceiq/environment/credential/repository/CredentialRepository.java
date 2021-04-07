@@ -29,12 +29,13 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> {
             @Param("type") CredentialType type);
 
     @Query("SELECT c FROM Credential c WHERE c.accountId = :accountId AND c.resourceCrn = :crn "
-            + "AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms) AND c.type = :type")
+            + "AND c.archived IS :archived AND cloudPlatform IN (:cloudPlatforms) AND c.type = :type")
     Optional<Credential> findByCrnAndAccountId(
             @Param("crn") String crn,
             @Param("accountId") String accountId,
             @Param("cloudPlatforms") Collection<String> cloudPlatforms,
-            @Param("type") CredentialType type);
+            @Param("type") CredentialType type,
+            @Param("archived") boolean archived);
 
     @Query("SELECT c.name as name, c.resourceCrn as crn FROM Credential c WHERE c.accountId = :accountId AND c.resourceCrn IN (:resourceCrns)"
             + "AND c.archived IS FALSE AND cloudPlatform IN (:cloudPlatforms)")
