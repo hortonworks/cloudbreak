@@ -25,6 +25,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
@@ -93,6 +94,10 @@ public class EntitlementService {
 
     public boolean useCmSyncCommandPoller(String accountId) {
         return isEntitlementRegistered(accountId, CDP_USE_CM_SYNC_COMMAND_POLLER);
+    }
+
+    public boolean networkPreflightNotificationsEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_NETWORK_PREFLIGHT_NOTIFICATIONS);
     }
 
     public boolean automaticUsersyncPollerEnabled(String accountId) {

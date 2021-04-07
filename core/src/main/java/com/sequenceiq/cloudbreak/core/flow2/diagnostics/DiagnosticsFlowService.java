@@ -69,11 +69,15 @@ public class DiagnosticsFlowService {
     private DataBusEndpointProvider dataBusEndpointProvider;
 
     public void nodeStatusNetworkReport(Long stackId) {
+        nodeStatusNetworkReport(stackId, true);
+    }
+
+    public void nodeStatusNetworkReport(Long stackId, boolean useNotifications) {
         try {
             RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getNetworkReport(stackId);
             if (rpcResponse != null) {
                 LOGGER.debug("Diagnostics network report response: {}", rpcResponse.getFirstTextMessage());
-                if (rpcResponse.getResult() != null) {
+                if (rpcResponse.getResult() != null && useNotifications) {
                     List<NodeStatusProto.NetworkDetails> networkNodes = rpcResponse.getResult().getNodesList().stream()
                             .map(NodeStatusProto.NodeStatus::getNetworkDetails)
                             .collect(Collectors.toList());
