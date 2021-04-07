@@ -24,6 +24,21 @@
         }
       },
       {
+        "nodeCount": 0,
+        "name": "nifi_scaling",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        }
+      },
+      {
         "nodeCount": 3,
         "name": "nifi",
         "type": "CORE",
