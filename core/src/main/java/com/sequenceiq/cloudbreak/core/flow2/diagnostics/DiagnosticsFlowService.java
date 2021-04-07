@@ -74,24 +74,33 @@ public class DiagnosticsFlowService {
             if (rpcResponse != null) {
                 LOGGER.debug("Diagnostics network report response: {}", rpcResponse.getFirstTextMessage());
                 if (rpcResponse.getResult() != null) {
-                    List<NodeStatusProto.NetworkDetails> nodesWithUnhealthyNetwork = rpcResponse.getResult().getNodesList().stream()
+                    List<NodeStatusProto.NetworkDetails> networkNodes = rpcResponse.getResult().getNodesList().stream()
                             .map(NodeStatusProto.NodeStatus::getNetworkDetails)
-                            .filter(this::isAnyNetworkHealthStatusIsNotOk)
                             .collect(Collectors.toList());
                     String globalDatabusEndpoint = altusDatabusConfiguration.getAltusDatabusEndpoint();
                     // TODO: handle CNAME endpoint based on account id
                     String databusEndpoint = dataBusEndpointProvider.getDataBusEndpoint(globalDatabusEndpoint, false);
                     if (StringUtils.isNotBlank(databusEndpoint)) {
                         firePreFlightCheckEvents(stackId, String.format("DataBus API ('%s') accessibility", databusEndpoint),
-                                nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusAccessible);
+                                networkNodes, NodeStatusProto.NetworkDetails::getDatabusAccessible);
                     }
                     String databusS3Endpoint = dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint);
                     if (StringUtils.isNotBlank(databusS3Endpoint)) {
-                        firePreFlightCheckEvents(stackId, String.format("DataBus S3 API '%s' accessibility", databusS3Endpoint),
-                                nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
+                        firePreFlightCheckEvents(stackId, String.format("DataBus S3 API ('%s') accessibility", databusS3Endpoint),
+                                networkNodes, NodeStatusProto.NetworkDetails::getDatabusS3Accessible);
                     }
                     firePreFlightCheckEvents(stackId, "'.cloudera.com' accessibility",
-                            nodesWithUnhealthyNetwork, NodeStatusProto.NetworkDetails::getClouderaComAccessible);
+                            networkNodes, NodeStatusProto.NetworkDetails::getClouderaComAccessible);
+                    firePreFlightCheckEvents(stackId, "S3 endpoint accessibility",
+                            networkNodes, NodeStatusProto.NetworkDetails::getS3Accessible);
+                    firePreFlightCheckEvents(stackId, "STS endpoint accessibility",
+                            networkNodes, NodeStatusProto.NetworkDetails::getStsAccessible);
+                    firePreFlightCheckEvents(stackId, "ADLSv2 ('<storage_account>.dfs.core.windows.net') endpoint accessibility",
+                            networkNodes, NodeStatusProto.NetworkDetails::getAdlsV2Accessible);
+                    firePreFlightCheckEvents(stackId, "'management.azure.com' accessibility",
+                            networkNodes, NodeStatusProto.NetworkDetails::getAzureManagementAccessible);
+                    firePreFlightCheckEvents(stackId, "GCS endpoint accessibility",
+                            networkNodes, NodeStatusProto.NetworkDetails::getGcsAccessible);
                 }
             }
         } catch (Exception e) {
@@ -244,12 +253,21 @@ public class DiagnosticsFlowService {
 
     private void firePreFlightCheckEvents(Long resourceId, String checkType, List<NodeStatusProto.NetworkDetails> networkNodes,
             Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
-        List<String> unhealthyNetworkHosts =
-                getUnhealthyHosts(networkNodes, NodeStatusProto.NetworkDetails::getDatabusAccessible);
-        List<String> eventMessageParameters = getPreFlightStatusParameters(checkType, unhealthyNetworkHosts);
-        String eventType = CollectionUtils.isEmpty(unhealthyNetworkHosts) ? UPDATE_IN_PROGRESS.name() : UPDATE_FAILED.name();
-        cloudbreakEventService.fireCloudbreakEvent(resourceId, eventType,
-                ResourceEvent.STACK_DIAGNOSTICS_PREFLIGHT_CHECK_FINISHED, eventMessageParameters);
+        if (allNetworkNodesInUnknownStatus(networkNodes, healthEvaluator)) {
+            LOGGER.debug("All network details are in UNKNOWN state, this could mean responses does not support this network check type yet. Skip processing..");
+        } else {
+            List<String> unhealthyNetworkHosts =
+                    getUnhealthyHosts(networkNodes, healthEvaluator);
+            List<String> eventMessageParameters = getPreFlightStatusParameters(checkType, unhealthyNetworkHosts);
+            String eventType = CollectionUtils.isEmpty(unhealthyNetworkHosts) ? UPDATE_IN_PROGRESS.name() : UPDATE_FAILED.name();
+            cloudbreakEventService.fireCloudbreakEvent(resourceId, eventType,
+                    ResourceEvent.STACK_DIAGNOSTICS_PREFLIGHT_CHECK_FINISHED, eventMessageParameters);
+        }
+    }
+
+    private boolean allNetworkNodesInUnknownStatus(List<NodeStatusProto.NetworkDetails> networkNodes,
+            Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
+        return networkNodes.stream().allMatch(n -> NodeStatusProto.HealthStatus.UNKNOWN.equals(healthEvaluator.apply(n)));
     }
 
     private List<String> getPreFlightStatusParameters(String checkType, List<String> unhealthyNetworkHosts) {
@@ -267,20 +285,6 @@ public class DiagnosticsFlowService {
         }
     }
 
-    private boolean isAnyNetworkHealthStatusIsNotOk(NodeStatusProto.NetworkDetails nd) {
-        return isAnyHealthStatusIsNotOk(nd.getDatabusAccessible(), nd.getDatabusS3Accessible(), nd.getClouderaComAccessible());
-    }
-
-    private boolean isAnyHealthStatusIsNotOk(NodeStatusProto.HealthStatus... healthStatuses) {
-        for (NodeStatusProto.HealthStatus healthStatus : healthStatuses) {
-            if (NodeStatusProto.HealthStatus.NOK.equals(healthStatus)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    // TODO: handle UNKNOWN status ?
     private List<String> getUnhealthyHosts(List<NodeStatusProto.NetworkDetails> networkNodes,
             Function<NodeStatusProto.NetworkDetails, NodeStatusProto.HealthStatus> healthEvaluator) {
         return networkNodes.stream()
