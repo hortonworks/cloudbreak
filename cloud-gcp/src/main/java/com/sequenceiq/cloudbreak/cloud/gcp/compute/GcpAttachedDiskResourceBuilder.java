@@ -29,6 +29,7 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -101,7 +102,6 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Map<String, Object> attributes = new HashMap<>(Map.of(CloudResource.ATTRIBUTES,
                 new VolumeSetAttributes.Builder()
                 .withAvailabilityZone(location.getAvailabilityZone().value())
-                .withVolumeType(template.getVolumes().get(0).getType())
                 .withDeleteOnTermination(Boolean.TRUE)
                 .withVolumes(volumes)
                 .build()));
@@ -132,8 +132,11 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         List<CloudResource> result = new ArrayList<>();
         for (CloudResource volumeSetResource : buildableResource) {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-
-            for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+            List<VolumeSetAttributes.Volume> notLocalSsds = volumeSetAttributes.getVolumes()
+                    .stream()
+                    .filter(e -> !e.getType().equals(GcpDiskType.LOCAL_SSD.value()))
+                    .collect(Collectors.toList());
+            for (VolumeSetAttributes.Volume volume : notLocalSsds) {
                 Map<String, String> labels = GcpLabelUtil.createLabelsFromTags(cloudStack);
                 Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
 

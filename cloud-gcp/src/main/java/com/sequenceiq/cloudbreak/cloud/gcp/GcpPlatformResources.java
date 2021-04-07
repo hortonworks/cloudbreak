@@ -428,26 +428,22 @@ public class GcpPlatformResources implements PlatformResources {
             VmType defaultVmType = null;
 
             CloudRegions regions = regions(cloudCredential, region, filters, true);
-
             for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
                 MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();
                 for (MachineType machineType : machineTypeList.getItems()) {
-                    VmTypeMeta vmTypeMeta = VmTypeMetaBuilder.builder()
+                    VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
                             .withCpuAndMemory(machineType.getGuestCpus(),
                                     machineType.getMemoryMb().floatValue() / THOUSAND)
-
                             .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
                                     1, machineType.getMaximumPersistentDisks())
-
-                            .withLocalSsdConfig(TEN, 375,1, 24)
-
                             .withSsdConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
                                     1, machineType.getMaximumPersistentDisks())
-
                             .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
-                            .withVolumeEncryptionSupport(true)
-                            .create();
-                    VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMeta, true);
+                            .withVolumeEncryptionSupport(true);
+                    if (isLocalSsdSupported(machineType)) {
+                        vmTypeMetaBuilder.withLocalSsdConfig(TEN, 375, 1, 24);
+                    }
+                    VmType vmType = VmType.vmTypeWithMeta(machineType.getName(), vmTypeMetaBuilder.create(), true);
                     types.add(vmType);
                     if (machineType.getName().equals(gcpVmDefault)) {
                         defaultVmType = vmType;
@@ -460,6 +456,16 @@ public class GcpPlatformResources implements PlatformResources {
         } catch (Exception e) {
             return new CloudVmTypes(new HashMap<>(), new HashMap<>());
         }
+    }
+
+    private boolean isLocalSsdSupported(MachineType machineType) {
+        String localSsdSegments[] = {"n2", "n2d", "n1", "c2", "a2"};
+        for (String localSsdSegment : localSsdSegments) {
+            if (machineType.getName().startsWith(localSsdSegment + "-")) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
