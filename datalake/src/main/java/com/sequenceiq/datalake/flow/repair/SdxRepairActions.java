@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.flow.repair;
 
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_FINALIZED_EVENT;
-import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_IN_PROGRESS_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +24,7 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairFailedEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
+import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartRequest;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
 import com.sequenceiq.datalake.metric.MetricType;
@@ -51,7 +51,7 @@ public class SdxRepairActions {
     private SdxMetricService metricService;
 
     @Bean(name = "SDX_REPAIR_START_STATE")
-    public Action<?, ?> sdxDeletion() {
+    public Action<?, ?> sdxRepairStarted() {
         return new AbstractSdxAction<>(SdxRepairStartEvent.class) {
 
             @Override
@@ -62,8 +62,8 @@ public class SdxRepairActions {
             @Override
             protected void doExecute(SdxContext context, SdxRepairStartEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Start repair flow for Datalake: {}", payload.getResourceId());
-                repairService.startSdxRepair(payload.getResourceId(), payload.getRepairSettings());
-                sendEvent(context, SDX_REPAIR_IN_PROGRESS_EVENT.event(), payload);
+                SdxRepairStartRequest request = new SdxRepairStartRequest(payload.getResourceId(), payload.getUserId(), payload.getRepairSettings());
+                sendEvent(context, request.selector(), request);
             }
 
             @Override

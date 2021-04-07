@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_COULD_NOT_START;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER;
+import static com.sequenceiq.redbeams.api.model.common.Status.AVAILABLE;
+import static com.sequenceiq.redbeams.api.model.common.Status.STOPPED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -60,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -67,6 +70,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterRepairServiceTest {
@@ -111,6 +115,9 @@ public class ClusterRepairServiceTest {
 
     @Mock
     private ClusterDBValidationService clusterDBValidationService;
+
+    @Mock
+    private RedbeamsClientService redbeamsClientService;
 
     @InjectMocks
     private ClusterRepairService underTest;
@@ -166,6 +173,9 @@ public class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setStatus(AVAILABLE);
+        when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
 
         Result result = underTest.repairWithDryRun(stack.getId());
 
@@ -301,6 +311,24 @@ public class ClusterRepairServiceTest {
     }
 
     @Test
+    public void repairShouldFailIfNotAvailableDatabaseExistsForCluster() {
+        cluster.setDatabaseServerCrn("dbCrn");
+
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
+        databaseServerV4Response.setStatus(STOPPED);
+        when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
+        });
+
+        assertEquals("Database dbCrn is not in AVAILABLE status, could not start repair.", exception.getMessage());
+        verifyEventArguments(CLUSTER_MANUALRECOVERY_COULD_NOT_START, "Database dbCrn is not in AVAILABLE status, could not start repair.");
+        verifyNoInteractions(stackUpdater);
+    }
+
+    @Test
     public void shouldNotAllowRepairWhenNodeIsStoppedInNotSelectedInstanceGroup() {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
@@ -333,7 +361,7 @@ public class ClusterRepairServiceTest {
     private void verifyEventArguments(ResourceEvent resourceEvent, String messageAssert) {
         @SuppressWarnings("unchecked")
         ArgumentCaptor<Collection<String>> argument = ArgumentCaptor.forClass(Collection.class);
-        verify(eventService).fireCloudbreakEvent(any(), eq("RECOVERY"), eq(resourceEvent), argument.capture());
+        verify(eventService).fireCloudbreakEvent(any(), eq("RECOVERY_FAILED"), eq(resourceEvent), argument.capture());
         assertEquals(messageAssert, argument.getValue().iterator().next());
     }
 

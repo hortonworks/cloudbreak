@@ -53,7 +53,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
         String userId = sdxRepairWaitRequest.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
+            LOGGER.debug("Start polling stack repair process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             repairService.waitCloudbreakClusterRepair(sdxId, pollingConfig);
             response = new SdxRepairSuccessEvent(sdxId, userId);

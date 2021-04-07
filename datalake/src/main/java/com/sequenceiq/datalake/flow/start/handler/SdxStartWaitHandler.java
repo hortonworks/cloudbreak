@@ -50,7 +50,7 @@ public class SdxStartWaitHandler extends ExceptionCatcherEventHandler<SdxStartWa
         String userId = waitRequest.getUserId();
         Selectable response;
         try {
-            LOGGER.debug("Start polling stack deletion process for id: {}", sdxId);
+            LOGGER.debug("Start polling stack start process for id: {}", sdxId);
             PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
             sdxStartService.waitCloudbreakCluster(sdxId, pollingConfig);
             response = new SdxStartSuccessEvent(sdxId, userId);

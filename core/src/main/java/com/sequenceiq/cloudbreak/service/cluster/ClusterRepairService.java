@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +51,12 @@ import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Service
 public class ClusterRepairService {
@@ -63,6 +66,8 @@ public class ClusterRepairService {
     private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
 
     private static final String RECOVERY = "RECOVERY";
+
+    private static final String RECOVERY_FAILED = "RECOVERY_FAILED";
 
     @Inject
     private StackService stackService;
@@ -93,6 +98,9 @@ public class ClusterRepairService {
 
     @Inject
     private ClusterDBValidationService clusterDBValidationService;
+
+    @Inject
+    private RedbeamsClientService redbeamsClientService;
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -143,6 +151,9 @@ public class ClusterRepairService {
         } else if (!isReattachSupportedOnProvider(stack, reattach)) {
             repairStartResult = Result.error(RepairValidation
                     .of(String.format("Volume reattach currently not supported on %s platform!", stack.getPlatformVariant())));
+        } else if (hasNotAvailableDatabase(stack)) {
+            repairStartResult = Result.error(RepairValidation
+                    .of(String.format("Database %s is not in AVAILABLE status, could not start repair.", stack.getCluster().getDatabaseServerCrn())));
         } else {
             Map<HostGroupName, Set<InstanceMetaData>> repairableNodes = selectRepairableNodes(getInstanceSelectors(repairMode, selectedParts), stack);
             RepairValidation validationBySelectedNodes = validateSelectedNodes(stack, repairableNodes, reattach);
@@ -154,6 +165,17 @@ public class ClusterRepairService {
             }
         }
         return repairStartResult;
+    }
+
+    private boolean hasNotAvailableDatabase(Stack stack) {
+        String databaseServerCrn = stack.getCluster().getDatabaseServerCrn();
+        if (StringUtils.isNotBlank(databaseServerCrn)) {
+            DatabaseServerV4Response databaseServerResponse = redbeamsClientService.getByCrn(databaseServerCrn);
+            if (!databaseServerResponse.getStatus().isAvailable()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean hasStoppedNotSelectedInstance(Stack stack, ManualClusterRepairMode repairMode, Set<String> selectedParts) {
@@ -332,7 +354,7 @@ public class ClusterRepairService {
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
             RepairValidation> repairValidationResult, boolean removeOnly, boolean restartServices, Set<String> recoveryMessageArgument) {
         if (repairValidationResult.isError()) {
-            eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
+            eventService.fireCloudbreakEvent(stackId, RECOVERY_FAILED, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
                     repairValidationResult.getError().getValidationErrors());
             throw new BadRequestException(String.join(" ", repairValidationResult.getError().getValidationErrors()));
         } else {
@@ -343,7 +365,7 @@ public class ClusterRepairService {
                         List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;
             } else {
-                eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, recoveryMessageArgument);
+                eventService.fireCloudbreakEvent(stackId, RECOVERY_FAILED, CLUSTER_MANUALRECOVERY_NO_NODES_TO_RECOVER, recoveryMessageArgument);
                 throw new BadRequestException(String.format("Could not trigger cluster repair for stack %s because node list is incorrect", stackId));
             }
         }
