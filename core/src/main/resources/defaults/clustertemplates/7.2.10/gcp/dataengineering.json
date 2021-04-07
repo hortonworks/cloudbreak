@@ -16,10 +16,10 @@
             {
               "count": 1,
               "size": 100,
-              "type": "pd-standard"
+              "type": "pd-ssd"
             }
           ],
-          "instanceType": "e2-standard-8"
+          "instanceType": "e2-standard-16"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -32,7 +32,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "pd-standard"
+              "type": "pd-ssd"
             }
           ],
           "instanceType": "e2-standard-8"
@@ -48,7 +48,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "pd-standard"
+              "type": "pd-ssd"
             }
           ],
           "instanceType": "e2-standard-8"
@@ -64,7 +64,7 @@
             {
               "count": 1,
               "size": 100,
-              "type": "pd-standard"
+              "type": "pd-ssd"
             }
           ],
           "instanceType": "e2-standard-8"

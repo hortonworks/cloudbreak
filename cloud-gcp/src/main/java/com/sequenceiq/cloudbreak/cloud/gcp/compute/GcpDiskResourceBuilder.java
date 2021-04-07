@@ -55,7 +55,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setDescription(description());
         disk.setSizeGb((long) group.getRootVolumeSize());
         disk.setName(buildableResources.get(0).getName());
-        disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
+        disk.setKind(GcpDiskType.SSD.getUrl(projectId, location.getAvailabilityZone()));
 
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
