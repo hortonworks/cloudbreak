@@ -32,6 +32,9 @@ gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERV
 echo "Binding Cloud SQL role to the service account"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/cloudsql.admin --quiet --no-user-output-enabled --condition=None
 
+echo "Binding IAM Service Account User role to the service account"
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/iam.serviceAccountUser --quiet --no-user-output-enabled --condition=None
+
 echo "Creating key for the service account"
 gcloud iam service-accounts keys create --iam-account=$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com $SERVICE_ACCOUNT_NAME-gcp-cred.json
 
