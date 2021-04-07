@@ -437,7 +437,9 @@ public class GcpPlatformResources implements PlatformResources {
                                     machineType.getMemoryMb().floatValue() / THOUSAND)
 
                             .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
-                                    1, machineType.getMaximumPersistentDisksSizeGb().intValue())
+                                    1, machineType.getMaximumPersistentDisks())
+
+                            .withLocalSsdConfig(TEN, 375,1, 24)
 
                             .withSsdConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
                                     1, machineType.getMaximumPersistentDisks())

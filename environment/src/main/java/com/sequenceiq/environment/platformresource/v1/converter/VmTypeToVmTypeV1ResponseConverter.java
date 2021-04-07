@@ -23,6 +23,7 @@ public class VmTypeToVmTypeV1ResponseConverter
         List<VolumeParameterConfigResponse> configs = new ArrayList<>();
         convertVolumeConfig(configs, source.getMetaData().getAutoAttachedConfig());
         convertVolumeConfig(configs, source.getMetaData().getEphemeralConfig());
+        convertVolumeConfig(configs, source.getMetaData().getLocalSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getMagneticConfig());
         convertVolumeConfig(configs, source.getMetaData().getSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getSt1Config());

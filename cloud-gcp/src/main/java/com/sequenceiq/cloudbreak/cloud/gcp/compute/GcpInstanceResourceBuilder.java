@@ -81,7 +81,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final String SERVICE_ACCOUNT_EMAIL = "serviceAccountEmail";
 
-    private static final String GCP_DISK_TYPE = "PERSISTENT";
+    private static final String PERSISTENT = "PERSISTENT";
+
+    private static final String SCRATCH = "SCRATCH";
 
     private static final String GCP_DISK_MODE = "READ_WRITE";
 
@@ -121,7 +123,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         List<AttachedDisk> listOfDisks = new ArrayList<>();
 
         listOfDisks.addAll(getBootDiskList(computeResources, projectId, location.getAvailabilityZone()));
-        listOfDisks.addAll(getAttachedDisks(computeResources, projectId));
+        listOfDisks.addAll(getAttachedDisks(group, computeResources, projectId));
 
         listOfDisks.forEach(disk -> gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
@@ -359,12 +361,14 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return listOfDisks;
     }
 
-    private Collection<AttachedDisk> getAttachedDisks(Iterable<CloudResource> resources, String projectId) {
+    private Collection<AttachedDisk> getAttachedDisks(Group group, Iterable<CloudResource> resources, String projectId) {
         Collection<AttachedDisk> listOfDisks = new ArrayList<>();
-        for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
-            VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-            for (Volume volume : volumeSetAttributes.getVolumes()) {
-                listOfDisks.add(createDisk(projectId, false, volume.getId(), volumeSetAttributes.getAvailabilityZone(), Boolean.FALSE));
+        if (group.getReferenceInstanceTemplate().getVolumes().get(0).getType() == "") {
+            for (CloudResource resource : filterResourcesByType(resources, ResourceType.GCP_ATTACHED_DISKSET)) {
+                VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+                for (Volume volume : volumeSetAttributes.getVolumes()) {
+                    listOfDisks.add(createDisk(projectId, false, volume.getId(), volumeSetAttributes.getAvailabilityZone(), Boolean.FALSE));
+                }
             }
         }
         return listOfDisks;
@@ -374,7 +378,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         AttachedDisk attachedDisk = new AttachedDisk();
         attachedDisk.setBoot(boot);
         attachedDisk.setAutoDelete(autoDelete);
-        attachedDisk.setType(GCP_DISK_TYPE);
+        attachedDisk.setType(PERSISTENT);
         attachedDisk.setMode(GCP_DISK_MODE);
         attachedDisk.setDeviceName(resourceName);
         attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",

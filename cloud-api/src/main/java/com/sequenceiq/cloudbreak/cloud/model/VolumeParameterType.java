@@ -107,6 +107,27 @@ public enum VolumeParameterType {
         public boolean in(VolumeParameterType... types) {
             return VolumeParameterType.in(this, types);
         }
+    },
+
+    LOCAL_SSD() {
+        @Override public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+            return metaData.getLocalSsdConfig();
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount, int maxdiskSize) {
+            builder.withLocalSsdConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount, maxdiskSize));
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount) {
+            builder.withLocalSsdConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount));
+        }
+
+        @Override
+        public boolean in(VolumeParameterType... types) {
+            return VolumeParameterType.in(this, types);
+        }
     };
 
     private static final int DEFAULT_MINIMUM_VOLUME_SIZE_IN_GIBIBYTES = 10;
