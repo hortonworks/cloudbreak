@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.common.metrics;
 
 import java.io.IOException;
-import java.util.Optional;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -9,9 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
-import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
 
 public class RequestHeaderMetricFilter extends OncePerRequestFilter {
 
@@ -25,13 +21,14 @@ public class RequestHeaderMetricFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String callerIdGroup = Optional.ofNullable(request.getHeader(CDP_CALLER_ID_HEADER)).orElse("NA");
-        String method = request.getMethod();
-        String requestURI = request.getRequestURI();
-        metricService.incrementMetricCounter(MetricType.REST_OPERATION_CALLER_ID,
-                MetricTag.URI.name(), requestURI,
-                MetricTag.TARGET_METHOD.name(), method,
-                MetricTag.CALLER_ID.name(), callerIdGroup);
+        //TODO Metrics should be tagged with URL template
+//        String callerIdGroup = Optional.ofNullable(request.getHeader(CDP_CALLER_ID_HEADER)).orElse("NA");
+//        String method = request.getMethod();
+//        String requestURI = request.getRequestURI();
+//        metricService.incrementMetricCounter(MetricType.REST_OPERATION_CALLER_ID,
+//                MetricTag.URI.name(), requestURI,
+//                MetricTag.TARGET_METHOD.name(), method,
+//                MetricTag.CALLER_ID.name(), callerIdGroup);
 
         filterChain.doFilter(request, response);
     }
