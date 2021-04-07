@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -135,6 +136,11 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
+                LOGGER.debug("Creating instance disk with id {} of type {}", volume.getId(), volume.getType());
+                if ("local-ssd".equalsIgnoreCase(volume.getType())) {
+                    LOGGER.info("Skip creating instance disk with id {} because of local-ssd type", volume.getId());
+                    continue;
+                }
                 Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
                 Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
 
