@@ -53,7 +53,11 @@ public class StackService implements ResourceCrnAndNameProvider {
                 Status.UNREACHABLE,
                 Status.UNHEALTHY,
                 Status.UNKNOWN,
-                Status.STOPPED));
+                Status.STOPPED,
+                Status.START_IN_PROGRESS,
+                Status.STOP_IN_PROGRESS,
+                Status.STOP_REQUESTED,
+                Status.START_REQUESTED));
     }
 
     public Stack getByIdWithListsInTransaction(Long id) {
