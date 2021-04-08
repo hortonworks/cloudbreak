@@ -99,7 +99,10 @@ public class ModelDescriptions {
         public static final String IMAGE_CATALOG_URL = "url of the image catalog";
         public static final String IMAGE_ID = "id of the image";
         public static final String IMAGE_CATALOG_NAME = "name of the image catalog";
-
+        public static final String IMAGE_TYPE = "type of the image - datalake, datahub or freeipa";
+        public static final String SOURCE_IMAGE_ID = "id of the source image serving as the base of the customized image";
+        public static final String PARCEL_BASE_URL = "custom base url for parcels in case of a customized image";
+        public static final String VMS_TO_REGIONS = "VM image references mapped to cloud regions";
     }
 
     public static class StructuredEventResponseDescription {
