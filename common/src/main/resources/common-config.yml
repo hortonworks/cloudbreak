@@ -1,0 +1,10 @@
+altus:
+  databus:
+    cname: https://dbusapi.us-west-1.altus.cloudera.com
+    s3.endpoint.patterns:
+      - pattern: dbusapi.us-west-1
+        endpoint: https://cloudera-dbus-prod.s3.amazonaws.com
+      - pattern: dbusapi.sigma-dev
+        endpoint: https://cloudera-dbus-dev.s3.amazonaws.com
+      - pattern: dbusapi.sigma-stage
+        endpoint: https://cloudera-dbus-stage.s3.amazonaws.com
