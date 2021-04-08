@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +56,10 @@ public class EnvironmentServiceTest {
                 .thenReturn(getDetailedEnvironmentResponseWithStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS))
                 .thenReturn(getDetailedEnvironmentResponseWithStatus(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS));
 
-        DetailedEnvironmentResponse environment = underTest.waitNetworkAndGetEnvironment(sdxId);
+        PollingConfig pollingConfig = new PollingConfig(100, TimeUnit.MILLISECONDS, 10, TimeUnit.SECONDS);
+
+        DetailedEnvironmentResponse environment = underTest.waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isNetworkCreationFinished);
+
         assertThat(environment.getEnvironmentStatus(), is(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS));
         verifyZeroInteractions(sdxClusterRepository);
         verifyZeroInteractions(environmentClientService);
@@ -82,7 +86,10 @@ public class EnvironmentServiceTest {
                 .thenReturn(getDetailedEnvironmentResponseWithStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS))
                 .thenReturn(getDetailedEnvironmentResponseWithStatus(EnvironmentStatus.AVAILABLE));
 
-        DetailedEnvironmentResponse environment = underTest.waitAndGetEnvironment(sdxId);
+        PollingConfig pollingConfig = new PollingConfig(100, TimeUnit.MILLISECONDS, 10, TimeUnit.SECONDS);
+
+        DetailedEnvironmentResponse environment = underTest.waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isAvailable);
+
         assertThat(environment.getEnvironmentStatus(), is(EnvironmentStatus.AVAILABLE));
         verifyZeroInteractions(sdxClusterRepository);
         verifyZeroInteractions(environmentClientService);

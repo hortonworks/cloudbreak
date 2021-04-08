@@ -1,11 +1,10 @@
 package com.sequenceiq.datalake.flow.stop.handler;
 
-import static com.sequenceiq.datalake.service.sdx.database.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -28,6 +27,9 @@ import reactor.bus.Event;
 public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToStopRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsStopHandler.class);
+
+    @Value("${sdx.db.operation.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -77,7 +79,7 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
             response = new SdxStopFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database stop timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes"));
+                    new PollerStoppedException("Database stop timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
             response = new SdxStopFailedEvent(sdxId, userId, exception);

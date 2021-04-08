@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -51,15 +52,17 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackReque
 @Service
 public class DatabaseService {
 
-    public static final int SLEEP_TIME_IN_SEC_FOR_DB_POLLING = 10;
-
-    public static final int DURATION_IN_MINUTES_FOR_DB_POLLING = 60;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseService.class);
 
     private static final String SSL_ENFORCEMENT_MIN_RUNTIME_VERSION = "7.2.2";
 
     private final Comparator<Versioned> versionComparator = new VersionComparator();
+
+    @Value("${sdx.db.operation.sleeptime_sec:10}")
+    private int sleepTimeInSec;
+
+    @Value("${sdx.db.operation.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -207,8 +210,8 @@ public class DatabaseService {
 
     public DatabaseServerStatusV4Response waitAndGetDatabase(SdxCluster sdxCluster, String databaseCrn,
             SdxDatabaseOperation sdxDatabaseOperation, boolean cancellable) {
-        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_DB_POLLING, TimeUnit.SECONDS,
-                DURATION_IN_MINUTES_FOR_DB_POLLING, TimeUnit.MINUTES);
+        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS,
+                durationInMinutes, TimeUnit.MINUTES);
         return waitAndGetDatabase(sdxCluster, databaseCrn, pollingConfig, sdxDatabaseOperation, cancellable);
     }
 

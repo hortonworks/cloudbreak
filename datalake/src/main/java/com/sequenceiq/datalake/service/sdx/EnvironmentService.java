@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
@@ -28,11 +29,13 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 @Service
 public class EnvironmentService {
 
-    public static final int SLEEP_TIME_IN_SEC_FOR_ENV_POLLING = 10;
-
-    public static final int DURATION_IN_MINUTES_FOR_ENV_POLLING = 60;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
+
+    @Value("${sdx.environment.sleeptime_sec:10}")
+    private int sleepTimeInSec;
+
+    @Value("${sdx.environment.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -44,14 +47,14 @@ public class EnvironmentService {
     private EnvironmentClientService environmentClientService;
 
     public DetailedEnvironmentResponse waitAndGetEnvironment(Long sdxId) {
-        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
-                DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
+        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS,
+                durationInMinutes, TimeUnit.MINUTES);
         return waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isAvailable);
     }
 
     public DetailedEnvironmentResponse waitNetworkAndGetEnvironment(Long sdxId) {
-        PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC_FOR_ENV_POLLING, TimeUnit.SECONDS,
-                DURATION_IN_MINUTES_FOR_ENV_POLLING, TimeUnit.MINUTES);
+        PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS,
+                durationInMinutes, TimeUnit.MINUTES);
         return waitAndGetEnvironment(sdxId, pollingConfig, EnvironmentStatus::isNetworkCreationFinished);
     }
 
