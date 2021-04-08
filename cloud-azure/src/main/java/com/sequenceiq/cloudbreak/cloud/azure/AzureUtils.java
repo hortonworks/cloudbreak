@@ -27,11 +27,13 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Splitter;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
+import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
@@ -655,6 +657,21 @@ public class AzureUtils {
             deletionObservable.subscribe(disk -> LOGGER.info("Deleting {}, managed disks ids: {}", disk, managedDiskIds));
             deletionObservable.toCompletable().await();
         }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public void signImageConsent(AzureClient azureClient, AzureMarketplaceImage azureMarketplaceImage) {
+        LOGGER.info("Signing terms and conditions for azure marketplace image: {}", azureMarketplaceImage);
+
+        Observable<AgreementTerms> signingObservable = azureClient.signImageConsent(azureMarketplaceImage)
+                .doOnError(throwable -> {
+                    LOGGER.error("Error happened during signing the image consent: " + azureMarketplaceImage, throwable);
+                    throw new CloudbreakServiceException("Cannot sign terms and conditions of azure marketplace image: " + azureMarketplaceImage, throwable);
+                })
+                .doOnCompleted(() -> LOGGER.info("Successfully signed terms and conditions of azure marketplace image: {}", azureMarketplaceImage))
+                .subscribeOn(Schedulers.io());
+        signingObservable.subscribe(s -> LOGGER.info("Signing {}", s));
+        signingObservable.toCompletable().await();
     }
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)

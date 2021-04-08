@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -62,8 +63,9 @@ public class AzureTemplateBuilder {
     @Inject
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
+    //CHECKSTYLE:OFF
     public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
-            CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
+            CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation, AzureMarketplaceImage azureMarketplaceImage) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
             String imageName = customVMImageNameProvider.getImageNameFromConnectionString(imageUrl);
@@ -80,6 +82,8 @@ public class AzureTemplateBuilder {
             // needed for pre 1.16.5 templates and Load balancer setup on Medium duty datalakes.
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
 
+            model.put("usePartnerCenter", true);
+            model.put("marketplaceImageDetails", azureMarketplaceImage);
             model.put("customImageId", customImageId);
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", AzureStorage.IMAGES_CONTAINER);

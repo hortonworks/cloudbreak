@@ -52,6 +52,8 @@ import com.microsoft.azure.management.graphrbac.RoleAssignment;
 import com.microsoft.azure.management.graphrbac.RoleAssignments;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
 import com.microsoft.azure.management.keyvault.KeyPermissions;
+import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
+import com.microsoft.azure.management.marketplaceordering.v2015_06_01.implementation.MarketplaceOrderingManager;
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.LoadBalancerFrontend;
@@ -95,6 +97,7 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
@@ -118,6 +121,8 @@ public class AzureClient {
 
     private final privatednsManager privatednsManager;
 
+    private final MarketplaceOrderingManager marketplaceOrderingManager;
+
     private final AzureClientCredentials azureClientCredentials;
 
     private final AzureAuthExceptionHandler azureAuthExceptionHandler;
@@ -126,6 +131,7 @@ public class AzureClient {
         this.azureClientCredentials = azureClientCredentials;
         azure = azureClientCredentials.getAzure();
         privatednsManager = azureClientCredentials.getPrivateDnsManager();
+        marketplaceOrderingManager = azureClientCredentials.getMarketplaceOrderingManager();
         this.azureAuthExceptionHandler = azureAuthExceptionHandler;
     }
 
@@ -414,6 +420,11 @@ public class AzureClient {
                             .create(),
                     LOGGER, "Custom image has been created under {} ms with name {}", imageName);
         });
+    }
+
+    public Observable<AgreementTerms> signImageConsent(AzureMarketplaceImage azureMarketplaceImage) {
+        return marketplaceOrderingManager.marketplaceAgreements()
+                .signAsync(azureMarketplaceImage.getPublisherId(), azureMarketplaceImage.getOfferId(), azureMarketplaceImage.getPlanId());
     }
 
     public void copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob, String sourceBlobName) {
@@ -961,5 +972,9 @@ public class AzureClient {
         // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
         DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
         dSetsIn.delete(resourceGroup, diskEncryptionSetName);
+    }
+
+    public Optional<String> getAccessToken() {
+        return azureClientCredentials.getAccesToken();
     }
 }

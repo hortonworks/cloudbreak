@@ -18,6 +18,9 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
@@ -75,6 +78,12 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Inject
     private AzureTerminationHelperService azureTerminationHelperService;
 
+    @Inject
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
+
+    @Inject
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
             AdjustmentType adjustmentType, Long threshold) {
@@ -92,8 +101,14 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         }
         String customImageId = image.getId();
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
+
+        // PoC of Marketplace: hardcoding one freeipa / DL image, and signing it
+        AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image.getName());
+//        azureUtils.signImageConsent(client, azureMarketplaceImage);
+        azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                cloudContext, stack, AzureInstanceTemplateOperation.PROVISION);
+                cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
