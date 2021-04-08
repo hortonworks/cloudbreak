@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.ssh.SshKeyService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -54,7 +55,7 @@ public class ClusterHostCertificatesRotationHandler extends ExceptionCatcherEven
         return new ClusterCertificatesRotationFailed(resourceId, e);
     }
 
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<ClusterHostCertificatesRotationRequest> event) {
         LOGGER.debug("Accepting Cluster Manager host certificates rotation request...");
         ClusterHostCertificatesRotationRequest request = event.getData();
         Selectable result;

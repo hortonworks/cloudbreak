@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClust
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.SuppressClusterWarningsSuccess;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -36,7 +37,7 @@ public class SuppressClusterWarningsHandler extends ExceptionCatcherEventHandler
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<SuppressClusterWarningsRequest> event) {
         Long stackId = event.getData().getResourceId();
         Selectable response;
         try {

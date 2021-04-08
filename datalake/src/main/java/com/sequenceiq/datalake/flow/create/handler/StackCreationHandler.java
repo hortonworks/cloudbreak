@@ -24,6 +24,7 @@ import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -58,7 +59,7 @@ public class StackCreationHandler extends ExceptionCatcherEventHandler<StackCrea
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent handlerEvent) {
+    protected Selectable doAccept(HandlerEvent<StackCreationWaitRequest> handlerEvent) {
         StackCreationWaitRequest stackCreationWaitRequest = handlerEvent.getData();
         Long sdxId = stackCreationWaitRequest.getResourceId();
         String userId = stackCreationWaitRequest.getUserId();

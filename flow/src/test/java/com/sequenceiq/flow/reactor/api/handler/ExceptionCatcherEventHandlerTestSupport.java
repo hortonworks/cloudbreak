@@ -25,12 +25,12 @@ public class ExceptionCatcherEventHandlerTestSupport<T extends Payload> {
     }
 
     /**
-     * Delegates to {@link ExceptionCatcherEventHandler#doAccept(ExceptionCatcherEventHandler.HandlerEvent)}.
+     * Delegates to {@link ExceptionCatcherEventHandler#doAccept(HandlerEvent)}.
      * @param event reactor event
      * @return response event payload
      */
     public Selectable doAccept(Event<T> event) {
-        return eventHandler.doAccept(eventHandler.new HandlerEvent(event));
+        return eventHandler.doAccept(new HandlerEvent(event));
     }
 
 }

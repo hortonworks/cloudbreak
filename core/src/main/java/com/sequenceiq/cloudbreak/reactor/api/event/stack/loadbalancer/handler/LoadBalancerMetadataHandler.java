@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<LoadBalancerMetadataRequest> {
@@ -47,7 +48,7 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<LoadBalancerMetadataRequest> event) {
         LoadBalancerMetadataRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {

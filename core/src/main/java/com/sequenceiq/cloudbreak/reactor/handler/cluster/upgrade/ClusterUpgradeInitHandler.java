@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -35,7 +36,7 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<ClusterUpgradeInitRequest> event) {
         LOGGER.debug("Accepting Cluster Manager parcel deactivation event..");
         ClusterUpgradeInitRequest request = event.getData();
         Selectable result;

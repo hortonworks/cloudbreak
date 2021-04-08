@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -39,7 +40,7 @@ public class RestartClusterServicesHandler extends ExceptionCatcherEventHandler<
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<RestartClusterServicesRequest> event) {
         LOGGER.debug("Accepting Cluster services restart request...");
         RestartClusterServicesRequest request = event.getData();
         Long stackId = request.getResourceId();

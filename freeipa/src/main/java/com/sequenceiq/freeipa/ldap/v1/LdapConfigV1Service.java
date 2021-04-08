@@ -24,6 +24,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.test.TestLdapConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -201,15 +202,15 @@ public class LdapConfigV1Service {
             LOGGER.debug("LdapConfig already exists");
             ldapConfig = existingLdapConfig.get();
         } else {
-            ldapConfig = createNewLdapConfig(environmentCrn, clusterName, stack);
+            ldapConfig = createNewLdapConfig(environmentCrn, clusterName, stack, false);
         }
         return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
     }
 
-    private LdapConfig createNewLdapConfig(String environmentCrn, String clusterName, Stack stack) throws FreeIpaClientException {
+    public LdapConfig createNewLdapConfig(String environmentCrn, String clusterName, Stack stack, boolean ignoreExistingUser) throws FreeIpaClientException {
         LOGGER.debug("Create new LDAP config for environment in FreeIPA");
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        User user = createBindUser(clusterName, freeIpaClient);
+        User user = ignoreExistingUser ? createBindUserIgnoreExisting(clusterName, freeIpaClient) : createBindUser(clusterName, freeIpaClient);
         String password = setBindUserPassword(freeIpaClient, user);
         return ldapConfigRegisterService.createLdapConfig(stack.getId(), user.getDn(), password, clusterName, environmentCrn);
     }
@@ -222,12 +223,40 @@ public class LdapConfigV1Service {
     }
 
     private User createBindUser(String clusterName, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        String bindUser = "ldapbind-" + clusterName;
+        String bindUser = createBindUserName(clusterName);
         try {
             return freeIpaClient.userAdd(bindUser, "service", "account");
         } catch (FreeIpaClientException e) {
             LOGGER.warn("Failed to create LDAP bind user: [{}]", bindUser, e);
             throw new RetryableFreeIpaClientException("Failed to create LDAP bind user", e);
         }
+    }
+
+    private User createBindUserIgnoreExisting(String clusterName, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
+        String bindUser = createBindUserName(clusterName);
+        try {
+            return freeIpaClient.userAdd(bindUser, "service", "account");
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                return getExistingBindUser(freeIpaClient, bindUser);
+            } else {
+                LOGGER.warn("Failed to create LDAP bind user: [{}]", bindUser, e);
+                throw new RetryableFreeIpaClientException("Failed to create LDAP bind user", e);
+            }
+        }
+    }
+
+    private User getExistingBindUser(FreeIpaClient freeIpaClient, String bindUser) throws RetryableFreeIpaClientException {
+        try {
+            LOGGER.info("Bind user already exists, getting it from FreeIPA");
+            return freeIpaClient.userShow(bindUser);
+        } catch (FreeIpaClientException e) {
+            LOGGER.warn("Failed to get kerberos bind user: [{}]", bindUser, e);
+            throw new RetryableFreeIpaClientException("Failed to get kerberos bind user", e);
+        }
+    }
+
+    private String createBindUserName(String clusterName) {
+        return "ldapbind-" + clusterName;
     }
 }

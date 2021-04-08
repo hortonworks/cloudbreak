@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -59,7 +60,7 @@ public class UpdateServiceConfigHandler extends ExceptionCatcherEventHandler<Upd
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<UpdateServiceConfigRequest> event) {
         UpdateServiceConfigRequest request = event.getData();
         Stack stack = request.getStack();
         requireNonNull(stack);

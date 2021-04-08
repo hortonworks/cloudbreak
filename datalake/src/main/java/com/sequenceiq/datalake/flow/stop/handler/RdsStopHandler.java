@@ -21,6 +21,7 @@ import com.sequenceiq.datalake.service.pause.DatabasePauseSupportService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -52,7 +53,7 @@ public class RdsStopHandler extends ExceptionCatcherEventHandler<RdsWaitingToSto
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<RdsWaitingToStopRequest> event) {
         RdsWaitingToStopRequest rdsWaitRequest = event.getData();
         Long sdxId = rdsWaitRequest.getResourceId();
         String userId = rdsWaitRequest.getUserId();

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ExecutePostCl
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -37,7 +38,7 @@ public class ExecutePostClusterManagerStartRecipesHandler extends ExceptionCatch
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<ExecutePostClusterManagerStartRecipesRequest> event) {
         Long stackId = event.getData().getResourceId();
         Selectable response;
         try {

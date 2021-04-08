@@ -11,6 +11,7 @@ import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +49,7 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<DatalakeDatabaseRestoreWaitRequest> event) {
         DatalakeDatabaseRestoreWaitRequest request = event.getData();
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();

@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterFr
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class RegisterFreeIpaDnsHandler extends ExceptionCatcherEventHandler<RegisterFreeIpaDnsRequest> {
@@ -36,7 +37,7 @@ public class RegisterFreeIpaDnsHandler extends ExceptionCatcherEventHandler<Regi
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<RegisterFreeIpaDnsRequest> event) {
         RegisterFreeIpaDnsRequest request = event.getData();
         Stack stack = request.getStack();
         try {

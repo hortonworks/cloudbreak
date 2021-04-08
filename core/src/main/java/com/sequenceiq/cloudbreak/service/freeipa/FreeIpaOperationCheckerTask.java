@@ -41,7 +41,7 @@ public class FreeIpaOperationCheckerTask<T extends FreeIpaOperationPollerObject>
                             .collect(Collectors.joining(","))
                     : "empty";
         } catch (Exception e) {
-            LOGGER.error("Cannot evaulate Failure details [{}]", failureDetails, e);
+            LOGGER.error("Cannot evaluate Failure details [{}]", failureDetails, e);
             failureDetails = "empty";
         }
         return failureDetails;
@@ -50,13 +50,13 @@ public class FreeIpaOperationCheckerTask<T extends FreeIpaOperationPollerObject>
     @Override
     public void handleTimeout(T operationPollerObject) {
         OperationStatus operationStatus = operationPollerObject.getOperationV1Endpoint().getOperationStatus(operationPollerObject.getOperationId());
-        throw new FreeIpaOperationFailedException(String.format("FreeIPA  [%s] operation [%s] timed out. Current state is [%s]",
+        throw new FreeIpaOperationFailedException(String.format("FreeIPA [%s] operation [%s] timed out. Current state is [%s]",
                 operationStatus.getOperationType(), operationPollerObject.getOperationId(), operationStatus.getStatus()));
     }
 
     @Override
     public String successMessage(T operationPollerObject) {
-        return String.format("FreeIPA  [%s] operation [%s] finished successfully",
+        return String.format("FreeIPA [%s] operation [%s] finished successfully",
                 operationPollerObject.getOperationType(), operationPollerObject.getOperationId());
     }
 

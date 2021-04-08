@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZone;
@@ -47,7 +48,7 @@ public class UpdateDnsSoaRecordsHandler extends ExceptionCatcherEventHandler<Upd
                 resourceId, "Downscale Update DNS SOA Records", Set.of(), Map.of(), e);    }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<UpdateDnsSoaRecordsRequest> event) {
         UpdateDnsSoaRecordsRequest request = event.getData();
         Selectable result;
         try {

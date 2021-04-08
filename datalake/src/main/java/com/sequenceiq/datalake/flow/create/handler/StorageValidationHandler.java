@@ -24,6 +24,7 @@ import com.sequenceiq.datalake.service.sdx.EnvironmentService;
 import com.sequenceiq.datalake.service.sdx.StackRequestManifester;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -52,7 +53,7 @@ public class StorageValidationHandler extends ExceptionCatcherEventHandler<Stora
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<StorageValidationRequest> event) {
         StorageValidationRequest storageValidationRequest = event.getData();
         Long sdxId = storageValidationRequest.getResourceId();
         String userId = storageValidationRequest.getUserId();

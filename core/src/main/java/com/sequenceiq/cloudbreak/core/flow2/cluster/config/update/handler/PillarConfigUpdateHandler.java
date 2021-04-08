@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarCo
 import com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.event.PillarConfigUpdateSuccess;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -35,7 +36,7 @@ public class PillarConfigUpdateHandler extends ExceptionCatcherEventHandler<Pill
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<PillarConfigUpdateRequest> event) {
         PillarConfigUpdateRequest request = event.getData();
         Selectable response;
         try {

@@ -19,6 +19,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String HEALTH = "Provides a detailed health of the FreeIPA stack";
     public static final String REBOOT = "Reboot one or more instances";
     public static final String REPAIR = "Repair one or more instances";
+    public static final String BIND_USER_CREATE = "Creates kerberos and ldap bind users for cluster";
 
     private FreeIpaOperationDescriptions() {
     }
