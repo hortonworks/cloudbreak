@@ -33,8 +33,11 @@ public class FreeIpaStopService {
     private StackUpdater stackUpdater;
 
     public void stop(String environmentCrn, String accountId) {
+        MDCBuilder.addEnvCrn(environmentCrn);
+        MDCBuilder.addAccountId(accountId);
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
+            LOGGER.info("No FreeIpa found in environment");
             throw new NotFoundException("No FreeIpa found in environment");
         }
 
@@ -48,6 +51,7 @@ public class FreeIpaStopService {
         if (!isStopNeeded(stack)) {
             return;
         }
+        LOGGER.debug("Trigger stop event, new status: {}", DetailedStackStatus.STOP_REQUESTED);
         stackUpdater.updateStackStatus(stack, DetailedStackStatus.STOP_REQUESTED, "Stopping of stack infrastructure has been requested.");
         flowManager.notify(STACK_STOP_EVENT.event(), new StackEvent(STACK_STOP_EVENT.event(), stack.getId()));
     }
@@ -58,6 +62,7 @@ public class FreeIpaStopService {
             LOGGER.debug("Stack stop is ignored");
             result = false;
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
+            LOGGER.debug("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.");
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
         }
