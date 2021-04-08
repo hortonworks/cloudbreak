@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,59 +61,28 @@ public class ClusterUpscaleFlowService {
     }
 
     public void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
-        int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
-        boolean success = numOfFailedHosts == 0;
-        if (success) {
-            LOGGER.info("Cluster upscaled successfully");
-            clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
-        } else {
-            LOGGER.info("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
-            clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);
-            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
-                    String.format("Ambari upscale operation failed on %d node(s).", numOfFailedHosts));
-        }
+        LOGGER.info("Cluster upscaled successfully");
+        clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
     }
 
     public void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,
-                String.format("New node(s) could not be added to the cluster: %s", errorDetails));
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
+                String.format("Error during cluster upscale: %s", errorDetails));
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "upscale", errorDetails);
     }
 
-    private int updateMetadata(StackView stackView, String hostGroupName) {
+    public void updateMetadata(StackView stackView, String hostGroupName) {
         LOGGER.info("Start update metadata");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        updateFailedHostMetaData(hostMetadata);
-        int failedHosts = 0;
         for (HostMetadata hostMeta : hostMetadata) {
             if (hostGroup.getInstanceGroup() != null) {
                 stackService.updateMetaDataStatusIfFound(stackView.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
             }
             hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
-            if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
-                failedHosts++;
-            }
-        }
-        return failedHosts;
-    }
-
-    private void updateFailedHostMetaData(Collection<HostMetadata> hostMetadata) {
-        List<String> upscaleHostNames = getHostNames(hostMetadata);
-        Collection<String> successHosts = new HashSet<>(upscaleHostNames);
-        updateFailedHostMetaData(successHosts, hostMetadata);
-    }
-
-    private void updateFailedHostMetaData(Collection<String> successHosts, Iterable<HostMetadata> hostMetadata) {
-        for (HostMetadata metaData : hostMetadata) {
-            if (!successHosts.contains(metaData.getHostName())) {
-                metaData.setHostMetadataState(HostMetadataState.UNHEALTHY);
-                metaData.setStatusReason("Cluster upscale failed. Host failed to upscale.");
-                hostMetadataRepository.save(metaData);
-            }
         }
     }
 
