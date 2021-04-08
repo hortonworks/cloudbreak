@@ -37,7 +37,7 @@
           }
         ]
       },
-      "nodeCount": 1,
+      "nodeCount": 2,
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
       "recipeNames": []
@@ -54,7 +54,7 @@
           }
         ]
       },
-      "nodeCount": 2,
+      "nodeCount": 3,
       "type": "CORE",
       "recoveryMode": "MANUAL",
       "recipeNames": []
