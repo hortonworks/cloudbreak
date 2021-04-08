@@ -20,11 +20,14 @@ public class EnvironmentUseCaseMapper {
     // At the moment we need to introduce a complex logic to figure out the use case
     public UsageProto.CDPEnvironmentStatus.Value useCase(FlowDetails flow) {
         UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        if (environmentRequestProcessingStepMapper.isFirstStep(flow)) {
-            useCase = firstStepToUseCaseMapping(flow.getFlowType());
-        } else if (environmentRequestProcessingStepMapper.isLastStep(flow)) {
-            String flowState = flow.getFlowState();
-            useCase = lastStepToUseCaseMapping(flowState);
+        if (flow != null) {
+            if (environmentRequestProcessingStepMapper.isFirstStep(flow)) {
+                if (flow.getFlowType() != null) {
+                    useCase = firstStepToUseCaseMapping(flow.getFlowType());
+                }
+            } else if (environmentRequestProcessingStepMapper.isLastStep(flow)) {
+                useCase = lastStepToUseCaseMapping(flow.getNextFlowState());
+            }
         }
         return useCase;
     }
@@ -51,9 +54,9 @@ public class EnvironmentUseCaseMapper {
         return useCase;
     }
 
-    private UsageProto.CDPEnvironmentStatus.Value lastStepToUseCaseMapping(String flowState) {
+    private UsageProto.CDPEnvironmentStatus.Value lastStepToUseCaseMapping(String nextFlowState) {
         UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
-        switch (flowState) {
+        switch (nextFlowState) {
             case "ENV_CREATION_FINISHED_STATE":
                 useCase = UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED;
                 break;
@@ -79,9 +82,9 @@ public class EnvironmentUseCaseMapper {
                 useCase = UsageProto.CDPEnvironmentStatus.Value.SUSPEND_FAILED;
                 break;
             default:
-                LOGGER.debug("Flow state: {}", flowState);
+                LOGGER.debug("Next flow state: {}", nextFlowState);
         }
-        LOGGER.debug("Mapping last flow state to use-case: {}, {}", flowState, useCase);
+        LOGGER.debug("Mapping next flow state to use-case: {}, {}", nextFlowState, useCase);
         return useCase;
     }
 }

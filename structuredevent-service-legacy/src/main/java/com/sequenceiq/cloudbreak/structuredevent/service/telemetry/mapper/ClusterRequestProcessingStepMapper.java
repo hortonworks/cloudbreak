@@ -25,6 +25,9 @@ public class ClusterRequestProcessingStepMapper {
     }
 
     public boolean isLastStep(FlowDetails flow) {
-        return "FINAL_STATE".equals(flow.getNextFlowState());
+        return flow.getNextFlowState() != null
+                && (flow.getNextFlowState().contains("_FAIL")
+                || flow.getNextFlowState().contains("FINISHED_STATE")
+                || flow.getNextFlowState().contains("FINALIZE_"));
     }
 }
