@@ -61,7 +61,7 @@ public class ParcelUrlProviderTest {
         StatedImage image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
 
         when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(image);
-        when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(createClusterComponents());
+        when(parcelService.getComponentsByImage(stack, image.getImage())).thenReturn(createClusterComponents());
 
         Set<String> actual = underTest.getRequiredParcelsFromImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID, stack);
 
@@ -69,7 +69,7 @@ public class ParcelUrlProviderTest {
         assertTrue(actual.contains("http://testCDH-2.7.6-el7.parcel"));
         assertTrue(actual.contains("http://test/spark/SPARK3-el7.parcel"));
         verify(imageCatalogService).getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
-        verify(parcelService).getParcelComponentsByBlueprint(stack);
+        verify(parcelService).getComponentsByImage(stack, image.getImage());
     }
 
     @Test

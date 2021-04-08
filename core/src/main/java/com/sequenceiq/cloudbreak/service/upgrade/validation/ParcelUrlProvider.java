@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -33,8 +34,8 @@ class ParcelUrlProvider {
 
     Set<String> getRequiredParcelsFromImage(String imageCatalogUrl, String imageCatalogName, String imageId, Stack stack) {
         StatedImage targetImage = getTargetImage(imageCatalogUrl, imageCatalogName, imageId);
-        String cdhRepoUrl = getCdhParcelUrl(targetImage);
-        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhRepoUrl) : getAllParcel(cdhRepoUrl, targetImage, stack);
+        String cdhParcelUrl = getCdhParcelUrl(targetImage);
+        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcel(cdhParcelUrl, targetImage, stack);
     }
 
     private StatedImage getTargetImage(String imageCatalogUrl, String imageCatalogName, String imageId) {
@@ -48,10 +49,10 @@ class ParcelUrlProvider {
     private String getCdhParcelUrl(StatedImage targetImage) {
         Map<String, String> stack = targetImage.getImage().getStackDetails().getRepo().getStack();
         String imageId = targetImage.getImage().getUuid();
-        return getBaseUrl(stack, imageId).concat("CDH-").concat(getRepoVersion(stack, imageId)).concat("-el7.parcel");
+        return getCdhBaseUrl(stack, imageId).concat("CDH-").concat(getRepoVersion(stack, imageId)).concat("-el7.parcel");
     }
 
-    private String getBaseUrl(Map<String, String> stack, String imageId) {
+    private String getCdhBaseUrl(Map<String, String> stack, String imageId) {
         return Optional.ofNullable(stack.get("redhat7"))
                 .orElseThrow(() -> new CloudbreakServiceException(String.format("Stack base URL is not found on image: %s", imageId)));
     }
@@ -68,23 +69,23 @@ class ParcelUrlProvider {
     }
 
     private Set<String> getPreWarmParcelUrls(StatedImage targetImage, Stack stack) {
-        Set<String> requiredParcelNames = getRequiredParcelNames(stack);
+        Set<String> requiredParcelNames = getRequiredParcelNames(stack, targetImage.getImage());
         return targetImage.getImage()
                 .getPreWarmParcels()
                 .stream()
                 .filter(filterRequiresParcels(requiredParcelNames))
-                .map(list -> removeUnnecessaryCharacters(getParcelBaseUrl(list)).concat("/").concat(getParcelName(list)))
+                .map(list -> removeUnnecessaryCharacters(getPreWarmParcelBaseUrl(list)).concat("/").concat(getPreWarmParcelName(list)))
                 .collect(Collectors.toSet());
     }
 
-    private String getParcelName(List<String> list) {
+    private String getPreWarmParcelName(List<String> list) {
         return list.stream()
                 .filter(parcelList -> !parcelList.startsWith("http"))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Parcel name not found in list: %s", list)));
     }
 
-    private String getParcelBaseUrl(List<String> list) {
+    private String getPreWarmParcelBaseUrl(List<String> list) {
         return list.stream()
                 .filter(parcelList -> parcelList.startsWith("http"))
                 .findFirst()
@@ -95,8 +96,8 @@ class ParcelUrlProvider {
         return list -> list.stream().anyMatch(parcelName -> requiredParcelNames.stream().anyMatch(parcelName::startsWith));
     }
 
-    private Set<String> getRequiredParcelNames(Stack stack) {
-        return parcelService.getParcelComponentsByBlueprint(stack)
+    private Set<String> getRequiredParcelNames(Stack stack, Image image) {
+        return parcelService.getComponentsByImage(stack, image)
                 .stream()
                 .map(ClusterComponent::getName)
                 .collect(Collectors.toSet());
