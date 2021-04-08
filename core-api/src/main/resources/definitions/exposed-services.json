@@ -645,7 +645,7 @@
       "displayName": "Token Integration",
       "serviceName": "KNOX",
       "knoxService": "KNOX_TOKEN_INTEGRATOR",
-      "knoxUrl": "/homepage/home",
+      "knoxUrl": "/homepage/home?profile=token&topologies=cdp-proxy-token",
       "ssoSupported": true,
       "apiOnly": false,
       "apiIncluded": false,
