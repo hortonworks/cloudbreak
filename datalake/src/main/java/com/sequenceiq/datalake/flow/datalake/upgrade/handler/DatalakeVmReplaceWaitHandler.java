@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -28,9 +29,11 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatalakeVmReplaceWaitHandler.class);
 
-    private static final int SLEEP_TIME_IN_SEC = 20;
+    @Value("${sdx.vm.replace.sleeptime_sec:20}")
+    private int sleepTimeInSec;
 
-    private static final int DURATION_IN_MINUTES = 60;
+    @Value("${sdx.vm.replace.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private SdxUpgradeService upgradeService;
@@ -53,7 +56,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
         Selectable response;
         try {
             LOGGER.info("Start polling cluster VM replacement process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             upgradeService.waitCloudbreakFlow(sdxId, pollingConfig, "VM replace");
             response = new DatalakeUpgradeSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -62,7 +65,7 @@ public class DatalakeVmReplaceWaitHandler extends ExceptionCatcherEventHandler<D
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("VM replace poller stopped for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId,
-                    new PollerStoppedException("VM replace timed out after " + DURATION_IN_MINUTES + " minutes"));
+                    new PollerStoppedException("VM replace timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("VM replace polling failed for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId, exception);

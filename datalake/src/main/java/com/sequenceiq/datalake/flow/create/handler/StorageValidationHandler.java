@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-import static com.sequenceiq.datalake.service.sdx.database.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
 
 import java.util.Optional;
 
@@ -9,6 +8,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -32,6 +32,9 @@ import reactor.bus.Event;
 public class StorageValidationHandler extends ExceptionCatcherEventHandler<StorageValidationRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageValidationHandler.class);
+
+    @Value("${sdx.db.operation.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private EnvironmentService environmentService;
@@ -72,7 +75,7 @@ public class StorageValidationHandler extends ExceptionCatcherEventHandler<Stora
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Env poller stopped for sdx: {}", sdxId, pollerStoppedException);
             return new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Env wait timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes in sdx storage validation phase"));
+                    new PollerStoppedException("Env wait timed out after " + durationInMinutes + " minutes in sdx storage validation phase"));
         } catch (PollerException exception) {
             LOGGER.error("Env polling failed for sdx: {}", sdxId, exception);
             return new SdxCreateFailedEvent(sdxId, userId, exception);

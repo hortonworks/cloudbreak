@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.flow.create.handler;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-import static com.sequenceiq.datalake.service.sdx.database.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
 
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -39,6 +39,9 @@ import reactor.bus.Event;
 public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsWaitHandler.class);
+
+    @Value("${sdx.db.operation.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private EnvironmentService environmentService;
@@ -90,7 +93,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
             return new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database creation timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes"));
+                    new PollerStoppedException("Database creation timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
             return new SdxCreateFailedEvent(sdxId, userId, exception);

@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -25,11 +26,13 @@ import reactor.bus.Event;
 @Component
 public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWaitRequest> {
 
-    public static final int SLEEP_TIME_IN_SEC = 20;
-
-    public static final int DURATION_IN_MINUTES = 40;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxStopWaitHandler.class);
+
+    @Value("${sdx.stack.stop.sleeptime_sec:20}")
+    private int sleepTimeInSec;
+
+    @Value("${sdx.stack.stop.duration_min:40}")
+    private int durationInMinutes;
 
     @Inject
     private SdxStopService sdxStopService;
@@ -47,7 +50,7 @@ public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWait
         Selectable response;
         try {
             LOGGER.debug("Stop polling stack stopping process for id: {}", sdxId);
-            PollingConfig pollingConfig = new PollingConfig(SLEEP_TIME_IN_SEC, TimeUnit.SECONDS, DURATION_IN_MINUTES, TimeUnit.MINUTES);
+            PollingConfig pollingConfig = new PollingConfig(sleepTimeInSec, TimeUnit.SECONDS, durationInMinutes, TimeUnit.MINUTES);
             sdxStopService.waitCloudbreakCluster(sdxId, pollingConfig);
             response = new SdxStopSuccessEvent(sdxId, userId);
         } catch (UserBreakException userBreakException) {
@@ -56,7 +59,7 @@ public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWait
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Stop poller stopped for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Datalake stop timed out after " + DURATION_IN_MINUTES + " minutes"));
+                    new PollerStoppedException("Datalake stop timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.error("Stop polling failed for stack: {}", sdxId);
             response = new SdxStopFailedEvent(sdxId, userId, exception);

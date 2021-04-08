@@ -1,12 +1,11 @@
 package com.sequenceiq.datalake.flow.delete.handler;
 
-import static com.sequenceiq.datalake.service.sdx.database.DatabaseService.DURATION_IN_MINUTES_FOR_DB_POLLING;
-
 import javax.inject.Inject;
 
 import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.dyngr.exception.PollerException;
@@ -32,6 +31,9 @@ import reactor.bus.Event;
 @Component
 public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletionWaitRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsDeletionHandler.class);
+
+    @Value("${sdx.db.operation.duration_min:60}")
+    private int durationInMinutes;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -78,7 +80,7 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
             response = new SdxDeletionFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Database deletion timed out after " + DURATION_IN_MINUTES_FOR_DB_POLLING + " minutes"),
+                    new PollerStoppedException("Database deletion timed out after " + durationInMinutes + " minutes"),
                     rdsWaitRequest.isForced());
         } catch (PollerException exception) {
             LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
