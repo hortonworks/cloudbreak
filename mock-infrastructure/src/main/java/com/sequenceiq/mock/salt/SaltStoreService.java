@@ -3,10 +3,12 @@ package com.sequenceiq.mock.salt;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,26 +21,33 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 @Component
 public class SaltStoreService {
 
-    private Map<String, SaltDto> saltDtos = new HashMap<>();
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltStoreService.class);
+
+    private Map<String, SaltDto> saltDtos = new ConcurrentHashMap<>();
 
     public List<Minion> getMinions(String mockUuid) {
+        LOGGER.info("read salt minions by {}", mockUuid);
         return read(mockUuid).getSaltAction().getMinions();
     }
 
     public Map<String, Multimap<String, String>> getGrains(String mockUuid) {
+        LOGGER.info("read salt grains by {}", mockUuid);
         return read(mockUuid).getGrains();
     }
 
     public SaltDto read(String mockUuid) {
+        LOGGER.info("read salt by {}", mockUuid);
         SaltDto saltDto = saltDtos.get(mockUuid);
         if (saltDto == null) {
+            LOGGER.info("cannot be found the salt by {}", mockUuid);
             throw new ResponseStatusException(NOT_FOUND, "SaltDto cannot be found by uuid: " + mockUuid);
         }
         return saltDto;
     }
 
-    public void terminate(String mockuuid) {
-        saltDtos.remove(mockuuid);
+    public void terminate(String mockUuid) {
+        LOGGER.info("terminate salt by {}", mockUuid);
+        saltDtos.remove(mockUuid);
     }
 
     public Collection<SaltDto> getAll() {
@@ -52,19 +61,23 @@ public class SaltStoreService {
     }
 
     public void saltbootFileDistribute(String mockUuid, MultipartFile body) {
+        LOGGER.info("add salt file distribute to {}", mockUuid);
         SaltDto saltDto = read(mockUuid);
         saltDto.getFileDistributonDtos().add(new FileDistributonDto(mockUuid, body.getOriginalFilename(), body.getSize(), body.getContentType()));
     }
 
     public void setSaltAction(String mockUuid, SaltAction saltAction) {
+        LOGGER.info("set salt actions to {}. Salt action: {}", mockUuid, saltAction);
         read(mockUuid).setSaltAction(saltAction);
     }
 
     public void addPillar(String mockUuid, Pillar pillar) {
+        LOGGER.info("add salt pillar to {}. Pillar: {}", mockUuid, pillar);
         read(mockUuid).getPillars().add(pillar);
     }
 
-    public void create(String mockuuid) {
-        saltDtos.put(mockuuid, new SaltDto(mockuuid));
+    public void create(String mockUuid) {
+        LOGGER.info("create salt for {}", mockUuid);
+        saltDtos.put(mockUuid, new SaltDto(mockUuid));
     }
 }
