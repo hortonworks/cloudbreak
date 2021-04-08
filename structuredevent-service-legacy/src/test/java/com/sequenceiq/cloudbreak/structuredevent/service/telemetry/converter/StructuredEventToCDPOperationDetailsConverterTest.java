@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.powermock.reflect.Whitebox;
@@ -86,10 +87,18 @@ public class StructuredEventToCDPOperationDetailsConverterTest {
     public void testFinalProcessingType() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
-        flowDetails.setNextFlowState("FINAL_STATE");
+        flowDetails.setFlowState("unknown");
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FAILED_STATE");
         structuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
+
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowState());
+
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FINISHED_STATE");
+
+        details = underTest.convert(structuredFlowEvent);
 
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
         Assert.assertEquals("", details.getFlowState());
@@ -113,7 +122,7 @@ public class StructuredEventToCDPOperationDetailsConverterTest {
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setFlowId("flowId");
         flowDetails.setFlowChainId("flowChainId");
-        flowDetails.setNextFlowState("FINAL_STATE");
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FINISHED_STATE");
         structuredFlowEvent.setFlow(flowDetails);
 
         OperationDetails operationDetails = new OperationDetails();
@@ -134,7 +143,7 @@ public class StructuredEventToCDPOperationDetailsConverterTest {
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setFlowId("flowId");
         flowDetails.setFlowState("SOMETHING");
-        flowDetails.setNextFlowState("FINAL_STATE");
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FINISHED_STATE");
         structuredFlowEvent.setFlow(flowDetails);
 
         UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
@@ -142,7 +151,44 @@ public class StructuredEventToCDPOperationDetailsConverterTest {
         Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
         Assert.assertEquals("flowId", details.getFlowId());
         Assert.assertEquals("flowId", details.getFlowChainId());
-        Assert.assertEquals("SOMETHING", details.getFlowState());
+        Assert.assertEquals("", details.getFlowState());
+    }
+
+    @Test
+    public void testFlowStateOnlyFilledOutInCaseOfFailure() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        FlowDetails flowDetails = new FlowDetails();
+        structuredFlowEvent.setFlow(flowDetails);
+
+        flowDetails.setFlowState("FLOW_STATE");
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FAILED_STATE");
+        UsageProto.CDPOperationDetails details = underTest.convert(structuredFlowEvent);
+        Assertions.assertEquals("FLOW_STATE", details.getFlowState());
+
+        flowDetails.setFlowState("FLOW_STATE");
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FINISHED_STATE");
+        details = underTest.convert(structuredFlowEvent);
+        Assertions.assertEquals("", details.getFlowState());
+
+        flowDetails.setFlowState("FLOW_STATE");
+        flowDetails.setNextFlowState("INIT_STATE");
+        details = underTest.convert(structuredFlowEvent);
+        Assertions.assertEquals("", details.getFlowState());
+
+        flowDetails.setFlowState(null);
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FAILED_STATE");
+        details = underTest.convert(structuredFlowEvent);
+        Assertions.assertEquals("", details.getFlowState());
+
+        flowDetails.setFlowState("unknown");
+        flowDetails.setNextFlowState("CLUSTER_CREATION_FAILED_STATE");
+        details = underTest.convert(structuredFlowEvent);
+        Assertions.assertEquals("", details.getFlowState());
+
+        flowDetails.setFlowState("FLOW_STATE");
+        flowDetails.setNextFlowState(null);
+        details = underTest.convert(structuredFlowEvent);
+        Assertions.assertEquals("", details.getFlowState());
     }
 
     @Test

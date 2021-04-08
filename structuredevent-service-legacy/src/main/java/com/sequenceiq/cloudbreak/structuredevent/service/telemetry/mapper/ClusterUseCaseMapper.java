@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 
 @Component
@@ -26,8 +27,9 @@ public class ClusterUseCaseMapper {
 
     private Map<Pair, UsageProto.CDPClusterStatus.Value> firstStepUseCaseMap;
 
+    @VisibleForTesting
     @PostConstruct
-    private void initUseCaseMaps() {
+    void initUseCaseMaps() {
         firstStepUseCaseMap = new HashMap<>();
         firstStepUseCaseMap.put(Pair.of("ProvisionFlowEventChainFactory", "CloudConfigValidationFlowConfig"), UsageProto.CDPClusterStatus.Value.CREATE_STARTED);
         firstStepUseCaseMap.put(Pair.of("ProperTerminationFlowEventChainFactory", "ClusterTerminationFlowConfig"),
@@ -47,11 +49,13 @@ public class ClusterUseCaseMapper {
     // At the moment we need to introduce a complex logic to figure out the use case
     public UsageProto.CDPClusterStatus.Value useCase(FlowDetails flow) {
         UsageProto.CDPClusterStatus.Value useCase = UsageProto.CDPClusterStatus.Value.UNSET;
-        String rootFlowChainType = getRootFlowChainType(flow.getFlowChainType());
-        if (clusterRequestProcessingStepMapper.isFirstStep(flow)) {
-            useCase = firstStepToUseCaseMapping(rootFlowChainType, flow.getFlowType());
-        } else if (clusterRequestProcessingStepMapper.isLastStep(flow)) {
-            useCase = lastStepToUseCaseMapping(rootFlowChainType, flow.getFlowType(), flow.getFlowState());
+        if (flow != null) {
+            String rootFlowChainType = getRootFlowChainType(flow.getFlowChainType());
+            if (clusterRequestProcessingStepMapper.isFirstStep(flow)) {
+                useCase = firstStepToUseCaseMapping(rootFlowChainType, flow.getFlowType());
+            } else if (clusterRequestProcessingStepMapper.isLastStep(flow)) {
+                useCase = lastStepToUseCaseMapping(rootFlowChainType, flow.getFlowType(), flow.getNextFlowState());
+            }
         }
         LOGGER.debug("FlowDetails: {}, Usecase: {}", flow, useCase);
         return useCase;
@@ -65,56 +69,58 @@ public class ClusterUseCaseMapper {
     }
 
     //CHECKSTYLE:OFF: CyclomaticComplexity
-    private UsageProto.CDPClusterStatus.Value lastStepToUseCaseMapping(String rootFlowChainType, String flowType, String flowState) {
+    private UsageProto.CDPClusterStatus.Value lastStepToUseCaseMapping(String rootFlowChainType, String flowType, String nextFlowState) {
         UsageProto.CDPClusterStatus.Value useCase = UsageProto.CDPClusterStatus.Value.UNSET;
         String rootFlowType = StringUtils.isNotEmpty(rootFlowChainType) ? rootFlowChainType : flowType;
-        switch (rootFlowType) {
-            case "ProvisionFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "CLUSTER_CREATION_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.CREATE_FINISHED, UsageProto.CDPClusterStatus.Value.CREATE_FAILED);
-                break;
-            case "ProperTerminationFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "TERMINATION_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.DELETE_FINISHED, UsageProto.CDPClusterStatus.Value.DELETE_FAILED);
-                break;
-            case "UpscaleFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "FINALIZE_UPSCALE_STATE",
-                        UsageProto.CDPClusterStatus.Value.UPSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.UPSCALE_FAILED);
-                break;
-            case "DownscaleFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "DOWNSCALE_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.DOWNSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.DOWNSCALE_FAILED);
-                break;
-            case "StartFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "CLUSTER_START_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.RESUME_FINISHED, UsageProto.CDPClusterStatus.Value.RESUME_FAILED);
-                break;
-            case "StopFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "STOP_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.SUSPEND_FINISHED, UsageProto.CDPClusterStatus.Value.SUSPEND_FAILED);
-                break;
-            case DISTROX_UPGRADE_REPAIR_FLOWCHAIN:
-            case "ClusterRepairFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.REPAIR_FINISHED, UsageProto.CDPClusterStatus.Value.REPAIR_FAILED);
-                break;
-            case "UpgradeDatalakeFlowEventChainFactory":
-            case "UpgradeDistroxFlowEventChainFactory":
-                useCase = getClusterStatus(flowState, "CLUSTER_UPGRADE_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED, UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED);
-                break;
-            case "ClusterCertificateRenewFlowConfig":
-                useCase = getClusterStatus(flowState, "CLUSTER_CERTIFICATE_RENEWAL_FINISHED_STATE",
-                        UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FINISHED, UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FAILED);
-                break;
-            case "CertRotationFlowConfig":
-                useCase = getClusterStatus(flowState, "CERT_ROTATION_FINISHED_STATE", UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FINISHED,
-                        UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FAILED);
-                break;
-            default:
-                LOGGER.debug("Flow state: {}", flowState);
+        if (rootFlowType != null) {
+            switch (rootFlowType) {
+                case "ProvisionFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "CLUSTER_CREATION_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.CREATE_FINISHED, UsageProto.CDPClusterStatus.Value.CREATE_FAILED);
+                    break;
+                case "ProperTerminationFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "TERMINATION_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.DELETE_FINISHED, UsageProto.CDPClusterStatus.Value.DELETE_FAILED);
+                    break;
+                case "UpscaleFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "FINALIZE_UPSCALE_STATE",
+                            UsageProto.CDPClusterStatus.Value.UPSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.UPSCALE_FAILED);
+                    break;
+                case "DownscaleFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "DOWNSCALE_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.DOWNSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.DOWNSCALE_FAILED);
+                    break;
+                case "StartFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "CLUSTER_START_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.RESUME_FINISHED, UsageProto.CDPClusterStatus.Value.RESUME_FAILED);
+                    break;
+                case "StopFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "STOP_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.SUSPEND_FINISHED, UsageProto.CDPClusterStatus.Value.SUSPEND_FAILED);
+                    break;
+                case DISTROX_UPGRADE_REPAIR_FLOWCHAIN:
+                case "ClusterRepairFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.REPAIR_FINISHED, UsageProto.CDPClusterStatus.Value.REPAIR_FAILED);
+                    break;
+                case "UpgradeDatalakeFlowEventChainFactory":
+                case "UpgradeDistroxFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "CLUSTER_UPGRADE_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.UPGRADE_FINISHED, UsageProto.CDPClusterStatus.Value.UPGRADE_FAILED);
+                    break;
+                case "ClusterCertificateRenewFlowConfig":
+                    useCase = getClusterStatus(nextFlowState, "CLUSTER_CERTIFICATE_RENEWAL_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FINISHED, UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_FAILED);
+                    break;
+                case "CertRotationFlowConfig":
+                    useCase = getClusterStatus(nextFlowState, "CERT_ROTATION_FINISHED_STATE", UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FINISHED,
+                            UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FAILED);
+                    break;
+                default:
+                    LOGGER.debug("Next flow state: {}", nextFlowState);
+            }
         }
-        LOGGER.debug("Mapping last flow state to use-case: [flowchain: {}, flow:{}, flowstate: {}]: {}", rootFlowChainType, flowType, flowState, useCase);
+        LOGGER.debug("Mapping next flow state to use-case: [flowchain: {}, flow:{}, nextflowstate: {}]: {}", rootFlowChainType, flowType, nextFlowState, useCase);
         return useCase;
     }
     //CHECKSTYLE:ON
@@ -130,11 +136,11 @@ public class ClusterUseCaseMapper {
         return "";
     }
 
-    private UsageProto.CDPClusterStatus.Value getClusterStatus(String flowState, String finishedFlowState, UsageProto.CDPClusterStatus.Value finishedStatus,
+    private UsageProto.CDPClusterStatus.Value getClusterStatus(String nextFlowState, String finishedFlowState, UsageProto.CDPClusterStatus.Value finishedStatus,
             UsageProto.CDPClusterStatus.Value failedStatus) {
-        if (flowState.equals(finishedFlowState)) {
+        if (nextFlowState.equals(finishedFlowState)) {
             return finishedStatus;
-        } else if (flowState.contains("_FAIL")) {
+        } else if (nextFlowState.contains("_FAIL")) {
             return failedStatus;
         }
         return UsageProto.CDPClusterStatus.Value.UNSET;

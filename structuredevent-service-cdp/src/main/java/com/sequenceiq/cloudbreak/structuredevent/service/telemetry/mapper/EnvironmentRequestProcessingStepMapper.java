@@ -25,6 +25,6 @@ public class EnvironmentRequestProcessingStepMapper {
     }
 
     public boolean isLastStep(FlowDetails flow) {
-        return "FINAL_STATE".equals(flow.getNextFlowState());
+        return flow.getNextFlowState() != null && (flow.getNextFlowState().endsWith("_FAILED_STATE") || flow.getNextFlowState().endsWith("_FINISHED_STATE"));
     }
 }
