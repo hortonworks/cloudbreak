@@ -2,7 +2,7 @@
   "name": "7.2.10 - Data Engineering HA for AWS",
   "description": "",
   "type": "DATAENGINEERING",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
@@ -13,7 +13,7 @@
     },
     "enableLoadBalancer": true,
     "instanceGroups": [{
-      "nodeCount": 1,
+      "nodeCount": 2,
       "name": "manager",
       "type": "GATEWAY",
       "recoveryMode": "MANUAL",
