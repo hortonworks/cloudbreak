@@ -12,6 +12,8 @@ import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -162,26 +164,43 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
+    public ImageV4Response getSingleImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name, String imageId) throws Exception {
+        StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, name);
+        // FIXME: This conversion WILL fail unless properly implemented!
+        return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public ImagesV4Response createImageInCatalog(Long workspaceId, @ResourceName String name, @RequestObject ImageEntryV4Request request) {
+    public ImageV4Response createImageInCatalog(Long workspaceId, @ResourceName String name, @RequestObject ImageEntryV4Request request) {
+
+        // FIXME: Implement this!
         return null;
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public ImagesV4Response updateImageInCatalog(Long workspaceId, @ResourceName String name, String imageId, @RequestObject ImageEntryV4Request request) {
+    public ImageBasicInfoV4Response updateImageInCatalog(Long workspaceId, @ResourceName String name, String imageId,
+            @RequestObject ImageEntryV4Request request) {
+
+        // FIXME: Implement this!
         return null;
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public ImagesV4Response deleteImageFromCatalog(Long workspaceId, @ResourceName String name, String imageId) {
+    public ImageBasicInfoV4Response deleteImageFromCatalog(Long workspaceId, @ResourceName String name, String imageId) {
+
+        // FIXME: Implement this!
         return null;
     }
 
     @Override
     @DisableCheckPermissions
     public ImagesV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
+
+        // FIXME: Implement this!
         return null;
     }
 }

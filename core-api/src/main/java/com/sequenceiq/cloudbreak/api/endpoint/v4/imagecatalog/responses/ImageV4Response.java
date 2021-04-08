@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NotNull
-public class ImageV4Response implements JsonEntity {
+public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEntity {
 
     @JsonProperty("date")
     private String date;
@@ -33,9 +33,6 @@ public class ImageV4Response implements JsonEntity {
 
     @JsonProperty("osType")
     private String osType;
-
-    @JsonProperty("uuid")
-    private String uuid;
 
     @JsonProperty("version")
     private String version;
@@ -89,14 +86,6 @@ public class ImageV4Response implements JsonEntity {
 
     public void setOs(String os) {
         this.os = os;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 
     public String getVersion() {
