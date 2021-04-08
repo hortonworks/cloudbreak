@@ -102,6 +102,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscaleClusterResult payload, Map<Object, Object> variables) {
+                clusterUpscaleFlowService.updateMetadata(context.getStack(), payload.getHostGroupName());
                 sendEvent(context);
             }
 

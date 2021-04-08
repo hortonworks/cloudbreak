@@ -98,7 +98,7 @@ public class ClusterDownscaleService {
             }
             String errorDetailes = String.format("The following hosts are in '%s': %s", status, String.join(", ", payload.getHostNames()));
             flowMessageService.fireEventAndLog(payload.getStackId(),
-                    Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+                    Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "downscale", errorDetailes);
         }
     }
 
@@ -111,7 +111,7 @@ public class ClusterDownscaleService {
         String errorDetailes = String.format("The following hosts are in '%s': %s",
                 InstanceStatus.ORCHESTRATION_FAILED, String.join(", ", payload.getFailedHostNames()));
         flowMessageService.fireEventAndLog(payload.getStackId(),
-                Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+                Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "downscale", errorDetailes);
     }
 
     private InstanceStatus getStatus(String errorPhase) {
@@ -131,6 +131,6 @@ public class ClusterDownscaleService {
         }
         clusterService.updateClusterStatusByStackId(stackId, status, errorDetailes);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetailes);
-        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "removed from", errorDetailes);
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "downscale", errorDetailes);
     }
 }
