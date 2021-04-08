@@ -2,30 +2,28 @@ package com.sequenceiq.freeipa.flow.freeipa.cleanup;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.entity.FreeIpa;
+import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.CleanupFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
 
 public abstract class AbstractFreeIpaCleanupAction<P extends CleanupEvent>
         extends AbstractStackAction<FreeIpaCleanupState, FreeIpaCleanupEvent, FreeIpaContext, P> {
 
-    @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFreeIpaCleanupAction.class);
 
     @Inject
     private FreeIpaService freeIpaService;
-
-    @Inject
-    private CleanupService cleanupService;
 
     protected AbstractFreeIpaCleanupAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -41,11 +39,8 @@ public abstract class AbstractFreeIpaCleanupAction<P extends CleanupEvent>
 
     @Override
     protected Object getFailurePayload(P payload, Optional<FreeIpaContext> flowContext, Exception ex) {
-        return null;
-    }
-
-    protected CleanupService getCleanupService() {
-        return cleanupService;
+        LOGGER.warn("Failure happened during cleanup, and 'getFailurePayload' is not overridden in state.", ex);
+        return new CleanupFailureEvent(payload, "Unknown phase", Map.of(), Set.of());
     }
 
     protected boolean shouldSkipState(CleanupEvent event, Map<Object, Object> variables) {

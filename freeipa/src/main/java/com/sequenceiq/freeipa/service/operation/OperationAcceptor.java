@@ -66,4 +66,8 @@ public abstract class OperationAcceptor {
     protected boolean doListsConflict(List<String> list1, List<String> list2) {
         return list1.isEmpty() || list2.isEmpty() || !Sets.intersection(Set.copyOf(list1), Set.copyOf(list2)).isEmpty();
     }
+
+    protected OperationRepository getOperationRepository() {
+        return operationRepository;
+    }
 }

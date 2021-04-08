@@ -19,6 +19,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -47,7 +48,7 @@ public class SdxRepairWaitHandler extends ExceptionCatcherEventHandler<SdxRepair
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<SdxRepairWaitRequest> event) {
         SdxRepairWaitRequest sdxRepairWaitRequest = event.getData();
         Long sdxId = sdxRepairWaitRequest.getResourceId();
         String userId = sdxRepairWaitRequest.getUserId();

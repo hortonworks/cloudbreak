@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigR
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -119,15 +120,16 @@ public class KerberosConfigV1Service {
             LOGGER.debug("Kerberos config already exists");
             kerberosConfig = existingKerberosConfig.get();
         } else {
-            kerberosConfig = createNewKerberosConfig(environmentCrn, clusterName, stack);
+            kerberosConfig = createNewKerberosConfig(environmentCrn, clusterName, stack, false);
         }
         return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }
 
-    private KerberosConfig createNewKerberosConfig(String environmentCrn, String clusterName, Stack existingStack) throws FreeIpaClientException {
+    public KerberosConfig createNewKerberosConfig(String environmentCrn, String clusterName, Stack existingStack, boolean ignoreExistingUser)
+            throws FreeIpaClientException {
         LOGGER.debug("Kerberos config doesn't exists for cluster [{}] in env [{}]. Creating new in FreeIPA", clusterName, environmentCrn);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(existingStack);
-        User user = createBindUser(freeIpaClient, clusterName);
+        User user = ignoreExistingUser ? createBindUserIgnoreExisting(freeIpaClient, clusterName) : createBindUser(freeIpaClient, clusterName);
         String password = setPasswordForBindUser(freeIpaClient, user);
         addEnrollmentAdminRole(freeIpaClient, user);
         return kerberosConfigRegisterService.createKerberosConfig(existingStack.getId(), user.getUid(), password, clusterName, environmentCrn);
@@ -146,12 +148,41 @@ public class KerberosConfigV1Service {
     }
 
     private User createBindUser(FreeIpaClient freeIpaClient, String clusterName) throws RetryableFreeIpaClientException {
-        String bindUser = "kerberosbind-" + clusterName;
+        String bindUser = createBindUserName(clusterName);
         try {
             return freeIpaClient.userAdd(bindUser, "service", "account");
         } catch (FreeIpaClientException e) {
             LOGGER.warn("Failed to create kerberos bind user: [{}]", bindUser, e);
             throw new RetryableFreeIpaClientException("Failed to create kerberos bind user", e);
         }
+
+    }
+
+    private User createBindUserIgnoreExisting(FreeIpaClient freeIpaClient, String clusterName) throws RetryableFreeIpaClientException {
+        String bindUser = createBindUserName(clusterName);
+        try {
+            return freeIpaClient.userAdd(bindUser, "service", "account");
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                return getExistingBindUser(freeIpaClient, bindUser);
+            } else {
+                LOGGER.warn("Failed to create kerberos bind user: [{}]", bindUser, e);
+                throw new RetryableFreeIpaClientException("Failed to create kerberos bind user", e);
+            }
+        }
+    }
+
+    private User getExistingBindUser(FreeIpaClient freeIpaClient, String bindUser) throws RetryableFreeIpaClientException {
+        try {
+            LOGGER.info("Bind user already exists, getting it from FreeIPA");
+            return freeIpaClient.userShow(bindUser);
+        } catch (FreeIpaClientException e) {
+            LOGGER.warn("Failed to get kerberos bind user: [{}]", bindUser, e);
+            throw new RetryableFreeIpaClientException("Failed to get kerberos bind user", e);
+        }
+    }
+
+    private String createBindUserName(String clusterName) {
+        return "kerberosbind-" + clusterName;
     }
 }

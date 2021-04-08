@@ -39,6 +39,7 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandler<CreateLoadBalancerEntityRequest> {
@@ -77,7 +78,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<CreateLoadBalancerEntityRequest> event) {
         CreateLoadBalancerEntityRequest request = event.getData();
         Stack stack = stackService.getById(request.getResourceId());
         try {

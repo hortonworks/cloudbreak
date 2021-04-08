@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<RegisterPublicDnsRequest> {
@@ -53,7 +54,7 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<RegisterPublicDnsRequest> event) {
         RegisterPublicDnsRequest request = event.getData();
         Stack stack = request.getStack();
         if (gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stack)) {

@@ -51,17 +51,14 @@ public class OperationService {
 
     public Operation startOperation(String accountId, OperationType operationType,
             Collection<String> environmentCrns, Collection<String> userCrns) {
-        Operation operation = requestOperation(accountId, operationType, environmentCrns, userCrns);
+        Operation requestedOperation = requestOperation(accountId, operationType, environmentCrns, userCrns);
         OperationAcceptor acceptor = operationAcceptorMap.get(operationType);
-
-        AcceptResult acceptResult = acceptor.accept(operation);
+        AcceptResult acceptResult = acceptor.accept(requestedOperation);
         if (acceptResult.isAccepted()) {
-            operation = acceptOperation(operation);
+            return acceptOperation(requestedOperation);
         } else {
-            operation = rejectOperation(operation, acceptResult.getRejectionMessage().orElse("Rejected for unspecified reason."));
+            return rejectOperation(requestedOperation, acceptResult.getRejectionMessage().orElse("Rejected for unspecified reason."));
         }
-
-        return operationRepository.save(operation);
     }
 
     public Operation completeOperation(String accountId, String operationId, Collection<SuccessDetails> success, Collection<FailureDetails> failure) {
@@ -118,7 +115,7 @@ public class OperationService {
     private Operation acceptOperation(Operation operation) {
         operation.setStatus(OperationState.RUNNING);
         LOGGER.info("Operation accepted: {}", operation);
-        return operation;
+        return operationRepository.save(operation);
     }
 
     private Operation rejectOperation(Operation operation, String reason) {
@@ -126,6 +123,6 @@ public class OperationService {
         operation.setEndTime(System.currentTimeMillis());
         operation.setError(reason);
         LOGGER.warn("Operation rejected: {}. Operation duration was {} ms.", operation, operation.getEndTime() - operation.getStartTime());
-        return operation;
+        return operationRepository.save(operation);
     }
 }

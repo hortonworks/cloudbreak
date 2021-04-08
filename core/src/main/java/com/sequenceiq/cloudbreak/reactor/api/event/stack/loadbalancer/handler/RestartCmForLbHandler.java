@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartCmForLbRequest> {
@@ -58,7 +59,7 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<RestartCmForLbRequest> event) {
         RestartCmForLbRequest request = event.getData();
         Stack stack = request.getStack();
         requireNonNull(stack);

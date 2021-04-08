@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -49,7 +50,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<ClusterUpgradeRequest> event) {
         LOGGER.debug("Accepting Cluster upgrade event..");
         ClusterUpgradeRequest request = event.getData();
         Long stackId = request.getResourceId();

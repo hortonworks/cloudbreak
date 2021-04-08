@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -65,7 +66,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<DatabaseRestoreRequest> event) {
         DatabaseRestoreRequest request = event.getData();
         Selectable result;
         Long stackId = request.getResourceId();

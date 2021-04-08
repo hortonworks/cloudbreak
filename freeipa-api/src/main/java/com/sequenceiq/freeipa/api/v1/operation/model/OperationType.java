@@ -9,7 +9,8 @@ public enum OperationType {
     REBOOT,
     REPAIR,
     DOWNSCALE,
-    UPSCALE;
+    UPSCALE,
+    BIND_USER_CREATE;
 
     public static OperationType fromSyncOperationType(SyncOperationType syncOperationType) {
         switch (syncOperationType) {

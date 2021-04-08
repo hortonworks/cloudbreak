@@ -40,10 +40,11 @@ public class FreeIpaFlowManager {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public void notify(String selector, Acceptable acceptable) {
+    public FlowIdentifier notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
         notify(selector, event);
+        return checkFlowOperationForResource(event);
     }
 
     public void notify(Selectable selectable) {

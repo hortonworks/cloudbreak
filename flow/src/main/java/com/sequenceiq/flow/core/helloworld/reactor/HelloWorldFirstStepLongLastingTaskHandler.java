@@ -9,6 +9,7 @@ import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLas
 import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLastingTaskSuccessResponse;
 import com.sequenceiq.flow.core.helloworld.flowevents.HelloWorldFirstStepLongLastingTaskTriggerEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -27,7 +28,7 @@ public class HelloWorldFirstStepLongLastingTaskHandler extends ExceptionCatcherE
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<HelloWorldFirstStepLongLastingTaskTriggerEvent> event) {
         HelloWorldFirstStepLongLastingTaskTriggerEvent helloWorldReactorEvent = event.getData();
         Long resourceId = helloWorldReactorEvent.getResourceId();
         try {

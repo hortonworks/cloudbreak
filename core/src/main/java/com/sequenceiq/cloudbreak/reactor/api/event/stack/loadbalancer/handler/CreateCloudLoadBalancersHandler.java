@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -69,7 +70,7 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<CreateCloudLoadBalancersRequest> event) {
         CreateCloudLoadBalancersRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {

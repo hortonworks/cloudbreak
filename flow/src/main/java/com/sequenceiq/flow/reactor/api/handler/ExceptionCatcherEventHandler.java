@@ -22,13 +22,13 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
 
     protected abstract Selectable defaultFailureEvent(Long resourceId, Exception e, Event<T> event);
 
-    protected abstract Selectable doAccept(HandlerEvent event);
+    protected abstract Selectable doAccept(HandlerEvent<T> event);
 
     @Override
     public void accept(Event<T> event) {
         String handlerName = getClass().getSimpleName();
         try {
-            HandlerEvent handlerEvent = new HandlerEvent(event);
+            HandlerEvent<T> handlerEvent = new HandlerEvent<T>(event);
             sendEvent(doAccept(handlerEvent), handlerEvent);
             if (handlerEvent.getCounter() < 1) {
                 String message = "No event has been sent from " + handlerName;
@@ -42,40 +42,9 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
         }
     }
 
-    private void sendEvent(Selectable event, HandlerEvent originalEvent) {
+    private void sendEvent(Selectable event, HandlerEvent<T> originalEvent) {
         eventBus.notify(event.selector(), new Event<>(originalEvent.getEvent().getHeaders(), event));
         originalEvent.increaseCounter();
-    }
-
-    protected class HandlerEvent {
-
-        private Event<T> event;
-
-        private int eventCounter;
-
-        public HandlerEvent(Event<T> event) {
-            this.event = event;
-        }
-
-        public Event<T> getEvent() {
-            return event;
-        }
-
-        public void setEvent(Event<T> event) {
-            this.event = event;
-        }
-
-        public T getData() {
-            return event.getData();
-        }
-
-        private void increaseCounter() {
-            eventCounter++;
-        }
-
-        private int getCounter() {
-            return eventCounter;
-        }
     }
 
 }

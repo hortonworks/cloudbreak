@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExterna
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -62,7 +63,7 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<StartExternalDatabaseRequest> event) {
         LOGGER.debug("In StartExternalDatabaseHandler.doAccept");
         StartExternalDatabaseRequest request = event.getData();
         Stack stack = request.getStack();

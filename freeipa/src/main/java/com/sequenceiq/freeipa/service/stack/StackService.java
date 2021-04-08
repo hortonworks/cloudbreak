@@ -21,6 +21,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourceCrnAndNameProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
@@ -102,6 +103,17 @@ public class StackService implements ResourceCrnAndNameProvider {
 
     public List<Long> findAllIdByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findAllIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+    }
+
+    public Long getIdByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
+        List<Long> ids = stackRepository.findAllIdByEnvironmentCrnAndAccountId(environmentCrn, accountId);
+        if (ids.isEmpty()) {
+            throw new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn));
+        } else if (ids.size() > 1) {
+            throw new BadRequestException(String.format("Multiple FreeIPA stack by environment [%s] found", environmentCrn));
+        } else {
+            return ids.get(0);
+        }
     }
 
     public Stack getByEnvironmentCrnAndAccountIdWithLists(String environmentCrn, String accountId) {

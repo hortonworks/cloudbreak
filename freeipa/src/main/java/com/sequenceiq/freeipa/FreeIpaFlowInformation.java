@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.freeipa.flow.freeipa.binduser.create.CreateBindUserFlowConfig;
+import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
@@ -24,11 +26,13 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             FreeIpaProvisionFlowConfig.class,
             StackStartFlowConfig.class,
             StackStopFlowConfig.class,
-            FreeIpaCleanupFlowConfig.class);
+            FreeIpaCleanupFlowConfig.class,
+            CreateBindUserFlowConfig.class);
 
     private static final List<String> PARALLEL_FLOWS = List.of(
             FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
-            StackTerminationEvent.TERMINATION_EVENT.event());
+            StackTerminationEvent.TERMINATION_EVENT.event(),
+            CreateBindUserFlowEvent.CREATE_BIND_USER_EVENT.event());
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {

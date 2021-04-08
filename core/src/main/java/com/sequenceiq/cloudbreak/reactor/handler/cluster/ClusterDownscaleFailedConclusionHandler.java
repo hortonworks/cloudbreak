@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDownscaleFailedConclusionRequest;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -45,7 +46,7 @@ public class ClusterDownscaleFailedConclusionHandler extends ExceptionCatcherEve
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<ClusterDownscaleFailedConclusionRequest> event) {
         ClusterDownscaleFailedConclusionRequest request = event.getData();
         LOGGER.info("Handle ClusterDownscaleFailedConclusionRequest, stackId: {}", request.getResourceId());
         try {
