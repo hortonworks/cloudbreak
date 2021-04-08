@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
@@ -51,15 +53,13 @@ public class ParcelService {
     @Inject
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
+    @Inject
+    private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
     public Set<ClusterComponent> getParcelComponentsByBlueprint(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        Set<ClusterComponent> components = getParcelComponents(cluster);
+        Set<ClusterComponent> components = getComponents(stack);
         if (stack.isDatalake()) {
-            ClusterComponent stackComponent = components.stream()
-                    .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
-                    .findFirst().orElseThrow(() -> new NotFoundException("Runtime component not found!"));
-            LOGGER.debug("For datalake clusters only the CDH parcel is used in CM: {}", stackComponent);
-            return Set.of(stackComponent);
+            return getDataLakeClusterComponents(components);
         } else {
             Map<String, ClusterComponent> cmProductMap = new HashMap<>();
             Set<ClouderaManagerProduct> cmProducts = new HashSet<>();
@@ -68,10 +68,50 @@ public class ParcelService {
                 cmProductMap.put(product.getName(), clusterComponent);
                 cmProducts.add(product);
             }
-            cmProducts = filterParcelsByBlueprint(cmProducts, cluster.getBlueprint(), false);
+            cmProducts = filterParcelsByBlueprint(cmProducts, stack.getCluster().getBlueprint(), false);
             LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
-            return cmProducts.stream().map(cmp -> cmProductMap.get(cmp.getName())).collect(Collectors.toSet());
+            return getComponentsByRequiredProducts(cmProductMap, cmProducts);
         }
+    }
+
+    public Set<ClusterComponent> getComponentsByImage(Stack stack, Image image) {
+        Set<ClusterComponent> components = getComponents(stack);
+        if (stack.isDatalake()) {
+            return getDataLakeClusterComponents(components);
+        } else {
+            Map<String, ClusterComponent> cmProductMap = collectClusterComponentsByName(components);
+            Set<ClouderaManagerProduct> cmProducts = clouderaManagerProductTransformer.transform(image);
+            cmProducts = filterParcelsByBlueprint(cmProducts, stack.getCluster().getBlueprint(), false);
+            LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
+            return getComponentsByRequiredProducts(cmProductMap, cmProducts);
+        }
+    }
+
+    private Map<String, ClusterComponent> collectClusterComponentsByName(Set<ClusterComponent> components) {
+        return components.stream().collect(Collectors.toMap(ClusterComponent::getName, component -> component));
+    }
+
+    private Set<ClusterComponent> getComponents(Stack stack) {
+        return getParcelComponents(stack.getCluster());
+    }
+
+    private Set<ClusterComponent> getParcelComponents(Cluster cluster) {
+        return clusterComponentConfigProvider.getComponentsByClusterId(cluster.getId()).stream()
+                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS == clusterComponent.getComponentType())
+                .collect(Collectors.toSet());
+    }
+
+    private Set<ClusterComponent> getDataLakeClusterComponents(Set<ClusterComponent> components) {
+        ClusterComponent stackComponent = getCdhComponent(components);
+        LOGGER.debug("For datalake clusters only the CDH parcel is used in CM: {}", stackComponent);
+        return Collections.singleton(stackComponent);
+    }
+
+    private ClusterComponent getCdhComponent(Set<ClusterComponent> components) {
+        return components.stream()
+                .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }
 
     public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint, boolean baseImage) {
@@ -150,9 +190,9 @@ public class ParcelService {
         }
     }
 
-    private Set<ClusterComponent> getParcelComponents(Cluster cluster) {
-        return clusterComponentConfigProvider.getComponentsByClusterId(cluster.getId()).stream()
-                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS == clusterComponent.getComponentType())
+    private Set<ClusterComponent> getComponentsByRequiredProducts(Map<String, ClusterComponent> cmProductMap, Set<ClouderaManagerProduct> cmProducts) {
+        return cmProducts.stream()
+                .map(cmp -> cmProductMap.get(cmp.getName()))
                 .collect(Collectors.toSet());
     }
 }
