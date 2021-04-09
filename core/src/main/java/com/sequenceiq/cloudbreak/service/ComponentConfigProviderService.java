@@ -128,6 +128,14 @@ public class ComponentConfigProviderService {
         }
     }
 
+    public void deleteComponents(Set<Component> components) {
+        if (!components.isEmpty()) {
+            LOGGER.debug("Components are going to be deleted: {}", components);
+            componentRepository.deleteAll(components);
+            LOGGER.debug("Components have been deleted: {}", components);
+        }
+    }
+
     public void replaceImageComponentWithNew(Component component) {
         Component componentEntity = componentRepository.findComponentByStackIdComponentTypeName(component.getStack().getId(), component.getComponentType(),
                 component.getName()).orElseThrow(NotFoundException.notFound("component", component.getName()));
