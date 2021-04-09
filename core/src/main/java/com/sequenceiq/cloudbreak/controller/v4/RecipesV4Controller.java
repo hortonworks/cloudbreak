@@ -29,11 +29,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.authorization.RecipeFiltering;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
@@ -49,6 +51,9 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Inject
     private RecipeFiltering recipeFiltering;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_RECIPE, filter = RecipeFiltering.class)
@@ -66,8 +71,8 @@ public class RecipesV4Controller extends NotificationController implements Recip
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
-    public RecipeV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
-        Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), workspaceId);
+    public RecipeV4Response getByCrn(Long workspaceId, @TenantAwareParam @NotNull @ResourceCrn String crn) {
+        Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
