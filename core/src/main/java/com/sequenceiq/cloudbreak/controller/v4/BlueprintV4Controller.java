@@ -29,10 +29,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
@@ -45,6 +47,9 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Inject
     private ConverterUtil converterUtil;
+
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
     @DisableCheckPermissions
@@ -62,8 +67,8 @@ public class BlueprintV4Controller extends NotificationController implements Blu
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
-    public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
-        Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofCrn(crn), workspaceId);
+    public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @TenantAwareParam @ResourceCrn String crn) {
+        Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }
 
