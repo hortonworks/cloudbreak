@@ -628,7 +628,9 @@ public class ClusterHostServiceRunner {
         }
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
-        gateway.put("cidrBlocks", stack.getNetwork().getNetworkCidrs());
+        if (stack.getNetwork() != null) {
+            gateway.put("cidrBlocks", stack.getNetwork().getNetworkCidrs());
+        }
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
