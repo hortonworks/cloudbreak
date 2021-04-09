@@ -17,7 +17,7 @@ import javax.validation.Payload;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 
 @Documented
-@Constraint(validatedBy = { CrnValidator.class, CrnCollectionValidator.class })
+@Constraint(validatedBy = { CrnValidator.class, CrnCollectionValidator.class})
 @Target({ METHOD, FIELD, CONSTRUCTOR, PARAMETER, TYPE_USE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidCrn {
@@ -26,7 +26,24 @@ public @interface ValidCrn {
 
     CrnResourceDescriptor[] resource();
 
+    Effect effect() default Effect.ACCEPT;
+
     Class<?>[] groups() default {};
 
     Class<? extends Payload>[] payload() default {};
+
+    enum Effect {
+        ACCEPT("Accepted"),
+        DENY("Denied");
+
+        private String name;
+
+        Effect(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 }

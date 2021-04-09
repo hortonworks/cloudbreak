@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.validation;
 
+import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.ACCEPT;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
@@ -13,16 +15,17 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 public class CrnCollectionValidator extends AbstractCrnValidator<Collection<String>> {
 
     @Override
-    protected String getErrorMessageIfServiceOrResourceTypeInvalid(Collection<String> req, Set<Pair> serviceAndResourceTypePairs) {
+    protected String getErrorMessageIfServiceOrResourceTypeInvalid(Collection<String> req, Set<Pair> serviceAndResourceTypePairs, ValidCrn.Effect effect) {
         return String.format("Crns provided: [%s] have invalid resource type or service type. " +
-                        "Accepted service type / resource type pairs: %s",
-                Joiner.on(",").join(getUnacceptedCrns(req)),
+                        "%s service type / resource type pairs: %s",
+                Joiner.on(",").join(getUnacceptedCrns(req, effect)),
+                effect.getName(),
                 Joiner.on(",").join(serviceAndResourceTypePairs));
     }
 
     @Override
-    protected boolean crnInputHasInvalidServiceOrResourceType(Collection<String> req) {
-        return !getUnacceptedCrns(req).isEmpty();
+    protected boolean crnInputHasInvalidServiceOrResourceType(Collection<String> req, ValidCrn.Effect effect) {
+        return !getUnacceptedCrns(req, effect).isEmpty();
     }
 
     @Override
@@ -40,7 +43,20 @@ public class CrnCollectionValidator extends AbstractCrnValidator<Collection<Stri
         return req == null || req.isEmpty();
     }
 
-    private Set<String> getUnacceptedCrns(Collection<String> req) {
+    private Set<String> getUnacceptedCrns(Collection<String> req, ValidCrn.Effect effect) {
+        return ACCEPT.equals(effect)
+                ? isMissingFromAllowedCrns(req)
+                : isPresentAmongDeniedCrns(req);
+    }
+
+    private Set<String> isPresentAmongDeniedCrns(Collection<String> req) {
+        return req.stream()
+                .filter(crnString -> Arrays.stream(getResourceDescriptors())
+                        .anyMatch(resourceDescriptor -> resourceDescriptor.checkIfCrnMatches(Crn.fromString(crnString))))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> isMissingFromAllowedCrns(Collection<String> req) {
         return req.stream()
                 .filter(crnString -> Arrays.stream(getResourceDescriptors())
                         .noneMatch(resourceDescriptor -> resourceDescriptor.checkIfCrnMatches(Crn.fromString(crnString))))

@@ -15,9 +15,12 @@ public abstract class AbstractCrnValidator<T> implements ConstraintValidator<Val
 
     private CrnResourceDescriptor[] resourceDescriptors;
 
+    private ValidCrn.Effect effect;
+
     @Override
     public void initialize(ValidCrn constraintAnnotation) {
         resourceDescriptors = constraintAnnotation.resource();
+        effect = constraintAnnotation.effect();
     }
 
     @Override
@@ -31,11 +34,11 @@ public abstract class AbstractCrnValidator<T> implements ConstraintValidator<Val
             addValidationErrorMessage(errorMessage, constraintValidatorContext);
             return false;
         }
-        if (resourceDescriptors.length != 0 && crnInputHasInvalidServiceOrResourceType(req)) {
+        if (resourceDescriptors.length != 0 && crnInputHasInvalidServiceOrResourceType(req, effect)) {
             Set<Pair> serviceAndResourceTypePairs = Arrays.stream(resourceDescriptors)
                     .map(CrnResourceDescriptor::createServiceAndResourceTypePair)
                     .collect(Collectors.toSet());
-            String errorMessage = getErrorMessageIfServiceOrResourceTypeInvalid(req, serviceAndResourceTypePairs);
+            String errorMessage = getErrorMessageIfServiceOrResourceTypeInvalid(req, serviceAndResourceTypePairs, effect);
             addValidationErrorMessage(errorMessage, constraintValidatorContext);
             return false;
         }
@@ -46,9 +49,13 @@ public abstract class AbstractCrnValidator<T> implements ConstraintValidator<Val
         return resourceDescriptors;
     }
 
-    protected abstract String getErrorMessageIfServiceOrResourceTypeInvalid(T req, Set<Pair> serviceAndResourceTypePairs);
+    public ValidCrn.Effect getEffect() {
+        return effect;
+    }
 
-    protected abstract boolean crnInputHasInvalidServiceOrResourceType(T req);
+    protected abstract String getErrorMessageIfServiceOrResourceTypeInvalid(T req, Set<Pair> serviceAndResourceTypePairs, ValidCrn.Effect effect);
+
+    protected abstract boolean crnInputHasInvalidServiceOrResourceType(T req, ValidCrn.Effect effect);
 
     protected abstract String getInvalidCrnErrorMessage(T req);
 

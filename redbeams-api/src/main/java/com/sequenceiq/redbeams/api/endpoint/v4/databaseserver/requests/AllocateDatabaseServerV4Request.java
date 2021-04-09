@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
+import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.DENY;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,7 +45,7 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     private String environmentCrn;
 
     @NotNull
-    @ValidCrn(resource = { CrnResourceDescriptor.DATALAKE, CrnResourceDescriptor.DATAHUB })
+    @ValidCrn(resource = { CrnResourceDescriptor.ENVIRONMENT }, effect = DENY)
     @ApiModelProperty(value = DatabaseServer.CLUSTER_CRN, required = true)
     private String clusterCrn;
 
