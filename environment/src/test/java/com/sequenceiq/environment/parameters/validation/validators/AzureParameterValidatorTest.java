@@ -352,6 +352,20 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
+    public void testWhenResourceEncryptionParameterDiskEncryptionSetIdThenError() {
+        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
+                .withAzureParameters(AzureParametersDto.builder()
+                        .withResourceGroup(AzureResourceGroupDto.builder().build())
+                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                .withDiskEncryptionSetId("DummyDesId").build())
+                        .build())
+                .build();
+        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+    }
+
+    @Test
     public void testCloudPlatform() {
         assertEquals(CloudPlatform.AZURE, underTest.getcloudPlatform());
     }

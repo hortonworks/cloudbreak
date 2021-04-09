@@ -64,6 +64,7 @@ public class AzureEnvironmentParametersConverter extends BaseEnvironmentParamete
                 .withEncryptionParameters(
                         AzureResourceEncryptionParametersDto.builder()
                                 .withEncryptionKeyUrl(azureParameters.getEncryptionKeyUrl())
+                                .withDiskEncryptionSetId(azureParameters.getDiskEncryptionSetId())
                                 .build())
                 .build());
     }

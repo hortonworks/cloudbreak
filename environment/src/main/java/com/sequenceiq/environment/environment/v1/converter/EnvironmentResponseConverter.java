@@ -222,6 +222,7 @@ public class EnvironmentResponseConverter {
             AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto) {
         return AzureResourceEncryptionParameters.builder()
                 .withEncryptionKeyUrl(azureResourceEncryptionParametersDto.getEncryptionKeyUrl())
+                .withDiskEncryptionSetId(azureResourceEncryptionParametersDto.getDiskEncryptionSetId())
                 .build();
     }
 
