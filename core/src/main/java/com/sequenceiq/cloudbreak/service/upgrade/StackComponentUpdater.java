@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
@@ -38,14 +41,17 @@ public class StackComponentUpdater {
         Set<Component> targetComponents = imageService.getComponents(stack, userData, targetImage, imageName);
         componentsFromDb.forEach(component -> setComponentIdIfAlreadyExists(targetComponents, component));
         componentConfigProviderService.store(targetComponents);
-
         LOGGER.info("Updated components:" + targetComponents);
+        removeUnusedComponents(componentsFromDb, targetComponents);
         return targetComponents;
     }
 
+    private Predicate<Component> filterDiffBetweenComponentsFromImageAndDatabase(Set<Component> targetComponents) {
+        return component -> targetComponents.stream().noneMatch(componentFromImage -> component.getName().equals(componentFromImage.getName()));
+    }
+
     private void setComponentIdIfAlreadyExists(Collection<Component> targetComponents, Component componentFromDb) {
-        Optional<Component> matchingComponentFromDb = targetComponents.stream().
-                filter(targetComponent -> isMatchingComponent(componentFromDb, targetComponent))
+        Optional<Component> matchingComponentFromDb = targetComponents.stream().filter(targetComponent -> isMatchingComponent(componentFromDb, targetComponent))
                 .findFirst();
         matchingComponentFromDb.ifPresent(targetComponent -> targetComponent.setId(componentFromDb.getId()));
     }
@@ -66,5 +72,13 @@ public class StackComponentUpdater {
 
     private boolean isSameType(Component component, Component targetComponent) {
         return targetComponent.getComponentType() == component.getComponentType();
+    }
+
+    private void removeUnusedComponents(Set<Component> componentsFromDb, Set<Component> targetComponents) {
+        Set<Component> unusedCdhProductDetails = componentsFromDb.stream()
+                .filter(component -> ComponentType.CDH_PRODUCT_DETAILS.equals(component.getComponentType()))
+                .filter(filterDiffBetweenComponentsFromImageAndDatabase(targetComponents))
+                .collect(Collectors.toSet());
+        componentConfigProviderService.deleteComponents(unusedCdhProductDetails);
     }
 }

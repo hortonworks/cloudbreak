@@ -124,6 +124,14 @@ public class ClusterComponentConfigProvider {
         }
     }
 
+    public void deleteClusterComponents(Set<ClusterComponent> components) {
+        if (!components.isEmpty()) {
+            LOGGER.debug("Components are going to be deleted: {}", components);
+            componentRepository.deleteAll(components);
+            LOGGER.debug("Components have been deleted: {}", components);
+        }
+    }
+
     private <T> T retrieveFromAttribute(ClusterComponent component, Class<T> clazz) {
         if (component == null) {
             return null;
