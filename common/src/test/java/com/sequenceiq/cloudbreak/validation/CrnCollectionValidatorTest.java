@@ -59,14 +59,15 @@ public class CrnCollectionValidatorTest {
 
     @Test
     public void testValidationIfDescriptorsIsEmpty() {
-        underTest.initialize(sampleAnnotation(new CrnResourceDescriptor[]{}));
+        underTest.initialize(sampleAnnotation(new CrnResourceDescriptor[]{}, ValidCrn.Effect.ACCEPT));
         assertTrue(underTest.isValid(Sets.newHashSet(MIXED_CRN), context));
     }
 
     @Test
-    public void testValidationIfDescriptorProvidedButCrnDoesntMatch() {
+    public void testValidationIfDescriptorProvidedButCrnDoesntMatchWhenEffectAccept() {
         setupContext();
-        underTest.initialize(sampleAnnotation(new CrnResourceDescriptor[]{ CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE }));
+        underTest.initialize(
+                sampleAnnotation(new CrnResourceDescriptor[]{ CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE }, ValidCrn.Effect.ACCEPT));
         assertFalse(underTest.isValid(Sets.newHashSet(MIXED_CRN, ENVIRONMENT_CRN, DATAHUB_CRN), context));
         assertEquals("Crns provided: [crn:cdp:datahub:us-west-1:acc:cluster:res,crn:cdp:iam:us-west-1:acc:datalake:res] " +
                 "have invalid resource type or service type. Accepted service type / resource type pairs: " +
@@ -74,9 +75,26 @@ public class CrnCollectionValidatorTest {
     }
 
     @Test
-    public void testValidationIfDescriptorProvidedAndCrnMatches() {
+    public void testValidationIfDescriptorProvidedButCrnMatchesWhenEffectDeny() {
+        setupContext();
+        underTest.initialize(
+                sampleAnnotation(new CrnResourceDescriptor[]{ CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE }, ValidCrn.Effect.DENY));
+        assertFalse(underTest.isValid(Sets.newHashSet(MIXED_CRN, ENVIRONMENT_CRN, DATAHUB_CRN), context));
+        assertEquals("Crns provided: [crn:cdp:environments:us-west-1:acc:environment:res] " +
+                "have invalid resource type or service type. Denied service type / resource type pairs: " +
+                "(datalake,datalake),(environments,environment)", errorMessageCaptor.getValue());
+    }
+
+    @Test
+    public void testValidationIfDescriptorProvidedAndCrnMatchesWhenEffectAccept() {
         underTest.initialize(sampleAnnotation(new CrnResourceDescriptor[]{ CrnResourceDescriptor.DATAHUB,
-                CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE }));
+                CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE }, ValidCrn.Effect.ACCEPT));
+        assertTrue(underTest.isValid(Sets.newHashSet(DATAHUB_CRN, ENVIRONMENT_CRN), context));
+    }
+
+    @Test
+    public void testValidationIfDescriptorProvidedAndCrnDoesntMatchWhenEffectDeny() {
+        underTest.initialize(sampleAnnotation(new CrnResourceDescriptor[]{ CrnResourceDescriptor.DATALAKE }, ValidCrn.Effect.DENY));
         assertTrue(underTest.isValid(Sets.newHashSet(DATAHUB_CRN, ENVIRONMENT_CRN), context));
     }
 
@@ -86,7 +104,7 @@ public class CrnCollectionValidatorTest {
         doReturn(context).when(builder).addConstraintViolation();
     }
 
-    private ValidCrn sampleAnnotation(CrnResourceDescriptor[] descriptors) {
+    private ValidCrn sampleAnnotation(CrnResourceDescriptor[] descriptors, ValidCrn.Effect effect) {
         return new ValidCrn() {
 
             @Override
@@ -102,6 +120,11 @@ public class CrnCollectionValidatorTest {
             @Override
             public CrnResourceDescriptor[] resource() {
                 return descriptors;
+            }
+
+            @Override
+            public Effect effect() {
+                return effect;
             }
 
             @Override

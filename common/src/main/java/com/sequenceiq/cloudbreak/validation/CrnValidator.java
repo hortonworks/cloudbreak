@@ -12,16 +12,17 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 public class CrnValidator extends AbstractCrnValidator<String> {
 
     @Override
-    protected String getErrorMessageIfServiceOrResourceTypeInvalid(String req, Set<Pair> serviceAndResourceTypePairs) {
+    protected String getErrorMessageIfServiceOrResourceTypeInvalid(String req, Set<Pair> serviceAndResourceTypePairs, ValidCrn.Effect effect) {
         return String.format("Crn provided: %s has invalid resource type or service type. " +
-                "Accepted service type / resource type pairs: %s", req, Joiner.on(",").join(serviceAndResourceTypePairs));
+                "%s service type / resource type pairs: %s", req, effect.getName(), Joiner.on(",").join(serviceAndResourceTypePairs));
     }
 
     @Override
-    protected boolean crnInputHasInvalidServiceOrResourceType(String req) {
+    protected boolean crnInputHasInvalidServiceOrResourceType(String req, ValidCrn.Effect effect) {
         Crn requestCrn = Crn.fromString(req);
-        return Arrays.stream(getResourceDescriptors())
-                .noneMatch(resourceDescriptor -> resourceDescriptor.checkIfCrnMatches(requestCrn));
+        return ValidCrn.Effect.ACCEPT.equals(effect)
+                ? isCrnNotInAllowed(requestCrn)
+                : isCrnAmongDenied(requestCrn);
     }
 
     @Override
@@ -37,6 +38,16 @@ public class CrnValidator extends AbstractCrnValidator<String> {
     @Override
     protected boolean crnInputIsEmpty(String req) {
         return StringUtils.isEmpty(req);
+    }
+
+    private boolean isCrnAmongDenied(Crn requestCrn) {
+        return Arrays.stream(getResourceDescriptors())
+                .anyMatch(resourceDescriptor -> resourceDescriptor.checkIfCrnMatches(requestCrn));
+    }
+
+    private boolean isCrnNotInAllowed(Crn requestCrn) {
+        return Arrays.stream(getResourceDescriptors())
+                .noneMatch(resourceDescriptor -> resourceDescriptor.checkIfCrnMatches(requestCrn));
     }
 
 }

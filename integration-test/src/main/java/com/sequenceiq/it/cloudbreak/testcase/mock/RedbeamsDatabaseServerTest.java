@@ -87,7 +87,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .withClusterCrn(Crn.builder(CrnResourceDescriptor.ENVIRONMENT).setAccountId("acc").setResource("res").build().toString())
                 .whenException(redbeamsDatabaseServerTest.createV4(), BadRequestException.class,
                         expectedMessage(".*Crn provided: crn:cdp:environments:us-west-1:acc:environment:res has invalid resource type or" +
-                                " service type. Accepted service type / resource type pairs: [(]datalake,datalake[)],[(]datahub,cluster[)].*"))
+                                " service type. Denied service type / resource type pairs: [(]environments,environment[)].*"))
                 .validate();
     }
 }
