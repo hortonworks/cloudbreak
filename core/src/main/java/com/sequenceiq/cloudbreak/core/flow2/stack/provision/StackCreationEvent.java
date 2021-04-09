@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoResult;
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
@@ -32,6 +33,8 @@ public enum StackCreationEvent implements FlowEvent {
     CREATE_CREDENTIAL_FAILED_EVENT(CloudPlatformResult.failureSelector(CreateCredentialResult.class)),
     LAUNCH_STACK_FINISHED_EVENT(CloudPlatformResult.selector(LaunchStackResult.class)),
     LAUNCH_STACK_FAILED_EVENT(CloudPlatformResult.failureSelector(LaunchStackResult.class)),
+    LAUNCH_LOAD_BALANCER_FINISHED_EVENT(CloudPlatformResult.selector(LaunchLoadBalancerResult.class)),
+    LAUNCH_LOAD_BALANCER_FAILED_EVENT(CloudPlatformResult.failureSelector(LaunchLoadBalancerResult.class)),
     COLLECT_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectMetadataResult.class)),
     COLLECT_METADATA_FAILED_EVENT(CloudPlatformResult.failureSelector(CollectMetadataResult.class)),
     COLLECT_LOADBALANCER_METADATA_FINISHED_EVENT(CloudPlatformResult.selector(CollectLoadBalancerMetadataResult.class)),

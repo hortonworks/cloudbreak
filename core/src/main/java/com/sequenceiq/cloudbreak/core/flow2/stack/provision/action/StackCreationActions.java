@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMet
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
@@ -193,12 +195,27 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "PROVISIONING_FINISHED_STATE")
-    public Action<?, ?> provisioningFinishedAction() {
+    @Bean(name = "PROVISION_LOAD_BALANCER_STATE")
+    public Action<?, ?> startProvisioningLoadBalancerAction() {
         return new AbstractStackCreationAction<>(LaunchStackResult.class) {
             @Override
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) {
-                Stack stack = stackCreationService.provisioningFinished(context, payload, variables);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new LaunchLoadBalancerRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+            }
+        };
+    }
+
+    @Bean(name = "PROVISIONING_FINISHED_STATE")
+    public Action<?, ?> provisioningFinishedAction() {
+        return new AbstractStackCreationAction<>(LaunchLoadBalancerResult.class) {
+            @Override
+            protected void doExecute(StackContext context, LaunchLoadBalancerResult payload, Map<Object, Object> variables) {
+                Stack stack = stackCreationService.loadBalancerProvisioningFinished(context, payload, variables);
                 StackContext newContext = new StackContext(context.getFlowParameters(), stack, context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
