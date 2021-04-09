@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.loadbalancer.CollectLoadBalancerMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
@@ -138,13 +139,22 @@ public class StackCreationService {
         instanceMetaDataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
     }
 
-    public Stack provisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
+    public Stack stackProvisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
         Date startDate = getStartDateIfExist(variables);
         Stack stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_LOAD_BALANCER, "Creating load balancer");
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_TIME,
                 String.valueOf(calculateStackCreationTime(startDate)));
+        Stack provisionedStack = stackService.getByIdWithListsInTransaction(stack.getId());
+        provisionedStack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
+        return provisionedStack;
+    }
+
+    public Stack loadBalancerProvisioningFinished(StackContext context, LaunchLoadBalancerResult result, Map<Object, Object> variables) {
+        Stack stack = context.getStack();
+        validateResourceResults(context.getCloudContext(), result);
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
         Stack provisionedStack = stackService.getByIdWithListsInTransaction(stack.getId());
         provisionedStack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
         return provisionedStack;
@@ -292,6 +302,10 @@ public class StackCreationService {
     }
 
     private void validateResourceResults(CloudContext cloudContext, LaunchStackResult res) {
+        validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults());
+    }
+
+    private void validateResourceResults(CloudContext cloudContext, LaunchLoadBalancerResult res) {
         validateResourceResults(cloudContext, res.getErrorDetails(), res.getResults());
     }
 

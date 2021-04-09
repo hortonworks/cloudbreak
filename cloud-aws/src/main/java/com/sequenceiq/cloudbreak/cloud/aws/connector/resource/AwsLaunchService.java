@@ -98,9 +98,6 @@ public class AwsLaunchService {
     private AwsCloudWatchService awsCloudWatchService;
 
     @Inject
-    private AwsLoadBalancerLaunchService awsLoadBalancerLaunchService;
-
-    @Inject
     private AwsModelService awsModelService;
 
     @Inject
@@ -158,8 +155,6 @@ public class AwsLaunchService {
         awsTaggingService.tagRootVolumes(ac, amazonEC2Client, instances, stack.getTags());
 
         awsCloudWatchService.addCloudWatchAlarmsForSystemFailures(instances, regionName, credentialView);
-
-        awsLoadBalancerLaunchService.updateCloudformationWithLoadBalancers(ac, stack, resourceNotifier, modelContext);
 
         return awsResourceConnector.check(ac, instances);
     }
