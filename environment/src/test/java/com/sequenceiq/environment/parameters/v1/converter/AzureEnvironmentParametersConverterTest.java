@@ -83,6 +83,7 @@ public class AzureEnvironmentParametersConverterTest {
             parameters.setId(ID);
             parameters.setName(ENV_NAME);
             parameters.setEncryptionKeyUrl(KEY_URL);
+            parameters.setDiskEncryptionSetId("DummyDesId");
 
             ParametersDto result = underTest.convertToDto(parameters);
 
@@ -90,5 +91,6 @@ public class AzureEnvironmentParametersConverterTest {
             assertEquals(ID, result.getId());
             assertEquals(ENV_NAME, result.getName());
             assertEquals(KEY_URL, result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+            assertEquals("DummyDesId", result.getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId());
         }
 }

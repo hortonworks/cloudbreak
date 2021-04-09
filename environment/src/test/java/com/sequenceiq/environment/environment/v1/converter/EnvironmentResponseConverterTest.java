@@ -239,6 +239,7 @@ public class EnvironmentResponseConverterTest {
         assertEquals(azureParametersDto.getAzureResourceGroupDto().getName(), azureEnvironmentParameters.getResourceGroup().getName());
         assertEquals(azureParametersDto.getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl(),
                 azureEnvironmentParameters.getResourceEncryptionParameters().getEncryptionKeyUrl());
+        assertEquals("dummy-des-id", azureEnvironmentParameters.getResourceEncryptionParameters().getDiskEncryptionSetId());
     }
 
     private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
@@ -303,6 +304,7 @@ public class EnvironmentResponseConverterTest {
                         .withEncryptionParameters(
                                 AzureResourceEncryptionParametersDto.builder()
                                         .withEncryptionKeyUrl("dummy-key-url")
+                                        .withDiskEncryptionSetId("dummy-des-id")
                                         .build())
                         .build())
                 .build();

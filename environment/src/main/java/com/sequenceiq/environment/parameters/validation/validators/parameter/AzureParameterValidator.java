@@ -141,6 +141,14 @@ public class AzureParameterValidator implements ParameterValidator {
                         build();
             }
         }
+        String diskEncryptionSetId = azureResourceEncryptionParametersDto.getDiskEncryptionSetId();
+        if (Objects.nonNull(diskEncryptionSetId)) {
+            LOGGER.info("Invalid request, diskEncryptionSetId cannot be specified");
+            return validationResultBuilder.error(
+                    "Specifying diskEncryptionSetId in request is Invalid." +
+                            "Please specify encryptionKeyUrl to use Server Side Encryption for Azure Managed disks with CMK.").
+                    build();
+        }
         return validationResultBuilder.build();
     }
     //CHECKSTYLE:ON

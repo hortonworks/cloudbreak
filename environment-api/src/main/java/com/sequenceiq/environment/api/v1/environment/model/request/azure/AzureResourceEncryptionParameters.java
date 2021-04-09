@@ -17,12 +17,23 @@ public class AzureResourceEncryptionParameters {
                     "keyVersion can only contain alphanumeric characters.")
     private String encryptionKeyUrl;
 
+    @ApiModelProperty(EnvironmentModelDescription.DISK_ENCRYPTION_SET_ID)
+    private String diskEncryptionSetId;
+
     public String getEncryptionKeyUrl() {
         return encryptionKeyUrl;
     }
 
     public void setEncryptionKeyUrl(String encryptionKeyUrl) {
         this.encryptionKeyUrl = encryptionKeyUrl;
+    }
+
+    public String getDiskEncryptionSetId() {
+        return diskEncryptionSetId;
+    }
+
+    public void setDiskEncryptionSetId(String diskEncryptionSetId) {
+        this.diskEncryptionSetId = diskEncryptionSetId;
     }
 
     public static Builder builder() {
@@ -33,6 +44,7 @@ public class AzureResourceEncryptionParameters {
     public String toString() {
         return "AzureResourceEncryptionParameters{" +
                 "encryptionKeyUrl=" + encryptionKeyUrl +
+                "diskEncryptionSetId=" + diskEncryptionSetId +
                 '}';
     }
 
@@ -40,14 +52,22 @@ public class AzureResourceEncryptionParameters {
 
         private String encryptionKeyUrl;
 
+        private String diskEncryptionSetId;
+
         public Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;
+            return this;
+        }
+
+        public Builder withDiskEncryptionSetId(String diskEncryptionSetId) {
+            this.diskEncryptionSetId = diskEncryptionSetId;
             return this;
         }
 
         public AzureResourceEncryptionParameters build() {
             AzureResourceEncryptionParameters resourceEncryptionParameters = new AzureResourceEncryptionParameters();
             resourceEncryptionParameters.setEncryptionKeyUrl(encryptionKeyUrl);
+            resourceEncryptionParameters.setDiskEncryptionSetId(diskEncryptionSetId);
             return resourceEncryptionParameters;
         }
     }

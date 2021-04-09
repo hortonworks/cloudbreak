@@ -15,7 +15,16 @@ public class AzureResourceEncryptionParametersDtoTest {
         assertEquals(dummyAzureResourceEncryptionParametersDto.getEncryptionKeyUrl(), "dummy-key-url");
     }
 
+    @Test
+    void testAzureResourceEncryptionParametersDtowithDiskEncryptionSetId() {
+        AzureResourceEncryptionParametersDto dummyAzureResourceEncryptionParametersDto = createAzureResourceEncryptionParametersDto();
+        assertEquals(dummyAzureResourceEncryptionParametersDto.getDiskEncryptionSetId(), "dummy-des-id");
+    }
+
     private AzureResourceEncryptionParametersDto createAzureResourceEncryptionParametersDto() {
-        return AzureResourceEncryptionParametersDto.builder().withEncryptionKeyUrl("dummy-key-url").build();
+        return AzureResourceEncryptionParametersDto.builder()
+                .withDiskEncryptionSetId("dummy-des-id")
+                .withEncryptionKeyUrl("dummy-key-url")
+                .build();
     }
 }
