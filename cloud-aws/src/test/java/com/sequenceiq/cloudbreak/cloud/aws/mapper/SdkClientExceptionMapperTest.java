@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
+import com.amazonaws.services.autoscaling.model.ScalingActivityInProgressException;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -114,5 +115,20 @@ public class SdkClientExceptionMapperTest {
 
         Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
         Assertions.assertEquals("Cannot execute method: methodName. Request limit exceeded", actual.getMessage());
+    }
+
+    @Test
+    public void testMapScalingActivityInProgressExceptionToActionFailed() {
+        String message = "Activity 123 is in progress. (Service: null; Status Code: 0; Error Code: null; Request ID: null; Proxy: null)";
+        ScalingActivityInProgressException e = new ScalingActivityInProgressException("Activity 123 is in progress.");
+
+        when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(ac, REGION, message)).thenReturn(message);
+
+        RuntimeException actual = underTest.map(ac, REGION, e, signature);
+
+        Assertions.assertEquals(Retry.ActionFailedException.class, actual.getClass());
+        Assertions.assertEquals(
+                "Cannot execute method: methodName. Activity 123 is in progress. " +
+                        "(Service: null; Status Code: 0; Error Code: null; Request ID: null; Proxy: null)", actual.getMessage());
     }
 }

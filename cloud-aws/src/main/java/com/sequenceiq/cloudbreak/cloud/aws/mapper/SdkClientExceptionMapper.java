@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
+import com.amazonaws.services.autoscaling.model.ScalingActivityInProgressException;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -26,6 +27,11 @@ public class SdkClientExceptionMapper {
             return new CloudConnectorException(message, e);
         }
         if (message.contains("Rate exceeded") || message.contains("Request limit exceeded")) {
+            message = addMethodNameIfNotContains(message, methodName);
+            return new ActionFailedException(message);
+        }
+
+        if (e instanceof ScalingActivityInProgressException) {
             message = addMethodNameIfNotContains(message, methodName);
             return new ActionFailedException(message);
         }
