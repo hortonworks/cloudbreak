@@ -96,7 +96,7 @@ public class BackupRestoreV4RequestValidatorTest {
         String backupLocation = "abfs://" + LOCATION;
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, BACKUP_ID);
         assert validationResult.hasError();
-        assertEquals("1. Incorrect URL scheme for AWS cloud platform: " + backupLocation, validationResult.getFormattedErrors());
+        assertEquals("Incorrect URL scheme for AWS cloud platform: " + backupLocation, validationResult.getFormattedErrors());
     }
 
     @Test
@@ -105,7 +105,7 @@ public class BackupRestoreV4RequestValidatorTest {
         String backupLocation = "s3://test/backup";
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, BACKUP_ID);
         assert validationResult.hasError();
-        assertEquals("1. Incorrect URL scheme for Azure cloud platform: " + backupLocation, validationResult.getFormattedErrors());
+        assertEquals("Incorrect URL scheme for Azure cloud platform: " + backupLocation, validationResult.getFormattedErrors());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class BackupRestoreV4RequestValidatorTest {
         Stack stack = getStack(CloudPlatform.YARN.name());
         ValidationResult validationResult = requestValidator.validate(stack, LOCATION, BACKUP_ID);
         assert validationResult.hasError();
-        assertEquals("1. Cloud platform YARN not supported for backup/restore", validationResult.getFormattedErrors());
+        assertEquals("Cloud platform YARN not supported for backup/restore", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -121,7 +121,7 @@ public class BackupRestoreV4RequestValidatorTest {
         Stack stack = getStack(CloudPlatform.AWS.name());
         ValidationResult validationResult = requestValidator.validate(stack, LOCATION, null);
         assert validationResult.hasError();
-        assertEquals("1. Parameter backupId required", validationResult.getFormattedErrors());
+        assertEquals("Parameter backupId required", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class BackupRestoreV4RequestValidatorTest {
         Stack stack = getStack(CloudPlatform.AWS.name());
         ValidationResult validationResult = requestValidator.validate(stack, null, BACKUP_ID);
         assert validationResult.hasError();
-        assertEquals("1. Parameter backupLocation required", validationResult.getFormattedErrors());
+        assertEquals("Parameter backupLocation required", validationResult.getFormattedErrors());
     }
 
     private Stack getStack(String cloudPlatform) {

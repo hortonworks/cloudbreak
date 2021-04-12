@@ -168,7 +168,7 @@ public class CloudStorageLocationValidatorTest {
         ValidationResult result = validationResultBuilder.build();
 
         assertTrue(result.hasError());
-        assertEquals(String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
+        assertEquals(String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].",
                 OTHER_REGION, BUCKET_NAME, ENV_REGION),
                 result.getErrors().get(0));
     }

@@ -155,7 +155,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. You specified to use multiple resource groups for your resources, " +
+        assertEquals("You specified to use multiple resource groups for your resources, " +
                         "but then the single resource group name 'myResourceGroup' cannot not be specified.",
                 validationResult.getFormattedErrors());
     }
@@ -178,7 +178,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. If you use a single resource group for your resources then please provide the name of that resource group.",
+        assertEquals("If you use a single resource group for your resources then please provide the name of that resource group.",
                 validationResult.getFormattedErrors());
     }
 
@@ -199,7 +199,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. If you have provided the resource group name for your resources then please provide the resource group usage pattern too.",
+        assertEquals("If you have provided the resource group name for your resources then please provide the resource group usage pattern too.",
                 validationResult.getFormattedErrors());
     }
 
@@ -222,7 +222,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. Resource group 'myResourceGroup' does not exist or insufficient permission to access it.", validationResult.getFormattedErrors());
+        assertEquals("Resource group 'myResourceGroup' does not exist or insufficient permission to access it.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -268,7 +268,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. You specified to use a single resource group for all of your resources, but that feature is currently disabled",
+        assertEquals("You specified to use a single resource group for all of your resources, but that feature is currently disabled",
                 validationResult.getFormattedErrors());
     }
 
@@ -293,7 +293,7 @@ public class AzureParameterValidatorTest {
         ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. You specified to use a single resource group with dedicated storage account for the images, but that feature is currently disabled",
+        assertEquals("You specified to use a single resource group with dedicated storage account for the images, but that feature is currently disabled",
                 validationResult.getFormattedErrors());
     }
 

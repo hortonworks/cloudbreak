@@ -155,7 +155,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .withPublicKey(null)
                 .given(EnvironmentTestDto.class)
                 .whenException(environmentTestClient.changeAuthentication(), BadRequestException.class,
-                        expectedMessage("1. You should define either the publicKey or the publicKeyId."))
+                        expectedMessage("You should define either the publicKey or the publicKeyId."))
                 .validate();
     }
 

@@ -193,7 +193,7 @@ class EnvironmentValidatorServiceTest {
         ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. The CIDR can be replaced with the default and knox security groups, please add to the request", validationResult.getFormattedErrors());
+        assertEquals("The CIDR can be replaced with the default and knox security groups, please add to the request", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -232,7 +232,7 @@ class EnvironmentValidatorServiceTest {
         ValidationResult validationResult = underTest.validateSecurityAccessModification(securityAccessDto, environment);
 
         assertTrue(validationResult.hasError());
-        assertEquals("1. The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
+        assertEquals("The CIDR could not be updated in the environment", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -248,7 +248,7 @@ class EnvironmentValidatorServiceTest {
         when(environmentResourceService.getPublicKeyConnector(environment.getCloudPlatform())).thenReturn(Optional.empty());
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. The change of publicKeyId is not supported on AZURE", validationResult.getFormattedErrors());
+        assertEquals("The change of publicKeyId is not supported on AZURE", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -268,7 +268,7 @@ class EnvironmentValidatorServiceTest {
         when(publicKeyValidator.validatePublicKey(anyString())).thenReturn(ValidationResult.empty());
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. You should define either publicKey or publicKeyId only, but not both.", validationResult.getFormattedErrors());
+        assertEquals("You should define either publicKey or publicKeyId only, but not both.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -280,7 +280,7 @@ class EnvironmentValidatorServiceTest {
                 .build();
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. You should define either the publicKey or the publicKeyId.", validationResult.getFormattedErrors());
+        assertEquals("You should define either the publicKey or the publicKeyId.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -299,7 +299,7 @@ class EnvironmentValidatorServiceTest {
 
 
         ValidationResult validationResult = underTest.validateAuthenticationModification(environmentEditDto, environment);
-        assertEquals("1. The publicKeyId with name of 'pub-key-id' does not exist on the provider.", validationResult.getFormattedErrors());
+        assertEquals("The publicKeyId with name of 'pub-key-id' does not exist on the provider.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -316,7 +316,7 @@ class EnvironmentValidatorServiceTest {
         environment.setParentEnvironment(null);
 
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
-        assertEquals("1. Active parent environment with name 'parentEnvName' is not available in account '" + ACCOUNT + "'.",
+        assertEquals("Active parent environment with name 'parentEnvName' is not available in account '" + ACCOUNT + "'.",
                 validationResult.getFormattedErrors());
     }
 
@@ -325,7 +325,7 @@ class EnvironmentValidatorServiceTest {
         Environment environment = aValidEnvirontmentWithParent();
         environment.getParentEnvironment().setStatus(EnvironmentStatus.ARCHIVED);
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
-        assertEquals("1. Parent environment should be in 'AVAILABLE' status.",
+        assertEquals("Parent environment should be in 'AVAILABLE' status.",
                 validationResult.getFormattedErrors());
     }
 
@@ -335,7 +335,7 @@ class EnvironmentValidatorServiceTest {
         environment.getParentEnvironment().setParentEnvironment(new Environment());
 
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
-        assertEquals("1. Parent environment is already a child environment.",
+        assertEquals("Parent environment is already a child environment.",
                 validationResult.getFormattedErrors());
     }
 
@@ -345,7 +345,7 @@ class EnvironmentValidatorServiceTest {
         environment.getParentEnvironment().setCloudPlatform(CloudPlatform.GCP.name());
 
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
-        assertEquals("1. 'GCP' platform is not supported for parent environment.", validationResult.getFormattedErrors());
+        assertEquals("'GCP' platform is not supported for parent environment.", validationResult.getFormattedErrors());
     }
 
     @Test
@@ -354,7 +354,7 @@ class EnvironmentValidatorServiceTest {
         environment.setCloudPlatform(CloudPlatform.GCP.name());
 
         ValidationResult validationResult = underTest.validateParentChildRelation(environment, "parentEnvName");
-        assertEquals("1. 'GCP' platform is not supported for child environment.", validationResult.getFormattedErrors());
+        assertEquals("'GCP' platform is not supported for child environment.", validationResult.getFormattedErrors());
     }
 
     @Test

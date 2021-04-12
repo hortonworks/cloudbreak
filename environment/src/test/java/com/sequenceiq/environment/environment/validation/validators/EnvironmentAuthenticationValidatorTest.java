@@ -26,7 +26,7 @@ class EnvironmentAuthenticationValidatorTest {
     @Test
     void testValidateShouldReturnValidationError() {
         EnvironmentDto environmentDto = createEnvironmentDto(PUBLIC_KEY, null);
-        String expected = "1. Failed to parse public key. Detailed message: Corrupt or unknown public key file format";
+        String expected = "Failed to parse public key. Detailed message: Corrupt or unknown public key file format";
 
         ValidationResult actual = underTest.validate(environmentDto);
 

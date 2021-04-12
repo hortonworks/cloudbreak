@@ -202,7 +202,7 @@ class EnvironmentModificationServiceTest {
         BadRequestException actual = assertThrows(BadRequestException.class,
                 () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
 
-        assertEquals("1. sec access error", actual.getMessage());
+        assertEquals("sec access error", actual.getMessage());
         verify(environmentService, times(0)).editSecurityAccess(eq(value), eq(securityAccessDto));
     }
 
@@ -224,7 +224,7 @@ class EnvironmentModificationServiceTest {
         BadRequestException actual = assertThrows(BadRequestException.class,
                 () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
 
-        assertEquals("1. sec group error", actual.getMessage());
+        assertEquals("sec group error", actual.getMessage());
         verify(environmentService, times(0)).editSecurityAccess(eq(value), eq(securityAccessDto));
     }
 
@@ -412,7 +412,7 @@ class EnvironmentModificationServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> environmentModificationServiceUnderTest.editAuthenticationIfChanged(environmentEditDto, environment));
 
-        assertEquals(badRequestException.getMessage(), "1. Error");
+        assertEquals(badRequestException.getMessage(), "Error");
     }
 
     @Test

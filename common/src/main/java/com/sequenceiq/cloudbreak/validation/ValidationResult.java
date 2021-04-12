@@ -31,8 +31,12 @@ public class ValidationResult {
             formattedErrors = prefix + ": \n";
         }
         formattedErrors += IntStream.range(0, this.errors.size())
-                .mapToObj(i -> i + 1 + ". " + this.errors.get(i))
+                .mapToObj(i -> getNumberingIfRequired(this.errors.size(), i) + this.errors.get(i))
                 .collect(Collectors.joining("\n"));
+    }
+
+    private String getNumberingIfRequired(int errorSize, int i) {
+        return errorSize == 1 ? "" : i + 1 + ". ";
     }
 
     public ValidationResult merge(ValidationResult other) {

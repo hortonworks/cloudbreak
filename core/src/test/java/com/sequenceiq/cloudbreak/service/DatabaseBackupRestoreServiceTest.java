@@ -125,7 +125,7 @@ public class DatabaseBackupRestoreServiceTest {
         when(requestValidator.validate(any(), any(), any())).thenReturn(getValidationResult(MISSING_PARAM_EXCEPTION_MESSAGE));
 
         expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("1. " + MISSING_PARAM_EXCEPTION_MESSAGE);
+        expectedException.expectMessage(MISSING_PARAM_EXCEPTION_MESSAGE);
 
         service.validate(WORKSPACE_ID, ofName, null, null);
     }
