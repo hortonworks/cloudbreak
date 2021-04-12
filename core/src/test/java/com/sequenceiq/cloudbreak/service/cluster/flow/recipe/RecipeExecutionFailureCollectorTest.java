@@ -6,10 +6,13 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.junit.Test;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
 public class RecipeExecutionFailureCollectorTest {
@@ -100,6 +103,22 @@ public class RecipeExecutionFailureCollectorTest {
                 .peek(failure -> assertEquals("failingRecipe1", failure.getRecipeName()))
                 .count();
         assertEquals(1, masterInstanceFailures);
+    }
+
+    @Test
+    public void testGetInstanceMetadataByHostWithNullFqdn() {
+        String host = "fqdn";
+
+        final InstanceMetaData im1 = new InstanceMetaData();
+        im1.setDiscoveryFQDN(null);
+        final InstanceMetaData im2 = new InstanceMetaData();
+        im2.setDiscoveryFQDN(host);
+        Set<InstanceMetaData> instanceMetaData = Set.of(im1, im2);
+
+        Optional<InstanceMetaData> instanceMetadataByHost = recipeExecutionFailureHandler.getInstanceMetadataByHost(instanceMetaData, host);
+
+        assertTrue(instanceMetadataByHost.isPresent());
+        assertEquals(im2, instanceMetadataByHost.get());
     }
 
     private ArrayListMultimap<String, String> getNodesWithErrors() {
