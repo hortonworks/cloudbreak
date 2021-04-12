@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -70,7 +71,7 @@ public class RecipeExecutionFailureCollector {
     }
 
     public Optional<InstanceMetaData> getInstanceMetadataByHost(Set<InstanceMetaData> instanceMetaData, String host) {
-        return instanceMetaData.stream().filter(metadata -> metadata.getDiscoveryFQDN().equals(host)).findFirst();
+        return instanceMetaData.stream().filter(metadata -> Objects.equals(metadata.getDiscoveryFQDN(), host)).findFirst();
     }
 
     public static class RecipeFailure {

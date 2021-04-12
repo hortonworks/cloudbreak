@@ -24,7 +24,9 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Joiner;
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -32,7 +34,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
@@ -107,7 +108,7 @@ class OrchestratorRecipeExecutor {
             LOGGER.info("{} {}", preClusterManagerStartException, timeoutException);
             throw new CloudbreakException(preClusterManagerStartException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFaiureMessage(stack, e);
+            String message = getRecipeExecutionFailureMessage(stack, e);
             LOGGER.info(message);
             throw new CloudbreakException(message);
         }
@@ -123,7 +124,7 @@ class OrchestratorRecipeExecutor {
             LOGGER.info("{} {}", postClusterManagerStartException, timeoutException);
             throw new CloudbreakException(postClusterManagerStartException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFaiureMessage(stack, e);
+            String message = getRecipeExecutionFailureMessage(stack, e);
             LOGGER.info(message);
             throw new CloudbreakException(message, e);
         }
@@ -139,7 +140,7 @@ class OrchestratorRecipeExecutor {
             LOGGER.info("{} {}", postInstallException, timeoutException);
             throw new CloudbreakException(postInstallException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFaiureMessage(stack, e);
+            String message = getRecipeExecutionFailureMessage(stack, e);
             LOGGER.info(message);
             throw new CloudbreakException(message, e);
         }
@@ -165,7 +166,7 @@ class OrchestratorRecipeExecutor {
             LOGGER.info("{} {}", preTerminationException, timeoutException);
             throw new CloudbreakException(preTerminationException, timeoutException);
         } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFaiureMessage(stack, e);
+            String message = getRecipeExecutionFailureMessage(stack, e);
             LOGGER.info(message);
             throw new CloudbreakException(message, e);
         }
@@ -176,28 +177,40 @@ class OrchestratorRecipeExecutor {
                 " minute(s), please check your recipe(s) and recipe logs on the machines under /var/log/recipes! Reason:" + timeoutException.getMessage();
     }
 
-    private String getRecipeExecutionFaiureMessage(Stack stack, CloudbreakOrchestratorException exception) {
+    private String getRecipeExecutionFailureMessage(Stack stack, CloudbreakOrchestratorException exception) {
+        LOGGER.info("Getting execution failure message in stack {} for exception", stack.getId(), exception);
         if (!recipeExecutionFailureCollector.canProcessExecutionFailure(exception)) {
             return exception.getMessage();
         }
         List<RecipeFailure> failures = recipeExecutionFailureCollector.collectErrors(exception);
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId());
 
-        String message = failures.stream().map(failure -> {
-            InstanceMetaData metadata = recipeExecutionFailureCollector.getInstanceMetadataByHost(instanceMetaData, failure.getHost()).get();
-            return new StringBuilder("[Recipe: '")
-                    .append(failure.getRecipeName())
-                    .append("' - \n")
-                    .append("Hostgroup: '")
-                    .append(metadata.getInstanceGroup().getGroupName())
-                    .append("' - \n")
-                    .append("Instance: '")
-                    .append(metadata.getDiscoveryFQDN())
-                    .append(']')
-                    .toString();
-        }).collect(Collectors.joining("\n ---------------------------------------------- \n")
-        );
+        String message = failures.stream()
+                .map(failure -> getSingleRecipeExecutionFailureMessage(instanceMetaData, failure))
+                .collect(Collectors.joining("\n ---------------------------------------------- \n"));
         return new StringBuilder("Failed to execute recipe(s): \n").append(message).toString();
+    }
+
+    @VisibleForTesting
+    String getSingleRecipeExecutionFailureMessage(Set<InstanceMetaData> instanceMetaData, RecipeFailure failure) {
+        String host = recipeExecutionFailureCollector.getInstanceMetadataByHost(instanceMetaData, failure.getHost())
+                .map(metadata -> new StringBuilder("Hostgroup: '")
+                        .append(metadata.getInstanceGroup().getGroupName())
+                        .append("' - \n")
+                        .append("Instance: '")
+                        .append(metadata.getDiscoveryFQDN())
+                        .append("'")
+                        .toString())
+                .orElse(new StringBuilder("Instance: '")
+                        .append(failure.getHost())
+                        .append("' (missing metadata)")
+                        .toString());
+        return new StringBuilder("[Recipe: '")
+                .append(failure.getRecipeName())
+                .append("' - \n")
+                .append(host)
+                .append(']')
+                .toString();
     }
 
     private Map<HostGroup, List<RecipeModel>> getHostgroupToRecipeMap(Stack stack, Set<HostGroup> hostGroups) {
