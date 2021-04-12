@@ -45,7 +45,7 @@ public class FreeIpaServiceStartService {
                     .waitPeriodly(sleepingTime, TimeUnit.SECONDS)
                     .run(attemptMakerFactory.create(stack, instanceMetaDataSet));
         } catch (Exception e) {
-            LOGGER.info("freeipa health check poller failed.");
+            LOGGER.info("freeipa health check poller failed, cause: {}", e.getMessage());
             throw new OperationException("Failed to start freeipa services");
         }
         LOGGER.debug("freeipa health check poller finished, freeipa is up and running.");
