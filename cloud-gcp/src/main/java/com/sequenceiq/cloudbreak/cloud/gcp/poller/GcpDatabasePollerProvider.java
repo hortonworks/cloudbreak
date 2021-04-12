@@ -62,6 +62,8 @@ public class GcpDatabasePollerProvider {
     }
 
     private AttemptResult<Void> fetchOperationResults(AuthenticatedContext ac, List<CloudResource> resources, ResourceStatus expectedStatus) {
+        String resourceNames = resources.stream().map(CloudResource::getName).collect(Collectors.joining(","));
+        LOGGER.info("Starting to poll resources '{}' to have the desired status: '{}'", resourceNames, expectedStatus);
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(
                 ResourceType.GCP_DATABASE,
@@ -70,9 +72,12 @@ public class GcpDatabasePollerProvider {
                 resources,
                 expectedStatus);
         if (checkAllResourceIsInTheRightState(cloudResourceStatuses, expectedStatus)) {
+            LOGGER.info("All resources '{}' are in the desired state '{}'", resourceNames, expectedStatus);
             return AttemptResults.finishWith(null);
         } else if (hasFailedState(cloudResourceStatuses)) {
-            return AttemptResults.breakFor(getFailedStatus(cloudResourceStatuses));
+            String failedStatus = getFailedStatus(cloudResourceStatuses);
+            LOGGER.warn("Polling has been finished due to failed status of a resource: '{}'", failedStatus);
+            return AttemptResults.breakFor(failedStatus);
         }
         return AttemptResults.justContinue();
     }
@@ -114,7 +119,10 @@ public class GcpDatabasePollerProvider {
                 }
             } catch (Exception e) {
                 CloudContext cloudContext = auth.getCloudContext();
-                throw new GcpResourceException("Error during status check", type,
+                String message = String.format("Error during the polling of resource status, the desired status was: '%s' for resource: '%s'", waitedStatus,
+                        resource.getName());
+                LOGGER.warn(message, e);
+                throw new GcpResourceException(message, type,
                         cloudContext.getName(), cloudContext.getId(), resource.getName(), e);
             }
         }
