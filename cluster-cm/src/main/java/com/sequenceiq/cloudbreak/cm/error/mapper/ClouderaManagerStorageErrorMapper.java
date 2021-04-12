@@ -39,6 +39,9 @@ public class ClouderaManagerStorageErrorMapper {
                     case CloudConstants.AZURE:
                         errorMessage = azureError(cloudStorage);
                         break;
+                    case CloudConstants.GCP:
+                        errorMessage = gcpError(cloudStorage);
+                        break;
                     default:
                         LOGGER.debug("We don't have error massage mapper for platform: {}", cloudPlatform);
                 }
@@ -84,6 +87,35 @@ public class ClouderaManagerStorageErrorMapper {
                 "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
     }
 
+    private String gcpError(CloudStorage cloudStorage) {
+
+        String serviceAccountEmail = "";
+
+        for (CloudIdentity cloudIdentity : cloudStorage.getCloudIdentities()) {
+            if (CloudIdentityType.ID_BROKER == cloudIdentity.getIdentityType()) {
+                serviceAccountEmail = cloudIdentity.getGcsIdentity().getServiceAccountEmail();
+                break;
+            }
+        }
+
+        String auditLocation = getRangerAuditDir(cloudStorage);
+        AccountMapping accountMapping = cloudStorage.getAccountMapping();
+        String dataAccessRole = accountMapping.getUserMappings().get("hive");
+        // There is no ranger in the IDBroker mapping, so we can use solr
+        String rangerAuditRole = accountMapping.getUserMappings().get("solr");
+
+        return String.format("Services running on the cluster were unable to write to %s location. " +
+                        "This problem usually occurs due to cloud storage permission misconfiguration. " +
+                        "Services on the cluster are using Data Access Role (%s) and Ranger Audit Role (%s) to write to the Ranger Audit location (%s), " +
+                        "therefore please verify that these roles have write access to this location. " +
+                        "During Data Lake cluster creation, CDP Control Plane attaches Assumer Instance Profile (%s) to the IDBroker Virtual Machine. " +
+                        "IDBroker will then use it to assume the Data Access Role and Ranger Audit Role, therefore Assumer Instance Profile (%s) " +
+                        "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
+                        "Refer to Cloudera documentation at %s for the required rights.",
+                auditLocation, dataAccessRole, rangerAuditRole, auditLocation, serviceAccountEmail, serviceAccountEmail,
+                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
+    }
+
     private String azureError(CloudStorage cloudStorage) {
 
         String assumerIdentity = "";
@@ -110,7 +142,7 @@ public class ClouderaManagerStorageErrorMapper {
                         "permissions must, at a minimum, allow to attach the Data Access Identity and Ranger Access Identity. " +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessIdentity, rangerAuditIdentity, auditLocation, assumerIdentity, assumerIdentity,
-                "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
+                "https://docs.cloudera.com/management-console/cloud/environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
     }
 
     private String getRangerAuditDir(CloudStorage cloudStorage) {

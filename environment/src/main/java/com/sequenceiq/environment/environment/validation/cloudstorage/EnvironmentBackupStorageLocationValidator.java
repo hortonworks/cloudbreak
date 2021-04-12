@@ -9,11 +9,11 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 
 @Component
-public class EnvironmentBackupLocationValidator {
+public class EnvironmentBackupStorageLocationValidator {
 
     private final CloudStorageLocationValidator cloudStorageLocationValidator;
 
-    public EnvironmentBackupLocationValidator(CloudStorageLocationValidator cloudStorageLocationValidator) {
+    public EnvironmentBackupStorageLocationValidator(CloudStorageLocationValidator cloudStorageLocationValidator) {
         this.cloudStorageLocationValidator = cloudStorageLocationValidator;
     }
 
@@ -31,6 +31,6 @@ public class EnvironmentBackupLocationValidator {
     }
 
     private boolean isCloudStorageEnabled(EnvironmentBackup backup) {
-        return backup.getS3() != null || backup.getAdlsGen2() != null;
+        return backup.getS3() != null || backup.getAdlsGen2() != null || backup.getGcs() != null;
     }
 }

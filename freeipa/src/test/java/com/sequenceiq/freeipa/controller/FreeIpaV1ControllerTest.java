@@ -118,7 +118,7 @@ class FreeIpaV1ControllerTest {
         CreateFreeIpaRequest freeIpaRequest = new CreateFreeIpaRequest();
         when(createFreeIpaRequestValidatior.validate(freeIpaRequest)).thenReturn(ValidationResult.builder().error("error").build());
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.create(freeIpaRequest));
-        assertEquals("1. error", badRequestException.getMessage());
+        assertEquals("error", badRequestException.getMessage());
         verify(creationService, never()).launchFreeIpa(freeIpaRequest, ACCOUNT_ID);
     }
 

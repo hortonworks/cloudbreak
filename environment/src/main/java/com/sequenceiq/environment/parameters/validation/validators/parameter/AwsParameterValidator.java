@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Component
@@ -49,8 +49,11 @@ public class AwsParameterValidator implements ParameterValidator {
             LOGGER.debug("S3Guard table name defined: {}", awsParametersDto.getS3GuardTableName());
             boolean tableAlreadyAttached = isTableAlreadyAttached(environmentDto, awsParametersDto);
             if (tableAlreadyAttached) {
-                validationResultBuilder.error(String.format("S3Guard table '%s' is already attached to another active environment. "
-                        + "Please select another unattached table or specify a non-existing name to create it.", awsParametersDto.getS3GuardTableName()));
+                validationResultBuilder.error(String.format("S3Guard Dynamo table '%s' is already attached to another active environment. "
+                        + "Please select another unattached table or specify a non-existing name to create it. "
+                        + "Refer to Cloudera documentation at %s for the required setup.",
+                        awsParametersDto.getS3GuardTableName(),
+                        "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-environment-aws-dynamodb.html"));
             } else {
                 determineAwsParameters(environmentDto, parametersDto);
             }

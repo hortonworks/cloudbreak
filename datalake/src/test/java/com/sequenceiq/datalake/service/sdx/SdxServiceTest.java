@@ -646,7 +646,7 @@ class SdxServiceTest {
         when(entitlementService.razEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning Ranger Raz is not enabled for this account.", badRequestException.getMessage());
+        assertEquals("Provisioning Ranger Raz is not enabled for this account.", badRequestException.getMessage());
     }
 
     @Test
@@ -658,7 +658,7 @@ class SdxServiceTest {
         when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
+        assertEquals("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
     }
 
     @Test
@@ -678,9 +678,9 @@ class SdxServiceTest {
         return new Object[][]{
                 // testCaseName cloudPlatform expectedErrorMsg
                 {"CloudPlatform.AWS", CloudPlatform.AWS,
-                        "1. Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.1.0"},
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.1.0"},
                 {"CloudPlatform.AZURE", CloudPlatform.AZURE,
-                        "1. Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.1.0"}
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.1.0"}
         };
     }
 
@@ -701,9 +701,9 @@ class SdxServiceTest {
         return new Object[][]{
                 // testCaseName cloudPlatform expectedErrorMsg
                 {"CloudPlatform.AWS", CloudPlatform.AWS,
-                        "1. Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.2.0"},
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.2.0"},
                 {"CloudPlatform.AZURE", CloudPlatform.AZURE,
-                        "1. Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.2.0"}
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.2.0"}
         };
     }
 
@@ -757,7 +757,7 @@ class SdxServiceTest {
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals(String.format("1. Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
+        assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
                 "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
     }
 
@@ -770,7 +770,7 @@ class SdxServiceTest {
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals(String.format("1. Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.GCP.name()) +
+        assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.GCP.name()) +
                 "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
     }
 
@@ -811,7 +811,7 @@ class SdxServiceTest {
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
                 + invalidRuntime, badRequestException.getMessage());
     }
 
@@ -824,7 +824,7 @@ class SdxServiceTest {
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        assertEquals("1. Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
                 + invalidRuntime, badRequestException.getMessage());
     }
 

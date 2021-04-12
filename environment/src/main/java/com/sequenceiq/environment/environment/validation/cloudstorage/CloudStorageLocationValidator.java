@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
@@ -38,10 +39,26 @@ public class CloudStorageLocationValidator {
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
         resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
-                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
                         response.getRegion(),
                         bucketName,
-                        environment.getLocation()));
+                        environment.getLocation(),
+                        getDocLink(environment.getCloudPlatform())));
+    }
+
+    private String getDocLink(String cloudPlatform) {
+        String docReferenceLink = " Refer to Cloudera documentation at %s for the required rights.";
+        if (cloudPlatform.equals(CloudConstants.AWS)) {
+            return String.format(docReferenceLink, "https://docs.cloudera.com/management-console/cloud/" +
+                    "environments/topics/mc-idbroker-minimum-setup.html");
+        } else if (cloudPlatform.equals(CloudConstants.AZURE)) {
+            return String.format(docReferenceLink, "https://docs.cloudera.com/management-console/cloud/" +
+                    "environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
+        } else if (cloudPlatform.equals(CloudConstants.GCP)) {
+            return String.format(docReferenceLink, "https://docs.cloudera.com/management-console/cloud/" +
+                    "environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
+        }
+        return "";
     }
 
     private Optional<FileSystemType> getFileSystemType(Environment environment) {
@@ -69,10 +86,11 @@ public class CloudStorageLocationValidator {
         ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
         resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().equals(response.getRegion()),
-                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",
+                String.format("Object storage location [%s] of bucket '%s' must match environment location [%s].%s",
                         response.getRegion(),
                         bucketName,
-                        environment.getLocation()));
+                        environment.getLocation(),
+                        getDocLink(environment.getCloudPlatform())));
     }
 
     private Optional<FileSystemType> getBackupFileSystemType(Environment environment) {

@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.validation;
 
 import java.util.Set;
 
-import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentBackupLocationValidator;
+import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentBackupStorageLocationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentBackupStorageConfigurationValidator;
+import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageConfigurationValidator;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentAuthenticationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentNetworkProviderValidator;
@@ -29,22 +31,33 @@ public class EnvironmentFlowValidatorService {
 
     private final EnvironmentLogStorageLocationValidator logStorageLocationValidator;
 
-    private final EnvironmentBackupLocationValidator backupLocationValidator;
+    private final EnvironmentLogStorageConfigurationValidator logStorageConfigurationValidator;
+
+    private final EnvironmentBackupStorageLocationValidator backupLocationValidator;
+
+    private final EnvironmentBackupStorageConfigurationValidator backupStorageConfigurationValidator;
 
     private final EnvironmentParameterValidator environmentParameterValidator;
 
     private final EnvironmentAuthenticationValidator environmentAuthenticationValidator;
 
     public EnvironmentFlowValidatorService(
-            EnvironmentRegionValidator environmentRegionValidator, EnvironmentNetworkProviderValidator environmentNetworkProviderValidator,
-            EnvironmentLogStorageLocationValidator logStorageLocationValidator, EnvironmentBackupLocationValidator backupLocationValidator,
-            EnvironmentParameterValidator environmentParameterValidator, EnvironmentAuthenticationValidator environmentAuthenticationValidator) {
+            EnvironmentRegionValidator environmentRegionValidator,
+            EnvironmentNetworkProviderValidator environmentNetworkProviderValidator,
+            EnvironmentLogStorageLocationValidator logStorageLocationValidator,
+            EnvironmentBackupStorageLocationValidator backupLocationValidator,
+            EnvironmentParameterValidator environmentParameterValidator,
+            EnvironmentAuthenticationValidator environmentAuthenticationValidator,
+            EnvironmentLogStorageConfigurationValidator logStorageConfigurationValidator,
+            EnvironmentBackupStorageConfigurationValidator backupStorageConfigurationValidator) {
         this.environmentRegionValidator = environmentRegionValidator;
         this.environmentNetworkProviderValidator = environmentNetworkProviderValidator;
         this.logStorageLocationValidator = logStorageLocationValidator;
         this.backupLocationValidator = backupLocationValidator;
         this.environmentParameterValidator = environmentParameterValidator;
         this.environmentAuthenticationValidator = environmentAuthenticationValidator;
+        this.logStorageConfigurationValidator = logStorageConfigurationValidator;
+        this.backupStorageConfigurationValidator = backupStorageConfigurationValidator;
     }
 
     public ValidationResult.ValidationResultBuilder validateRegionsAndLocation(String location, Set<String> requestedRegions,
@@ -62,8 +75,16 @@ public class EnvironmentFlowValidatorService {
         return logStorageLocationValidator.validateTelemetryLoggingStorageLocation(environment);
     }
 
+    public ValidationResult validateTelemetryLoggingStorageConfig(Environment environment) {
+        return logStorageConfigurationValidator.validateTelemetryLoggingStorageConfiguration(environment);
+    }
+
     public ValidationResult validateBackupStorageLocation(Environment environment) {
         return backupLocationValidator.validateBackupStorageLocation(environment);
+    }
+
+    public ValidationResult validateBackupStorageConfig(Environment environment) {
+        return backupStorageConfigurationValidator.validateBackupStorageConfiguration(environment);
     }
 
     public ValidationResult validateNetworkWithProvider(EnvironmentDto environmentDto) {

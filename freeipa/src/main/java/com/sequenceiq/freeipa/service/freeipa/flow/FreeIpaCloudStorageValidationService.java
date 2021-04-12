@@ -80,8 +80,14 @@ public class FreeIpaCloudStorageValidationService {
                             "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
                 } else if (backup.getGcs() != null) {
                     errorMsg = String.format("Validating FreeIPA cloud storage permission for backup failed. " +
-                            "Verify there is permission to write to %s.",
-                            backup.getStorageLocation());
+                                    "The managed profile %s did not have permission to write to %s. " +
+                                    "If provisioning was done using the UI, then verify the logger identity and logs location base when provisioning " +
+                                    "in the UI. " +
+                                    "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. " +
+                                    "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
+                                    "Refer to Cloudera documentation at %s for the required rights.",
+                            backup.getGcs().getServiceAccountEmail(), backup.getStorageLocation(),
+                            "https://docs.cloudera.com/management-console/cloud/environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
                 }
             }
             LOGGER.error(errorMsg, e);
