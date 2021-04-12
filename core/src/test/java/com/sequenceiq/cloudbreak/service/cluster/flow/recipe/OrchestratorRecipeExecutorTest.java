@@ -2,12 +2,16 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -20,6 +24,8 @@ import org.springframework.core.convert.ConversionService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -148,5 +154,35 @@ public class OrchestratorRecipeExecutorTest {
 
         ExitCriteriaModel exitCriteriaModel = exitCriteriaModelCaptor.getValue();
         assertThat(exitCriteriaModel).isOfAnyClassIn(ClusterDeletionBasedExitCriteriaModel.class);
+    }
+
+    @Test
+    public void testGetSingleRecipeExecutionFailureMessageWithInstanceMetaData() {
+        final InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("fqdn");
+        final InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("instance-group");
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        when(recipeExecutionFailureCollector.getInstanceMetadataByHost(anySet(), anyString())).thenReturn(Optional.of(instanceMetaData));
+
+        final RecipeExecutionFailureCollector.RecipeFailure recipeFailure = new RecipeExecutionFailureCollector.RecipeFailure("fqdn", "phase", "recipe");
+        final String message = underTest.getSingleRecipeExecutionFailureMessage(Set.of(instanceMetaData), recipeFailure);
+
+        Assert.assertEquals("[Recipe: 'recipe' - \nHostgroup: 'instance-group' - \nInstance: 'fqdn']", message);
+    }
+
+    @Test
+    public void testGetSingleRecipeExecutionFailureMessageWithoutInstanceMetaData() {
+        final InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("other-fqdn");
+        final InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("instance-group");
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        when(recipeExecutionFailureCollector.getInstanceMetadataByHost(anySet(), anyString())).thenReturn(Optional.empty());
+
+        final RecipeExecutionFailureCollector.RecipeFailure recipeFailure = new RecipeExecutionFailureCollector.RecipeFailure("fqdn", "phase", "recipe");
+        final String message = underTest.getSingleRecipeExecutionFailureMessage(Set.of(instanceMetaData), recipeFailure);
+
+        Assert.assertEquals("[Recipe: 'recipe' - \nInstance: 'fqdn' (missing metadata)]", message);
     }
 }
