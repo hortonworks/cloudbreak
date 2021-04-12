@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
@@ -37,7 +38,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
     private StackService stackService;
 
     @Override
-    protected Selectable doAccept(HandlerEvent event) {
+    protected Selectable doAccept(HandlerEvent<ClusterUpgradeValidationEvent> event) {
         LOGGER.debug("Accepting Cluster upgrade validation event.");
         ClusterUpgradeValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
