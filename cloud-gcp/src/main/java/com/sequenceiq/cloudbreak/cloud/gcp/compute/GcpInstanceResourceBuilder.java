@@ -390,16 +390,19 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private AttachedDisk createDisk(String projectId, boolean boot, String resourceName, String zone, boolean autoDelete, String type) {
         AttachedDisk attachedDisk = new AttachedDisk();
         attachedDisk.setBoot(boot);
-        attachedDisk.setAutoDelete(autoDelete);
         attachedDisk.setMode(GCP_DISK_MODE);
         attachedDisk.setDeviceName(resourceName);
         if (type.equals(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value())) {
+            attachedDisk.setAutoDelete(true);
             attachedDisk.setType(SCRATCH);
             attachedDisk.setInterface("NVME");
             attachedDisk.setInitializeParams(new AttachedDiskInitializeParams()
+                    .setDescription(resourceName)
+                    .setLabels(Map.of("name", resourceName))
                     .setDiskType(String.format("zones/%s/diskTypes/local-ssd", zone))
             );
         } else {
+            attachedDisk.setAutoDelete(autoDelete);
             attachedDisk.setType(PERSISTENT);
             attachedDisk.setSource(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/disks/%s",
                     projectId, zone, resourceName));
