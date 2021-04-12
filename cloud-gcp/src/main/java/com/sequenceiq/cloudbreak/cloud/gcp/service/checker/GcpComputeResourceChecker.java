@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service.checker;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -16,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 
 @Component
 public class GcpComputeResourceChecker {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpComputeResourceChecker.class);
 
     @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
     public Operation check(GcpContext context,  String operationId) throws IOException {
@@ -26,7 +30,15 @@ public class GcpComputeResourceChecker {
             Operation execute = GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operationId).execute();
             checkComputeOperationError(execute);
             return execute;
+        } catch (InterruptedIOException interruptedIOException) {
+            String message = String.format("Failed to check the '%s' operation on the database for '%s' due to network issues.", operationId,
+                    context.getName());
+            LOGGER.warn(message, interruptedIOException);
+            throw new CloudConnectorException(message, interruptedIOException);
         } catch (GoogleJsonResponseException e) {
+            String message = String.format("Failed to check the '%s' operation on the resource for '%s'.", operationId,
+                    context.getName());
+            LOGGER.warn(message, e);
             return handleException(context, operationId, e);
         }
     }
