@@ -18,6 +18,7 @@ import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -124,8 +125,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         try {
             handle(key, payload, flowParameters, flowChainId, flowChainType, contextParams);
         } catch (Exception e) {
-            LOGGER.error("Failed update last flow log status and save new flow log entry.", e);
-            runningFlows.remove(flowId);
+            LOGGER.error("Failed to handle flow event.", e);
+            throw new CloudbreakServiceException(e);
         }
     }
 
@@ -176,50 +177,48 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
                     }
                 } else {
-                    handleFlowControlEventAndTerminateOnFail(key, payload, flowParameters, flowChainId, flowId);
+                    handleFlowControlEvent(key, payload, flowParameters, flowChainId);
                 }
                 break;
         }
     }
 
-    private void handleFlowControlEventAndTerminateOnFail(String key, Payload payload, FlowParameters flowParameters, String flowChainId, String flowId)
-            throws TransactionExecutionException {
-        try {
-            handleFlowControlEvent(key, payload, flowParameters, flowChainId);
-        } catch (Exception e) {
-            LOGGER.error("Flow will be terminated because flow control event handling failed", e);
-            flowLogService.terminate(payload.getResourceId(), flowId);
-            runningFlows.remove(flowId);
-        }
-    }
-
-    private void handleFlowControlEvent(String key, Payload payload, FlowParameters flowParameters, String flowChainId)
-            throws TransactionExecutionException {
+    private void handleFlowControlEvent(String key, Payload payload, FlowParameters flowParameters, String flowChainId) throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow control event arrived: key: {}, flowid: {}, usercrn: {}, payload: {}", key, flowId, flowParameters.getFlowTriggerUserCrn(), payload);
         Flow flow = runningFlows.get(flowId);
         if (flow != null) {
             MutableBoolean flowCancelled = new MutableBoolean(false);
-            transactionService.required(() -> {
-                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
-                lastFlowLog.ifPresent(flowLog -> {
-                    String nodeId = nodeConfig.getId();
-                    if (flowLog.getFinalized() || flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
-                        updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters);
-                    } else {
-                        LOGGER.info("Flow {} was handled by another node {}, current node ID is {}, abandoning.",
-                                flow.getFlowId(), flowLog.getCloudbreakNodeId(), nodeId);
-                        inMemoryCleanup.cancelFlowWithoutDbUpdate(flow.getFlowId());
-                        flowCancelled.setTrue();
-                    }
-                });
-            });
+            try {
+                updateFlowLogStatusInTransaction(key, payload, flowParameters, flowChainId, flow, flowCancelled);
+            } catch (TransactionExecutionException e) {
+                LOGGER.error("Can't update flow status: {}", flowId);
+                throw e;
+            }
             if (!flowCancelled.booleanValue()) {
                 flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext());
             }
         } else {
             LOGGER.debug("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getResourceId(), flowId, key);
         }
+    }
+
+    private void updateFlowLogStatusInTransaction(String key, Payload payload, FlowParameters flowParameters, String flowChainId, Flow flow,
+            MutableBoolean flowCancelled) throws TransactionExecutionException {
+        transactionService.required(() -> {
+            Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
+            lastFlowLog.ifPresent(flowLog -> {
+                String nodeId = nodeConfig.getId();
+                if (flowLog.getFinalized() || flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
+                    updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters);
+                } else {
+                    LOGGER.info("Flow {} was handled by another node {}, current node ID is {}, abandoning.",
+                            flow.getFlowId(), flowLog.getCloudbreakNodeId(), nodeId);
+                    inMemoryCleanup.cancelFlowWithoutDbUpdate(flow.getFlowId());
+                    flowCancelled.setTrue();
+                }
+            });
+        });
     }
 
     private void updateFlowLogStatus(String key, Payload payload, String flowChainId, Flow flow, FlowLog lastFlowLog, FlowParameters flowParameters) {

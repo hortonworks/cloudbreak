@@ -1,7 +1,7 @@
 package com.sequenceiq.flow.core;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -24,8 +24,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
@@ -44,6 +45,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
@@ -168,7 +170,7 @@ public class Flow2HandlerTest {
 
     private final Payload payload = () -> 1L;
 
-    @Before
+    @BeforeEach
     public void setUp() throws TransactionExecutionException {
         underTest = new Flow2Handler();
         MockitoAnnotations.initMocks(this);
@@ -216,7 +218,8 @@ public class Flow2HandlerTest {
         event.setKey("KEY");
         when(flowLogService.save(any(FlowParameters.class), nullable(String.class), anyString(), any(Payload.class), any(),
                 eq(flowConfig.getClass()), eq(flowState))).thenThrow(new RuntimeException("Can't save flow log"));
-        underTest.accept(event);
+        Assertions.assertThrows(CloudbreakServiceException.class,
+                () -> underTest.accept(event));
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
         verify(flowLogService, times(1))
