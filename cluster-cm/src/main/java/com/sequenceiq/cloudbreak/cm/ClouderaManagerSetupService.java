@@ -517,7 +517,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private ApiConfig setHostName(Stack stack) {
         Set<LoadBalancer> loadBalancers = loadBalancerRepository.findByStackId(stack.getId());
-        return new ApiConfig().name("cm_host_name").value(loadBalancers.iterator().next().toString());
+        return new ApiConfig().name("cm_host_name").value(loadBalancers.iterator().next().getFqdn());
     }
 
     private ApiConfig setHostNameValidation(Stack stack) {
