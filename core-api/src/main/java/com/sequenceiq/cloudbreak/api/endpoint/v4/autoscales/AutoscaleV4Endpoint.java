@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
@@ -73,6 +74,13 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = StackOpDescription.GET_AUTOSCALE_BY_NAME, produces = APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "getAutoscaleClusterByName")
     AutoscaleStackV4Response getAutoscaleClusterByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/autoscale_cluster/name/{name}/internal")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_INTERNAL_AUTOSCALE_BY_NAME, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "getInternalAutoscaleClusterByName")
+    AutoscaleStackV4Response getInternalAutoscaleClusterByName(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("/stack/crn/{crn}")
