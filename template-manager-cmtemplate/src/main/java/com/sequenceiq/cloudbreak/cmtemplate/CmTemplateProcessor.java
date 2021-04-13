@@ -72,12 +72,6 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CmTemplateProcessor.class);
 
-    private static final String SERVICES_NODE = "services";
-
-    private static final String ROLE_CONFIG_GROUPS = "roleConfigGroups";
-
-    private static final String ROLE_TYPE = "roleType";
-
     private final ApiClusterTemplate cmTemplate;
 
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
