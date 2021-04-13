@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.ClusterMonitoringEngine;
 import com.sequenceiq.cloudbreak.service.datalake.DatalakeResourcesService;
@@ -211,8 +211,8 @@ public class ClusterBuilderService {
 
     public void prepareExtendedTemplate(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
         Cluster cluster = stack.getCluster();
+        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(cluster.getId());
 
         setInitialBlueprintText(cluster);
 
@@ -227,6 +227,8 @@ public class ClusterBuilderService {
                             stack.getName()
                     ).orElse(null)
                 );
+
+        validateExtendedBlueprintTextDoesNotContainUnresolvedHandlebarParams(template);
 
         cluster.setExtendedBlueprintText(template);
         clusterService.save(cluster);
@@ -318,4 +320,12 @@ public class ClusterBuilderService {
         }
         return instanceMetaDataByHostGroup;
     }
+
+    private void validateExtendedBlueprintTextDoesNotContainUnresolvedHandlebarParams(String template) {
+        if (template.matches(".*\\{\\{\\{.*}}}.*")) {
+            throw new IllegalStateException("Some of the template parameters has not been resolved! Please check your custom properties at cluster the " +
+                    "cluster creation to be able to resolve them!");
+        }
+    }
+
 }
