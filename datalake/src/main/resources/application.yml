@@ -42,7 +42,7 @@ management:
 sdx:
   db:
     aws:
-      engineversion: 10.6
+      engineversion: 10.14
       ha:
         backupretentionperiod: 30
       nonha:
