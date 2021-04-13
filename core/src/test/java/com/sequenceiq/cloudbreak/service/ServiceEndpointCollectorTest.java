@@ -231,6 +231,55 @@ public class ServiceEndpointCollectorTest {
     }
 
     @Test
+    public void testPrepareClusterExposedServicesByGeneratedBlueprint() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        cluster.getGateway().setGatewayPort(443);
+        cluster.setExtendedBlueprintText("extended-blueprint");
+
+        mockBlueprintTextProcessor();
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
+
+        Collection<ClusterExposedServiceV4Response> topology2ClusterExposedServiceV4Responses = clusterExposedServicesMap.get("topology2");
+        Optional<ClusterExposedServiceV4Response> webHDFS =
+                topology2ClusterExposedServiceV4Responses.stream().filter(service -> "WEBHDFS".equals(service.getKnoxService())).findFirst();
+
+        if (webHDFS.isPresent()) {
+            assertEquals("https://10.0.0.1/gateway-path/topology2/webhdfs/v1", webHDFS.get().getServiceUrl());
+            assertEquals("WEBHDFS", webHDFS.get().getKnoxService());
+            assertEquals("WebHDFS", webHDFS.get().getDisplayName());
+            assertEquals("NAMENODE", webHDFS.get().getServiceName());
+            assertTrue(webHDFS.get().isOpen());
+        }
+
+        Optional<ClusterExposedServiceV4Response> sparkHistoryUI =
+                topology2ClusterExposedServiceV4Responses.stream().filter(service -> "SPARKHISTORYUI".equals(service.getKnoxService())).findFirst();
+        if (sparkHistoryUI.isPresent()) {
+            assertEquals("https://10.0.0.1/gateway-path/topology2/sparkhistory/", sparkHistoryUI.get().getServiceUrl());
+            assertEquals("SPARKHISTORYUI", sparkHistoryUI.get().getKnoxService());
+            assertEquals("Spark 1.x History Server", sparkHistoryUI.get().getDisplayName());
+            assertEquals("SPARK_YARN_HISTORY_SERVER", sparkHistoryUI.get().getServiceName());
+            assertFalse(sparkHistoryUI.get().isOpen());
+        }
+
+        Optional<ClusterExposedServiceV4Response> hiveServer =
+                topology2ClusterExposedServiceV4Responses.stream().filter(service -> "HIVE".equals(service.getKnoxService())).findFirst();
+        if (hiveServer.isPresent()) {
+            assertEquals("jdbc:hive2://10.0.0.1/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword=${GATEWAY_JKS_PASSWORD};"
+                    + "transportMode=http;httpPath=gateway-path/topology2/hive", hiveServer.get().getServiceUrl());
+            assertEquals("HIVE", hiveServer.get().getKnoxService());
+            assertEquals("Hive Server", hiveServer.get().getDisplayName());
+            assertEquals("HIVE_SERVER", hiveServer.get().getServiceName());
+            assertTrue(hiveServer.get().isOpen());
+        }
+    }
+
+    @Test
     public void testGetKnoxServices() {
         mockBlueprintTextProcessor();
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");

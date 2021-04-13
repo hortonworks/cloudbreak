@@ -106,57 +106,65 @@ public class ServiceEndpointCollector {
     }
 
     public Map<String, Collection<ClusterExposedServiceV4Response>> prepareClusterExposedServices(Cluster cluster, String managerIp) {
-        if (cluster.getBlueprint() != null) {
-            String blueprintText = cluster.getBlueprint().getBlueprintText();
-            if (isNotEmpty(blueprintText)) {
-                BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
-                Collection<ExposedService> knownExposedServices = getExposedServices(
-                        cluster.getBlueprint(),
-                        entitlementService.getEntitlements(cluster.getWorkspace().getTenant().getName()));
-                Gateway gateway = cluster.getGateway();
-                Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
-                Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
-                        knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
-                if (privateIps.containsKey(exposedServiceCollector.getImpalaService().getServiceName())) {
-                    setImpalaDebugUIToCoordinator(cluster, privateIps);
-                }
-                if (gateway != null) {
-                    for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                        Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
-                                .flatMap(this::getExposedServiceStream)
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet());
-                        List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
-                        List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
-                        boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
-                        SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
-                        String managerServerUrl = getManagerServerUrl(cluster, managerIp);
-                        for (ExposedService exposedService : knownExposedServices) {
-                            if (exposedService.isCmProxied()) {
-                                List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createCmProxiedServiceEntries(exposedService, gateway,
-                                        gatewayTopology, managerServerUrl, cluster.getName());
+        String blueprintText = getBlueprintString(cluster);
+        if (!Strings.isNullOrEmpty(blueprintText)) {
+            BlueprintTextProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+            Collection<ExposedService> knownExposedServices = getExposedServices(
+                    cluster.getBlueprint(),
+                    entitlementService.getEntitlements(cluster.getWorkspace().getTenant().getName()));
+            Gateway gateway = cluster.getGateway();
+            Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
+            Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
+                    knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
+            if (privateIps.containsKey(exposedServiceCollector.getImpalaService().getServiceName())) {
+                setImpalaDebugUIToCoordinator(cluster, privateIps);
+            }
+            if (gateway != null) {
+                for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
+                    Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
+                            .flatMap(this::getExposedServiceStream)
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet());
+                    List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
+                    List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
+                    boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+                    SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
+                    String managerServerUrl = getManagerServerUrl(cluster, managerIp);
+                    for (ExposedService exposedService : knownExposedServices) {
+                        if (exposedService.isCmProxied()) {
+                            List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createCmProxiedServiceEntries(exposedService, gateway,
+                                    gatewayTopology, managerServerUrl, cluster.getName());
+                            uiServices.addAll(uiServiceOnPrivateIps);
+                        } else {
+                            if (!exposedService.isApiOnly()) {
+                                List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
+                                        managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
                                 uiServices.addAll(uiServiceOnPrivateIps);
-                            } else {
-                                if (!exposedService.isApiOnly()) {
-                                    List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                                            managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
-                                    uiServices.addAll(uiServiceOnPrivateIps);
-                                }
-                                if (exposedService.isApiIncluded()) {
-                                    List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                                            managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
-                                    apiServices.addAll(apiServiceOnPrivateIps);
-                                }
+                            }
+                            if (exposedService.isApiIncluded()) {
+                                List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
+                                        managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
+                                apiServices.addAll(apiServiceOnPrivateIps);
                             }
                         }
-                        clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), uiServices);
-                        clusterExposedServiceMap.put(gatewayTopology.getTopologyName() + API_TOPOLOGY_POSTFIX, apiServices);
                     }
+                    clusterExposedServiceMap.put(gatewayTopology.getTopologyName(), uiServices);
+                    clusterExposedServiceMap.put(gatewayTopology.getTopologyName() + API_TOPOLOGY_POSTFIX, apiServices);
                 }
-                return clusterExposedServiceMap;
             }
+            return clusterExposedServiceMap;
         }
         return Collections.emptyMap();
+    }
+
+    private String getBlueprintString(Cluster cluster) {
+        String blueprintText = null;
+        if (!Strings.isNullOrEmpty(cluster.getExtendedBlueprintText())) {
+            blueprintText = cluster.getExtendedBlueprintText();
+        } else if (cluster.getBlueprint() != null) {
+            blueprintText = cluster.getBlueprint().getBlueprintText();
+        }
+        return blueprintText;
     }
 
     public Map<String, Collection<ClusterExposedServiceView>> prepareClusterExposedServicesViews(Cluster cluster, String managerIp) {
