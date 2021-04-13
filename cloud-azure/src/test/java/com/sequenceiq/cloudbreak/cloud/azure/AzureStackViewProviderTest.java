@@ -18,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -63,6 +64,9 @@ public class AzureStackViewProviderTest {
     @Mock
     private CloudStack cloudStack;
 
+    @Mock
+    private AzureImageFormatValidator azureImageFormatValidator;
+
     @Before
     public void before() {
         ReflectionTestUtils.setField(underTest, "stackNamePrefixLength", 255);
@@ -80,9 +84,11 @@ public class AzureStackViewProviderTest {
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());
         when(cloudStack.getNetwork()).thenReturn(network);
+//        when(cloudStack.getImage()).thenReturn(network);
         when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
         when(azureUtils.getCustomSubnetIds(network)).thenReturn(Collections.emptyList());
+//        when(azureImageFormatValidator.isMarketplaceImageFormat(image))
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 

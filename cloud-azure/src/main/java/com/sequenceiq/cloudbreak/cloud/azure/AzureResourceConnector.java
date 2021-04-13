@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSi
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -82,6 +84,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
 
     @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
     private AzureImageTermsSignerService azureImageTermsSignerService;
 
     @Override
@@ -92,25 +97,32 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
-
-        AzureImage image = azureStorage.getCustomImage(client, ac, stack);
-        if (!image.getAlreadyExists()) {
-            LOGGER.debug("Image {} has been created now, so we need to persist it", image.getName());
-            CloudResource imageCloudResource = azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
-            azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
-        }
-        String customImageId = image.getId();
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(azureCredentialView, stack, client, ac);
+        String template;
 
-        // PoC of Marketplace: hardcoding one freeipa / DL image, and signing it
-        AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image.getName());
+        Image stackImage = stack.getImage();
+        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
+            LOGGER.debug("Launching with Azure Marketplace image {}", stackImage);
+            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
 //        azureUtils.signImageConsent(client, azureMarketplaceImage);
-        azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+            azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+            template = azureTemplateBuilder.build(stackName, null, azureCredentialView, azureStackView,
+                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
+        } else {
+            LOGGER.debug("Launching with non-Azure Marketplace image {}", stackImage);
+            AzureImage image = azureStorage.getCustomImage(client, ac, stack);
+            if (!image.getAlreadyExists()) {
+                LOGGER.debug("Image {} has been created now, so we need to persist it", image.getName());
+                CloudResource imageCloudResource = azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
+                azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
+            }
+            String customImageId = image.getId();
+            template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
+                    cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, null);
+        }
 
-        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
-                cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
-        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stackImage);
 
         boolean resourcesPersisted = false;
         try {

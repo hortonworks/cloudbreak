@@ -21,11 +21,11 @@ public class AzureImageTermsSignerService {
     private RestOperationsService restOperationsService;
 
     public void sign(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
-        signWithAzUrlGetPur(subscriptionId, azureMarketplaceImage, azureClient);
+        signWithAzUrlGetPut(subscriptionId, azureMarketplaceImage, azureClient);
 
     }
 
-    private void signWithAzUrlGetPur(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
+    private void signWithAzUrlGetPut(String subscriptionId, AzureMarketplaceImage azureMarketplaceImage, AzureClient azureClient) {
         String signUrlAzTemplate = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/offerTypes/virtualmachine/" +
                 "publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
         String signUrl = String.format(signUrlAzTemplate,
@@ -46,8 +46,10 @@ public class AzureImageTermsSignerService {
             AzureImageTerms responseImageTerms = restOperationsService.httpPut(signUri, azureImageTerms, AzureImageTerms.class, tokenOptional.get());
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, responseImageTerms);
         } catch (Exception e) {
-            LOGGER.warn("Exception when signing vm image terms and conditions, method azure-cli url.");
-            throw new CloudConnectorException("Exception when signing vm image terms and conditions, method azure-cli url.", e);
+            String message = String.format("Exception occurred when signing vm image terms and conditions, method azure-cli url. Message is %s",
+                    e.getMessage());
+            LOGGER.warn(message);
+            throw new CloudConnectorException(message, e);
         }
 
     }

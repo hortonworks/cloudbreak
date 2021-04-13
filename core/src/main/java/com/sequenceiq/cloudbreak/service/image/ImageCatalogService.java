@@ -280,13 +280,19 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         List<Image> images = statedImages.getImages().getCdhImages();
         Optional<Image> selectedImage = Optional.empty();
         if (!CollectionUtils.isEmpty(images)) {
-            List<Image> matchingVersionImages = images.stream().filter(img -> {
-                String[] repoIdParts = img.getStackDetails().getRepo().getStack().get("repoid").split("-");
-                return repoIdParts.length > 1 && repoIdParts[1].equals(clusterVersion);
-            }).collect(toList());
+            List<Image> matchingVersionImages = filterImagesByRuntimeVersion(clusterVersion, images);
             selectedImage = getLatestImageDefaultPreferred(matchingVersionImages);
         }
         return selectedImage;
+    }
+
+    private List<Image> filterImagesByRuntimeVersion(String clusterVersion, List<Image> images) {
+        List<Image> matchingVersionImages = images.stream().filter(img -> {
+            String[] repoIdParts = img.getStackDetails().getRepo().getStack().get("repoid").split("-");
+            return repoIdParts.length > 1 && repoIdParts[1].equals(clusterVersion);
+        }).collect(toList());
+        LOGGER.debug("Images matching runtime are: {}", matchingVersionImages.stream().map(Image::getUuid).collect(Collectors.joining(",")));
+        return matchingVersionImages;
     }
 
     private String imageNotFoundErrorMessage(String platform) {
