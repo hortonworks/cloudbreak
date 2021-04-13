@@ -11,6 +11,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
@@ -120,7 +121,7 @@ public class KerberosConfigV1Service {
             LOGGER.debug("Kerberos config already exists");
             kerberosConfig = existingKerberosConfig.get();
         } else {
-            kerberosConfig = createNewKerberosConfig(environmentCrn, clusterName, stack, false);
+            throw NotFoundException.notFoundException("Kerberos config", clusterName);
         }
         return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }

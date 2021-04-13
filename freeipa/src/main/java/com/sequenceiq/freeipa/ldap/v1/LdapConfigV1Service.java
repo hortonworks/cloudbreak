@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
@@ -202,7 +203,7 @@ public class LdapConfigV1Service {
             LOGGER.debug("LdapConfig already exists");
             ldapConfig = existingLdapConfig.get();
         } else {
-            ldapConfig = createNewLdapConfig(environmentCrn, clusterName, stack, false);
+            throw NotFoundException.notFoundException("LDAP config", clusterName);
         }
         return convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
     }

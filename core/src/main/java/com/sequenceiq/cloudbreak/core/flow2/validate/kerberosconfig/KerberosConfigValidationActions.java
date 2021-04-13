@@ -16,6 +16,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
@@ -32,11 +33,18 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationCheckerTask;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationPollerObject;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
+import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 @Configuration
 public class KerberosConfigValidationActions {
@@ -55,11 +63,27 @@ public class KerberosConfigValidationActions {
     @Inject
     private KerberosConfigService kerberosConfigService;
 
+    @Inject
+    private FreeipaClientService freeipaClientService;
+
+    @Inject
+    private OperationV1Endpoint operationV1Endpoint;
+
+    @Inject
+    private PollingService<FreeIpaOperationPollerObject> freeIpaOperationChecker;
+
     @Bean(name = "VALIDATE_KERBEROS_CONFIG_STATE")
     public Action<?, ?> kerberosConfigValidationAction() {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                BindUserCreateRequest request = new BindUserCreateRequest();
+                request.setEnvironmentCrn(context.getStack().getEnvironmentCrn());
+                request.setBindUserNameSuffix(context.getStack().getName());
+                OperationStatus operation = freeipaClientService.createBindUsers(request, ThreadBasedUserCrnProvider.getUserCrn());
+                FreeIpaOperationPollerObject operationPollerObject = new FreeIpaOperationPollerObject(operation.getOperationId(),
+                        operation.getOperationType().name(), operationV1Endpoint);
+                freeIpaOperationChecker.pollWithAbsoluteTimeoutSingleFailure(new FreeIpaOperationCheckerTask<>(), operationPollerObject, 5000, 600L);
                 decorateStackWithCustomDomainIfAdOrIpaJoinable(context.getStack());
                 Cluster cluster = context.getStack().getCluster();
                 if (cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled())) {
