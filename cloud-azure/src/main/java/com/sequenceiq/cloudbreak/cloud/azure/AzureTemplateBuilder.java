@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureInstanceTemplateOperati
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.inject.Inject;
 
@@ -82,7 +83,7 @@ public class AzureTemplateBuilder {
             // needed for pre 1.16.5 templates and Load balancer setup on Medium duty datalakes.
             model.put("existingSubnetName", azureUtils.getCustomSubnetIds(network).stream().findFirst().orElse(""));
 
-            model.put("usePartnerCenter", true);
+            model.put("usePartnerCenter", Objects.nonNull(azureMarketplaceImage));
             model.put("marketplaceImageDetails", azureMarketplaceImage);
             model.put("customImageId", customImageId);
             model.put("storage_account_name", rootDiskStorage);

@@ -13,11 +13,13 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTemplateBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 
 @Component
 public class AzureTemplateDeploymentService {
@@ -35,6 +37,9 @@ public class AzureTemplateDeploymentService {
     private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
 
     @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Inject
     private AzureTemplateBuilder azureTemplateBuilder;
 
     public Deployment getTemplateDeployment(AzureClient client, CloudStack stack, AuthenticatedContext ac, AzureStackView azureStackView,
@@ -49,10 +54,17 @@ public class AzureTemplateDeploymentService {
 
     private String getTemplate(CloudStack stack, AzureStackView azureStackView, AuthenticatedContext ac, CloudContext cloudContext,
             String stackName, AzureClient client, AzureInstanceTemplateOperation azureInstanceTemplateOperation) {
-        String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
-        AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(customImageId);
-        return azureTemplateBuilder.build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
-                azureMarketplaceImage);
+        String template;
+        Image stackImage = stack.getImage();
+        if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
+            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stack.getImage());
+            template = azureTemplateBuilder.build(stackName, null, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation,
+                    azureMarketplaceImage);
+        } else {
+            String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
+            template = azureTemplateBuilder.build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation, null);
+        }
+        return template;
     }
 
     private AzureCredentialView createCredential(AuthenticatedContext ac) {

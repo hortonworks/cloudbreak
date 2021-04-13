@@ -1,16 +1,5 @@
 package com.sequenceiq.freeipa.service.image;
 
-import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
-import com.sequenceiq.freeipa.api.model.image.Image;
-import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
-import com.sequenceiq.freeipa.dto.ImageWrapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,11 +7,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.sequenceiq.freeipa.api.model.image.FreeIpaVersions;
+import com.sequenceiq.freeipa.api.model.image.Image;
+import com.sequenceiq.freeipa.api.model.image.ImageCatalog;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @Service
 public class FreeIpaImageProvider implements ImageProvider {
@@ -30,6 +34,8 @@ public class FreeIpaImageProvider implements ImageProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaImageProvider.class);
 
     private static final Pattern VERSION_PATTERN = Pattern.compile("^([0-9]+\\.[0-9]+\\.[0-9]+-(dev\\.|rc\\.|[b]))[0-9]+$");
+
+    private static final String DEFAULT_REGION = "default";
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
@@ -72,10 +78,10 @@ public class FreeIpaImageProvider implements ImageProvider {
         }
         if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
             return images.stream()
-                    .filter(img -> img.getImageSetsByProvider().containsKey(platform) && img.getImageSetsByProvider().get(platform).containsKey(region))
+                    .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
-                    .filter(img -> img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId) || img.getUuid().equalsIgnoreCase(imageId))
+                    .filter(img -> img.getUuid().equalsIgnoreCase(imageId) || img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
                     .collect(Collectors.toList());
         } else {
             return images.stream().filter(image -> image.getImageSetsByProvider().containsKey(platform))
@@ -83,9 +89,14 @@ public class FreeIpaImageProvider implements ImageProvider {
         }
     }
 
+    private boolean filterRegion(String region, String platform, Image img) {
+        Set<String> regionSet = img.getImageSetsByProvider().get(platform).keySet();
+        return CollectionUtils.containsAny(regionSet, region, DEFAULT_REGION);
+    }
+
     private List<Image> filterImages(List<Image> imageList, String os, String platform, String region) {
         Predicate<Image> predicate = img -> img.getOs().equalsIgnoreCase(os)
-                && img.getImageSetsByProvider().containsKey(platform) && img.getImageSetsByProvider().get(platform).containsKey(region);
+                && img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img);
         Map<Boolean, List<Image>> partitionedImages =
                 Optional.ofNullable(imageList).orElse(Collections.emptyList()).stream()
                         .collect(Collectors.partitioningBy(predicate));
