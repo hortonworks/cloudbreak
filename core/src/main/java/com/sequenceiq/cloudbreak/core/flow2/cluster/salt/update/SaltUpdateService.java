@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
@@ -59,9 +58,9 @@ public class SaltUpdateService {
     public void clusterInstallationFinished(StackView stackView) {
         try {
             transactionService.required(() -> {
-                clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Salt update finished.");
-                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SALT_UPDATE_FINISHED);
+                clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_IN_PROGRESS);
+                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.SALT_UPDATE_FINISHED, "Salt update finished.");
+                flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SALT_UPDATE_FINISHED);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
