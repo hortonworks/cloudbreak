@@ -277,7 +277,7 @@ public class LoadBalancerConfigService {
             } else {
                 LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
             }
-            if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork())) {
+            if (shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, targetGroup.get(), LoadBalancerType.PUBLIC);
             } else {
                 LOGGER.debug("External load balancer creation is disabled.");

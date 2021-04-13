@@ -1,6 +1,6 @@
 {%- set manager_server_hostname = salt['pillar.get']('hosts')[server_address]['hostname'] %}
 {%- set manager_server_fqdn = salt['pillar.get']('hosts')[server_address]['fqdn'] %}
-{%- set primary_gateway = salt['pillar.get']('cloudera-manager:communication:primary') %}
+{%- set primary_gateway = salt['pillar.get']('cloudera-manager:communication:primary_fqdn') %}
 {%- set loadbalancer_url = salt['pillar.get']('cloudera-manager:communication:loadbalancer_url') %}
 
 #!/bin/bash
@@ -37,9 +37,9 @@ rm -f ${CACERTS_DIR}/cacerts.pem
 keytool -importkeystore -srckeystore ${JAVA_HOME}/jre/lib/security/cacerts -srcstorepass changeit -destkeystore ${CACERTS_DIR}/cacerts.p12 -deststorepass changeit -deststoretype PKCS12
 openssl pkcs12 -in ${CACERTS_DIR}/cacerts.p12 -passin pass:changeit -out ${CACERTS_DIR}/cacerts.pem
 
-/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --configure-services $CERTMANAGER_ARGS --override ca_dn="CN=${PRIMARY_HOSTNAME}" --stop-at-csr --altname DNS:${LOADBALANCER} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
+/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --configure-services $CERTMANAGER_ARGS --override ca_dn="CN=${PRIMARY_HOSTNAME}" --stop-at-csr --hostname ${PRIMARY_HOSTNAME} --altname DNS:${LOADBALANCER} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
 /opt/cloudera/cm/bin/generate_intermediate_ca_ipa.sh $CM_PRINCIPAL ${CERTMANAGER_DIR}/CMCA/private/ca_csr.pem $OUT_FILE
-/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --configure-services $CERTMANAGER_ARGS --override ca_dn="CN=${PRIMARY_HOSTNAME}" --signed-ca-cert=$OUT_FILE --skip-cm-init --altname DNS:${LOADBALANCER} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > $CERTMANAGER_DIR/auto-tls.init.txt
+/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --configure-services $CERTMANAGER_ARGS --override ca_dn="CN=${PRIMARY_HOSTNAME}" --signed-ca-cert=$OUT_FILE --skip-cm-init --hostname ${PRIMARY_HOSTNAME} --altname DNS:${LOADBALANCER} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > $CERTMANAGER_DIR/auto-tls.init.txt
 
 rm -rf $OUT_FILE
 

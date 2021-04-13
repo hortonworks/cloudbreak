@@ -32,12 +32,24 @@ install-psycopg2:
     - unless: pip list --no-index | grep -E 'psycopg2.*2.7.5'
 {%- endif %}
 
+{% if "manager_server" in grains.get('roles', []) %}
+
 replace_server_host:
   file.replace:
     - name: /etc/cloudera-scm-agent/config.ini
     - pattern: "server_host=.*"
     - repl: "server_host={{ primary_gateway }}"
     - unless: grep 'server_host={{ primary_gateway }}' /etc/cloudera-scm-agent/config.ini
+
+{% else %}
+
+replace_server_host:
+  file.replace:
+    - name: /etc/cloudera-scm-agent/config.ini
+    - pattern: "server_host=.*"
+    - repl: "server_host={{ loadbalancer_url }}"
+    - unless: grep 'server_host={{ loadbalancer_url }}' /etc/cloudera-scm-agent/config.ini
+{% endif %}
 
 {% if cloudera_manager.communication.autotls_enabled == True %}
 

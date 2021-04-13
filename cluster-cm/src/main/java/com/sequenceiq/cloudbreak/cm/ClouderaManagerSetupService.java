@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -121,6 +122,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
+
+    @Inject
+    private LoadBalancerRepositoryDos loadBalancerRepository;
 
     private final Stack stack;
 
@@ -290,11 +294,18 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Override
     public void updateConfig() {
         com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType = stack.getType();
+
         try {
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(removeRemoteParcelRepos())
                     .addItemsItem(setHeader(stackType));
+            if (stack.getGatewayInstanceMetadata().size() > 1) {
+                //cm ha
+                //check cm ha
+                apiConfigList.addItemsItem(setHostName(stack));
+                apiConfigList.addItemsItem(setHostNameValidation(stack));
+            }
             clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
         } catch (ApiException e) {
             throw mapApiException(e);
@@ -502,6 +513,15 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private ApiConfig setHeader(com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType stackType) {
         return new ApiConfig().name("custom_header_color").value(StackType.DATALAKE.equals(stackType) ? "RED" : "BLUE");
+    }
+
+    private ApiConfig setHostName(Stack stack) {
+        Set<LoadBalancer> loadBalancers = loadBalancerRepository.findByStackId(stack.getId());
+        return new ApiConfig().name("cm_host_name").value(loadBalancers.iterator().next().toString());
+    }
+
+    private ApiConfig setHostNameValidation(Stack stack) {
+        return new ApiConfig().name("need_agent_hostname_validation").value(Boolean.FALSE.toString());
     }
 
     private String getExtendedBlueprintText(ApiClusterTemplate apiClusterTemplate) {

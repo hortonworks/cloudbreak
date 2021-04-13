@@ -726,7 +726,7 @@ gateway:
     polling:
       attempt: 50
       intervall: 10
-    base.domain.name: dev.cldr.work
+    base.domain.name: wl.cloudera.site
 
 notification:
   urls: http://localhost:3000/notifications
