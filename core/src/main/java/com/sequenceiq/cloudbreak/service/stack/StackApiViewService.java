@@ -13,7 +13,6 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -124,7 +123,6 @@ public class StackApiViewService {
         ));
     }
 
-    @PreAuthorize("hasRole('INTERNAL')")
     public StackApiView retrieveStackByCrnAndType(String crn, StackType stackType) {
         return stackApiViewRepository.findByResourceCrnAndStackType(crn, stackType).orElseThrow(notFound("Stack", crn));
     }

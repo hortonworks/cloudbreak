@@ -20,10 +20,12 @@ public class OperationDescriptions {
         public static final String PUT_BY_NAME = "update stack by name";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String GET_ALL = "retrieve all stacks";
+        public static final String GET_ALL_INTERNAL = "retrieve all stacks internally";
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace and environment name";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get stack by crn in workspace";
         public static final String GET_AUTOSCALE_BY_NAME = "get autoscale stack by name in workspace";
+        public static final String GET_INTERNAL_AUTOSCALE_BY_NAME = "get internal autoscale stack by name in workspace";
         public static final String GET_AUTOSCALE_BY_CRN = "get autoscale stack by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create stack in workspace";
         public static final String CREATE_IN_WORKSPACE_INTERNAL = "create stack in workspace, internal only";

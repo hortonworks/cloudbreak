@@ -14,12 +14,12 @@ import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
@@ -79,27 +80,27 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putStack(@ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+    public void putStack(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
         stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putCluster(@ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
+    public void putCluster(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
         clusterCommonService.put(crn, updateRequest);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void decommissionInstancesForClusterCrn(@ResourceCrn String clusterCrn, Long workspaceId,
+    public void decommissionInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), workspaceId,
+        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 new HashSet(instanceIds), forced);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public AutoscaleStackV4Response getAutoscaleClusterByCrn(@ResourceCrn String crn) {
+    public AutoscaleStackV4Response getAutoscaleClusterByCrn(@TenantAwareParam @ResourceCrn String crn) {
         Stack stack = stackService.getByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(stack, AutoscaleStackV4Response.class);
     }
@@ -112,31 +113,33 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
+    @InternalOnly
+    public AutoscaleStackV4Response getInternalAutoscaleClusterByName(String name, @AccountId String accountId) {
+        return getAutoscaleClusterByName(name);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public AutoscaleStackV4Responses getAllForAutoscale() {
         Set<AutoscaleStackV4Response> allForAutoscale = stackCommonService.getAllForAutoscale();
         return new AutoscaleStackV4Responses(new ArrayList<>(allForAutoscale));
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public StackV4Response get(String crn) {
+    @InternalOnly
+    public StackV4Response get(@TenantAwareParam String crn) {
         return stackCommonService.getByCrn(crn, Collections.emptySet());
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE') or hasRole('INTERNAL')")
+    @InternalOnly
     public StackStatusV4Response getStatusByCrn(@TenantAwareParam String crn) {
         return stackOperations.getStatus(crn);
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public AuthorizeForAutoscaleV4Response authorizeForAutoscale(String crn, String userId, String tenant, String permission) {
+    @InternalOnly
+    public AuthorizeForAutoscaleV4Response authorizeForAutoscale(@TenantAwareParam String crn, String userId, String tenant, String permission) {
         AuthorizeForAutoscaleV4Response response = new AuthorizeForAutoscaleV4Response();
         try {
             restRequestThreadLocalService.setCloudbreakUserByUsernameAndTenant(userId, tenant);
@@ -150,23 +153,21 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
+    @InternalOnly
     public CertificateV4Response getCertificate(@TenantAwareParam String crn) {
         return stackCommonService.getCertificate(crn);
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
+    // for this logic, we do not need account id, thus internal call should work without account id
+    @InternalOnly
     public ClusterProxyConfiguration getClusterProxyconfiguration() {
         return clusterProxyService.getClusterProxyConfigurationForAutoscale();
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public AutoscaleRecommendationV4Response getRecommendation(String crn) {
+    @InternalOnly
+    public AutoscaleRecommendationV4Response getRecommendation(@TenantAwareParam String crn) {
         Stack stack = stackService.getByCrn(crn);
 
         String blueprintName = stack.getCluster().getBlueprint().getName();
@@ -178,10 +179,10 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    @PreAuthorize("hasRole('AUTOSCALE')")
-    public AutoscaleRecommendationV4Response getRecommendation(Long workspaceId, String blueprintName) {
-        AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
+    public AutoscaleRecommendationV4Response getRecommendation(Long workspaceId, @ResourceName String blueprintName) {
+        AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(
+                restRequestThreadLocalService.getRequestedWorkspaceId(), blueprintName);
 
         return converterUtil.convert(autoscaleRecommendation, AutoscaleRecommendationV4Response.class);
     }
