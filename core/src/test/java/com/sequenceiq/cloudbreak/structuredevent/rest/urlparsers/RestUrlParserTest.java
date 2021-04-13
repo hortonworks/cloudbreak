@@ -65,6 +65,10 @@ public class RestUrlParserTest {
 
     private static final String PATH_CODE_GRANT_FLOW = "code_grant_flow";
 
+    private static final String PATH_IMAGE_CATALOGS = "image_catalogs";
+
+    private static final String PATH_IMAGE = "image";
+
     private static final String CRN = "crn";
 
     private static final String NAME = "name";
@@ -135,6 +139,7 @@ public class RestUrlParserTest {
                                 setupMocks(methodPath, requestMethod);
                                 if (restUrlParser.fillParams(containerRequestContext, params)) {
                                     matchedParsers.add(restUrlParser);
+                                    LOGGER.info("Found matching parser: " + restUrlParser.getClass().getName());
                                 }
                             }
                             LOGGER.info("Matched URL: " + methodPath + "\nslurped params: " + params);
@@ -165,7 +170,12 @@ public class RestUrlParserTest {
     private void checkResourceEvent(String methodPath, Map<String, String> params) {
         String[] parts = methodPath.substring(1).split(SLASH);
         String resourceEvent = null;
-        if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && (parts[3].equals(CRN) || parts[3].equals(NAME))) {
+
+        if (List.of(parts).contains(PATH_IMAGE_CATALOGS) && parts.length > 5) {
+            // Specialized image catalog related endpoints that have nothing in the URLs that qualify as a resource event,
+            // so this is just a fake for the sake of backward compatibility...
+            resourceEvent = PATH_IMAGE_CATALOGS;
+        } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && (parts[3].equals(CRN) || parts[3].equals(NAME))) {
             resourceEvent = parts[2];
         } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))
                 && !(PATH_CREDENTIALS.equals(parts[2]) && PATH_CODE_GRANT_FLOW.equals(parts[3])) && !RESOURCE_NAME.equals(parts[parts.length - 1])
@@ -318,6 +328,12 @@ public class RestUrlParserTest {
                         methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_NAME);
                     }  else if (pathParam.value().equals(CRN)) {
                         methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_CRN);
+                    } else if (methodPath.contains("image_catalogs") && pathParam.value().equals("type")) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', "DATALAKE");
+                    } else if (methodPath.contains("image_catalogs") && pathParam.value().equals("provider")) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', "AWS");
+                    } else if (methodPath.contains("image_catalogs") && pathParam.value().equals("runtime")) {
+                        methodPath = methodPath.replace('{' + pathParamValue + '}', "7.2.6");
                     } else {
                         methodPath = methodPath.replace('{' + pathParamValue + '}', RESOURCE_NAME);
                     }
