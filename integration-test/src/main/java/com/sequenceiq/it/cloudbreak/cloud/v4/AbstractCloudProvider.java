@@ -237,7 +237,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform).getBaseImages();
+                            platform, null, null).getBaseImages();
 
             if (images.size() == 0) {
                 throw new IllegalStateException("Images are empty, there is not any base image on provider " + platform);

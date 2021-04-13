@@ -362,7 +362,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                         .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.AZURE.name()).getCdhImages();
+                                CloudPlatform.AZURE.name(), null, null).getCdhImages();
 
                 ImageV4Response olderImage = images.get(images.size() - 2);
                 Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));

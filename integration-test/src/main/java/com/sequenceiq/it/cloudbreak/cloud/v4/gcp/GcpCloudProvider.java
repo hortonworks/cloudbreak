@@ -329,7 +329,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
                         .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.GCP.name()).getCdhImages();
+                                CloudPlatform.GCP.name(), null, null).getCdhImages();
 
                 ImageV4Response olderImage = images.get(images.size() - 2);
                 Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));

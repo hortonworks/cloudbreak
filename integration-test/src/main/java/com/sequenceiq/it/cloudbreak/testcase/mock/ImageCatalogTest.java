@@ -384,7 +384,7 @@ public class ImageCatalogTest extends AbstractMockTest {
                     ImageCatalogV4Responses list = cloudbreakClient
                             .getDefaultClient()
                             .imageCatalogV4Endpoint()
-                            .list(cloudbreakClient.getWorkspaceId());
+                            .list(cloudbreakClient.getWorkspaceId(), false);
                     return entity;
                 })
                 .validate();

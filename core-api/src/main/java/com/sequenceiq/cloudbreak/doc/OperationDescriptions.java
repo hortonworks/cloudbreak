@@ -170,6 +170,11 @@ public class OperationDescriptions {
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete image catalog by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete image catalog by crn in workspace";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple image catalogs by name in workspace";
+        public static final String CREATE_IN_CATALOG = "create a new image in an already existing custom catalog";
+        public static final String UPDATE_IN_CATALOG = "update an existing image in a custom catalog";
+        public static final String DELETE_FROM_CATALOG = "delete an existing image from a custom catalog";
+        public static final String GET_IMAGE_FROM_DEFAULT = "returns an image from the default catalog based on the provided filter";
+        public static final String GET_IMAGE_FROM_DEFAULT_BY_ID = "returns an image from the default catalog by id";
     }
 
     public static class SecurityRuleOpDescription {

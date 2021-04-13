@@ -99,7 +99,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     @Override
     public Collection<ImageCatalogV4Response> getAll(CloudbreakClient client) {
-        return client.getDefaultClient().imageCatalogV4Endpoint().list(client.getWorkspaceId()).getResponses();
+        return client.getDefaultClient().imageCatalogV4Endpoint().list(client.getWorkspaceId(), false).getResponses();
     }
 
     @Override
