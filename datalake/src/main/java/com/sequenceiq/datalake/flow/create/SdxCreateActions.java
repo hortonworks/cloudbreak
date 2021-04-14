@@ -15,9 +15,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -58,6 +60,9 @@ public class SdxCreateActions {
 
     @Inject
     private SdxMetricService metricService;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Bean(name = "SDX_CREATION_STORAGE_VALIDATION_STATE")
     public Action<?, ?> storageValidation() {
@@ -210,11 +215,14 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, SdxCreateFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake create failed for datalakeId: {}", payload.getResourceId(), exception);
                 String statusReason = "Datalake creation failed";
-                if (exception.getMessage() != null) {
-                    statusReason = exception.getMessage();
+                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
+                if (StringUtils.hasText(errorMessage)) {
+                    statusReason = statusReason + ". " + errorMessage;
+                } else if (exception.getMessage() != null) {
+                    statusReason = statusReason + ". " + exception.getMessage();
                 }
+                LOGGER.error(statusReason, exception);
                 try {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
                             statusReason, payload.getResourceId());
