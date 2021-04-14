@@ -1,12 +1,19 @@
 package com.sequenceiq.freeipa.flow.instance.reboot.action;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootContext;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
@@ -35,5 +42,21 @@ public abstract class AbstractRebootAction<P extends Payload>
     protected void addMdcOperationId(Map<Object, Object> varialbes) {
         String operationId = getOperationId(varialbes);
         MDCBuilder.addOperationId(operationId);
+    }
+
+    protected CloudContext getCloudContext(Stack stack) {
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        return CloudContext.Builder.builder()
+                .withId(stack.getId())
+                .withName(stack.getName())
+                .withCrn(stack.getResourceCrn())
+                .withPlatform(stack.getCloudPlatform())
+                .withVariant(stack.getCloudPlatform())
+                .withLocation(location)
+                .withUserId(stack.getOwner())
+                .withUserName(stack.getOwner())
+                .withAccountId(stack.getAccountId())
+                .withAccountUUID(stack.getAccountId())
+                .build();
     }
 }

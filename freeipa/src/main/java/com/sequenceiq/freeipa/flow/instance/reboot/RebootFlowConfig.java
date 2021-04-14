@@ -5,11 +5,14 @@ import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_FAI
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_WAIT_UNTIL_AVAILABLE_FAILURE_EVENT;
+import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootState.REBOOT_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootState.REBOOT_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootState.REBOOT_STATE;
+import static com.sequenceiq.freeipa.flow.instance.reboot.RebootState.REBOOT_WAIT_UNTIL_AVAILABLE_STATE;
 
 import java.util.List;
 
@@ -24,7 +27,9 @@ public class RebootFlowConfig extends AbstractFlowConfiguration<RebootState, Reb
     private static final List<Transition<RebootState, RebootEvent>> TRANSITIONS = new Builder<RebootState, RebootEvent>()
             .defaultFailureEvent(REBOOT_FAILURE_EVENT)
             .from(INIT_STATE).to(REBOOT_STATE).event(REBOOT_EVENT).defaultFailureEvent()
-            .from(REBOOT_STATE).to(REBOOT_FINISHED_STATE).event(REBOOT_FINISHED_EVENT).defaultFailureEvent()
+            .from(REBOOT_STATE).to(REBOOT_WAIT_UNTIL_AVAILABLE_STATE).event(REBOOT_FINISHED_EVENT).defaultFailureEvent()
+            .from(REBOOT_WAIT_UNTIL_AVAILABLE_STATE).to(REBOOT_FINISHED_STATE)
+            .event(REBOOT_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT).failureEvent(REBOOT_WAIT_UNTIL_AVAILABLE_FAILURE_EVENT)
             .from(REBOOT_FINISHED_STATE).to(FINAL_STATE).event(REBOOT_FINALIZED_EVENT).defaultFailureEvent()
             .build();
 

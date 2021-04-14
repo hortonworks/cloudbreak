@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
@@ -42,6 +43,9 @@ import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePr
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionRequest;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.selection.ChangePrimaryGatewaySelectionSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.failure.ClusterProxyUpdateRegistrationFailedToChangePrimaryGatewayFailureEventConverter;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.failure.HealthCheckFailedToChangePrimaryGatewayFailureEventConverter;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckRequest;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -143,6 +147,27 @@ public class ChangePrimaryGatewayActions {
         };
     }
 
+    @Bean(name = "CHANGE_PRIMARY_GATEWAY_HEALTH_CHECK_STATE")
+    public Action<?, ?> healthCheckAction() {
+        return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+
+                Selectable request;
+                if (isFinalChain(variables)) {
+                    stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_IN_PROGRESS, "Checking the health");
+                    request = new HealthCheckRequest(stack.getId(), false);
+                } else {
+                    LOGGER.debug("Repair in progress, skipping the health check");
+                    request = new HealthCheckSuccess(stack.getId(), null);
+                }
+
+                sendEvent(context, request.selector(), request);
+            }
+        };
+    }
+
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FINISHED_STATE")
     public Action<?, ?> finsihedAction() {
         return new AbstractChangePrimaryGatewayAction<>(StackEvent.class) {
@@ -155,7 +180,6 @@ public class ChangePrimaryGatewayActions {
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
 
                 if (isFinalChain(variables)) {
-                    stackStatusCheckerJob.syncAStack(stack);
                     successDetails.getAdditionalDetails().put("DownscaleHosts", getDownscaleHosts(variables));
                     successDetails.getAdditionalDetails().put("UpscaleHosts", getUpscaleHosts(variables));
                     operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
@@ -211,6 +235,7 @@ public class ChangePrimaryGatewayActions {
             @Override
             protected void initPayloadConverterMap(List<PayloadConverter<ChangePrimaryGatewayFailureEvent>> payloadConverters) {
                 payloadConverters.add(new ClusterProxyUpdateRegistrationFailedToChangePrimaryGatewayFailureEventConverter());
+                payloadConverters.add(new HealthCheckFailedToChangePrimaryGatewayFailureEventConverter());
             }
         };
     }

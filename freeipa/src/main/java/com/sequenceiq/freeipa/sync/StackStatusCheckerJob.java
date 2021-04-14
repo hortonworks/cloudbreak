@@ -82,7 +82,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 LOGGER.debug("StackStatusCheckerJob cannot run, because flow is running for freeipa stack: {}", stackId);
             } else {
                 LOGGER.debug("No flows running, trying to sync freeipa");
-                syncAStack(stack);
+                syncAStack(stack, false);
             }
         } catch (InterruptSyncingException e) {
             LOGGER.info("Syncing was interrupted", e);
@@ -93,7 +93,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         return Long.valueOf(getLocalId());
     }
 
-    public void syncAStack(Stack stack) {
+    public void syncAStack(Stack stack, boolean updateStatusFromFlow) {
         try {
             checkedMeasure(() -> {
                 ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
@@ -115,12 +115,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                             for (Map.Entry<InstanceMetaData, DetailedStackStatus> entry : syncResult.getInstanceStatusMap().entrySet()) {
                                 updateInstanceStatus(entry.getKey(), entry.getValue());
                             }
-                            updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
+                            updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
                         } else {
                             List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
                                     syncResult.getInstanceStatusMap());
                             if (!results.isEmpty()) {
-                                updateStackStatus(stack, syncResult, results, alreadyDeletedCount);
+                                updateStackStatus(stack, syncResult, results, alreadyDeletedCount, updateStatusFromFlow);
                             } else {
                                 LOGGER.debug("results is empty, skip update");
                             }
@@ -128,7 +128,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     } else if (alreadyDeletedCount > 0) {
                         SyncResult syncResult =  new SyncResult("FreeIpa is " + DetailedStackStatus.DELETED_ON_PROVIDER_SIDE,
                                 DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, null);
-                        updateStackStatus(stack, syncResult, null, alreadyDeletedCount);
+                        updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
                     }
                     freeipaStatusInfoLogger.logFreeipaStatus(stack.getId(), checkableInstances);
                 });
@@ -155,11 +155,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount) {
+    private void updateStackStatus(Stack stack, SyncResult result, List<ProviderSyncResult> providerSyncResults, int alreadyDeletedCount,
+            boolean updateStatusFromFlow) {
         DetailedStackStatus status = providerSyncResults == null ? result.getStatus() : getStackStatus(providerSyncResults, result, alreadyDeletedCount);
         if (status != stack.getStackStatus().getDetailedStackStatus()) {
             if (autoSyncConfig.isUpdateStatus()) {
-                if (flowLogService.isOtherFlowRunning(stack.getId())) {
+                if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
                     throw new InterruptSyncingException(":::Auto sync::: interrupt syncing in updateStackStatus, flow is running on freeipa stack " +
                             stack.getName());
                 } else {

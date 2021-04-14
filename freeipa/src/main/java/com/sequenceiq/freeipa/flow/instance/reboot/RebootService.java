@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.start.FreeIpaServiceStartService;
@@ -47,10 +46,14 @@ public class RebootService {
         LOGGER.error("Reboot failed for instances: {}", context.getInstanceIds());
     }
 
-    public void finishInstanceReboot(RebootContext context, RebootInstancesResult rebootInstancesResult) {
+    public void waitForAvailableStatus(RebootContext context) {
         Stack stack = context.getStack();
-        freeIpaServiceStartService.pollFreeIpaHealth(stack);
-        stackStatusCheckerJob.syncAStack(stack);
+        stackUpdater.updateStackStatus(stack.getId(), REPAIR_IN_PROGRESS, "Waiting for FreeIpa to be available");
+        instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.REBOOTING);
+    }
+
+    public void finishInstanceReboot(RebootContext context) {
+        Stack stack = context.getStack();
         instanceMetaDataService.updateStatus(stack, context.getInstanceIdList(), InstanceStatus.CREATED);
     }
 }

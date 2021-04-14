@@ -7,12 +7,17 @@ import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_FAIL
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_SAVE_METADATA_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_WAIT_UNTIL_AVAILABLE_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.START_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.COLLECTING_METADATA;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.START_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.START_FINISHED_STATE;
+import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.START_SAVE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.START_STATE;
+import static com.sequenceiq.freeipa.flow.stack.start.StackStartState.START_WAIT_UNTIL_AVAILABLE_STATE;
 
 import java.util.List;
 
@@ -28,7 +33,10 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
             .defaultFailureEvent(START_FAILURE_EVENT)
             .from(INIT_STATE).to(START_STATE).event(STACK_START_EVENT).noFailureEvent()
             .from(START_STATE).to(COLLECTING_METADATA).event(START_FINISHED_EVENT).defaultFailureEvent()
-            .from(COLLECTING_METADATA).to(START_FINISHED_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)
+            .from(COLLECTING_METADATA).to(START_SAVE_METADATA_STATE).event(COLLECT_METADATA_FINISHED_EVENT).failureEvent(COLLECT_METADATA_FAILED_EVENT)
+            .from(START_SAVE_METADATA_STATE).to(START_WAIT_UNTIL_AVAILABLE_STATE).event(START_SAVE_METADATA_FINISHED_EVENT).noFailureEvent()
+            .from(START_WAIT_UNTIL_AVAILABLE_STATE).to(START_FINISHED_STATE)
+            .event(START_WAIT_UNTIL_AVAILABLE_FINISHED_EVENT).failureEvent(START_WAIT_UNTIL_AVAILABLE_FAILED_EVENT)
             .from(START_FINISHED_STATE).to(FINAL_STATE).event(START_FINALIZED_EVENT).defaultFailureEvent()
             .build();
 
