@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.io.IOException;
 import java.util.Objects;
 
 import javax.inject.Inject;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
@@ -41,7 +39,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonClientExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -54,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
@@ -320,21 +318,6 @@ public class AwsClient {
             throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accessKeyString, secretAccessKeyString));
         } else if (awsSecretAccessKeyAvailable && !awsAccessKeyAvailable) {
             throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", secretAccessKeyString, accessKeyString));
-        } else if (!awsAccessKeyAvailable) {
-            try {
-                try (InstanceProfileCredentialsProvider provider = getInstanceProfileProvider()) {
-                    provider.getCredentials();
-                } catch (IOException e) {
-                    LOGGER.error("Unable to create AWS provider", e);
-                    throw new CredentialVerificationException("Unable to create AWS provider");
-                }
-            } catch (AmazonClientException ignored) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(String.format("The '%s' and '%s' environment variables must be set ", accessKeyString, secretAccessKeyString));
-                sb.append("or an instance profile role should be available.");
-                LOGGER.info(sb.toString());
-                throw new CredentialVerificationException(sb.toString());
-            }
         }
     }
 
