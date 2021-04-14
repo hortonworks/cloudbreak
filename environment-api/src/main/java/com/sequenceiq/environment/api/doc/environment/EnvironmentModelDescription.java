@@ -102,7 +102,8 @@ public class EnvironmentModelDescription {
     public static final String RESOURCE_GROUP_USAGE = "Resource group usage: single resource group for all resources where possible "
             + "or use multiple resource groups.";
 
-    public static final String ENCRYPTION_KEY_URL = "URL of the CustomerManagedkey to encrypt Azure resources";
+    public static final String ENCRYPTION_KEY_URL = "URL of the Customer Managed Key to encrypt Azure resources";
+    public static final String ENCRYPTION_KEY_RESOURCE_GROUP_NAME = "Name of the Azure resource group of the Customer Managed Key to encrypt Azure resources";
     public static final String DISK_ENCRYPTION_SET_ID = "Resource Id of the disk encryption set used to encrypt Azure disks.";
     public static final String RESOURCE_ENCRYPTION_PARAMETERS = "Parameter 'encryptionKeyUrl' - to encrypt Azure resources.";
     public static final String PARENT_ENVIRONMENT_CRN = "Parent environment global identifier";
