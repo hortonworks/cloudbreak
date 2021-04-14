@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.cloudbreak.validation.ValidEnvironmentName;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -31,8 +32,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     static final String LENGHT_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";
 
     @Size(max = 28, min = 5, message = LENGHT_INVALID_MSG)
-    @Pattern(regexp = "^(?!.*\\-\\-)[a-z][-a-z0-9]*[a-z0-9]$",
-            message = "The environments's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+    @ValidEnvironmentName
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     @NotNull
     private String name;
