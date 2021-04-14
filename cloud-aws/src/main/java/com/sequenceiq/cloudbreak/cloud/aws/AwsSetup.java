@@ -209,7 +209,13 @@ public class AwsSetup implements Setup {
                 LOGGER.info(errorMessage, e);
             }
             if (!keyPairIsPresentOnEC2) {
-                throw new CloudConnectorException(String.format("The key pair '%s' could not be found in the '%s' region of EC2.", keyPairName, region));
+                throw new CloudConnectorException(
+                        String.format("The key pair '%s' could not be found in the '%s' region of EC2. " +
+                                "Please check AWS EC2 console because probably you are using a wrong key or " +
+                                "refer to Cloudera documentation at %s for the required setup",
+                                keyPairName,
+                                region,
+                                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-environment-aws-ssh-key.html"));
             }
         }
     }
