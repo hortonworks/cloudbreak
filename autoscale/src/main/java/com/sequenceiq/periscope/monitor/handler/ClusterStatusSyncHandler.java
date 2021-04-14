@@ -14,11 +14,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component
 public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStatusSyncEvent> {
@@ -38,7 +38,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         if (cluster == null) {
             return;
         }
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
 
         StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
         boolean clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)

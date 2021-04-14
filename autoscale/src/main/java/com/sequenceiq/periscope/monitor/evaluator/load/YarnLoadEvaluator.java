@@ -13,7 +13,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
@@ -28,6 +27,7 @@ import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Component("YarnLoadEvaluator")
@@ -90,8 +90,8 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         long start = System.currentTimeMillis();
         String stackCrn = null;
         try {
-            MDCBuilder.buildMdcContext(cluster);
             cluster = clusterService.findById(clusterId);
+            LoggingUtils.buildMdcContext(cluster);
             stackCrn = cluster.getStackCrn();
             loadAlert = cluster.getLoadAlerts().stream().findFirst().get();
             loadAlertConfiguration = loadAlert.getLoadAlertConfiguration();

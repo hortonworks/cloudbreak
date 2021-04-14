@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ClusterManagerVariant;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationRequest;
@@ -38,6 +37,7 @@ import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 import com.sequenceiq.periscope.service.ha.PeriscopeNodeConfig;
 import com.sequenceiq.periscope.service.security.SecurityConfigService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Service
 public class ClusterService {
@@ -143,10 +143,12 @@ public class ClusterService {
     }
 
     public Optional<Cluster> findOneByStackCrnAndTenant(String stackCrn, String tenant) {
+        LoggingUtils.buildMdcContextWithCrn(stackCrn);
         return  clusterRepository.findByStackCrnAndTenant(stackCrn, tenant);
     }
 
     public Optional<Cluster> findOneByStackNameAndTenant(String stackName, String tenant) {
+        LoggingUtils.buildMdcContextWithName(stackName);
         return  clusterRepository.findByStackNameAndTenant(stackName, tenant);
     }
 
@@ -156,13 +158,13 @@ public class ClusterService {
 
     public Cluster findById(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId).orElseThrow(notFound("Cluster", clusterId));
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         return cluster;
     }
 
     public void removeById(Long clusterId) {
         Cluster cluster = findById(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         clusterRepository.delete(cluster);
         calculateClusterStateMetrics();
     }
@@ -186,7 +188,7 @@ public class ClusterService {
 
     public Cluster setState(Long clusterId, ClusterState state) {
         Cluster cluster = findById(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         cluster.setState(state);
         calculateClusterStateMetrics();
         return clusterRepository.save(cluster);
@@ -194,7 +196,7 @@ public class ClusterService {
 
     public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoscaling) {
         Cluster cluster = findById(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         cluster.setAutoscalingEnabled(enableAutoscaling);
         cluster = clusterRepository.save(cluster);
         calculateClusterStateMetrics();

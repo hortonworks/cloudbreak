@@ -3,8 +3,11 @@ package com.sequenceiq.periscope.monitor.handler;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ACTIVITY_SUCCESS;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -18,7 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustm
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
@@ -30,6 +33,7 @@ import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component("ScalingRequest")
 @Scope("prototype")
@@ -83,7 +87,7 @@ public class ScalingRequest implements Runnable {
 
     @Override
     public void run() {
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         try {
             int scalingAdjustment = desiredNodeCount - totalNodes;
             if (!decommissionNodeIds.isEmpty()) {
@@ -123,13 +127,13 @@ public class ScalingRequest implements Runnable {
 
             cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
-            statusReason =  getMessageForCBStatus(ScalingStatus.SUCCESS.name());
+            statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
         } catch (RuntimeException e) {
             scalingStatus = ScalingStatus.FAILED;
-            statusReason = getMessageForCBStatus(e.getMessage());
+            statusReason = getMessageForCBException(e);
             LOGGER.error("Couldn't trigger upscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
-                    hostGroup, cluster.getStackCrn(), desiredNodeCount, e);
+                    hostGroup, cluster.getStackCrn(), desiredNodeCount, statusReason, e);
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED);
         } finally {
             createHistoryAndNotify(scalingAdjustment, totalNodes, statusReason, scalingStatus);
@@ -156,14 +160,14 @@ public class ScalingRequest implements Runnable {
             cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint()
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
-            statusReason =  getMessageForCBStatus(ScalingStatus.SUCCESS.name());
+            statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
-            statusReason = getMessageForCBStatus(e.getMessage());
+            statusReason = getMessageForCBException(e);
             LOGGER.error("Couldn't trigger downscaling for host group '{}', cluster '{}', desiredNodeCount '{}', error '{}' ",
-                    hostGroup, cluster.getStackCrn(), desiredNodeCount, e);
+                    hostGroup, cluster.getStackCrn(), desiredNodeCount, statusReason, e);
         } finally {
             createHistoryAndNotify(scalingAdjustment, totalNodes, statusReason, scalingStatus);
         }
@@ -180,14 +184,15 @@ public class ScalingRequest implements Runnable {
                     cluster.getClusterPertain().getUserCrn());
             cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
             scalingStatus = ScalingStatus.SUCCESS;
-            statusReason = getMessageForCBStatus(ScalingStatus.SUCCESS.name());
+            statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);
         } catch (Exception e) {
             scalingStatus = ScalingStatus.FAILED;
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_FAILED);
-            statusReason = getMessageForCBStatus(e.getMessage());
+            statusReason = getMessageForCBException(e);
             LOGGER.error("Couldn't trigger decommissioning for host group '{}', cluster '{}', decommissionNodeCount '{}', " +
-                    "decommissionNodeIds '{}' error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(), decommissionNodeIds, e);
+                    "decommissionNodeIds '{}', error '{}' ", hostGroup, cluster.getStackCrn(), decommissionNodeIds.size(),
+                    decommissionNodeIds, statusReason, e);
         } finally {
             createHistoryAndNotify(-decommissionNodeIds.size(), totalNodes, statusReason, scalingStatus);
         }
@@ -201,19 +206,21 @@ public class ScalingRequest implements Runnable {
                 cluster.getClusterPertain().getTenant(), System.currentTimeMillis());
     }
 
-    private String getMessageForCBStatus(String cbMessage) {
-        switch (cbMessage) {
-            case "HTTP 409 Conflict":
-                return messagesService.getMessage(MessageCode.CLUSTER_UPDATE_IN_PROGRESS, List.of(policy.getAlert().getAlertType()));
-            case "HTTP 400 Bad Request":
-            case "HTTP 500 Internal Server Error":
-            case "HTTP 404 Not Found":
-                return messagesService.getMessage(MessageCode.CLUSTER_NOT_AVAILABLE, List.of(policy.getAlert().getAlertType()));
-            case "SUCCESS":
-                return messagesService.getMessage(AUTOSCALING_ACTIVITY_SUCCESS,
-                        List.of(policy.getAlert().getAlertType(), policy.getHostGroup(), totalNodes, desiredNodeCount));
-            default:
-                return cbMessage;
+    private String getMessageForCBException(Exception cbApiException) {
+        String cbApiError = cbApiException.getMessage();
+        if (cbApiException instanceof ClientErrorException) {
+            try (Response exceptionResponse = ((ClientErrorException) cbApiException).getResponse()) {
+                cbApiError = exceptionResponse.readEntity(ExceptionResponse.class).getMessage();
+            } catch (Exception ex) {
+                LOGGER.error("Error processing CB API Exception '{}'", cbApiException, ex);
+            }
         }
+        return messagesService.getMessage(MessageCode.CLUSTER_SCALING_FAILED,
+                List.of(policy.getAlert().getAlertType(), Optional.ofNullable(cbApiError).orElse("")));
+    }
+
+    private String getMessageForCBSuccess() {
+        return messagesService.getMessage(AUTOSCALING_ACTIVITY_SUCCESS,
+                List.of(policy.getAlert().getAlertType(), policy.getHostGroup(), totalNodes, desiredNodeCount));
     }
 }

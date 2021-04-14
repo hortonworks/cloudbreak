@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -20,6 +19,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component
 public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEvent> {
@@ -43,7 +43,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     public void onApplicationEvent(UpdateFailedEvent event) {
         long autoscaleClusterId = event.getClusterId();
         Cluster cluster = clusterService.findById(autoscaleClusterId);
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
 
         Integer failed = Optional.ofNullable(updateFailures.get(autoscaleClusterId))
                 .map(failedCount -> failedCount + 1)
