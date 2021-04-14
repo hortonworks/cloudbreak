@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
 @Component
-class ImageFilterParamsFactory {
+public class ImageFilterParamsFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageFilterParamsFactory.class);
 
@@ -31,11 +31,11 @@ class ImageFilterParamsFactory {
     @Inject
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
-    ImageFilterParams create(Image image, boolean lockComponents, Stack stack) {
+    public ImageFilterParams create(Image image, boolean lockComponents, Stack stack) {
         return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(), getBlueprint(stack));
     }
 
-    private Map<String, String> getStackRelatedParcels(Stack stack) {
+    public Map<String, String> getStackRelatedParcels(Stack stack) {
         Set<ClusterComponent> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
         if (stack.isDatalake()) {
             ClouderaManagerProduct stackProduct = getCdhProduct(componentsByBlueprint);
