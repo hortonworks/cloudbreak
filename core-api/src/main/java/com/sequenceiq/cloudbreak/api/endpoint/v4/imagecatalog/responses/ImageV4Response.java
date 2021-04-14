@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @NotNull
-public class ImageV4Response implements JsonEntity {
+public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEntity {
 
     @JsonProperty("date")
     private String date;
@@ -33,9 +33,6 @@ public class ImageV4Response implements JsonEntity {
 
     @JsonProperty("osType")
     private String osType;
-
-    @JsonProperty("uuid")
-    private String uuid;
 
     @JsonProperty("version")
     private String version;
@@ -67,6 +64,12 @@ public class ImageV4Response implements JsonEntity {
     @JsonProperty("packageVersions")
     private Map<String, String> packageVersions;
 
+    @JsonProperty("baseParcelUrl")
+    private String baseParcelUrl;
+
+    @JsonProperty("sourceImageId")
+    private String sourceImageId;
+
     public String getDate() {
         return date;
     }
@@ -89,14 +92,6 @@ public class ImageV4Response implements JsonEntity {
 
     public void setOs(String os) {
         this.os = os;
-    }
-
-    public String getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
     }
 
     public String getVersion() {
@@ -185,5 +180,21 @@ public class ImageV4Response implements JsonEntity {
 
     public void setPreWarmCsd(List<String> preWarmCsd) {
         this.preWarmCsd = preWarmCsd;
+    }
+
+    public String getBaseParcelUrl() {
+        return baseParcelUrl;
+    }
+
+    public void setBaseParcelUrl(String baseParcelUrl) {
+        this.baseParcelUrl = baseParcelUrl;
+    }
+
+    public String getSourceImageId() {
+        return sourceImageId;
+    }
+
+    public void setSourceImageId(String sourceImageId) {
+        this.sourceImageId = sourceImageId;
     }
 }
