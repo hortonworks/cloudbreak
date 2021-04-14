@@ -9,21 +9,29 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
+import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -56,7 +64,22 @@ public class DistroXUpgradeService {
     private StackService stackService;
 
     @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
+
+    @Inject
+    private ImageCatalogProvider imageCatalogProvider;
+
+    @Inject
+    private ImageProvider imageProvider;
+
+    @Inject
+    private LockedComponentChecker lockedComponentChecker;
+
+    @Inject
+    private ImageFilterParamsFactory imageFilterParamsFactory;
 
     public UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request) {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
@@ -68,9 +91,12 @@ public class DistroXUpgradeService {
     private UpgradeV4Response initUpgrade(UpgradeV4Request request, UpgradeV4Response upgradeV4Response, NameOrCrn cluster, Long workspaceId) {
         ImageInfoV4Response image = imageSelector.determineImageId(request, upgradeV4Response.getUpgradeCandidates());
         ImageChangeDto imageChangeDto = createImageChangeDto(cluster, workspaceId, image);
-        Long stackId = stackService.getIdByNameOrCrnInWorkspace(cluster, workspaceId);
-        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stackId, imageChangeDto, upgradeV4Response.isReplaceVms());
-        return new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
+        Stack stack = stackService.getByNameOrCrnInWorkspace(cluster, workspaceId);
+        boolean replaceVms = determineReplaceVmsParam(upgradeV4Response, stack, image);
+        FlowIdentifier flowIdentifier = reactorFlowManager.triggerDistroXUpgrade(stack.getId(), imageChangeDto, replaceVms);
+        UpgradeV4Response response = new UpgradeV4Response("Upgrade started with Image: " + image.getImageId(), flowIdentifier);
+        response.setReplaceVms(replaceVms);
+        return response;
     }
 
     private ImageChangeDto createImageChangeDto(NameOrCrn cluster, Long workspaceId, ImageInfoV4Response image) {
@@ -108,5 +134,28 @@ public class DistroXUpgradeService {
         LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
         JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
+    }
+
+    private boolean determineReplaceVmsParam(UpgradeV4Response upgradeV4Response, Stack stack, ImageInfoV4Response targetImage) {
+        boolean originalReplaceVms = upgradeV4Response.isReplaceVms();
+        if (originalReplaceVms) {
+            try {
+                Image currentImage = componentConfigProviderService.getImage(stack.getId());
+                CloudbreakImageCatalogV3 imageCatalog = imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl());
+                com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage =
+                        imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
+                com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage =
+                        imageProvider.getCurrentImageFromCatalog(targetImage.getImageId(), imageCatalog);
+                if (!lockedComponentChecker.isUpgradePermitted(
+                        currentCatalogImage, targetCatalogImage, imageFilterParamsFactory.getStackRelatedParcels(stack))) {
+                    LOGGER.info("ReplaceVms parameter has been overridden to false for stack {} in case of distrox runtime upgrade." +
+                            " Current image: {}, target image: {}", stack.getName(), currentCatalogImage.getUuid(), targetCatalogImage.getUuid());
+                    return false;
+                }
+            } catch (Exception ex) {
+                LOGGER.warn("Exception during override the replaceVms parameter of upgrade response.", ex);
+            }
+        }
+        return originalReplaceVms;
     }
 }
