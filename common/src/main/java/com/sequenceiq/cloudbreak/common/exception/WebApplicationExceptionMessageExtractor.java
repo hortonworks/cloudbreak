@@ -17,6 +17,14 @@ public class WebApplicationExceptionMessageExtractor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebApplicationExceptionMessageExtractor.class);
 
+    public String getErrorMessage(Exception exception) {
+        String errorMessage = exception.getMessage();
+        if (exception instanceof WebApplicationException) {
+            errorMessage = getErrorMessage((WebApplicationException) exception);
+        }
+        return errorMessage;
+    }
+
     public String getErrorMessage(WebApplicationException exception) {
         try (Response response = exception.getResponse()) {
             String errorResponse = response.readEntity(String.class);
