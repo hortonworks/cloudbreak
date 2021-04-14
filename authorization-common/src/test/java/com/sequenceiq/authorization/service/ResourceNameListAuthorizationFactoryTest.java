@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class ResourceNameListAuthorizationFactoryTest {
     private ResourcePropertyProvider resourceBasedCrnProvider;
 
     @Test
-    public void testAuthorrization() {
+    public void testAuthorization() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(RESOURCES);
         when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
         when(resourceBasedCrnProvider.getResourceCrnListByResourceNameList(anyList())).thenReturn(RESOURCE_CRNS);
@@ -65,12 +66,27 @@ public class ResourceNameListAuthorizationFactoryTest {
     }
 
     @Test
-    public void testAuthorrizationWithEmptyList() {
+    public void testAuthorizationWithEmptyList() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(List.of());
 
         Optional<AuthorizationRule> authorization = underTest.getAuthorization(getAnnotation(), USER_CRN, null, null);
 
         verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceNameList.class), eq(Collection.class));
+        assertEquals(Optional.empty(), authorization);
+    }
+
+    @Test
+    public void testAuthorizationWhenResourceCrnNotFound() {
+        when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(RESOURCES);
+        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
+        when(resourceBasedCrnProvider.getResourceCrnListByResourceNameList(anyList())).thenReturn(Arrays.asList(null, null));
+        when(resourceCrnListAuthorizationFactory.calcAuthorization(anyCollection(), any()))
+                .thenReturn(Optional.empty());
+
+        Optional<AuthorizationRule> authorization = underTest.getAuthorization(getAnnotation(), USER_CRN, null, null);
+
+        verify(commonPermissionCheckingUtils).getParameter(any(), any(), eq(ResourceNameList.class), eq(Collection.class));
+        verify(resourceCrnListAuthorizationFactory).calcAuthorization(List.of(), ACTION);
         assertEquals(Optional.empty(), authorization);
     }
 

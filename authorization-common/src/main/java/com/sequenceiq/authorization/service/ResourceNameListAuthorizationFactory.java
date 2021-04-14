@@ -50,12 +50,12 @@ public class ResourceNameListAuthorizationFactory extends TypedAuthorizationFact
             return Optional.empty();
         }
         List<String> resourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action)
-                .getResourceCrnListByResourceNameList(getNotNullResourceNames(resourceNames));
-        return resourceCrnListAuthorizationFactory.calcAuthorization(resourceCrns, action);
+                .getResourceCrnListByResourceNameList(getNotNullValues(resourceNames));
+        return resourceCrnListAuthorizationFactory.calcAuthorization(getNotNullValues(resourceCrns), action);
     }
 
-    private List<String> getNotNullResourceNames(Collection<String> resourceNames) {
-        return resourceNames.stream()
+    private List<String> getNotNullValues(Collection<String> values) {
+        return values.stream()
                 .filter(not(StringUtils::isBlank))
                 .collect(toList());
     }
