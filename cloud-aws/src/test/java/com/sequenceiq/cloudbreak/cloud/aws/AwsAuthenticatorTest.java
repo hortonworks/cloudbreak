@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -26,7 +25,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.mapper.SdkClientExceptionMapper;
@@ -91,36 +89,6 @@ public class AwsAuthenticatorTest {
         testAuthenticate(Map.of("roleArn", "role"));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
-    }
-
-    @Test
-    public void testAuthenticateSucceedWithRoleOnEC2Machine() {
-        when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        testAuthenticate(Map.of("roleArn", "role"));
-        verify(awsEnvironmentVariableChecker, times(1)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
-        verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
-        verify(instanceProfileCredentialsProvider, times(1)).getCredentials();
-    }
-
-    @Test
-    public void testAuthenticateSucceedWithRoleOnEC2MachineProviderFailure() {
-        when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        when(awsClient.getInstanceProfileProvider()).thenAnswer(invocation -> {
-            throw new IOException();
-        });
-
-        Assertions.assertThrows(CredentialVerificationException.class, () -> testAuthenticate(Map.of("roleArn", "role")));
-    }
-
-    @Test
-    public void testAuthenticateSucceedWithRoleOnEC2MachineProviderGetCredentialFailure() {
-        when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
-        when(instanceProfileCredentialsProvider.getCredentials()).thenThrow(AmazonClientException.class);
-
-        Assertions.assertThrows(CredentialVerificationException.class, () -> testAuthenticate(Map.of("roleArn", "role")));
     }
 
     @Test
