@@ -58,8 +58,14 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
             // It is also true though that if the bucket indeed exists but it is in another account or otherwise denied from the requesting user,
             // the same error code will be returned. However, this hack is mainly for QAAS.
             if (e.getStatusCode() != ACCESS_DENIED_ERROR_CODE) {
-                throw new CloudConnectorException(String.format("Cannot get object storage location for %s. "
-                        + "Provider error message: %s", request.getObjectStoragePath(), e.getErrorMessage()), e);
+                throw new CloudConnectorException(
+                        String.format("We were not able to query S3 object storage location for %s. "
+                        + "Refer to Cloudera documentation at %s for the required setup. "
+                        + "The message from Amazon S3 was: %s.",
+                        request.getObjectStoragePath(),
+                        "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html",
+                        e.getErrorMessage()),
+                        e);
             }
             return ObjectStorageMetadataResponse.builder()
                     .withStatus(ResponseStatus.ACCESS_DENIED)

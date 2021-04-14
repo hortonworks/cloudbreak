@@ -75,7 +75,10 @@ public class AwsObjectStorageConnectorTest {
     public void getObjectStorageMetadataThrows() {
         AmazonS3Exception exception = new AmazonS3Exception(ERROR_MESSAGE);
         thrown.expect(CloudConnectorException.class);
-        thrown.expectMessage(String.format("Cannot get object storage location for %s. Provider error message: %s", BUCKET_NAME, ERROR_MESSAGE));
+        thrown.expectMessage("We were not able to query S3 object storage location for mybucket. " +
+                "Refer to Cloudera documentation at " +
+                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html " +
+                "for the required setup. The message from Amazon S3 was: errormessage.");
         when(s3Client.getBucketLocation(BUCKET_NAME)).thenThrow(exception);
         ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).build();
         underTest.getObjectStorageMetadata(request);
