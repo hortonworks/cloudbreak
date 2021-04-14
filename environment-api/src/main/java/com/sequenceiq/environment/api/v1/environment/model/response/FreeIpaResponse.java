@@ -15,6 +15,9 @@ public class FreeIpaResponse {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
     private AwsFreeIpaParameters aws;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE)
+    private FreeIpaImageResponse image;
+
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
     }
@@ -29,5 +32,13 @@ public class FreeIpaResponse {
 
     public void setAws(AwsFreeIpaParameters aws) {
         this.aws = aws;
+    }
+
+    public FreeIpaImageResponse getImage() {
+        return image;
+    }
+
+    public void setImage(FreeIpaImageResponse image) {
+        this.image = image;
     }
 }

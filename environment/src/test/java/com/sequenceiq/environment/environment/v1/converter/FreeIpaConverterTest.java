@@ -48,6 +48,45 @@ public class FreeIpaConverterTest {
         assertNotNull(result.getInstanceCountByGroup());
         assertEquals(1, result.getInstanceCountByGroup());
         assertNull(result.getAws());
+        assertNull(result.getImage());
+    }
+
+    @Test
+    public void testConvertWithFreeIpaImageCatalogAndId() {
+        // GIVEN
+        FreeIpaCreationDto request = FreeIpaCreationDto.builder()
+                .withImageId(IMAGE_ID)
+                .withImageCatalog(IMAGE_CATALOG)
+                .build();
+        // WHEN
+        FreeIpaResponse result = underTest.convert(request);
+        // THEN
+        assertEquals(IMAGE_ID, result.getImage().getId());
+        assertEquals(IMAGE_CATALOG, result.getImage().getCatalog());
+    }
+
+    @Test
+    public void testConvertWithFreeIpaImageCatalogButWithoutImageId() {
+        // GIVEN
+        FreeIpaCreationDto request = FreeIpaCreationDto.builder()
+                .withImageCatalog(IMAGE_CATALOG)
+                .build();
+        // WHEN
+        FreeIpaResponse result = underTest.convert(request);
+        // THEN
+        assertNull(result.getImage());
+    }
+
+    @Test
+    public void testConvertWithFreeIpaImageIdButWithoutImageCatalog() {
+        // GIVEN
+        FreeIpaCreationDto request = FreeIpaCreationDto.builder()
+                .withImageId(IMAGE_ID)
+                .build();
+        // WHEN
+        FreeIpaResponse result = underTest.convert(request);
+        // THEN
+        assertNull(result.getImage());
     }
 
     @Test
