@@ -560,11 +560,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     private CloudbreakImageCatalogV3 createImageCatalog(List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> images) {
-        return new CloudbreakImageCatalogV3(new Images(null, images, null), new Versions(Collections.emptyList()));
+        return new CloudbreakImageCatalogV3(new Images(null, images, null, null), new Versions(Collections.emptyList(), Collections.emptyList()));
     }
 
     private ImageFilterResult createFilteredImages(com.sequenceiq.cloudbreak.cloud.model.catalog.Image image) {
-        return new ImageFilterResult(new Images(null, List.of(image), null), null);
+        return new ImageFilterResult(new Images(null, List.of(image), null, null), null);
     }
 
     private ImageComponentVersions creatExpectedPackageVersions() {

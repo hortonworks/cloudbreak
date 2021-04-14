@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -70,6 +71,9 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private AdvertisedImageProvider advertisedImageProvider;
 
+    @Mock
+    private CloudbreakVersionListProvider cloudbreakVersionListProvider;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
@@ -102,6 +106,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         String catalogJson = FileReaderUtils.readFileFromClasspath(DEFAULT_CDH_IMAGE_CATALOG);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalogProvider.getImageCatalogV3(DEFAULT_CDH_IMAGE_CATALOG)).thenReturn(catalog);
+        when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
         when(imageCatalog.getImageCatalogUrl()).thenReturn(DEFAULT_CDH_IMAGE_CATALOG);
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("aws"), "2.6", true, Set.of("centos7", "amazonlinux2"), null);

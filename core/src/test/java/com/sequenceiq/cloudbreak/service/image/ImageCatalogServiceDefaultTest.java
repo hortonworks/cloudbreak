@@ -106,6 +106,9 @@ public class ImageCatalogServiceDefaultTest {
     @Mock
     private AdvertisedImageProvider advertisedImageProvider;
 
+    @Mock
+    private CloudbreakVersionListProvider cloudbreakVersionListProvider;
+
     @InjectMocks
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 

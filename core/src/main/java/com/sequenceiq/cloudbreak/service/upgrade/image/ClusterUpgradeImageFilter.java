@@ -75,7 +75,7 @@ public class ClusterUpgradeImageFilter {
                 .filter(validatePackageLocation(imageFilterParams, currentImage, reason))
                 .collect(Collectors.toList());
 
-        return new ImageFilterResult(new Images(null, images, null), getReason(images, reason));
+        return new ImageFilterResult(new Images(null, images, null, null), getReason(images, reason));
     }
 
     private String getReason(Collection<Image> images, Mutable<String> reason) {
@@ -132,6 +132,6 @@ public class ClusterUpgradeImageFilter {
     }
 
     private ImageFilterResult createEmptyResult() {
-        return new ImageFilterResult(new Images(null, Collections.emptyList(), null), "The upgrade is not allowed for this blueprint.");
+        return new ImageFilterResult(new Images(null, Collections.emptyList(), null, null), "The upgrade is not allowed for this blueprint.");
     }
 }

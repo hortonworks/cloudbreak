@@ -12,12 +12,20 @@ public class Versions {
 
     private final List<CloudbreakVersion> cloudbreakVersions;
 
+    private final List<CloudbreakVersion> freeipaVersions;
+
     @JsonCreator
-    public Versions(@JsonProperty(value = "cloudbreak", required = true) List<CloudbreakVersion> cloudbreakVersions) {
+    public Versions(@JsonProperty(value = "cloudbreak") List<CloudbreakVersion> cloudbreakVersions,
+                    @JsonProperty(value = "freeipa") List<CloudbreakVersion> freeipaVersions) {
         this.cloudbreakVersions = (cloudbreakVersions == null) ? Collections.emptyList() : cloudbreakVersions;
+        this.freeipaVersions = (freeipaVersions == null) ? Collections.emptyList() : freeipaVersions;
     }
 
     public List<CloudbreakVersion> getCloudbreakVersions() {
         return cloudbreakVersions;
+    }
+
+    public List<CloudbreakVersion> getFreeipaVersions() {
+        return freeipaVersions;
     }
 }
