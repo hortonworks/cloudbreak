@@ -8,6 +8,7 @@ public enum RebootState implements FlowState {
     INIT_STATE,
     REBOOT_FAILED_STATE,
     REBOOT_STATE,
+    REBOOT_WAIT_UNTIL_AVAILABLE_STATE,
     REBOOT_FINISHED_STATE,
     FINAL_STATE;
 

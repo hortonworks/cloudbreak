@@ -10,9 +10,10 @@ public class RebootInstancesResult extends CloudPlatformResult {
 
     private List<String> instanceIds;
 
-    public RebootInstancesResult(Long resourceId, InstancesStatusResult results) {
+    public RebootInstancesResult(Long resourceId, InstancesStatusResult results, List<String> instanceIds) {
         super(resourceId);
         this.results = results;
+        this.instanceIds = instanceIds;
     }
 
     public RebootInstancesResult(String statusReason, Exception errorDetails, Long resourceId, List<String> instanceIds) {

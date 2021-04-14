@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.flow.instance.reboot.action;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -12,10 +8,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
-import com.sequenceiq.freeipa.entity.Resource;
-import com.sequenceiq.freeipa.service.resource.ResourceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -30,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.RebootInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -38,8 +30,10 @@ import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
+import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.dto.Credential;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure.RebootInstancesResultToCleanupFailureEventConverter;
 import com.sequenceiq.freeipa.flow.instance.InstanceEvent;
@@ -49,8 +43,12 @@ import com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootInstanceEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootService;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootState;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckRequest;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
+import com.sequenceiq.freeipa.flow.instance.reboot.failure.WaitUntilAvailableFailedToInstanceFailureEventConverter;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
@@ -113,23 +111,11 @@ public class RebootActions {
                     RebootInstanceEvent payload) {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
+                MDCBuilder.buildMdcContext(stack);
                 List<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
                         .filter(instanceMetaData -> payload.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
-                MDCBuilder.buildMdcContext(stack);
 
-                Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-                CloudContext cloudContext = CloudContext.Builder.builder()
-                        .withId(stack.getId())
-                        .withName(stack.getName())
-                        .withCrn(stack.getResourceCrn())
-                        .withPlatform(stack.getCloudPlatform())
-                        .withVariant(stack.getCloudPlatform())
-                        .withLocation(location)
-                        .withUserId(stack.getOwner())
-                        .withUserName(stack.getOwner())
-                        .withAccountId(stack.getAccountId())
-                        .withAccountUUID(stack.getAccountId())
-                        .build();
+                CloudContext cloudContext = getCloudContext(stack);
                 Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
                 CloudCredential cloudCredential = credentialConverter.convert(credential);
                 return new RebootContext(flowParameters, stack, instances, cloudContext, cloudCredential);
@@ -137,21 +123,13 @@ public class RebootActions {
         };
     }
 
-    @Bean(name = "REBOOT_FINISHED_STATE")
-    public Action<?, ?> rebootFinishedAction() {
+    @Bean(name = "REBOOT_WAIT_UNTIL_AVAILABLE_STATE")
+    public Action<?, ?> rebootWaitUntilAvailableAction() {
         return new AbstractRebootAction<>(RebootInstancesResult.class) {
-            @Inject
-            private OperationService operationService;
-
             @Override
             protected void doExecute(RebootContext context, RebootInstancesResult payload, Map<Object, Object> variables) {
-                addMdcOperationId(variables);
-                rebootService.finishInstanceReboot(context, payload);
-                LOGGER.info("Finished rebooting {}.", context.getInstanceIds());
-                Stack stack = context.getStack();
-                SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
-                successDetails.getAdditionalDetails().put("InstanceIds", context.getInstanceIdList());
-                operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
+                LOGGER.info("Starting reboot polling FreeIpa until it is available for {}", context.getInstanceIds());
+                rebootService.waitForAvailableStatus(context);
                 sendEvent(context);
             }
 
@@ -162,20 +140,62 @@ public class RebootActions {
 
             @Override
             protected Selectable createRequest(RebootContext context) {
+                return new HealthCheckRequest(context.getStack().getId(), true, context.getInstanceIdList());
+            }
+
+            @Override
+            protected RebootContext createFlowContext(FlowParameters flowParameters, StateContext<RebootState, RebootEvent> stateContext,
+                    RebootInstancesResult payload) {
+                Long stackId = payload.getResourceId();
+                Stack stack = stackService.getStackById(stackId);
+                MDCBuilder.buildMdcContext(stack);
+                List<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
+                        .filter(instanceMetaData -> payload.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
+
+                CloudContext cloudContext = getCloudContext(stack);
+                Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
+                CloudCredential cloudCredential = credentialConverter.convert(credential);
+                return new RebootContext(flowParameters, stack, instances, cloudContext, cloudCredential);
+            }
+        };
+    }
+
+    @Bean(name = "REBOOT_FINISHED_STATE")
+    public Action<?, ?> rebootFinishedAction() {
+        return new AbstractRebootAction<>(HealthCheckSuccess.class) {
+            @Inject
+            private OperationService operationService;
+
+            @Override
+            protected void doExecute(RebootContext context, HealthCheckSuccess payload, Map<Object, Object> variables) {
+                addMdcOperationId(variables);
+                rebootService.finishInstanceReboot(context);
+                LOGGER.info("Finished rebooting {}.", context.getInstanceIds());
+                Stack stack = context.getStack();
+                SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
+                successDetails.getAdditionalDetails().put("InstanceIds", context.getInstanceIdList());
+                operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(successDetails), Collections.emptyList());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Object getFailurePayload(HealthCheckSuccess payload, Optional<RebootContext> flowContext, Exception ex) {
+                return new InstanceFailureEvent(payload.getResourceId(), ex, payload.getInstanceIds());
+            }
+
+            @Override
+            protected Selectable createRequest(RebootContext context) {
                 return new InstanceEvent(RebootEvent.REBOOT_FINALIZED_EVENT.event(), context.getStack().getId(), context.getInstanceIdList());
             }
 
             @Override
             protected RebootContext createFlowContext(FlowParameters flowParameters, StateContext<RebootState,
-                    RebootEvent> stateContext, RebootInstancesResult payload) {
-                List<InstanceMetaData> instances = payload.getResults().getResults().stream().map(instance -> {
-                    InstanceMetaData md = new InstanceMetaData();
-                    md.setInstanceId(instance.getCloudInstance().getInstanceId());
-                    return md;
-                }).collect(Collectors.toList());
+                    RebootEvent> stateContext, HealthCheckSuccess payload) {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
                 MDCBuilder.buildMdcContext(stack);
+                List<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
+                        .filter(instanceMetaData -> payload.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
                 return new RebootContext(flowParameters, stack, instances, null, null);
             }
         };
@@ -222,6 +242,7 @@ public class RebootActions {
             @Override
             protected void initPayloadConverterMap(List<PayloadConverter<InstanceFailureEvent>> payloadConverters) {
                 payloadConverters.add(new RebootInstancesResultToCleanupFailureEventConverter());
+                payloadConverters.add(new WaitUntilAvailableFailedToInstanceFailureEventConverter());
             }
         };
     }
@@ -230,5 +251,4 @@ public class RebootActions {
         List<Resource> resources = resourceService.findAllByStackId(stackId);
         return resourceToCloudResourceConverter.convert(resources);
     }
-
 }

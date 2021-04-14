@@ -31,6 +31,8 @@ import com.sequenceiq.freeipa.flow.stack.start.StackStartContext;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartEvent;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartService;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartState;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckRequest;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Configuration
@@ -90,12 +92,44 @@ public class StackStartActions {
         };
     }
 
-    @Bean(name = "START_FINISHED_STATE")
-    public Action<?, ?> startFinishedAction() {
+    @Bean(name = "START_SAVE_METADATA_STATE")
+    public Action<?, ?> startSaveMetadataAction() {
         return new AbstractStackStartAction<>(CollectMetadataResult.class) {
             @Override
             protected void doExecute(StackStartContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
-                stackStartService.finishStackStart(context, payload.getResults());
+                stackStartService.saveMetadata(context, payload.getResults());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackStartContext context) {
+                return new StackEvent(StackStartEvent.START_SAVE_METADATA_FINISHED_EVENT.event(), context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "START_WAIT_UNTIL_AVAILABLE_STATE")
+    public Action<?, ?> startWaitUntilAvailableAction() {
+        return new AbstractStackStartAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackStartContext context, StackEvent payload, Map<Object, Object> variables) {
+                stackStartService.waitForAvailableStatus(context);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackStartContext context) {
+                return new HealthCheckRequest(context.getStack().getId(), true);
+            }
+        };
+    }
+
+    @Bean(name = "START_FINISHED_STATE")
+    public Action<?, ?> startFinishedAction() {
+        return new AbstractStackStartAction<>(HealthCheckSuccess.class) {
+            @Override
+            protected void doExecute(StackStartContext context, HealthCheckSuccess payload, Map<Object, Object> variables) {
+                stackStartService.finishStackStart(context);
                 sendEvent(context);
             }
 

@@ -48,14 +48,18 @@ public class RebootInstanceHandler implements CloudPlatformEventHandler<RebootIn
             List<CloudVmInstanceStatus> cloudVmInstanceStatuses = connector.instances()
                     .reboot(authenticatedContext,  request.getCloudResources(), request.getCloudInstances());
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
-            RebootInstancesResult result = new RebootInstancesResult(request.getResourceId(), statusResult);
+            RebootInstancesResult result = new RebootInstancesResult(request.getResourceId(), statusResult, getInstances(request));
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
             RebootInstancesResult failure = new RebootInstancesResult("Failed to reboot instances", e, request.getResourceId(),
-                    request.getCloudInstances().stream().map(instance -> instance.getInstanceId()).collect(Collectors.toList()));
+                    getInstances(request));
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event<>(event.getHeaders(), failure));
         }
+    }
+
+    private List<String> getInstances(RebootInstancesRequest<RebootInstancesResult> request) {
+        return request.getCloudInstances().stream().map(instance -> instance.getInstanceId()).collect(Collectors.toList());
     }
 }
