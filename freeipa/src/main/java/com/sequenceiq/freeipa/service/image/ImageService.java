@@ -43,7 +43,7 @@ public class ImageService {
         ImageWrapper imageWrapper = getImage(imageRequest, region, platformString);
         String imageName = determineImageName(platformString, region, imageWrapper.getImage());
         LOGGER.info("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog with '{}' catalog name",
-                platformString, region, imageName, imageWrapper.getCatalogUrl(), imageWrapper.getCatalogName());
+        platformString, region, imageName, imageWrapper.getCatalogUrl(), imageWrapper.getCatalogName());
 
         ImageEntity imageEntity = imageConverter.convert(imageWrapper.getImage());
         imageEntity.setStack(stack);
