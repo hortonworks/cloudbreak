@@ -23,7 +23,8 @@ class StackStatusMessageTransformatorTest {
 
         String expected = "The Control Plane was not able to establish the connection with the gateway instance. This means that the reverse SSH tunnel "
                 + "(autossh process) running on this instance could not connect to the Cloudera server. Please check your connection and proxy settings and "
-                + "make sure the instance can reach *.ccm.cdp.cloudera.com";
+                + "make sure the instance can reach *.ccm.cdp.cloudera.com. Refer to Cloudera documentation at "
+                + "https://docs.cloudera.com/management-console/cloud/connection-to-private-subnets/topics/mc-ccm-overview.html";
         Assertions.assertEquals(expected, result);
     }
 
