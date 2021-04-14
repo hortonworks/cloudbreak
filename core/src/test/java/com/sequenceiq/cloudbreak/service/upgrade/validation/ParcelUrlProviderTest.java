@@ -138,7 +138,7 @@ public class ParcelUrlProviderTest {
 
     private StatedImage createImage(StackRepoDetails stackRepoDetails) {
         return StatedImage.statedImage(new Image(null, null, null, null, IMAGE_ID, null, null, null, new StackDetails(null, stackRepoDetails, null), null,
-                null, createPreWarmParcels(), null, null, false), IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+                null, createPreWarmParcels(), null, null, false, null, null), IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
     }
 
     private List<List<String>> createPreWarmParcels() {

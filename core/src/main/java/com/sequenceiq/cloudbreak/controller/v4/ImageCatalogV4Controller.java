@@ -167,7 +167,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @DisableCheckPermissions
     public ImagesV4Response getImageByImageId(Long workspaceId, String imageId, @AccountId String accountId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, "");
-        Images images = new Images(List.of(), List.of(statedImage.getImage()), Set.of());
+        Images images = new Images(List.of(), List.of(statedImage.getImage()), List.of(), Set.of());
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 
@@ -176,7 +176,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     public ImagesV4Response getImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name,
             String imageId, @AccountId String accountId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, name);
-        Images images = new Images(List.of(), List.of(statedImage.getImage()), Set.of());
+        Images images = new Images(List.of(), List.of(statedImage.getImage()), List.of(), Set.of());
         return converterUtil.convert(images, ImagesV4Response.class);
     }
 
@@ -184,7 +184,6 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageV4Response getSingleImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name, String imageId) throws Exception {
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, name);
-        // FIXME: This conversion WILL fail unless properly implemented!
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
     }
 

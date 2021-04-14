@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import com.sequenceiq.cloudbreak.converter.ImageTypeConverter;
+import com.sequenceiq.common.api.type.ImageType;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -48,11 +53,12 @@ public class CustomImage implements ProvisionEntity {
 
     private Long created = System.currentTimeMillis();
 
-    private String imageType;
+    @Convert(converter = ImageTypeConverter.class)
+    private ImageType imageType;
 
     private String baseParcelUrl;
 
-    @OneToMany(mappedBy = "customImage", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "customImage", cascade = CascadeType.REMOVE)
     private Set<VmImage> vmImage = new HashSet<>();
 
     public Long getId() {
@@ -115,11 +121,11 @@ public class CustomImage implements ProvisionEntity {
         this.creator = creator;
     }
 
-    public String getImageType() {
+    public ImageType getImageType() {
         return imageType;
     }
 
-    public void setImageType(String imageType) {
+    public void setImageType(ImageType imageType) {
         this.imageType = imageType;
     }
 
@@ -144,7 +150,7 @@ public class CustomImage implements ProvisionEntity {
         final StringBuffer sb = new StringBuffer("ImageCatalog{");
         sb.append("id='").append(id).append('\'');
         sb.append("name='").append(name).append('\'');
-        sb.append("imageType='").append(imageType).append('\'');
+        sb.append("imageType='").append(imageType.name()).append('\'');
         sb.append("customizedImageId='").append(customizedImageId).append('\'');
         sb.append('}');
         return sb.toString();

@@ -4,8 +4,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.service.image.CloudbreakVersionListProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogVersionFilter;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
@@ -44,6 +44,9 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
     @Inject
     private VersionBasedImageProvider versionBasedImageProvider;
 
+    @Inject
+    private CloudbreakVersionListProvider cloudbreakVersionListProvider;
+
     @Override
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
         return versionBasedImageProvider.getImages(imageCatalogV3, imageFilter);
@@ -57,17 +60,22 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
 
     @Override
     public ImageFilterResult getImageFilterResult(CloudbreakImageCatalogV3 imageCatalogV3) {
-        Set<String> imageIds = getImageIds(imageCatalogV3.getVersions());
+        Set<String> imageIds = getImageIds(imageCatalogV3);
         LOGGER.debug("{} image id(s) found for Cloudbreak version: {}", imageIds.size(), cbVersion);
         String message = String.format("%d image id(s) found for Cloudbreak version: %s", imageIds.size(), cbVersion);
-        List<Image> images = imageCatalogV3.getImages().getCdhImages().stream()
-                .filter(image -> imageIds.contains(image.getUuid()))
-                .collect(Collectors.toList());
-        return new ImageFilterResult(new Images(null, images, null), message);
+        List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages();
+        if (!freeipaImages.isEmpty()) {
+            List<Image> images = freeipaImages.stream().filter(image -> imageIds.contains(image.getUuid())).collect(Collectors.toList());
+            return new ImageFilterResult(new Images(null, null, images, null), message);
+        } else {
+            List<Image> cdhImages = imageCatalogV3.getImages().getCdhImages();
+            List<Image> images = cdhImages.stream().filter(image -> imageIds.contains(image.getUuid())).collect(Collectors.toList());
+            return new ImageFilterResult(new Images(null, images, null, null), message);
+        }
     }
 
     private void validateVersion(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
-        if (imageCatalogV3.getVersions() == null || imageCatalogV3.getVersions().getCloudbreakVersions().isEmpty()) {
+        if (imageCatalogV3.getVersions() == null || cloudbreakVersionListProvider.getVersions(imageCatalogV3).isEmpty()) {
             throw new CloudbreakImageCatalogException("Cloudbreak versions cannot be NULL");
         }
     }
@@ -75,11 +83,10 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
     private void validateUuids(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
         Stream<String> baseUuids = imageCatalogV3.getImages().getBaseImages().stream().map(Image::getUuid);
         Stream<String> cdhUuids = imageCatalogV3.getImages().getCdhImages().stream().map(Image::getUuid);
-        Stream<String> uuidStream = Stream.of(baseUuids, cdhUuids).
-                reduce(Stream::concat).
-                orElseGet(Stream::empty);
+        Stream<String> freeipaUuids = imageCatalogV3.getImages().getFreeIpaImages().stream().map(Image::getUuid);
+        Stream<String> uuidStream = Stream.of(baseUuids, cdhUuids, freeipaUuids).reduce(Stream::concat).orElseGet(Stream::empty);
         List<String> uuidList = uuidStream.collect(Collectors.toList());
-        List<String> orphanUuids = imageCatalogV3.getVersions().getCloudbreakVersions().stream().flatMap(cbv -> cbv.getImageIds().stream()).
+        List<String> orphanUuids = cloudbreakVersionListProvider.getVersions(imageCatalogV3).stream().flatMap(cbv -> cbv.getImageIds().stream()).
                 filter(imageId -> !uuidList.contains(imageId)).collect(Collectors.toList());
         if (!orphanUuids.isEmpty()) {
             throw new CloudbreakImageCatalogException(String.format("Images with ids: %s is not present in cdh-images block",
@@ -87,9 +94,9 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
         }
     }
 
-    private Set<String> getImageIds(Versions versions) {
+    private Set<String> getImageIds(CloudbreakImageCatalogV3 imageCatalogV3) {
         Set<String> imageIds = new HashSet<>();
-        List<CloudbreakVersion> cbVersionsFromImageCatalog = versions.getCloudbreakVersions();
+        List<CloudbreakVersion> cbVersionsFromImageCatalog = cloudbreakVersionListProvider.getVersions(imageCatalogV3);
         String currentCbVersion = getCurrentCBVersion(cbVersionsFromImageCatalog);
 
         List<CloudbreakVersion> exactMatchedImages = getExtractMatchedImages(cbVersionsFromImageCatalog, currentCbVersion);

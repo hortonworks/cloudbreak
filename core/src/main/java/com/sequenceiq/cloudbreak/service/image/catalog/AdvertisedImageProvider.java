@@ -33,6 +33,7 @@ public class AdvertisedImageProvider {
                 new Images(
                         getImages(getBaseImagesOrEmptyList(imageCatalogV3, imageFilter), imageFilter.getPlatforms()),
                         getImages(imageCatalogV3.getImages().getCdhImages(), imageFilter.getPlatforms()),
+                        imageCatalogV3.getImages().getFreeIpaImages(),
                         singleton(imageFilter.getCbVersion())),
                 imageFilter.getImageCatalog().getImageCatalogUrl(),
                 imageFilter.getImageCatalog().getName());

@@ -97,8 +97,9 @@ public class CachedImageCatalogProvider {
 
         List<Image> filteredBaseImages = filterImages(catalogImages.getBaseImages(), enabledOsPredicate());
         List<Image> filteredCdhImages = filterImages(catalogImages.getCdhImages(), enabledOsPredicate());
+        List<Image> filteredFreeipaImages = filterImages(catalogImages.getFreeIpaImages(), enabledOsPredicate());
 
-        Images images = new Images(filteredBaseImages, filteredCdhImages, catalogImages.getSuppertedVersions());
+        Images images = new Images(filteredBaseImages, filteredCdhImages, filteredFreeipaImages, catalogImages.getSuppertedVersions());
         return new CloudbreakImageCatalogV3(images, catalog.getVersions());
     }
 
@@ -151,9 +152,16 @@ public class CachedImageCatalogProvider {
     private void cleanAndValidateMaps(CloudbreakImageCatalogV3 catalog) throws CloudbreakImageCatalogException {
         boolean baseImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getBaseImages());
         boolean cdhImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getCdhImages());
+        boolean freeipaImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getFreeIpaImages());
 
-        if (baseImagesValidate && cdhImagesValidate) {
-            throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
+        if (!catalog.getImages().getFreeIpaImages().isEmpty()) {
+            if (freeipaImagesValidate) {
+                throw new CloudbreakImageCatalogException("Freeipa images are empty or every items equals NULL");
+            }
+        } else {
+            if (baseImagesValidate && cdhImagesValidate) {
+                throw new CloudbreakImageCatalogException("Base and CDH images are empty or every items equals NULL");
+            }
         }
     }
 

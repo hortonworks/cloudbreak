@@ -46,6 +46,10 @@ public class Image {
 
     private final boolean advertised;
 
+    private final String baseParcelUrl;
+
+    private final String sourceImageId;
+
     @JsonCreator
     public Image(
             @JsonProperty(value = "date", required = true) String date,
@@ -62,7 +66,9 @@ public class Image {
             @JsonProperty("pre_warm_parcels") List<List<String>> preWarmParcels,
             @JsonProperty("pre_warm_csd") List<String> preWarmCsd,
             @JsonProperty("build-number") String cmBuildNumber,
-            @JsonProperty("advertised") boolean advertised) {
+            @JsonProperty("advertised") boolean advertised,
+            @JsonProperty("baseParcelUrl") String baseParcelUrl,
+            @JsonProperty("sourceImageId") String sourceImageId) {
         this.date = date;
         this.created = created;
         this.description = description;
@@ -78,6 +84,8 @@ public class Image {
         this.preWarmCsd = preWarmCsd == null ? Collections.emptyList() : preWarmCsd;
         this.cmBuildNumber = cmBuildNumber;
         this.advertised = advertised;
+        this.baseParcelUrl = baseParcelUrl;
+        this.sourceImageId = sourceImageId;
     }
 
     public String getDate() {
@@ -156,6 +164,14 @@ public class Image {
         return advertised;
     }
 
+    public String getBaseParcelUrl() {
+        return baseParcelUrl;
+    }
+
+    public String getSourceImageId() {
+        return sourceImageId;
+    }
+
     @Override
     public String toString() {
         return shortOsDescriptionFormat();
@@ -176,6 +192,8 @@ public class Image {
                 + ", preWarmCsd='" + String.join(", ", preWarmCsd) + '\''
                 + ", cmBuildNumber='" + cmBuildNumber + '\''
                 + ", advertised='" + advertised + '\''
+                + ", baseParcelUrl='" + baseParcelUrl + '\''
+                + ", sourceImageId='" + sourceImageId + '\''
                 + '}';
     }
 

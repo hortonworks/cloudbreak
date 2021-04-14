@@ -1,0 +1,930 @@
+{
+  "images": {
+    "base-images": [
+      {
+        "created": 1589610592,
+        "date": "2020-05-16",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-0850971f7aba807f2",
+            "ap-northeast-2": "ami-096c11169cb8b95fb",
+            "ap-south-1": "ami-0e5f9022df182c057",
+            "ap-southeast-1": "ami-0b2761b5508f0b302",
+            "ap-southeast-2": "ami-03528916d1a66e7a6",
+            "ca-central-1": "ami-018e1701e4e80e3e9",
+            "eu-central-1": "ami-09e19b69d442d53a3",
+            "eu-north-1": "ami-0077f910f5bc934d9",
+            "eu-west-1": "ami-0abfe54a566bec51c",
+            "eu-west-2": "ami-034ef4196dc47bf31",
+            "eu-west-3": "ami-0196bbfd682891553",
+            "sa-east-1": "ami-02a79537af040e778",
+            "us-east-1": "ami-0e828064727d63e22",
+            "us-east-2": "ami-0262d52a50b589468",
+            "us-west-1": "ami-0fde43eec9eda62f7",
+            "us-west-2": "ami-03320fe795db7d3d2"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "1dcb6c74-85ea-4c12-7de7-7c4fe6948cf0",
+        "package-versions": {
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.1-2019-10-10T12:31:24"
+        }
+      },
+      {
+        "created": 1589610585,
+        "date": "2020-05-16",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://hwxaustraliacentral.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Australia East": "https://hwxaustraliaeast.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Australia Southeast": "https://hwxaustralisoutheast.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Brazil South": "https://sequenceiqbrazilsouth2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Canada Central": "https://sequenceiqcanadacentral.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Canada East": "https://sequenceiqcanadaeast.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Central India": "https://hwxcentralindia.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Central US": "https://sequenceiqcentralus2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "East Asia": "https://sequenceiqeastasia2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "East US": "https://sequenceiqeastus12.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "East US 2": "https://sequenceiqeastus22.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "France Central": "https://hwxfrancecentral.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Germany North": "https://hwxgermanynorth.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Germany West Central": "https://hwxgermanywestcentral.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Japan East": "https://sequenceiqjapaneast2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Japan West": "https://sequenceiqjapanwest2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Korea Central": "https://hwxkoreacentral.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Korea South": "https://hwxkoreasouth.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "North Central US": "https://sequenceiqorthcentralus2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "North Europe": "https://sequenceiqnortheurope2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Norway East": "https://hwxnorwayeast.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Norway West": "https://hwxnorwaywest.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "South Africa North": "https://hwxsouthafricanorth.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "South Africa West": "https://hwxsouthafricawest.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "South Central US": "https://sequenceiqouthcentralus2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "South East Asia": "https://sequenceiqsoutheastasia2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "South India": "https://hwxsouthindia.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Switzerland North": "https://hwxswitzerlandnorth.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "Switzerland West": "https://hwxswitzerlandwest.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "UAE Central": "https://hwxuaecentral.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "UAE North": "https://hwxuaenorth.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "UK South": "https://hwxsouthuk.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "UK West": "https://hwxwestuk.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "West Central US": "https://hwxwestcentralus.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "West Europe": "https://sequenceiqwesteurope2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "West India": "https://hwxwestindia.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "West US": "https://sequenceiqwestus2.blob.core.windows.net/images/cb-cdh--2005160629.vhd",
+            "West US 2": "https://hwxwestus2.blob.core.windows.net/images/cb-cdh--2005160629.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "83d976b6-5aa7-4f25-5888-08dccd937f8a",
+        "package-versions": {
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.1-2019-10-10T12:31:24"
+        }
+      }
+    ],
+    "cdh-images": [
+      {
+        "created": 1602165796,
+        "date": "2020-10-08",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-01a9d94e6900a33cb",
+            "ap-northeast-2": "ami-0802d1c8b7c9d4fdd",
+            "ap-south-1": "ami-00cbf51b376027cf6",
+            "ap-southeast-1": "ami-06e3b40329762791f",
+            "ap-southeast-2": "ami-0a8810be63d1f8d31",
+            "ca-central-1": "ami-0a730de19accf616f",
+            "eu-central-1": "ami-0cdfddb5735c02abd",
+            "eu-north-1": "ami-0c2da68150c51bc39",
+            "eu-west-1": "ami-014e37f7503d3f654",
+            "eu-west-2": "ami-052172b23b4a4b40e",
+            "eu-west-3": "ami-0bdc4c2b59f01d9d3",
+            "sa-east-1": "ami-02710986352384df5",
+            "us-east-1": "ami-0ac13148be4bb5a42",
+            "us-east-2": "ami-01eb0c42eaa765b46",
+            "us-west-1": "ami-04c916ad82cb19f62",
+            "us-west-2": "ami-06b809496a3f58917"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "949bffa3-17d4-4076-9d5a-bf3d23c1086b",
+        "package-versions": {
+          "cdh-build-number": "6244118",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.2",
+          "cm-build-number": "6182830",
+          "csa": "1.2.1.0-40",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-81",
+          "stack": "7.2.2"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://archive.cloudera.com/p/cdp-public/7.2.2.0/parcels/",
+              "repoid": "CDH-7.2.2",
+              "repository-version": "7.2.2-1.cdh7.2.2.p0.6244118"
+            },
+            "util": null
+          },
+          "version": "7.2.2",
+          "build-number": "6244118"
+        },
+        "repo": {
+          "redhat7": "https://archive.cloudera.com/p/cm-public/7.2.2/redhat7/yum/"
+        },
+        "version": "7.2.2",
+        "build-number": "6182830",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.1.3.0.7110.0-81-1.p0.5866256-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/SPARK3_ON_YARN-3.0.1.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/LIVY_FOR_SPARK3-0.6.0.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1602165937,
+        "date": "2020-10-08",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Germany North": "https://cldrgermanynorth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Norway West": "https://cldrnorwaywest.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "South Africa West": "https://cldrsouthafricawest.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "South East Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/cb-cdh-72-2010051530.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "ea9d91aa-583f-4858-835c-e20976c96ca4",
+        "package-versions": {
+          "cdh-build-number": "6244118",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.2",
+          "cm-build-number": "6182830",
+          "csa": "1.2.1.0-40",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-81",
+          "stack": "7.2.2"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "https://archive.cloudera.com/p/cdp-public/7.2.2.0/parcels/",
+              "repoid": "CDH-7.2.2",
+              "repository-version": "7.2.2-1.cdh7.2.2.p0.6244118"
+            },
+            "util": null
+          },
+          "version": "7.2.2",
+          "build-number": "6244118"
+        },
+        "repo": {
+          "redhat7": "https://archive.cloudera.com/p/cm-public/7.2.2/redhat7/yum/"
+        },
+        "version": "7.2.2",
+        "build-number": "6182830",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.1.3.0.7110.0-81-1.p0.5866256-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/SPARK3_ON_YARN-3.0.1.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/LIVY_FOR_SPARK3-0.6.0.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1603282520,
+        "date": "2020-10-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Germany North": "https://cldrgermanynorth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Norway West": "https://cldrnorwaywest.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "South Africa West": "https://cldrsouthafricawest.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "South East Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/cb-cdh-72-2010211215.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "232fe6b6-aec4-4fa9-bb02-2c295d319a36",
+        "package-versions": {
+          "cdh-build-number": "6575992",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.2",
+          "cm-build-number": "6458542",
+          "csa": "1.2.1.0-40",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-81",
+          "stack": "7.2.2"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6575992/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.2",
+              "repository-version": "7.2.2-1.cdh7.2.2.p1.6575992"
+            },
+            "util": null
+          },
+          "version": "7.2.2",
+          "build-number": "6575992"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6458542/cm7/7.2.2/redhat7/yum/"
+        },
+        "version": "7.2.2",
+        "build-number": "6458542",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "https://archive.cloudera.com/p/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.1.3.0.7110.0-81-1.p0.5866256-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "https://archive.cloudera.com/p/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/SPARK3_ON_YARN-3.0.1.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/LIVY_FOR_SPARK3-0.6.0.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1603290046,
+        "date": "2020-10-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Germany North": "https://cldrgermanynorth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Norway West": "https://cldrnorwaywest.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "South Africa West": "https://cldrsouthafricawest.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "South East Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/cb-cdh-72-2010211420.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "a29f863a-9ebb-4750-bc2b-f4dec4b56286",
+        "package-versions": {
+          "cdh-build-number": "6575992",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.2",
+          "cm-build-number": "6458542",
+          "csa": "1.2.1.0-40",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-81",
+          "stack": "7.2.2"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6575992/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.2",
+              "repository-version": "7.2.2-1.cdh7.2.2.p1.6575992"
+            },
+            "util": null
+          },
+          "version": "7.2.2",
+          "build-number": "6575992"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6458542/cm7/7.2.2/redhat7/yum/"
+        },
+        "version": "7.2.2",
+        "build-number": "6458542",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.1.3.0.7110.0-81-1.p0.5866256-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/SPARK3_ON_YARN-3.0.1.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/LIVY_FOR_SPARK3-0.6.0.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1603299397,
+        "date": "2020-10-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-015ed68c50aa4c96e",
+            "ap-northeast-2": "ami-0c5695904efee5003",
+            "ap-south-1": "ami-0b6353f4e13b946ec",
+            "ap-southeast-1": "ami-06f3e0403f77c1ef8",
+            "ap-southeast-2": "ami-057281661a04f3ce0",
+            "ca-central-1": "ami-05818afcd414add16",
+            "eu-central-1": "ami-0dfe71830f6dbd57b",
+            "eu-north-1": "ami-06ac50cd550a4209d",
+            "eu-west-1": "ami-05326b5dd60af3c30",
+            "eu-west-2": "ami-06bc771390d69510f",
+            "eu-west-3": "ami-0aea3fceed977636a",
+            "sa-east-1": "ami-0c36fddfe4ae4b0ae",
+            "us-east-1": "ami-020b67b8bd4078cc6",
+            "us-east-2": "ami-05b01a980229f7556",
+            "us-west-1": "ami-07a4214778f58bc45",
+            "us-west-2": "ami-091a20b4ba0c2767a"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "eb1d458a-bf82-434b-bc2a-ac06b8cd6c0a",
+        "package-versions": {
+          "cdh-build-number": "6575992",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.2",
+          "cm-build-number": "6458542",
+          "csa": "1.2.1.0-40",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-81",
+          "stack": "7.2.2"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6575992/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.2",
+              "repository-version": "7.2.2-1.cdh7.2.2.p1.6575992"
+            },
+            "util": null
+          },
+          "version": "7.2.2",
+          "build-number": "6575992"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6458542/cm7/7.2.2/redhat7/yum/"
+        },
+        "version": "7.2.2",
+        "build-number": "6458542",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.1.3.0.7110.0-81-1.p0.5866256-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/SPARK3_ON_YARN-3.0.1.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/LIVY_FOR_SPARK3-0.6.0.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1603301289,
+        "date": "2020-10-21",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-003526d4dfaf642ae",
+            "ap-northeast-2": "ami-07686c6eed135d0f2",
+            "ap-south-1": "ami-06a06339414c6255f",
+            "ap-southeast-1": "ami-0979d43c57b4a6c3c",
+            "ap-southeast-2": "ami-0ec0501f82337ee45",
+            "ca-central-1": "ami-031a4f691cd2d7723",
+            "eu-central-1": "ami-0d85f1898489c4532",
+            "eu-north-1": "ami-0090a03039f00cb81",
+            "eu-west-1": "ami-068f8148e5c313e78",
+            "eu-west-2": "ami-0e3e4d832b477ba7c",
+            "eu-west-3": "ami-09dab1a4343d4ff60",
+            "sa-east-1": "ami-020d97cf56d30b47c",
+            "us-east-1": "ami-0a617822dfba747ae",
+            "us-east-2": "ami-0e45cd0b9e16e1e7a",
+            "us-west-1": "ami-0b3dcf51f106ac35f",
+            "us-west-2": "ami-0da3e16653786b576"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "4fd396d1-5899-47d1-b252-a860156a666b",
+        "package-versions": {
+          "cdh-build-number": "6575992",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.2",
+          "cm-build-number": "6458542",
+          "csa": "1.2.1.0-40",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-81",
+          "stack": "7.2.2"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6575992/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.2",
+              "repository-version": "7.2.2-1.cdh7.2.2.p1.6575992"
+            },
+            "util": null
+          },
+          "version": "7.2.2",
+          "build-number": "6575992"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6458542/cm7/7.2.2/redhat7/yum/"
+        },
+        "version": "7.2.2",
+        "build-number": "6458542",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.1.3.0.7110.0-81-1.p0.5866256-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/SPARK3_ON_YARN-3.0.1.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5866256/spark3/3.x/csd/LIVY_FOR_SPARK3-0.6.0.3.0.7110.0-81.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/6137533/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-327-6137533.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1605687719,
+        "date": "2020-11-18",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "aws": {
+            "ap-northeast-1": "ami-065e7d07ce44a7011",
+            "ap-northeast-2": "ami-0bfbc30b4f553c8b0",
+            "ap-south-1": "ami-03f4426bbb5920231",
+            "ap-southeast-1": "ami-0387ea52e81c6b724",
+            "ap-southeast-2": "ami-03727c671652eab7b",
+            "ca-central-1": "ami-02258a4ef48123c3d",
+            "eu-central-1": "ami-0eec5e4cd026ee595",
+            "eu-north-1": "ami-0987e4b8b5dceb81e",
+            "eu-west-1": "ami-0a16f25f6590db563",
+            "eu-west-2": "ami-09c1a8cdac1f947d4",
+            "eu-west-3": "ami-0f1b2ae69888037b3",
+            "sa-east-1": "ami-007852fa3bdd0766f",
+            "us-east-1": "ami-094141c5623e57177",
+            "us-east-2": "ami-0be43059f740f6abc",
+            "us-west-1": "ami-002fe7c590f74c086",
+            "us-west-2": "ami-0576c0576543725d8"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "0898c324-c1f0-4055-98e1-ddc565473878",
+        "package-versions": {
+          "cdh-build-number": "7150148",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.1",
+          "cm-build-number": "4731218",
+          "csa": "1.2.1.0-38",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-37",
+          "stack": "7.2.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/7150148/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.1",
+              "repository-version": "7.2.1-1.cdh7.2.1.p2.7150148"
+            },
+            "util": null
+          },
+          "version": "7.2.1",
+          "build-number": "7150148"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4731218/cm7/7.2.1/redhat7/yum/"
+        },
+        "version": "7.2.1",
+        "build-number": "4731218",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.0.3.0.7110.0-37-1.p0.5053441-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5053441/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-240-4844562-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4844562/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5053441/spark3/3.x/csd/SPARK3_ON_YARN-3.0.0.3.0.7110.0-37.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4844562/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-240-4844562.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      },
+      {
+        "created": 1605687812,
+        "date": "2020-11-18",
+        "description": "Official Cloudbreak image",
+        "images": {
+          "azure": {
+            "Australia Central": "https://cldraustraliacentral.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Australia East": "https://cldraustraliaeast.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Australia Southeast": "https://cldraustralisoutheast.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Brazil South": "https://cldrbrazilsouth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Canada Central": "https://cldrcanadacentral.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Canada East": "https://cldrcanadaeast.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Central India": "https://cldrcentralindia.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Central US": "https://cldrcentralus.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "East Asia": "https://cldreastasia.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "East US": "https://cldreastus.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "East US 2": "https://cldreastus2.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "France Central": "https://cldrfrancecentral.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Germany North": "https://cldrgermanynorth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Germany West Central": "https://cldrgermanywestcentral.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Japan East": "https://cldrjapaneast.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Japan West": "https://cldrjapanwest.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Korea Central": "https://cldrkoreacentral.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Korea South": "https://cldrkoreasouth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "North Central US": "https://cldrnorthcentralus.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "North Europe": "https://cldrnortheurope.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Norway East": "https://cldrnorwayeast.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Norway West": "https://cldrnorwaywest.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "South Africa North": "https://cldrsouthafricanorth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "South Africa West": "https://cldrsouthafricawest.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "South Central US": "https://cldrsouthcentralus.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "South East Asia": "https://cldrsoutheastasia.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "South India": "https://cldrsouthindia.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "Switzerland North": "https://cldrswitzerlandnorth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "UAE North": "https://cldruaenorth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "UK South": "https://cldruksouth.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "UK West": "https://cldrukwest.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "West Central US": "https://cldrwestcentralus.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "West Europe": "https://cldrwesteurope.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "West India": "https://cldrwestindia.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "West US": "https://cldrwestus.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd",
+            "West US 2": "https://cldrwestus2.blob.core.windows.net/images/cb-cdh-72-2011180823.vhd"
+          }
+        },
+        "os": "centos7",
+        "os_type": "redhat7",
+        "uuid": "3cba3cd0-a169-4d62-8bc5-709df5f73b50",
+        "package-versions": {
+          "cdh-build-number": "7150148",
+          "cfm": "2.0.3.0-13",
+          "cm": "7.2.1",
+          "cm-build-number": "4731218",
+          "csa": "1.2.1.0-38",
+          "profiler": "2.0.3.0-98",
+          "salt": "3000.2",
+          "salt-bootstrap": "0.13.4-2020-09-30T15:03:43",
+          "spark3": "3.0.7110.0-37",
+          "stack": "7.2.1"
+        },
+        "stack-details": {
+          "repo": {
+            "stack": {
+              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/7150148/cdh/7.x/parcels/",
+              "repoid": "CDH-7.2.1",
+              "repository-version": "7.2.1-1.cdh7.2.1.p2.7150148"
+            },
+            "util": null
+          },
+          "version": "7.2.1",
+          "build-number": "7150148"
+        },
+        "repo": {
+          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4731218/cm7/7.2.1/redhat7/yum/"
+        },
+        "version": "7.2.1",
+        "build-number": "4731218",
+        "pre_warm_parcels": [
+          [
+            "PROFILER_MANAGER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "PROFILER_SCHEDULER-2.0.3.2.0.3.0-98-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers"
+          ],
+          [
+            "SPARK3-3.0.0.3.0.7110.0-37-1.p0.5053441-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5053441/spark3/3.x/parcels"
+          ],
+          [
+            "FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-240-4844562-el7.parcel",
+            "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4844562/csa/1.2.1.0/parcels"
+          ],
+          [
+            "CFM-2.0.3.0-el7.parcel",
+            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel"
+          ]
+        ],
+        "pre_warm_csd": [
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_MANAGER-2.0.3.2.0.3.0-98.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/2.x/BUILDS/2.0.3.0-98/tars/dataplane_profilers/PROFILER_SCHEDULER-2.0.3.2.0.3.0-98.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/5053441/spark3/3.x/csd/SPARK3_ON_YARN-3.0.0.3.0.7110.0-37.jar",
+          "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/4844562/csa/1.2.1.0/csd/FLINK-1.10.0-csa1.2.1.0-cdh7.2.1.0-240-4844562.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFI-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFICA-1.11.4.2.0.3.0-13.jar",
+          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.3.0-13/tars/parcel/NIFIREGISTRY-0.5.0.2.0.3.0-13.jar"
+        ]
+      }
+    ]
+  },
+  "versions": {
+    "cloudbreak": [
+      {
+        "images": [
+          "1dcb6c74-85ea-4c12-7de7-7c4fe6948cf0",
+          "83d976b6-5aa7-4f25-5888-08dccd937f8a",
+          "949bffa3-17d4-4076-9d5a-bf3d23c1086b",
+          "ea9d91aa-583f-4858-835c-e20976c96ca4",
+          "232fe6b6-aec4-4fa9-bb02-2c295d319a36"
+        ],
+        "defaults": [
+          "1dcb6c74-85ea-4c12-7de7-7c4fe6948cf0",
+          "83d976b6-5aa7-4f25-5888-08dccd937f8a",
+          "949bffa3-17d4-4076-9d5a-bf3d23c1086b",
+          "ea9d91aa-583f-4858-835c-e20976c96ca4",
+          "232fe6b6-aec4-4fa9-bb02-2c295d319a36"
+        ],
+        "versions": [
+          "2.39.0-b124",
+          "2.39.0-b126",
+          "2.39.0-b127",
+          "2.39.0-b128",
+          "2.39.0-b129",
+          "2.39.0-b138",
+          "2.39.0-b139",
+          "2.39.0-b140",
+          "2.39.0-b141",
+          "2.39.0-b142",
+          "2.39.0-b143",
+          "2.39.0-b145",
+          "2.39.0-b147",
+          "2.40.0-b143",
+          "2.40.0-b149",
+          "2.40.0-b157",
+          "2.40.0-b160",
+          "2.40.0-b162",
+          "2.40.0-b163",
+          "2.41.0-b110",
+          "2.41.0-b115",
+          "2.41.0-b117",
+          "2.41.0-b118",
+          "2.41.0-b121"
+        ]
+      }
+    ]
+  }
+}
