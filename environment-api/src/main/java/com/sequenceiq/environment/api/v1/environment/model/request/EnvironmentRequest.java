@@ -31,7 +31,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     static final String LENGHT_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";
 
     @Size(max = 28, min = 5, message = LENGHT_INVALID_MSG)
-    @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",
+    @Pattern(regexp = "^(?!.*\\-\\-)[a-z][-a-z0-9]*[a-z0-9]$",
             message = "The environments's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     @NotNull
