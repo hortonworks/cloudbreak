@@ -2,7 +2,9 @@ package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Optional;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaImageResponse;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
@@ -25,6 +27,7 @@ public class FreeIpaConverter {
             Optional.ofNullable(freeIpaCreation.getAws())
                     .map(this::convertAws)
                     .ifPresent(response::setAws);
+            response.setImage(convertImage(freeIpaCreation.getImageCatalog(), freeIpaCreation.getImageId()));
             return response;
         }
     }
@@ -39,6 +42,16 @@ public class FreeIpaConverter {
         AwsFreeIpaSpotParameters result = new AwsFreeIpaSpotParameters();
         result.setPercentage(spot.getPercentage());
         result.setMaxPrice(spot.getMaxPrice());
+        return result;
+    }
+
+    private FreeIpaImageResponse convertImage(String catalog, String id) {
+        FreeIpaImageResponse result = null;
+        if (!Strings.isNullOrEmpty(catalog) && !Strings.isNullOrEmpty(id)) {
+            result = new FreeIpaImageResponse();
+            result.setCatalog(catalog);
+            result.setId(id);
+        }
         return result;
     }
 
