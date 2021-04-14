@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 
@@ -199,6 +200,9 @@ public class ClusterStatusSyncHandlerTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(clusterState);
+
+        ClusterPertain clusterPertain = new ClusterPertain();
+        cluster.setClusterPertain(clusterPertain);
         return cluster;
     }
 }

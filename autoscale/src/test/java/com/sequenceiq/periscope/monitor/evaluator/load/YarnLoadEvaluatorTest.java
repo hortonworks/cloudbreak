@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
@@ -242,6 +243,10 @@ public class YarnLoadEvaluatorTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(ClusterState.RUNNING);
+
+        ClusterPertain clusterPertain = new ClusterPertain();
+        clusterPertain.setTenant("testtenant");
+        cluster.setClusterPertain(clusterPertain);
 
         ScalingPolicy scalingPolicy = new ScalingPolicy();
         scalingPolicy.setAdjustmentType(AdjustmentType.LOAD_BASED);

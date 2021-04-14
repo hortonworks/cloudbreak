@@ -12,7 +12,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
@@ -25,6 +24,7 @@ import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 
 @Component
 public class ScalingHandler implements ApplicationListener<ScalingEvent> {
@@ -57,7 +57,7 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     public void onApplicationEvent(ScalingEvent event) {
         BaseAlert alert = event.getAlert();
         Cluster cluster = clusterService.findById(alert.getCluster().getId());
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         ScalingPolicy policy = alert.getScalingPolicy();
 
         int hostGroupNodeCount = event.getHostGroupNodeCount();

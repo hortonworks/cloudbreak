@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
@@ -93,6 +94,9 @@ public class UpdateFailedHandlerTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(ClusterState.RUNNING);
+
+        ClusterPertain clusterPertain = new ClusterPertain();
+        cluster.setClusterPertain(clusterPertain);
         return cluster;
     }
 }

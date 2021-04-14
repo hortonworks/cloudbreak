@@ -34,6 +34,7 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
@@ -182,6 +183,9 @@ public class ScalingHandlerTest {
         cluster.setState(ClusterState.RUNNING);
         cluster.setLastScalingActivity(Instant.now()
                 .minus(45, ChronoUnit.MINUTES).toEpochMilli());
+
+        ClusterPertain clusterPertain = new ClusterPertain();
+        cluster.setClusterPertain(clusterPertain);
         return cluster;
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
@@ -35,6 +34,7 @@ import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.HistoryService;
+import com.sequenceiq.periscope.utils.LoggingUtils;
 import com.sequenceiq.periscope.utils.StackResponseUtils;
 
 @Component("CronTimeEvaluator")
@@ -112,7 +112,7 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     public void execute() {
         long start = System.currentTimeMillis();
         Cluster cluster = clusterService.findById(clusterId);
-        MDCBuilder.buildMdcContext(cluster);
+        LoggingUtils.buildMdcContext(cluster);
         publishIfNeeded(alertRepository.findAllByClusterIdOrderById(clusterId));
         LOGGER.debug("Finished cronTimeEvaluator for cluster {} in {} ms", cluster.getStackCrn(), System.currentTimeMillis() - start);
     }
