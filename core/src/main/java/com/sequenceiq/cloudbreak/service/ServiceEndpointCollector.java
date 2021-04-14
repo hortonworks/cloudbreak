@@ -116,11 +116,13 @@ public class ServiceEndpointCollector {
             Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap = new HashMap<>();
             Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
+            LOGGER.debug("The private IPs in the cluster {}", privateIps);
             if (privateIps.containsKey(exposedServiceCollector.getImpalaService().getServiceName())) {
                 setImpalaDebugUIToCoordinator(cluster, privateIps);
             }
             if (gateway != null) {
                 for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
+                    LOGGER.debug("Generating the topology for '{}' topologies", gatewayTopology.getTopologyName());
                     Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
                             .flatMap(this::getExposedServiceStream)
                             .filter(Objects::nonNull)
@@ -128,6 +130,7 @@ public class ServiceEndpointCollector {
                     List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
                     List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
                     boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+                    LOGGER.debug("AutoTls enabled '{}' for the cluster", autoTlsEnabled);
                     SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
                     String managerServerUrl = getManagerServerUrl(cluster, managerIp);
                     for (ExposedService exposedService : knownExposedServices) {

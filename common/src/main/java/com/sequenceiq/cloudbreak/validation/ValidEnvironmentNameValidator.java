@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-class ValidEnvironmentNameValidator implements ConstraintValidator<ValidEnvironmentName, String> {
+public class ValidEnvironmentNameValidator implements ConstraintValidator<ValidEnvironmentName, String> {
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
