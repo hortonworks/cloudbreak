@@ -32,16 +32,19 @@ public class AdvertisedImageCatalogService implements ImageCatalogService {
     @Override
     public void validate(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
         validateVersion(imageCatalogV3);
-        validateAdvertisedCdhImageExistance(imageCatalogV3);
+        validateAdvertisedImageExistance(imageCatalogV3);
     }
 
     @Override
     public ImageFilterResult getImageFilterResult(CloudbreakImageCatalogV3 imageCatalogV3) {
-        List<Image> images = imageCatalogV3.getImages().getCdhImages().stream().filter(Image::isAdvertised).collect(toList());
+        List<Image> cdhImages = imageCatalogV3.getImages().getCdhImages().stream().filter(Image::isAdvertised).collect(toList());
+        List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages().stream().filter(Image::isAdvertised).collect(toList());
+        List<Image> images = !freeipaImages.isEmpty() ? freeipaImages : cdhImages;
         LOGGER.debug("{} images found by the advertised flag", images.size());
         String message = String.format("%d images found by the advertised flag", images.size());
-
-        return new ImageFilterResult(new Images(null, images, null), message);
+        return !freeipaImages.isEmpty() ?
+                new ImageFilterResult(new Images(null, null, images, null), message) :
+                new ImageFilterResult(new Images(null, images, null, null), message);
     }
 
     private void validateVersion(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
@@ -50,8 +53,11 @@ public class AdvertisedImageCatalogService implements ImageCatalogService {
         }
     }
 
-    private void validateAdvertisedCdhImageExistance(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
-        if (imageCatalogV3.getImages().getCdhImages().stream().noneMatch(i -> i.isAdvertised())) {
+    private void validateAdvertisedImageExistance(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
+        List<Image> cdhImages = imageCatalogV3.getImages().getCdhImages();
+        List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages();
+        List<Image> images = !freeipaImages.isEmpty() ? freeipaImages : cdhImages;
+        if (images.stream().noneMatch(i -> i.isAdvertised())) {
             throw new CloudbreakImageCatalogException("There should be at least one advertised cdh image.");
         }
     }

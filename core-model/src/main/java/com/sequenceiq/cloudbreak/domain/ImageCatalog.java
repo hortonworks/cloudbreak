@@ -1,17 +1,23 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
@@ -39,6 +45,10 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     @Column(nullable = false)
     private String resourceCrn;
+
+    //FIXME: lazy load
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "imageCatalog", cascade = CascadeType.ALL)
+    private Set<CustomImage> customImages = new HashSet<>();
 
     private String creator;
 
@@ -111,6 +121,18 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
+    }
+
+    public Set<CustomImage> getCustomImages() {
+        return customImages;
+    }
+
+    public void setCustomImages(Set<CustomImage> customImages) {
+        this.customImages = customImages;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 
     @Override

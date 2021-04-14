@@ -171,6 +171,7 @@ public class StackImageFilterServiceTest {
         Images images = new Images(
                 Collections.singletonList(getImage("a", IMAGE_BASE_ID)),
                 Collections.singletonList(getImage("b", IMAGE_CDH_ID)),
+                Collections.emptyList(),
                 new HashSet<>()
         );
         return StatedImages.statedImages(images, CUSTOM_IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
@@ -180,7 +181,7 @@ public class StackImageFilterServiceTest {
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         imageSetsByProvider.put(PROVIDER_AWS, null);
         return new Image("", System.currentTimeMillis(), "", os, id, "", Collections.emptyMap(), imageSetsByProvider, null, "", Collections.emptyMap(),
-                Collections.emptyList(), Collections.emptyList(), "1", true);
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image getImage(String id) {

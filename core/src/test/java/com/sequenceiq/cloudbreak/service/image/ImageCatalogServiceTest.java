@@ -31,11 +31,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -62,7 +65,9 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
+import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -85,6 +90,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.ImageType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ImageCatalogServiceTest {
@@ -93,7 +99,11 @@ public class ImageCatalogServiceTest {
 
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 
-    private static final String V2_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json";
+    private static final String V2_CB_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json";
+
+    private static final String V3_CB_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v3.json";
+
+    private static final String V3_FREEIPA_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/freeipa-image-catalog-v3.json";
 
     private static final String PROD_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-prod-image-catalog.json";
 
@@ -102,6 +112,16 @@ public class ImageCatalogServiceTest {
     private static final String RC_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-rc-image-catalog.json";
 
     private static final long ORG_ID = 100L;
+
+    private static final Long WORKSPACE_ID = 1L;
+
+    private static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
+
+    private static final String CUSTOM_CATALOG_NAME = "custom-catalog";
+
+    private static final String CUSTOM_BASE_PARCEL_URL = "https://myarchive.test.com";
+
+    private static final String CUSTOM_IMAGE_ID = "customImageId";
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -187,9 +207,18 @@ public class ImageCatalogServiceTest {
     @InjectMocks
     private VersionBasedImageCatalogService versionBasedImageCatalogService;
 
+    @Mock
+    private CustomImageProvider customImageProvider;
+
+    @Mock
+    private CloudbreakVersionListProvider cloudbreakVersionListProvider;
+
+    @Captor
+    private ArgumentCaptor<StatedImage> sourceImageCaptor;
+
     @Before
     public void beforeTest() throws Exception {
-        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList("AZURE", "AWS", "GCP", "OPENSTACK")));
         lenient().when(user.getUserCrn()).thenReturn(TestConstants.CRN);
@@ -216,7 +245,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetLatestBaseImageDefaultPreferredWithNoDefaultsLatest() throws Exception {
         setupUserProfileService();
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
         StatedImage image = underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
@@ -228,10 +257,10 @@ public class ImageCatalogServiceTest {
     @Test
     public void shouldGetStatedImagesFromAdvertisedImageProvider() throws Exception {
         setupUserProfileService();
-        setupImageCatalogProviderWithoutVersions(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProviderWithoutVersions(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         when(advertisedImageProvider.getImages(any(), any())).thenReturn(
                 StatedImages.statedImages(
-                        new Images(Collections.singletonList(ImageTestUtil.getImage(false, "uuid", "stack")), null, null), null, null));
+                        new Images(Collections.singletonList(ImageTestUtil.getImage(false, "uuid", "stack")), null, null, null), null, null));
 
         ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("AWS"), null, true, null, null);
         underTest.getLatestBaseImageDefaultPreferred(imageFilter, i -> true);
@@ -242,7 +271,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetLatestBaseImageDefaultPreferredWithNoDefaultsLatestNoVersionMatch() throws Exception {
         setupUserProfileService();
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.200", null);
 
         Set<String> vMImageUUIDs = Set.of("7aca1fa6-980c-44e2-a75e-3144b18a5993");
@@ -262,7 +291,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetLatestBaseImageDefaultPreferredWithMultipleDefaults() throws Exception {
         setupUserProfileService();
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.1", null);
         setupLatestDefaultImageUuidProvider("7aca1fa6-980c-44e2-a75e-3144b18a5993");
 
@@ -276,7 +305,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetLatestBaseImageDefaultPreferredWenNotLatestSelected() throws Exception {
         setupUserProfileService();
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         ReflectionTestUtils.setField(underTest, ImageCatalogService.class, "cbVersion", "2.1.0-dev.2", null);
         setupLatestDefaultImageUuidProvider("f6e778fc-7f17-4535-9021-515351df3691");
 
@@ -327,7 +356,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenLatestVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, PROD_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, PROD_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
         StatedImages images = underTest.getImages(
@@ -340,7 +369,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenLatestDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
         Set<String> vMImageUUIDs = Set.of("cab28152-f5e1-43e1-5107-9e7bbed33eef");
@@ -359,7 +388,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenLatestRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, RC_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, RC_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
         StatedImages images = underTest.getImages(
@@ -372,7 +401,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionDoesntExistInDevCatalogShouldReturnWithLatestDevVersionIfExists() throws Exception {
-        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, DEV_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
         ImageCatalog imageCatalog = getImageCatalog();
 
         Set<String> vMImageUUIDs = Set.of("0f575e42-9d90-4f85-5f8a-bdced2221dc3");
@@ -586,7 +615,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesFromDefaultWithStackName() throws CloudbreakImageCatalogException {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(),
-                Lists.newArrayList(), Sets.newHashSet()));
+                Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
         underTest.getImagesFromDefault(ORG_ID, "stack", null, Collections.emptySet());
 
@@ -597,7 +626,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesFromDefaultWithPlatform() throws CloudbreakImageCatalogException, IOException {
         setupUserProfileService();
-        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
 
         underTest.getImagesFromDefault(ORG_ID, null, "AWS", Collections.emptySet());
 
@@ -634,7 +663,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWithStackName() throws CloudbreakImageCatalogException {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(),
-                Lists.newArrayList(), Sets.newHashSet()));
+                Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", null);
 
@@ -645,7 +674,7 @@ public class ImageCatalogServiceTest {
     @Test
     public void testGetImagesWithPlatform() throws CloudbreakImageCatalogException, IOException {
         setupUserProfileService();
-        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, V2_CATALOG_FILE);
+        setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(new ImageCatalog()));
 
         underTest.getImagesByCatalogName(ORG_ID, "catalog", null, "AWS");
@@ -719,11 +748,11 @@ public class ImageCatalogServiceTest {
     public void testPopulateCrnCorrectly() throws TransactionExecutionException {
         ImageCatalog imageCatalog = getImageCatalog();
 
-        when(workspaceService.get(1L, user)).thenReturn(imageCatalog.getWorkspace());
+        when(workspaceService.get(WORKSPACE_ID, user)).thenReturn(imageCatalog.getWorkspace());
         when(workspaceService.retrieveForUser(user)).thenReturn(Set.of(imageCatalog.getWorkspace()));
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
 
-        underTest.createForLoggedInUser(imageCatalog, 1L, "account_id", "creator");
+        underTest.createForLoggedInUser(imageCatalog, WORKSPACE_ID, "account_id", "creator");
 
         assertThat(imageCatalog.getCreator(), is("creator"));
         String crnPattern = "crn:cdp:datahub:us-west-1:account_id:imageCatalog:.*";
@@ -731,11 +760,68 @@ public class ImageCatalogServiceTest {
         verify(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(eq("creator"), matches(crnPattern), eq("account_id"));
     }
 
+    @Test
+    public void testGetImageByCatalogNameWithCustomCatalogNameAndExistingDatahubImage()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
+
+        setupCustomImageCatalog(ImageType.DATAHUB, "949bffa3-17d4-4076-9d5a-bf3d23c1086b", CUSTOM_BASE_PARCEL_URL);
+
+        StatedImage image = underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
+        assertEquals("Test uuid", image.getImage().getUuid());
+
+        verify(customImageProvider).mergeSourceImageAndCustomImageProperties(sourceImageCaptor.capture(), any(), any(), any());
+
+        Assertions.assertThat(sourceImageCaptor.getValue().getImage().getUuid()).isEqualTo("949bffa3-17d4-4076-9d5a-bf3d23c1086b");
+    }
+
+    @Test
+    public void testGetImageByCatalogNameWithCustomCatalogNameAndExistingDatalakeImage()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
+
+        setupCustomImageCatalog(ImageType.DATALAKE, "232fe6b6-aec4-4fa9-bb02-2c295d319a36", CUSTOM_BASE_PARCEL_URL + "/");
+
+        StatedImage image = underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
+        assertEquals("Test uuid", image.getImage().getUuid());
+
+        verify(customImageProvider).mergeSourceImageAndCustomImageProperties(sourceImageCaptor.capture(), any(), any(), any());
+
+        Assertions.assertThat(sourceImageCaptor.getValue().getImage().getUuid()).isEqualTo("232fe6b6-aec4-4fa9-bb02-2c295d319a36");
+    }
+
+    @Test
+    public void testGetImageByCatalogNameWithCustomCatalogNameAndExistingFreeipaImage()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
+
+        setupCustomImageCatalog(ImageType.FREEIPA, "3b6ae396-df40-4e2b-7c2b-54b15822614c", CUSTOM_BASE_PARCEL_URL);
+
+        StatedImage image = underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
+        assertEquals("Test uuid", image.getImage().getUuid());
+
+        verify(customImageProvider).mergeSourceImageAndCustomImageProperties(sourceImageCaptor.capture(), any(), any(), any());
+
+        Assertions.assertThat(sourceImageCaptor.getValue().getImage().getUuid()).isEqualTo("3b6ae396-df40-4e2b-7c2b-54b15822614c");
+    }
+
+    @Test
+    public void testGetImageByCatalogNameWithCustomCatalogNameAndUnknownImageType()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
+
+        thrown.expect(CloudbreakImageCatalogException.class);
+
+        setupCustomImageCatalog(ImageType.UNKNOWN, "3b6ae396-df40-4e2b-7c2b-54b15822614c", CUSTOM_BASE_PARCEL_URL);
+
+        underTest.getImageByCatalogName(WORKSPACE_ID, CUSTOM_IMAGE_ID, CUSTOM_CATALOG_NAME);
+
+        thrown.expectMessage("Image type is not supported.");
+    }
+
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogUrl);
         when(imageCatalogProvider.getImageCatalogV3(catalogUrl)).thenReturn(catalog);
+        when(imageCatalogProvider.getImageCatalogV3(catalogUrl, true)).thenReturn(catalog);
+        when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
     }
 
     private void setupImageCatalogProviderWithoutVersions(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {
@@ -755,9 +841,27 @@ public class ImageCatalogServiceTest {
         when(latestDefaultImageUuidProvider.getLatestDefaultImageUuids(any(), any())).thenReturn(List.of(uuid));
     }
 
+    private void setupCustomImageCatalog(ImageType imageType, String customizedImageId, String baseParcelUrl)
+            throws IOException, CloudbreakImageCatalogException {
+
+        ImageCatalog imageCatalog = getImageCatalog();
+        CustomImage customImage = getCustomImage(imageType, customizedImageId, baseParcelUrl);
+        imageCatalog.setCustomImages(Set.of(customImage));
+
+        setupImageCatalogProvider(CUSTOM_IMAGE_CATALOG_URL, imageType == ImageType.FREEIPA ? V3_FREEIPA_CATALOG_FILE : V3_CB_CATALOG_FILE);
+        ReflectionTestUtils.setField(underTest,
+                ImageCatalogService.class,
+                imageType == ImageType.FREEIPA ? "defaultFreeIpaCatalogUrl" : "defaultCatalogUrl",
+                CUSTOM_IMAGE_CATALOG_URL, null);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
+
+        StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
+        when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
+    }
+
     private ImageCatalog getImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
-        imageCatalog.setImageCatalogUrl(CUSTOM_IMAGE_CATALOG_URL);
+        imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
         imageCatalog.setName("default");
         Workspace ws = new Workspace();
         ws.setId(ORG_ID);
@@ -765,6 +869,21 @@ public class ImageCatalogServiceTest {
         imageCatalog.setCreator("someone");
         imageCatalog.setResourceCrn("someCrn");
         return imageCatalog;
+    }
+
+    private Image getImage() {
+        return new Image(null, null, null, null, "Test uuid", null, null, null, null, null, null, null, null, null, true, null, null);
+    }
+
+    private CustomImage getCustomImage(ImageType imageType, String customizedImageId, String baseParcelUrl) {
+        CustomImage customImage = new CustomImage();
+        customImage.setId(0L);
+        customImage.setName(CUSTOM_IMAGE_ID);
+        customImage.setDescription("Test image");
+        customImage.setImageType(imageType);
+        customImage.setCustomizedImageId(customizedImageId);
+        customImage.setBaseParcelUrl(baseParcelUrl);
+        return customImage;
     }
 
     private static class AwsCloudConstant implements CloudConstant {
