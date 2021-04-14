@@ -121,6 +121,7 @@ cb:
     url: http://localhost:8088
     contextPath: /environmentservice
   freeipa:
+    image.catalog.url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-prod-freeipa-image-catalog.json
     url: http://localhost:8090
     contextPath: /freeipa
     dns:

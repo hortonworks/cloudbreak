@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.service.image.CloudbreakVersionListProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogVersionFilter;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
@@ -42,6 +43,9 @@ public class VersionBasedImageProvider {
     @Inject
     private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
 
+    @Inject
+    private CloudbreakVersionListProvider cloudbreakVersionListProvider;
+
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
         Set<String> suppertedVersions;
 
@@ -49,7 +53,7 @@ public class VersionBasedImageProvider {
         Set<String> defaultVMImageUUIDs = new HashSet<>();
         String currentCbVersion;
 
-        List<CloudbreakVersion> cloudbreakVersions = imageCatalogV3.getVersions().getCloudbreakVersions();
+        List<CloudbreakVersion> cloudbreakVersions = cloudbreakVersionListProvider.getVersions(imageCatalogV3);
 
         currentCbVersion = getCBVersion(imageFilter, cloudbreakVersions);
 
@@ -73,6 +77,7 @@ public class VersionBasedImageProvider {
 
         List<Image> baseImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getBaseImages(), vMImageUUIDs);
         List<Image> cdhImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getCdhImages(), vMImageUUIDs);
+        List<Image> freeipaImages = filterImagesByPlatforms(imageFilter.getPlatforms(), imageCatalogV3.getImages().getFreeIpaImages(), vMImageUUIDs);
 
         List<Image> defaultImages = defaultVMImageUUIDs.stream()
                 .map(imageId -> getImage(imageId, imageCatalogV3.getImages()))
@@ -80,15 +85,15 @@ public class VersionBasedImageProvider {
                 .collect(Collectors.toList());
 
         Collection<String> latestDefaultImageUuids = latestDefaultImageUuidProvider.getLatestDefaultImageUuids(imageFilter.getPlatforms(), defaultImages);
-        Stream.of(baseImages.stream(), cdhImages.stream())
-                .reduce(Stream::concat)
-                .orElseGet(Stream::empty)
+        (!freeipaImages.isEmpty() ?
+                freeipaImages.stream() :
+                Stream.of(baseImages.stream(), cdhImages.stream()).reduce(Stream::concat).orElseGet(Stream::empty))
                 .forEach(img -> img.setDefaultImage(latestDefaultImageUuids.contains(img.getUuid())));
 
         if (!imageFilter.isBaseImageEnabled()) {
             baseImages.clear();
         }
-        return statedImages(new Images(baseImages, cdhImages, suppertedVersions),
+        return statedImages(new Images(baseImages, cdhImages, freeipaImages, suppertedVersions),
                 imageFilter.getImageCatalog().getImageCatalogUrl(),
                 imageFilter.getImageCatalog().getName());
     }
@@ -111,9 +116,14 @@ public class VersionBasedImageProvider {
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) {
-        Optional<? extends Image> image = findFirstWithImageId(imageId, images.getBaseImages());
-        if (image.isEmpty()) {
-            image = findFirstWithImageId(imageId, images.getCdhImages());
+        Optional<? extends Image> image;
+        if (!images.getFreeIpaImages().isEmpty()) {
+            image = findFirstWithImageId(imageId, images.getFreeIpaImages());
+        } else {
+            image = findFirstWithImageId(imageId, images.getBaseImages());
+            if (image.isEmpty()) {
+                image = findFirstWithImageId(imageId, images.getCdhImages());
+            }
         }
         return image;
     }

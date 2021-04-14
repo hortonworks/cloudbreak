@@ -51,6 +51,8 @@ public class ImageCatalogProviderTest {
 
     private static final String CB_IMAGE_CATALOG_V2_JSON = "cb-image-catalog-v2.json";
 
+    private static final String FREEIPA_IMAGE_CATALOG_V3_JSON = "freeipa-image-catalog-v3.json";
+
     private static final String CB_IMAGE_CATALOG_RC_JSON = "cb-rc-image-catalog.json";
 
     private static final String CB_IMAGE_CATALOG_NULL_FIELD_JSON = "cb-image-catalog-null-field.json";
@@ -60,6 +62,8 @@ public class ImageCatalogProviderTest {
     private static final String CB_IMAGE_CATALOG_FILTER_NULL_IMAGES_JSON = "cb-image-catalog-filter-null-images.json";
 
     private static final String CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON = "cb-image-catalog-filter-images-null.json";
+
+    private static final String FREEIPA_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON = "freeipa-image-catalog-filter-images-null.json";
 
     private static final String CB_IMAGE_CATALOG_EMPTY_CLOUDBREAK_VERSIONS_JSON = "cb-image-catalog-empty-cloudbreak-versions.json";
 
@@ -72,6 +76,8 @@ public class ImageCatalogProviderTest {
     private static final List<String> RC_IMAGE_CATALOG_OS_TYPES = Lists.newArrayList("amazonlinux", "centos7", "amazonlinux2", "sles12", "ubuntu16");
 
     private static final List<String> CB_AMAZONLINUX_FILTER = Lists.newArrayList("amazonlinux");
+
+    private static final List<String> CB_REDHAT7_FILTER = Lists.newArrayList("redhat7");
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -194,7 +200,7 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogFilterToAmazonlinux() throws CloudbreakImageCatalogException, IOException {
+    public void testCbImageCatalogFilterToAmazonlinux() throws CloudbreakImageCatalogException, IOException {
         String path = getPath(CB_IMAGE_CATALOG_V2_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", CB_AMAZONLINUX_FILTER);
@@ -210,6 +216,20 @@ public class ImageCatalogProviderTest {
         assertEquals(mapToUuid(expectedCatalog.getImages().getBaseImages()), mapToUuid(actualCatalog.getImages().getBaseImages()));
         assertEquals(mapToUuid(Collections.emptyList()), mapToUuid(actualCatalog.getImages().getCdhImages()));
         assertEquals(1, expectedCatalog.getImages().getCdhImages().size());
+    }
+
+    @Test
+    public void testFreeipaImageCatalogFilterToRedhat7() throws CloudbreakImageCatalogException, IOException {
+        String path = getPath(FREEIPA_IMAGE_CATALOG_V3_JSON);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", CB_REDHAT7_FILTER);
+
+        CloudbreakImageCatalogV3 actualCatalog = underTest.getImageCatalogV3(FREEIPA_IMAGE_CATALOG_V3_JSON);
+
+        assertEquals(mapToUuid(Collections.emptyList()), mapToUuid(actualCatalog.getImages().getBaseImages()));
+        assertEquals(mapToUuid(Collections.emptyList()), mapToUuid(actualCatalog.getImages().getCdhImages()));
+        assertEquals(1, actualCatalog.getImages().getFreeIpaImages().size());
+        assertEquals("81851893-8340-411d-afb7-e1b55107fb10", actualCatalog.getImages().getFreeIpaImages().get(0).getUuid());
     }
 
     private List<String> getImageCatalogOses(CloudbreakImageCatalogV3 actualCatalog) {
@@ -272,15 +292,27 @@ public class ImageCatalogProviderTest {
     }
 
     @Test
-    public void testImageCatalogFilterImagesNull() throws CloudbreakImageCatalogException {
+    public void testCbImageCatalogFilterImagesNull() throws CloudbreakImageCatalogException {
         String path = getPath(CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
-        thrown.expectMessage("All images are empty or every items equals NULL");
+        thrown.expectMessage("Base and CDH images are empty or every items equals NULL");
         thrown.expect(CloudbreakImageCatalogException.class);
 
         underTest.getImageCatalogV3(CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON);
+    }
+
+    @Test
+    public void testFreeipaImageCatalogFilterImagesNull() throws CloudbreakImageCatalogException {
+        String path = getPath(FREEIPA_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
+
+        thrown.expectMessage("Freeipa images are empty or every items equals NULL");
+        thrown.expect(CloudbreakImageCatalogException.class);
+
+        underTest.getImageCatalogV3(FREEIPA_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON);
     }
 
     @Test

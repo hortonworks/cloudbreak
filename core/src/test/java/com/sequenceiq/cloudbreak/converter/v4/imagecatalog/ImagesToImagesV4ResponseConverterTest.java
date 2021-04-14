@@ -55,6 +55,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
         Images images = new Images(
                 Collections.singletonList(getImage(REDHAT_7)),
                 Collections.singletonList(getImage(REDHAT_7)),
+                Collections.emptyList(),
                 new HashSet<>()
         );
         return images;
@@ -68,7 +69,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
 
         return new Image("", System.currentTimeMillis(), "", osType, UUID.randomUUID().toString(), "",
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, osType, Collections.emptyMap(),
-                Collections.emptyList(), Collections.emptyList(), "1", true);
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
     }
 
     private void setupStackEntries() {

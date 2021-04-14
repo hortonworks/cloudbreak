@@ -83,7 +83,7 @@ public class StackImageUpdateServiceTest {
 
         image = new Image("asdf", System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
-                Collections.emptyList(), Collections.emptyList(), "1", true);
+                Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
         statedImage = StatedImage.statedImage(image, "url", "name");
         when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.ok());
         when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anySet())).thenReturn(CheckResult.ok());
