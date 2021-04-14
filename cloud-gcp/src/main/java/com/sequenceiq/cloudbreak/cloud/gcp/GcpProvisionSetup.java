@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getImageName
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.util.List;
@@ -74,6 +75,7 @@ public class GcpProvisionSetup implements Setup {
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         CloudContext cloudContext = authenticatedContext.getCloudContext();
+        String finalImageName = null;
         try {
             String projectId = getProjectId(credential);
             String imageName = image.getImageName();
@@ -105,7 +107,7 @@ public class GcpProvisionSetup implements Setup {
                 copyImage(getBucket(imageName), tarName, bucket.getName(), tarName, storage);
 
                 Image gcpApiImage = new Image();
-                String finalImageName = getImageName(imageName);
+                finalImageName = getImageName(imageName);
                 gcpApiImage.setName(finalImageName);
                 RawDisk rawDisk = new RawDisk();
                 rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucket.getName(), tarName));
@@ -128,8 +130,9 @@ public class GcpProvisionSetup implements Setup {
                 }
             }
         } catch (Exception e) {
-            Long stackId = cloudContext.getId();
-            String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
+            String msg = String.format("Error occurred on %s stack during the image creation process%s: %s", cloudContext.getName(),
+                    isBlank(finalImageName) ? "" : ", image name: " + finalImageName,
+                    e.getMessage());
             LOGGER.warn(msg, e);
             throw new CloudConnectorException(msg, e);
         }
@@ -181,12 +184,12 @@ public class GcpProvisionSetup implements Setup {
             throw new CloudbreakServiceException("Image copy failed because the copy take too long time. "
                     + "Please check Google Cloud console because probably the image should be ready.");
         } catch (PollerException exception) {
-            LOGGER.error("Polling failed for image copy: {}", exception);
+            LOGGER.error("Polling failed for image copy: {}", sourceKey, exception);
             throw new CloudbreakServiceException("Image copy failed because: " + exception.getMessage());
         } catch (Exception e) {
-            LOGGER.error("Polling could not started because: {}", e);
-            throw new CloudbreakServiceException("Copying the image could not started, "
-                    + "please check that you already giving access to CDP for storage API.");
+            LOGGER.error("Polling could not started because: {}", e.getMessage(), e);
+            throw new CloudbreakServiceException("Copying the image could not be started, "
+                    + "please check whether you have given access to CDP for storage API.");
         }
     }
 
