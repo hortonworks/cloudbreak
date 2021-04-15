@@ -50,6 +50,8 @@ public class ImageServiceTest {
 
     private static final String DEFAULT_VERSION = "2.20.0-dev.1";
 
+    private static final String IMAGE_UUID = "61851893-8340-411d-afb7-e1b55107fb10";
+
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -106,7 +108,7 @@ public class ImageServiceTest {
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
-        assertEquals("61851893-8340-411d-afb7-e1b55107fb10", image.getUuid());
+        assertEquals(IMAGE_UUID, image.getUuid());
     }
 
     @Test
@@ -115,7 +117,7 @@ public class ImageServiceTest {
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
-        assertEquals("61851893-8340-411d-afb7-e1b55107fb10", image.getUuid());
+        assertEquals(IMAGE_UUID, image.getUuid());
     }
 
     @Test
@@ -124,7 +126,14 @@ public class ImageServiceTest {
         Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals("Assuming the latest image to be selected", LATEST_DATE, image.getDate());
-        assertEquals("61851893-8340-411d-afb7-e1b55107fb10", image.getUuid());
+        assertEquals(IMAGE_UUID, image.getUuid());
+    }
+
+    @Test
+    public void testGetImageGivenUuidInputFound() {
+        ImageSettingsRequest is = setupImageSettingsRequest(IMAGE_UUID, null, null);
+        Image image = underTest.getImage(is, DEFAULT_REGION, DEFAULT_PLATFORM);
+        assertEquals(IMAGE_UUID, image.getUuid());
     }
 
     @Test
