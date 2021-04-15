@@ -75,10 +75,6 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     private Integer freeIpaInstanceCountByGroup;
 
-    private String freeIpaImageCatalog;
-
-    private String freeIpaImageId;
-
     @Column(nullable = false)
     private String locationDisplayName;
 
@@ -355,22 +351,6 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setFreeIpaInstanceCountByGroup(Integer freeIpaInstanceCountByGroup) {
         this.freeIpaInstanceCountByGroup = freeIpaInstanceCountByGroup;
-    }
-
-    public String getFreeIpaImageCatalog() {
-        return freeIpaImageCatalog;
-    }
-
-    public void setFreeIpaImageCatalog(String freeIpaImageCatalog) {
-        this.freeIpaImageCatalog = freeIpaImageCatalog;
-    }
-
-    public String getFreeIpaImageId() {
-        return freeIpaImageId;
-    }
-
-    public void setFreeIpaImageId(String freeIpaImageId) {
-        this.freeIpaImageId = freeIpaImageId;
     }
 
     public EnvironmentAuthentication getAuthentication() {

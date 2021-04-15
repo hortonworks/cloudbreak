@@ -6,19 +6,15 @@ import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescriptio
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-import javax.validation.constraints.Size;
-
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class FreeIpaImageRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_CATALOG)
-    @Size(max = 255)
     private String catalog;
 
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE_ID)
-    @Size(max = 255)
     private String id;
 
     @Override
