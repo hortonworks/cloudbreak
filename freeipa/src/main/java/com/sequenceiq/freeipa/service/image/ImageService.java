@@ -230,7 +230,9 @@ public class ImageService {
         if (Objects.nonNull(imageId) && !imageId.isEmpty()) {
             return images.stream()
                     .filter(img -> img.getImageSetsByProvider().containsKey(platform) && img.getImageSetsByProvider().get(platform).containsKey(region))
-                    .filter(img -> img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
+                    //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
+                    //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
+                    .filter(img -> img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId) || img.getUuid().equalsIgnoreCase(imageId))
                     .collect(Collectors.toList());
         } else {
             return images.stream().filter(image -> image.getImageSetsByProvider().containsKey(platform))
