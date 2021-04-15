@@ -143,6 +143,8 @@ public class EnvironmentDtoConverter {
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
+        environment.setFreeIpaImageCatalog(creationDto.getFreeIpaCreation().getImageCatalog());
+        environment.setFreeIpaImageId(creationDto.getFreeIpaCreation().getImageId());
         environment.setAdminGroupName(creationDto.getAdminGroupName());
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(getTags(creationDto));
@@ -220,6 +222,8 @@ public class EnvironmentDtoConverter {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
                 .withCreate(environment.isCreateFreeIpa());
         Optional.ofNullable(environment.getFreeIpaInstanceCountByGroup()).ifPresent(builder::withInstanceCountByGroup);
+        builder.withImageCatalog(environment.getFreeIpaImageCatalog());
+        builder.withImageId(environment.getFreeIpaImageId());
 
         if (environment.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
             AwsParameters awsParameters = (AwsParameters) environment.getParameters();
