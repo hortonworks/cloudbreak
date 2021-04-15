@@ -1,3 +1,5 @@
+apply plugin: 'com.google.protobuf'
+
 buildscript {
   repositories {
     mavenLocal()
@@ -8,12 +10,6 @@ buildscript {
   dependencies {
     classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
   }
-}
-
-apply plugin: 'com.google.protobuf'
-
-jar {
-  baseName = 'node-status-monitor-client'
 }
 
 dependencies {
