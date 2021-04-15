@@ -151,8 +151,9 @@ public class FluentConfigService {
                 validDatabusLogging = true;
             }
             if (databusEnabled && telemetry.isMonitoringFeatureEnabled()) {
-                builder.withMonitoringEnabled(true);
-                LOGGER.debug("Fluent based cluster monitoring is enabled.");
+                // TODO: support pushing metrics - then this value can be set to "true"
+                builder.withMonitoringEnabled(false);
+                LOGGER.debug("Telemetry based cluster monitoring is enabled, but pushing metrics is not supported yet.");
                 builder.withMonitoringConfiguration(monitoringConfiguration);
                 validDatabusLogging = true;
             }

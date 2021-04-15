@@ -16985,6 +16985,2324 @@ public final class NodeStatusProto {
 
   }
 
+  public interface CmMetricsReportOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdp.telemetry.CmMetricsReport)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> 
+        getMetricsList();
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent getMetrics(int index);
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    int getMetricsCount();
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder> 
+        getMetricsOrBuilderList();
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder getMetricsOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    boolean hasClusterDetails();
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+  }
+  /**
+   * <pre>
+   * Holds Cloudera Manager service level metrics.
+   * </pre>
+   *
+   * Protobuf type {@code cdp.telemetry.CmMetricsReport}
+   */
+  public  static final class CmMetricsReport extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdp.telemetry.CmMetricsReport)
+      CmMetricsReportOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CmMetricsReport.newBuilder() to construct.
+    private CmMetricsReport(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CmMetricsReport() {
+      metrics_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CmMetricsReport(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                metrics_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              metrics_.add(
+                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.parser(), extensionRegistry));
+              break;
+            }
+            case 18: {
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
+              if (clusterDetails_ != null) {
+                subBuilder = clusterDetails_.toBuilder();
+              }
+              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(clusterDetails_);
+                clusterDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          metrics_ = java.util.Collections.unmodifiableList(metrics_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmMetricsReport_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmMetricsReport_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int METRICS_FIELD_NUMBER = 1;
+    private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> metrics_;
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> getMetricsList() {
+      return metrics_;
+    }
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder> 
+        getMetricsOrBuilderList() {
+      return metrics_;
+    }
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    public int getMetricsCount() {
+      return metrics_.size();
+    }
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent getMetrics(int index) {
+      return metrics_.get(index);
+    }
+    /**
+     * <pre>
+     * CM Service level metrics.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder getMetricsOrBuilder(
+        int index) {
+      return metrics_.get(index);
+    }
+
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 2;
+    private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    public boolean hasClusterDetails() {
+      return clusterDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
+      return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+    }
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+      return getClusterDetails();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < metrics_.size(); i++) {
+        output.writeMessage(1, metrics_.get(i));
+      }
+      if (clusterDetails_ != null) {
+        output.writeMessage(2, getClusterDetails());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < metrics_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, metrics_.get(i));
+      }
+      if (clusterDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getClusterDetails());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport) obj;
+
+      boolean result = true;
+      result = result && getMetricsList()
+          .equals(other.getMetricsList());
+      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (hasClusterDetails()) {
+        result = result && getClusterDetails()
+            .equals(other.getClusterDetails());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getMetricsCount() > 0) {
+        hash = (37 * hash) + METRICS_FIELD_NUMBER;
+        hash = (53 * hash) + getMetricsList().hashCode();
+      }
+      if (hasClusterDetails()) {
+        hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getClusterDetails().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Holds Cloudera Manager service level metrics.
+     * </pre>
+     *
+     * Protobuf type {@code cdp.telemetry.CmMetricsReport}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdp.telemetry.CmMetricsReport)
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReportOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmMetricsReport_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmMetricsReport_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getMetricsFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (metricsBuilder_ == null) {
+          metrics_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          metricsBuilder_.clear();
+        }
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmMetricsReport_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport build() {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport buildPartial() {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (metricsBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            metrics_ = java.util.Collections.unmodifiableList(metrics_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.metrics_ = metrics_;
+        } else {
+          result.metrics_ = metricsBuilder_.build();
+        }
+        if (clusterDetailsBuilder_ == null) {
+          result.clusterDetails_ = clusterDetails_;
+        } else {
+          result.clusterDetails_ = clusterDetailsBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport) {
+          return mergeFrom((com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport other) {
+        if (other == com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.getDefaultInstance()) return this;
+        if (metricsBuilder_ == null) {
+          if (!other.metrics_.isEmpty()) {
+            if (metrics_.isEmpty()) {
+              metrics_ = other.metrics_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureMetricsIsMutable();
+              metrics_.addAll(other.metrics_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.metrics_.isEmpty()) {
+            if (metricsBuilder_.isEmpty()) {
+              metricsBuilder_.dispose();
+              metricsBuilder_ = null;
+              metrics_ = other.metrics_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              metricsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getMetricsFieldBuilder() : null;
+            } else {
+              metricsBuilder_.addAllMessages(other.metrics_);
+            }
+          }
+        }
+        if (other.hasClusterDetails()) {
+          mergeClusterDetails(other.getClusterDetails());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> metrics_ =
+        java.util.Collections.emptyList();
+      private void ensureMetricsIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          metrics_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent>(metrics_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder> metricsBuilder_;
+
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> getMetricsList() {
+        if (metricsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(metrics_);
+        } else {
+          return metricsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public int getMetricsCount() {
+        if (metricsBuilder_ == null) {
+          return metrics_.size();
+        } else {
+          return metricsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent getMetrics(int index) {
+        if (metricsBuilder_ == null) {
+          return metrics_.get(index);
+        } else {
+          return metricsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder setMetrics(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent value) {
+        if (metricsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMetricsIsMutable();
+          metrics_.set(index, value);
+          onChanged();
+        } else {
+          metricsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder setMetrics(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder builderForValue) {
+        if (metricsBuilder_ == null) {
+          ensureMetricsIsMutable();
+          metrics_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          metricsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder addMetrics(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent value) {
+        if (metricsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMetricsIsMutable();
+          metrics_.add(value);
+          onChanged();
+        } else {
+          metricsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder addMetrics(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent value) {
+        if (metricsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureMetricsIsMutable();
+          metrics_.add(index, value);
+          onChanged();
+        } else {
+          metricsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder addMetrics(
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder builderForValue) {
+        if (metricsBuilder_ == null) {
+          ensureMetricsIsMutable();
+          metrics_.add(builderForValue.build());
+          onChanged();
+        } else {
+          metricsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder addMetrics(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder builderForValue) {
+        if (metricsBuilder_ == null) {
+          ensureMetricsIsMutable();
+          metrics_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          metricsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder addAllMetrics(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> values) {
+        if (metricsBuilder_ == null) {
+          ensureMetricsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, metrics_);
+          onChanged();
+        } else {
+          metricsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder clearMetrics() {
+        if (metricsBuilder_ == null) {
+          metrics_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          metricsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public Builder removeMetrics(int index) {
+        if (metricsBuilder_ == null) {
+          ensureMetricsIsMutable();
+          metrics_.remove(index);
+          onChanged();
+        } else {
+          metricsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder getMetricsBuilder(
+          int index) {
+        return getMetricsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder getMetricsOrBuilder(
+          int index) {
+        if (metricsBuilder_ == null) {
+          return metrics_.get(index);  } else {
+          return metricsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder> 
+           getMetricsOrBuilderList() {
+        if (metricsBuilder_ != null) {
+          return metricsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(metrics_);
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder addMetricsBuilder() {
+        return getMetricsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder addMetricsBuilder(
+          int index) {
+        return getMetricsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * CM Service level metrics.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder> 
+           getMetricsBuilderList() {
+        return getMetricsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder> 
+          getMetricsFieldBuilder() {
+        if (metricsBuilder_ == null) {
+          metricsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder>(
+                  metrics_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          metrics_ = null;
+        }
+        return metricsBuilder_;
+      }
+
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public boolean hasClusterDetails() {
+        return clusterDetailsBuilder_ != null || clusterDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+        } else {
+          return clusterDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder setClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          clusterDetails_ = value;
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder setClusterDetails(
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder builderForValue) {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder mergeClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (clusterDetails_ != null) {
+            clusterDetails_ =
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.newBuilder(clusterDetails_).mergeFrom(value).buildPartial();
+          } else {
+            clusterDetails_ = value;
+          }
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder clearClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+          onChanged();
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder getClusterDetailsBuilder() {
+        
+        onChanged();
+        return getClusterDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+        if (clusterDetailsBuilder_ != null) {
+          return clusterDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return clusterDetails_ == null ?
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> 
+          getClusterDetailsFieldBuilder() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder>(
+                  getClusterDetails(),
+                  getParentForChildren(),
+                  isClean());
+          clusterDetails_ = null;
+        }
+        return clusterDetailsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdp.telemetry.CmMetricsReport)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdp.telemetry.CmMetricsReport)
+    private static final com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport();
+    }
+
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CmMetricsReport>
+        PARSER = new com.google.protobuf.AbstractParser<CmMetricsReport>() {
+      @java.lang.Override
+      public CmMetricsReport parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CmMetricsReport(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CmMetricsReport> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CmMetricsReport> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CmHealthChecksReportOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:cdp.telemetry.CmHealthChecksReport)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> 
+        getHealthChecksList();
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent getHealthChecks(int index);
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    int getHealthChecksCount();
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder> 
+        getHealthChecksOrBuilderList();
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder getHealthChecksOrBuilder(
+        int index);
+
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    boolean hasClusterDetails();
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+  }
+  /**
+   * <pre>
+   * Holds Cloudera Manager service health details.
+   * </pre>
+   *
+   * Protobuf type {@code cdp.telemetry.CmHealthChecksReport}
+   */
+  public  static final class CmHealthChecksReport extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:cdp.telemetry.CmHealthChecksReport)
+      CmHealthChecksReportOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CmHealthChecksReport.newBuilder() to construct.
+    private CmHealthChecksReport(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CmHealthChecksReport() {
+      healthChecks_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CmHealthChecksReport(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                healthChecks_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent>();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              healthChecks_.add(
+                  input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.parser(), extensionRegistry));
+              break;
+            }
+            case 18: {
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
+              if (clusterDetails_ != null) {
+                subBuilder = clusterDetails_.toBuilder();
+              }
+              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(clusterDetails_);
+                clusterDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          healthChecks_ = java.util.Collections.unmodifiableList(healthChecks_);
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmHealthChecksReport_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmHealthChecksReport_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.Builder.class);
+    }
+
+    private int bitField0_;
+    public static final int HEALTHCHECKS_FIELD_NUMBER = 1;
+    private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> healthChecks_;
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> getHealthChecksList() {
+      return healthChecks_;
+    }
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder> 
+        getHealthChecksOrBuilderList() {
+      return healthChecks_;
+    }
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    public int getHealthChecksCount() {
+      return healthChecks_.size();
+    }
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent getHealthChecks(int index) {
+      return healthChecks_.get(index);
+    }
+    /**
+     * <pre>
+     * CM Service level health check details.
+     * </pre>
+     *
+     * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder getHealthChecksOrBuilder(
+        int index) {
+      return healthChecks_.get(index);
+    }
+
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 2;
+    private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    public boolean hasClusterDetails() {
+      return clusterDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
+      return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+    }
+    /**
+     * <pre>
+     * Common cluster related data.
+     * </pre>
+     *
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     */
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+      return getClusterDetails();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < healthChecks_.size(); i++) {
+        output.writeMessage(1, healthChecks_.get(i));
+      }
+      if (clusterDetails_ != null) {
+        output.writeMessage(2, getClusterDetails());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      for (int i = 0; i < healthChecks_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, healthChecks_.get(i));
+      }
+      if (clusterDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getClusterDetails());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport) obj;
+
+      boolean result = true;
+      result = result && getHealthChecksList()
+          .equals(other.getHealthChecksList());
+      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (hasClusterDetails()) {
+        result = result && getClusterDetails()
+            .equals(other.getClusterDetails());
+      }
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getHealthChecksCount() > 0) {
+        hash = (37 * hash) + HEALTHCHECKS_FIELD_NUMBER;
+        hash = (53 * hash) + getHealthChecksList().hashCode();
+      }
+      if (hasClusterDetails()) {
+        hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getClusterDetails().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Holds Cloudera Manager service health details.
+     * </pre>
+     *
+     * Protobuf type {@code cdp.telemetry.CmHealthChecksReport}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:cdp.telemetry.CmHealthChecksReport)
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReportOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmHealthChecksReport_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmHealthChecksReport_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+          getHealthChecksFieldBuilder();
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (healthChecksBuilder_ == null) {
+          healthChecks_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        } else {
+          healthChecksBuilder_.clear();
+        }
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.internal_static_cdp_telemetry_CmHealthChecksReport_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport build() {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport buildPartial() {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (healthChecksBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            healthChecks_ = java.util.Collections.unmodifiableList(healthChecks_);
+            bitField0_ = (bitField0_ & ~0x00000001);
+          }
+          result.healthChecks_ = healthChecks_;
+        } else {
+          result.healthChecks_ = healthChecksBuilder_.build();
+        }
+        if (clusterDetailsBuilder_ == null) {
+          result.clusterDetails_ = clusterDetails_;
+        } else {
+          result.clusterDetails_ = clusterDetailsBuilder_.build();
+        }
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport) {
+          return mergeFrom((com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport other) {
+        if (other == com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.getDefaultInstance()) return this;
+        if (healthChecksBuilder_ == null) {
+          if (!other.healthChecks_.isEmpty()) {
+            if (healthChecks_.isEmpty()) {
+              healthChecks_ = other.healthChecks_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+            } else {
+              ensureHealthChecksIsMutable();
+              healthChecks_.addAll(other.healthChecks_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.healthChecks_.isEmpty()) {
+            if (healthChecksBuilder_.isEmpty()) {
+              healthChecksBuilder_.dispose();
+              healthChecksBuilder_ = null;
+              healthChecks_ = other.healthChecks_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              healthChecksBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getHealthChecksFieldBuilder() : null;
+            } else {
+              healthChecksBuilder_.addAllMessages(other.healthChecks_);
+            }
+          }
+        }
+        if (other.hasClusterDetails()) {
+          mergeClusterDetails(other.getClusterDetails());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> healthChecks_ =
+        java.util.Collections.emptyList();
+      private void ensureHealthChecksIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          healthChecks_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent>(healthChecks_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder> healthChecksBuilder_;
+
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> getHealthChecksList() {
+        if (healthChecksBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(healthChecks_);
+        } else {
+          return healthChecksBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public int getHealthChecksCount() {
+        if (healthChecksBuilder_ == null) {
+          return healthChecks_.size();
+        } else {
+          return healthChecksBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent getHealthChecks(int index) {
+        if (healthChecksBuilder_ == null) {
+          return healthChecks_.get(index);
+        } else {
+          return healthChecksBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder setHealthChecks(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent value) {
+        if (healthChecksBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureHealthChecksIsMutable();
+          healthChecks_.set(index, value);
+          onChanged();
+        } else {
+          healthChecksBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder setHealthChecks(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder builderForValue) {
+        if (healthChecksBuilder_ == null) {
+          ensureHealthChecksIsMutable();
+          healthChecks_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          healthChecksBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder addHealthChecks(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent value) {
+        if (healthChecksBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureHealthChecksIsMutable();
+          healthChecks_.add(value);
+          onChanged();
+        } else {
+          healthChecksBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder addHealthChecks(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent value) {
+        if (healthChecksBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureHealthChecksIsMutable();
+          healthChecks_.add(index, value);
+          onChanged();
+        } else {
+          healthChecksBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder addHealthChecks(
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder builderForValue) {
+        if (healthChecksBuilder_ == null) {
+          ensureHealthChecksIsMutable();
+          healthChecks_.add(builderForValue.build());
+          onChanged();
+        } else {
+          healthChecksBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder addHealthChecks(
+          int index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder builderForValue) {
+        if (healthChecksBuilder_ == null) {
+          ensureHealthChecksIsMutable();
+          healthChecks_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          healthChecksBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder addAllHealthChecks(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> values) {
+        if (healthChecksBuilder_ == null) {
+          ensureHealthChecksIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, healthChecks_);
+          onChanged();
+        } else {
+          healthChecksBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder clearHealthChecks() {
+        if (healthChecksBuilder_ == null) {
+          healthChecks_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          onChanged();
+        } else {
+          healthChecksBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public Builder removeHealthChecks(int index) {
+        if (healthChecksBuilder_ == null) {
+          ensureHealthChecksIsMutable();
+          healthChecks_.remove(index);
+          onChanged();
+        } else {
+          healthChecksBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder getHealthChecksBuilder(
+          int index) {
+        return getHealthChecksFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder getHealthChecksOrBuilder(
+          int index) {
+        if (healthChecksBuilder_ == null) {
+          return healthChecks_.get(index);  } else {
+          return healthChecksBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder> 
+           getHealthChecksOrBuilderList() {
+        if (healthChecksBuilder_ != null) {
+          return healthChecksBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(healthChecks_);
+        }
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder addHealthChecksBuilder() {
+        return getHealthChecksFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder addHealthChecksBuilder(
+          int index) {
+        return getHealthChecksFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * CM Service level health check details.
+       * </pre>
+       *
+       * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder> 
+           getHealthChecksBuilderList() {
+        return getHealthChecksFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder> 
+          getHealthChecksFieldBuilder() {
+        if (healthChecksBuilder_ == null) {
+          healthChecksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder>(
+                  healthChecks_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  getParentForChildren(),
+                  isClean());
+          healthChecks_ = null;
+        }
+        return healthChecksBuilder_;
+      }
+
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public boolean hasClusterDetails() {
+        return clusterDetailsBuilder_ != null || clusterDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+        } else {
+          return clusterDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder setClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          clusterDetails_ = value;
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder setClusterDetails(
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder builderForValue) {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder mergeClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (clusterDetails_ != null) {
+            clusterDetails_ =
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.newBuilder(clusterDetails_).mergeFrom(value).buildPartial();
+          } else {
+            clusterDetails_ = value;
+          }
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public Builder clearClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+          onChanged();
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder getClusterDetailsBuilder() {
+        
+        onChanged();
+        return getClusterDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+        if (clusterDetailsBuilder_ != null) {
+          return clusterDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return clusterDetails_ == null ?
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Common cluster related data.
+       * </pre>
+       *
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> 
+          getClusterDetailsFieldBuilder() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder>(
+                  getClusterDetails(),
+                  getParentForChildren(),
+                  isClean());
+          clusterDetails_ = null;
+        }
+        return clusterDetailsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:cdp.telemetry.CmHealthChecksReport)
+    }
+
+    // @@protoc_insertion_point(class_scope:cdp.telemetry.CmHealthChecksReport)
+    private static final com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport();
+    }
+
+    public static com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CmHealthChecksReport>
+        PARSER = new com.google.protobuf.AbstractParser<CmHealthChecksReport>() {
+      @java.lang.Override
+      public CmHealthChecksReport parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CmHealthChecksReport(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CmHealthChecksReport> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CmHealthChecksReport> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface CpuMetricsOrBuilder extends
       // @@protoc_insertion_point(interface_extends:cdp.telemetry.CpuMetrics)
       com.google.protobuf.MessageOrBuilder {
@@ -32931,10 +35249,28 @@ public final class NodeStatusProto {
 
     /**
      * <pre>
+     * Explanation for health status.
+     * </pre>
+     *
+     * <code>string explanation = 5;</code>
+     */
+    java.lang.String getExplanation();
+    /**
+     * <pre>
+     * Explanation for health status.
+     * </pre>
+     *
+     * <code>string explanation = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getExplanationBytes();
+
+    /**
+     * <pre>
      * Timestamp of the CM service health record.
      * </pre>
      *
-     * <code>int64 timestamp = 5;</code>
+     * <code>int64 timestamp = 6;</code>
      */
     long getTimestamp();
 
@@ -32943,7 +35279,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
     boolean hasClusterDetails();
     /**
@@ -32951,7 +35287,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -32959,7 +35295,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
   }
@@ -32984,6 +35320,7 @@ public final class NodeStatusProto {
       serviceType_ = "";
       name_ = "";
       value_ = "";
+      explanation_ = "";
       timestamp_ = 0L;
     }
 
@@ -33035,12 +35372,18 @@ public final class NodeStatusProto {
               value_ = s;
               break;
             }
-            case 40: {
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              explanation_ = s;
+              break;
+            }
+            case 48: {
 
               timestamp_ = input.readInt64();
               break;
             }
-            case 50: {
+            case 58: {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
               if (clusterDetails_ != null) {
                 subBuilder = clusterDetails_.toBuilder();
@@ -33253,27 +35596,69 @@ public final class NodeStatusProto {
       }
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 5;
+    public static final int EXPLANATION_FIELD_NUMBER = 5;
+    private volatile java.lang.Object explanation_;
+    /**
+     * <pre>
+     * Explanation for health status.
+     * </pre>
+     *
+     * <code>string explanation = 5;</code>
+     */
+    public java.lang.String getExplanation() {
+      java.lang.Object ref = explanation_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        explanation_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Explanation for health status.
+     * </pre>
+     *
+     * <code>string explanation = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getExplanationBytes() {
+      java.lang.Object ref = explanation_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        explanation_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TIMESTAMP_FIELD_NUMBER = 6;
     private long timestamp_;
     /**
      * <pre>
      * Timestamp of the CM service health record.
      * </pre>
      *
-     * <code>int64 timestamp = 5;</code>
+     * <code>int64 timestamp = 6;</code>
      */
     public long getTimestamp() {
       return timestamp_;
     }
 
-    public static final int CLUSTERDETAILS_FIELD_NUMBER = 6;
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 7;
     private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
     /**
      * <pre>
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
@@ -33283,7 +35668,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
@@ -33293,7 +35678,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
@@ -33325,11 +35710,14 @@ public final class NodeStatusProto {
       if (!getValueBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, value_);
       }
+      if (!getExplanationBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, explanation_);
+      }
       if (timestamp_ != 0L) {
-        output.writeInt64(5, timestamp_);
+        output.writeInt64(6, timestamp_);
       }
       if (clusterDetails_ != null) {
-        output.writeMessage(6, getClusterDetails());
+        output.writeMessage(7, getClusterDetails());
       }
       unknownFields.writeTo(output);
     }
@@ -33352,13 +35740,16 @@ public final class NodeStatusProto {
       if (!getValueBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, value_);
       }
+      if (!getExplanationBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, explanation_);
+      }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(5, timestamp_);
+          .computeInt64Size(6, timestamp_);
       }
       if (clusterDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(6, getClusterDetails());
+          .computeMessageSize(7, getClusterDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -33384,6 +35775,8 @@ public final class NodeStatusProto {
           .equals(other.getName());
       result = result && getValue()
           .equals(other.getValue());
+      result = result && getExplanation()
+          .equals(other.getExplanation());
       result = result && (getTimestamp()
           == other.getTimestamp());
       result = result && (hasClusterDetails() == other.hasClusterDetails());
@@ -33410,6 +35803,8 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
       hash = (53 * hash) + getValue().hashCode();
+      hash = (37 * hash) + EXPLANATION_FIELD_NUMBER;
+      hash = (53 * hash) + getExplanation().hashCode();
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
@@ -33562,6 +35957,8 @@ public final class NodeStatusProto {
 
         value_ = "";
 
+        explanation_ = "";
+
         timestamp_ = 0L;
 
         if (clusterDetailsBuilder_ == null) {
@@ -33600,6 +35997,7 @@ public final class NodeStatusProto {
         result.serviceType_ = serviceType_;
         result.name_ = name_;
         result.value_ = value_;
+        result.explanation_ = explanation_;
         result.timestamp_ = timestamp_;
         if (clusterDetailsBuilder_ == null) {
           result.clusterDetails_ = clusterDetails_;
@@ -33668,6 +36066,10 @@ public final class NodeStatusProto {
         }
         if (!other.getValue().isEmpty()) {
           value_ = other.value_;
+          onChanged();
+        }
+        if (!other.getExplanation().isEmpty()) {
+          explanation_ = other.explanation_;
           onChanged();
         }
         if (other.getTimestamp() != 0L) {
@@ -34061,13 +36463,102 @@ public final class NodeStatusProto {
         return this;
       }
 
+      private java.lang.Object explanation_ = "";
+      /**
+       * <pre>
+       * Explanation for health status.
+       * </pre>
+       *
+       * <code>string explanation = 5;</code>
+       */
+      public java.lang.String getExplanation() {
+        java.lang.Object ref = explanation_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          explanation_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Explanation for health status.
+       * </pre>
+       *
+       * <code>string explanation = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getExplanationBytes() {
+        java.lang.Object ref = explanation_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          explanation_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Explanation for health status.
+       * </pre>
+       *
+       * <code>string explanation = 5;</code>
+       */
+      public Builder setExplanation(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        explanation_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Explanation for health status.
+       * </pre>
+       *
+       * <code>string explanation = 5;</code>
+       */
+      public Builder clearExplanation() {
+        
+        explanation_ = getDefaultInstance().getExplanation();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Explanation for health status.
+       * </pre>
+       *
+       * <code>string explanation = 5;</code>
+       */
+      public Builder setExplanationBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        explanation_ = value;
+        onChanged();
+        return this;
+      }
+
       private long timestamp_ ;
       /**
        * <pre>
        * Timestamp of the CM service health record.
        * </pre>
        *
-       * <code>int64 timestamp = 5;</code>
+       * <code>int64 timestamp = 6;</code>
        */
       public long getTimestamp() {
         return timestamp_;
@@ -34077,7 +36568,7 @@ public final class NodeStatusProto {
        * Timestamp of the CM service health record.
        * </pre>
        *
-       * <code>int64 timestamp = 5;</code>
+       * <code>int64 timestamp = 6;</code>
        */
       public Builder setTimestamp(long value) {
         
@@ -34090,7 +36581,7 @@ public final class NodeStatusProto {
        * Timestamp of the CM service health record.
        * </pre>
        *
-       * <code>int64 timestamp = 5;</code>
+       * <code>int64 timestamp = 6;</code>
        */
       public Builder clearTimestamp() {
         
@@ -34107,7 +36598,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -34117,7 +36608,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -34131,7 +36622,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public Builder setClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
         if (clusterDetailsBuilder_ == null) {
@@ -34151,7 +36642,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public Builder setClusterDetails(
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder builderForValue) {
@@ -34169,7 +36660,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public Builder mergeClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
         if (clusterDetailsBuilder_ == null) {
@@ -34191,7 +36682,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public Builder clearClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -34209,7 +36700,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder getClusterDetailsBuilder() {
         
@@ -34221,7 +36712,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
         if (clusterDetailsBuilder_ != null) {
@@ -34236,7 +36727,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> 
@@ -34346,28 +36837,10 @@ public final class NodeStatusProto {
 
     /**
      * <pre>
-     * Long name of the CM metric.
-     * </pre>
-     *
-     * <code>string longName = 3;</code>
-     */
-    java.lang.String getLongName();
-    /**
-     * <pre>
-     * Long name of the CM metric.
-     * </pre>
-     *
-     * <code>string longName = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getLongNameBytes();
-
-    /**
-     * <pre>
      * Name of the CM metric.
      * </pre>
      *
-     * <code>string name = 4;</code>
+     * <code>string name = 3;</code>
      */
     java.lang.String getName();
     /**
@@ -34375,7 +36848,7 @@ public final class NodeStatusProto {
      * Name of the CM metric.
      * </pre>
      *
-     * <code>string name = 4;</code>
+     * <code>string name = 3;</code>
      */
     com.google.protobuf.ByteString
         getNameBytes();
@@ -34385,7 +36858,7 @@ public final class NodeStatusProto {
      * Floating point value of the CM metric.
      * </pre>
      *
-     * <code>double value = 5;</code>
+     * <code>double value = 4;</code>
      */
     double getValue();
 
@@ -34394,7 +36867,7 @@ public final class NodeStatusProto {
      * Timestamp of the CM service metric record.
      * </pre>
      *
-     * <code>int64 timestamp = 6;</code>
+     * <code>int64 timestamp = 5;</code>
      */
     long getTimestamp();
 
@@ -34403,7 +36876,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     boolean hasClusterDetails();
     /**
@@ -34411,7 +36884,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -34419,7 +36892,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder();
   }
@@ -34442,7 +36915,6 @@ public final class NodeStatusProto {
     private CmServiceMetricEvent() {
       serviceName_ = "";
       serviceType_ = "";
-      longName_ = "";
       name_ = "";
       value_ = 0D;
       timestamp_ = 0L;
@@ -34487,26 +36959,20 @@ public final class NodeStatusProto {
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
 
-              longName_ = s;
-              break;
-            }
-            case 34: {
-              java.lang.String s = input.readStringRequireUtf8();
-
               name_ = s;
               break;
             }
-            case 41: {
+            case 33: {
 
               value_ = input.readDouble();
               break;
             }
-            case 48: {
+            case 40: {
 
               timestamp_ = input.readInt64();
               break;
             }
-            case 58: {
+            case 50: {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder subBuilder = null;
               if (clusterDetails_ != null) {
                 subBuilder = clusterDetails_.toBuilder();
@@ -34635,56 +37101,14 @@ public final class NodeStatusProto {
       }
     }
 
-    public static final int LONGNAME_FIELD_NUMBER = 3;
-    private volatile java.lang.Object longName_;
-    /**
-     * <pre>
-     * Long name of the CM metric.
-     * </pre>
-     *
-     * <code>string longName = 3;</code>
-     */
-    public java.lang.String getLongName() {
-      java.lang.Object ref = longName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        longName_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Long name of the CM metric.
-     * </pre>
-     *
-     * <code>string longName = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getLongNameBytes() {
-      java.lang.Object ref = longName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        longName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
-    public static final int NAME_FIELD_NUMBER = 4;
+    public static final int NAME_FIELD_NUMBER = 3;
     private volatile java.lang.Object name_;
     /**
      * <pre>
      * Name of the CM metric.
      * </pre>
      *
-     * <code>string name = 4;</code>
+     * <code>string name = 3;</code>
      */
     public java.lang.String getName() {
       java.lang.Object ref = name_;
@@ -34703,7 +37127,7 @@ public final class NodeStatusProto {
      * Name of the CM metric.
      * </pre>
      *
-     * <code>string name = 4;</code>
+     * <code>string name = 3;</code>
      */
     public com.google.protobuf.ByteString
         getNameBytes() {
@@ -34719,40 +37143,40 @@ public final class NodeStatusProto {
       }
     }
 
-    public static final int VALUE_FIELD_NUMBER = 5;
+    public static final int VALUE_FIELD_NUMBER = 4;
     private double value_;
     /**
      * <pre>
      * Floating point value of the CM metric.
      * </pre>
      *
-     * <code>double value = 5;</code>
+     * <code>double value = 4;</code>
      */
     public double getValue() {
       return value_;
     }
 
-    public static final int TIMESTAMP_FIELD_NUMBER = 6;
+    public static final int TIMESTAMP_FIELD_NUMBER = 5;
     private long timestamp_;
     /**
      * <pre>
      * Timestamp of the CM service metric record.
      * </pre>
      *
-     * <code>int64 timestamp = 6;</code>
+     * <code>int64 timestamp = 5;</code>
      */
     public long getTimestamp() {
       return timestamp_;
     }
 
-    public static final int CLUSTERDETAILS_FIELD_NUMBER = 7;
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 6;
     private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
     /**
      * <pre>
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
@@ -34762,7 +37186,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
@@ -34772,7 +37196,7 @@ public final class NodeStatusProto {
      * Common cluster related data (optional - can be filled from NodeStatusReport as well).
      * </pre>
      *
-     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
@@ -34798,20 +37222,17 @@ public final class NodeStatusProto {
       if (!getServiceTypeBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceType_);
       }
-      if (!getLongNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, longName_);
-      }
       if (!getNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, name_);
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
       }
       if (value_ != 0D) {
-        output.writeDouble(5, value_);
+        output.writeDouble(4, value_);
       }
       if (timestamp_ != 0L) {
-        output.writeInt64(6, timestamp_);
+        output.writeInt64(5, timestamp_);
       }
       if (clusterDetails_ != null) {
-        output.writeMessage(7, getClusterDetails());
+        output.writeMessage(6, getClusterDetails());
       }
       unknownFields.writeTo(output);
     }
@@ -34828,23 +37249,20 @@ public final class NodeStatusProto {
       if (!getServiceTypeBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceType_);
       }
-      if (!getLongNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, longName_);
-      }
       if (!getNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, name_);
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
       }
       if (value_ != 0D) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(5, value_);
+          .computeDoubleSize(4, value_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
-          .computeInt64Size(6, timestamp_);
+          .computeInt64Size(5, timestamp_);
       }
       if (clusterDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(7, getClusterDetails());
+          .computeMessageSize(6, getClusterDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -34866,8 +37284,6 @@ public final class NodeStatusProto {
           .equals(other.getServiceName());
       result = result && getServiceType()
           .equals(other.getServiceType());
-      result = result && getLongName()
-          .equals(other.getLongName());
       result = result && getName()
           .equals(other.getName());
       result = result && (
@@ -34896,8 +37312,6 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getServiceName().hashCode();
       hash = (37 * hash) + SERVICETYPE_FIELD_NUMBER;
       hash = (53 * hash) + getServiceType().hashCode();
-      hash = (37 * hash) + LONGNAME_FIELD_NUMBER;
-      hash = (53 * hash) + getLongName().hashCode();
       hash = (37 * hash) + NAME_FIELD_NUMBER;
       hash = (53 * hash) + getName().hashCode();
       hash = (37 * hash) + VALUE_FIELD_NUMBER;
@@ -35051,8 +37465,6 @@ public final class NodeStatusProto {
 
         serviceType_ = "";
 
-        longName_ = "";
-
         name_ = "";
 
         value_ = 0D;
@@ -35093,7 +37505,6 @@ public final class NodeStatusProto {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent(this);
         result.serviceName_ = serviceName_;
         result.serviceType_ = serviceType_;
-        result.longName_ = longName_;
         result.name_ = name_;
         result.value_ = value_;
         result.timestamp_ = timestamp_;
@@ -35156,10 +37567,6 @@ public final class NodeStatusProto {
         }
         if (!other.getServiceType().isEmpty()) {
           serviceType_ = other.serviceType_;
-          onChanged();
-        }
-        if (!other.getLongName().isEmpty()) {
-          longName_ = other.longName_;
           onChanged();
         }
         if (!other.getName().isEmpty()) {
@@ -35382,102 +37789,13 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private java.lang.Object longName_ = "";
-      /**
-       * <pre>
-       * Long name of the CM metric.
-       * </pre>
-       *
-       * <code>string longName = 3;</code>
-       */
-      public java.lang.String getLongName() {
-        java.lang.Object ref = longName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          longName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Long name of the CM metric.
-       * </pre>
-       *
-       * <code>string longName = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getLongNameBytes() {
-        java.lang.Object ref = longName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          longName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Long name of the CM metric.
-       * </pre>
-       *
-       * <code>string longName = 3;</code>
-       */
-      public Builder setLongName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        longName_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Long name of the CM metric.
-       * </pre>
-       *
-       * <code>string longName = 3;</code>
-       */
-      public Builder clearLongName() {
-        
-        longName_ = getDefaultInstance().getLongName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Long name of the CM metric.
-       * </pre>
-       *
-       * <code>string longName = 3;</code>
-       */
-      public Builder setLongNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        longName_ = value;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object name_ = "";
       /**
        * <pre>
        * Name of the CM metric.
        * </pre>
        *
-       * <code>string name = 4;</code>
+       * <code>string name = 3;</code>
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -35496,7 +37814,7 @@ public final class NodeStatusProto {
        * Name of the CM metric.
        * </pre>
        *
-       * <code>string name = 4;</code>
+       * <code>string name = 3;</code>
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -35516,7 +37834,7 @@ public final class NodeStatusProto {
        * Name of the CM metric.
        * </pre>
        *
-       * <code>string name = 4;</code>
+       * <code>string name = 3;</code>
        */
       public Builder setName(
           java.lang.String value) {
@@ -35533,7 +37851,7 @@ public final class NodeStatusProto {
        * Name of the CM metric.
        * </pre>
        *
-       * <code>string name = 4;</code>
+       * <code>string name = 3;</code>
        */
       public Builder clearName() {
         
@@ -35546,7 +37864,7 @@ public final class NodeStatusProto {
        * Name of the CM metric.
        * </pre>
        *
-       * <code>string name = 4;</code>
+       * <code>string name = 3;</code>
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -35566,7 +37884,7 @@ public final class NodeStatusProto {
        * Floating point value of the CM metric.
        * </pre>
        *
-       * <code>double value = 5;</code>
+       * <code>double value = 4;</code>
        */
       public double getValue() {
         return value_;
@@ -35576,7 +37894,7 @@ public final class NodeStatusProto {
        * Floating point value of the CM metric.
        * </pre>
        *
-       * <code>double value = 5;</code>
+       * <code>double value = 4;</code>
        */
       public Builder setValue(double value) {
         
@@ -35589,7 +37907,7 @@ public final class NodeStatusProto {
        * Floating point value of the CM metric.
        * </pre>
        *
-       * <code>double value = 5;</code>
+       * <code>double value = 4;</code>
        */
       public Builder clearValue() {
         
@@ -35604,7 +37922,7 @@ public final class NodeStatusProto {
        * Timestamp of the CM service metric record.
        * </pre>
        *
-       * <code>int64 timestamp = 6;</code>
+       * <code>int64 timestamp = 5;</code>
        */
       public long getTimestamp() {
         return timestamp_;
@@ -35614,7 +37932,7 @@ public final class NodeStatusProto {
        * Timestamp of the CM service metric record.
        * </pre>
        *
-       * <code>int64 timestamp = 6;</code>
+       * <code>int64 timestamp = 5;</code>
        */
       public Builder setTimestamp(long value) {
         
@@ -35627,7 +37945,7 @@ public final class NodeStatusProto {
        * Timestamp of the CM service metric record.
        * </pre>
        *
-       * <code>int64 timestamp = 6;</code>
+       * <code>int64 timestamp = 5;</code>
        */
       public Builder clearTimestamp() {
         
@@ -35644,7 +37962,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -35654,7 +37972,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -35668,7 +37986,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public Builder setClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
         if (clusterDetailsBuilder_ == null) {
@@ -35688,7 +38006,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public Builder setClusterDetails(
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder builderForValue) {
@@ -35706,7 +38024,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public Builder mergeClusterDetails(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails value) {
         if (clusterDetailsBuilder_ == null) {
@@ -35728,7 +38046,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public Builder clearClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -35746,7 +38064,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder getClusterDetailsBuilder() {
         
@@ -35758,7 +38076,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
         if (clusterDetailsBuilder_ != null) {
@@ -35773,7 +38091,7 @@ public final class NodeStatusProto {
        * Common cluster related data (optional - can be filled from NodeStatusReport as well).
        * </pre>
        *
-       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
        */
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> 
@@ -37403,6 +39721,16 @@ public final class NodeStatusProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_cdp_telemetry_SystemMetrics_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdp_telemetry_CmMetricsReport_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdp_telemetry_CmMetricsReport_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_cdp_telemetry_CmHealthChecksReport_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_cdp_telemetry_CmHealthChecksReport_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_cdp_telemetry_CpuMetrics_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -37574,74 +39902,81 @@ public final class NodeStatusProto {
       "p.telemetry.MemoryMetrics\022.\n\007network\030\004 \001" +
       "(\0132\035.cdp.telemetry.NetworkMetrics\022\021\n\ttim" +
       "estamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035.c" +
-      "dp.telemetry.ClusterDetails\"\277\001\n\nCpuMetri" +
-      "cs\022\r\n\005count\030\001 \001(\005\022\025\n\rlogical_count\030\002 \001(\005" +
-      "\022\020\n\010load_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp." +
-      "telemetry.CpuTimes\022&\n\005stats\030\005 \001(\0132\027.cdp." +
-      "telemetry.CpuStats\022)\n\004freq\030\006 \001(\0132\033.cdp.t" +
-      "elemetry.CpuFrequency\"_\n\010CpuStats\022\024\n\014ctx" +
-      "_switches\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017s" +
-      "oft_interrupts\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D" +
-      "\n\010CpuTimes\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016" +
-      "\n\006system\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequ" +
-      "ency\022\017\n\007current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003ma" +
-      "x\030\003 \001(\003\"\214\001\n\013DiskMetrics\0220\n\npartitions\030\001 " +
-      "\003(\0132\034.cdp.telemetry.DiskPartition\022(\n\ntop" +
-      "_varlog\030\002 \003(\0132\024.cdp.telemetry.VmLog\022!\n\002i" +
-      "o\030\003 \001(\0132\025.cdp.telemetry.DiskIO\"#\n\005VmLog\022" +
-      "\014\n\004path\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPart" +
-      "ition\022\'\n\005usage\030\001 \001(\0132\030.cdp.telemetry.Dis" +
-      "kUsage\022\016\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017" +
-      "\n\007maxfile\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmoun" +
-      "tpoint\030\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022" +
-      "\014\n\004free\030\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001" +
-      "(\003\022\017\n\007percent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_b" +
-      "ytes\030\001 \001(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\tread_t" +
-      "ime\030\003 \001(\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013write_" +
-      "count\030\005 \001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n\016Netwo" +
-      "rkMetrics\0226\n\013connections\030\001 \001(\0132!.cdp.tel" +
-      "emetry.NetworkConnections\022$\n\002io\030\002 \001(\0132\030." +
-      "cdp.telemetry.NetworkIO\"\237\001\n\tNetworkIO\022\022\n" +
-      "\nbytes_recv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n" +
-      "\006dropin\030\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030" +
-      "\005 \001(\003\022\016\n\006errout\030\006 \001(\003\022\024\n\014packets_recv\030\007 " +
-      "\001(\003\022\024\n\014packets_sent\030\010 \001(\003\"\322\001\n\022NetworkCon" +
-      "nections\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030" +
-      "\002 \001(\005\022\021\n\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004" +
-      " \001(\005\022\016\n\006CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024" +
-      "\n\014SYN_RECEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005" +
-      "\022\022\n\nFIN_WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u" +
-      "\n\rMemoryMetrics\0224\n\016virtual_memory\030\001 \001(\0132" +
-      "\034.cdp.telemetry.VirtualMemory\022.\n\013swap_me" +
-      "mory\030\002 \001(\0132\031.cdp.telemetry.SwapMemory\"\277\001" +
-      "\n\rVirtualMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002" +
-      " \001(\003\022\014\n\004free\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\ta" +
-      "vailable\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010inacti" +
-      "ve\030\007 \001(\003\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cached\030\t \001(" +
-      "\003\022\016\n\006shared\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapM" +
-      "emory\022\014\n\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003" +
-      "sin\030\003 \001(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014" +
-      "\n\004used\030\006 \001(\003\"\254\001\n\031CmServiceHealthCheckEve" +
-      "nt\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013serviceType\030\002" +
-      " \001(\t\022\014\n\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022\021\n\ttim" +
-      "estamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035.c" +
-      "dp.telemetry.ClusterDetails\"\271\001\n\024CmServic" +
-      "eMetricEvent\022\023\n\013serviceName\030\001 \001(\t\022\023\n\013ser" +
-      "viceType\030\002 \001(\t\022\020\n\010longName\030\003 \001(\t\022\014\n\004name" +
-      "\030\004 \001(\t\022\r\n\005value\030\005 \001(\001\022\021\n\ttimestamp\030\006 \001(\003" +
-      "\0225\n\016clusterDetails\030\007 \001(\0132\035.cdp.telemetry" +
-      ".ClusterDetails\"\262\002\n\016ClusterDetails\022\013\n\003cr" +
-      "n\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227" +
-      "\n\004type\030\004 \001(\0162).cdp.telemetry.ClusterDeta" +
-      "ils.ClusterType\022=\n\010platform\030\005 \001(\0162+.cdp." +
-      "telemetry.ClusterDetails.CloudPlatform\"5" +
-      "\n\013ClusterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001" +
-      "\022\013\n\007FREEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOW" +
-      "N\020\000\022\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLO" +
-      "UD\020\004*,\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020" +
-      "\001\022\007\n\003NOK\020\002B[\n-com.cloudera.thunderhead.t" +
-      "elemetry.nodestatusB\017NodeStatusProtoZ\031co" +
-      "m/cloudera/cdp/protobufb\006proto3"
+      "dp.telemetry.ClusterDetails\"~\n\017CmMetrics" +
+      "Report\0224\n\007metrics\030\001 \003(\0132#.cdp.telemetry." +
+      "CmServiceMetricEvent\0225\n\016clusterDetails\030\002" +
+      " \001(\0132\035.cdp.telemetry.ClusterDetails\"\215\001\n\024" +
+      "CmHealthChecksReport\022>\n\014healthChecks\030\001 \003" +
+      "(\0132(.cdp.telemetry.CmServiceHealthCheckE" +
+      "vent\0225\n\016clusterDetails\030\002 \001(\0132\035.cdp.telem" +
+      "etry.ClusterDetails\"\277\001\n\nCpuMetrics\022\r\n\005co" +
+      "unt\030\001 \001(\005\022\025\n\rlogical_count\030\002 \001(\005\022\020\n\010load" +
+      "_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp.telemetr" +
+      "y.CpuTimes\022&\n\005stats\030\005 \001(\0132\027.cdp.telemetr" +
+      "y.CpuStats\022)\n\004freq\030\006 \001(\0132\033.cdp.telemetry" +
+      ".CpuFrequency\"_\n\010CpuStats\022\024\n\014ctx_switche" +
+      "s\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017soft_inte" +
+      "rrupts\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D\n\010CpuTim" +
+      "es\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016\n\006system" +
+      "\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequency\022\017\n\007" +
+      "current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003max\030\003 \001(\003\"" +
+      "\214\001\n\013DiskMetrics\0220\n\npartitions\030\001 \003(\0132\034.cd" +
+      "p.telemetry.DiskPartition\022(\n\ntop_varlog\030" +
+      "\002 \003(\0132\024.cdp.telemetry.VmLog\022!\n\002io\030\003 \001(\0132" +
+      "\025.cdp.telemetry.DiskIO\"#\n\005VmLog\022\014\n\004path\030" +
+      "\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPartition\022\'\n" +
+      "\005usage\030\001 \001(\0132\030.cdp.telemetry.DiskUsage\022\016" +
+      "\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017\n\007maxfil" +
+      "e\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmountpoint\030\006" +
+      " \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022\014\n\004free\030" +
+      "\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001(\003\022\017\n\007pe" +
+      "rcent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_bytes\030\001 \001" +
+      "(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\tread_time\030\003 \001(" +
+      "\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013write_count\030\005 " +
+      "\001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n\016NetworkMetric" +
+      "s\0226\n\013connections\030\001 \001(\0132!.cdp.telemetry.N" +
+      "etworkConnections\022$\n\002io\030\002 \001(\0132\030.cdp.tele" +
+      "metry.NetworkIO\"\237\001\n\tNetworkIO\022\022\n\nbytes_r" +
+      "ecv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n\006dropin\030" +
+      "\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030\005 \001(\003\022\016\n" +
+      "\006errout\030\006 \001(\003\022\024\n\014packets_recv\030\007 \001(\003\022\024\n\014p" +
+      "ackets_sent\030\010 \001(\003\"\322\001\n\022NetworkConnections" +
+      "\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030\002 \001(\005\022\021\n" +
+      "\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004 \001(\005\022\016\n\006" +
+      "CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024\n\014SYN_RE" +
+      "CEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005\022\022\n\nFIN_" +
+      "WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u\n\rMemory" +
+      "Metrics\0224\n\016virtual_memory\030\001 \001(\0132\034.cdp.te" +
+      "lemetry.VirtualMemory\022.\n\013swap_memory\030\002 \001" +
+      "(\0132\031.cdp.telemetry.SwapMemory\"\277\001\n\rVirtua" +
+      "lMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002 \001(\003\022\014\n\004" +
+      "free\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\tavailable" +
+      "\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010inactive\030\007 \001(\003" +
+      "\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cached\030\t \001(\003\022\016\n\006sha" +
+      "red\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapMemory\022\014\n" +
+      "\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003sin\030\003 \001(" +
+      "\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014\n\004used\030\006" +
+      " \001(\003\"\301\001\n\031CmServiceHealthCheckEvent\022\023\n\013se" +
+      "rviceName\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004" +
+      "name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022\023\n\013explanation" +
+      "\030\005 \001(\t\022\021\n\ttimestamp\030\006 \001(\003\0225\n\016clusterDeta" +
+      "ils\030\007 \001(\0132\035.cdp.telemetry.ClusterDetails" +
+      "\"\247\001\n\024CmServiceMetricEvent\022\023\n\013serviceName" +
+      "\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004name\030\003 \001(" +
+      "\t\022\r\n\005value\030\004 \001(\001\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016c" +
+      "lusterDetails\030\006 \001(\0132\035.cdp.telemetry.Clus" +
+      "terDetails\"\262\002\n\016ClusterDetails\022\013\n\003crn\030\001 \001" +
+      "(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227\n\004typ" +
+      "e\030\004 \001(\0162).cdp.telemetry.ClusterDetails.C" +
+      "lusterType\022=\n\010platform\030\005 \001(\0162+.cdp.telem" +
+      "etry.ClusterDetails.CloudPlatform\"5\n\013Clu" +
+      "sterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001\022\013\n\007F" +
+      "REEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOWN\020\000\022\007" +
+      "\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLOUD\020\004*" +
+      ",\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020\001\022\007\n\003" +
+      "NOK\020\002B[\n-com.cloudera.thunderhead.teleme" +
+      "try.nodestatusB\017NodeStatusProtoZ\031com/clo" +
+      "udera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -37733,110 +40068,122 @@ public final class NodeStatusProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_SystemMetrics_descriptor,
         new java.lang.String[] { "Cpu", "Disk", "Memory", "Network", "Timestamp", "ClusterDetails", });
-    internal_static_cdp_telemetry_CpuMetrics_descriptor =
+    internal_static_cdp_telemetry_CmMetricsReport_descriptor =
       getDescriptor().getMessageTypes().get(11);
+    internal_static_cdp_telemetry_CmMetricsReport_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdp_telemetry_CmMetricsReport_descriptor,
+        new java.lang.String[] { "Metrics", "ClusterDetails", });
+    internal_static_cdp_telemetry_CmHealthChecksReport_descriptor =
+      getDescriptor().getMessageTypes().get(12);
+    internal_static_cdp_telemetry_CmHealthChecksReport_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_cdp_telemetry_CmHealthChecksReport_descriptor,
+        new java.lang.String[] { "HealthChecks", "ClusterDetails", });
+    internal_static_cdp_telemetry_CpuMetrics_descriptor =
+      getDescriptor().getMessageTypes().get(13);
     internal_static_cdp_telemetry_CpuMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuMetrics_descriptor,
         new java.lang.String[] { "Count", "LogicalCount", "LoadAvg", "Times", "Stats", "Freq", });
     internal_static_cdp_telemetry_CpuStats_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_cdp_telemetry_CpuStats_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuStats_descriptor,
         new java.lang.String[] { "CtxSwitches", "Interrupts", "SoftInterrupts", "Syscalls", });
     internal_static_cdp_telemetry_CpuTimes_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_cdp_telemetry_CpuTimes_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuTimes_descriptor,
         new java.lang.String[] { "Idle", "Nice", "System", "User", });
     internal_static_cdp_telemetry_CpuFrequency_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_cdp_telemetry_CpuFrequency_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CpuFrequency_descriptor,
         new java.lang.String[] { "Current", "Min", "Max", });
     internal_static_cdp_telemetry_DiskMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_cdp_telemetry_DiskMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskMetrics_descriptor,
         new java.lang.String[] { "Partitions", "TopVarlog", "Io", });
     internal_static_cdp_telemetry_VmLog_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_cdp_telemetry_VmLog_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_VmLog_descriptor,
         new java.lang.String[] { "Path", "Size", });
     internal_static_cdp_telemetry_DiskPartition_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_cdp_telemetry_DiskPartition_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskPartition_descriptor,
         new java.lang.String[] { "Usage", "Device", "Fstype", "Maxfile", "Maxpath", "Mountpoint", "Opts", });
     internal_static_cdp_telemetry_DiskUsage_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_cdp_telemetry_DiskUsage_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskUsage_descriptor,
         new java.lang.String[] { "Free", "Total", "Used", "Percent", });
     internal_static_cdp_telemetry_DiskIO_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_cdp_telemetry_DiskIO_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_DiskIO_descriptor,
         new java.lang.String[] { "ReadBytes", "ReadCount", "ReadTime", "WriteBytes", "WriteCount", "WriteTime", });
     internal_static_cdp_telemetry_NetworkMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_cdp_telemetry_NetworkMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkMetrics_descriptor,
         new java.lang.String[] { "Connections", "Io", });
     internal_static_cdp_telemetry_NetworkIO_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_cdp_telemetry_NetworkIO_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkIO_descriptor,
         new java.lang.String[] { "BytesRecv", "BytesSent", "Dropin", "Dropout", "Errin", "Errout", "PacketsRecv", "PacketsSent", });
     internal_static_cdp_telemetry_NetworkConnections_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_cdp_telemetry_NetworkConnections_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_NetworkConnections_descriptor,
         new java.lang.String[] { "LISTEN", "ESTABLISHED", "TIMEWAIT", "CLOSEWAIT", "CLOSED", "SYNSEND", "SYNRECEIVED", "FINWAIT1", "FINWAIT2", "LASTACK", });
     internal_static_cdp_telemetry_MemoryMetrics_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_cdp_telemetry_MemoryMetrics_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_MemoryMetrics_descriptor,
         new java.lang.String[] { "VirtualMemory", "SwapMemory", });
     internal_static_cdp_telemetry_VirtualMemory_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_cdp_telemetry_VirtualMemory_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_VirtualMemory_descriptor,
         new java.lang.String[] { "Total", "Used", "Free", "Percent", "Available", "Active", "Inactive", "Buffers", "Cached", "Shared", "Slab", });
     internal_static_cdp_telemetry_SwapMemory_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_cdp_telemetry_SwapMemory_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_SwapMemory_descriptor,
         new java.lang.String[] { "Free", "Percent", "Sin", "Sout", "Total", "Used", });
     internal_static_cdp_telemetry_CmServiceHealthCheckEvent_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_cdp_telemetry_CmServiceHealthCheckEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CmServiceHealthCheckEvent_descriptor,
-        new java.lang.String[] { "ServiceName", "ServiceType", "Name", "Value", "Timestamp", "ClusterDetails", });
+        new java.lang.String[] { "ServiceName", "ServiceType", "Name", "Value", "Explanation", "Timestamp", "ClusterDetails", });
     internal_static_cdp_telemetry_CmServiceMetricEvent_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_cdp_telemetry_CmServiceMetricEvent_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_CmServiceMetricEvent_descriptor,
-        new java.lang.String[] { "ServiceName", "ServiceType", "LongName", "Name", "Value", "Timestamp", "ClusterDetails", });
+        new java.lang.String[] { "ServiceName", "ServiceType", "Name", "Value", "Timestamp", "ClusterDetails", });
     internal_static_cdp_telemetry_ClusterDetails_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_cdp_telemetry_ClusterDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_ClusterDetails_descriptor,
