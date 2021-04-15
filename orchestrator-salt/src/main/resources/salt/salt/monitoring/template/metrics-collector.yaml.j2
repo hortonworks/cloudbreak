@@ -31,13 +31,6 @@ logger:
     max_bytes: 10485760
     backup_count: 10
     debug: True
-jsonMetricsLogger:
-    name: metrics_logger
-    path: /var/log/metrics-collector/metrics.json
-    max_bytes: 10485760
-    backup_count: 10
-jsonHealthChecksLogger:
-    name: health_checks_logger
-    path: /var/log/metrics-collector/health_checks.json
-    max_bytes: 10485760
-    backup_count: 10
+statusReportFiles:
+     metricsFileLocation: /var/lib/cdp-nodestatus/report/cm_metrics_report.json
+     healthchecksFileLocation: /var/lib/cdp-nodestatus/report/cm_health_report.json

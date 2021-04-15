@@ -183,6 +183,22 @@ message SystemMetrics {
     ClusterDetails clusterDetails = 6;
 }
 
+// Holds Cloudera Manager service level metrics.
+message CmMetricsReport {
+    // CM Service level metrics.
+    repeated CmServiceMetricEvent metrics = 1;
+    // Common cluster related data.
+    ClusterDetails clusterDetails = 2;
+}
+
+// Holds Cloudera Manager service health details.
+message CmHealthChecksReport {
+    // CM Service level health check details.
+    repeated CmServiceHealthCheckEvent healthChecks = 1;
+    // Common cluster related data.
+    ClusterDetails clusterDetails = 2;
+}
+
 // Holds CPU related system metrics.
 message CpuMetrics {
     // Number of CPUs.
@@ -408,10 +424,12 @@ message CmServiceHealthCheckEvent {
     string name = 3;
     // Health status.
     string value = 4;
+    // Explanation for health status.
+    string explanation = 5;
     // Timestamp of the CM service health record.
-    int64 timestamp = 5;
+    int64 timestamp = 6;
     // Common cluster related data (optional - can be filled from NodeStatusReport as well).
-    ClusterDetails clusterDetails = 6;
+    ClusterDetails clusterDetails = 7;
 }
 
 // Holds CM service related metric record.
@@ -420,16 +438,14 @@ message CmServiceMetricEvent {
     string serviceName = 1;
     // Type of the CM service.
     string serviceType = 2;
-    // Long name of the CM metric.
-    string longName = 3;
     // Name of the CM metric.
-    string name = 4;
+    string name = 3;
     // Floating point value of the CM metric.
-    double value = 5;
+    double value = 4;
     // Timestamp of the CM service metric record.
-    int64 timestamp = 6;
+    int64 timestamp = 5;
     // Common cluster related data (optional - can be filled from NodeStatusReport as well).
-    ClusterDetails clusterDetails = 7;
+    ClusterDetails clusterDetails = 6;
 }
 
 // Holds common cluster related data.
