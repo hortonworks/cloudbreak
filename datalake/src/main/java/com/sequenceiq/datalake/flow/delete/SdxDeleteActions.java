@@ -15,8 +15,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -56,6 +58,9 @@ public class SdxDeleteActions {
 
     @Inject
     private SdxMetricService metricService;
+
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
@@ -164,11 +169,14 @@ public class SdxDeleteActions {
             @Override
             protected void doExecute(SdxContext context, SdxDeletionFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 Exception exception = payload.getException();
-                LOGGER.error("Datalake delete failed for datalake: {}", payload.getResourceId(), exception);
                 String statusReason = "Datalake deletion failed";
-                if (exception.getMessage() != null) {
-                    statusReason = exception.getMessage();
+                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
+                if (StringUtils.hasText(errorMessage)) {
+                    statusReason = statusReason + ". " + errorMessage;
+                } else if (exception.getMessage() != null) {
+                    statusReason = statusReason + ". " + exception.getMessage();
                 }
+                LOGGER.error(statusReason, exception);
                 try {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, statusReason,
                             payload.getResourceId());
