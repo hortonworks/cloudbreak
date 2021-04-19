@@ -27,6 +27,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_CLUSTER_PROXY_REGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
@@ -49,6 +51,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_S
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_TLS_SETUP_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_CLUSTERPROXY_REGISTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_UPDATE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATE_INSTANCES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState.UPSCALE_VALIDATING_CLOUD_STORAGE_STATE;
@@ -125,9 +128,13 @@ public class UpscaleFlowConfig extends AbstractFlowConfiguration<UpscaleState, U
                     .event(UPSCALE_FREEIPA_POST_INSTALL_FINISHED_EVENT)
                     .failureEvent(UPSCALE_FREEIPA_POST_INSTALL_FAILED_EVENT)
 
-                    .from(UPSCALE_UPDATE_METADATA_STATE).to(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
+                    .from(UPSCALE_UPDATE_METADATA_STATE).to(UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE)
                     .event(UPSCALE_UPDATE_METADATA_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE).to(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
+                    .event(UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT)
+                    .failureEvent(UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT)
 
                     .from(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE).to(UPSCALE_FINISHED_STATE)
                     .event(UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT)

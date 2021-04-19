@@ -13,6 +13,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.D
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_DNS_ENTRIES_FINISHED_EVENT;
@@ -42,6 +44,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNS
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_TELEMETRY_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_DNS_SOA_RECORDS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_UPDATE_METADATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.INIT_STATE;
@@ -111,9 +114,13 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT)
                     .failureEvent(REMOVE_HOSTS_FROM_ORCHESTRATION_FAILED_EVENT)
 
-                    .from(DOWNSCALE_UPDATE_METADATA_STATE).to(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
+                    .from(DOWNSCALE_UPDATE_METADATA_STATE).to(DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE)
                     .event(UPDATE_METADATA_FINISHED_EVENT)
                     .defaultFailureEvent()
+
+                    .from(DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE).to(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE)
+                    .event(DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT)
+                    .failureEvent(DOWNSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT)
 
                     .from(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_STATE).to(DOWNSCALE_FINISHED_STATE)
                     .event(DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT)
