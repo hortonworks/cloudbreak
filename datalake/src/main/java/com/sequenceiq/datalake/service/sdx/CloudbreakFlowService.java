@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.inject.Inject;
@@ -28,6 +29,18 @@ public class CloudbreakFlowService {
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
+
+    public FlowLogResponse getLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
+        FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                flowEndpoint.getLastFlowByResourceCrn(sdxCluster.getStackCrn()));
+        logFlowLogResponse(lastFlowByResourceName);
+        return lastFlowByResourceName;
+    }
+
+    public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                flowEndpoint.getFlowLogsByFlowId(flowId));
+    }
 
     public FlowState getLastKnownFlowState(SdxCluster sdxCluster) {
         try {
@@ -93,12 +106,7 @@ public class CloudbreakFlowService {
         try {
             FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     flowEndpoint.getLastFlowByResourceName(sdxCluster.getAccountId(), sdxCluster.getClusterName()));
-            LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
-                    lastFlowByResourceName.getFlowId(),
-                    lastFlowByResourceName.getCreated(),
-                    lastFlowByResourceName.getNextEvent(),
-                    lastFlowByResourceName.getResourceId(),
-                    lastFlowByResourceName.getStateStatus());
+            logFlowLogResponse(lastFlowByResourceName);
             if (StringUtils.isNotBlank(lastFlowByResourceName.getFlowChainId())) {
                 setFlowChainIdAndResetFlowId(sdxCluster, lastFlowByResourceName.getFlowChainId());
             } else if (StringUtils.isNotBlank(lastFlowByResourceName.getFlowId())) {
@@ -142,5 +150,14 @@ public class CloudbreakFlowService {
         } else {
             LOGGER.info("Cloudbreak {} {} is ACTIVE", flowType, idSupplier.get());
         }
+    }
+
+    private void logFlowLogResponse(FlowLogResponse lastFlowByResourceName) {
+        LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
+                lastFlowByResourceName.getFlowId(),
+                lastFlowByResourceName.getCreated(),
+                lastFlowByResourceName.getNextEvent(),
+                lastFlowByResourceName.getResourceId(),
+                lastFlowByResourceName.getStateStatus());
     }
 }

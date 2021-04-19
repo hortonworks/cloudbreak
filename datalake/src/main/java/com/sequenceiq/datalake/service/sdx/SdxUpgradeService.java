@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -34,6 +35,7 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.datalake.service.upgrade.SdxUpgradeValidationResultProvider;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -58,6 +60,9 @@ public class SdxUpgradeService {
 
     @Inject
     private AvailabilityChecker availabilityChecker;
+
+    @Inject
+    private SdxUpgradeValidationResultProvider sdxUpgradeValidationResultProvider;
 
     public void changeImage(Long id, UpgradeOptionV4Response upgradeOption) {
         SdxCluster cluster = sdxService.getById(id);
@@ -110,8 +115,7 @@ public class SdxUpgradeService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         String clusterName = sdxCluster.getClusterName();
         LOGGER.info("Trying to update the runtime version from Cloudbreak for cluster: {}", clusterName);
-        StackV4Response stack = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.get(0L, clusterName, Set.of(), sdxCluster.getAccountId()));
+        StackV4Response stack = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(0L, clusterName, Set.of(), sdxCluster.getAccountId()));
         sdxService.updateRuntimeVersionFromStackResponse(sdxCluster, stack);
     }
 
@@ -180,7 +184,11 @@ public class SdxUpgradeService {
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
         if (availabilityChecker.stackAndClusterAvailable(stackV4Response, cluster)) {
-            return AttemptResults.finishWith(stackV4Response);
+            if (sdxUpgradeValidationResultProvider.isValidationFailed(sdxCluster)) {
+                return AttemptResults.breakFor(new UpgradeValidationFailedException("Upgrade validation failed."));
+            } else {
+                return AttemptResults.finishWith(stackV4Response);
+            }
         } else {
             if (Status.UPDATE_FAILED.equals(stackV4Response.getStatus())) {
                 LOGGER.info("{} failed for Stack {} with status {}", pollingMessage, stackV4Response.getName(), stackV4Response.getStatus());

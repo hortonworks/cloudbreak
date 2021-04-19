@@ -9,6 +9,7 @@ import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_SUCCESS_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_VALIDATION_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_IMAGE_CHANGE_IN_PROGRESS_STATE;
@@ -20,6 +21,7 @@ import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_FINISHED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_IN_PROGRESS_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_START_STATE;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.DATALAKE_UPGRADE_VALIDATION_FAILED_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeState.INIT_STATE;
 
@@ -51,6 +53,14 @@ public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<Datalak
                     .from(DATALAKE_UPGRADE_IN_PROGRESS_STATE)
                     .to(DATALAKE_IMAGE_CHANGE_STATE)
                     .event(DATALAKE_IMAGE_CHANGE_EVENT).defaultFailureEvent()
+
+                    .from(DATALAKE_UPGRADE_IN_PROGRESS_STATE)
+                    .to(DATALAKE_UPGRADE_VALIDATION_FAILED_STATE)
+                    .event(DATALAKE_UPGRADE_VALIDATION_FAILED_EVENT).defaultFailureEvent()
+
+                    .from(DATALAKE_UPGRADE_VALIDATION_FAILED_STATE)
+                    .to(FINAL_STATE)
+                    .event(DATALAKE_UPGRADE_FINALIZED_EVENT).defaultFailureEvent()
 
                     .from(DATALAKE_IMAGE_CHANGE_STATE)
                     .to(DATALAKE_IMAGE_CHANGE_IN_PROGRESS_STATE)

@@ -13,8 +13,10 @@ import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeImageChangeEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFailedEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeValidationFailedEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeWaitRequest;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
@@ -60,7 +62,11 @@ public class DatalakeUpgradeWaitHandler extends ExceptionCatcherEventHandler<Dat
             response = new DatalakeImageChangeEvent(sdxId, userId, request.getImageId());
         } catch (UserBreakException userBreakException) {
             LOGGER.error("Upgrade polling exited before timeout. Cause: ", userBreakException);
-            response = new DatalakeUpgradeFailedEvent(sdxId, userId, userBreakException);
+            if (userBreakException.getCause() instanceof UpgradeValidationFailedException) {
+                response = new DatalakeUpgradeValidationFailedEvent(sdxId, userId);
+            } else {
+                response = new DatalakeUpgradeFailedEvent(sdxId, userId, userBreakException);
+            }
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.error("Upgrade poller stopped for cluster: {}", sdxId);
             response = new DatalakeUpgradeFailedEvent(sdxId, userId,
