@@ -69,7 +69,7 @@ public class ClouderaManagerCollectDiagnosticsListenerTask extends AbstractCloud
                 .forEach(cmd -> digForFailureCause(cmd, childErrors, commandsResourceApi));
 
         if (childErrors.isEmpty() && StringUtils.isNotEmpty(apiCommand.getResultMessage())) {
-            String reason = String.format("Command [%s], with id [%.0f] failed: %s", apiCommand.getName(), apiCommand.getId(), apiCommand.getResultMessage());
+            String reason = String.format("Command [%s], with id [%s] failed: %s", apiCommand.getName(), apiCommand.getId(), apiCommand.getResultMessage());
             errorReasons.add(reason);
         }
 

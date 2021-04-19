@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.math.BigDecimal;
 import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
@@ -404,7 +403,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     private void processHostCertsBatchResponse(ApiClient client, ApiBatchResponse apiBatchResponse) {
         if (apiBatchResponse.getSuccess()) {
-            List<BigDecimal> ids = apiBatchResponse.getItems().stream()
+            List<Integer> ids = apiBatchResponse.getItems().stream()
                     .map(bre -> new Json((String) bre.getResponse()).getSilent(ApiCommand.class).getId())
                     .collect(Collectors.toList());
             PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCommandList(stack, client, ids, "Rotate host certificates");

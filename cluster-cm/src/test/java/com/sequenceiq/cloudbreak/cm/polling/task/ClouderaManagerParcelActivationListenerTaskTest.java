@@ -11,7 +11,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
@@ -40,7 +39,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerParcelActivationListenerTaskTest {
 
-    private static final BigDecimal COMMAND_ID = new BigDecimal(100);
+    private static final Integer COMMAND_ID = 100;
 
     private static final String STACK_NAME = "stack_name";
 

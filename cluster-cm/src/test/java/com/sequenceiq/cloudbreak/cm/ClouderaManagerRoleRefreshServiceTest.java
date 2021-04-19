@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 
 import org.junit.jupiter.api.Test;
@@ -32,7 +31,7 @@ public class ClouderaManagerRoleRefreshServiceTest {
 
     private static final String CLUSTER_NAME = "myCluster";
 
-    private static final BigDecimal COMMAND_ID = BigDecimal.TEN;
+    private static final Integer COMMAND_ID = 10;
 
     @InjectMocks
     private ClouderaManagerRoleRefreshService underTest;

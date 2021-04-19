@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -41,7 +40,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
         boolean result = false;
         ClouderaManagerSyncCommandPollerObject castedObj = cast(pollerObject);
         try {
-            Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(
+            Optional<Integer> commandId = syncApiCommandRetriever.getCommandId(
                     castedObj.getCommandName(), api, castedObj.getStack());
             if (commandId.isPresent() && !commandId.get().equals(pollerObject.getId())) {
                 LOGGER.debug("Found a new latest command ID for {} command: {}", castedObj.getCommandName(), commandId);

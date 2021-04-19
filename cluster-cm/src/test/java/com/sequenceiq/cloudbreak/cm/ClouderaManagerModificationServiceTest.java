@@ -11,7 +11,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +80,7 @@ class ClouderaManagerModificationServiceTest {
 
     private static final long CLUSTER_ID = 1L;
 
-    private static final BigDecimal REFRESH_PARCEL_REPOS_ID = new BigDecimal(1);
+    private static final Integer REFRESH_PARCEL_REPOS_ID = 1;
 
     @InjectMocks
     private ClouderaManagerModificationService underTest;
@@ -284,7 +283,7 @@ class ClouderaManagerModificationServiceTest {
         setUpReadHosts();
         setUpDeployClientConfigPolling(PollingResult.SUCCESS);
 
-        BigDecimal applyHostTemplateCommandId = new BigDecimal(200);
+        Integer applyHostTemplateCommandId = 200;
         when(hostTemplatesResourceApi.applyHostTemplate(eq(STACK_NAME), eq(HOST_GROUP_NAME), eq(Boolean.TRUE), any(ApiHostRefList.class)))
                 .thenReturn(new ApiCommand().id(applyHostTemplateCommandId));
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(eq(apiClientMock))).thenReturn(hostTemplatesResourceApi);
@@ -331,7 +330,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getParcelResourceApi(any())).thenReturn(parcelResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
-        BigDecimal apiCommandId = new BigDecimal(200);
+        Integer apiCommandId = 200;
         PollingResult successPollingResult = PollingResult.SUCCESS;
 
         // Restart services
@@ -371,7 +370,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any())).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
 
-        BigDecimal apiCommandId = new BigDecimal(200);
+        Integer apiCommandId = 200;
         PollingResult successPollingResult = PollingResult.SUCCESS;
 
         // Mgmt Service restart
@@ -496,14 +495,14 @@ class ClouderaManagerModificationServiceTest {
         apiServiceList.setItems(apiServices);
 
         List<ApiCommand> apiCommands = List.of(
-                new ApiCommand().name("DeployClusterClientConfig").id(BigDecimal.ONE),
-                new ApiCommand().name("RefreshCluster").id(BigDecimal.ONE));
+                new ApiCommand().name("DeployClusterClientConfig").id(1),
+                new ApiCommand().name("RefreshCluster").id(1));
         ApiCommandList apiCommandList = new ApiCommandList();
         apiCommandList.setItems(apiCommands);
 
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
         when(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
-                .thenReturn(new ApiCommand().id(BigDecimal.ONE));
+                .thenReturn(new ApiCommand().id(1));
         when(servicesResourceApi.readServices("stack_name", "SUMMARY")).thenReturn(apiServiceList);
         when(clustersResourceApi.listActiveCommands(stack.getName(), "SUMMARY")).thenReturn(apiCommandList);
 
@@ -554,9 +553,9 @@ class ClouderaManagerModificationServiceTest {
     }
 
     private void setUpDeployClientConfigPolling(PollingResult success) throws ApiException, CloudbreakException {
-        BigDecimal deployClientCommandId = new BigDecimal(100);
+        Integer deployClientCommandId = 100;
         when(clustersResourceApi.listActiveCommands(STACK_NAME, "SUMMARY")).thenReturn(new ApiCommandList().addItemsItem(
-                new ApiCommand().id(BigDecimal.ONE).name("notDeployClientConfig")));
+                new ApiCommand().id(1).name("notDeployClientConfig")));
         when(clouderaManagerCommonCommandService.getDeployClientConfigCommandId(any(), any(), any())).thenReturn(deployClientCommandId);
         when(clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(eq(stack), eq(apiClientMock), eq(deployClientCommandId)))
                 .thenReturn(success);

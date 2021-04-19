@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfig;
 import static java.util.Objects.requireNonNull;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -128,12 +127,12 @@ public class ClouderaManagerMgmtSetupService {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
-        Optional<BigDecimal> generateCredentialsCommandId = apiCommandList.getItems().stream()
+        Optional<Integer> generateCredentialsCommandId = apiCommandList.getItems().stream()
                 .filter(toGenerateCredentialsCommand()).map(ApiCommand::getId).findFirst();
         generateCredentialsCommandId.ifPresent(pollCredentialGeneration(stack, apiClient));
     }
 
-    private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
+    private Consumer<Integer> pollCredentialGeneration(Stack stack, ApiClient client) {
         return id -> {
             LOGGER.debug("Generate Credentials command is still active.");
             clouderaManagerPollingServiceProvider.startPollingCmGenerateCredentials(stack, client, id);

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,9 +60,9 @@ public class ClouderaManagerSyncApiCommandIdProvider {
      * 4. if the API command ties out, use 1. with polling
      * 5. if polling finished, do a last check, returns with the command id or throw an exception
      */
-    public BigDecimal executeSyncApiCommandAndGetCommandId(String commandName, ClustersResourceApi api, Stack stack,
+    public Integer executeSyncApiCommandAndGetCommandId(String commandName, ClustersResourceApi api, Stack stack,
             List<ApiCommand> activeCommands, Callable<ApiCommand> commandAction) throws CloudbreakException, ApiException {
-        Optional<BigDecimal> runningCommandIdOpt = getRunningCommandIdFromActiveCommands(commandName, activeCommands);
+        Optional<Integer> runningCommandIdOpt = getRunningCommandIdFromActiveCommands(commandName, activeCommands);
         if (runningCommandIdOpt.isPresent()) {
             LOGGER.debug("Found actively running {} command with id {}. Skip execution.", commandName, runningCommandIdOpt.get());
             return runningCommandIdOpt.get();
@@ -72,9 +71,9 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private BigDecimal executeSyncApiCommand(String commandName, ClustersResourceApi api, Stack stack, Callable<ApiCommand> commandAction)
+    private Integer executeSyncApiCommand(String commandName, ClustersResourceApi api, Stack stack, Callable<ApiCommand> commandAction)
             throws CloudbreakException, ApiException {
-        Optional<BigDecimal> lastSyncApiCommandId = syncApiCommandRetriever.getLastFinishedCommandId(commandName, api, stack);
+        Optional<Integer> lastSyncApiCommandId = syncApiCommandRetriever.getLastFinishedCommandId(commandName, api, stack);
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         Future<ApiCommand> future = executorService.submit(() -> {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
@@ -100,12 +99,12 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private Optional<BigDecimal> getRunningCommandIdFromActiveCommands(String commandName, List<ApiCommand> activeCommands) {
+    private Optional<Integer> getRunningCommandIdFromActiveCommands(String commandName, List<ApiCommand> activeCommands) {
         if (CollectionUtils.isEmpty(activeCommands)) {
             LOGGER.debug("Not found any active commands. Trigger {} command.", commandName);
             return Optional.empty();
         } else {
-            BigDecimal runningCommandId = activeCommands
+            Integer runningCommandId = activeCommands
                     .stream()
                     .filter(c -> commandName.equals(c.getName()))
                     .findFirst()
@@ -115,15 +114,15 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private BigDecimal getCommandIdAfterTimeout(String commandName, ClustersResourceApi api, Stack stack,
-            Future<ApiCommand> future, BigDecimal lastSyncApiCommandId)
+    private Integer getCommandIdAfterTimeout(String commandName, ClustersResourceApi api, Stack stack,
+            Future<ApiCommand> future, Integer lastSyncApiCommandId)
             throws ApiException, CloudbreakException {
         future.cancel(true);
         LOGGER.debug("{} command took too much time. Start command ID query by listing active commands", commandName);
         clouderaManagerPollingServiceProvider.checkSyncApiCommandId(
                 stack, api.getApiClient(), commandName, lastSyncApiCommandId,
                 syncApiCommandRetriever);
-        Optional<BigDecimal> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack);
+        Optional<Integer> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack);
         if (finalCommandId.isPresent()) {
             LOGGER.debug("Get final command ID after timeout: {}", finalCommandId.get());
             return finalCommandId.get();

@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -418,7 +417,7 @@ public class ClouderaManagerSecurityServiceTest {
 
     private ApiBatchResponse createApiBatchResponse(ApiHostList hostList, boolean success) {
         List<ApiBatchResponseElement> responseElements = hostList.getItems().stream().map(req -> {
-            ApiCommand apiCommand = new ApiCommand().active(Boolean.FALSE).id(BigDecimal.ONE).hostRef(new ApiHostRef().hostId(req.getHostId()));
+            ApiCommand apiCommand = new ApiCommand().active(Boolean.FALSE).id(1).hostRef(new ApiHostRef().hostId(req.getHostId()));
             return new ApiBatchResponseElement().response(JsonUtil.writeValueAsStringSilent(apiCommand));
         }).collect(Collectors.toList());
         return new ApiBatchResponse().success(success).items(responseElements);

@@ -8,7 +8,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -80,9 +79,9 @@ public class ClouderaManagerSyncApiCommandIdProviderTest {
         // GIVEN
         given(syncApiCommandPollerConfig.getInterruptTimeoutSeconds()).willReturn(INTERRUPT_TIMEOUT_SECONDS);
         given(executorService.submit(any(Callable.class))).willReturn(future);
-        given(future.get(INTERRUPT_TIMEOUT_SECONDS, TimeUnit.SECONDS)).willReturn(createCommand(1L));
+        given(future.get(INTERRUPT_TIMEOUT_SECONDS, TimeUnit.SECONDS)).willReturn(createCommand(1));
         // WHEN
-        BigDecimal result = underTest.executeSyncApiCommandAndGetCommandId(
+        Integer result = underTest.executeSyncApiCommandAndGetCommandId(
                 COMMAND_NAME, clustersResourceApi, stack, null, apiCommandCallable);
         // THEN
         assertEquals(1L, result.longValue());
@@ -94,11 +93,11 @@ public class ClouderaManagerSyncApiCommandIdProviderTest {
         // GIVEN
         List<ApiCommand> activeCommands = new ArrayList<>();
         ApiCommand command = new ApiCommand();
-        command.setId(new BigDecimal(10L));
+        command.setId(10);
         command.setName(COMMAND_NAME);
         activeCommands.add(command);
         // WHEN
-        BigDecimal result = underTest.executeSyncApiCommandAndGetCommandId(
+        Integer result = underTest.executeSyncApiCommandAndGetCommandId(
                 COMMAND_NAME, clustersResourceApi, stack, activeCommands, apiCommandCallable);
         // THEN
         assertEquals(10L, result.longValue());
@@ -160,9 +159,9 @@ public class ClouderaManagerSyncApiCommandIdProviderTest {
         verify(future, times(1)).cancel(true);
     }
 
-    private ApiCommand createCommand(long id) {
+    private ApiCommand createCommand(int id) {
         ApiCommand command = new ApiCommand();
-        command.setId(new BigDecimal(id));
+        command.setId(id);
         return command;
     }
 

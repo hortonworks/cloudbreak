@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
@@ -68,9 +67,8 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     @Test
     public void testPollingWithFiveInternalServerErrors() throws ApiException {
         Stack stack = new Stack();
-        BigDecimal id = new BigDecimal(ID);
-        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
-        when(commandsResourceApi.readCommand(id)).thenAnswer(new Http500Answer(FIVE));
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, ID);
+        when(commandsResourceApi.readCommand(ID)).thenAnswer(new Http500Answer(FIVE));
 
         for (int i = 0; i < FIVE; i++) {
             boolean inProgress = underTest.checkStatus(pollerObject);
@@ -84,9 +82,8 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     @Test
     public void testPollingWithSixInternalServerErrors() throws ApiException {
         Stack stack = new Stack();
-        BigDecimal id = new BigDecimal(1);
-        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
-        when(commandsResourceApi.readCommand(id)).thenAnswer(new Http500Answer(SIX));
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, 1);
+        when(commandsResourceApi.readCommand(1)).thenAnswer(new Http500Answer(SIX));
 
         expectedEx.expect(ClouderaManagerOperationFailedException.class);
         expectedEx.expectMessage("Operation is considered failed.");
@@ -101,13 +98,12 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     @Test
     public void testPollingWithFiveSocketExceptions() throws ApiException {
         Stack stack = new Stack();
-        BigDecimal id = new BigDecimal(ID);
-        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, ID);
         SocketTimeoutException socketTimeoutException = new SocketTimeoutException("timeout");
         ApiException apiException0 = new ApiException(socketTimeoutException);
         SocketException socketException = new SocketException("Network is unreachable (connect failed)");
         ApiException apiException1 = new ApiException(socketException);
-        when(commandsResourceApi.readCommand(id))
+        when(commandsResourceApi.readCommand(ID))
                 .thenAnswer(new ExceptionThrowingApiCommandAnswer(apiException0, apiException1, apiException1, apiException1, apiException1));
 
         for (int i = 0; i < FIVE; i++) {
@@ -122,12 +118,11 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     @Test
     public void testPollingWithThreeInternalServerErrorAndThreeSocketExceptions() throws ApiException {
         Stack stack = new Stack();
-        BigDecimal id = new BigDecimal(1);
-        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, 1);
         SocketException socketException = new SocketException("Network is unreachable (connect failed)");
         ApiException socketApiException = new ApiException(socketException);
         ApiException internalServerError = new ApiException(HttpStatus.INTERNAL_SERVER_ERROR.value(), "error");
-        when(commandsResourceApi.readCommand(id)).thenAnswer(new ExceptionThrowingApiCommandAnswer(internalServerError, internalServerError,
+        when(commandsResourceApi.readCommand(1)).thenAnswer(new ExceptionThrowingApiCommandAnswer(internalServerError, internalServerError,
                 internalServerError, socketApiException, socketApiException, socketApiException));
 
         expectedEx.expect(ClouderaManagerOperationFailedException.class);
@@ -147,15 +142,14 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.UPDATE_IN_PROGRESS);
         stack.setStackStatus(stackStatus);
-        BigDecimal id = new BigDecimal(1);
-        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, 1);
         ConnectException connectException = new ConnectException("Connect failed.");
         ApiException apiException = new ApiException(connectException);
         ApiException[] exceptions = new ApiException[TEN];
         for (int i = 0; i < TEN; i++) {
             exceptions[i] = apiException;
         }
-        when(commandsResourceApi.readCommand(id)).thenAnswer(new ExceptionThrowingApiCommandAnswer(exceptions));
+        when(commandsResourceApi.readCommand(1)).thenAnswer(new ExceptionThrowingApiCommandAnswer(exceptions));
 
         for (int i = 0; i < TEN; i++) {
             boolean inProgress = underTest.checkStatus(pollerObject);
