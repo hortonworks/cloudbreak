@@ -31,6 +31,7 @@ import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeCouldN
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFailedEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeSuccessEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeValidationFailedEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeWaitRequest;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeVmReplaceWaitRequest;
@@ -256,6 +257,32 @@ public class DatalakeUpgradeActions {
             @Override
             protected Object getFailurePayload(DatalakeUpgradeCouldNotStartEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 return null;
+            }
+        };
+    }
+
+    @Bean(name = "DATALAKE_UPGRADE_VALIDATION_FAILED_STATE")
+    public Action<?, ?> validationFailedAction() {
+        return new AbstractSdxAction<>(DatalakeUpgradeValidationFailedEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    DatalakeUpgradeValidationFailedEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, DatalakeUpgradeValidationFailedEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Sdx upgrade validation failed for sdxId: {}", payload.getResourceId());
+                sdxStatusService.setStatusForDatalakeAndNotify(
+                        DatalakeStatusEnum.RUNNING,
+                        "Upgrade validation failed",
+                        payload.getResourceId());
+                sendEvent(context, DATALAKE_UPGRADE_FINALIZED_EVENT.event(), payload);
+            }
+
+            @Override
+            protected Object getFailurePayload(DatalakeUpgradeValidationFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return DatalakeUpgradeFailedEvent.from(payload, ex);
             }
         };
     }

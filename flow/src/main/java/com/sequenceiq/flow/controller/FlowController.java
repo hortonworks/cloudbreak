@@ -7,6 +7,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -30,22 +32,22 @@ public class FlowController implements FlowEndpoint {
     }
 
     @Override
-    public FlowLogResponse getLastFlowByResourceName(String resourceName) {
+    public FlowLogResponse getLastFlowByResourceName(@AccountId String accountId, String resourceName) {
         return flowService.getLastFlowByResourceName(resourceName);
     }
 
     @Override
-    public FlowLogResponse getLastFlowByResourceCrn(String resourceCrn) {
+    public FlowLogResponse getLastFlowByResourceCrn(@TenantAwareParam String resourceCrn) {
         return flowService.getLastFlowByResourceCrn(resourceCrn);
     }
 
     @Override
-    public List<FlowLogResponse> getFlowLogsByResourceCrn(String resourceCrn) {
+    public List<FlowLogResponse> getFlowLogsByResourceCrn(@TenantAwareParam String resourceCrn) {
         return flowService.getFlowLogsByResourceCrn(resourceCrn);
     }
 
     @Override
-    public List<FlowLogResponse> getFlowLogsByResourceName(String resourceName) {
+    public List<FlowLogResponse> getFlowLogsByResourceName(@AccountId String accountId, String resourceName) {
         return flowService.getFlowLogsByResourceName(resourceName);
     }
 

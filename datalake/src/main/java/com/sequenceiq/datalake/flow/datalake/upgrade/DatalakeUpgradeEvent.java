@@ -12,6 +12,7 @@ public enum DatalakeUpgradeEvent implements FlowEvent {
     DATALAKE_VM_REPLACE_EVENT("DatalakeVmReplaceEvent"),
     DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT,
     DATALAKE_UPGRADE_SUCCESS_EVENT("DatalakeUpgradeSuccessEvent"),
+    DATALAKE_UPGRADE_VALIDATION_FAILED_EVENT("DatalakeUpgradeValidationFailedEvent"),
     DATALAKE_UPGRADE_FAILED_EVENT("DatalakeUpgradeFailedEvent"),
     DATALAKE_UPGRADE_FAILED_HANDLED_EVENT,
     DATALAKE_UPGRADE_FINALIZED_EVENT;

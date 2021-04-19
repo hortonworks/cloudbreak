@@ -141,13 +141,12 @@ public class CloudbreakFlowServiceTest {
         response.setStateStatus(StateStatus.SUCCESSFUL);
         response.setFinalized(true);
         response.setFlowId(FLOW_ID);
-        when(flowEndpoint.getLastFlowByResourceName(anyString()))
-                .thenReturn(response);
+        when(flowEndpoint.getLastFlowByResourceName(any(), anyString())).thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
 
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
-        verify(flowEndpoint).getLastFlowByResourceName(anyString());
+        verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
 
         verify(sdxClusterRepository).save(clusterCaptor.capture());
         assertEquals(FLOW_ID, clusterCaptor.getValue().getLastCbFlowId());
@@ -165,13 +164,13 @@ public class CloudbreakFlowServiceTest {
         response.setStateStatus(StateStatus.SUCCESSFUL);
         response.setFinalized(true);
         response.setFlowChainId(FLOW_CHAIN_ID);
-        when(flowEndpoint.getLastFlowByResourceName(anyString()))
+        when(flowEndpoint.getLastFlowByResourceName(any(), anyString()))
                 .thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
 
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
-        verify(flowEndpoint).getLastFlowByResourceName(anyString());
+        verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
 
         verify(sdxClusterRepository).save(clusterCaptor.capture());
         assertEquals(FLOW_CHAIN_ID, clusterCaptor.getValue().getLastCbFlowChainId());
@@ -190,13 +189,13 @@ public class CloudbreakFlowServiceTest {
         response.setFinalized(true);
         response.setFlowId(FLOW_ID);
         response.setFlowChainId(FLOW_CHAIN_ID);
-        when(flowEndpoint.getLastFlowByResourceName(anyString()))
+        when(flowEndpoint.getLastFlowByResourceName(any(), anyString()))
                 .thenReturn(response);
         when(sdxClusterRepository.save(any())).thenReturn(cluster);
 
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
-        verify(flowEndpoint).getLastFlowByResourceName(anyString());
+        verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
 
         verify(sdxClusterRepository).save(clusterCaptor.capture());
         assertEquals(FLOW_CHAIN_ID, clusterCaptor.getValue().getLastCbFlowChainId());
@@ -210,11 +209,11 @@ public class CloudbreakFlowServiceTest {
         cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
-        when(flowEndpoint.getLastFlowByResourceName(anyString())).thenThrow(new NotFoundException("something"));
+        when(flowEndpoint.getLastFlowByResourceName(any(), anyString())).thenThrow(new NotFoundException("something"));
 
         underTest.saveLastCloudbreakFlowChainId(cluster, null);
 
-        verify(flowEndpoint).getLastFlowByResourceName(anyString());
+        verify(flowEndpoint).getLastFlowByResourceName(any(), anyString());
         verify(sdxClusterRepository).save(clusterCaptor.capture());
         assertNull(clusterCaptor.getValue().getLastCbFlowId());
         assertNull(clusterCaptor.getValue().getLastCbFlowChainId());
