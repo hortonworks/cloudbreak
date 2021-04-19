@@ -73,6 +73,9 @@ freeipa:
   sdx:
     url: http://localhost:8086
     contextPath: /dl
+  cloudbreak:
+    url: http://localhost:9091
+    contextPath: /cb
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000

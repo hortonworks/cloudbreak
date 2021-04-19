@@ -25,9 +25,8 @@ public class ImageCatalogV4Base {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @NotNull
+    @ApiModelProperty(value = ImageCatalogDescription.IMAGE_CATALOG_URL)
     @ValidImageCatalog
-    @ApiModelProperty(value = ImageCatalogDescription.IMAGE_CATALOG_URL, required = true)
     private String url;
 
     @ApiModelProperty(ModelDescriptions.CREATOR)

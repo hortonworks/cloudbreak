@@ -62,7 +62,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
     public ImageCatalogV4Responses list(Long workspaceId, boolean customCatalogsOnly) {
-        Set<ImageCatalog> allByWorkspaceId = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG);
+        Set<ImageCatalog> allByWorkspaceId = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, customCatalogsOnly);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(allByWorkspaceId, ImageCatalogV4Response.class));
     }
 
@@ -150,7 +150,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform,
-                                            String runtimeVersion, String imageType) throws Exception {
+        String runtimeVersion, String imageType) throws Exception {
         Images images = imageCatalogService.getImagesByCatalogName(workspaceId, name, stackName, platform);
         return converterUtil.convert(images, ImagesV4Response.class);
     }

@@ -58,5 +58,4 @@ public class V4ImageCatalogGetImageByNameAndByIdRestUrlParser extends LegacyRest
     protected String getResourceEvent(Matcher matcher) {
         return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
-
 }
