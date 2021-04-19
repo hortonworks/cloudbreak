@@ -191,6 +191,7 @@ public class AmbariDecommissioner {
     public void init() {
         COMPONENTS_NEED_TO_DECOMMISSION.put(DATANODE, "HDFS");
         COMPONENTS_NEED_TO_DECOMMISSION.put(NODEMANAGER, "YARN");
+        COMPONENTS_NEED_TO_DECOMMISSION.put(HBASE_REGIONSERVER, "HBASE");
     }
 
     public Set<String> collectDownscaleCandidates(Stack stack, String hostGroupName, Integer scalingAdjustment, boolean forced) throws CloudbreakException {
