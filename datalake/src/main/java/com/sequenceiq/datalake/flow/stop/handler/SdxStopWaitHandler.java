@@ -31,7 +31,7 @@ public class SdxStopWaitHandler extends ExceptionCatcherEventHandler<SdxStopWait
     @Value("${sdx.stack.stop.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.stop.duration_min:40}")
+    @Value("${sdx.stack.stop.duration_min:120}")
     private int durationInMinutes;
 
     @Inject
