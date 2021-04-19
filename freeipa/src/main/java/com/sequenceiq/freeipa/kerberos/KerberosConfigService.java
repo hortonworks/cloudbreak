@@ -56,6 +56,19 @@ public class KerberosConfigService extends AbstractArchivistService<KerberosConf
         return kerberosConfigRepository.findByAccountIdAndEnvironmentCrn(accountId, environmentCrn);
     }
 
+    public List<KerberosConfig> findAllInEnvironment(String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(accountId, environmentCrn);
+    }
+
+    public KerberosConfig save(KerberosConfig kerberosConfig) {
+        return kerberosConfigRepository.save(kerberosConfig);
+    }
+
+    public List<KerberosConfig> saveAll(List<KerberosConfig> kerberosConfigs) {
+        return kerberosConfigRepository.saveAll(kerberosConfigs);
+    }
+
     public void delete(String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
         delete(environmentCrn, accountId);

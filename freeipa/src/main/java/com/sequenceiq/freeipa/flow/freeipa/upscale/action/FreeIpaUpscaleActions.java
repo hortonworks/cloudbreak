@@ -8,6 +8,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCA
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_STARTING_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_UPDATE_METADATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent.UPSCALE_VALIDATE_INSTANCES_FINISHED_EVENT;
@@ -88,6 +90,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.UpscaleStackResultToU
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.TlsSetupService;
+import com.sequenceiq.freeipa.service.config.KerberosConfigUpdateService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
@@ -462,6 +465,28 @@ public class FreeIpaUpscaleActions {
                     }
                 }
                 sendEvent(context, UPSCALE_UPDATE_METADATA_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_STATE")
+    public Action<?, ?> updateKerberosNameserversConfigAction() {
+        return new AbstractUpscaleAction<>(StackEvent.class) {
+            @Inject
+            private KerberosConfigUpdateService kerberosConfigUpdateService;
+
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
+                Stack stack = context.getStack();
+                stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Updating kerberos nameserver config");
+                try {
+                    kerberosConfigUpdateService.updateNameservers(stack.getId());
+                    sendEvent(context, UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
+                } catch (Exception e) {
+                    LOGGER.error("Failed to update the kerberos nameserver config", e);
+                    sendEvent(context, UPSCALE_UPDATE_KERBEROS_NAMESERVERS_CONFIG_FAILED_EVENT.selector(),
+                            new UpscaleFailureEvent(stack.getId(), "Updating kerberos nameserver config", Set.of(), Map.of(), e));
+                }
             }
         };
     }

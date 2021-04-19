@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.kerberos;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 
 import java.util.List;
 import java.util.Optional;
@@ -91,6 +92,33 @@ public class KerberosConfigServiceTest {
         KerberosConfig actualResult = underTest.get(ENVIRONMENT_ID);
         // THEN
         assertEquals(expectedKerberosConfig, actualResult);
+    }
+
+    @Test
+    public void testFindAllInEnvironment() {
+        // GIVEN
+        KerberosConfig expectedKerberosConfig1 = new KerberosConfig();
+        KerberosConfig expectedKerberosConfig2 = new KerberosConfig();
+        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_ID))
+                .thenReturn(List.of(expectedKerberosConfig1, expectedKerberosConfig2));
+        // WHEN
+        List<KerberosConfig> actualResults = underTest.findAllInEnvironment(ENVIRONMENT_ID);
+        // THEN
+        assertEquals(List.of(expectedKerberosConfig1, expectedKerberosConfig2), actualResults);
+    }
+
+    @Test
+    public void testSaveAll() {
+        // GIVEN
+        KerberosConfig expectedKerberosConfig1 = new KerberosConfig();
+        KerberosConfig expectedKerberosConfig2 = new KerberosConfig();
+        List<KerberosConfig> kerberosConfigs = List.of(expectedKerberosConfig1, expectedKerberosConfig2);
+        Mockito.when(kerberosConfigRepository.saveAll(any())).thenReturn(kerberosConfigs);
+        // WHEN
+        List<KerberosConfig> actualResults = underTest.saveAll(List.of(expectedKerberosConfig1, expectedKerberosConfig2));
+        // THEN
+        assertEquals(kerberosConfigs, actualResults);
     }
 
     @Test
