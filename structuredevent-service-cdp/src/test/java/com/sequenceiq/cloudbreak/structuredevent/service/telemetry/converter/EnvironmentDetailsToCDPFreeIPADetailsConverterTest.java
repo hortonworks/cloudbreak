@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 import static org.mockito.Mockito.when;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,24 @@ class EnvironmentDetailsToCDPFreeIPADetailsConverterTest {
     @BeforeEach()
     public void setUp() {
         underTest = new EnvironmentDetailsToCDPFreeIPADetailsConverter();
+    }
+
+    @Test
+    public void testNull() {
+        UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(null);
+
+        Assertions.assertFalse(freeIPADetails.getSpot());
+        Assertions.assertEquals(-1, freeIPADetails.getNodes());
+    }
+
+    @Test
+    public void testNullFreeIpaCreationDto() {
+        when(environmentDetails.getFreeIpaCreation()).thenReturn(null);
+
+        UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(environmentDetails);
+
+        Assertions.assertFalse(freeIPADetails.getSpot());
+        Assertions.assertEquals(-1, freeIPADetails.getNodes());
     }
 
     @Test

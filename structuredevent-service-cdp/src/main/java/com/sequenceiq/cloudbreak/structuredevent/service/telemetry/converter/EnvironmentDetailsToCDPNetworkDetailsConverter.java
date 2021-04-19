@@ -24,8 +24,12 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentDetailsToCDPNetworkDetailsConverter.class);
 
+    private static final int DEFAULT_INTEGER_VALUE = -1;
+
     public UsageProto.CDPNetworkDetails convert(EnvironmentDetails environmentDetails) {
         UsageProto.CDPNetworkDetails.Builder cdpNetworkDetails = UsageProto.CDPNetworkDetails.newBuilder();
+        cdpNetworkDetails.setNumberPublicSubnets(DEFAULT_INTEGER_VALUE);
+        cdpNetworkDetails.setNumberPrivateSubnets(DEFAULT_INTEGER_VALUE);
 
         Tunnel tunnel = environmentDetails.getTunnel();
         if (tunnel != null) {
@@ -37,20 +41,26 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
             cdpNetworkDetails.setNetworkType(network.getRegistrationType().name());
             cdpNetworkDetails.setServiceEndpointCreation(network.getServiceEndpointCreation().name());
             if (network.getSubnetMetas() != null) {
-                List<SubnetType> types = network.getSubnetMetas().values().stream().map(CloudSubnet::getType)
-                        .filter(Objects::nonNull).sorted().collect(Collectors.toUnmodifiableList());
-                cdpNetworkDetails.setNumberPrivateSubnets(
-                        types.stream()
-                                .filter(e -> e.equals(SubnetType.PRIVATE) || e.equals(SubnetType.MLX) || e.equals(SubnetType.DWX))
-                                .collect(Collectors.toList())
-                                .size());
-                cdpNetworkDetails.setNumberPublicSubnets(
-                        types.stream()
-                                .filter(e -> e.equals(SubnetType.PUBLIC))
-                                .collect(Collectors.toList())
-                                .size());
+                if (network.getSubnetMetas().isEmpty()) {
+                    cdpNetworkDetails.setNumberPrivateSubnets(0);
+                    cdpNetworkDetails.setNumberPublicSubnets(0);
+                } else {
+                    List<SubnetType> types = network.getSubnetMetas().values().stream().map(CloudSubnet::getType)
+                            .filter(Objects::nonNull).sorted().collect(Collectors.toUnmodifiableList());
+                    if (!types.isEmpty()) {
+                        cdpNetworkDetails.setNumberPrivateSubnets(
+                                types.stream()
+                                        .filter(e -> e.equals(SubnetType.PRIVATE) || e.equals(SubnetType.MLX) || e.equals(SubnetType.DWX))
+                                        .collect(Collectors.toList())
+                                        .size());
+                        cdpNetworkDetails.setNumberPublicSubnets(
+                                types.stream()
+                                        .filter(e -> e.equals(SubnetType.PUBLIC))
+                                        .collect(Collectors.toList())
+                                        .size());
+                    }
+                }
             }
-
             cdpNetworkDetails.setPublicEndpointAccessGateway(network.getPublicEndpointAccessGateway() != null ?
                     network.getPublicEndpointAccessGateway().name() : PublicEndpointAccessGateway.DISABLED.name());
         }

@@ -35,7 +35,7 @@ class StructuredFlowEventToClusterShapeConverterTest {
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
         Assert.assertEquals("", flowClusterShape.getClusterTemplateName());
-        Assert.assertEquals(0, flowClusterShape.getNodes());
+        Assert.assertEquals(-1, flowClusterShape.getNodes());
         Assert.assertEquals("", flowClusterShape.getDefinitionDetails());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
@@ -43,7 +43,7 @@ class StructuredFlowEventToClusterShapeConverterTest {
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
         Assert.assertEquals("", syncClusterShape.getClusterTemplateName());
-        Assert.assertEquals(0, syncClusterShape.getNodes());
+        Assert.assertEquals(-1, syncClusterShape.getNodes());
         Assert.assertEquals("", syncClusterShape.getDefinitionDetails());
     }
 

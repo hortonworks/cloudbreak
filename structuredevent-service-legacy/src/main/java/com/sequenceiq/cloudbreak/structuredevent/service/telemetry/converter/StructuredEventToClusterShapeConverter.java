@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 @Component
 public class StructuredEventToClusterShapeConverter {
 
+    private static final int DEFAULT_INTEGER_VALUE = -1;
+
     public UsageProto.CDPClusterShape convert(StructuredFlowEvent structuredFlowEvent) {
 
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
@@ -44,6 +46,7 @@ public class StructuredEventToClusterShapeConverter {
     private UsageProto.CDPClusterShape.Builder convert(BlueprintDetails blueprintDetails, StackDetails stackDetails) {
 
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
+        cdpClusterShape.setNodes(DEFAULT_INTEGER_VALUE);
 
         if (blueprintDetails != null) {
             cdpClusterShape.setClusterTemplateName(defaultIfEmpty(blueprintDetails.getName(), ""));
