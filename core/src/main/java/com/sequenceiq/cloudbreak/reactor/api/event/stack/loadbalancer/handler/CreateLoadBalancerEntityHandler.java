@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoad
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -63,6 +64,9 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
 
     @Inject
     private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private NetworkService networkService;
 
     @Inject
     private SubnetSelector subnetSelector;
@@ -114,10 +118,15 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
                 measure(() -> instanceGroupService.saveAll(newLoadBalancers.stream()
                         .flatMap(lb -> lb.getAllInstanceGroups().stream()).collect(Collectors.toSet())),
                     LOGGER, "Instance groups saved in {} ms for stack {}", stackName);
+                if (stack.getNetwork() != null) {
+                    measure(() -> networkService.pureSave(stack.getNetwork()), LOGGER,
+                        "Network saved in {} ms for stack {}", stackName);
+                }
             }
 
             LOGGER.debug("Load balancer entities successfully persisted.");
             savedStack.setInstanceGroups(newLoadBalancers.stream().flatMap(lb -> lb.getAllInstanceGroups().stream()).collect(Collectors.toSet()));
+            savedStack.setNetwork(stack.getNetwork());
             return new CreateLoadBalancerEntitySuccess(request.getResourceId(), savedStack);
         } catch (Exception e) {
             LOGGER.warn("Failed create load balancer entities and persist them to the database.", e);
@@ -127,7 +136,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
 
     private void enableEndpointGateway(Stack stack, DetailedEnvironmentResponse environment) throws CloudbreakException {
         if (stack.getNetwork() == null) {
-            throw new CloudbreakException("Could not create endpoint gateway; network information is missing from environment");
+            throw new CloudbreakException("Could not create endpoint gateway; network information is missing from stack");
         }
 
         Json attributes = stack.getNetwork().getAttributes();

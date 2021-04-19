@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
-import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
 import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
@@ -162,26 +161,6 @@ public class AwsLaunchService {
         awsLoadBalancerLaunchService.updateCloudformationWithLoadBalancers(ac, stack, resourceNotifier, modelContext);
 
         return awsResourceConnector.check(ac, instances);
-    }
-
-    private ListStackResourcesResult updateCloudFormationStack(AuthenticatedContext ac, CloudStack stack, ModelContext modelContext) {
-        String cFStackName = cfStackUtil.getCfStackName(ac);
-        AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
-        String regionName = ac.getCloudContext().getLocation().getRegion().value();
-
-        AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
-
-        String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
-        LOGGER.debug("Update CloudFormationTemplate: {}", cfTemplate);
-        cfClient.updateStack(awsStackRequestHelper.createUpdateStackRequest(ac, stack, cFStackName, cfTemplate));
-
-        Waiter<DescribeStacksRequest> updateWaiter = cfClient.waiters().stackUpdateComplete();
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        run(updateWaiter, describeStacksRequest, stackCancellationCheck, String.format("CloudFormation stack %s update failed.", cFStackName),
-            () -> awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.UPDATE_FAILED));
-
-        return cfClient.listStackResources(awsStackRequestHelper.createListStackResourcesRequest(cFStackName));
     }
 
     private void associatePublicIpsToGatewayInstances(CloudStack stack, String cFStackName, AmazonCloudFormationClient cfRetryClient,
