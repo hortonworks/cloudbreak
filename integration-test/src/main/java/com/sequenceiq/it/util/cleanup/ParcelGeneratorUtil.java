@@ -1,7 +1,5 @@
 package com.sequenceiq.it.util.cleanup;
 
-import java.math.BigDecimal;
-
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiParcel;
@@ -22,7 +20,7 @@ public class ParcelGeneratorUtil {
     public ApiParcel getActivatedCDHParcelWithVersion(String version) {
         ApiParcel parcel = new ApiParcel();
         ApiParcelState state = new ApiParcelState();
-        state.setCount(new BigDecimal(0));
+        state.setCount(0);
         parcel.setProduct("CDH");
         parcel.setState(state);
         parcel.setVersion(version);

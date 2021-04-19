@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,16 +30,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 class ClouderaManagerTemplateInstallationCheckerTest {
-
-    private static final BigDecimal TEMPLATE_INSTALL_ID = new BigDecimal(1);
-
-    private static final BigDecimal ADD_REPOSITORIES_ID = new BigDecimal(11);
-
-    private static final BigDecimal DEPLOY_PARCELS_ID = new BigDecimal(12);
-
-    private static final BigDecimal FIRST_RUN_ID = new BigDecimal(13);
-
-    private static final BigDecimal AUDIT_DIR = new BigDecimal(14);
 
     private static final String TEMPLATE_INSTALL_NAME = "TemplateInstall";
 
@@ -71,7 +60,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     void setUp() throws ApiException {
         when(commandsResourceApi.readCommand(any())).thenReturn(apiCommand);
         when(clouderaManagerApiPojoFactory.getCommandsResourceApi(eq(apiClient))).thenReturn(commandsResourceApi);
-        pollerObject = new ClouderaManagerCommandPollerObject(new Stack(), apiClient, TEMPLATE_INSTALL_ID);
+        pollerObject = new ClouderaManagerCommandPollerObject(new Stack(), apiClient, 1);
     }
 
     @Test
@@ -167,15 +156,15 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     }
 
     private void expectReadCommandForFailedCommands(ApiCommand templateInstallCmd) throws ApiException {
-        Map<BigDecimal, ApiCommand> failedCommands = Stream.concat(
+        Map<Integer, ApiCommand> failedCommands = Stream.concat(
                 Stream.of(templateInstallCmd),
                 templateInstallCmd.getChildren().getItems().stream()
         )
                 .filter(cmd -> (cmd.getActive() != null && cmd.getActive()) || (cmd.getSuccess() != null && !cmd.getSuccess()))
                 .collect(Collectors.toMap(ApiCommand::getId, Function.identity()));
 
-        when(commandsResourceApi.readCommand(any(BigDecimal.class))).thenAnswer(invocation -> {
-            BigDecimal cmdId = invocation.getArgument(0);
+        when(commandsResourceApi.readCommand(any(Integer.class))).thenAnswer(invocation -> {
+            Integer cmdId = invocation.getArgument(0);
             ApiCommand cmd = failedCommands.get(cmdId);
             if (cmd == null) {
                 throw new IllegalArgumentException("Unexpected argument for readCommand: " + cmdId);
@@ -189,35 +178,35 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         String cmdFormat = "Command [%s], with id [%d] failed: %s";
         return String.format(msgFormat,
                 Arrays.stream(commands)
-                        .map(cmd -> String.format(cmdFormat, cmd.getName(), cmd.getId().intValue(), cmd.getResultMessage()))
+                        .map(cmd -> String.format(cmdFormat, cmd.getName(), cmd.getId(), cmd.getResultMessage()))
                         .collect(Collectors.joining(", "))
         );
     }
 
     private ApiCommand templateInstallCmd(ApiCommand... children) {
-        return cmd(TEMPLATE_INSTALL_ID, TEMPLATE_INSTALL_NAME)
+        return cmd(1, TEMPLATE_INSTALL_NAME)
                 .active(Boolean.FALSE)
                 .success(Boolean.FALSE)
                 .children(new ApiCommandList().items(List.of(children)));
     }
 
     private ApiCommand auditDirCmd() {
-        return cmd(AUDIT_DIR, AUDIT_DIR_COMMAND_NAME);
+        return cmd(14, AUDIT_DIR_COMMAND_NAME);
     }
 
     private ApiCommand addReposCmd() {
-        return cmd(ADD_REPOSITORIES_ID, ADD_REPOSITORIES_NAME);
+        return cmd(11, ADD_REPOSITORIES_NAME);
     }
 
     private ApiCommand deployParcelsCmd() {
-        return cmd(DEPLOY_PARCELS_ID, DEPLOY_PARCELS_NAME);
+        return cmd(12, DEPLOY_PARCELS_NAME);
     }
 
     private ApiCommand firstRunCmd() {
-        return cmd(FIRST_RUN_ID, FIRST_RUN_NAME);
+        return cmd(13, FIRST_RUN_NAME);
     }
 
-    private ApiCommand cmd(BigDecimal id, String name) {
+    private ApiCommand cmd(Integer id, String name) {
         return new ApiCommand().id(id).name(name).active(Boolean.FALSE).success(Boolean.TRUE);
     }
 }

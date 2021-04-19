@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +49,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
         // GIVEN
         ClouderaManagerSyncCommandPollerObject pollerObject =
                 new ClouderaManagerSyncCommandPollerObject(stack, apiClient, null, COMMAND_NAME);
-        given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(new BigDecimal(1L)));
+        given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(1));
         // WHEN
         boolean result = underTest.checkStatus(pollerObject);
         // THEN
@@ -61,8 +60,8 @@ public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
     public void testCheckStatusWithRecentCommandId() throws ApiException, CloudbreakException {
         // GIVEN
         ClouderaManagerSyncCommandPollerObject pollerObject =
-                new ClouderaManagerSyncCommandPollerObject(stack, apiClient, new BigDecimal(1L), COMMAND_NAME);
-        given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(new BigDecimal(2L)));
+                new ClouderaManagerSyncCommandPollerObject(stack, apiClient, 1, COMMAND_NAME);
+        given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(2));
         // WHEN
         boolean result = underTest.checkStatus(pollerObject);
         // THEN
@@ -73,8 +72,8 @@ public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
     public void testCheckStatusWithSameRecentCommandId() throws ApiException, CloudbreakException {
         // GIVEN
         ClouderaManagerSyncCommandPollerObject pollerObject =
-                new ClouderaManagerSyncCommandPollerObject(stack, apiClient, new BigDecimal(1L), COMMAND_NAME);
-        given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(new BigDecimal(1L)));
+                new ClouderaManagerSyncCommandPollerObject(stack, apiClient, 1, COMMAND_NAME);
+        given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(1));
         // WHEN
         boolean result = underTest.checkStatus(pollerObject);
         // THEN

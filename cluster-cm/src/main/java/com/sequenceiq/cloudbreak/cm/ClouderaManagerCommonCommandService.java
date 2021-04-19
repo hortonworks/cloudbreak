@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import static com.sequenceiq.cloudbreak.util.Benchmark.multiCheckedMeasure;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
@@ -37,13 +36,13 @@ public class ClouderaManagerCommonCommandService {
 
     }
 
-    protected BigDecimal getDeployClientConfigCommandId(Stack stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
+    protected Integer getDeployClientConfigCommandId(Stack stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
             throws ApiException, CloudbreakException {
-        BigDecimal deployClientConfigCommandId;
+        Integer deployClientConfigCommandId;
         if (syncApiCommandPollerConfig.isSyncApiCommandPollingEnaabled(stack.getResourceCrn())) {
             LOGGER.debug("Execute DeployClusterClientConfig command with sync poller.");
             deployClientConfigCommandId = multiCheckedMeasure(
-                    (Benchmark.MultiCheckedSupplier<BigDecimal, ApiException, CloudbreakException>)
+                    (Benchmark.MultiCheckedSupplier<Integer, ApiException, CloudbreakException>)
                             () -> getSyncDeployClientConfigCommandId(stack, clustersResourceApi, commands),
                     LOGGER, "The DeployClusterClientConfig command (with sync poller) registration to CM took {} ms");
         } else {
@@ -71,7 +70,7 @@ public class ClouderaManagerCommonCommandService {
         return command;
     }
 
-    private BigDecimal getSyncDeployClientConfigCommandId(Stack stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
+    private Integer getSyncDeployClientConfigCommandId(Stack stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
             throws CloudbreakException, ApiException {
         return clouderaManagerSyncApiCommandIdProvider.executeSyncApiCommandAndGetCommandId(
                 syncApiCommandPollerConfig.getDeployClusterClientConfigCommandName(), clustersResourceApi, stack, commands,

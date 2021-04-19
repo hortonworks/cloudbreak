@@ -15,7 +15,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -88,8 +87,8 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testDecommissionForLostNodesIfFirstDecommissionSucceeded() throws ApiException {
         mockListHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.SUCCESS));
-        mockAbortCommand(BigDecimal.ONE);
+        mockDecommission(Pair.of(1, PollingResult.SUCCESS));
+        mockAbortCommand(1);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
         underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), client);
@@ -101,30 +100,30 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testDecommissionForLostNodesIfSecondDecommissionSucceeded() throws ApiException {
         mockListHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.TIMEOUT),
-                Pair.of(BigDecimal.TEN, PollingResult.SUCCESS));
-        mockAbortCommand(BigDecimal.ONE);
+        mockDecommission(Pair.of(1, PollingResult.TIMEOUT),
+                Pair.of(10, PollingResult.SUCCESS));
+        mockAbortCommand(1);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
         underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), client);
 
-        verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.ONE));
+        verify(commandsResourceApi, times(1)).abortCommand(eq(1));
         verify(clouderaManagerResourceApi, times(2)).hostsDecommissionCommand(any());
     }
 
     @Test
     public void testDecommissionForLostNodesIfBothDecommissionFails() throws ApiException {
         mockListHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.TIMEOUT),
-                Pair.of(BigDecimal.TEN, PollingResult.TIMEOUT));
-        mockAbortCommand(BigDecimal.ONE, BigDecimal.TEN);
+        mockDecommission(Pair.of(1, PollingResult.TIMEOUT),
+                Pair.of(10, PollingResult.TIMEOUT));
+        mockAbortCommand(1, 10);
         doNothing().when(flowMessageService).fireInstanceGroupEventAndLog(any(), any(), any(), any(), any());
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
         underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), client);
 
-        verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.ONE));
-        verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.TEN));
+        verify(commandsResourceApi, times(1)).abortCommand(eq(1));
+        verify(commandsResourceApi, times(1)).abortCommand(eq(10));
         verify(clouderaManagerResourceApi, times(2)).hostsDecommissionCommand(any());
     }
 
@@ -196,7 +195,7 @@ class ClouderaManagerDecomissionerTest {
         return hostGroup;
     }
 
-    private void mockDecommission(Pair<BigDecimal, PollingResult> resultPair, Pair<BigDecimal, PollingResult>... resultPairs)
+    private void mockDecommission(Pair<Integer, PollingResult> resultPair, Pair<Integer, PollingResult>... resultPairs)
             throws ApiException {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.hostsDecommissionCommand(any())).thenReturn(getApiCommand(resultPair.getLeft()),
@@ -205,7 +204,7 @@ class ClouderaManagerDecomissionerTest {
                 Arrays.stream(resultPairs).map(resultPairItem -> resultPairItem.getRight()).toArray(PollingResult[]::new));
     }
 
-    private void mockAbortCommand(BigDecimal commandId, BigDecimal... commandIds) throws ApiException {
+    private void mockAbortCommand(Integer commandId, Integer... commandIds) throws ApiException {
         lenient().when(clouderaManagerApiFactory.getCommandsResourceApi(eq(client))).thenReturn(commandsResourceApi);
         lenient().when(commandsResourceApi.abortCommand(any())).thenReturn(getApiCommand(commandId),
                 Arrays.stream(commandIds).map(commandIdItem -> getApiCommand(commandIdItem)).toArray(ApiCommand[]::new));
@@ -243,7 +242,7 @@ class ClouderaManagerDecomissionerTest {
         return deletedInstanceHostRef;
     }
 
-    private ApiCommand getApiCommand(BigDecimal commandId) {
+    private ApiCommand getApiCommand(int commandId) {
         ApiCommand apiCommand = new ApiCommand();
         apiCommand.setId(commandId);
         return apiCommand;

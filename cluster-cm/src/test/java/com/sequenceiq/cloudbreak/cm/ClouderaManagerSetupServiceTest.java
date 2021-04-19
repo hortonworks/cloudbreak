@@ -532,12 +532,12 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerRepo.getPredefined()).thenReturn(true);
         when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class))).thenReturn(clouderaManagerResourceApi);
-        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(apiCommand.getId()).thenReturn(1);
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(apiCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(
                 any(Stack.class),
                 any(ApiClient.class),
-                any(BigDecimal.class)
+                any(Integer.class)
         )).thenReturn(PollingResult.SUCCESS);
 
         underTest.refreshParcelRepos();
@@ -545,7 +545,7 @@ public class ClouderaManagerSetupServiceTest {
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmParcelRepositoryRefresh(
                 any(Stack.class),
                 any(ApiClient.class),
-                any(BigDecimal.class)
+                any(Integer.class)
         );
     }
 
@@ -561,7 +561,7 @@ public class ClouderaManagerSetupServiceTest {
         verify(clouderaManagerPollingServiceProvider, times(0)).startPollingCmParcelRepositoryRefresh(
                 any(Stack.class),
                 any(ApiClient.class),
-                any(BigDecimal.class)
+                any(Integer.class)
         );
     }
 
@@ -811,19 +811,19 @@ public class ClouderaManagerSetupServiceTest {
         when(clustersResourceApi.readCluster(anyString())).thenReturn(apiCluster);
         when(clusterCommandRepository.findTopByClusterIdAndClusterCommandType(anyLong(), any(ClusterCommandType.class)))
                 .thenReturn(Optional.empty());
-        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(apiCommand.getId()).thenReturn(1);
         when(clusterCommand.getCommandId()).thenReturn(BigDecimal.ONE);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.importClusterTemplate(anyBoolean(), any(ApiClusterTemplate.class))).thenReturn(apiCommand);
         when(clusterCommandRepository.save(any(ClusterCommand.class))).thenReturn(clusterCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(BigDecimal.class)))
+        when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(Integer.class)))
                 .thenReturn(PollingResult.EXIT);
 
         underTest.installCluster("{}");
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmTemplateInstallation(
-                any(Stack.class), any(ApiClient.class), any(BigDecimal.class));
+                any(Stack.class), any(ApiClient.class), any(Integer.class));
         verify(clusterCommandRepository, times(1)).save(any(ClusterCommand.class));
     }
 
