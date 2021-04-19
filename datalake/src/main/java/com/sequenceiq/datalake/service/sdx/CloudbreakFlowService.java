@@ -29,19 +29,6 @@ public class CloudbreakFlowService {
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
-    public void getAndSaveLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
-        FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName()));
-        LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
-                lastFlowByResourceName.getFlowId(),
-                lastFlowByResourceName.getCreated(),
-                lastFlowByResourceName.getNextEvent(),
-                lastFlowByResourceName.getResourceId(),
-                lastFlowByResourceName.getStateStatus());
-        sdxCluster.setLastCbFlowChainId(lastFlowByResourceName.getFlowChainId());
-        sdxClusterRepository.save(sdxCluster);
-    }
-
     public FlowState getLastKnownFlowState(SdxCluster sdxCluster) {
         try {
             if (sdxCluster.getLastCbFlowChainId() != null) {
@@ -105,7 +92,7 @@ public class CloudbreakFlowService {
     private void trySaveLastCbFlowIdOrFlowChainId(SdxCluster sdxCluster) {
         try {
             FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    flowEndpoint.getLastFlowByResourceName(sdxCluster.getClusterName()));
+                    flowEndpoint.getLastFlowByResourceName(sdxCluster.getAccountId(), sdxCluster.getClusterName()));
             LOGGER.info("Found last flow from Cloudbreak, flowId: {} created: {} nextEvent:{} resourceId: {} stateStatus: {}",
                     lastFlowByResourceName.getFlowId(),
                     lastFlowByResourceName.getCreated(),

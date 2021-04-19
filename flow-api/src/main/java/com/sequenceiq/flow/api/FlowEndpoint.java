@@ -7,8 +7,10 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -42,7 +44,7 @@ public interface FlowEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get last flow log for resource by resource name", produces = "application/json", notes = "Flow log operations",
             nickname = "getLastFlowByResourceName")
-    FlowLogResponse getLastFlowByResourceName(@PathParam("resourceName") String resourceName);
+    FlowLogResponse getLastFlowByResourceName(@QueryParam ("accountId") @AccountId String accountId, @PathParam("resourceName") String resourceName);
 
     @GET
     @Path("/logs/resource/crn/{resourceCrn}/last")
@@ -56,7 +58,7 @@ public interface FlowEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Get flow logs for resource by resource name", produces = "application/json", notes = "Flow log operations",
             nickname = "getFlowLogsByResourceName")
-    List<FlowLogResponse> getFlowLogsByResourceName(@PathParam("resourceName") String resourceName);
+    List<FlowLogResponse> getFlowLogsByResourceName(@QueryParam ("accountId") @AccountId String accountId, @PathParam("resourceName") String resourceName);
 
     @GET
     @Path("/logs/resource/crn/{resourceCrn}")
