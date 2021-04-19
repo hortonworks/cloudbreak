@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -358,6 +359,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.endpointgateway.skip.validation}")
     private boolean endpointGatewaySkipValidation;
 
+    @Value("${auth.mock.cm.ha.enable}")
+    private boolean cmHAEnabled;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -678,6 +682,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (endpointGatewaySkipValidation) {
             builder.addEntitlements(createEntitlement(CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION));
+        }
+        if (cmHAEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CM_HA));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

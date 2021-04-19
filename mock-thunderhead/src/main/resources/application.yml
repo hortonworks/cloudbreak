@@ -47,3 +47,4 @@ auth:
     azure:
       disk:
         SSEWithCMK.enable: true
+    cm.ha.enable: false
