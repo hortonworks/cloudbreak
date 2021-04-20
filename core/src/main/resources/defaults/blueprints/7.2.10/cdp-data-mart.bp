@@ -21,23 +21,6 @@
         ]
       },
       {
-        "refName": "zookeeper",
-        "serviceType": "ZOOKEEPER",
-        "serviceConfigs": [
-          {
-            "name": "service_config_suppression_server_count_validator",
-            "value": "true"
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "zookeeper-SERVER-BASE",
-            "roleType": "SERVER",
-            "base": true
-          }
-        ]
-      },
-      {
         "refName": "hue",
         "serviceType": "HUE",
         "roleConfigGroups": [
@@ -111,7 +94,6 @@
         "roleConfigGroupsRefNames": [
           "core_settings-GATEWAY-BASE",
           "core_settings-STORAGEOPERATIONS-BASE",
-          "zookeeper-SERVER-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE",
           "impala-CATALOGSERVER-BASE",
