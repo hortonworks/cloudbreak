@@ -21,7 +21,7 @@ echo "Binding Image User role to the service account"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.imageUser --quiet --no-user-output-enabled --condition=None
 
 echo "Binding Storage Admin role to the service account"
-gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/compute.storageAdmin --quiet --no-user-output-enabled --condition=None
+gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/storage.admin --quiet --no-user-output-enabled --condition=None
 
 echo "Binding RuntimeConfig Admin role to the service account"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role roles/runtimeconfig.admin --quiet --no-user-output-enabled --condition=None
