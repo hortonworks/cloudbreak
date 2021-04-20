@@ -44,6 +44,9 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("UpgradeDistroxFlowEventChainFactory", "SaltUpdateFlowConfig"), UsageProto.CDPClusterStatus.Value.UPGRADE_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "ClusterCertificateRenewFlowConfig"), UsageProto.CDPClusterStatus.Value.RENEW_PUBLIC_CERT_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "CertRotationFlowConfig"), UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_STARTED);
+        firstStepUseCaseMap.put(Pair.of("BackupDatalakeDatabaseFlowEventChainFactory", "SaltUpdateFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.BACKUP_STARTED);
+        firstStepUseCaseMap.put(Pair.of("", "DiagnosticsCollectionFlowConfig"), UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_STARTED);
     }
 
     // At the moment we need to introduce a complex logic to figure out the use case
@@ -115,6 +118,16 @@ public class ClusterUseCaseMapper {
                 case "CertRotationFlowConfig":
                     useCase = getClusterStatus(nextFlowState, "CERT_ROTATION_FINISHED_STATE", UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FINISHED,
                             UsageProto.CDPClusterStatus.Value.RENEW_CLUSTER_INTERNAL_CERT_FAILED);
+                    break;
+                case "BackupDatalakeDatabaseFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "DATABASE_BACKUP_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.BACKUP_FINISHED,
+                            UsageProto.CDPClusterStatus.Value.BACKUP_FAILED);
+                    break;
+                case "DiagnosticsCollectionFlowConfig":
+                    useCase = getClusterStatus(nextFlowState, "DIAGNOSTICS_COLLECTION_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_FINISHED,
+                            UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_FAILED);
                     break;
                 default:
                     LOGGER.debug("Next flow state: {}", nextFlowState);

@@ -650,6 +650,20 @@ message CDPClusterStatus {
     RENEW_CLUSTER_INTERNAL_CERT_FINISHED = 29;
     // The status when CB could not renew the internal certificates of the cluster
     RENEW_CLUSTER_INTERNAL_CERT_FAILED = 30;
+
+    // The status when CB is trying to do a backup of the cluster
+    BACKUP_STARTED = 31;
+    // The status when CB has finished backing up the cluster
+    BACKUP_FINISHED = 32;
+    // The status when CB could not do a backup of the cluster
+    BACKUP_FAILED = 33;
+
+    // The status when CB is trying to create a diagnostic bundle for the the cluster
+    DIAGNOSTIC_COLLECTION_STARTED = 34;
+    // The status when CB is done creating the diagnostic bundle for the the cluster
+    DIAGNOSTIC_COLLECTION_FINISHED = 35;
+    // The status when CB could not create the diagnostic bundle for the the cluster
+    DIAGNOSTIC_COLLECTION_FAILED = 36;
   }
 }
 
