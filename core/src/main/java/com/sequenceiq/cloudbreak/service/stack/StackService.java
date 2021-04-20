@@ -795,12 +795,12 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
                 .collect(Collectors.toList());
     }
 
-    public Set<Long> getPrivateIdsForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+    public Set<Long> getPrivateIdsForHostNames(Collection<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
         return getInstanceMetadatasForHostNames(instanceMetaDataList, hostNames).stream()
                 .map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
     }
 
-    private Set<InstanceMetaData> getInstanceMetadatasForHostNames(List<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
+    private Set<InstanceMetaData> getInstanceMetadatasForHostNames(Collection<InstanceMetaData> instanceMetaDataList, Collection<String> hostNames) {
         return instanceMetaDataList.stream()
                 .filter(instanceMetaData -> hostNames.contains(instanceMetaData.getDiscoveryFQDN()))
                 .collect(Collectors.toSet());
