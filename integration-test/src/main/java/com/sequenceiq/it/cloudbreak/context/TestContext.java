@@ -627,9 +627,9 @@ public abstract class TestContext implements ApplicationContextAware {
             requestedRealUmsUser = actingUser;
         } else {
             requestedRealUmsUser = cloudbreakActor.useRealUmsUser(userKey);
-            LOGGER.info(" Found real UMS user:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {}" +
-                            " \nDescription: {} ", requestedRealUmsUser.getDisplayName(), requestedRealUmsUser.getAccessKey(),
-                    requestedRealUmsUser.getSecretKey(), requestedRealUmsUser.getCrn(), requestedRealUmsUser.getAdmin(),
+            LOGGER.info(" Found real UMS user:: \nDisplay Name: {} \nWorkload username: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {}" +
+                            " \nDescription: {} ", requestedRealUmsUser.getDisplayName(), requestedRealUmsUser.getWorkloadUserName(),
+                    requestedRealUmsUser.getAccessKey(), requestedRealUmsUser.getSecretKey(), requestedRealUmsUser.getCrn(), requestedRealUmsUser.getAdmin(),
                     requestedRealUmsUser.getDescription());
         }
         return requestedRealUmsUser;

@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.freeipa;
 
+import static java.lang.String.format;
+
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class FreeIpaFindUsersAction implements Action<FreeIpaTestDto, FreeIpaClient> {
 
@@ -18,16 +21,31 @@ public class FreeIpaFindUsersAction implements Action<FreeIpaTestDto, FreeIpaCli
 
     private final Set<String> users;
 
-    public FreeIpaFindUsersAction(Set<String> users) {
+    private final boolean expectedPresence;
+
+    public FreeIpaFindUsersAction(Set<String> users, boolean expectedPresence) {
         this.users = users;
+        this.expectedPresence = expectedPresence;
     }
 
     public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         CheckUsersV1Request checkUsersRequest = new CheckUsersV1Request();
         checkUsersRequest.setEnvironmentCrn(testDto.getResponse().getEnvironmentCrn());
         checkUsersRequest.setUsers(users);
-        if (!client.getDefaultClient().getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
-            throw new TestFailException("Given freeipa users cannot be found, please check FMS logs for details");
+        Log.when(LOGGER, format(" Checking users [%s] are present at environment '%s'", users, testDto.getResponse().getEnvironmentCrn()));
+        Log.whenJson(LOGGER, format(" FreeIpa '%s' find users request:%n ", testDto.getResponse().getCrn()), checkUsersRequest);
+        if (expectedPresence) {
+            if (!client.getDefaultClient().getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
+                throw new TestFailException("Given freeipa users cannot be found, please check FMS logs for details!");
+            }
+            LOGGER.info(format(" Users [%s] are present at environment '%s'", users, testDto.getResponse().getEnvironmentCrn()));
+            Log.when(LOGGER, format(" Users [%s] are present at environment '%s'", users, testDto.getResponse().getEnvironmentCrn()));
+        } else {
+            if (client.getDefaultClient().getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
+                throw new TestFailException("Given freeipa users have been found, please check FMS logs for details!");
+            }
+            LOGGER.info(format(" Users [%s] have been removed successfully from environment '%s'", users, testDto.getResponse().getEnvironmentCrn()));
+            Log.when(LOGGER, format(" Users [%s] have been removed successfully from environment '%s'", users, testDto.getResponse().getEnvironmentCrn()));
         }
         return testDto;
     }

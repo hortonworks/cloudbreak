@@ -59,8 +59,9 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
         String filePath = "/var/lib/cloudera-scm-agent";
         String fileName = "uuid";
         String newWorkloadPassword = "Admin@123";
+        String userCrn = testContext.getActingUserCrn().toString();
         String workloadUsername = testContext.given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.getUserDetails()).getResponse().getWorkloadUsername();
+                .when(umsTestClient.getUserDetails(userCrn, userCrn)).getResponse().getWorkloadUsername();
 
         testContext
                 .given(FreeIpaTestDto.class)
