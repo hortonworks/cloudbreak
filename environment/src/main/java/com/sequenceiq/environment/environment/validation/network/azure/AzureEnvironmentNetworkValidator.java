@@ -140,7 +140,8 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             String subnetsInVnet = cloudNetworks.values().stream().map(CloudSubnet::getName).collect(Collectors.joining(", "));
             String errorMessage = String.format("It is not possible to create private endpoints for existing network with id '%s' in resource group '%s': " +
                             "Azure requires at least one subnet with private endpoint network policies (eg. NSGs) disabled.  Please disable private endpoint " +
-                            "network policies in at least one of the following subnets and retry: '%s'.",
+                            "network policies in at least one of the following subnets and retry: '%s'. Refer to Microsoft documentation at: " +
+                            "https://docs.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy",
                     networkDto.getNetworkId(), networkDto.getAzure().getResourceGroupName(), subnetsInVnet);
             LOGGER.warn(errorMessage);
             resultBuilder.error(errorMessage);
