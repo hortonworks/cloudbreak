@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.action.freeipa;
 
+import static java.lang.String.format;
+
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 public class FreeIpaFindGroupsAction implements Action<FreeIpaTestDto, FreeIpaClient> {
 
@@ -26,9 +29,13 @@ public class FreeIpaFindGroupsAction implements Action<FreeIpaTestDto, FreeIpaCl
         CheckGroupsV1Request checkGroupsRequest = new CheckGroupsV1Request();
         checkGroupsRequest.setEnvironmentCrn(testDto.getResponse().getEnvironmentCrn());
         checkGroupsRequest.setGroups(groups);
+        Log.when(LOGGER, format(" Checking groups [%s] are present at environment '%s'", groups, testDto.getResponse().getEnvironmentCrn()));
+        Log.whenJson(LOGGER, format(" FreeIpa '%s' find groups request:%n ", testDto.getResponse().getCrn()), checkGroupsRequest);
         if (!client.getDefaultClient().getClientTestV1Endpoint().checkGroups(checkGroupsRequest).getResult()) {
             throw new TestFailException("Given freeipa groups cannot be found, please check FMS logs for details");
         }
+        LOGGER.info(format(" Groups [%s] are present at environment '%s'", groups, testDto.getResponse().getEnvironmentCrn()));
+        Log.when(LOGGER, format(" Groups [%s] are present at environment '%s'", groups, testDto.getResponse().getEnvironmentCrn()));
         return testDto;
     }
 }

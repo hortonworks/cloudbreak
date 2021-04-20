@@ -1,0 +1,5 @@
+name: "aws-env-virtualgroup-tests"
+tests:
+  - name: "aws_env_virtualgroup_e2e_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.BasicEnvironmentVirtualGroupTest

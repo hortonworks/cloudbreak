@@ -94,15 +94,15 @@ public class FreeIpaTestClient {
         return new FreeipaUsedImagesAction();
     }
 
-    public Action<FreeIpaTestDto, FreeIpaClient> findUsers(Set<String> users) {
-        return new FreeIpaFindUsersAction(users);
+    public Action<FreeIpaTestDto, FreeIpaClient> findUsers(Set<String> users, boolean expectedPresence) {
+        return new FreeIpaFindUsersAction(users, expectedPresence);
     }
 
     public Action<FreeIpaTestDto, FreeIpaClient> findGroups(Set<String> groups) {
         return new FreeIpaFindGroupsAction(groups);
     }
 
-    public Action<FreeIpaTestDto, FreeIpaClient> findUsersInGroup(Set<String> users, String group) {
-        return new FreeIpaFindUsersInGroupAction(users, group);
+    public Action<FreeIpaTestDto, FreeIpaClient> findUsersInGroup(Set<String> users, String group, boolean expectedPresence) {
+        return new FreeIpaFindUsersInGroupAction(users, group, expectedPresence);
     }
 }
