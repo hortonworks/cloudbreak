@@ -27,13 +27,17 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -61,19 +65,22 @@ public class ClusterRepairFlowEventChainFactoryTest {
     private StackService stackService;
 
     @Mock
+    private StackViewService stackViewService;
+
+    @Mock
     private HostGroupService hostGroupService;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private ClusterService clusterService;
-
-    @Mock
     private BlueprintService blueprintService;
 
     @Mock
     private KerberosConfigService kerberosConfigService;
+
+    @Mock
+    private InstanceGroupService instanceGroupService;
 
     @InjectMocks
     private ClusterRepairFlowEventChainFactory underTest;
@@ -86,6 +93,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Test
     public void testRepairSingleGatewayWithNoAttached() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
+        setupStackView();
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(true);
 
@@ -103,6 +111,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     public void testRepairSingleGatewayWithAttached() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
+        setupStackView();
         setupHostGroup(true);
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
@@ -119,6 +128,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
     @Test
     public void testRepairSingleGatewayMultipleNodes() {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
+        setupStackView();
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
 
         HostGroup masterHostGroup = setupHostGroup(setupInstanceGroup(InstanceGroupType.GATEWAY));
@@ -145,7 +155,12 @@ public class ClusterRepairFlowEventChainFactoryTest {
     public void testRepairMultipleGatewayWithNoAttached() {
         Stack stack = getStack(MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
+        InstanceGroupView ig = mock(InstanceGroupView.class);
+        when(ig.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        when(ig.getNodeCount()).thenReturn(5);
+        when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
         setupHostGroup(true);
+        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
@@ -163,7 +178,12 @@ public class ClusterRepairFlowEventChainFactoryTest {
     public void testRepairMultipleGatewayWithAttached() {
         Stack stack = getStack(MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
+        InstanceGroupView ig = mock(InstanceGroupView.class);
+        when(ig.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        when(ig.getNodeCount()).thenReturn(5);
+        when(instanceGroupService.findViewByStackId(STACK_ID)).thenReturn(Set.of(ig));
         setupHostGroup(true);
+        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedPrimaryGateway().build());
 
@@ -183,6 +203,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of(ATTACHED_WORKLOAD));
         setupHostGroup(false);
+        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
@@ -199,6 +220,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         Stack stack = getStack(NOT_MULTIPLE_GATEWAY);
         when(stackService.findClustersConnectedToDatalakeByDatalakeStackId(STACK_ID)).thenReturn(Set.of());
         setupHostGroup(false);
+        setupStackView();
 
         FlowTriggerEventQueue eventQueues = underTest.createFlowTriggerEventQueue(new TriggerEventBuilder(stack).withFailedCore().build());
 
@@ -230,6 +252,15 @@ public class ClusterRepairFlowEventChainFactoryTest {
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         return stack;
+    }
+
+    private void setupStackView() {
+        StackView stack = mock(StackView.class);
+        ClusterView cluster = mock(ClusterView.class);
+        when(stack.getClusterView()).thenReturn(cluster);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(cluster.getId()).thenReturn(CLUSTER_ID);
+        when(stackViewService.getById(STACK_ID)).thenReturn(stack);
     }
 
     private HostGroup setupHostGroup(InstanceGroup instanceGroup) {

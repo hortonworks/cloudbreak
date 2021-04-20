@@ -46,6 +46,9 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
     Set<InstanceMetaData> findAllInStack(@Param("stackId") Long stackId);
 
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
+    Set<InstanceMetaData> findAllWithoutInstanceGroupInStack(@Param("stackId") Long stackId);
+
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceMetaData> findByStackIdAndInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);

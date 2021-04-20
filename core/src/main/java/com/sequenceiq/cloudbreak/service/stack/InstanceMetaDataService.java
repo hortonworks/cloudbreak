@@ -109,6 +109,10 @@ public class InstanceMetaDataService {
         return repository.findAllInStack(stackId);
     }
 
+    public Set<InstanceMetaData> getAllInstanceMetadataWithoutInstaceGroupByStackId(Long stackId) {
+        return repository.findAllWithoutInstanceGroupInStack(stackId);
+    }
+
     private InstanceGroup getInstanceGroup(Iterable<InstanceGroup> instanceGroups, String groupName) {
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (groupName.equalsIgnoreCase(instanceGroup.getGroupName())) {

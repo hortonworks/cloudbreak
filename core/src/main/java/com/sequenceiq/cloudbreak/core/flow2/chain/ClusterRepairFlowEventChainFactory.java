@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 
 import java.util.ArrayList;
@@ -25,19 +26,21 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTrigge
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -51,13 +54,16 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private StackService stackService;
 
     @Inject
+    private StackViewService stackViewService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
+
+    @Inject
     private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -75,18 +81,18 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private RepairConfig createRepairConfig(ClusterRepairTriggerEvent event) {
         RepairConfig repairConfig = new RepairConfig();
-        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
+        StackView stack = stackViewService.getById(event.getStackId());
         for (Entry<String, List<String>> failedNodes : event.getFailedNodesMap().entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(), hostGroupName)
-                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getClusterView().getId(), hostGroupName)
+                    .orElseThrow(notFound("hostgroup", hostGroupName));
             InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                Optional<String> primaryGatewayHostName = instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(stack.getId(),
+                Optional<String> primaryGatewayHostName = instanceMetaDataService.getPrimaryGatewayDiscoveryFQDNByInstanceGroup(event.getStackId(),
                         instanceGroup.getId());
                 boolean primaryGatewayRepairable = primaryGatewayHostName.isPresent() && hostNames.contains(primaryGatewayHostName.get());
-                boolean singlePrimaryGatewayRepairable = primaryGatewayRepairable && !stack.isMultipleGateway();
+                boolean singlePrimaryGatewayRepairable = primaryGatewayRepairable && !isMultipleGateway(event.getStackId());
                 if (singlePrimaryGatewayRepairable || StackType.DATALAKE.equals(stack.getType())) {
                     repairConfig.setSinglePrimaryGateway(new Repair(instanceGroup.getGroupName(), hostGroup.getName(), hostNames));
                 } else if (primaryGatewayRepairable) {
@@ -98,6 +104,17 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             }
         }
         return repairConfig;
+    }
+
+    private boolean isMultipleGateway(Long stackId) {
+        Set<InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(stackId);
+        int gatewayCount = 0;
+        for (InstanceGroupView ig : instanceGroupViews) {
+            if (ig.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+                gatewayCount += ig.getNodeCount();
+            }
+        }
+        return gatewayCount > 1;
     }
 
     private Queue<Selectable> createFlowTriggers(ClusterRepairTriggerEvent event, RepairConfig repairConfig) {
@@ -128,14 +145,14 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     }
 
     private StackDownscaleTriggerEvent stackDownscaleEvent(ClusterRepairTriggerEvent event, String groupName, List<String> hostNames) {
-        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), new HashSet<>(hostNames));
+        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstaceGroupByStackId(event.getStackId());
+        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, new HashSet<>(hostNames));
         return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupName, privateIdsForHostNames, event.accepted());
     }
 
     private ClusterAndStackDownscaleTriggerEvent fullDownscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames) {
-        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), hostNames);
+        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstaceGroupByStackId(event.getStackId());
+        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, hostNames);
         return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
                 hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
                 new ClusterDownscaleDetails(true, true));
@@ -158,16 +175,24 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames,
             boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
-        Stack stack = stackService.getByIdWithListsInTransaction(event.getStackId());
-        boolean singleNodeCluster = clusterService.isSingleNode(stack);
+        Set<InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
+        boolean singleNodeCluster = isSingleNode(instanceGroupViews);
         ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
         return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
                 hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
                 kerberosSecured, event.accepted(), singleNodeCluster, restartServices, cmType).setRepair();
     }
 
+    public boolean isSingleNode(Set<InstanceGroupView> instanceGroupViews) {
+        int nodeCount = 0;
+        for (InstanceGroupView ig : instanceGroupViews) {
+            nodeCount += ig.getNodeCount();
+        }
+        return nodeCount == 1;
+    }
+
     private boolean isKerberosSecured(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackView stack = stackViewService.getById(stackId);
         return kerberosConfigService.isKerberosConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
     }
 

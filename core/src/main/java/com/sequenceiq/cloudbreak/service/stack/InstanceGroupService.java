@@ -12,7 +12,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupViewRepository;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -25,6 +27,9 @@ public class InstanceGroupService {
     private InstanceGroupRepository repository;
 
     @Inject
+    private InstanceGroupViewRepository viewRepository;
+
+    @Inject
     private SecurityGroupService securityGroupService;
 
     @Inject
@@ -35,6 +40,10 @@ public class InstanceGroupService {
 
     public Set<InstanceGroup> findByStackId(Long stackId) {
         return repository.findByStackId(stackId);
+    }
+
+    public Set<InstanceGroupView> findViewByStackId(Long stackId) {
+        return viewRepository.findInstanceGroupsInStack(stackId);
     }
 
     public Set<InstanceGroup> findNotTerminatedByStackId(Long stackId) {
