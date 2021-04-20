@@ -30,10 +30,10 @@ import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
-import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @ExtendWith(MockitoExtension.class)
 class AzureEnvironmentNetworkValidatorTest {
@@ -113,7 +113,8 @@ class AzureEnvironmentNetworkValidatorTest {
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "It is not possible to create private endpoints for existing network with id 'networkId' in resource group 'networkResourceGroupName': " +
                         "Azure requires at least one subnet with private endpoint network policies (eg. NSGs) disabled.  Please disable private endpoint " +
-                        "network policies in at least one of the following subnets and retry: 'subnet-one'."));
+                        "network policies in at least one of the following subnets and retry: 'subnet-one'. Refer to Microsoft documentation at: " +
+                        "https://docs.microsoft.com/en-us/azure/private-link/disable-private-endpoint-network-policy"));
     }
 
     @Test
