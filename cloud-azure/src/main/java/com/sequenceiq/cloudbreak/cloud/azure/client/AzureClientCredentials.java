@@ -12,6 +12,7 @@ import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.implementation.ComputeManager;
 import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
 import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
@@ -58,6 +59,10 @@ public class AzureClientCredentials {
 
     public privatednsManager getPrivateDnsManager() {
         return privatednsManager.authenticate(azureClientCredentials, credentialView.getSubscriptionId());
+    }
+
+    public ComputeManager getComputeManager() {
+        return ComputeManager.authenticate(azureClientCredentials, credentialView.getSubscriptionId());
     }
 
     private AzureTokenCredentials getAzureCredentials() {

@@ -22,6 +22,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
+import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -40,19 +41,19 @@ public class NetworkCreationRequestFactory {
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    private final NetworkTagProvider networkTagProvider;
+    private final EnvironmentTagProvider environmentTagProvider;
 
     private final ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter;
 
     public NetworkCreationRequestFactory(Collection<SubnetCidrProvider> subnetCidrProviders,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
             DefaultSubnetCidrProvider defaultSubnetCidrProvider,
-            NetworkTagProvider networkTagProvider,
+            EnvironmentTagProvider environmentTagProvider,
             ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter) {
         this.subnetCidrProviders = subnetCidrProviders.stream().collect(Collectors.toMap(SubnetCidrProvider::cloudPlatform, s -> s));
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.defaultSubnetCidrProvider = defaultSubnetCidrProvider;
-        this.networkTagProvider = networkTagProvider;
+        this.environmentTagProvider = environmentTagProvider;
         this.serviceEndpointCreationToEndpointTypeConverter = serviceEndpointCreationToEndpointTypeConverter;
     }
 
@@ -78,7 +79,7 @@ public class NetworkCreationRequestFactory {
                 .withUserName(getUserFromCrn(environment.getCreator()))
                 .withAccountId(environment.getAccountId())
                 .withCreatorCrn(environment.getCreator())
-                .withTags(networkTagProvider.getTags(environment))
+                .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()))
                 .withPrivateSubnets(cidrs.getPrivateSubnets())
                 .withPublicSubnets(cidrs.getPublicSubnets());
         getNoPublicIp(networkDto).ifPresent(builder::withNoPublicIp);
@@ -96,7 +97,7 @@ public class NetworkCreationRequestFactory {
                 .withCloudContext(getCloudContext(environment))
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withPrivateEndpointsEnabled(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == networkDto.getServiceEndpointCreation())
-                .withTags(networkTagProvider.getTags(environment));
+                .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()));
                 getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         return builder.build();
     }

@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -80,6 +81,9 @@ public class AzureConnector implements CloudConnector<List<CloudResource>> {
 
     @Inject
     private AzureNoSqlConnector azureNoSqlConnector;
+
+    @Inject
+    private AzureEncryptionResources azureEncryptionResources;
 
     @Override
     public Authenticator authentication() {
@@ -170,4 +174,10 @@ public class AzureConnector implements CloudConnector<List<CloudResource>> {
     public NoSqlConnector noSql() {
         return azureNoSqlConnector;
     }
+
+    @Override
+    public EncryptionResources encryptionResources() {
+        return azureEncryptionResources;
+    }
+
 }

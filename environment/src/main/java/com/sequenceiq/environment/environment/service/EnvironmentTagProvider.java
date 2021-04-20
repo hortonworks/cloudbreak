@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.network.service;
+package com.sequenceiq.environment.environment.service;
 
 import java.util.List;
 import java.util.Map;
@@ -20,7 +20,7 @@ import com.sequenceiq.environment.tags.service.DefaultInternalAccountTagService;
 import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagResponsesConverter;
 
 @Service
-public class NetworkTagProvider {
+public class EnvironmentTagProvider {
 
     private final EntitlementService entitlementService;
 
@@ -34,7 +34,7 @@ public class NetworkTagProvider {
 
     private final CrnUserDetailsService crnUserDetailsService;
 
-    public NetworkTagProvider(EntitlementService entitlementService,
+    public EnvironmentTagProvider(EntitlementService entitlementService,
             AccountTagService accountTagService,
             DefaultInternalAccountTagService defaultInternalAccountTagService,
             AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
@@ -48,10 +48,10 @@ public class NetworkTagProvider {
         this.crnUserDetailsService = crnUserDetailsService;
     }
 
-    public Map<String, String> getTags(EnvironmentDto environmentDto) {
+    public Map<String, String> getTags(EnvironmentDto environmentDto, String resourceCrn) {
         Map<String, String> userDefinedTags = environmentDto.getTags().getUserDefinedTags();
         Map<String, String> accountTags = getAccountTags(environmentDto.getAccountId());
-        Map<String, String> defaultTags = getDefaultTags(environmentDto, userDefinedTags, accountTags);
+        Map<String, String> defaultTags = getDefaultTags(environmentDto, userDefinedTags, accountTags, resourceCrn);
 
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
@@ -72,14 +72,15 @@ public class NetworkTagProvider {
                 .collect(Collectors.toMap(AccountTagResponse::getKey, AccountTagResponse::getValue));
     }
 
-    private Map<String, String> getDefaultTags(EnvironmentDto environmentDto, Map<String, String> userDefinedTags, Map<String, String> accountTagsMap) {
+    private Map<String, String> getDefaultTags(EnvironmentDto environmentDto, Map<String, String> userDefinedTags,
+            Map<String, String> accountTagsMap, String resourceCrn) {
         boolean internalTenant = entitlementService.internalTenant(environmentDto.getAccountId());
         CDPTagGenerationRequest request = CDPTagGenerationRequest.Builder.builder()
                 .withCreatorCrn(environmentDto.getCreator())
                 .withEnvironmentCrn(environmentDto.getResourceCrn())
                 .withAccountId(environmentDto.getAccountId())
                 .withPlatform(environmentDto.getCloudPlatform())
-                .withResourceCrn(environmentDto.getNetwork().getResourceCrn())
+                .withResourceCrn(resourceCrn)
                 .withIsInternalTenant(internalTenant)
                 .withUserName(getUserNameFromCrn(environmentDto.getCreator()))
                 .withAccountTags(accountTagsMap)

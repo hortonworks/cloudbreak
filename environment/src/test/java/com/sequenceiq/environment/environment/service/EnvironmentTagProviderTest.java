@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.network.service;
+package com.sequenceiq.environment.environment.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -41,8 +41,8 @@ import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagRespon
         CentralTagUpdater.class,
         TagTemplateProcessor.class,
         Clock.class,
-        NetworkTagProvider.class})
-class NetworkTagProviderTest {
+        EnvironmentTagProvider.class})
+class EnvironmentTagProviderTest {
 
     private static final EnvironmentDto ENVIRONMENT = new EnvironmentDto();
 
@@ -78,7 +78,7 @@ class NetworkTagProviderTest {
     private DefaultInternalAccountTagService defaultInternalAccountTagService;
 
     @Inject
-    private NetworkTagProvider underTest;
+    private EnvironmentTagProvider underTest;
 
     @BeforeAll
     static void init() {
@@ -112,7 +112,7 @@ class NetworkTagProviderTest {
 
     @Test
     void tagsShouldIncludeUserDefinedTags() {
-        Map<String, String> result = underTest.getTags(ENVIRONMENT);
+        Map<String, String> result = underTest.getTags(ENVIRONMENT, NETWORK_CRN);
 
         assertThat(result)
                 .containsAllEntriesOf(USER_DEFINED_TAGS);
@@ -120,7 +120,7 @@ class NetworkTagProviderTest {
 
     @Test
     void tagsShouldIncludeDefaultTags() {
-        Map<String, String> result = underTest.getTags(ENVIRONMENT);
+        Map<String, String> result = underTest.getTags(ENVIRONMENT, NETWORK_CRN);
 
         assertThat(result)
                 .containsEntry(DefaultApplicationTag.CREATOR_CRN.key(), USER_CRN)
@@ -130,7 +130,7 @@ class NetworkTagProviderTest {
 
     @Test
     void tagsShouldIncludeApplicationTags() {
-        Map<String, String> result = underTest.getTags(ENVIRONMENT);
+        Map<String, String> result = underTest.getTags(ENVIRONMENT, NETWORK_CRN);
 
         assertThat(result)
                 .containsEntry(OWNER_TAG, USERNAME);

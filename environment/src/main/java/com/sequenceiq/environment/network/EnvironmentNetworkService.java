@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -151,7 +152,8 @@ public class EnvironmentNetworkService {
 
     private NetworkConnector getNetworkConnector(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
-        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant).networkConnector())
+        return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant))
+                .map(CloudConnector<Object>::networkConnector)
                 .orElseThrow(() -> new NetworkConnectorNotFoundException("No network connector for cloud platform: " + cloudPlatform));
     }
 

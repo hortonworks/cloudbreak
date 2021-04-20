@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
@@ -123,6 +124,11 @@ public class OpenStackNativeConnector implements CloudConnector<List<CloudResour
 
     @Override
     public NetworkConnector networkConnector() {
+        return null;
+    }
+
+    @Override
+    public EncryptionResources encryptionResources() {
         return null;
     }
 

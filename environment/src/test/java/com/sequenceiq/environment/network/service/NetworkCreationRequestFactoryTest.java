@@ -33,6 +33,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
+import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -66,13 +67,13 @@ class NetworkCreationRequestFactoryTest {
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
 
-    private final NetworkTagProvider networkTagProvider = mock(NetworkTagProvider.class);
+    private final EnvironmentTagProvider environmentTagProvider = mock(EnvironmentTagProvider.class);
 
     private final ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter
             = mock(ServiceEndpointCreationToEndpointTypeConverter.class);
 
     private final NetworkCreationRequestFactory underTest = new NetworkCreationRequestFactory(Collections.emptyList(),
-            credentialToCloudCredentialConverter, defaultSubnetCidrProvider, networkTagProvider, serviceEndpointCreationToEndpointTypeConverter);
+            credentialToCloudCredentialConverter, defaultSubnetCidrProvider, environmentTagProvider, serviceEndpointCreationToEndpointTypeConverter);
 
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
@@ -81,7 +82,7 @@ class NetworkCreationRequestFactoryTest {
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
-        when(networkTagProvider.getTags(environmentDto)).thenReturn(Map.of());
+        when(environmentTagProvider.getTags(environmentDto, environmentDto.getNetwork().getResourceCrn())).thenReturn(Map.of());
 
         NetworkCreationRequest actual = underTest.create(environmentDto);
 

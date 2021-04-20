@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.validation.constraints.NotNull;
 
@@ -51,7 +53,9 @@ public class AzureUtilsTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String MAX_RESOURCE_NAME_LENGTH = "50";
+    private static final int MAX_RESOURCE_NAME_LENGTH = 50;
+
+    private static final int MAX_DISK_ENCRYPTION_SET_NAME_LENGTH = 80;
 
     @Mock
     private AzurePremiumValidatorService azurePremiumValidatorService;
@@ -67,7 +71,7 @@ public class AzureUtilsTest {
 
     @BeforeEach
     public void setUp() {
-        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
+        ReflectionTestUtils.setField(underTest, "maxResourceNameLength", MAX_RESOURCE_NAME_LENGTH);
         RxJavaHooks.setOnIOScheduler(current -> Schedulers.immediate());
     }
 
@@ -94,7 +98,7 @@ public class AzureUtilsTest {
         //THEN
         assertNotNull(testResult, "The generated name must not be null!");
         assertEquals("thisisaverylongazureresourcenamewhichneedstobe7899", testResult, "The resource name is not the excepted one!");
-        assertEquals(Integer.parseInt(MAX_RESOURCE_NAME_LENGTH), testResult.length(), "The resource name length is wrong");
+        assertEquals(MAX_RESOURCE_NAME_LENGTH, testResult.length(), "The resource name length is wrong");
 
     }
 
@@ -400,6 +404,19 @@ public class AzureUtilsTest {
                 () -> underTest.deleteGenericResources(azureClient, List.of("genericResource1", "genericResource2", "genericResource3")));
 
         verify(azureClient, times(3)).deleteGenericResourceByIdAsync(anyString());
+    }
+
+    @Test
+    public void shouldAdjustDesNameLengthIfItsTooLong() {
+        String name = "aVeryVeryVeryLoooooooooooooooooooooooooooooooooooooongNaaaaaaaaaaaaaaaaaaaaame";
+        String id = UUID.randomUUID().toString();
+        String desName = underTest.generateDesNameByNameAndId(name, id);
+
+        assertNotNull(desName, "The generated name must not be null!");
+        assertNotEquals("aVeryVeryVeryLoooooooooooooooooooooooooooooooooooooongNaaaaaaaaaaaaaaaaaaaaame",
+                desName, "The resource name is not the excepted one!");
+        assertEquals(MAX_DISK_ENCRYPTION_SET_NAME_LENGTH, desName.length(), "The resource name length is wrong");
+
     }
 
     @NotNull

@@ -25,6 +25,8 @@ import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.UserInfo;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.implementation.ComputeManager;
+import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
 import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -191,6 +193,22 @@ public class AzureClientCredentialsTest {
         verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(anyString());
         verify(cbRefreshTokenClient, times(1)).refreshToken(anyString(), anyString(), anyString(), anyString(), anyString(), anyBoolean());
         verify(cbRefreshTokenClientProvider, times(2)).getCBRefreshTokenClient(eq(AzureEnvironment.AZURE.activeDirectoryEndpoint()));
+    }
+
+    @Test
+    public void testGetPrivateDnsManagerForSubscriptionId() {
+        privatednsManager result = new AzureClientCredentials(credentialView, LOG_LEVEL,
+                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getPrivateDnsManager();
+        assertNotNull(result);
+        assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
+    }
+
+    @Test
+    public void testGetComputeManagerForSubscriptionId() {
+        ComputeManager result = new AzureClientCredentials(credentialView, LOG_LEVEL,
+                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getComputeManager();
+        assertNotNull(result);
+        assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
     }
 
 }

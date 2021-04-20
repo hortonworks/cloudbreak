@@ -31,19 +31,27 @@ import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.CachingTypes;
 import com.microsoft.azure.management.compute.Disk;
+import com.microsoft.azure.management.compute.DiskEncryptionSetIdentityType;
+import com.microsoft.azure.management.compute.DiskEncryptionSetType;
 import com.microsoft.azure.management.compute.DiskSkuTypes;
 import com.microsoft.azure.management.compute.DiskStorageAccountTypes;
 import com.microsoft.azure.management.compute.Encryption;
+import com.microsoft.azure.management.compute.EncryptionSetIdentity;
+import com.microsoft.azure.management.compute.KeyVaultAndKeyReference;
 import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
+import com.microsoft.azure.management.compute.SourceVault;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
+import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetsInner;
 import com.microsoft.azure.management.compute.implementation.DiskInner;
 import com.microsoft.azure.management.graphrbac.RoleAssignment;
 import com.microsoft.azure.management.graphrbac.RoleAssignments;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
+import com.microsoft.azure.management.keyvault.KeyPermissions;
 import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.Network;
@@ -862,5 +870,43 @@ public class AzureClient {
 
     public Completable deleteGenericResourceByIdAsync(String databaseServerId) {
         return handleAuthException(() -> azure.genericResources().deleteByIdAsync(databaseServerId));
+    }
+
+    private DiskEncryptionSetInner createDiskEncryptionSetInner(String sourceVaultId, String encryptionKeyUrl, String location, Map<String, String> tags) {
+        SourceVault sourceVault = new SourceVault().withId(sourceVaultId);
+        KeyVaultAndKeyReference keyUrl = new KeyVaultAndKeyReference().withKeyUrl(encryptionKeyUrl).withSourceVault(sourceVault);
+        EncryptionSetIdentity eSetId = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        return (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(keyUrl)
+                .withIdentity(eSetId)
+                .withLocation(location)
+                .withTags(tags);
+    }
+
+    public DiskEncryptionSetInner getDiskEncryptionSet(String resourceGroupName, String diskEncryptionSetName) {
+        // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
+        DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
+        return dSetsIn.getByResourceGroup(resourceGroupName, diskEncryptionSetName);
+    }
+
+    public DiskEncryptionSetInner createDiskEncryptionSet(String diskEncryptionSetName, String encryptionKeyUrl, String location,
+            String resourceGroupName, String sourceVaultId, Map<String, String> tags) {
+        // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
+        DiskEncryptionSetInner desIn = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
+        DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
+        return dSetsIn.createOrUpdate(resourceGroupName, diskEncryptionSetName, desIn);
+    }
+
+    public void grantKeyVaultAccessPolicyToServicePrincipal(String resourceGroupName, String vaultName, String principalId) {
+        azureClientCredentials.getAzure()
+                .vaults()
+                .getByResourceGroup(resourceGroupName, vaultName)
+                .update()
+                .defineAccessPolicy()
+                .forObjectId(principalId)
+                .allowKeyPermissions(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))
+                .attach()
+                .apply();
     }
 }

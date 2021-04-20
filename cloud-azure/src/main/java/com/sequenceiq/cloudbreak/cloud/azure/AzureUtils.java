@@ -76,6 +76,8 @@ public class AzureUtils {
 
     private static final int NETWORKINTERFACE_DETACH_CHECKING_MAXATTEMPT = 5;
 
+    private static final int MAX_DISK_ENCRYPTION_SET_NAME_LENGTH = 80;
+
     @Value("${cb.max.azure.resource.name.length:}")
     private int maxResourceNameLength;
 
@@ -136,6 +138,11 @@ public class AzureUtils {
 
     public String generateResourceGroupNameByNameAndId(String name, String id) {
         return Splitter.fixedLength(maxResourceNameLength - id.length())
+                .splitToList(name).get(0) + id;
+    }
+
+    public String generateDesNameByNameAndId(String name, String id) {
+        return Splitter.fixedLength(MAX_DISK_ENCRYPTION_SET_NAME_LENGTH - id.length())
                 .splitToList(name).get(0) + id;
     }
 
@@ -676,5 +683,4 @@ public class AzureUtils {
             return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
         }
     }
-
 }
