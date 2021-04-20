@@ -64,9 +64,9 @@ public class DataStewardTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .whenException(environmentTestClient.stop(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/stopEnvironment'" +
-                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
+                        " right on environment " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .whenException(environmentTestClient.delete(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/deleteCdpEnvironment'" +
-                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
+                        " right on environment " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .validate();
 
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
@@ -75,7 +75,7 @@ public class DataStewardTest extends AbstractIntegrationTest {
         testContext
                 .given(SdxInternalTestDto.class)
                 .whenException(sdxTestClient.repairInternal(), ForbiddenException.class, expectedMessage("Doesn't have 'datalake/repairDatalake'" +
-                        " right on any of the 'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
+                        " right on any of the environment[(]s[)] [\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
                         datalakePattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .validate();
     }

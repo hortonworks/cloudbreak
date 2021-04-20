@@ -43,7 +43,7 @@ public class HasRightTest {
         Optional<AuthorizationRule> failedAuthorizations = authorization.evaluateAndGetFailed(iterator);
 
         assertEquals(Optional.of(authorization), failedAuthorizations);
-        assertEquals("Doesn't have 'environments/editCredential' right on 'unknown resource type' [name='crn', crn='crn'].",
+        assertEquals("Doesn't have 'environments/editCredential' right on unknown resource type [name: crn, crn: crn].",
                 failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight, Optional::ofNullable));
         assertFalse(iterator.hasNext());
     }

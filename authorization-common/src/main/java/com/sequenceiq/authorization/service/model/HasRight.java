@@ -12,7 +12,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 
 public class HasRight implements AuthorizationRule {
 
-    private static final String FAILURE_MESSAGE_TEMPLATE = "Doesn't have '%s' right on '%s' [%s].";
+    private static final String FAILURE_MESSAGE_TEMPLATE = "Doesn't have '%s' right on %s [%s].";
 
     private final AuthorizationResourceAction right;
 
@@ -40,8 +40,8 @@ public class HasRight implements AuthorizationRule {
     public String getAsFailureMessage(Function<AuthorizationResourceAction, String> rightMapper,
             Function<String, Optional<String>> nameMapper) {
         String resourceNameFormatted = nameMapper.apply(crn)
-                .map(name -> String.format("name='%s'", name)).orElse("");
-        String resourceCrnFormatted = String.format("crn='%s'", crn);
+                .map(name -> String.format("name: %s", name)).orElse("");
+        String resourceCrnFormatted = String.format("crn: %s", crn);
         String identifiers = Stream.of(resourceNameFormatted, resourceCrnFormatted)
                 .filter(part -> !part.isEmpty())
                 .collect(Collectors.joining(", "));

@@ -56,8 +56,8 @@ public class HasRightOnAnyTest {
         Optional<AuthorizationRule> failedAuthorizations = authorization.evaluateAndGetFailed(iterator);
 
         assertEquals(Optional.of(authorization), failedAuthorizations);
-        assertEquals("Doesn't have 'environments/editCredential' right on any of the 'unknown resource type'(-s) " +
-                        "[name='crn1', crn='crn1'] [name='crn2', crn='crn2'].",
+        assertEquals("Doesn't have 'environments/editCredential' right on any of the unknown resource type(s) " +
+                        "[name: crn1, crn: crn1] [name: crn2, crn: crn2].",
                 failedAuthorizations.get().getAsFailureMessage(AuthorizationResourceAction::getRight, Optional::ofNullable));
         assertFalse(iterator.hasNext());
     }

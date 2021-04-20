@@ -23,7 +23,7 @@ public class HasRightOnAny implements AuthorizationRule {
 
     private static final String FAILURE_MESSAGE_FIX = "Doesn't have '%s' right on any of the ";
 
-    private static final String FAILURE_MESSAGE_REPEATABLE_TEMPLATE = "'%s'(-s) %s";
+    private static final String FAILURE_MESSAGE_REPEATABLE_TEMPLATE = "%s(s) %s";
 
     private final AuthorizationResourceAction right;
 
