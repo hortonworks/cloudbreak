@@ -54,19 +54,19 @@ public class RecipeTest extends AbstractIntegrationTest {
                     return dto;
                 })
                 .whenException(recipeTestClient.getV4(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
+                        expectedMessage("Doesn't have 'environments/useSharedResource' right on recipe " +
                                 datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(recipeTestClient.getV4(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/useSharedResource' right on 'recipe' " +
+                        expectedMessage("Doesn't have 'environments/useSharedResource' right on recipe " +
                                 datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
+                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on recipe " +
                                 datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(recipeTestClient.deleteV4(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on 'recipe' " +
+                        expectedMessage("Doesn't have 'environments/deleteRecipe' right on recipe " +
                                 datahubRecipePattern(testContext.get(RecipeTestDto.class).getName()))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .when(recipeTestClient.deleteV4(), who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))

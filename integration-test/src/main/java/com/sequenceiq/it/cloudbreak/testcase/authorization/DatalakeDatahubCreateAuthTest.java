@@ -91,13 +91,13 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .when(sdxTestClient.detailedDescribeInternal(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(sdxTestClient.detailedDescribeInternal(), ForbiddenException.class, expectedMessage("Doesn't have " +
-                        "'datalake/describeDetailedDatalake' right on any of the 'environment'[(]-s[)] " +
-                        "[\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " + datalakePattern(testContext.get(sdxInternal).getName()))
+                        "'datalake/describeDetailedDatalake' right on any of the environment[(]s[)] " +
+                        "[\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " + datalakePattern(testContext.get(sdxInternal).getName()))
                         .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .given(RenewDatalakeCertificateTestDto.class)
                 .withStackCrn(testContext.get(sdxInternal).getCrn())
                 .whenException(sdxTestClient.renewDatalakeCertificateV4(), ForbiddenException.class, expectedMessage("Doesn't have 'datalake/repairDatalake'" +
-                        " right on any of the 'environment'[(]-s[)] [\\[]crn='crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
+                        " right on any of the environment[(]s[)] [\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
                         datalakePattern(testContext.get(sdxInternal).getName())).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
     }

@@ -57,7 +57,7 @@ public class CredentialCreateTest extends AbstractIntegrationTest {
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .whenException(credentialTestClient.get(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeCredential'" +
-                        " right on 'credential' " + String.format("[\\[]name='%s', crn='crn:cdp:environments:us-west-1:.*:credential:.*'[]]\\.",
+                        " right on credential " + String.format("[\\[]name: %s, crn: crn:cdp:environments:us-west-1:.*:credential:.*[]]\\.",
                         testContext.get(CredentialTestDto.class).getName())).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
     }

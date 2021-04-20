@@ -96,10 +96,10 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " + environmentPattern(testContext))
+                        expectedMessage("Doesn't have 'environments/describeEnvironment' right on environment " + environmentPattern(testContext))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(environmentTestClient.describe(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/describeEnvironment' right on 'environment' " + environmentPattern(testContext))
+                        expectedMessage("Doesn't have 'environments/describeEnvironment' right on environment " + environmentPattern(testContext))
                                 .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 

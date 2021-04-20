@@ -100,9 +100,9 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on environment " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on 'environment' " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                        " right on environment " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
@@ -130,7 +130,7 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .given(DistroXTestDto.class)
                 .withRecipe(recipe1Name)
                 .whenException(distroXClient.create(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/useSharedResource' right on" +
-                        " 'recipe' " + datahubRecipePattern(recipe1Name)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " recipe " + datahubRecipePattern(recipe1Name)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .withRecipe(recipe2Name)
                 .when(distroXClient.create(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .await(STACK_AVAILABLE, RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ACCOUNT_ADMIN)))

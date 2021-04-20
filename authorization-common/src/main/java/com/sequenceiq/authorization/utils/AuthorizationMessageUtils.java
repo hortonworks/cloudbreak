@@ -17,8 +17,8 @@ public class AuthorizationMessageUtils {
         return crns.stream().map(crn -> Pair.of(crn, nameMapper.apply(crn)))
                 .map(crnAndName -> {
                             String resourceNameFormatted = crnAndName.getRight()
-                                    .map(name -> String.format("name='%s'", name)).orElse("");
-                            String resourceCrnFormatted = String.format("crn='%s'", crnAndName.getLeft());
+                                    .map(name -> String.format("name: %s", name)).orElse("");
+                            String resourceCrnFormatted = String.format("crn: %s", crnAndName.getLeft());
                             return Stream.of(resourceNameFormatted, resourceCrnFormatted)
                                     .filter(part -> !part.isEmpty())
                                     .collect(Collectors.joining(", "));

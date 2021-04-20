@@ -190,7 +190,8 @@ public class PermissionCheckServiceTest {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no access to this resource.");
+        thrown.expectMessage("This API is not publicly available and therefore not usable by end users. " +
+                "Please refer to our documentation about public APIs used by our UI and CLI.");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
     }
@@ -214,7 +215,8 @@ public class PermissionCheckServiceTest {
         when(proceedingJoinPoint.getTarget()).thenReturn(new InternalOnlyClassExample());
 
         thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("You have no access to this resource.");
+        thrown.expectMessage("This API is not publicly available and therefore not usable by end users. " +
+                "Please refer to our documentation about public APIs used by our UI and CLI.");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
     }

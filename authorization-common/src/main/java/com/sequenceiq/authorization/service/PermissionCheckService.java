@@ -98,7 +98,8 @@ public class PermissionCheckService {
     private AccessDeniedException getAccessDeniedAndLogInternalActorRestriction(MethodSignature methodSignature) {
         LOGGER.error("Method {} should be called by internal actor only.",
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
-        return new AccessDeniedException("You have no access to this resource.");
+        return new AccessDeniedException("This API is not publicly available and therefore not usable by end users. " +
+                "Please refer to our documentation about public APIs used by our UI and CLI.");
     }
 
     @SafeVarargs
