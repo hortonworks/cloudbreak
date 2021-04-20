@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -140,5 +141,10 @@ public class GcpConnector implements CloudConnector<List<CloudResource>> {
     @Override
     public ObjectStorageConnector objectStorage() {
         return gcpObjectStorageConnector;
+    }
+
+    @Override
+    public EncryptionResources encryptionResources() {
+        return null;
     }
 }

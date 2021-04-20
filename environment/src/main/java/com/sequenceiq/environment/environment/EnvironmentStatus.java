@@ -34,6 +34,10 @@ public enum EnvironmentStatus {
     // If the user chooses to encrypt resources with CMK then we delete encryption resources which are used to encrypt other resources
     ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
         .ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS),
+    // If the user chooses to encrypt resources with CMK then we create required encryption resources in cloud which will be used to
+    // encrypt other resources
+    ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus
+            .ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED),
 
     // Creating the FreeIPA resource for the environment
     FREEIPA_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS),

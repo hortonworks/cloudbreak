@@ -33,6 +33,7 @@ class EnvironmentStatusTest {
                 { "UPDATE_FAILED",                          EnvironmentStatus.UPDATE_FAILED,                        false },
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS, false},
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, true},
+                { "ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED", EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED, false},
         };
     }
     // CHECKSTYLE:ON
@@ -70,6 +71,7 @@ class EnvironmentStatusTest {
                 { "UPDATE_FAILED",                          EnvironmentStatus.UPDATE_FAILED,                        false },
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS, false},
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, false},
+                { "ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED", EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED, false},
         };
     }
     // CHECKSTYLE:ON

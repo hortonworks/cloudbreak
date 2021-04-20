@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_FREEIPA_CREATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -24,11 +25,18 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
+import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
+import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
@@ -45,11 +53,16 @@ class ResourceEncryptionInitializationHandlerTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
+    private EnvironmentDto eventDto;
+
     @Mock
     private EventSender eventSender;
 
     @Mock
     private EnvironmentService environmentService;
+
+    @Mock
+    private EnvironmentEncryptionService environmentEncryptionService;
 
     @Mock
     private Event<EnvironmentDto> environmentDtoEvent;
@@ -77,10 +90,18 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @BeforeEach
     void setUp() {
-        EnvironmentDto eventDto = EnvironmentDto.builder()
+        eventDto = EnvironmentDto.builder()
                 .withId(ENVIRONMENT_ID)
                 .withResourceCrn(ENVIRONMENT_CRN)
                 .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform("AZURE")
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withEncryptionKeyUrl("dummy-key-url")
+                                        .build())
+                                .build())
+                        .build())
                 .build();
         when(environmentDtoEvent.getData()).thenReturn(eventDto);
         when(environmentDtoEvent.getHeaders()).thenReturn(headers);
@@ -94,7 +115,7 @@ class ResourceEncryptionInitializationHandlerTest {
         underTest.accept(environmentDtoEvent);
 
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
-        verify(environmentService, never()).save(any());
+        verify(environmentService, never()).save(any(Environment.class));
         verifyEnvCreationEvent();
     }
 
@@ -113,13 +134,13 @@ class ResourceEncryptionInitializationHandlerTest {
     void acceptTestEnvironmentShouldNotBeUpdatedWhenCloudPlatformIsNotAzure() {
         doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
         Environment environment = new Environment();
-        environment.setCloudPlatform("Dummy-cloud");
+        eventDto.setCloudPlatform("Dummy-cloud");
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
 
         underTest.accept(environmentDtoEvent);
 
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
-        verify(environmentService, never()).save(any());
+        verify(environmentService, never()).save(any(Environment.class));
         verifyEnvCreationEvent();
     }
 
@@ -127,13 +148,34 @@ class ResourceEncryptionInitializationHandlerTest {
     void acceptTestEnvironmentShouldNotBeUpdatedWhenEncryptionKeyUrlIsEmpty() {
         doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
         Environment environment = new Environment();
-        environment.setCloudPlatform("AZURE");
+        eventDto.setParameters(null);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
 
         underTest.accept(environmentDtoEvent);
 
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
-        verify(environmentService, never()).save(any());
+        verify(environmentService, never()).save(any(Environment.class));
+        verifyEnvCreationEvent();
+    }
+
+    @Test
+    void acceptTestEnvironmentShouldBeUpdatedWhenEncryptionKeyUrlIsPresent() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        Environment environment = new Environment();
+        environment.setParameters(newAzureParameters());
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        CreatedDiskEncryptionSet createdDiskEncryptionSet = new CreatedDiskEncryptionSet.Builder()
+                .withDiskEncryptionSetId("dummmy-set-id")
+                .build();
+        when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class), any(Environment.class))).thenReturn(createdDiskEncryptionSet);
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
+        verify(environmentService).save(environment);
+        AzureParameters azureParameters = (AzureParameters) environment.getParameters();
+        assertEquals(azureParameters.getDiskEncryptionSetId(), "dummmy-set-id");
+        assertEquals(environment.getStatus(), EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED);
         verifyEnvCreationEvent();
     }
 
@@ -168,5 +210,11 @@ class ResourceEncryptionInitializationHandlerTest {
         assertThat(envCreateFailedEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
         assertThat(envCreateFailedEvent.selector()).isEqualTo(FAILED_ENV_CREATION_EVENT.selector());
         assertThat(envCreateFailedEvent.getException()).isSameAs(exceptionExpected);
+    }
+
+    private static AzureParameters newAzureParameters() {
+        AzureParameters azureParameters = new AzureParameters();
+        azureParameters.setId(10L);
+        return azureParameters;
     }
 }
