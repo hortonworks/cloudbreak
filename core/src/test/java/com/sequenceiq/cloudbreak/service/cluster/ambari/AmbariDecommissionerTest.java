@@ -1,19 +1,24 @@
-package com.sequenceiq.cloudbreak.service.cluster.flow;
+package com.sequenceiq.cloudbreak.service.cluster.ambari;
 
 import static org.hamcrest.Matchers.hasEntry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -26,6 +31,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,6 +47,8 @@ import org.mockito.Spy;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.model.HostComponentStatuses;
+import com.sequenceiq.ambari.client.model.HostStatus;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.stack.instance.InstanceStatus;
@@ -70,21 +78,28 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientRetryer;
 import com.sequenceiq.cloudbreak.service.cluster.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.service.cluster.NotRecommendedNodeRemovalException;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariConfigurationService;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissionTimeCalculator;
-import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.cluster.filter.ConfigParam;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClientPollerObject;
+import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
 @RunWith(org.mockito.junit.MockitoJUnitRunner.class)
 public class AmbariDecommissionerTest {
 
+    private static final String EXAMPLE_IP = "192.18.256.1";
+
+    private static final String EXAMPLE_IP2 = "192.18.256.12";
+
+    private static final int EXAMPLE_PORT = 1234;
+
+    private static final String EXAMPLE_NAME = "ambari-name";
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
-    private final AmbariDecommissioner underTest = new AmbariDecommissioner();
+    private AmbariDecommissioner underTest;
 
     @Mock
     private TlsSecurityService tlsSecurityService;
@@ -128,14 +143,68 @@ public class AmbariDecommissionerTest {
     @Mock
     private AmbariClientRetryer ambariClientRetryer;
 
+    @Mock
+    private AmbariOperationService ambariOperationService;
+
+    @Mock
+    private AmbariDeleteHostsService ambariDeleteHostsService;
+
     @Before
     public void setUp() throws Exception {
         when(transactionService.required(any())).thenAnswer(answer -> ((Supplier) answer.getArgument(0)).get());
     }
 
     @Test
-    public void testSelectNodesWhenHasOneUnhealthyNodeAndShouldSelectOne() {
+    public void testSuccessRetire() throws IOException, URISyntaxException {
+        Stack stack = getStack(EXAMPLE_PORT, getCluster(EXAMPLE_IP, getBlueprint(EXAMPLE_NAME)));
+        AmbariClient ambariClient = getAmbariClient(stack);
+        HostStatus hostStatus = new HostStatus();
+        hostStatus.setHostStatus("STARTED");
+        hostStatus.setHostComponentsStatuses(Map.of("NIFI_MASTER", new HostComponentStatuses()));
+        when(ambariClientRetryer.getHostsStatuses(eq(ambariClient), anyList())).thenReturn(Map.of(EXAMPLE_IP, hostStatus, EXAMPLE_IP2, hostStatus));
+        when(ambariClient.retire(any(), eq("NIFI"), eq("NIFI_MASTER"))).thenReturn(1);
+        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE))).
+                thenReturn(Pair.of(PollingResult.SUCCESS, null));
+        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE))).
+                thenReturn(Pair.of(PollingResult.SUCCESS, null));
+        doNothing().when(ambariDeleteHostsService).deleteHostsButFirstQueryThemFromAmbari(eq(ambariClient), anyList());
 
+        underTest.decommissionAmbariNodes(stack, Map.of(EXAMPLE_IP, getHostMetadata(EXAMPLE_IP, HostMetadataState.HEALTHY),
+                EXAMPLE_IP2, getHostMetadata(EXAMPLE_IP2, HostMetadataState.HEALTHY)));
+
+        verify(ambariClient, times(2)).retire(any(), eq("NIFI"), eq("NIFI_MASTER"));
+        verify(ambariOperationService, times(2)).waitForOperations(any(), any(), any(),
+                eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE));
+    }
+
+    @Test
+    public void testFailedRetire() throws IOException, URISyntaxException {
+        Stack stack = getStack(EXAMPLE_PORT, getCluster(EXAMPLE_IP, getBlueprint(EXAMPLE_NAME)));
+        AmbariClient ambariClient = getAmbariClient(stack);
+        HostStatus hostStatus = new HostStatus();
+        hostStatus.setHostStatus("STARTED");
+        hostStatus.setHostComponentsStatuses(Map.of("NIFI_MASTER", new HostComponentStatuses()));
+        when(ambariClientRetryer.getHostsStatuses(eq(ambariClient), anyList())).thenReturn(Map.of(EXAMPLE_IP, hostStatus, EXAMPLE_IP2, hostStatus));
+        when(ambariClient.retire(any(), eq("NIFI"), eq("NIFI_MASTER")))
+                .thenReturn(1)
+                .thenReturn(2);
+        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE)))
+                .thenReturn(Pair.of(PollingResult.SUCCESS, null))
+                .thenReturn(Pair.of(PollingResult.FAILURE, new Exception("Retirement failed")));
+
+        thrown.expect(DecommissionException.class);
+        thrown.expectMessage("Retirement failed");
+
+        underTest.decommissionAmbariNodes(stack, Map.of(EXAMPLE_IP, getHostMetadata(EXAMPLE_IP, HostMetadataState.HEALTHY),
+                EXAMPLE_IP2, getHostMetadata(EXAMPLE_IP2, HostMetadataState.HEALTHY)));
+
+        verify(ambariClient, times(2)).retire(any(), eq("NIFI"), eq("NIFI_MASTER"));
+        verify(ambariOperationService, times(2)).waitForOperations(any(), any(), any(),
+                eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE));
+    }
+
+    @Test
+    public void testSelectNodesWhenHasOneUnhealthyNodeAndShouldSelectOne() {
         String hostname1 = "10.0.0.1";
         String hostname2 = "10.0.0.2";
 
@@ -249,23 +318,11 @@ public class AmbariDecommissionerTest {
         Assert.assertTrue(selectedNodes.keySet().contains(hostname1));
     }
 
+    @Test
     public void testVerifyNodesAreRemovableWithReplicationFactor() {
-        String ipAddress = "192.18.256.1";
-        int gatewayPort = 1234;
-        String ambariName = "ambari-name";
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setName(ambariName);
-        blueprint.setAmbariName(ambariName);
-
-        Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
-        cluster.setBlueprint(blueprint);
-
-        Stack stack = new Stack();
-        stack.setCluster(cluster);
-        stack.setGatewayPort(gatewayPort);
-        stack.setId(100L);
+        Blueprint blueprint = getBlueprint(EXAMPLE_NAME);
+        Cluster cluster = getCluster(EXAMPLE_IP, blueprint);
+        Stack stack = getStack(EXAMPLE_PORT, cluster);
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(100);
@@ -278,18 +335,14 @@ public class AmbariDecommissionerTest {
         Map<String, List<String>> blueprintMap = new HashMap<>();
         blueprintMap.put(slaveHostGroup.getName(), Collections.singletonList("DATANODE"));
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
-
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        AmbariClient ambariClient = getAmbariClient(stack);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
         when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
@@ -313,23 +366,9 @@ public class AmbariDecommissionerTest {
 
     @Test
     public void testVerifyNodesAreRemovableFilterOutNodes() {
-
-        String ipAddress = "192.18.256.1";
-        int gatewayPort = 1234;
-        String ambariName = "ambari-name";
-
-        Blueprint blueprint = new Blueprint();
-        blueprint.setName(ambariName);
-        blueprint.setAmbariName(ambariName);
-
-        Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
-        cluster.setBlueprint(blueprint);
-
-        Stack stack = new Stack();
-        stack.setCluster(cluster);
-        stack.setGatewayPort(gatewayPort);
-        stack.setId(100L);
+        Blueprint blueprint = getBlueprint(EXAMPLE_NAME);
+        Cluster cluster = getCluster(EXAMPLE_IP, blueprint);
+        Stack stack = getStack(EXAMPLE_PORT, cluster);
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(100);
@@ -342,18 +381,14 @@ public class AmbariDecommissionerTest {
         Map<String, List<String>> blueprintMap = new HashMap<>();
         blueprintMap.put(slaveHostGroup.getName(), Collections.singletonList("DATANODE"));
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
-
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        AmbariClient ambariClient = getAmbariClient(stack);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
 
@@ -378,24 +413,11 @@ public class AmbariDecommissionerTest {
 
     @Test
     public void testVerifyNodesAreRemovableWithReplicationFactoryVerificationFailBecauseReplication() {
-
-        String ipAddress = "192.18.256.1";
-        int gatewayPort = 1234;
-        String ambariName = "ambari-name";
         String replication = "3";
 
-        Blueprint blueprint = new Blueprint();
-        blueprint.setName(ambariName);
-        blueprint.setAmbariName(ambariName);
-
-        Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
-        cluster.setBlueprint(blueprint);
-
-        Stack stack = new Stack();
-        stack.setCluster(cluster);
-        stack.setGatewayPort(gatewayPort);
-        stack.setId(100L);
+        Blueprint blueprint = getBlueprint(EXAMPLE_NAME);
+        Cluster cluster = getCluster(EXAMPLE_IP, blueprint);
+        Stack stack = getStack(EXAMPLE_PORT, cluster);
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(10);
@@ -408,18 +430,14 @@ public class AmbariDecommissionerTest {
         Map<String, List<String>> blueprintMap = new HashMap<>();
         blueprintMap.put(slaveHostGroup.getName(), Collections.singletonList("DATANODE"));
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
-
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        AmbariClient ambariClient = getAmbariClient(stack);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
 
@@ -443,24 +461,11 @@ public class AmbariDecommissionerTest {
 
     @Test
     public void testVerifyNodesAreRemovableWithoutReplicationFactory() {
-
-        String ipAddress = "192.18.256.1";
-        int gatewayPort = 1234;
-        String ambariName = "ambari-name";
         String replication = "0";
 
-        Blueprint blueprint = new Blueprint();
-        blueprint.setName(ambariName);
-        blueprint.setAmbariName(ambariName);
-
-        Cluster cluster = new Cluster();
-        cluster.setAmbariIp(ipAddress);
-        cluster.setBlueprint(blueprint);
-
-        Stack stack = new Stack();
-        stack.setCluster(cluster);
-        stack.setGatewayPort(gatewayPort);
-        stack.setId(100L);
+        Blueprint blueprint = getBlueprint(EXAMPLE_NAME);
+        Cluster cluster = getCluster(EXAMPLE_IP, blueprint);
+        Stack stack = getStack(EXAMPLE_PORT, cluster);
 
         InstanceGroup masterInstanceGroup = getMasterInstanceGroup();
         InstanceGroup slaveInstanceGroup = getSlaveInstanceGroup(10);
@@ -473,18 +478,14 @@ public class AmbariDecommissionerTest {
         Map<String, List<String>> blueprintMap = new HashMap<>();
         blueprintMap.put(slaveHostGroup.getName(), Collections.singletonList("DATANODE"));
 
-        AmbariClient ambariClient = mock(AmbariClient.class);
-
-        HttpClientConfig config = new HttpClientConfig(ipAddress);
-        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp())).thenReturn(config);
-        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), cluster)).thenReturn(ambariClient);
+        AmbariClient ambariClient = getAmbariClient(stack);
 
         doReturn(Sets.newHashSet(masterHostGroup, slaveHostGroup)).when(hostGroupService).getByCluster(nullable(Long.class));
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
                 .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
-        when(ambariClientRetryer.getBlueprintMap(ambariClient, ambariName)).thenReturn(blueprintMap);
+        when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
         when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
@@ -533,6 +534,36 @@ public class AmbariDecommissionerTest {
         assertEquals(privateIPsByFQDN.keySet().size(), 2L);
         assertThat(privateIPsByFQDN, hasEntry("10-0-1-50.example.com", "10.0.1.50"));
         assertThat(privateIPsByFQDN, hasEntry("10-0-1-62.example.com", "10.0.1.62"));
+    }
+
+    private AmbariClient getAmbariClient(Stack stack) {
+        AmbariClient ambariClient = mock(AmbariClient.class);
+        HttpClientConfig config = new HttpClientConfig(EXAMPLE_IP);
+        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getCluster().getAmbariIp())).thenReturn(config);
+        when(ambariClientProvider.getAmbariClient(config, stack.getGatewayPort(), stack.getCluster())).thenReturn(ambariClient);
+        return ambariClient;
+    }
+
+    private Blueprint getBlueprint(String ambariName) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(ambariName);
+        blueprint.setAmbariName(ambariName);
+        return blueprint;
+    }
+
+    private Cluster getCluster(String ipAddress, Blueprint blueprint) {
+        Cluster cluster = new Cluster();
+        cluster.setAmbariIp(ipAddress);
+        cluster.setBlueprint(blueprint);
+        return cluster;
+    }
+
+    private Stack getStack(int gatewayPort, Cluster cluster) {
+        Stack stack = new Stack();
+        stack.setCluster(cluster);
+        stack.setGatewayPort(gatewayPort);
+        stack.setId(100L);
+        return stack;
     }
 
     private HostGroup getHostGroupForInstanceGroup(InstanceGroup instanceGroup, Long id) {
