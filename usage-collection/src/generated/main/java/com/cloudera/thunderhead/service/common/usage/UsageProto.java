@@ -35298,6 +35298,54 @@ public final class UsageProto {
        * <code>RENEW_CLUSTER_INTERNAL_CERT_FAILED = 30;</code>
        */
       RENEW_CLUSTER_INTERNAL_CERT_FAILED(30),
+      /**
+       * <pre>
+       * The status when CB is trying to do a backup of the cluster
+       * </pre>
+       *
+       * <code>BACKUP_STARTED = 31;</code>
+       */
+      BACKUP_STARTED(31),
+      /**
+       * <pre>
+       * The status when CB has finished backing up the cluster
+       * </pre>
+       *
+       * <code>BACKUP_FINISHED = 32;</code>
+       */
+      BACKUP_FINISHED(32),
+      /**
+       * <pre>
+       * The status when CB could not do a backup of the cluster
+       * </pre>
+       *
+       * <code>BACKUP_FAILED = 33;</code>
+       */
+      BACKUP_FAILED(33),
+      /**
+       * <pre>
+       * The status when CB is trying to create a diagnostic bundle for the the cluster
+       * </pre>
+       *
+       * <code>DIAGNOSTIC_COLLECTION_STARTED = 34;</code>
+       */
+      DIAGNOSTIC_COLLECTION_STARTED(34),
+      /**
+       * <pre>
+       * The status when CB is done creating the diagnostic bundle for the the cluster
+       * </pre>
+       *
+       * <code>DIAGNOSTIC_COLLECTION_FINISHED = 35;</code>
+       */
+      DIAGNOSTIC_COLLECTION_FINISHED(35),
+      /**
+       * <pre>
+       * The status when CB could not create the diagnostic bundle for the the cluster
+       * </pre>
+       *
+       * <code>DIAGNOSTIC_COLLECTION_FAILED = 36;</code>
+       */
+      DIAGNOSTIC_COLLECTION_FAILED(36),
       UNRECOGNIZED(-1),
       ;
 
@@ -35549,6 +35597,54 @@ public final class UsageProto {
        * <code>RENEW_CLUSTER_INTERNAL_CERT_FAILED = 30;</code>
        */
       public static final int RENEW_CLUSTER_INTERNAL_CERT_FAILED_VALUE = 30;
+      /**
+       * <pre>
+       * The status when CB is trying to do a backup of the cluster
+       * </pre>
+       *
+       * <code>BACKUP_STARTED = 31;</code>
+       */
+      public static final int BACKUP_STARTED_VALUE = 31;
+      /**
+       * <pre>
+       * The status when CB has finished backing up the cluster
+       * </pre>
+       *
+       * <code>BACKUP_FINISHED = 32;</code>
+       */
+      public static final int BACKUP_FINISHED_VALUE = 32;
+      /**
+       * <pre>
+       * The status when CB could not do a backup of the cluster
+       * </pre>
+       *
+       * <code>BACKUP_FAILED = 33;</code>
+       */
+      public static final int BACKUP_FAILED_VALUE = 33;
+      /**
+       * <pre>
+       * The status when CB is trying to create a diagnostic bundle for the the cluster
+       * </pre>
+       *
+       * <code>DIAGNOSTIC_COLLECTION_STARTED = 34;</code>
+       */
+      public static final int DIAGNOSTIC_COLLECTION_STARTED_VALUE = 34;
+      /**
+       * <pre>
+       * The status when CB is done creating the diagnostic bundle for the the cluster
+       * </pre>
+       *
+       * <code>DIAGNOSTIC_COLLECTION_FINISHED = 35;</code>
+       */
+      public static final int DIAGNOSTIC_COLLECTION_FINISHED_VALUE = 35;
+      /**
+       * <pre>
+       * The status when CB could not create the diagnostic bundle for the the cluster
+       * </pre>
+       *
+       * <code>DIAGNOSTIC_COLLECTION_FAILED = 36;</code>
+       */
+      public static final int DIAGNOSTIC_COLLECTION_FAILED_VALUE = 36;
 
 
       public final int getNumber() {
@@ -35600,6 +35696,12 @@ public final class UsageProto {
           case 28: return RENEW_CLUSTER_INTERNAL_CERT_STARTED;
           case 29: return RENEW_CLUSTER_INTERNAL_CERT_FINISHED;
           case 30: return RENEW_CLUSTER_INTERNAL_CERT_FAILED;
+          case 31: return BACKUP_STARTED;
+          case 32: return BACKUP_FINISHED;
+          case 33: return BACKUP_FAILED;
+          case 34: return DIAGNOSTIC_COLLECTION_STARTED;
+          case 35: return DIAGNOSTIC_COLLECTION_FINISHED;
+          case 36: return DIAGNOSTIC_COLLECTION_FAILED;
           default: return null;
         }
       }
@@ -63287,8 +63389,8 @@ public final class UsageProto {
       "\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n" +
       "\020SUSPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022" +
       "\022\n\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013" +
-      "\022\021\n\rRESUME_FAILED\020\014\"\361\005\n\020CDPClusterStatus" +
-      "\"\334\005\n\005Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020" +
+      "\022\021\n\rRESUME_FAILED\020\014\"\226\007\n\020CDPClusterStatus" +
+      "\"\201\007\n\005Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020" +
       "\001\022\023\n\017CREATE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020" +
       "\003\022\022\n\016DELETE_STARTED\020\004\022\023\n\017DELETE_FINISHED" +
       "\020\005\022\021\n\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED" +
@@ -63306,105 +63408,109 @@ public final class UsageProto {
       "ERT_FAILED\020\033\022\'\n#RENEW_CLUSTER_INTERNAL_C" +
       "ERT_STARTED\020\034\022(\n$RENEW_CLUSTER_INTERNAL_" +
       "CERT_FINISHED\020\035\022&\n\"RENEW_CLUSTER_INTERNA" +
-      "L_CERT_FAILED\020\036\"\343\002\n\023CDPOperationDetails\022" +
-      "\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022" +
-      "\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 " +
-      "\001(\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n\030cdpRe" +
-      "questProcessingStep\030\006 \001(\0162%.usage.CDPReq" +
-      "uestProcessingStep.Value\022\016\n\006flowId\030\007 \001(\t" +
-      "\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t" +
-      "\022\025\n\rcorrelationId\030\n \001(\t\022D\n\017environmentTy" +
-      "pe\030\013 \001(\0162+.usage.CDPEnvironmentsEnvironm" +
-      "entType.Value\"\313\002\n\025CDPEnvironmentDetails\022" +
-      "D\n\017environmentType\030\001 \001(\0162+.usage.CDPEnvi" +
-      "ronmentsEnvironmentType.Value\022\016\n\006region\030" +
-      "\002 \001(\t\022!\n\031numberOfAvailabilityZones\030\003 \001(\005" +
-      "\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016networkDe" +
-      "tails\030\005 \001(\0132\030.usage.CDPNetworkDetails\0223\n" +
-      "\nawsDetails\030\006 \001(\0132\037.usage.CDPEnvironment" +
-      "AwsDetails\0227\n\014azureDetails\030\007 \001(\0132!.usage" +
-      ".CDPEnvironmentAzureDetails\"0\n\021CDPFreeIP" +
-      "ADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030\002 \001(\010\"9\n" +
-      "\032CDPEnvironmentAzureDetails\022\033\n\023singleRes" +
-      "ourceGroup\030\001 \001(\010\"\032\n\030CDPEnvironmentAwsDet" +
-      "ails\"a\n%CDPEnvironmentTelemetryFeatureDe" +
-      "tails\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035\n\025clus" +
-      "terLogsCollection\030\002 \001(\t\"J\n\017CDPProxyDetai" +
-      "ls\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002 \001(\t\022\026\n\016a" +
-      "uthentication\030\003 \001(\t\"\211\002\n\021CDPNetworkDetail" +
-      "s\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectivity\030\002" +
-      " \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034\n\024num" +
-      "berPrivateSubnets\030\004 \001(\005\022\037\n\027serviceEndpoi" +
-      "ntCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 \001(\0132\026" +
-      ".usage.CDPProxyDetails\022#\n\033publicEndpoint" +
-      "AccessGateway\030\007 \001(\t\022\032\n\022securityAccessTyp" +
-      "e\030\010 \001(\t\"\203\002\n\027CDPEnvironmentRequested\0224\n\020o" +
-      "perationDetails\030\001 \001(\0132\032.usage.CDPOperati" +
-      "onDetails\0228\n\022environmentDetails\030\002 \001(\0132\034." +
-      "usage.CDPEnvironmentDetails\022M\n\027telemetry" +
-      "FeatureDetails\030\003 \001(\0132,.usage.CDPEnvironm" +
-      "entTelemetryFeatureDetails\022)\n\007freeIPA\030\004 " +
-      "\001(\0132\030.usage.CDPFreeIPADetails\"\326\001\n\033CDPEnv" +
-      "ironmentStatusChanged\0224\n\020operationDetail" +
-      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0224\n\to" +
-      "ldStatus\030\002 \001(\0162!.usage.CDPEnvironmentSta" +
-      "tus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usage.CDP" +
-      "EnvironmentStatus.Value\022\025\n\rfailureReason" +
-      "\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001" +
-      "(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPClusterSh" +
-      "ape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005node" +
-      "s\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021d" +
-      "efinitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDet" +
-      "ails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001" +
-      "(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004" +
-      " \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"" +
-      "\241\001\n\021CDPClusterDetails\022,\n\014clusterShape\030\001 " +
-      "\001(\0132\026.usage.CDPClusterShape\0220\n\016versionDe" +
-      "tails\030\002 \001(\0132\030.usage.CDPVersionDetails\022,\n" +
-      "\014imageDetails\030\003 \001(\0132\026.usage.CDPImageDeta" +
-      "ils\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStatus\030" +
-      "\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n\021st" +
-      "ackStatusReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004" +
-      " \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023CDP" +
-      "DatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage.CD" +
-      "PRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPDa" +
-      "talakeRequested\0224\n\020operationDetails\030\001 \001(" +
-      "\0132\032.usage.CDPOperationDetails\022\026\n\016environ" +
-      "mentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030." +
-      "usage.CDPClusterDetails\022,\n\010features\030\004 \001(" +
-      "\0132\032.usage.CDPDatalakeFeatures\"\344\001\n\030CDPDat" +
-      "alakeStatusChanged\0224\n\020operationDetails\030\001" +
-      " \001(\0132\032.usage.CDPOperationDetails\0220\n\toldS" +
-      "tatus\030\002 \001(\0162\035.usage.CDPClusterStatus.Val" +
-      "ue\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPCluster" +
-      "Status.Value\022.\n\rstatusDetails\030\004 \001(\0132\027.us" +
-      "age.CDPStatusDetails\"\225\001\n\023CDPDatahubReque" +
-      "sted\0224\n\020operationDetails\030\001 \001(\0132\032.usage.C" +
-      "DPOperationDetails\022\026\n\016environmentCrn\030\002 \001" +
-      "(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPCl" +
-      "usterDetails\"\343\001\n\027CDPDatahubStatusChanged" +
+      "L_CERT_FAILED\020\036\022\022\n\016BACKUP_STARTED\020\037\022\023\n\017B" +
+      "ACKUP_FINISHED\020 \022\021\n\rBACKUP_FAILED\020!\022!\n\035D" +
+      "IAGNOSTIC_COLLECTION_STARTED\020\"\022\"\n\036DIAGNO" +
+      "STIC_COLLECTION_FINISHED\020#\022 \n\034DIAGNOSTIC" +
+      "_COLLECTION_FAILED\020$\"\343\002\n\023CDPOperationDet" +
+      "ails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002" +
+      " \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiatorC" +
+      "rn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n\030" +
+      "cdpRequestProcessingStep\030\006 \001(\0162%.usage.C" +
+      "DPRequestProcessingStep.Value\022\016\n\006flowId\030" +
+      "\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState\030" +
+      "\t \001(\t\022\025\n\rcorrelationId\030\n \001(\t\022D\n\017environm" +
+      "entType\030\013 \001(\0162+.usage.CDPEnvironmentsEnv" +
+      "ironmentType.Value\"\313\002\n\025CDPEnvironmentDet" +
+      "ails\022D\n\017environmentType\030\001 \001(\0162+.usage.CD" +
+      "PEnvironmentsEnvironmentType.Value\022\016\n\006re" +
+      "gion\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030" +
+      "\003 \001(\005\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016netw" +
+      "orkDetails\030\005 \001(\0132\030.usage.CDPNetworkDetai" +
+      "ls\0223\n\nawsDetails\030\006 \001(\0132\037.usage.CDPEnviro" +
+      "nmentAwsDetails\0227\n\014azureDetails\030\007 \001(\0132!." +
+      "usage.CDPEnvironmentAzureDetails\"0\n\021CDPF" +
+      "reeIPADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030\002 \001" +
+      "(\010\"9\n\032CDPEnvironmentAzureDetails\022\033\n\023sing" +
+      "leResourceGroup\030\001 \001(\010\"\032\n\030CDPEnvironmentA" +
+      "wsDetails\"a\n%CDPEnvironmentTelemetryFeat" +
+      "ureDetails\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035\n" +
+      "\025clusterLogsCollection\030\002 \001(\t\"J\n\017CDPProxy" +
+      "Details\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002 \001(\t" +
+      "\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CDPNetworkD" +
+      "etails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectiv" +
+      "ity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034" +
+      "\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serviceE" +
+      "ndpointCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 " +
+      "\001(\0132\026.usage.CDPProxyDetails\022#\n\033publicEnd" +
+      "pointAccessGateway\030\007 \001(\t\022\032\n\022securityAcce" +
+      "ssType\030\010 \001(\t\"\203\002\n\027CDPEnvironmentRequested" +
       "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
-      "erationDetails\0220\n\toldStatus\030\002 \001(\0162\035.usag" +
-      "e.CDPClusterStatus.Value\0220\n\tnewStatus\030\003 " +
-      "\001(\0162\035.usage.CDPClusterStatus.Value\022.\n\rst" +
-      "atusDetails\030\004 \001(\0132\027.usage.CDPStatusDetai" +
-      "ls\"y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016" +
-      "detailedStatus\030\002 \001(\t\022\036\n\026clusterCreationS" +
-      "tarted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030" +
-      "\004 \001(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operationDe" +
-      "tails\030\001 \001(\0132\032.usage.CDPOperationDetails\022" +
-      "*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSyncDeta" +
-      "ils\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPC" +
-      "lusterDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.u" +
-      "sage.CDPStatusDetails\"\324\001\n\016CDPDatahubSync" +
-      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
-      "erationDetails\022*\n\013syncDetails\030\002 \001(\0132\025.us" +
-      "age.CDPSyncDetails\0220\n\016clusterDetails\030\003 \001" +
-      "(\0132\030.usage.CDPClusterDetails\022.\n\rstatusDe" +
-      "tails\030\004 \001(\0132\027.usage.CDPStatusDetailsBV\n-" +
-      "com.cloudera.thunderhead.service.common." +
-      "usageB\nUsageProtoZ\031com/cloudera/cdp/prot" +
-      "obufb\006proto3"
+      "erationDetails\0228\n\022environmentDetails\030\002 \001" +
+      "(\0132\034.usage.CDPEnvironmentDetails\022M\n\027tele" +
+      "metryFeatureDetails\030\003 \001(\0132,.usage.CDPEnv" +
+      "ironmentTelemetryFeatureDetails\022)\n\007freeI" +
+      "PA\030\004 \001(\0132\030.usage.CDPFreeIPADetails\"\326\001\n\033C" +
+      "DPEnvironmentStatusChanged\0224\n\020operationD" +
+      "etails\030\001 \001(\0132\032.usage.CDPOperationDetails" +
+      "\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvironme" +
+      "ntStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usag" +
+      "e.CDPEnvironmentStatus.Value\022\025\n\rfailureR" +
+      "eason\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageI" +
+      "d\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPClus" +
+      "terShape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n" +
+      "\005nodes\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t" +
+      "\022\031\n\021definitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersi" +
+      "onDetails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersio" +
+      "n\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVers" +
+      "ion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006" +
+      " \001(\t\"\241\001\n\021CDPClusterDetails\022,\n\014clusterSha" +
+      "pe\030\001 \001(\0132\026.usage.CDPClusterShape\0220\n\016vers" +
+      "ionDetails\030\002 \001(\0132\030.usage.CDPVersionDetai" +
+      "ls\022,\n\014imageDetails\030\003 \001(\0132\026.usage.CDPImag" +
+      "eDetails\"\223\001\n\020CDPStatusDetails\022\023\n\013stackSt" +
+      "atus\030\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022" +
+      "\031\n\021stackStatusReason\030\003 \001(\t\022\025\n\rclusterSta" +
+      "tus\030\004 \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1" +
+      "\n\023CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usa" +
+      "ge.CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024" +
+      "CDPDatalakeRequested\0224\n\020operationDetails" +
+      "\030\001 \001(\0132\032.usage.CDPOperationDetails\022\026\n\016en" +
+      "vironmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001" +
+      "(\0132\030.usage.CDPClusterDetails\022,\n\010features" +
+      "\030\004 \001(\0132\032.usage.CDPDatalakeFeatures\"\344\001\n\030C" +
+      "DPDatalakeStatusChanged\0224\n\020operationDeta" +
+      "ils\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n" +
+      "\toldStatus\030\002 \001(\0162\035.usage.CDPClusterStatu" +
+      "s.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPCl" +
+      "usterStatus.Value\022.\n\rstatusDetails\030\004 \001(\013" +
+      "2\027.usage.CDPStatusDetails\"\225\001\n\023CDPDatahub" +
+      "Requested\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
+      "age.CDPOperationDetails\022\026\n\016environmentCr" +
+      "n\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage." +
+      "CDPClusterDetails\"\343\001\n\027CDPDatahubStatusCh" +
+      "anged\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
+      "CDPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035" +
+      ".usage.CDPClusterStatus.Value\0220\n\tnewStat" +
+      "us\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
+      ".\n\rstatusDetails\030\004 \001(\0132\027.usage.CDPStatus" +
+      "Details\"y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(" +
+      "\t\022\026\n\016detailedStatus\030\002 \001(\t\022\036\n\026clusterCrea" +
+      "tionStarted\030\003 \001(\004\022\037\n\027clusterCreationFini" +
+      "shed\030\004 \001(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operat" +
+      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
+      "ails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSyn" +
+      "cDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usage" +
+      ".CDPClusterDetails\022.\n\rstatusDetails\030\004 \001(" +
+      "\0132\027.usage.CDPStatusDetails\"\324\001\n\016CDPDatahu" +
+      "bSync\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
+      "CDPOperationDetails\022*\n\013syncDetails\030\002 \001(\013" +
+      "2\025.usage.CDPSyncDetails\0220\n\016clusterDetail" +
+      "s\030\003 \001(\0132\030.usage.CDPClusterDetails\022.\n\rsta" +
+      "tusDetails\030\004 \001(\0132\027.usage.CDPStatusDetail" +
+      "sBV\n-com.cloudera.thunderhead.service.co" +
+      "mmon.usageB\nUsageProtoZ\031com/cloudera/cdp" +
+      "/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
