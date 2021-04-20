@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -152,5 +153,94 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 networkDetails.getProxyDetails().getProtocol());
         Assert.assertEquals("",
                 networkDetails.getProxyDetails().getAuthentication());
+    }
+
+    @Test
+    public void testConvertingEmptyEnvironmentDetails() {
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertEquals("", networkDetails.getNetworkType());
+        Assertions.assertEquals("", networkDetails.getServiceEndpointCreation());
+        Assertions.assertEquals("", networkDetails.getNetworkType());
+        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+        Assertions.assertEquals("", networkDetails.getPublicEndpointAccessGateway());
+        Assertions.assertEquals("", networkDetails.getSecurityAccessType());
+        Assertions.assertFalse(networkDetails.getProxyDetails().getProxy());
+        Assertions.assertEquals("", networkDetails.getProxyDetails().getProtocol());
+        Assertions.assertEquals("", networkDetails.getProxyDetails().getAuthentication());
+    }
+
+    @Test
+    public void testSettingSubnetNumbersWhenNetworkIsNull() {
+        when(environmentDetails.getNetwork()).thenReturn(null);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+    }
+
+    @Test
+    public void testSettingSubnetNumbersWhenSubnetMetasIsNull() {
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .build();
+        networkDto.setSubnetMetas(null);
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+    }
+
+    @Test
+    public void testSettingSubnetNumbersWhenSubnetMetasIsEmpty() {
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withSubnetMetas(null)
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertEquals(0, networkDetails.getNumberPrivateSubnets());
+        Assertions.assertEquals(0, networkDetails.getNumberPublicSubnets());
+    }
+
+    @Test
+    public void testSettingSubnetNumbersWhenSubnetTypeIsEmpty() {
+        CloudSubnet publicSubnet = new CloudSubnet();
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withSubnetMetas(Map.of("1", publicSubnet))
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+    }
+
+    @Test
+    public void testSettingSubnetNumbersWhenSubnetTypeIsNotEmpty() {
+        CloudSubnet publicSubnet = new CloudSubnet();
+        publicSubnet.setType(SubnetType.PUBLIC);
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withSubnetMetas(Map.of("1", publicSubnet))
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertEquals(0, networkDetails.getNumberPrivateSubnets());
+        Assertions.assertEquals(1, networkDetails.getNumberPublicSubnets());
     }
 }

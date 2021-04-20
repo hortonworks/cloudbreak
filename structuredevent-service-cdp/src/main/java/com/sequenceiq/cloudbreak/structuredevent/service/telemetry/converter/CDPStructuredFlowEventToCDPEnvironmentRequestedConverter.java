@@ -25,6 +25,8 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredFlowEventToCDPEnvironmentRequestedConverter.class);
 
+    private static final int DEFAULT_INTEGER_VALUE = -1;
+
     @Inject
     private CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
 
@@ -53,6 +55,8 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
 
     private UsageProto.CDPEnvironmentDetails convertEnvironmentDetails(EnvironmentDetails srcEnvironmentDetails) {
         UsageProto.CDPEnvironmentDetails.Builder cdpEnvironmentDetails = UsageProto.CDPEnvironmentDetails.newBuilder();
+        cdpEnvironmentDetails.setNumberOfAvailabilityZones(DEFAULT_INTEGER_VALUE);
+
         if (srcEnvironmentDetails != null) {
             if (srcEnvironmentDetails.getRegions() != null) {
                 cdpEnvironmentDetails.setRegion(srcEnvironmentDetails.getRegions().stream()
@@ -71,16 +75,21 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
 
             NetworkDto network = srcEnvironmentDetails.getNetwork();
             if (network != null && network.getSubnetMetas() != null) {
-                List<String> availabilityZones = network.getSubnetMetas().values()
-                        .stream()
-                        .map(CloudSubnet::getAvailabilityZone)
-                        .filter(Objects::nonNull)
-                        .sorted()
-                        .distinct()
-                        .collect(Collectors.toUnmodifiableList());
-
-                cdpEnvironmentDetails.setNumberOfAvailabilityZones(availabilityZones.size());
-                cdpEnvironmentDetails.setAvailabilityZones(String.join(",", availabilityZones));
+                if (network.getSubnetMetas().isEmpty()) {
+                    cdpEnvironmentDetails.setNumberOfAvailabilityZones(0);
+                } else {
+                    List<String> availabilityZones = network.getSubnetMetas().values()
+                            .stream()
+                            .map(CloudSubnet::getAvailabilityZone)
+                            .filter(Objects::nonNull)
+                            .sorted()
+                            .distinct()
+                            .collect(Collectors.toUnmodifiableList());
+                    if (!availabilityZones.isEmpty()) {
+                        cdpEnvironmentDetails.setNumberOfAvailabilityZones(availabilityZones.size());
+                        cdpEnvironmentDetails.setAvailabilityZones(String.join(",", availabilityZones));
+                    }
+                }
             }
             cdpEnvironmentDetails.setNetworkDetails(networkDetailsConverter.convert(srcEnvironmentDetails));
 

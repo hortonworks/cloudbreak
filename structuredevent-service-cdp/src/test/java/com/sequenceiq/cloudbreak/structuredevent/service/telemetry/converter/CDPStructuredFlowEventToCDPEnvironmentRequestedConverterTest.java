@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,13 +16,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.reflect.Whitebox;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 import com.sequenceiq.common.api.type.FeatureSetting;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
+import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
@@ -221,5 +227,88 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
         UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
 
         Assert.assertEquals("invalidregion,uksouth,westus2", environmentRequested.getEnvironmentDetails().getRegion());
+    }
+
+    @Test
+    public void testSettingAvailabilityZonesWhenNetworkIsNull() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+        when(environmentDetails.getNetwork()).thenReturn(null);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals(-1, environmentRequested.getEnvironmentDetails().getNumberOfAvailabilityZones());
+        Assertions.assertEquals("", environmentRequested.getEnvironmentDetails().getAvailabilityZones());
+    }
+
+    @Test
+    public void testSettingAvailabilityZonesWhenSubnetMetasIsNull() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .build();
+        networkDto.setSubnetMetas(null);
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals(-1, environmentRequested.getEnvironmentDetails().getNumberOfAvailabilityZones());
+        Assertions.assertEquals("", environmentRequested.getEnvironmentDetails().getAvailabilityZones());
+    }
+
+    @Test
+    public void testSettingAvailabilityZonesWhenSubnetMetasIsEmpty() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withSubnetMetas(null)
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals(0, environmentRequested.getEnvironmentDetails().getNumberOfAvailabilityZones());
+        Assertions.assertEquals("", environmentRequested.getEnvironmentDetails().getAvailabilityZones());
+    }
+
+    @Test
+    public void testSettingAvailabilityZonesWhenSubnetAvailabilityZoneIsEmpty() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+        CloudSubnet publicSubnet = new CloudSubnet();
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withSubnetMetas(Map.of("1", publicSubnet))
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals(-1, environmentRequested.getEnvironmentDetails().getNumberOfAvailabilityZones());
+        Assertions.assertEquals("", environmentRequested.getEnvironmentDetails().getAvailabilityZones());
+    }
+
+    @Test
+    public void testSettingAvailabilityZonesWhenSubnetAvailabilityZoneIsNotEmpty() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+        CloudSubnet publicSubnet = new CloudSubnet();
+        publicSubnet.setAvailabilityZone("availibilityzone");
+        NetworkDto networkDto = NetworkDto.builder()
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
+                .withSubnetMetas(Map.of("1", publicSubnet))
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals(1, environmentRequested.getEnvironmentDetails().getNumberOfAvailabilityZones());
+        Assertions.assertEquals("availibilityzone", environmentRequested.getEnvironmentDetails().getAvailabilityZones());
     }
 }

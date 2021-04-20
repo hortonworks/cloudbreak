@@ -15,8 +15,11 @@ public class EnvironmentDetailsToCDPFreeIPADetailsConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentDetailsToCDPFreeIPADetailsConverter.class);
 
+    private static final int DEFAULT_INTEGER_VALUE = -1;
+
     public UsageProto.CDPFreeIPADetails convert(EnvironmentDetails environmentDetails) {
         UsageProto.CDPFreeIPADetails.Builder cdpFreeIPADetails = UsageProto.CDPFreeIPADetails.newBuilder();
+        cdpFreeIPADetails.setNodes(DEFAULT_INTEGER_VALUE);
 
         if (environmentDetails != null) {
             FreeIpaCreationDto freeIpaCreationDto = environmentDetails.getFreeIpaCreation();
