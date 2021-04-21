@@ -1,11 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config;
 
+import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.BIND_USER_CREATION_STARTED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.FREEIPA_EXISTS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_EXISTS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.CHECK_FREEIPA_EXISTS_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.CREATE_BIND_USER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.POLL_BIND_USER_CREATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.VALIDATE_KERBEROS_CONFIG_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationState.VALIDATE_KERBEROS_CONFIG_STATE;
 
@@ -23,14 +29,33 @@ public class KerberosConfigValidationFlowConfig extends AbstractFlowConfiguratio
 
     private static final List<Transition<KerberosConfigValidationState, KerberosConfigValidationEvent>> TRANSITIONS =
             new Builder<KerberosConfigValidationState, KerberosConfigValidationEvent>()
-            .defaultFailureEvent(VALIDATE_KERBEROS_CONFIG_FAILED_EVENT)
-            .from(INIT_STATE)
-            .to(VALIDATE_KERBEROS_CONFIG_STATE)
-            .event(VALIDATE_KERBEROS_CONFIG_EVENT).defaultFailureEvent()
-            .from(VALIDATE_KERBEROS_CONFIG_STATE)
-            .to(FINAL_STATE)
-            .event(VALIDATE_KERBEROS_CONFIG_FINISHED_EVENT).defaultFailureEvent()
-            .build();
+                    .defaultFailureEvent(VALIDATE_KERBEROS_CONFIG_FAILED_EVENT)
+
+                    .from(INIT_STATE)
+                    .to(CHECK_FREEIPA_EXISTS_STATE)
+                    .event(VALIDATE_KERBEROS_CONFIG_EVENT).defaultFailureEvent()
+
+                    .from(CHECK_FREEIPA_EXISTS_STATE)
+                    .to(VALIDATE_KERBEROS_CONFIG_STATE)
+                    .event(VALIDATE_KERBEROS_CONFIG_EXISTS_EVENT).defaultFailureEvent()
+
+                    .from(CHECK_FREEIPA_EXISTS_STATE)
+                    .to(CREATE_BIND_USER_STATE)
+                    .event(FREEIPA_EXISTS_EVENT).defaultFailureEvent()
+
+                    .from(CREATE_BIND_USER_STATE)
+                    .to(POLL_BIND_USER_CREATION_STATE)
+                    .event(BIND_USER_CREATION_STARTED_EVENT).defaultFailureEvent()
+
+                    .from(POLL_BIND_USER_CREATION_STATE)
+                    .to(VALIDATE_KERBEROS_CONFIG_STATE)
+                    .event(VALIDATE_KERBEROS_CONFIG_EXISTS_EVENT).defaultFailureEvent()
+
+                    .from(VALIDATE_KERBEROS_CONFIG_STATE)
+                    .to(FINAL_STATE)
+                    .event(VALIDATE_KERBEROS_CONFIG_FINISHED_EVENT).defaultFailureEvent()
+
+                    .build();
 
     private static final FlowEdgeConfig<KerberosConfigValidationState, KerberosConfigValidationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, VALIDATE_KERBEROS_CONFIG_FAILED_STATE, VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT);
@@ -56,7 +81,7 @@ public class KerberosConfigValidationFlowConfig extends AbstractFlowConfiguratio
 
     @Override
     public KerberosConfigValidationEvent[] getInitEvents() {
-        return new KerberosConfigValidationEvent[] {
+        return new KerberosConfigValidationEvent[]{
                 VALIDATE_KERBEROS_CONFIG_EVENT
         };
     }
