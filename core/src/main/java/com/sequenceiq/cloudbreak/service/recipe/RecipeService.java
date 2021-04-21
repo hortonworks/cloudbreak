@@ -196,7 +196,7 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
     }
 
     public Set<RecipeView> findAllViewById(List<Long> ids) {
-        return Sets.newLinkedHashSet(recipeViewRepository.findAllById(ids));
+        return Sets.newLinkedHashSet(recipeViewRepository.findAllByIdNotArchived(ids));
     }
 
     public List<ResourceWithId> findAsAuthorizationResourcesInWorkspace(Long workspaceId) {

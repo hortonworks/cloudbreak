@@ -147,8 +147,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    public Set<ImageCatalog> findAllByIdsWithDefaults(Iterable<Long> ids, boolean customCatalogsOnly) {
-        Set<ImageCatalog> imageCatalogs = Sets.newLinkedHashSet(imageCatalogRepository.findAllById(ids));
+    public Set<ImageCatalog> findAllByIdsWithDefaults(List<Long> ids, boolean customCatalogsOnly) {
+        Set<ImageCatalog> imageCatalogs = Sets.newLinkedHashSet(imageCatalogRepository.findAllByIdNotArchived(ids));
 
         // FIXME: We need to clean up this part
         // In contrast with the method name, this will only return the default catalog if the customCatalogsOnly

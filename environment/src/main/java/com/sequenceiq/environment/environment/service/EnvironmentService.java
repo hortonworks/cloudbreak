@@ -207,7 +207,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     public List<EnvironmentDto> findAllByIds(List<Long> ids) {
-        return Lists.newArrayList(environmentRepository.findAllById(ids))
+        return Lists.newArrayList(environmentRepository.findAllByIdNotArchived(ids))
                 .stream()
                 .map(environmentDtoConverter::environmentToDto)
                 .collect(Collectors.toList());

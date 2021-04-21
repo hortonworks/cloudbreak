@@ -51,4 +51,11 @@ public interface ImageCatalogRepository extends WorkspaceResourceRepository<Imag
 
     Optional<ImageCatalog> findByResourceCrnAndArchivedFalseAndImageCatalogUrlIsNotNull(String resourceCrn);
 
+    @Query("SELECT i FROM ImageCatalog i "
+            + "LEFT JOIN FETCH i.workspace w "
+            + "LEFT JOIN FETCH w.tenant t "
+            + "WHERE i.id IN :ids "
+            + "AND i.archived = false")
+    Set<ImageCatalog> findAllByIdNotArchived(@Param("ids") List<Long> ids);
+
 }

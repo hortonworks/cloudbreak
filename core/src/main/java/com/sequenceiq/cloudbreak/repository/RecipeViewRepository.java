@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -35,4 +36,12 @@ public interface RecipeViewRepository extends WorkspaceResourceRepository<Recipe
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(r.id, r.resourceCrn) FROM Recipe r WHERE r.workspace.id = :workspaceId " +
             "AND r.archived = false")
     List<ResourceWithId> findAsAuthorizationResourcesInWorkspace(@Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT r FROM RecipeView r "
+            + "LEFT JOIN FETCH r.workspace w "
+            + "LEFT JOIN FETCH w.tenant t "
+            + "WHERE r.id IN :ids "
+            + "AND r.archived = false")
+    Set<RecipeView> findAllByIdNotArchived(@Param("ids") List<Long> ids);
+
 }
