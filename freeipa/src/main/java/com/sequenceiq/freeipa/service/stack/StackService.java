@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -141,6 +142,10 @@ public class StackService implements ResourcePropertyProvider {
 
     public List<Stack> findAllWithStatuses(Collection<Status> statuses) {
         return stackRepository.findAllWithStatuses(statuses);
+    }
+
+    public List<Stack> findAllWithDetailedStackStatuses(Collection<DetailedStackStatus> detailedStackStatuses) {
+        return stackRepository.findAllWithDetailedStackStatuses(detailedStackStatuses);
     }
 
     public List<Stack> findAllByAccountIdWithStatuses(String accountId, Collection<Status> statuses) {

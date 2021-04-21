@@ -29,6 +29,8 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSele
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -102,6 +104,7 @@ class StartFreeIpaHandlerTest {
     @Test
     void testWhenFreeIpaDescribeTellsFreeIpaIsNotStartableThenExceptionComesAndNoStartEventHappens() {
         when(mockFreeIpaService.describe(MOCK_ENV_CRN)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
+        when(mockDescribeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.UNAVAILABLE);
         when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(Status.DELETED_ON_PROVIDER_SIDE);
 
         underTest.accept(mockEnvironmentDtoEvent);
@@ -119,6 +122,7 @@ class StartFreeIpaHandlerTest {
     @Test
     void testWhenFreeIpaDescribeTellsFreeIpaIsStartableThenStartEventHappens() {
         when(mockFreeIpaService.describe(MOCK_ENV_CRN)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
+        when(mockDescribeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.UNAVAILABLE);
         when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(Status.STOPPED);
 
         underTest.accept(mockEnvironmentDtoEvent);
@@ -133,14 +137,15 @@ class StartFreeIpaHandlerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"AVAILABLE", "MAINTENANCE_MODE_ENABLED", "START_IN_PROGRESS"})
-    public void shouldSkipStartFreeipaInstanceWhenStatusAvaialbleOrStartInrogress(Status status) {
+    @EnumSource(value = DetailedStackStatus.class, names = {"PROVISIONED", "START_IN_PROGRESS"})
+    public void shouldSkipStartFreeipaInstanceWhenStatusAvaialbleOrStartInProgress(DetailedStackStatus detailedStackStatus) {
         String envCrn = "someCrnValue";
         EnvironmentDto environmentDto = createEnvironmentDto();
         environmentDto.setResourceCrn(envCrn);
         Event<EnvironmentStartDto> environmentDtoEvent = Event.wrap(mockEnvironmentDto);
 
-        when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(status);
+        when(mockDescribeFreeIpaResponse.getAvailabilityStatus()).thenReturn(detailedStackStatus.getAvailabilityStatus());
+        when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(detailedStackStatus.getStatus());
         when(mockFreeIpaService.describe(envCrn)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
 
         underTest.accept(environmentDtoEvent);
@@ -150,20 +155,24 @@ class StartFreeIpaHandlerTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status.class, names = {"STOPPED", "STOP_FAILED", "START_FAILED", "AVAILABLE", "START_IN_PROGRESS", "MAINTENANCE_MODE_ENABLED"},
+    @EnumSource(value = DetailedStackStatus.class, names = {"STOPPED", "STOP_FAILED", "START_FAILED", "START_IN_PROGRESS"},
             mode = EnumSource.Mode.EXCLUDE)
-    public void shouldThrowErrorWhenUnstartable(Status status) {
-        String envCrn = "someCrnValue";
-        EnvironmentDto environmentDto = createEnvironmentDto();
-        environmentDto.setResourceCrn(envCrn);
-        Event<EnvironmentStartDto> environmentDtoEvent = Event.wrap(mockEnvironmentDto);
+    public void shouldThrowErrorWhenUnstartable(DetailedStackStatus detailedStackStatus) {
+        if (!detailedStackStatus.getAvailabilityStatus().isAvailable()) {
+            String envCrn = "someCrnValue";
+            EnvironmentDto environmentDto = createEnvironmentDto();
+            environmentDto.setResourceCrn(envCrn);
+            Event<EnvironmentStartDto> environmentDtoEvent = Event.wrap(mockEnvironmentDto);
 
-        when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(status);
-        when(mockFreeIpaService.describe(envCrn)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
+            when(mockDescribeFreeIpaResponse.getAvailabilityStatus()).thenReturn(detailedStackStatus.getAvailabilityStatus());
+            when(mockDescribeFreeIpaResponse.getStatus()).thenReturn(detailedStackStatus.getStatus());
+            when(mockFreeIpaService.describe(envCrn)).thenReturn(Optional.of(mockDescribeFreeIpaResponse));
 
-        underTest.accept(environmentDtoEvent);
+            underTest.accept(environmentDtoEvent);
 
-        verifyEnvStartFailedEvent(environmentDtoEvent, "FreeIPA is not in a valid state to start! Current state is: " + status);
+            verifyEnvStartFailedEvent(environmentDtoEvent, "FreeIPA is not in a valid state to start! Current state is: " +
+                    detailedStackStatus.getStatus());
+        }
     }
 
     private EnvironmentDto createEnvironmentDto() {

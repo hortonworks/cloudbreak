@@ -19,15 +19,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.EventGenerationIdsChecker;
-import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncStatusService;
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -126,7 +126,7 @@ class UserSyncPollerTest {
     }
 
     private Stack setupMockStackService(Stack stack) {
-        when(stackService.findAllWithStatuses(Status.AVAILABLE_STATUSES)).thenReturn(List.of(stack));
+        when(stackService.findAllWithDetailedStackStatuses(DetailedStackStatus.AVAILABLE_STATUSES)).thenReturn(List.of(stack));
         return stack;
     }
 

@@ -46,6 +46,7 @@ import com.sequenceiq.datalake.service.sdx.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -89,7 +90,7 @@ public class SdxStartServiceTest {
         sdxCluster.setEnvCrn("envCrn");
 
         DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
-        freeIpaResponse.setStatus(Status.AVAILABLE);
+        freeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
 
         when(freeipaService.describe("envCrn")).thenReturn(freeIpaResponse);
 
@@ -114,6 +115,7 @@ public class SdxStartServiceTest {
 
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
         freeipa.setStatus(Status.STOPPED);
+        freeipa.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
 
         when(freeipaService.describe("envCrn")).thenReturn(freeipa);
 

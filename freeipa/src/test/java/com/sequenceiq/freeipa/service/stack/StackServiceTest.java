@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,9 +16,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
@@ -163,5 +166,13 @@ class StackServiceTest {
         underTest.getImagesOfAliveStacks(thresholdInDays);
 
         verify(stackRepository).findImagesOfAliveStacks(Timestamp.valueOf(thresholdTime).getTime());
+    }
+
+    @Test
+    void findAllWithDetailedStackStatuses() {
+        when(stackRepository.findAllWithDetailedStackStatuses(Mockito.eq(List.of(DetailedStackStatus.AVAILABLE)))).thenReturn(List.of(stack));
+        List<Stack> results = underTest.findAllWithDetailedStackStatuses(List.of(DetailedStackStatus.AVAILABLE));
+
+        assertEquals(List.of(stack), results);
     }
 }

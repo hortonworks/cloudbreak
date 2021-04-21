@@ -44,9 +44,9 @@ public class StartFreeIpaHandler extends EventSenderAwareHandler<EnvironmentStar
         EnvironmentDto environmentDto = environmentStartDtoEvent.getData().getEnvironmentDto();
         try {
             freeIpaService.describe(environmentDto.getResourceCrn()).ifPresentOrElse(freeIpa -> {
-                if (freeIpa.getStatus() == null) {
+                if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, env start will be interrupted.");
-                } else if (freeIpa.getStatus().isAvailable() || freeIpa.getStatus().isStartInProgressPhase()) {
+                } else if (freeIpa.getAvailabilityStatus().isAvailable() || freeIpa.getStatus().isStartInProgressPhase()) {
                     LOGGER.info("Start has already been triggered continuing without new start trigger. FreeIPA status: {}", freeIpa.getStatus());
                 } else if (!freeIpa.getStatus().isStartable()) {
                     throw new FreeIpaOperationFailedException("FreeIPA is not in a valid state to start! Current state is: " + freeIpa.getStatus().name());

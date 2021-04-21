@@ -50,7 +50,7 @@ public class SynchronizeUsersHandler extends EventSenderAwareHandler<Environment
         try {
             if (synchronizeOnStartEnabled) {
                 freeIpaService.describe(environmentDto.getResourceCrn()).ifPresent(freeIpa -> {
-                    if (freeIpa.getStatus() != null && !freeIpa.getStatus().isAvailable()) {
+                    if (freeIpa.getStatus() != null && freeIpa.getAvailabilityStatus() != null && !freeIpa.getAvailabilityStatus().isAvailable()) {
                         throw new FreeIpaOperationFailedException("FreeIPA is not in AVAILABLE state to synchronize users! Current state is: " +
                                 freeIpa.getStatus().name());
                     }

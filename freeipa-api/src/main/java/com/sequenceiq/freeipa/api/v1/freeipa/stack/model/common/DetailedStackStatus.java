@@ -1,80 +1,99 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public enum DetailedStackStatus {
-    UNKNOWN(Status.UNKNOWN),
+    UNKNOWN(Status.UNKNOWN, AvailabilityStatus.UNKNOWN),
     // Provision statuses
-    PROVISION_REQUESTED(Status.REQUESTED),
-    PROVISION_SETUP(Status.CREATE_IN_PROGRESS),
-    IMAGE_SETUP(Status.CREATE_IN_PROGRESS),
-    CREATING_INFRASTRUCTURE(Status.CREATE_IN_PROGRESS),
-    METADATA_COLLECTION(Status.CREATE_IN_PROGRESS),
-    TLS_SETUP(Status.CREATE_IN_PROGRESS),
-    REGISTERING_WITH_CLUSTER_PROXY(Status.CREATE_IN_PROGRESS),
-    STACK_PROVISIONED(Status.STACK_AVAILABLE),
-    PROVISIONED(Status.AVAILABLE),
-    PROVISION_FAILED(Status.CREATE_FAILED),
+    PROVISION_REQUESTED(Status.REQUESTED, AvailabilityStatus.UNAVAILABLE),
+    PROVISION_SETUP(Status.CREATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    IMAGE_SETUP(Status.CREATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    CREATING_INFRASTRUCTURE(Status.CREATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    METADATA_COLLECTION(Status.CREATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    TLS_SETUP(Status.CREATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    REGISTERING_WITH_CLUSTER_PROXY(Status.CREATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    STACK_PROVISIONED(Status.STACK_AVAILABLE, AvailabilityStatus.UNAVAILABLE),
+    PROVISIONED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
+    PROVISION_FAILED(Status.CREATE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Orchestration statuses
-    BOOTSTRAPPING_MACHINES(Status.UPDATE_IN_PROGRESS),
-    COLLECTING_HOST_METADATA(Status.UPDATE_IN_PROGRESS),
-    MOUNTING_DISKS(Status.UPDATE_IN_PROGRESS),
-    CONFIGURING_ORCHESTRATOR(Status.UPDATE_IN_PROGRESS),
-    VALIDATING_CLOUD_STORAGE(Status.UPDATE_IN_PROGRESS),
-    STARTING_FREEIPA_SERVICES(Status.UPDATE_IN_PROGRESS),
-    REGISTER_WITH_CLUSTER_PROXY(Status.UPDATE_IN_PROGRESS),
-    UPDATE_CLUSTER_PROXY_REGISTRATION(Status.UPDATE_IN_PROGRESS),
-    POSTINSTALL_FREEIPA_CONFIGURATION(Status.UPDATE_IN_PROGRESS),
+    BOOTSTRAPPING_MACHINES(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    COLLECTING_HOST_METADATA(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    MOUNTING_DISKS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    CONFIGURING_ORCHESTRATOR(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    VALIDATING_CLOUD_STORAGE(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    STARTING_FREEIPA_SERVICES(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    REGISTER_WITH_CLUSTER_PROXY(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    UPDATE_CLUSTER_PROXY_REGISTRATION(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    POSTINSTALL_FREEIPA_CONFIGURATION(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     // Start statuses
-    START_REQUESTED(Status.START_REQUESTED),
-    START_IN_PROGRESS(Status.START_IN_PROGRESS),
-    STARTED(Status.AVAILABLE),
-    START_FAILED(Status.START_FAILED),
+    START_REQUESTED(Status.START_REQUESTED, AvailabilityStatus.UNAVAILABLE),
+    START_IN_PROGRESS(Status.START_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    STARTED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
+    START_FAILED(Status.START_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Stop statuses
-    STOP_REQUESTED(Status.STOP_REQUESTED),
-    STOP_IN_PROGRESS(Status.STOP_IN_PROGRESS),
-    STOPPED(Status.STOPPED),
-    STOP_FAILED(Status.STOP_FAILED),
+    STOP_REQUESTED(Status.STOP_REQUESTED, AvailabilityStatus.UNAVAILABLE),
+    STOP_IN_PROGRESS(Status.STOP_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    STOPPED(Status.STOPPED, AvailabilityStatus.UNAVAILABLE),
+    STOP_FAILED(Status.STOP_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Upscale statuses
-    UPSCALE_REQUESTED(Status.UPDATE_REQUESTED),
-    UPSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
-    UPSCALE_COMPLETED(Status.AVAILABLE),
-    UPSCALE_FAILED(Status.UPSCALE_FAILED),
+    UPSCALE_REQUESTED(Status.UPDATE_REQUESTED, AvailabilityStatus.AVAILABLE),
+    UPSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    UPSCALE_COMPLETED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
+    UPSCALE_FAILED(Status.UPSCALE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Downscale statuses
-    DOWNSCALE_REQUESTED(Status.UPDATE_REQUESTED),
-    DOWNSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
-    DOWNSCALE_COMPLETED(Status.AVAILABLE),
-    DOWNSCALE_FAILED(Status.DOWNSCALE_FAILED),
+    DOWNSCALE_REQUESTED(Status.UPDATE_REQUESTED, AvailabilityStatus.AVAILABLE),
+    DOWNSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    DOWNSCALE_COMPLETED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
+    DOWNSCALE_FAILED(Status.DOWNSCALE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Repair statuses
-    REPAIR_REQUESTED(Status.UPDATE_REQUESTED),
-    REPAIR_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
-    REPAIR_COMPLETED(Status.AVAILABLE),
-    REPAIR_FAILED(Status.REPAIR_FAILED),
+    REPAIR_REQUESTED(Status.UPDATE_REQUESTED, AvailabilityStatus.AVAILABLE),
+    REPAIR_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    REPAIR_COMPLETED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
+    REPAIR_FAILED(Status.REPAIR_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Termination statuses
-    DEREGISTERING_WITH_CLUSTERPROXY(Status.DELETE_IN_PROGRESS),
-    DEREGISTERING_CCM_KEY(Status.DELETE_IN_PROGRESS),
-    DELETE_IN_PROGRESS(Status.DELETE_IN_PROGRESS),
-    DELETE_COMPLETED(Status.DELETE_COMPLETED),
-    DELETE_FAILED(Status.DELETE_FAILED),
+    DEREGISTERING_WITH_CLUSTERPROXY(Status.DELETE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    DEREGISTERING_CCM_KEY(Status.DELETE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    DELETE_IN_PROGRESS(Status.DELETE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
+    DELETE_COMPLETED(Status.DELETE_COMPLETED, AvailabilityStatus.UNAVAILABLE),
+    DELETE_FAILED(Status.DELETE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Rollback statuses
-    ROLLING_BACK(Status.UPDATE_IN_PROGRESS),
+    ROLLING_BACK(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     // The stack is available
-    AVAILABLE(Status.AVAILABLE),
+    AVAILABLE(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
     // Instance removing status
-    REMOVE_INSTANCE(Status.UPDATE_IN_PROGRESS),
+    REMOVE_INSTANCE(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     // Cluster operation is in progress
-    CLUSTER_OPERATION(Status.UPDATE_IN_PROGRESS),
+    CLUSTER_OPERATION(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
     // Wait for sync
-    WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC),
-    UNREACHABLE(Status.UNREACHABLE),
-    DELETED_ON_PROVIDER_SIDE(Status.DELETED_ON_PROVIDER_SIDE),
-    UNHEALTHY(Status.UNHEALTHY);
+    WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC, AvailabilityStatus.UNAVAILABLE),
+    UNREACHABLE(Status.UNREACHABLE, AvailabilityStatus.UNAVAILABLE),
+    DELETED_ON_PROVIDER_SIDE(Status.DELETED_ON_PROVIDER_SIDE, AvailabilityStatus.UNAVAILABLE),
+    UNHEALTHY(Status.UNHEALTHY, AvailabilityStatus.AVAILABLE);
+
+    public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
+
+    static {
+        AVAILABLE_STATUSES = Stream.of(DetailedStackStatus.values())
+                .filter(s -> s.getAvailabilityStatus().isAvailable())
+                .collect(Collectors.toList());
+    }
 
     private final Status status;
 
-    DetailedStackStatus(Status status) {
+    private final AvailabilityStatus availabilityStatus;
+
+    DetailedStackStatus(Status status, AvailabilityStatus availabilityStatus) {
         this.status = status;
+        this.availabilityStatus = availabilityStatus;
     }
 
     public Status getStatus() {
         return status;
+    }
+
+    public AvailabilityStatus getAvailabilityStatus() {
+        return availabilityStatus;
     }
 }

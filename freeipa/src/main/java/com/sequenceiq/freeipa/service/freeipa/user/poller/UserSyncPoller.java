@@ -22,16 +22,16 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.EventGenerationIdsChecker;
-import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncStatusService;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -89,7 +89,7 @@ public class UserSyncPoller {
 
             ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
                 LOGGER.debug("Attempting to sync users to FreeIPA stacks");
-                List<Stack> stackList = stackService.findAllWithStatuses(Status.AVAILABLE_STATUSES);
+                List<Stack> stackList = stackService.findAllWithDetailedStackStatuses(DetailedStackStatus.AVAILABLE_STATUSES);
                 LOGGER.debug("Found {} active stacks", stackList.size());
 
                 stackList.stream()

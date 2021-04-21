@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -75,6 +76,9 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
 
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
     List<Stack> findAllWithStatuses(@Param("stackStatuses") Collection<Status> stackStatuses);
+
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.detailedStackStatus IN :detailedStackStatuses AND s.terminated = -1 ")
+    List<Stack> findAllWithDetailedStackStatuses(@Param("detailedStackStatuses") Collection<DetailedStackStatus> detailedStackStatuses);
 
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
     List<Stack> findByAccountIdWithStatuses(@Param("accountId") String accountId, @Param("stackStatuses") Collection<Status> stackStatuses);
