@@ -117,9 +117,9 @@ class BaseDnsEntryServiceTest {
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
         when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
 
         Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdate(stack));
 
@@ -147,7 +147,7 @@ class BaseDnsEntryServiceTest {
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
         when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
+        when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 
         Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createOrUpdateCandidates(stack, Map.of(FQDN_1, PUBLIC_IP_1)));
 
@@ -171,9 +171,9 @@ class BaseDnsEntryServiceTest {
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
         when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
-        when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
-        when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
-        when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
+        when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
+        when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
+        when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_3, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_3))).thenReturn(true);
 
         Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deregister(stack));
 
@@ -201,7 +201,7 @@ class BaseDnsEntryServiceTest {
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
         when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
-        when(dnsManagementService.deleteDnsEntryWithIp(USER_CRN, ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
+        when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 
         Map<String, String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deregister(stack, Map.of(FQDN_1, PUBLIC_IP_1)));
 

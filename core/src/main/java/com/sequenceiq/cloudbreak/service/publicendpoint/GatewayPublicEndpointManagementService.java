@@ -76,7 +76,6 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     public String updateDnsEntry(Stack stack, String gatewayIp) {
         LOGGER.info("Update dns entry");
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
         Set<String> hueHostGroups = getHueHostGroups(stack);
@@ -93,7 +92,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         String endpointName = getEndpointNameForStack(stack);
         LOGGER.info("Creating DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environment.getName(), gatewayIp);
         List<String> ips = List.of(gatewayIp);
-        boolean success = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpointName, environment.getName(), false, ips);
+        boolean success = getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpointName, environment.getName(), false, ips);
         if (success) {
             try {
                 String fullQualifiedDomainName = getDomainNameProvider()
@@ -101,7 +100,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
                                 hueHostGroups,
                                 endpointName,
                                 environment.getName(),
-                                getWorkloadSubdomain(userCrn));
+                                getWorkloadSubdomain(accountId));
                 if (fullQualifiedDomainName != null) {
                     LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
                     return fullQualifiedDomainName;
@@ -139,7 +138,6 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private boolean registerLoadBalancersDnsEntries(LoadBalancer loadBalancer, String environmentCrn, Set<String> hueHostGroups) {
         boolean success = false;
         LOGGER.info("Updating load balancer DNS entries");
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
@@ -147,12 +145,12 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
             LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
                 endpoint, environment.getName(), loadBalancer.getDns());
-            success = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(userCrn, accountId, endpoint,
+            success = getDnsManagementService().createOrUpdateDnsEntryWithCloudDns(accountId, endpoint,
                 environment.getName(), loadBalancer.getDns(), loadBalancer.getHostedZoneId());
         } else if (loadBalancer.getIp() != null) {
             LOGGER.info("Creating load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
                 endpoint, environment.getName(), loadBalancer.getIp());
-            success = getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId, endpoint,
+            success = getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId, endpoint,
                 environment.getName(), false, List.of(loadBalancer.getIp()));
         } else {
             LOGGER.warn("Could not find IP or cloud DNS info for load balancer with endpoint {} ." +
@@ -160,21 +158,20 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
 
         if (success) {
-            setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment.getName(), userCrn);
+            setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment.getName(), accountId);
         }
 
         return success;
     }
 
-    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, String envName, String userCrn) {
+    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, String envName, String accountId) {
         loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
-                hueHostGroups, endpoint, envName, getWorkloadSubdomain(userCrn)));
+                hueHostGroups, endpoint, envName, getWorkloadSubdomain(accountId)));
         loadBalancerPersistenceService.save(loadBalancer);
         LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
     }
 
     public String deleteDnsEntry(Stack stack, String environmentName) {
-        String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (StringUtils.isEmpty(environmentName)) {
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
@@ -191,7 +188,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
         String endpointName = getEndpointNameForStack(stack);
         LOGGER.info("Deleting DNS entry with endpoint name: '{}', environment name: '{}' and gateway IP: '{}'", endpointName, environmentName, ip);
-        getDnsManagementService().deleteDnsEntryWithIp(actorCrn, accountId, endpointName, environmentName, false, List.of(ip));
+        getDnsManagementService().deleteDnsEntryWithIp(accountId, endpointName, environmentName, false, List.of(ip));
         return ip;
     }
 
@@ -201,7 +198,6 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         if (loadBalancerOptional.isEmpty()) {
             LOGGER.warn("Unable to find appropriate load balancer in stack. Load balancer public domain name will not be deleted.");
         } else {
-            String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             if (StringUtils.isEmpty(environmentName)) {
                 DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
@@ -213,12 +209,12 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             if (loadBalancer.getDns() != null && loadBalancer.getHostedZoneId() != null) {
                 LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and cloud DNS: '{}'",
                     endpoint, environmentName, loadBalancer.getDns());
-                getDnsManagementService().deleteDnsEntryWithCloudDns(userCrn, accountId, endpoint,
+                getDnsManagementService().deleteDnsEntryWithCloudDns(accountId, endpoint,
                     environmentName, loadBalancer.getDns(), loadBalancer.getHostedZoneId());
             } else if (loadBalancer.getIp() != null) {
                 LOGGER.info("Deleting load balancer DNS entry with endpoint name: '{}', environment name: '{}' and IP: '{}'",
                     endpoint, environmentName, loadBalancer.getIp());
-                getDnsManagementService().deleteDnsEntryWithIp(userCrn, accountId, endpoint,
+                getDnsManagementService().deleteDnsEntryWithIp(accountId, endpoint,
                     environmentName, false, List.of(loadBalancer.getIp()));
             }
         }
@@ -240,7 +236,6 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     private boolean generateCertAndSaveForStack(Stack stack) {
         boolean result = false;
         LOGGER.info("Acquire certificate from PEM service and save for stack");
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         SecurityConfig securityConfig = stack.getSecurityConfig();
         Set<String> hueHostGroups = getHueHostGroups(stack);
@@ -250,7 +245,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             Set<String> loadBalancerEndpoints = getLoadBalancerNamesForStack(stack);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             String environmentName = environment.getName();
-            String workloadSubdomain = getWorkloadSubdomain(userCrn);
+            String workloadSubdomain = getWorkloadSubdomain(accountId);
 
             String commonName = getDomainNameProvider().getCommonName(endpointName, environmentName, workloadSubdomain);
             String fullyQualifiedEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
@@ -266,7 +261,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
             LOGGER.info("Acquiring certificate with common name:{} and SANs: {}", commonName, String.join(",", subjectAlternativeNames));
             PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
-            List<String> certs = getCertificateCreationService().create(userCrn, accountId, endpointName, environmentName, csr);
+            List<String> certs = getCertificateCreationService().create(accountId, endpointName, environmentName, csr);
             securityConfig.setUserFacingCert(String.join("", certs));
             securityConfigService.save(securityConfig);
             result = true;

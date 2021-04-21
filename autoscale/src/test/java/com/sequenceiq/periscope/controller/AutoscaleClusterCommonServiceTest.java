@@ -66,7 +66,7 @@ public class AutoscaleClusterCommonServiceTest {
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(getACluster());
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
-        verify(cloudbreakCommunicator, never()).getAutoscaleClusterByName(TEST_CLUSTER_NAME);
+        verify(cloudbreakCommunicator, never()).getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant);
         verify(clusterService, never()).create(any(AutoscaleStackV4Response.class));
     }
 
@@ -87,7 +87,7 @@ public class AutoscaleClusterCommonServiceTest {
     public void testGetClusterByNameWhenNotPresentInDBThenCBSyncByName() {
         AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
-        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME)).thenReturn(autoscaleStackV4Response);
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant)).thenReturn(autoscaleStackV4Response);
         when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
         when(clusterService.create(autoscaleStackV4Response)).thenReturn(getACluster().get());
 
@@ -99,7 +99,7 @@ public class AutoscaleClusterCommonServiceTest {
     @Test(expected = NotFoundException.class)
     public void testGetClusterByNameWhenNotFound() {
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(Optional.empty());
-        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME)).thenThrow(NotFoundException.class);
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant)).thenThrow(NotFoundException.class);
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
     }
