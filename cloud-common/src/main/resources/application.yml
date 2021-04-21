@@ -108,6 +108,7 @@ cb:
                 EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin=hdp26-edw-analytics;
                 Data Science: Apache Spark 2, Apache Zeppelin=hdp26-data-science-spark2;
                 Flow Management: Apache NiFi, Apache NiFi Registry=hdf33-flow-management;
+                HDF 3.4 Flow Management: Apache NiFi, Apache NiFi Registry=hdf34-flow-management;
                 Messaging Management: Apache Kafka=hdf33-messaging-kafka;
                 Data Lake: Apache Ranger, Apache Atlas, Apache Hive Metastore=hdp26-shared-services;
                 Data Lake: Apache Ranger, Apache Hive Metastore HA=hdp26-shared-services-ha;
@@ -368,6 +369,22 @@ cb:
                 stackDefault: true
             redhat7:
               - mpackUrl: https://archive.cloudera.com/p/HDF/3.x/3.3.1.0/centos7/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
+                stackDefault: true
+      3.4:
+        version: 3.4.1.124-3
+        min-ambari: 2.7
+        repo:
+          stack:
+            repoid: HDF-3.4
+            redhat7: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-3/centos7
+            repository-version: 3.4.1.124-3
+            vdf-redhat7: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-3/centos7/HDF-3.4.1.124-3.xml
+          util:
+            repoid: HDP-UTILS-1.1.0.22
+            redhat7: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/centos7
+          mpacks:
+            redhat7:
+              - mpackUrl: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-3/centos7/tars/hdf_ambari_mp/hdf-ambari-mpack-3.4.1.124-3.tar.gz
                 stackDefault: true
       3.5:
         version: 3.5.2.0-99

@@ -1,0 +1,114 @@
+{
+  "inputs": [],
+  "description": "Useful for data-flow management with Apache NiFi and Apache NiFi Registry",
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdf34-flow-management",
+      "stack_name": "HDF",
+      "stack_version": "3.4"
+    },
+    "configurations": [
+      {
+        "nifi-ambari-config": {
+          "nifi.security.encrypt.configuration.password": "changethisplease",
+          "nifi.max_mem": "1g",
+          "nifi.sensitive.props.key": "changethisplease"
+        }
+      },
+      {
+        "nifi-bootstrap-env": {
+          "content": "#\n# Licensed to the Apache Software Foundation (ASF) under one or more\n# contributor license agreements. See the NOTICE file distributed with\n# this work for additional information regarding copyright ownership.\n# The ASF licenses this file to You under the Apache License, Version 2.0\n# (the \"License\"); you may not use this file except in compliance with\n# the License. You may obtain a copy of the License at\n#\n# http://www.apache.org/licenses/LICENSE-2.0\n#\n# Unless required by applicable law or agreed to in writing, software\n# distributed under the License is distributed on an \"AS IS\" BASIS,\n# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n# See the License for the specific language governing permissions and\n# limitations under the License.\n#\n\n# Java command to use when running NiFi\njava=java\n\n# Username to use when running NiFi. This value will be ignored on Windows.\nrun.as={{nifi_user}}\n##run.as=root\n\n# Configure where NiFi's lib and conf directories live\nlib.dir={{nifi_install_dir}}/lib\nconf.dir={{nifi_config_dir}}\n\n# How long to wait after telling NiFi to shutdown before explicitly killing the Process\ngraceful.shutdown.seconds=20\n\n{% if security_enabled %}\njava.arg.0=-Djava.security.auth.login.config={{nifi_jaas_conf}}\n{% endif %}\n\n# Disable JSR 199 so that we can use JSP's without running a JDK\njava.arg.1=-Dorg.apache.jasper.compiler.disablejsr199=true\n\n# JVM memory settings\njava.arg.2=-Xms{{nifi_initial_mem}}\njava.arg.3=-Xmx{{nifi_max_mem}}\n\n# Enable Remote Debugging\n#java.arg.debug=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=8000\n\njava.arg.4=-Djava.net.preferIPv4Stack=true\n\n# allowRestrictedHeaders is required for Cluster/Node communications to work properly\njava.arg.5=-Dsun.net.http.allowRestrictedHeaders=true\njava.arg.6=-Djava.protocol.handler.pkgs=sun.net.www.protocol\n\n# The G1GC is still considered experimental but has proven to be very advantageous in providing great\n# performance without significant \"stop-the-world\" delays.\njava.arg.13=-XX:+UseG1GC\n\n#Set headless mode by default\njava.arg.14=-Djava.awt.headless=true\n\n#Ambari Metrics Collector URL - passed in to flow.xml for AmbariReportingTask\njava.arg.15=-Dambari.metrics.collector.url=http://{{metrics_collector_host}}:{{metrics_collector_port}}/ws/v1/timeline/metrics\n\n#Application ID - used in flow.xml - passed into flow.xml for AmbariReportingTask\njava.arg.16=-Dambari.application.id=nifi\n\n#Sets the provider of SecureRandom to /dev/urandom to prevent blocking on VMs\njava.arg.17=-Djava.security.egd=file:/dev/urandom\n\n# Requires JAAS to use only the provided JAAS configuration to authenticate a Subject, without using any \"fallback\" methods (such as prompting for username/password)\n# Please see https://docs.oracle.com/javase/8/docs/technotes/guides/security/jgss/single-signon.html, section \"EXCEPTIONS TO THE MODEL\"\njava.arg.18=-Djavax.security.auth.useSubjectCredsOnly=true\n\n###\n# Notification Services for notifying interested parties when NiFi is stopped, started, dies\n###\n\n# XML File that contains the definitions of the notification services\nnotification.services.file={{nifi_config_dir}}/bootstrap-notification-services.xml\n\n# In the case that we are unable to send a notification for an event, how many times should we retry?\nnotification.max.attempts=5\n\n# Comma-separated list of identifiers that are present in the notification.services.file; which services should be used to notify when NiFi is started?\n#nifi.start.notification.services=email-notification\n\n# Comma-separated list of identifiers that are present in the notification.services.file; which services should be used to notify when NiFi is stopped?\n#nifi.stop.notification.services=email-notification\n\n# Comma-separated list of identifiers that are present in the notification.services.file; which services should be used to notify when NiFi dies?\n#nifi.dead.notification.services=email-notification\n\njava.arg.tmpdir=-Djava.io.tmpdir=/usr/hdf/current/nifi/lib"
+        }
+      },
+      {
+        "nifi-properties": {
+          "nifi.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
+          "nifi.security.identity.mapping.value.kerb": "$1"
+        }
+      },
+      {
+        "nifi-ambari-ssl-config": {
+          "nifi.toolkit.tls.token": "changethisplease",
+          "nifi.node.ssl.isenabled": "true",
+          "nifi.toolkit.dn.prefix": "CN=",
+          "nifi.toolkit.dn.suffix": ", OU=NIFI"
+        }
+      },
+      {
+        "nifi-registry-ambari-config": {
+          "nifi.registry.security.encrypt.configuration.password": "changethisplease"
+        }
+      },
+      {
+        "nifi-registry-properties": {
+          "nifi.registry.security.identity.mapping.pattern.kerb": "^(.*?)@(.*?)$",
+          "nifi.registry.security.identity.mapping.value.kerb": "$1",
+          "nifi.registry.db.password":"changethisplease"
+        }
+      },
+      {
+        "nifi-registry-ambari-ssl-config": {
+          "nifi.registry.ssl.isenabled": "true",
+          "nifi.registry.toolkit.dn.prefix": "CN=",
+          "nifi.registry.toolkit.dn.suffix": ", OU=NIFI"
+        }
+      }
+    ],
+    "host_groups": [
+      {
+        "name": "Services",
+        "components": [
+          {
+            "name": "NIFI_CA"
+          },
+          {
+            "name": "NIFI_REGISTRY_MASTER"
+          },
+          {
+            "name": "METRICS_COLLECTOR"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "METRICS_GRAFANA"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "NiFi",
+        "components": [
+          {
+            "name": "NIFI_MASTER"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          }
+        ],
+        "cardinality": "1+"
+      },
+      {
+        "name": "ZooKeeper",
+        "components": [
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          }
+        ],
+        "cardinality": "3+"
+      }
+    ]
+  }
+}
