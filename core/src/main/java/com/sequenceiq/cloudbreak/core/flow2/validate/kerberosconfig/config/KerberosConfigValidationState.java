@@ -7,6 +7,9 @@ import com.sequenceiq.flow.core.RestartAction;
 public enum KerberosConfigValidationState implements FlowState {
 
     INIT_STATE,
+    CHECK_FREEIPA_EXISTS_STATE,
+    CREATE_BIND_USER_STATE,
+    POLL_BIND_USER_CREATION_STATE,
     VALIDATE_KERBEROS_CONFIG_STATE,
     VALIDATE_KERBEROS_CONFIG_FAILED_STATE,
     VALIDATE_KERBEROS_CONFIG_FINISHED_STATE,
