@@ -41,9 +41,6 @@ public class CreateCertificationTest {
     @Inject
     private CertificateCreationService certificateCreationService;
 
-    @Value("${actor.crn}")
-    private String actorCrn;
-
     @Value("${account.id}")
     private String accountId;
 
@@ -60,8 +57,7 @@ public class CreateCertificationTest {
                 endpointName + domain
         );
         PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
-        List<String> strings = certificateCreationService.create(actorCrn,
-                accountId,
+        List<String> strings = certificateCreationService.create(accountId,
                 commonName,
                 "env-tb",
                 csr);
@@ -71,7 +67,7 @@ public class CreateCertificationTest {
     @Test
     public void onlyPolling() throws IOException {
         String requestId = "982c3446-2942-4f2c-893b-44c9dfe0e718";
-        List<String> strings = certificateCreationService.polling(actorCrn, requestId);
+        List<String> strings = certificateCreationService.polling(requestId);
         LOGGER.info("CERT: " + String.join(",", strings));
     }
 

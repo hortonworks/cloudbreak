@@ -810,8 +810,8 @@ public class GrpcUmsClient {
      * @param accountId the account ID
      * @return metadata as string
      */
-    public String getIdentityProviderMetadataXml(String accountId, String actorCrn) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+    public String getIdentityProviderMetadataXml(String accountId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
         String requestId = RequestIdUtil.newRequestId();
         LOGGER.debug("Getting IdP metadata through account ID: {}, request id: {}", accountId, requestId);
         return client.getIdentityProviderMetadataXml(requestId, accountId);

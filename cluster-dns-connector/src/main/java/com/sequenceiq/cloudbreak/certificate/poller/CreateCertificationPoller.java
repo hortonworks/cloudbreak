@@ -19,17 +19,14 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
 
     private GrpcClusterDnsClient grpcClusterDnsClient;
 
-    private String actorCrn;
-
     private String workflowId;
 
     private Optional<String> requestId;
 
     private int attempt;
 
-    public CreateCertificationPoller(GrpcClusterDnsClient grpcClusterDnsClient, String actorCrn, String workflowId, Optional<String> requestId) {
+    public CreateCertificationPoller(GrpcClusterDnsClient grpcClusterDnsClient, String workflowId, Optional<String> requestId) {
         this.grpcClusterDnsClient = grpcClusterDnsClient;
-        this.actorCrn = actorCrn;
         this.workflowId = workflowId;
         this.requestId = requestId;
     }
@@ -37,7 +34,7 @@ public class CreateCertificationPoller implements AttemptMaker<List<String>> {
     @Override
     public AttemptResult<List<String>> process() throws Exception {
         attempt++;
-        PollCertificateSigningResponse response = grpcClusterDnsClient.pollCertificateSigning(actorCrn, workflowId, requestId);
+        PollCertificateSigningResponse response = grpcClusterDnsClient.pollCertificateSigning(workflowId, requestId);
         final SigningStatus actualStatus = response.getStatus();
         LOGGER.debug("Polling attempt result: {}", actualStatus);
         if (SigningStatus.SUCCEEDED.equals(actualStatus)) {

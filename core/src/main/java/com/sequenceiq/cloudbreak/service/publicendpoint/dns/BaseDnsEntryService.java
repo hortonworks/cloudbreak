@@ -83,28 +83,26 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
 
     private Map<String, String> createOrUpdateDnsEntries(Map<String, String> ipsByFqdn, String environmentCrn) {
         LOGGER.info("Register DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
         return ipsByFqdn
                 .entrySet()
                 .stream()
-                .filter(entry -> getDnsManagementService().createOrUpdateDnsEntryWithIp(userCrn, accountId,
+                .filter(entry -> getDnsManagementService().createOrUpdateDnsEntryWithIp(accountId,
                         getShortHostname(entry.getKey()), environment.getName(), false, List.of(entry.getValue())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     private Map<String, String> doDeregister(Map<String, String> ipsByFqdn, String environmentCrn) {
         LOGGER.info("Deregister DNS entries for {} for FQDNs: '{}'", logName(), String.join(",", ipsByFqdn.keySet()));
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
 
         return ipsByFqdn
                 .entrySet()
                 .stream()
-                .filter(entry -> getDnsManagementService().deleteDnsEntryWithIp(userCrn, accountId,
+                .filter(entry -> getDnsManagementService().deleteDnsEntryWithIp(accountId,
                         getShortHostname(entry.getKey()), environment.getName(), false, List.of(entry.getValue())))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
