@@ -69,15 +69,14 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName());
-        assertUserDoesNotSeeAnyOf(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName());
+        assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName());
 
         useRealUmsUser(testContext, AuthUserKeys.USER_ENV_CREATOR_B);
         DistroXTestDto dataHubB = resourceCreator.createNewDataHubAndWaitAs(testContext, Optional.of(AuthUserKeys.USER_ACCOUNT_ADMIN));
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName(), dataHubB.getName());
         assertUserSeesAll(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN, datahubA.getName(), dataHubB.getName());
-        assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, dataHubB.getName());
-        assertUserDoesNotSeeAnyOf(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName());
+        assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_B, datahubA.getName(), dataHubB.getName());
 
         testContext.given(UmsTestDto.class)
                 .assignTarget(DistroXTestDto.class.getSimpleName())
