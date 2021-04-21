@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,7 @@ class AwsEncodedAuthorizationFailureMessageDecoderTest {
 
     @BeforeAll
     static void init() throws IOException {
-        decodedMessage = Files.read(new File("src/test/resources/json/aws-decoded-authorization-error.json"));
+        decodedMessage = Files.read(new File("src/test/resources/json/aws-decoded-authorization-error.json"), Charset.defaultCharset());
     }
 
     @BeforeEach
