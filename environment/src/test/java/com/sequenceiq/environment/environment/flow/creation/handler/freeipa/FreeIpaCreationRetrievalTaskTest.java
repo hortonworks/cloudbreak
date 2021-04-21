@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 import net.jcip.annotations.NotThreadSafe;
@@ -70,6 +71,7 @@ class FreeIpaCreationRetrievalTaskTest {
     void testCheckStatusWithDeleteInProgressState() {
         FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
         DescribeFreeIpaResponse freeIpa = new DescribeFreeIpaResponse();
+        freeIpa.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
         freeIpa.setStatus(DELETE_IN_PROGRESS);
         freeIpa.setName(FREE_IPA_NAME);
         freeIpa.setCrn(FREE_IPA_CRN);
@@ -82,6 +84,7 @@ class FreeIpaCreationRetrievalTaskTest {
     void testCheckStatusWithFailedState() {
         FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN);
         DescribeFreeIpaResponse freeIpa = new DescribeFreeIpaResponse();
+        freeIpa.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
         freeIpa.setStatus(DELETE_IN_PROGRESS);
         freeIpa.setName(FREE_IPA_NAME);
         freeIpa.setCrn(FREE_IPA_CRN);

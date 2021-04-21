@@ -32,6 +32,7 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSele
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -85,6 +86,7 @@ class SynchronizeUsersHandlerTest {
         ReflectionTestUtils.setField(underTest, "synchronizeOnStartEnabled", true);
 
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
         when(describeFreeIpaResponse.getStatus()).thenReturn(Status.AVAILABLE);
 
         underTest.accept(environmentDtoEvent);
@@ -118,6 +120,7 @@ class SynchronizeUsersHandlerTest {
         ReflectionTestUtils.setField(underTest, "synchronizeOnStartEnabled", true);
 
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
+        when(describeFreeIpaResponse.getAvailabilityStatus()).thenReturn(AvailabilityStatus.UNAVAILABLE);
         when(describeFreeIpaResponse.getStatus()).thenReturn(Status.STOPPED);
 
         underTest.accept(environmentDtoEvent);

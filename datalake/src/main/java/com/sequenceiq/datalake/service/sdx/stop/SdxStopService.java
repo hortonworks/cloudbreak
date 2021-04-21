@@ -179,7 +179,7 @@ public class SdxStopService {
 
     private void checkFreeipaRunning(String envCrn) {
         DescribeFreeIpaResponse freeipa = freeipaService.describe(envCrn);
-        if (freeipa != null && !freeipa.getStatus().isAvailable()) {
+        if (freeipa != null && freeipa.getAvailabilityStatus() != null && !freeipa.getAvailabilityStatus().isAvailable()) {
             throw new BadRequestException("Freeipa should be in Available state but currently is " + freeipa.getStatus().name());
         }
     }

@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
@@ -54,6 +55,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testStopAttachedFreeipaInstancesWhenFreeipaAvailable() {
         DescribeFreeIpaResponse freeipaResponse = new DescribeFreeIpaResponse();
+        freeipaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipaResponse.setStatus(Status.AVAILABLE);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeipaResponse));
         when(freeipaPollerProvider.stopPoller(ENV_ID, ENV_CRN)).thenReturn(AttemptResults::justFinish);
@@ -66,6 +68,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testStopAttachedFreeipaInstancesWhenFreeipaStopped() {
         DescribeFreeIpaResponse freeipaResponse = new DescribeFreeIpaResponse();
+        freeipaResponse.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
         freeipaResponse.setStatus(Status.STOPPED);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeipaResponse));
         when(freeipaPollerProvider.stopPoller(ENV_ID, ENV_CRN)).thenReturn(AttemptResults::justFinish);
@@ -78,6 +81,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testStartAttachedFreeipaInstancesWhenFreeipaAvailable() {
         DescribeFreeIpaResponse freeipaResponse = new DescribeFreeIpaResponse();
+        freeipaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipaResponse.setStatus(Status.AVAILABLE);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeipaResponse));
         when(freeipaPollerProvider.startPoller(ENV_ID, ENV_CRN)).thenReturn(AttemptResults::justFinish);
@@ -90,6 +94,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testStartAttachedFreeipaInstancesWhenFreeipaStopped() {
         DescribeFreeIpaResponse freeipaResponse = new DescribeFreeIpaResponse();
+        freeipaResponse.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
         freeipaResponse.setStatus(Status.STOPPED);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeipaResponse));
         when(freeipaPollerProvider.startPoller(ENV_ID, ENV_CRN)).thenReturn(AttemptResults::justFinish);
@@ -102,6 +107,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testSyncUsersWhenFreeIpaAvailable() {
         DescribeFreeIpaResponse freeipaResponse = new DescribeFreeIpaResponse();
+        freeipaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipaResponse.setStatus(Status.AVAILABLE);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeipaResponse));
         when(freeIpaService.synchronizeAllUsersInEnvironment(ENV_CRN)).thenReturn(createStatus(SynchronizationStatus.REQUESTED, ""));
@@ -115,6 +121,7 @@ public class FreeIpaPollerServiceTest {
     @Test
     void testSyncUsersWhenFreeIpaStopped() {
         DescribeFreeIpaResponse freeipaResponse = new DescribeFreeIpaResponse();
+        freeipaResponse.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
         freeipaResponse.setStatus(Status.STOPPED);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(freeipaResponse));
 

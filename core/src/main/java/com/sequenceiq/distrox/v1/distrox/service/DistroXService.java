@@ -59,7 +59,7 @@ public class DistroXService {
             throw new BadRequestException(format("'%s' Environment does not exist.", request.getEnvironmentName()));
         }
         DescribeFreeIpaResponse freeipa = freeipaClientService.getByEnvironmentCrn(environment.getCrn());
-        if (!freeipa.getStatus().isAvailable()) {
+        if (freeipa == null || freeipa.getAvailabilityStatus() == null || !freeipa.getAvailabilityStatus().isAvailable()) {
             throw new BadRequestException(format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.",
                     environment.getName()));
         }

@@ -35,8 +35,6 @@ public enum Status {
     DELETED_ON_PROVIDER_SIDE,
     UNKNOWN;
 
-    public static final Collection<Status> AVAILABLE_STATUSES = List.of(AVAILABLE, MAINTENANCE_MODE_ENABLED);
-
     public static final Collection<Status> REMOVABLE_STATUSES = List.of(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, DELETE_FAILED,
             DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED, REPAIR_FAILED, UPSCALE_FAILED, DOWNSCALE_FAILED);
 
@@ -62,10 +60,6 @@ public enum Status {
 
     public boolean isFailed() {
         return FAILED_STATUSES.contains(this);
-    }
-
-    public boolean isAvailable() {
-        return AVAILABLE_STATUSES.contains(this);
     }
 
     public boolean isSuccessfullyDeleted() {

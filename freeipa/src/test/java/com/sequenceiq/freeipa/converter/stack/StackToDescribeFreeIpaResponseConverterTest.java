@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
@@ -60,6 +61,8 @@ class StackToDescribeFreeIpaResponseConverterTest {
     private static final UserSyncStatusResponse USERSYNC_STATUS_RESPONSE = new UserSyncStatusResponse();
 
     private static final Status STATUS = Status.AVAILABLE;
+
+    private static final DetailedStackStatus DETAILED_STACK_STATUS = DetailedStackStatus.AVAILABLE;
 
     private static final String STATUS_REASON = "Because reasons";
 
@@ -168,6 +171,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stackStatus.setStatus(STATUS);
         stackStatus.setStatusString(STATUS_STRING);
         stackStatus.setStatusReason(STATUS_REASON);
+        stackStatus.setDetailedStackStatus(DETAILED_STACK_STATUS);
         return stackStatus;
     }
 }

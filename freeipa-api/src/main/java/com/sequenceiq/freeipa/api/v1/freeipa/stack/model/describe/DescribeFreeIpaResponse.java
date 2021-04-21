@@ -11,6 +11,7 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
@@ -61,6 +62,8 @@ public class DescribeFreeIpaResponse {
     @NotNull
     @ApiModelProperty(value = FreeIpaModelDescriptions.FREEIPA_SERVER_SETTINGS, required = true)
     private FreeIpaServerResponse freeIpa;
+
+    private AvailabilityStatus availabilityStatus;
 
     private Status status;
 
@@ -169,6 +172,14 @@ public class DescribeFreeIpaResponse {
 
     public void setCloudStorage(CloudStorageResponse cloudStorage) {
         this.cloudStorage = cloudStorage;
+    }
+
+    public AvailabilityStatus getAvailabilityStatus() {
+        return availabilityStatus;
+    }
+
+    public void setAvailabilityStatus(AvailabilityStatus availabilityStatus) {
+        this.availabilityStatus = availabilityStatus;
     }
 
     public Status getStatus() {

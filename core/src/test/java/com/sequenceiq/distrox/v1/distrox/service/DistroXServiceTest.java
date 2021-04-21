@@ -41,6 +41,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.converter.DistroXV1RequestToStackV4RequestConverter;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 class DistroXServiceTest {
@@ -105,6 +106,7 @@ class DistroXServiceTest {
         envResponse.setEnvironmentStatus(START_DATAHUB_STARTED);
         envResponse.setCrn("crn");
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
@@ -116,35 +118,37 @@ class DistroXServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.class, names = {"AVAILABLE", "MAINTENANCE_MODE_ENABLED"},
-            mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.class)
     @DisplayName("When request contains a valid environment name but that environment is not in the AVAILABLE state then BadRequestException should come")
     void testWithValidEnvironmentNameValueButTheActualEnvIsNotAvailableBadRequestExceptionShouldCome(
-            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status status) {
-        String envName = "someAwesomeExistingButNotAvailableEnvironment";
-        DistroXV1Request r = new DistroXV1Request();
-        r.setEnvironmentName(envName);
+            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus detailedStackStatus) {
+        if (!detailedStackStatus.getAvailabilityStatus().isAvailable()) {
+            String envName = "someAwesomeExistingButNotAvailableEnvironment";
+            DistroXV1Request r = new DistroXV1Request();
+            r.setEnvironmentName(envName);
 
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        envResponse.setCrn("crn");
-        envResponse.setName(envName);
+            DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+            envResponse.setCrn("crn");
+            envResponse.setName(envName);
 
-        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
-        freeipa.setStatus(status);
-        when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
+            DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+            freeipa.setAvailabilityStatus(detailedStackStatus.getAvailabilityStatus());
+            freeipa.setStatus(detailedStackStatus.getStatus());
+            when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
 
-        when(environmentClientService.getByName(envName)).thenReturn(envResponse);
+            when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
-        BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
+            BadRequestException err = assertThrows(BadRequestException.class, () -> underTest.post(r));
 
-        assertEquals(String.format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.", envName),
-                err.getMessage());
+            assertEquals(String.format("If you want to provision a Data Hub then the FreeIPA instance must be running in the '%s' Environment.", envName),
+                    err.getMessage());
 
-        verify(environmentClientService, calledOnce()).getByName(any());
-        verify(environmentClientService, calledOnce()).getByName(eq(envName));
-        verify(stackOperations, never()).post(any(), any(), anyBoolean());
-        verify(workspaceService, never()).getForCurrentUser();
-        verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
+            verify(environmentClientService, calledOnce()).getByName(any());
+            verify(environmentClientService, calledOnce()).getByName(eq(envName));
+            verify(stackOperations, never()).post(any(), any(), anyBoolean());
+            verify(workspaceService, never()).getForCurrentUser();
+            verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
+        }
     }
 
     @Test
@@ -158,6 +162,7 @@ class DistroXServiceTest {
         envResponse.setEnvironmentStatus(AVAILABLE);
         envResponse.setCrn("crn");
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
 
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
@@ -187,6 +192,7 @@ class DistroXServiceTest {
         envResponse.setEnvironmentStatus(AVAILABLE);
         envResponse.setCrn("crn");
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
@@ -206,6 +212,7 @@ class DistroXServiceTest {
         envResponse.setEnvironmentStatus(AVAILABLE);
         envResponse.setCrn("crn");
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
@@ -225,6 +232,7 @@ class DistroXServiceTest {
         envResponse.setEnvironmentStatus(AVAILABLE);
         envResponse.setCrn("crn");
         DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
+        freeipa.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
