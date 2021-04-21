@@ -116,7 +116,7 @@ public class AwsInstanceConnector implements InstanceConnector {
             LOGGER.warn(exceptionText, e);
             throw e;
         }
-        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED));
+        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED), status);
     }
 
     @Retryable(
