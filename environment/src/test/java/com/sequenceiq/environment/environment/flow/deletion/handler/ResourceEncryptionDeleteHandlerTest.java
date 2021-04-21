@@ -3,8 +3,10 @@ package com.sequenceiq.environment.environment.flow.deletion.handler;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PUBLICKEY_DELETE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,11 +23,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.sequenceiq.environment.environment.EnvironmentStatus;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 
@@ -48,6 +56,9 @@ class ResourceEncryptionDeleteHandlerTest {
     private EnvironmentService environmentService;
 
     @Mock
+    private EnvironmentEncryptionService environmentEncryptionService;
+
+    @Mock
     private Event<EnvironmentDeletionDto> environmentDtoEvent;
 
     @Mock
@@ -68,14 +79,23 @@ class ResourceEncryptionDeleteHandlerTest {
                 .withId(ENVIRONMENT_ID)
                 .withResourceCrn(ENVIRONMENT_CRN)
                 .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform("AZURE")
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withDiskEncryptionSetId("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/" +
+                                                "providers/Microsoft.Compute/diskEncryptionSets/dummyDesId")
+                                        .build())
+                                .build())
+                        .build())
                 .build();
-        EnvironmentDeletionDto build = EnvironmentDeletionDto
+        EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
                 .builder()
                 .withId(ENVIRONMENT_ID)
                 .withForceDelete(false)
                 .withEnvironmentDto(eventDto)
                 .build();
-        when(environmentDtoEvent.getData()).thenReturn(build);
+        when(environmentDtoEvent.getData()).thenReturn(environmentDeletionDto);
         when(environmentDtoEvent.getHeaders()).thenReturn(headers);
         doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
     }
@@ -98,6 +118,46 @@ class ResourceEncryptionDeleteHandlerTest {
         underTest.accept(environmentDtoEvent);
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
         verifyEnvDeleteFailedEvent(error);
+    }
+
+    @Test
+    void testEnvironmentStatusShouldBeUpdatedWhenDesIsDeleted() {
+        Environment environment = new Environment();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        underTest.accept(environmentDtoEvent);
+        verify(environmentEncryptionService).deleteEncryptionResources(environmentDtoEvent.getData().getEnvironmentDto());
+        assertEquals(environment.getStatus(), EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
+        verifyEnvDeleteEvent();
+    }
+
+    @Test
+    void testDeletionContinuesIfEnvironmentEncryptionResourcesAreAlreadyDeleted() {
+        Environment environment = new Environment();
+        environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        underTest.accept(environmentDtoEvent);
+        assertEquals(environment.getStatus(), EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
+        verify(environmentEncryptionService, never()).deleteEncryptionResources(environmentDtoEvent.getData().getEnvironmentDto());
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
+        verifyEnvDeleteEvent();
+    }
+
+    @Test
+    void testDeletionContinuesIfDiskEncryptionSetIdIsNotPresent() {
+        Environment environment = new Environment();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        environmentDtoEvent.getData().setEnvironmentDto(EnvironmentDto.builder()
+                .withId(ENVIRONMENT_ID)
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform("AZURE")
+                .build());
+        underTest.accept(environmentDtoEvent);
+        assertEquals(environment.getStatus(), null);
+        verify(environmentEncryptionService, never()).deleteEncryptionResources(environmentDtoEvent.getData().getEnvironmentDto());
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
+        verifyEnvDeleteEvent();
     }
 
     @Test

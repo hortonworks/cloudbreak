@@ -40,6 +40,7 @@ public enum EnvironmentStatus {
     ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS("Initializing Resource Encryption settings for environment"),
     ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS("Deleting Resource Encryption settings of environment"),
     ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED("Created Resource Encryption settings for environment"),
+    ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED("Deleted Resource Encryption settings for environment"),
 
     AVAILABLE("Available"),
     ARCHIVED("Archived"),

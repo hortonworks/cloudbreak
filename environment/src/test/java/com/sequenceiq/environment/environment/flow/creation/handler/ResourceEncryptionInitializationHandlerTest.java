@@ -167,7 +167,7 @@ class ResourceEncryptionInitializationHandlerTest {
         CreatedDiskEncryptionSet createdDiskEncryptionSet = new CreatedDiskEncryptionSet.Builder()
                 .withDiskEncryptionSetId("dummmy-set-id")
                 .build();
-        when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class), any(Environment.class))).thenReturn(createdDiskEncryptionSet);
+        when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenReturn(createdDiskEncryptionSet);
 
         underTest.accept(environmentDtoEvent);
 

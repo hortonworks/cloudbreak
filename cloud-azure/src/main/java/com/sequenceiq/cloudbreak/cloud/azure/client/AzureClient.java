@@ -909,4 +909,10 @@ public class AzureClient {
                 .attach()
                 .apply();
     }
+
+    public void deleteDiskEncryptionSet(String resourceGroup, String diskEncryptionSetName) {
+        // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
+        DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
+        dSetsIn.delete(resourceGroup, diskEncryptionSetName);
+    }
 }

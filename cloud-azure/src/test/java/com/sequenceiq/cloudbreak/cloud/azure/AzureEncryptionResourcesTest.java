@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -33,8 +37,11 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureEncryptionResourcesTest {
@@ -201,5 +208,109 @@ public class AzureEncryptionResourcesTest {
         CreatedDiskEncryptionSet createdDes = underTest.createDiskEncryptionSet(requestedSet);
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroup(), "dummyResourceGroup");
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldThrowExceptionWhenDiskEncryptionSetNameIsNotFound() {
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(new CloudCredential())
+                .withCloudContext(CloudContext.Builder.builder()
+                        .withId(1L)
+                        .withName("envName")
+                        .withCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
+                        .withPlatform("AZURE")
+                        .withVariant("AZURE")
+                        .withLocation(location(Region.region("dummyRegion")))
+                        .withUserName("dummyUser")
+                        .withAccountId("dummyAccountId")
+                        .build())
+                .withCloudResources(getResource("dummyDesId"))
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> underTest.deleteDiskEncryptionSet(deletionRequest));
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldThrowExceptionWhenResourceGroupIsNotFound() {
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(new CloudCredential())
+                .withCloudContext(CloudContext.Builder.builder()
+                        .withId(1L)
+                        .withName("envName")
+                        .withCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
+                        .withPlatform("AZURE")
+                        .withVariant("AZURE")
+                        .withLocation(location(Region.region("dummyRegion")))
+                        .withUserName("dummyUser")
+                        .withAccountId("dummyAccountId")
+                        .build())
+                .withCloudResources(getResource("/subscriptions/dummySubscriptionId/resourceGroups/wrongValuesFramed/diskEncryptionSets/dummyDesName"))
+                .build();
+        assertThrows(IllegalArgumentException.class, () -> underTest.deleteDiskEncryptionSet(deletionRequest));
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldDeduceValidResourceGroupAndDiskEncryptionSetName() {
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(new CloudCredential())
+                .withCloudContext(CloudContext.Builder.builder()
+                        .withId(1L)
+                        .withName("envName")
+                        .withCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
+                        .withPlatform("AZURE")
+                        .withVariant("AZURE")
+                        .withLocation(location(Region.region("dummyRegion")))
+                        .withUserName("dummyUser")
+                        .withAccountId("dummyAccountId")
+                        .build())
+                .withCloudResources(getResource("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/providers/" +
+                        "Microsoft.Compute/diskEncryptionSets/dummyDesId"))
+                .build();
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyVaultAndKeyReference()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED))
+                .withLocation("dummyRegion");
+        when(azureClient.getDiskEncryptionSet(any(), any())).thenReturn(des);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        underTest.deleteDiskEncryptionSet(deletionRequest);
+        verify(azureClient).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().stream().findFirst().get(), deletionRequest.getCloudContext());
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldNotMakeCloudCallWhenDiskEncyrptionSetIsNotFound() {
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(new CloudCredential())
+                .withCloudContext(CloudContext.Builder.builder()
+                        .withId(1L)
+                        .withName("envName")
+                        .withCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
+                        .withPlatform("AZURE")
+                        .withVariant("AZURE")
+                        .withLocation(location(Region.region("dummyRegion")))
+                        .withUserName("dummyUser")
+                        .withAccountId("dummyAccountId")
+                        .build())
+                .withCloudResources(getResource("/subscriptions/dummySubscriptionId/resourceGroups/dummyResourceGroup/providers/" +
+                        "Microsoft.Compute/diskEncryptionSets/dummyDesId"))
+                .build();
+        when(azureClient.getDiskEncryptionSet(any(), any())).thenReturn(null);
+        when(azureClientService.getClient(any())).thenReturn(azureClient);
+        underTest.deleteDiskEncryptionSet(deletionRequest);
+        verify(azureClient, never()).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().stream().findFirst().get(), deletionRequest.getCloudContext());
+    }
+
+    private List<CloudResource> getResource(String desId) {
+        CloudResource desCloudResource = new CloudResource.Builder()
+                .name("Des")
+                .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
+                .reference(desId)
+                .status(CommonStatus.CREATED)
+                .build();
+        return List.of(desCloudResource);
     }
 }

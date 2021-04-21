@@ -67,8 +67,7 @@ public class ResourceEncryptionInitializationHandler extends EventSenderAwareHan
                         if (StringUtils.isNotEmpty(encryptionKeyUrl)) {
                             if (environment.getStatus() != EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED) {
                                 LOGGER.info("Initializing Encryption resources for environment.");
-                                CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(environmentDto,
-                                        environment);
+                                CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(environmentDto);
                                 AzureParameters azureParameters = (AzureParameters) environment.getParameters();
                                 azureParameters.setDiskEncryptionSetId(createdDiskEncryptionSet.getDiskEncryptionSetId());
                                 environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED);

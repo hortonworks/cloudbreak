@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK_ENCRYPTION_SET;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,19 +17,26 @@ import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AzureEncryptionResources implements EncryptionResources {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureEncryptionResources.class);
 
     private static final Pattern ENCRYPTION_KEY_URL_PATTERN = Pattern.compile("https://([^.]+)\\.vault.*");
+
+    private static final Pattern DISK_ENCRYPTION_SET_NAME = Pattern.compile(".*diskEncryptionSets/([^.]+)");
+
+    private static final Pattern DISK_ENCRYPTION_SET_RESOURCE_GROUP = Pattern.compile(".*resourceGroups/([^.]+)/providers.*");
 
     @Inject
     private AzureClientService azureClientService;
@@ -83,6 +91,41 @@ public class AzureEncryptionResources implements EncryptionResources {
         return diskEncryptionSet;
     }
 
+    @Override
+    public void deleteDiskEncryptionSet(DiskEncryptionSetDeletionRequest diskEncryptionSetDeletionRequest) {
+        Optional<CloudResource> desCloudResourceOptional = diskEncryptionSetDeletionRequest.getCloudResources().stream()
+                .filter(r -> r.getType() == ResourceType.AZURE_DISK_ENCRYPTION_SET)
+                .findFirst();
+        if (desCloudResourceOptional.isPresent()) {
+            CloudResource desCloudResource = desCloudResourceOptional.get();
+            String diskEncryptionSetId = desCloudResource.getReference();
+            CloudCredential cloudCredential = diskEncryptionSetDeletionRequest.getCloudCredential();
+            AzureClient azureClient = azureClientService.getClient(cloudCredential);
+            String diskEncryptionSetName;
+            String desResourceGroupName;
+
+            Matcher matcher = DISK_ENCRYPTION_SET_NAME.matcher(diskEncryptionSetId);
+            if (matcher.matches()) {
+                diskEncryptionSetName = matcher.group(1);
+            } else {
+                throw new IllegalArgumentException(String.format("Failed to deduce Disk Encryption Set name from given resource id %s",
+                        diskEncryptionSetId));
+            }
+            matcher = DISK_ENCRYPTION_SET_RESOURCE_GROUP.matcher(diskEncryptionSetId);
+            if (matcher.matches()) {
+                desResourceGroupName = matcher.group(1);
+            } else {
+                throw new IllegalArgumentException(String.format("Failed to deduce Disk Encryption Set's resource group name from given resource id %s",
+                        diskEncryptionSetId));
+            }
+            LOGGER.info("Deleting Disk Encryption Set {}", diskEncryptionSetId);
+            deleteDiskEncryptionSetOnCloud(azureClient, desResourceGroupName, diskEncryptionSetName);
+            persistenceNotifier.notifyDeletion(desCloudResource, diskEncryptionSetDeletionRequest.getCloudContext());
+        } else {
+            LOGGER.info("No Disk Encryption Set found to delete");
+        }
+    }
+
     private CreatedDiskEncryptionSet getOrCreateDiskEncryptionSetOnCloud(AzureClient azureClient, String desResourceGroupName,
             String sourceVaultId, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest) {
         String diskEncryptionSetName = azureUtils.generateDesNameByNameAndId(
@@ -117,6 +160,17 @@ public class AzureEncryptionResources implements EncryptionResources {
                     .build();
         } else {
             throw new CloudConnectorException("Creating Disk Encryption Set resulted in failure from Azure cloud.");
+        }
+    }
+
+    private void deleteDiskEncryptionSetOnCloud(AzureClient azureClient, String desResourceGroupName, String diskEncryptionSetName) {
+        LOGGER.info("Checking if Disk Encryption Set {} exists on cloud Azure", diskEncryptionSetName);
+        DiskEncryptionSetInner existingDiskEncryptionSet = azureClient.getDiskEncryptionSet(desResourceGroupName, diskEncryptionSetName);
+        if (existingDiskEncryptionSet != null) {
+            azureClient.deleteDiskEncryptionSet(desResourceGroupName, diskEncryptionSetName);
+            LOGGER.info("Deleted Disk Encryption Set on Azure cloud");
+        } else {
+            LOGGER.info("No Disk Encryption Set found to delete");
         }
     }
 }
