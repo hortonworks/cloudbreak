@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.encryption;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern.USE_MULTIPLE;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -15,19 +16,23 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
+import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
-import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
+import com.sequenceiq.environment.resourcepersister.CloudResourceRetrieverService;
 
 @Component
 public class EnvironmentEncryptionService {
@@ -38,16 +43,25 @@ public class EnvironmentEncryptionService {
 
     private final EnvironmentTagProvider environmentTagProvider;
 
+    private final CloudResourceRetrieverService resourceRetriever;
+
     public EnvironmentEncryptionService(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            CloudPlatformConnectors cloudPlatformConnectors, EnvironmentTagProvider environmentTagProvider) {
+            CloudPlatformConnectors cloudPlatformConnectors, EnvironmentTagProvider environmentTagProvider,
+            CloudResourceRetrieverService resourceRetriever) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.environmentTagProvider = environmentTagProvider;
+        this.resourceRetriever = resourceRetriever;
     }
 
-    public CreatedDiskEncryptionSet createEncryptionResources(EnvironmentDto environmentDto, Environment environment) {
-        EncryptionResources encryptionResources = getEncryptionResources(environment.getCloudPlatform());
+    public CreatedDiskEncryptionSet createEncryptionResources(EnvironmentDto environmentDto) {
+        EncryptionResources encryptionResources = getEncryptionResources(environmentDto.getCloudPlatform());
         return encryptionResources.createDiskEncryptionSet(createEncryptionResourcesCreationRequest(environmentDto));
+    }
+
+    public void deleteEncryptionResources(EnvironmentDto environmentDto) {
+        EncryptionResources encryptionResources = getEncryptionResources(environmentDto.getCloudPlatform());
+        encryptionResources.deleteDiskEncryptionSet(createEncryptionResourcesDeletionRequest(environmentDto));
     }
 
     @VisibleForTesting
@@ -81,6 +95,16 @@ public class EnvironmentEncryptionService {
         return builder.build();
     }
 
+    @VisibleForTesting
+    DiskEncryptionSetDeletionRequest createEncryptionResourcesDeletionRequest(EnvironmentDto environment) {
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
+        return new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(getCloudContext(environment))
+                .withCloudResources(getResourcesForDeletion(environment))
+                .build();
+    }
+
     private boolean isSingleResourceGroup(EnvironmentDto environmentDto) {
         ResourceGroupUsagePattern resourceGroupUsagePattern = Optional.ofNullable(environmentDto.getParameters())
                 .map(ParametersDto::azureParametersDto)
@@ -101,6 +125,13 @@ public class EnvironmentEncryptionService {
                 .withUserName(environment.getCreator())
                 .withAccountId(environment.getAccountId())
                 .build();
+    }
+
+    private List<CloudResource> getResourcesForDeletion(EnvironmentDto environment) {
+        Optional<CloudResource> desCloudResourceOptional = resourceRetriever.findByResourceReferenceAndStatusAndType(
+                environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId(),
+                CommonStatus.CREATED, ResourceType.AZURE_DISK_ENCRYPTION_SET);
+        return desCloudResourceOptional.map(r -> List.of(r)).orElse(List.of());
     }
 
 }
