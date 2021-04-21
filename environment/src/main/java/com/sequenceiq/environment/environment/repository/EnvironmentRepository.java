@@ -32,6 +32,16 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             + "AND e.archived = false")
     Set<Environment> findByAccountId(@Param("accountId") String accountId);
 
+    @Query("SELECT e FROM Environment e "
+            + "LEFT JOIN FETCH e.network n "
+            + "LEFT JOIN FETCH n.environment ev "
+            + "LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a "
+            + "LEFT JOIN FETCH e.parameters p "
+            + "WHERE e.id IN :ids "
+            + "AND e.archived = false")
+    Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);
+
     Set<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Collection<String> names, String accountId);
 
     Set<Environment> findByResourceCrnInAndAccountIdAndArchivedIsFalse(Collection<String> resourceCrns, String accountId);
