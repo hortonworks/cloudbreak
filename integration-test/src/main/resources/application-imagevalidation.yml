@@ -1,0 +1,12 @@
+integrationtest:
+  aws:
+    region: us-west-1
+    location: us-west-1
+    availabilityZone: us-west-1b
+    vpcId: vpc-0966cbdb18b658ecd
+    subnetIds:
+      - subnet-0378c3192817740d1
+      - subnet-0cf33f5e43d3ca588
+      - subnet-095203f3a2844d64c
+    publicKeyId: api-e2e-test
+    hybridCloudSecurityGroupID: sg-0bfe09c7f21c4b483
