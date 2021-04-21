@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import org.junit.Before;
@@ -103,7 +104,7 @@ public class AwsLaunchTemplateImageUpdateServiceTest {
                 .type(ResourceType.CLOUDFORMATION_STACK)
                 .name(cfStackName)
                 .build();
-        String template = Files.read(new File("src/test/resources/json/aws-cf-template.json"));
+        String template = Files.read(new File("src/test/resources/json/aws-cf-template.json"), Charset.defaultCharset());
         String cfTemplateBody = JsonUtil.minify(String.format(template, "{\"Ref\":\"AMI\"}"));
         when(cloudFormationClient.getTemplate(any())).thenReturn(new GetTemplateResult().withTemplateBody(cfTemplateBody));
 
