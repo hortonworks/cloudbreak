@@ -23,6 +23,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
@@ -156,7 +157,7 @@ public class EntitlementService {
     }
 
     public boolean mediumDutySdxEnabled(String accountId) {
-        return true;
+        return isEntitlementRegistered(accountId, CDP_MEDIUM_DUTY_SDX);
     }
 
     public boolean runtimeUpgradeEnabled(String accountId) {
@@ -228,7 +229,7 @@ public class EntitlementService {
     }
 
     public boolean datalakeLoadBalancerEnabled(String accountId) {
-        return true;
+        return isEntitlementRegistered(accountId, CDP_DATA_LAKE_LOAD_BALANCER);
     }
 
     public boolean publicEndpointAccessGatewayEnabled(String accountId) {

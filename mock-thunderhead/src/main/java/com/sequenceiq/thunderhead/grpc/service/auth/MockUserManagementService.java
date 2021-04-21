@@ -383,7 +383,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.endpointgateway.skip.validation}")
     private boolean endpointGatewaySkipValidation;
 
-    @Value("${auth.mock.cm.ha.enable}")
+    @Value("${auth.mock.cmHA.enable}")
     private boolean cmHAEnabled;
 
     @PostConstruct

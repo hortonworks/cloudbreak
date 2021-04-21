@@ -179,7 +179,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
-            assertEquals(1, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
+            assertEquals(2, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
         });
     }
 
@@ -276,7 +276,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, false);
             assertEquals(1, loadBalancers.size());
             assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
-            assertEquals(1, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
+            assertEquals(2, stack.getInstanceGroups().iterator().next().getTargetGroups().size());
         });
     }
 
