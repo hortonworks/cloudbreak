@@ -59,8 +59,8 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
         try {
             ApiParcel apiParcel = getApiParcel(toolsResourceApi);
             ApiParcelState parcelState = apiParcel.getState();
-            String progress = FileUtils.byteCountToDisplaySize(parcelState.getProgress().intValue());
-            String totalProgress = FileUtils.byteCountToDisplaySize(parcelState.getTotalProgress().intValue());
+            String progress = FileUtils.byteCountToDisplaySize(parcelState.getProgress().toBigInteger());
+            String totalProgress = FileUtils.byteCountToDisplaySize(parcelState.getTotalProgress().toBigInteger());
             String progressMessage = String.format(" %s out of total %s has been downloaded!", progress, totalProgress);
             throw new ClouderaManagerOperationFailedException(baseMessage + progressMessage);
         } catch (ApiException e) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
 
     private List<ApiCommand> collectApiCommands(T pollerObject, CommandsResourceApi commandsResourceApi)  throws ApiException {
         List<ApiCommand> apiCommands = new ArrayList<>();
-        for (Integer commandId : pollerObject.getIdList()) {
+        for (BigDecimal commandId : pollerObject.getIdList()) {
             ApiCommand apiCommand = commandsResourceApi.readCommand(commandId);
             apiCommands.add(apiCommand);
             if (apiCommand.getActive()) {

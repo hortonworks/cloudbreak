@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -271,15 +270,12 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                             .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
                     ClusterCommand clusterCommand = new ClusterCommand();
                     clusterCommand.setClusterId(cluster.getId());
-                    clusterCommand.setCommandId(BigDecimal.valueOf(apiCommand.getId()));
+                    clusterCommand.setCommandId(apiCommand.getId());
                     clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
                     importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
                     LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
             }
-            importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(
-                    stack,
-                    apiClient,
-                    cmd.getCommandId().intValue()));
+            importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
         } catch (ApiException e) {
             String msg = "Installation of CDP with Cloudera Manager has failed: " + extractMessage(e);
             throw new ClouderaManagerOperationFailedException(msg, e);

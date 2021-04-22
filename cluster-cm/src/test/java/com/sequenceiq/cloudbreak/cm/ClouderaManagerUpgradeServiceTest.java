@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 
@@ -61,13 +62,13 @@ public class ClouderaManagerUpgradeServiceTest {
 
         when(clustersResourceApi.listActiveCommands(CLUSTER_NAME, SUMMARY)).thenReturn(apiCommandList);
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), any())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, 1)).thenReturn(PollingResult.SUCCESS);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, BigDecimal.ONE)).thenReturn(PollingResult.SUCCESS);
 
         underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient);
 
         verify(clustersResourceApi).listActiveCommands(CLUSTER_NAME, SUMMARY);
         verify(clustersResourceApi).upgradeCdhCommand(eq(CLUSTER_NAME), any());
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, 1);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, BigDecimal.ONE);
     }
 
     @Test
@@ -77,12 +78,12 @@ public class ClouderaManagerUpgradeServiceTest {
         ApiCommandList apiCommandList = createApiCommandList(Collections.singletonList(apiCommand));
 
         when(clustersResourceApi.listActiveCommands(CLUSTER_NAME, SUMMARY)).thenReturn(apiCommandList);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, 1)).thenReturn(PollingResult.SUCCESS);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, BigDecimal.ONE)).thenReturn(PollingResult.SUCCESS);
 
         underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient);
 
         verify(clustersResourceApi).listActiveCommands(CLUSTER_NAME, SUMMARY);
-        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, 1);
+        verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, BigDecimal.ONE);
         verifyNoMoreInteractions(clustersResourceApi);
     }
 
@@ -95,7 +96,7 @@ public class ClouderaManagerUpgradeServiceTest {
 
         when(clustersResourceApi.listActiveCommands(CLUSTER_NAME, SUMMARY)).thenReturn(apiCommandList);
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), any())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, 1)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, BigDecimal.ONE)).thenReturn(pollingResult);
         doThrow(new CancellationException("Exit")).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
 
         underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient);
@@ -110,7 +111,7 @@ public class ClouderaManagerUpgradeServiceTest {
 
         when(clustersResourceApi.listActiveCommands(CLUSTER_NAME, SUMMARY)).thenReturn(apiCommandList);
         when(clustersResourceApi.upgradeCdhCommand(eq(CLUSTER_NAME), any())).thenReturn(apiCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, 1)).thenReturn(pollingResult);
+        when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, BigDecimal.ONE)).thenReturn(pollingResult);
         doThrow(new CloudbreakException("Timeout")).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
 
         underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient);
@@ -134,7 +135,7 @@ public class ClouderaManagerUpgradeServiceTest {
 
     private ApiCommand createApiCommand() {
         ApiCommand apiCommand = new ApiCommand();
-        apiCommand.setId(1);
+        apiCommand.setId(BigDecimal.ONE);
         apiCommand.setName("UpgradeCluster");
         return apiCommand;
     }

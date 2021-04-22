@@ -6,6 +6,8 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -75,7 +77,7 @@ public class ClouderaManagerMgmtLaunchServiceTest {
 
     private ApiCommand getApiCommand() {
         ApiCommand apiCommand = new ApiCommand();
-        apiCommand.setId(10);
+        apiCommand.setId(BigDecimal.TEN);
         return apiCommand;
     }
 

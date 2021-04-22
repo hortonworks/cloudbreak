@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
@@ -256,7 +257,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaDatas));
         stack.setInstanceGroups(Set.of(instanceGroup));
-        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), 1);
+        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), BigDecimal.ONE);
     }
 
 }

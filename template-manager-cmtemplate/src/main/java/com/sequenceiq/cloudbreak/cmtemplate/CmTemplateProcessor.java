@@ -8,6 +8,7 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -164,8 +165,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     /**
      * Crude instance count recommendation based on cardinality.
      */
-    private Optional<InstanceCount> recommendInstanceCount(String hostGroup, Integer cardinality) {
-        return Optional.ofNullable(cardinality).map(count ->
+    private Optional<InstanceCount> recommendInstanceCount(String hostGroup, BigDecimal cardinality) {
+        return Optional.ofNullable(cardinality).map(BigDecimal::intValue).map(count ->
                 hostGroup.startsWith("master") || hostGroup.startsWith("gateway") ? exactly(count) : atLeast(count)
         );
     }
