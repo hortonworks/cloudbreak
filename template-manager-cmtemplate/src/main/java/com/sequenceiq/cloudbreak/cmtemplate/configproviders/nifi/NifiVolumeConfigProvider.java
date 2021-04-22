@@ -43,25 +43,29 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
         int provenanceVolInd = THIRD_VOLUME;
         int logDirVolInd = FOURTH_VOLUME;
         int databaseVolInd = FOURTH_VOLUME;
+        int workingDirVolInd = FOURTH_VOLUME;
         if (volumeCount == SECOND_VOLUME) {
             flowFileVolInd = FIRST_VOLUME;
             provenanceVolInd = FIRST_VOLUME;
             databaseVolInd = FIRST_VOLUME;
             contentVolInd = SECOND_VOLUME;
             logDirVolInd = SECOND_VOLUME;
+            workingDirVolInd = SECOND_VOLUME;
         } else if (volumeCount == THIRD_VOLUME) {
             flowFileVolInd = FIRST_VOLUME;
             databaseVolInd = FIRST_VOLUME;
             provenanceVolInd = SECOND_VOLUME;
             contentVolInd = THIRD_VOLUME;
             logDirVolInd = THIRD_VOLUME;
+            workingDirVolInd = THIRD_VOLUME;
         }
         return List.of(
                 config("nifi.flowfile.repository.directory", buildSingleVolumePath(flowFileVolInd, volumeCount, "flowfile-repo")),
                 config("nifi.content.repository.directory.default", buildSingleVolumePath(contentVolInd, volumeCount, "content-repo")),
                 config("nifi.provenance.repository.directory.default", buildSingleVolumePath(provenanceVolInd, volumeCount, "provenance-repo")),
                 config("log_dir", buildSingleVolumePath(logDirVolInd, volumeCount, "nifi-log")),
-                config("nifi.database.directory", buildSingleVolumePath(databaseVolInd, volumeCount, "database-dir"))
+                config("nifi.database.directory", buildSingleVolumePath(databaseVolInd, volumeCount, "database-dir")),
+                config("nifi.working.directory", buildSingleVolumePath(workingDirVolInd, volumeCount, "working-dir"))
         );
     }
 

@@ -21,7 +21,8 @@ public class NifiRegistryVolumeConfigProvider implements CmHostGroupRoleConfigPr
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
         Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;
         return List.of(
-                config("log_dir", buildSingleVolumePath(volumeCount, "nifi-registry-log"))
+                config("log_dir", buildSingleVolumePath(volumeCount, "nifi-registry-log")),
+                config("nifi.registry.working.directory", buildSingleVolumePath(volumeCount, "working-dir"))
         );
     }
 
