@@ -1,10 +1,13 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_NETWORK_DELETE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -51,6 +55,9 @@ class PublicKeyDeleteHandlerTest {
     private Event<EnvironmentDeletionDto> environmentDtoEvent;
 
     @Mock
+    private HandlerExceptionProcessor mockExceptionProcessor;
+
+    @Mock
     private Headers headers;
 
     @InjectMocks
@@ -75,9 +82,9 @@ class PublicKeyDeleteHandlerTest {
                 .withForceDelete(false)
                 .withEnvironmentDto(eventDto)
                 .build();
-        when(environmentDtoEvent.getData()).thenReturn(build);
-        when(environmentDtoEvent.getHeaders()).thenReturn(headers);
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
+        lenient().when(environmentDtoEvent.getData()).thenReturn(build);
+        lenient().when(environmentDtoEvent.getHeaders()).thenReturn(headers);
+        lenient().doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEvent.capture(), any(Headers.class));
     }
 
     @Test
@@ -96,8 +103,9 @@ class PublicKeyDeleteHandlerTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(error);
 
         underTest.accept(environmentDtoEvent);
-        verify(eventSender).sendEvent(baseNamedFlowEvent.capture(), headersArgumentCaptor.capture());
-        verifyEnvDeleteFailedEvent(error);
+        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
+        verify(mockExceptionProcessor, times(1))
+                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_PUBLICKEY_EVENT.selector()));
     }
 
     @Test

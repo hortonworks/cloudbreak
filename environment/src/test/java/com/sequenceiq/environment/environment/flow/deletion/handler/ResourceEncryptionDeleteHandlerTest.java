@@ -1,12 +1,15 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PUBLICKEY_DELETE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,8 +25,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -58,6 +61,9 @@ class ResourceEncryptionDeleteHandlerTest {
 
     @Mock
     private EnvironmentEncryptionService environmentEncryptionService;
+
+    @Mock
+    private HandlerExceptionProcessor mockExceptionProcessor;
 
     @Mock
     private Event<EnvironmentDeletionDto> environmentDtoEvent;
@@ -96,9 +102,9 @@ class ResourceEncryptionDeleteHandlerTest {
                 .withForceDelete(false)
                 .withEnvironmentDto(eventDto)
                 .build();
-        when(environmentDtoEvent.getData()).thenReturn(environmentDeletionDto);
-        when(environmentDtoEvent.getHeaders()).thenReturn(headers);
-        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        lenient().when(environmentDtoEvent.getData()).thenReturn(environmentDeletionDto);
+        lenient().when(environmentDtoEvent.getHeaders()).thenReturn(headers);
+        lenient().doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
     }
 
     @Test
@@ -117,8 +123,9 @@ class ResourceEncryptionDeleteHandlerTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(error);
 
         underTest.accept(environmentDtoEvent);
-        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
-        verifyEnvDeleteFailedEvent(error);
+        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
+        verify(mockExceptionProcessor, times(1))
+                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector()));
     }
 
     @Test
@@ -166,9 +173,12 @@ class ResourceEncryptionDeleteHandlerTest {
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenThrow(new IllegalArgumentException("error"));
+
         underTest.accept(environmentDtoEvent);
-        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
-        verifyEnvDeleteFailedEvent(new CloudbreakServiceException("Error occured while deleting encryption resources: error"));
+
+        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
+        verify(mockExceptionProcessor, times(1))
+                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector()));
     }
 
     @Test

@@ -6,6 +6,8 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
@@ -70,6 +73,9 @@ class S3GuardTableDeleteHandlerTest {
     private EventSender eventSender;
 
     @Mock
+    private HandlerExceptionProcessor mockExceptionProcessor;
+
+    @Mock
     private EnvironmentService environmentService;
 
     @Mock
@@ -102,7 +108,7 @@ class S3GuardTableDeleteHandlerTest {
     @BeforeEach
     void setUp() {
         when(environmentDtoEvent.getData()).thenReturn(createEnvironmentDto());
-        when(environmentDtoEvent.getHeaders()).thenReturn(headers);
+        lenient().when(environmentDtoEvent.getHeaders()).thenReturn(headers);
     }
 
     @Test
@@ -166,8 +172,9 @@ class S3GuardTableDeleteHandlerTest {
         NoSqlTableDeleteRequest request = getNoSqlTableDeleteRequest(cloudCredential);
         verify(cloudPlatformConnectors).get(any(), any());
         verify(noSql).deleteNoSqlTable(request);
-        verify(eventSender).sendEvent(eventArgumentCaptor.capture(), headersArgumentCaptor.capture());
-        verifyEnvDeleteFailedEvent(exception);
+        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
+        verify(mockExceptionProcessor, times(1))
+                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_S3GUARD_TABLE_EVENT.selector()));
     }
 
     @Test

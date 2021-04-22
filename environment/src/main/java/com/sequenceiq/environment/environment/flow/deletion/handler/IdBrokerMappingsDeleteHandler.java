@@ -17,7 +17,6 @@ import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingS
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -29,14 +28,18 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IdBrokerMappingsDeleteHandler.class);
 
+    private final HandlerExceptionProcessor exceptionProcessor;
+
     private final EnvironmentService environmentService;
 
     private final GrpcIdbmmsClient idbmmsClient;
 
-    protected IdBrokerMappingsDeleteHandler(EventSender eventSender, EnvironmentService environmentService, GrpcIdbmmsClient idbmmsClient) {
+    protected IdBrokerMappingsDeleteHandler(EventSender eventSender, EnvironmentService environmentService, GrpcIdbmmsClient idbmmsClient,
+            HandlerExceptionProcessor exceptionProcessor) {
         super(eventSender);
-        this.environmentService = environmentService;
         this.idbmmsClient = idbmmsClient;
+        this.environmentService = environmentService;
+        this.exceptionProcessor = exceptionProcessor;
     }
 
     @Override
@@ -64,18 +67,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
             });
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The {} was not successful but the environment deletion was requested as force delete so continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                        .withEnvironmentID(environmentDto.getId())
-                        .withException(e)
-                        .withResourceCrn(environmentDto.getResourceCrn())
-                        .withResourceName(environmentDto.getName())
-                        .build();
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            exceptionProcessor.handle(new HandlerFailureConjoiner(e, environmentDtoEvent, envDeleteEvent), LOGGER, eventSender(), selector());
         }
     }
 
