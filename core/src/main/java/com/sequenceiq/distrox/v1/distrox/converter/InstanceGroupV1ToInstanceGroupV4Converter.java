@@ -50,6 +50,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setName(source.getName());
         response.setTemplate(getIfNotNull(source.getTemplate(), environment, instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
+        response.setScalabilityOption(source.getScalabilityOption());
         response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));
         response.setRecipeNames(source.getRecipeNames());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
@@ -66,6 +67,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setRecipeNames(source.getRecipeNames());
+        response.setScalabilityOption(source.getScalabilityOption());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
         response.setGcp(getIfNotNull(source.getGcp(), instanceGroupParameterConverter::convert));

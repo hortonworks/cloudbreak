@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @Component
 public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConversionServiceAwareConverter<InstanceGroupV4Request, InstanceGroup> {
@@ -34,6 +35,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         setAttributes(source, instanceGroup);
         instanceGroup.setInstanceGroupType(source.getType());
         instanceGroup.setInitialNodeCount(source.getNodeCount());
+        instanceGroup.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup);
         }

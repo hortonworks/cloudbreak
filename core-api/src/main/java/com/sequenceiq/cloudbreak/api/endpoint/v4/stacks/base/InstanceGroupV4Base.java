@@ -6,6 +6,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AzureInstanceGroupV4Parameters;
@@ -34,6 +35,10 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_TYPE, allowableValues = "CORE,GATEWAY")
     private InstanceGroupType type = InstanceGroupType.CORE;
+
+    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE,
+            allowableValues = "ALLOWED,FORBIDDEN,ONLY_UPSCALE,ONLY_DOWNSCALE")
+    private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
     @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV4Parameters azure;
@@ -179,5 +184,13 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public void setRecoveryMode(RecoveryMode recoveryMode) {
         this.recoveryMode = recoveryMode;
+    }
+
+    public ScalabilityOption getScalabilityOption() {
+        return scalabilityOption;
+    }
+
+    public void setScalabilityOption(ScalabilityOption scalabilityOption) {
+        this.scalabilityOption = scalabilityOption;
     }
 }

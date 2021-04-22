@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @Component
 public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupV4Response> {
@@ -41,6 +42,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
         instanceGroupResponse.setNodeCount(source.getNodeCount());
         instanceGroupResponse.setName(source.getGroupName());
         instanceGroupResponse.setType(source.getInstanceGroupType());
+        instanceGroupResponse.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
         return instanceGroupResponse;
     }
 }

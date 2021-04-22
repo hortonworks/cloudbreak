@@ -28,12 +28,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.InstanceGroupTypeConverter;
+import com.sequenceiq.cloudbreak.converter.ScalabilityOptionConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
@@ -72,6 +74,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     private Json attributes;
 
     private int initialNodeCount;
+
+    @Convert(converter = ScalabilityOptionConverter.class)
+    private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
     @ManyToMany(mappedBy = "instanceGroups", fetch = FetchType.LAZY)
     private Set<TargetGroup> targetGroups = new HashSet<>();
@@ -236,5 +241,13 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @Override
     public int compareTo(InstanceGroup o) {
         return groupName.compareTo(o.groupName);
+    }
+
+    public ScalabilityOption getScalabilityOption() {
+        return scalabilityOption;
+    }
+
+    public void setScalabilityOption(ScalabilityOption scalabilityOption) {
+        this.scalabilityOption = scalabilityOption;
     }
 }
