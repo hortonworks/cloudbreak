@@ -711,6 +711,206 @@ public final class UsageProto {
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubSyncOrBuilder getCdpDatahubSyncOrBuilder();
 
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+     */
+    boolean hasCdpDFCatalogArtifactCreated();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated getCdpDFCatalogArtifactCreated();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder getCdpDFCatalogArtifactCreatedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+     */
+    boolean hasCdpDFCatalogArtifactDeleted();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted getCdpDFCatalogArtifactDeleted();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder getCdpDFCatalogArtifactDeletedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+     */
+    boolean hasCdpDFCatalogArtifactVersionCreated();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated getCdpDFCatalogArtifactVersionCreated();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder getCdpDFCatalogArtifactVersionCreatedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+     */
+    boolean hasCdpDFCatalogArtifactVersionDeleted();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted getCdpDFCatalogArtifactVersionDeleted();
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder getCdpDFCatalogArtifactVersionDeletedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+     */
+    boolean hasCdpDFServiceRequested();
+    /**
+     * <pre>
+     * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested getCdpDFServiceRequested();
+    /**
+     * <pre>
+     * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder getCdpDFServiceRequestedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP DataFlow Service's status changed.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+     */
+    boolean hasCdpDFServiceStatusChanged();
+    /**
+     * <pre>
+     * A CDP DataFlow Service's status changed.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged getCdpDFServiceStatusChanged();
+    /**
+     * <pre>
+     * A CDP DataFlow Service's status changed.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder getCdpDFServiceStatusChangedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP UDX Bundle was initiated
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+     */
+    boolean hasCdpUDXBundleInitiated();
+    /**
+     * <pre>
+     * A CDP UDX Bundle was initiated
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated getCdpUDXBundleInitiated();
+    /**
+     * <pre>
+     * A CDP UDX Bundle was initiated
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder getCdpUDXBundleInitiatedOrBuilder();
+
+    /**
+     * <pre>
+     * A CDP UDX Bundle was received
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+     */
+    boolean hasCdpUDXBundleReceived();
+    /**
+     * <pre>
+     * A CDP UDX Bundle was received
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived getCdpUDXBundleReceived();
+    /**
+     * <pre>
+     * A CDP UDX Bundle was received
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder getCdpUDXBundleReceivedOrBuilder();
+
     public com.cloudera.thunderhead.service.common.usage.UsageProto.Event.DetailsCase getDetailsCase();
   }
   /**
@@ -749,6 +949,7 @@ public final class UsageProto {
         throw new java.lang.NullPointerException();
       }
       int mutable_bitField0_ = 0;
+      int mutable_bitField1_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1139,6 +1340,118 @@ public final class UsageProto {
               detailsCase_ = 39;
               break;
             }
+            case 322: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder subBuilder = null;
+              if (detailsCase_ == 40) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 40;
+              break;
+            }
+            case 330: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder subBuilder = null;
+              if (detailsCase_ == 41) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 41;
+              break;
+            }
+            case 338: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder subBuilder = null;
+              if (detailsCase_ == 42) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 42;
+              break;
+            }
+            case 346: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder subBuilder = null;
+              if (detailsCase_ == 43) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 43;
+              break;
+            }
+            case 354: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder subBuilder = null;
+              if (detailsCase_ == 44) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 44;
+              break;
+            }
+            case 362: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder subBuilder = null;
+              if (detailsCase_ == 45) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 45;
+              break;
+            }
+            case 370: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder subBuilder = null;
+              if (detailsCase_ == 46) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 46;
+              break;
+            }
+            case 378: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder subBuilder = null;
+              if (detailsCase_ == 47) {
+                subBuilder = ((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_).toBuilder();
+              }
+              details_ =
+                  input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_);
+                details_ = subBuilder.buildPartial();
+              }
+              detailsCase_ = 47;
+              break;
+            }
             default: {
               if (!parseUnknownFieldProto3(
                   input, unknownFields, extensionRegistry, tag)) {
@@ -1201,6 +1514,14 @@ public final class UsageProto {
       CDPDATAHUBSTATUSCHANGED(35),
       CDPDATALAKESYNC(36),
       CDPDATAHUBSYNC(37),
+      CDPDFCATALOGARTIFACTCREATED(40),
+      CDPDFCATALOGARTIFACTDELETED(41),
+      CDPDFCATALOGARTIFACTVERSIONCREATED(42),
+      CDPDFCATALOGARTIFACTVERSIONDELETED(43),
+      CDPDFSERVICEREQUESTED(44),
+      CDPDFSERVICESTATUSCHANGED(45),
+      CDPUDXBUNDLEINITIATED(46),
+      CDPUDXBUNDLERECEIVED(47),
       DETAILS_NOT_SET(0);
       private final int value;
       private DetailsCase(int value) {
@@ -1242,6 +1563,14 @@ public final class UsageProto {
           case 35: return CDPDATAHUBSTATUSCHANGED;
           case 36: return CDPDATALAKESYNC;
           case 37: return CDPDATAHUBSYNC;
+          case 40: return CDPDFCATALOGARTIFACTCREATED;
+          case 41: return CDPDFCATALOGARTIFACTDELETED;
+          case 42: return CDPDFCATALOGARTIFACTVERSIONCREATED;
+          case 43: return CDPDFCATALOGARTIFACTVERSIONDELETED;
+          case 44: return CDPDFSERVICEREQUESTED;
+          case 45: return CDPDFSERVICESTATUSCHANGED;
+          case 46: return CDPUDXBUNDLEINITIATED;
+          case 47: return CDPUDXBUNDLERECEIVED;
           case 0: return DETAILS_NOT_SET;
           default: return null;
         }
@@ -2320,6 +2649,310 @@ public final class UsageProto {
       return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatahubSync.getDefaultInstance();
     }
 
+    public static final int CDPDFCATALOGARTIFACTCREATED_FIELD_NUMBER = 40;
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+     */
+    public boolean hasCdpDFCatalogArtifactCreated() {
+      return detailsCase_ == 40;
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated getCdpDFCatalogArtifactCreated() {
+      if (detailsCase_ == 40) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder getCdpDFCatalogArtifactCreatedOrBuilder() {
+      if (detailsCase_ == 40) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+    }
+
+    public static final int CDPDFCATALOGARTIFACTDELETED_FIELD_NUMBER = 41;
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+     */
+    public boolean hasCdpDFCatalogArtifactDeleted() {
+      return detailsCase_ == 41;
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted getCdpDFCatalogArtifactDeleted() {
+      if (detailsCase_ == 41) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder getCdpDFCatalogArtifactDeletedOrBuilder() {
+      if (detailsCase_ == 41) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+    }
+
+    public static final int CDPDFCATALOGARTIFACTVERSIONCREATED_FIELD_NUMBER = 42;
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+     */
+    public boolean hasCdpDFCatalogArtifactVersionCreated() {
+      return detailsCase_ == 42;
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated getCdpDFCatalogArtifactVersionCreated() {
+      if (detailsCase_ == 42) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder getCdpDFCatalogArtifactVersionCreatedOrBuilder() {
+      if (detailsCase_ == 42) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+    }
+
+    public static final int CDPDFCATALOGARTIFACTVERSIONDELETED_FIELD_NUMBER = 43;
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+     */
+    public boolean hasCdpDFCatalogArtifactVersionDeleted() {
+      return detailsCase_ == 43;
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted getCdpDFCatalogArtifactVersionDeleted() {
+      if (detailsCase_ == 43) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP DF Catalog Artifact version was deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder getCdpDFCatalogArtifactVersionDeletedOrBuilder() {
+      if (detailsCase_ == 43) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+    }
+
+    public static final int CDPDFSERVICEREQUESTED_FIELD_NUMBER = 44;
+    /**
+     * <pre>
+     * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+     */
+    public boolean hasCdpDFServiceRequested() {
+      return detailsCase_ == 44;
+    }
+    /**
+     * <pre>
+     * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested getCdpDFServiceRequested() {
+      if (detailsCase_ == 44) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder getCdpDFServiceRequestedOrBuilder() {
+      if (detailsCase_ == 44) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+    }
+
+    public static final int CDPDFSERVICESTATUSCHANGED_FIELD_NUMBER = 45;
+    /**
+     * <pre>
+     * A CDP DataFlow Service's status changed.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+     */
+    public boolean hasCdpDFServiceStatusChanged() {
+      return detailsCase_ == 45;
+    }
+    /**
+     * <pre>
+     * A CDP DataFlow Service's status changed.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged getCdpDFServiceStatusChanged() {
+      if (detailsCase_ == 45) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP DataFlow Service's status changed.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder getCdpDFServiceStatusChangedOrBuilder() {
+      if (detailsCase_ == 45) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+    }
+
+    public static final int CDPUDXBUNDLEINITIATED_FIELD_NUMBER = 46;
+    /**
+     * <pre>
+     * A CDP UDX Bundle was initiated
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+     */
+    public boolean hasCdpUDXBundleInitiated() {
+      return detailsCase_ == 46;
+    }
+    /**
+     * <pre>
+     * A CDP UDX Bundle was initiated
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated getCdpUDXBundleInitiated() {
+      if (detailsCase_ == 46) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP UDX Bundle was initiated
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder getCdpUDXBundleInitiatedOrBuilder() {
+      if (detailsCase_ == 46) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+    }
+
+    public static final int CDPUDXBUNDLERECEIVED_FIELD_NUMBER = 47;
+    /**
+     * <pre>
+     * A CDP UDX Bundle was received
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+     */
+    public boolean hasCdpUDXBundleReceived() {
+      return detailsCase_ == 47;
+    }
+    /**
+     * <pre>
+     * A CDP UDX Bundle was received
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived getCdpUDXBundleReceived() {
+      if (detailsCase_ == 47) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+    }
+    /**
+     * <pre>
+     * A CDP UDX Bundle was received
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder getCdpUDXBundleReceivedOrBuilder() {
+      if (detailsCase_ == 47) {
+         return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_;
+      }
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -2420,6 +3053,30 @@ public final class UsageProto {
       }
       if (detailsCase_ == 39) {
         output.writeMessage(39, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_);
+      }
+      if (detailsCase_ == 40) {
+        output.writeMessage(40, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_);
+      }
+      if (detailsCase_ == 41) {
+        output.writeMessage(41, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_);
+      }
+      if (detailsCase_ == 42) {
+        output.writeMessage(42, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_);
+      }
+      if (detailsCase_ == 43) {
+        output.writeMessage(43, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_);
+      }
+      if (detailsCase_ == 44) {
+        output.writeMessage(44, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_);
+      }
+      if (detailsCase_ == 45) {
+        output.writeMessage(45, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_);
+      }
+      if (detailsCase_ == 46) {
+        output.writeMessage(46, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_);
+      }
+      if (detailsCase_ == 47) {
+        output.writeMessage(47, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_);
       }
       unknownFields.writeTo(output);
     }
@@ -2544,6 +3201,38 @@ public final class UsageProto {
       if (detailsCase_ == 39) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(39, (com.cloudera.thunderhead.service.common.usage.UsageProto.AltusIamAccessTokenDeleted) details_);
+      }
+      if (detailsCase_ == 40) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(40, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_);
+      }
+      if (detailsCase_ == 41) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(41, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_);
+      }
+      if (detailsCase_ == 42) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(42, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_);
+      }
+      if (detailsCase_ == 43) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(43, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_);
+      }
+      if (detailsCase_ == 44) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(44, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_);
+      }
+      if (detailsCase_ == 45) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(45, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_);
+      }
+      if (detailsCase_ == 46) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(46, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_);
+      }
+      if (detailsCase_ == 47) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(47, (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -2675,6 +3364,38 @@ public final class UsageProto {
           result = result && getCdpDatahubSync()
               .equals(other.getCdpDatahubSync());
           break;
+        case 40:
+          result = result && getCdpDFCatalogArtifactCreated()
+              .equals(other.getCdpDFCatalogArtifactCreated());
+          break;
+        case 41:
+          result = result && getCdpDFCatalogArtifactDeleted()
+              .equals(other.getCdpDFCatalogArtifactDeleted());
+          break;
+        case 42:
+          result = result && getCdpDFCatalogArtifactVersionCreated()
+              .equals(other.getCdpDFCatalogArtifactVersionCreated());
+          break;
+        case 43:
+          result = result && getCdpDFCatalogArtifactVersionDeleted()
+              .equals(other.getCdpDFCatalogArtifactVersionDeleted());
+          break;
+        case 44:
+          result = result && getCdpDFServiceRequested()
+              .equals(other.getCdpDFServiceRequested());
+          break;
+        case 45:
+          result = result && getCdpDFServiceStatusChanged()
+              .equals(other.getCdpDFServiceStatusChanged());
+          break;
+        case 46:
+          result = result && getCdpUDXBundleInitiated()
+              .equals(other.getCdpUDXBundleInitiated());
+          break;
+        case 47:
+          result = result && getCdpUDXBundleReceived()
+              .equals(other.getCdpUDXBundleReceived());
+          break;
         case 0:
         default:
       }
@@ -2800,6 +3521,38 @@ public final class UsageProto {
         case 37:
           hash = (37 * hash) + CDPDATAHUBSYNC_FIELD_NUMBER;
           hash = (53 * hash) + getCdpDatahubSync().hashCode();
+          break;
+        case 40:
+          hash = (37 * hash) + CDPDFCATALOGARTIFACTCREATED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDFCatalogArtifactCreated().hashCode();
+          break;
+        case 41:
+          hash = (37 * hash) + CDPDFCATALOGARTIFACTDELETED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDFCatalogArtifactDeleted().hashCode();
+          break;
+        case 42:
+          hash = (37 * hash) + CDPDFCATALOGARTIFACTVERSIONCREATED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDFCatalogArtifactVersionCreated().hashCode();
+          break;
+        case 43:
+          hash = (37 * hash) + CDPDFCATALOGARTIFACTVERSIONDELETED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDFCatalogArtifactVersionDeleted().hashCode();
+          break;
+        case 44:
+          hash = (37 * hash) + CDPDFSERVICEREQUESTED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDFServiceRequested().hashCode();
+          break;
+        case 45:
+          hash = (37 * hash) + CDPDFSERVICESTATUSCHANGED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpDFServiceStatusChanged().hashCode();
+          break;
+        case 46:
+          hash = (37 * hash) + CDPUDXBUNDLEINITIATED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpUDXBundleInitiated().hashCode();
+          break;
+        case 47:
+          hash = (37 * hash) + CDPUDXBUNDLERECEIVED_FIELD_NUMBER;
+          hash = (53 * hash) + getCdpUDXBundleReceived().hashCode();
           break;
         case 0:
         default:
@@ -3160,6 +3913,62 @@ public final class UsageProto {
             result.details_ = cdpDatahubSyncBuilder_.build();
           }
         }
+        if (detailsCase_ == 40) {
+          if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDFCatalogArtifactCreatedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 41) {
+          if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDFCatalogArtifactDeletedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 42) {
+          if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDFCatalogArtifactVersionCreatedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 43) {
+          if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDFCatalogArtifactVersionDeletedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 44) {
+          if (cdpDFServiceRequestedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDFServiceRequestedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 45) {
+          if (cdpDFServiceStatusChangedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpDFServiceStatusChangedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 46) {
+          if (cdpUDXBundleInitiatedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpUDXBundleInitiatedBuilder_.build();
+          }
+        }
+        if (detailsCase_ == 47) {
+          if (cdpUDXBundleReceivedBuilder_ == null) {
+            result.details_ = details_;
+          } else {
+            result.details_ = cdpUDXBundleReceivedBuilder_.build();
+          }
+        }
         result.detailsCase_ = detailsCase_;
         onBuilt();
         return result;
@@ -3322,6 +4131,38 @@ public final class UsageProto {
           }
           case CDPDATAHUBSYNC: {
             mergeCdpDatahubSync(other.getCdpDatahubSync());
+            break;
+          }
+          case CDPDFCATALOGARTIFACTCREATED: {
+            mergeCdpDFCatalogArtifactCreated(other.getCdpDFCatalogArtifactCreated());
+            break;
+          }
+          case CDPDFCATALOGARTIFACTDELETED: {
+            mergeCdpDFCatalogArtifactDeleted(other.getCdpDFCatalogArtifactDeleted());
+            break;
+          }
+          case CDPDFCATALOGARTIFACTVERSIONCREATED: {
+            mergeCdpDFCatalogArtifactVersionCreated(other.getCdpDFCatalogArtifactVersionCreated());
+            break;
+          }
+          case CDPDFCATALOGARTIFACTVERSIONDELETED: {
+            mergeCdpDFCatalogArtifactVersionDeleted(other.getCdpDFCatalogArtifactVersionDeleted());
+            break;
+          }
+          case CDPDFSERVICEREQUESTED: {
+            mergeCdpDFServiceRequested(other.getCdpDFServiceRequested());
+            break;
+          }
+          case CDPDFSERVICESTATUSCHANGED: {
+            mergeCdpDFServiceStatusChanged(other.getCdpDFServiceStatusChanged());
+            break;
+          }
+          case CDPUDXBUNDLEINITIATED: {
+            mergeCdpUDXBundleInitiated(other.getCdpUDXBundleInitiated());
+            break;
+          }
+          case CDPUDXBUNDLERECEIVED: {
+            mergeCdpUDXBundleReceived(other.getCdpUDXBundleReceived());
             break;
           }
           case DETAILS_NOT_SET: {
@@ -8028,6 +8869,1382 @@ public final class UsageProto {
         detailsCase_ = 37;
         onChanged();;
         return cdpDatahubSyncBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder> cdpDFCatalogArtifactCreatedBuilder_;
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public boolean hasCdpDFCatalogArtifactCreated() {
+        return detailsCase_ == 40;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated getCdpDFCatalogArtifactCreated() {
+        if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+          if (detailsCase_ == 40) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 40) {
+            return cdpDFCatalogArtifactCreatedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public Builder setCdpDFCatalogArtifactCreated(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated value) {
+        if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactCreatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 40;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public Builder setCdpDFCatalogArtifactCreated(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder builderForValue) {
+        if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactCreatedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 40;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public Builder mergeCdpDFCatalogArtifactCreated(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated value) {
+        if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+          if (detailsCase_ == 40 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 40) {
+            cdpDFCatalogArtifactCreatedBuilder_.mergeFrom(value);
+          }
+          cdpDFCatalogArtifactCreatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 40;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public Builder clearCdpDFCatalogArtifactCreated() {
+        if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+          if (detailsCase_ == 40) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 40) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDFCatalogArtifactCreatedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder getCdpDFCatalogArtifactCreatedBuilder() {
+        return getCdpDFCatalogArtifactCreatedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder getCdpDFCatalogArtifactCreatedOrBuilder() {
+        if ((detailsCase_ == 40) && (cdpDFCatalogArtifactCreatedBuilder_ != null)) {
+          return cdpDFCatalogArtifactCreatedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 40) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder> 
+          getCdpDFCatalogArtifactCreatedFieldBuilder() {
+        if (cdpDFCatalogArtifactCreatedBuilder_ == null) {
+          if (!(detailsCase_ == 40)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+          }
+          cdpDFCatalogArtifactCreatedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 40;
+        onChanged();;
+        return cdpDFCatalogArtifactCreatedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder> cdpDFCatalogArtifactDeletedBuilder_;
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public boolean hasCdpDFCatalogArtifactDeleted() {
+        return detailsCase_ == 41;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted getCdpDFCatalogArtifactDeleted() {
+        if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+          if (detailsCase_ == 41) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 41) {
+            return cdpDFCatalogArtifactDeletedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public Builder setCdpDFCatalogArtifactDeleted(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted value) {
+        if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactDeletedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 41;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public Builder setCdpDFCatalogArtifactDeleted(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder builderForValue) {
+        if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactDeletedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 41;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public Builder mergeCdpDFCatalogArtifactDeleted(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted value) {
+        if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+          if (detailsCase_ == 41 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 41) {
+            cdpDFCatalogArtifactDeletedBuilder_.mergeFrom(value);
+          }
+          cdpDFCatalogArtifactDeletedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 41;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public Builder clearCdpDFCatalogArtifactDeleted() {
+        if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+          if (detailsCase_ == 41) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 41) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDFCatalogArtifactDeletedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder getCdpDFCatalogArtifactDeletedBuilder() {
+        return getCdpDFCatalogArtifactDeletedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder getCdpDFCatalogArtifactDeletedOrBuilder() {
+        if ((detailsCase_ == 41) && (cdpDFCatalogArtifactDeletedBuilder_ != null)) {
+          return cdpDFCatalogArtifactDeletedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 41) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder> 
+          getCdpDFCatalogArtifactDeletedFieldBuilder() {
+        if (cdpDFCatalogArtifactDeletedBuilder_ == null) {
+          if (!(detailsCase_ == 41)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+          }
+          cdpDFCatalogArtifactDeletedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 41;
+        onChanged();;
+        return cdpDFCatalogArtifactDeletedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder> cdpDFCatalogArtifactVersionCreatedBuilder_;
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public boolean hasCdpDFCatalogArtifactVersionCreated() {
+        return detailsCase_ == 42;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated getCdpDFCatalogArtifactVersionCreated() {
+        if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+          if (detailsCase_ == 42) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 42) {
+            return cdpDFCatalogArtifactVersionCreatedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public Builder setCdpDFCatalogArtifactVersionCreated(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated value) {
+        if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactVersionCreatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 42;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public Builder setCdpDFCatalogArtifactVersionCreated(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder builderForValue) {
+        if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactVersionCreatedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 42;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public Builder mergeCdpDFCatalogArtifactVersionCreated(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated value) {
+        if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+          if (detailsCase_ == 42 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 42) {
+            cdpDFCatalogArtifactVersionCreatedBuilder_.mergeFrom(value);
+          }
+          cdpDFCatalogArtifactVersionCreatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 42;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public Builder clearCdpDFCatalogArtifactVersionCreated() {
+        if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+          if (detailsCase_ == 42) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 42) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDFCatalogArtifactVersionCreatedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder getCdpDFCatalogArtifactVersionCreatedBuilder() {
+        return getCdpDFCatalogArtifactVersionCreatedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder getCdpDFCatalogArtifactVersionCreatedOrBuilder() {
+        if ((detailsCase_ == 42) && (cdpDFCatalogArtifactVersionCreatedBuilder_ != null)) {
+          return cdpDFCatalogArtifactVersionCreatedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 42) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder> 
+          getCdpDFCatalogArtifactVersionCreatedFieldBuilder() {
+        if (cdpDFCatalogArtifactVersionCreatedBuilder_ == null) {
+          if (!(detailsCase_ == 42)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+          }
+          cdpDFCatalogArtifactVersionCreatedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 42;
+        onChanged();;
+        return cdpDFCatalogArtifactVersionCreatedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder> cdpDFCatalogArtifactVersionDeletedBuilder_;
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public boolean hasCdpDFCatalogArtifactVersionDeleted() {
+        return detailsCase_ == 43;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted getCdpDFCatalogArtifactVersionDeleted() {
+        if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+          if (detailsCase_ == 43) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 43) {
+            return cdpDFCatalogArtifactVersionDeletedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public Builder setCdpDFCatalogArtifactVersionDeleted(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted value) {
+        if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactVersionDeletedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 43;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public Builder setCdpDFCatalogArtifactVersionDeleted(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder builderForValue) {
+        if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDFCatalogArtifactVersionDeletedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 43;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public Builder mergeCdpDFCatalogArtifactVersionDeleted(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted value) {
+        if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+          if (detailsCase_ == 43 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 43) {
+            cdpDFCatalogArtifactVersionDeletedBuilder_.mergeFrom(value);
+          }
+          cdpDFCatalogArtifactVersionDeletedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 43;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public Builder clearCdpDFCatalogArtifactVersionDeleted() {
+        if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+          if (detailsCase_ == 43) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 43) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDFCatalogArtifactVersionDeletedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder getCdpDFCatalogArtifactVersionDeletedBuilder() {
+        return getCdpDFCatalogArtifactVersionDeletedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder getCdpDFCatalogArtifactVersionDeletedOrBuilder() {
+        if ((detailsCase_ == 43) && (cdpDFCatalogArtifactVersionDeletedBuilder_ != null)) {
+          return cdpDFCatalogArtifactVersionDeletedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 43) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DF Catalog Artifact version was deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder> 
+          getCdpDFCatalogArtifactVersionDeletedFieldBuilder() {
+        if (cdpDFCatalogArtifactVersionDeletedBuilder_ == null) {
+          if (!(detailsCase_ == 43)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+          }
+          cdpDFCatalogArtifactVersionDeletedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 43;
+        onChanged();;
+        return cdpDFCatalogArtifactVersionDeletedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder> cdpDFServiceRequestedBuilder_;
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public boolean hasCdpDFServiceRequested() {
+        return detailsCase_ == 44;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested getCdpDFServiceRequested() {
+        if (cdpDFServiceRequestedBuilder_ == null) {
+          if (detailsCase_ == 44) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 44) {
+            return cdpDFServiceRequestedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public Builder setCdpDFServiceRequested(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested value) {
+        if (cdpDFServiceRequestedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDFServiceRequestedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 44;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public Builder setCdpDFServiceRequested(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder builderForValue) {
+        if (cdpDFServiceRequestedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDFServiceRequestedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 44;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public Builder mergeCdpDFServiceRequested(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested value) {
+        if (cdpDFServiceRequestedBuilder_ == null) {
+          if (detailsCase_ == 44 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 44) {
+            cdpDFServiceRequestedBuilder_.mergeFrom(value);
+          }
+          cdpDFServiceRequestedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 44;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public Builder clearCdpDFServiceRequested() {
+        if (cdpDFServiceRequestedBuilder_ == null) {
+          if (detailsCase_ == 44) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 44) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDFServiceRequestedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder getCdpDFServiceRequestedBuilder() {
+        return getCdpDFServiceRequestedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder getCdpDFServiceRequestedOrBuilder() {
+        if ((detailsCase_ == 44) && (cdpDFServiceRequestedBuilder_ != null)) {
+          return cdpDFServiceRequestedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 44) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceRequested cdpDFServiceRequested = 44;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder> 
+          getCdpDFServiceRequestedFieldBuilder() {
+        if (cdpDFServiceRequestedBuilder_ == null) {
+          if (!(detailsCase_ == 44)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+          }
+          cdpDFServiceRequestedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 44;
+        onChanged();;
+        return cdpDFServiceRequestedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder> cdpDFServiceStatusChangedBuilder_;
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public boolean hasCdpDFServiceStatusChanged() {
+        return detailsCase_ == 45;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged getCdpDFServiceStatusChanged() {
+        if (cdpDFServiceStatusChangedBuilder_ == null) {
+          if (detailsCase_ == 45) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 45) {
+            return cdpDFServiceStatusChangedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public Builder setCdpDFServiceStatusChanged(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged value) {
+        if (cdpDFServiceStatusChangedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpDFServiceStatusChangedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 45;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public Builder setCdpDFServiceStatusChanged(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder builderForValue) {
+        if (cdpDFServiceStatusChangedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpDFServiceStatusChangedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 45;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public Builder mergeCdpDFServiceStatusChanged(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged value) {
+        if (cdpDFServiceStatusChangedBuilder_ == null) {
+          if (detailsCase_ == 45 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 45) {
+            cdpDFServiceStatusChangedBuilder_.mergeFrom(value);
+          }
+          cdpDFServiceStatusChangedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 45;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public Builder clearCdpDFServiceStatusChanged() {
+        if (cdpDFServiceStatusChangedBuilder_ == null) {
+          if (detailsCase_ == 45) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 45) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpDFServiceStatusChangedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder getCdpDFServiceStatusChangedBuilder() {
+        return getCdpDFServiceStatusChangedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder getCdpDFServiceStatusChangedOrBuilder() {
+        if ((detailsCase_ == 45) && (cdpDFServiceStatusChangedBuilder_ != null)) {
+          return cdpDFServiceStatusChangedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 45) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP DataFlow Service's status changed.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder> 
+          getCdpDFServiceStatusChangedFieldBuilder() {
+        if (cdpDFServiceStatusChangedBuilder_ == null) {
+          if (!(detailsCase_ == 45)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+          }
+          cdpDFServiceStatusChangedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 45;
+        onChanged();;
+        return cdpDFServiceStatusChangedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder> cdpUDXBundleInitiatedBuilder_;
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public boolean hasCdpUDXBundleInitiated() {
+        return detailsCase_ == 46;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated getCdpUDXBundleInitiated() {
+        if (cdpUDXBundleInitiatedBuilder_ == null) {
+          if (detailsCase_ == 46) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 46) {
+            return cdpUDXBundleInitiatedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public Builder setCdpUDXBundleInitiated(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated value) {
+        if (cdpUDXBundleInitiatedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpUDXBundleInitiatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 46;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public Builder setCdpUDXBundleInitiated(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder builderForValue) {
+        if (cdpUDXBundleInitiatedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpUDXBundleInitiatedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 46;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public Builder mergeCdpUDXBundleInitiated(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated value) {
+        if (cdpUDXBundleInitiatedBuilder_ == null) {
+          if (detailsCase_ == 46 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 46) {
+            cdpUDXBundleInitiatedBuilder_.mergeFrom(value);
+          }
+          cdpUDXBundleInitiatedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 46;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public Builder clearCdpUDXBundleInitiated() {
+        if (cdpUDXBundleInitiatedBuilder_ == null) {
+          if (detailsCase_ == 46) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 46) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpUDXBundleInitiatedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder getCdpUDXBundleInitiatedBuilder() {
+        return getCdpUDXBundleInitiatedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder getCdpUDXBundleInitiatedOrBuilder() {
+        if ((detailsCase_ == 46) && (cdpUDXBundleInitiatedBuilder_ != null)) {
+          return cdpUDXBundleInitiatedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 46) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was initiated
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder> 
+          getCdpUDXBundleInitiatedFieldBuilder() {
+        if (cdpUDXBundleInitiatedBuilder_ == null) {
+          if (!(detailsCase_ == 46)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+          }
+          cdpUDXBundleInitiatedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 46;
+        onChanged();;
+        return cdpUDXBundleInitiatedBuilder_;
+      }
+
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder> cdpUDXBundleReceivedBuilder_;
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public boolean hasCdpUDXBundleReceived() {
+        return detailsCase_ == 47;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived getCdpUDXBundleReceived() {
+        if (cdpUDXBundleReceivedBuilder_ == null) {
+          if (detailsCase_ == 47) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+        } else {
+          if (detailsCase_ == 47) {
+            return cdpUDXBundleReceivedBuilder_.getMessage();
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public Builder setCdpUDXBundleReceived(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived value) {
+        if (cdpUDXBundleReceivedBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          details_ = value;
+          onChanged();
+        } else {
+          cdpUDXBundleReceivedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 47;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public Builder setCdpUDXBundleReceived(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder builderForValue) {
+        if (cdpUDXBundleReceivedBuilder_ == null) {
+          details_ = builderForValue.build();
+          onChanged();
+        } else {
+          cdpUDXBundleReceivedBuilder_.setMessage(builderForValue.build());
+        }
+        detailsCase_ = 47;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public Builder mergeCdpUDXBundleReceived(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived value) {
+        if (cdpUDXBundleReceivedBuilder_ == null) {
+          if (detailsCase_ == 47 &&
+              details_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance()) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.newBuilder((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_)
+                .mergeFrom(value).buildPartial();
+          } else {
+            details_ = value;
+          }
+          onChanged();
+        } else {
+          if (detailsCase_ == 47) {
+            cdpUDXBundleReceivedBuilder_.mergeFrom(value);
+          }
+          cdpUDXBundleReceivedBuilder_.setMessage(value);
+        }
+        detailsCase_ = 47;
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public Builder clearCdpUDXBundleReceived() {
+        if (cdpUDXBundleReceivedBuilder_ == null) {
+          if (detailsCase_ == 47) {
+            detailsCase_ = 0;
+            details_ = null;
+            onChanged();
+          }
+        } else {
+          if (detailsCase_ == 47) {
+            detailsCase_ = 0;
+            details_ = null;
+          }
+          cdpUDXBundleReceivedBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder getCdpUDXBundleReceivedBuilder() {
+        return getCdpUDXBundleReceivedFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder getCdpUDXBundleReceivedOrBuilder() {
+        if ((detailsCase_ == 47) && (cdpUDXBundleReceivedBuilder_ != null)) {
+          return cdpUDXBundleReceivedBuilder_.getMessageOrBuilder();
+        } else {
+          if (detailsCase_ == 47) {
+            return (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_;
+          }
+          return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+        }
+      }
+      /**
+       * <pre>
+       * A CDP UDX Bundle was received
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleReceived cdpUDXBundleReceived = 47;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder> 
+          getCdpUDXBundleReceivedFieldBuilder() {
+        if (cdpUDXBundleReceivedBuilder_ == null) {
+          if (!(detailsCase_ == 47)) {
+            details_ = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+          }
+          cdpUDXBundleReceivedBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder>(
+                  (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) details_,
+                  getParentForChildren(),
+                  isClean());
+          details_ = null;
+        }
+        detailsCase_ = 47;
+        onChanged();;
+        return cdpUDXBundleReceivedBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -27160,6 +29377,30 @@ public final class UsageProto {
        * <code>UPGRADE_FAILED = 22;</code>
        */
       UPGRADE_FAILED(22),
+      /**
+       * <pre>
+       * The status when the pre-flight validation of a workspace request is started.
+       * </pre>
+       *
+       * <code>VALIDATION_STARTED = 23;</code>
+       */
+      VALIDATION_STARTED(23),
+      /**
+       * <pre>
+       * The status when the pre-flight validation of a workspace results in validation success.
+       * </pre>
+       *
+       * <code>VALIDATION_SUCCEEDED = 24;</code>
+       */
+      VALIDATION_SUCCEEDED(24),
+      /**
+       * <pre>
+       * The status when the pre-flight validation of a workspace results in validation failure.
+       * </pre>
+       *
+       * <code>VALIDATION_FAILED = 25;</code>
+       */
+      VALIDATION_FAILED(25),
       UNRECOGNIZED(-1),
       ;
 
@@ -27347,6 +29588,30 @@ public final class UsageProto {
        * <code>UPGRADE_FAILED = 22;</code>
        */
       public static final int UPGRADE_FAILED_VALUE = 22;
+      /**
+       * <pre>
+       * The status when the pre-flight validation of a workspace request is started.
+       * </pre>
+       *
+       * <code>VALIDATION_STARTED = 23;</code>
+       */
+      public static final int VALIDATION_STARTED_VALUE = 23;
+      /**
+       * <pre>
+       * The status when the pre-flight validation of a workspace results in validation success.
+       * </pre>
+       *
+       * <code>VALIDATION_SUCCEEDED = 24;</code>
+       */
+      public static final int VALIDATION_SUCCEEDED_VALUE = 24;
+      /**
+       * <pre>
+       * The status when the pre-flight validation of a workspace results in validation failure.
+       * </pre>
+       *
+       * <code>VALIDATION_FAILED = 25;</code>
+       */
+      public static final int VALIDATION_FAILED_VALUE = 25;
 
 
       public final int getNumber() {
@@ -27390,6 +29655,9 @@ public final class UsageProto {
           case 20: return UPGRADE_STARTED;
           case 21: return UPGRADE_FINISHED;
           case 22: return UPGRADE_FAILED;
+          case 23: return VALIDATION_STARTED;
+          case 24: return VALIDATION_SUCCEEDED;
+          case 25: return VALIDATION_FAILED;
           default: return null;
         }
       }
@@ -30179,6 +32447,46 @@ public final class UsageProto {
     com.google.protobuf.ByteString
         getWorkspaceVersionBytes();
 
+    /**
+     * <pre>
+     * the request id of the create event
+     * </pre>
+     *
+     * <code>string requestId = 11;</code>
+     */
+    java.lang.String getRequestId();
+    /**
+     * <pre>
+     * the request id of the create event
+     * </pre>
+     *
+     * <code>string requestId = 11;</code>
+     */
+    com.google.protobuf.ByteString
+        getRequestIdBytes();
+
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 12;</code>
+     */
+    java.lang.String getUserTags();
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 12;</code>
+     */
+    com.google.protobuf.ByteString
+        getUserTagsBytes();
+
     public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPCMLWorkspaceRequested.MetadataCase getMetadataCase();
   }
   /**
@@ -30206,6 +32514,8 @@ public final class UsageProto {
       cdpdVersion_ = "";
       creatorCrn_ = "";
       workspaceVersion_ = "";
+      requestId_ = "";
+      userTags_ = "";
     }
 
     @java.lang.Override
@@ -30306,6 +32616,18 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               workspaceVersion_ = s;
+              break;
+            }
+            case 90: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              requestId_ = s;
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              userTags_ = s;
               break;
             }
             default: {
@@ -30773,6 +33095,94 @@ public final class UsageProto {
       }
     }
 
+    public static final int REQUESTID_FIELD_NUMBER = 11;
+    private volatile java.lang.Object requestId_;
+    /**
+     * <pre>
+     * the request id of the create event
+     * </pre>
+     *
+     * <code>string requestId = 11;</code>
+     */
+    public java.lang.String getRequestId() {
+      java.lang.Object ref = requestId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        requestId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the request id of the create event
+     * </pre>
+     *
+     * <code>string requestId = 11;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRequestIdBytes() {
+      java.lang.Object ref = requestId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        requestId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int USERTAGS_FIELD_NUMBER = 12;
+    private volatile java.lang.Object userTags_;
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 12;</code>
+     */
+    public java.lang.String getUserTags() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        userTags_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 12;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUserTagsBytes() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        userTags_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -30817,6 +33227,12 @@ public final class UsageProto {
       if (!getWorkspaceVersionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, workspaceVersion_);
       }
+      if (!getRequestIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 11, requestId_);
+      }
+      if (!getUserTagsBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, userTags_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -30859,6 +33275,12 @@ public final class UsageProto {
       if (!getWorkspaceVersionBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, workspaceVersion_);
       }
+      if (!getRequestIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, requestId_);
+      }
+      if (!getUserTagsBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, userTags_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -30890,6 +33312,10 @@ public final class UsageProto {
           .equals(other.getCreatorCrn());
       result = result && getWorkspaceVersion()
           .equals(other.getWorkspaceVersion());
+      result = result && getRequestId()
+          .equals(other.getRequestId());
+      result = result && getUserTags()
+          .equals(other.getUserTags());
       result = result && getMetadataCase().equals(
           other.getMetadataCase());
       if (!result) return false;
@@ -30932,6 +33358,10 @@ public final class UsageProto {
       hash = (53 * hash) + getCreatorCrn().hashCode();
       hash = (37 * hash) + WORKSPACEVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getWorkspaceVersion().hashCode();
+      hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
+      hash = (53 * hash) + getRequestId().hashCode();
+      hash = (37 * hash) + USERTAGS_FIELD_NUMBER;
+      hash = (53 * hash) + getUserTags().hashCode();
       switch (metadataCase_) {
         case 8:
           hash = (37 * hash) + CDPCMLAWSWORKSPACEMETADATA_FIELD_NUMBER;
@@ -31097,6 +33527,10 @@ public final class UsageProto {
 
         workspaceVersion_ = "";
 
+        requestId_ = "";
+
+        userTags_ = "";
+
         metadataCase_ = 0;
         metadata_ = null;
         return this;
@@ -31147,6 +33581,8 @@ public final class UsageProto {
           }
         }
         result.workspaceVersion_ = workspaceVersion_;
+        result.requestId_ = requestId_;
+        result.userTags_ = userTags_;
         result.metadataCase_ = metadataCase_;
         onBuilt();
         return result;
@@ -31225,6 +33661,14 @@ public final class UsageProto {
         }
         if (!other.getWorkspaceVersion().isEmpty()) {
           workspaceVersion_ = other.workspaceVersion_;
+          onChanged();
+        }
+        if (!other.getRequestId().isEmpty()) {
+          requestId_ = other.requestId_;
+          onChanged();
+        }
+        if (!other.getUserTags().isEmpty()) {
+          userTags_ = other.userTags_;
           onChanged();
         }
         switch (other.getMetadataCase()) {
@@ -32315,6 +34759,194 @@ public final class UsageProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object requestId_ = "";
+      /**
+       * <pre>
+       * the request id of the create event
+       * </pre>
+       *
+       * <code>string requestId = 11;</code>
+       */
+      public java.lang.String getRequestId() {
+        java.lang.Object ref = requestId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          requestId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the request id of the create event
+       * </pre>
+       *
+       * <code>string requestId = 11;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRequestIdBytes() {
+        java.lang.Object ref = requestId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          requestId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the request id of the create event
+       * </pre>
+       *
+       * <code>string requestId = 11;</code>
+       */
+      public Builder setRequestId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        requestId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the request id of the create event
+       * </pre>
+       *
+       * <code>string requestId = 11;</code>
+       */
+      public Builder clearRequestId() {
+        
+        requestId_ = getDefaultInstance().getRequestId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the request id of the create event
+       * </pre>
+       *
+       * <code>string requestId = 11;</code>
+       */
+      public Builder setRequestIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        requestId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object userTags_ = "";
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 12;</code>
+       */
+      public java.lang.String getUserTags() {
+        java.lang.Object ref = userTags_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          userTags_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 12;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUserTagsBytes() {
+        java.lang.Object ref = userTags_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          userTags_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 12;</code>
+       */
+      public Builder setUserTags(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userTags_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 12;</code>
+       */
+      public Builder clearUserTags() {
+        
+        userTags_ = getDefaultInstance().getUserTags();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 12;</code>
+       */
+      public Builder setUserTagsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        userTags_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -32463,6 +35095,64 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getToVersionBytes();
+
+    /**
+     * <pre>
+     * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+     * </pre>
+     *
+     * <code>string requestId = 7;</code>
+     */
+    java.lang.String getRequestId();
+    /**
+     * <pre>
+     * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+     * </pre>
+     *
+     * <code>string requestId = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getRequestIdBytes();
+
+    /**
+     * <pre>
+     * the liftie cluster id to use when watching the cluster logs
+     * </pre>
+     *
+     * <code>string liftieId = 8;</code>
+     */
+    java.lang.String getLiftieId();
+    /**
+     * <pre>
+     * the liftie cluster id to use when watching the cluster logs
+     * </pre>
+     *
+     * <code>string liftieId = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getLiftieIdBytes();
+
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 9;</code>
+     */
+    java.lang.String getUserTags();
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 9;</code>
+     */
+    com.google.protobuf.ByteString
+        getUserTagsBytes();
   }
   /**
    * <pre>
@@ -32487,6 +35177,9 @@ public final class UsageProto {
       failureReason_ = "";
       fromVersion_ = "";
       toVersion_ = "";
+      requestId_ = "";
+      liftieId_ = "";
+      userTags_ = "";
     }
 
     @java.lang.Override
@@ -32547,6 +35240,24 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               toVersion_ = s;
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              requestId_ = s;
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              liftieId_ = s;
+              break;
+            }
+            case 74: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              userTags_ = s;
               break;
             }
             default: {
@@ -32785,6 +35496,136 @@ public final class UsageProto {
       }
     }
 
+    public static final int REQUESTID_FIELD_NUMBER = 7;
+    private volatile java.lang.Object requestId_;
+    /**
+     * <pre>
+     * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+     * </pre>
+     *
+     * <code>string requestId = 7;</code>
+     */
+    public java.lang.String getRequestId() {
+      java.lang.Object ref = requestId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        requestId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+     * </pre>
+     *
+     * <code>string requestId = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRequestIdBytes() {
+      java.lang.Object ref = requestId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        requestId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int LIFTIEID_FIELD_NUMBER = 8;
+    private volatile java.lang.Object liftieId_;
+    /**
+     * <pre>
+     * the liftie cluster id to use when watching the cluster logs
+     * </pre>
+     *
+     * <code>string liftieId = 8;</code>
+     */
+    public java.lang.String getLiftieId() {
+      java.lang.Object ref = liftieId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        liftieId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * the liftie cluster id to use when watching the cluster logs
+     * </pre>
+     *
+     * <code>string liftieId = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getLiftieIdBytes() {
+      java.lang.Object ref = liftieId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        liftieId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int USERTAGS_FIELD_NUMBER = 9;
+    private volatile java.lang.Object userTags_;
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 9;</code>
+     */
+    public java.lang.String getUserTags() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        userTags_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user-defined tags for the workspace. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 9;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUserTagsBytes() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        userTags_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -32817,6 +35658,15 @@ public final class UsageProto {
       if (!getToVersionBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, toVersion_);
       }
+      if (!getRequestIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, requestId_);
+      }
+      if (!getLiftieIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, liftieId_);
+      }
+      if (!getUserTagsBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 9, userTags_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -32846,6 +35696,15 @@ public final class UsageProto {
       if (!getToVersionBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, toVersion_);
       }
+      if (!getRequestIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, requestId_);
+      }
+      if (!getLiftieIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, liftieId_);
+      }
+      if (!getUserTagsBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, userTags_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -32872,6 +35731,12 @@ public final class UsageProto {
           .equals(other.getFromVersion());
       result = result && getToVersion()
           .equals(other.getToVersion());
+      result = result && getRequestId()
+          .equals(other.getRequestId());
+      result = result && getLiftieId()
+          .equals(other.getLiftieId());
+      result = result && getUserTags()
+          .equals(other.getUserTags());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -32895,6 +35760,12 @@ public final class UsageProto {
       hash = (53 * hash) + getFromVersion().hashCode();
       hash = (37 * hash) + TOVERSION_FIELD_NUMBER;
       hash = (53 * hash) + getToVersion().hashCode();
+      hash = (37 * hash) + REQUESTID_FIELD_NUMBER;
+      hash = (53 * hash) + getRequestId().hashCode();
+      hash = (37 * hash) + LIFTIEID_FIELD_NUMBER;
+      hash = (53 * hash) + getLiftieId().hashCode();
+      hash = (37 * hash) + USERTAGS_FIELD_NUMBER;
+      hash = (53 * hash) + getUserTags().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -33044,6 +35915,12 @@ public final class UsageProto {
 
         toVersion_ = "";
 
+        requestId_ = "";
+
+        liftieId_ = "";
+
+        userTags_ = "";
+
         return this;
       }
 
@@ -33076,6 +35953,9 @@ public final class UsageProto {
         result.failureReason_ = failureReason_;
         result.fromVersion_ = fromVersion_;
         result.toVersion_ = toVersion_;
+        result.requestId_ = requestId_;
+        result.liftieId_ = liftieId_;
+        result.userTags_ = userTags_;
         onBuilt();
         return result;
       }
@@ -33144,6 +36024,18 @@ public final class UsageProto {
         }
         if (!other.getToVersion().isEmpty()) {
           toVersion_ = other.toVersion_;
+          onChanged();
+        }
+        if (!other.getRequestId().isEmpty()) {
+          requestId_ = other.requestId_;
+          onChanged();
+        }
+        if (!other.getLiftieId().isEmpty()) {
+          liftieId_ = other.liftieId_;
+          onChanged();
+        }
+        if (!other.getUserTags().isEmpty()) {
+          userTags_ = other.userTags_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -33622,6 +36514,283 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         toVersion_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object requestId_ = "";
+      /**
+       * <pre>
+       * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+       * </pre>
+       *
+       * <code>string requestId = 7;</code>
+       */
+      public java.lang.String getRequestId() {
+        java.lang.Object ref = requestId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          requestId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+       * </pre>
+       *
+       * <code>string requestId = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRequestIdBytes() {
+        java.lang.Object ref = requestId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          requestId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+       * </pre>
+       *
+       * <code>string requestId = 7;</code>
+       */
+      public Builder setRequestId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        requestId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+       * </pre>
+       *
+       * <code>string requestId = 7;</code>
+       */
+      public Builder clearRequestId() {
+        
+        requestId_ = getDefaultInstance().getRequestId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+       * </pre>
+       *
+       * <code>string requestId = 7;</code>
+       */
+      public Builder setRequestIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        requestId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object liftieId_ = "";
+      /**
+       * <pre>
+       * the liftie cluster id to use when watching the cluster logs
+       * </pre>
+       *
+       * <code>string liftieId = 8;</code>
+       */
+      public java.lang.String getLiftieId() {
+        java.lang.Object ref = liftieId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          liftieId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the liftie cluster id to use when watching the cluster logs
+       * </pre>
+       *
+       * <code>string liftieId = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getLiftieIdBytes() {
+        java.lang.Object ref = liftieId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          liftieId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * the liftie cluster id to use when watching the cluster logs
+       * </pre>
+       *
+       * <code>string liftieId = 8;</code>
+       */
+      public Builder setLiftieId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        liftieId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the liftie cluster id to use when watching the cluster logs
+       * </pre>
+       *
+       * <code>string liftieId = 8;</code>
+       */
+      public Builder clearLiftieId() {
+        
+        liftieId_ = getDefaultInstance().getLiftieId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * the liftie cluster id to use when watching the cluster logs
+       * </pre>
+       *
+       * <code>string liftieId = 8;</code>
+       */
+      public Builder setLiftieIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        liftieId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object userTags_ = "";
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 9;</code>
+       */
+      public java.lang.String getUserTags() {
+        java.lang.Object ref = userTags_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          userTags_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 9;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUserTagsBytes() {
+        java.lang.Object ref = userTags_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          userTags_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 9;</code>
+       */
+      public Builder setUserTags(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userTags_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 9;</code>
+       */
+      public Builder clearUserTags() {
+        
+        userTags_ = getDefaultInstance().getUserTags();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the workspace. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 9;</code>
+       */
+      public Builder setUserTagsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        userTags_ = value;
         onChanged();
         return this;
       }
@@ -38466,6 +41635,28 @@ public final class UsageProto {
      * <code>.usage.CDPEnvironmentAzureDetails azureDetails = 7;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentAzureDetailsOrBuilder getAzureDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * The user-defined tags for the environment. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 8;</code>
+     */
+    java.lang.String getUserTags();
+    /**
+     * <pre>
+     * The user-defined tags for the environment. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getUserTagsBytes();
   }
   /**
    * Protobuf type {@code usage.CDPEnvironmentDetails}
@@ -38484,6 +41675,7 @@ public final class UsageProto {
       region_ = "";
       numberOfAvailabilityZones_ = 0;
       availabilityZones_ = "";
+      userTags_ = "";
     }
 
     @java.lang.Override
@@ -38570,6 +41762,12 @@ public final class UsageProto {
                 azureDetails_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              userTags_ = s;
               break;
             }
             default: {
@@ -38825,6 +42023,52 @@ public final class UsageProto {
       return getAzureDetails();
     }
 
+    public static final int USERTAGS_FIELD_NUMBER = 8;
+    private volatile java.lang.Object userTags_;
+    /**
+     * <pre>
+     * The user-defined tags for the environment. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 8;</code>
+     */
+    public java.lang.String getUserTags() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        userTags_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user-defined tags for the environment. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUserTagsBytes() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        userTags_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -38860,6 +42104,9 @@ public final class UsageProto {
       if (azureDetails_ != null) {
         output.writeMessage(7, getAzureDetails());
       }
+      if (!getUserTagsBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, userTags_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -38894,6 +42141,9 @@ public final class UsageProto {
       if (azureDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(7, getAzureDetails());
+      }
+      if (!getUserTagsBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, userTags_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -38933,6 +42183,8 @@ public final class UsageProto {
         result = result && getAzureDetails()
             .equals(other.getAzureDetails());
       }
+      result = result && getUserTags()
+          .equals(other.getUserTags());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -38964,6 +42216,8 @@ public final class UsageProto {
         hash = (37 * hash) + AZUREDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getAzureDetails().hashCode();
       }
+      hash = (37 * hash) + USERTAGS_FIELD_NUMBER;
+      hash = (53 * hash) + getUserTags().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -39123,6 +42377,8 @@ public final class UsageProto {
           azureDetails_ = null;
           azureDetailsBuilder_ = null;
         }
+        userTags_ = "";
+
         return this;
       }
 
@@ -39168,6 +42424,7 @@ public final class UsageProto {
         } else {
           result.azureDetails_ = azureDetailsBuilder_.build();
         }
+        result.userTags_ = userTags_;
         onBuilt();
         return result;
       }
@@ -39238,6 +42495,10 @@ public final class UsageProto {
         }
         if (other.hasAzureDetails()) {
           mergeAzureDetails(other.getAzureDetails());
+        }
+        if (!other.getUserTags().isEmpty()) {
+          userTags_ = other.userTags_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -40006,6 +43267,105 @@ public final class UsageProto {
           azureDetails_ = null;
         }
         return azureDetailsBuilder_;
+      }
+
+      private java.lang.Object userTags_ = "";
+      /**
+       * <pre>
+       * The user-defined tags for the environment. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 8;</code>
+       */
+      public java.lang.String getUserTags() {
+        java.lang.Object ref = userTags_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          userTags_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the environment. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUserTagsBytes() {
+        java.lang.Object ref = userTags_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          userTags_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the environment. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 8;</code>
+       */
+      public Builder setUserTags(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userTags_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the environment. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 8;</code>
+       */
+      public Builder clearUserTags() {
+        
+        userTags_ = getDefaultInstance().getUserTags();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the environment. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 8;</code>
+       */
+      public Builder setUserTagsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        userTags_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -50693,6 +54053,28 @@ public final class UsageProto {
      * <code>.usage.CDPImageDetails imageDetails = 3;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPImageDetailsOrBuilder getImageDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * The user-defined tags for the cluster. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 4;</code>
+     */
+    java.lang.String getUserTags();
+    /**
+     * <pre>
+     * The user-defined tags for the cluster. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getUserTagsBytes();
   }
   /**
    * Protobuf type {@code usage.CDPClusterDetails}
@@ -50707,6 +54089,7 @@ public final class UsageProto {
       super(builder);
     }
     private CDPClusterDetails() {
+      userTags_ = "";
     }
 
     @java.lang.Override
@@ -50770,6 +54153,12 @@ public final class UsageProto {
                 imageDetails_ = subBuilder.buildPartial();
               }
 
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              userTags_ = s;
               break;
             }
             default: {
@@ -50903,6 +54292,52 @@ public final class UsageProto {
       return getImageDetails();
     }
 
+    public static final int USERTAGS_FIELD_NUMBER = 4;
+    private volatile java.lang.Object userTags_;
+    /**
+     * <pre>
+     * The user-defined tags for the cluster. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 4;</code>
+     */
+    public java.lang.String getUserTags() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        userTags_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The user-defined tags for the cluster. These should not include automatically
+     * added tags that are product-specific. The format of this is a map serialized
+     * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+     * </pre>
+     *
+     * <code>string userTags = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUserTagsBytes() {
+      java.lang.Object ref = userTags_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        userTags_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -50926,6 +54361,9 @@ public final class UsageProto {
       if (imageDetails_ != null) {
         output.writeMessage(3, getImageDetails());
       }
+      if (!getUserTagsBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, userTags_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -50946,6 +54384,9 @@ public final class UsageProto {
       if (imageDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getImageDetails());
+      }
+      if (!getUserTagsBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, userTags_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -50978,6 +54419,8 @@ public final class UsageProto {
         result = result && getImageDetails()
             .equals(other.getImageDetails());
       }
+      result = result && getUserTags()
+          .equals(other.getUserTags());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -51001,6 +54444,8 @@ public final class UsageProto {
         hash = (37 * hash) + IMAGEDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getImageDetails().hashCode();
       }
+      hash = (37 * hash) + USERTAGS_FIELD_NUMBER;
+      hash = (53 * hash) + getUserTags().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -51152,6 +54597,8 @@ public final class UsageProto {
           imageDetails_ = null;
           imageDetailsBuilder_ = null;
         }
+        userTags_ = "";
+
         return this;
       }
 
@@ -51193,6 +54640,7 @@ public final class UsageProto {
         } else {
           result.imageDetails_ = imageDetailsBuilder_.build();
         }
+        result.userTags_ = userTags_;
         onBuilt();
         return result;
       }
@@ -51249,6 +54697,10 @@ public final class UsageProto {
         }
         if (other.hasImageDetails()) {
           mergeImageDetails(other.getImageDetails());
+        }
+        if (!other.getUserTags().isEmpty()) {
+          userTags_ = other.userTags_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -51736,6 +55188,105 @@ public final class UsageProto {
           imageDetails_ = null;
         }
         return imageDetailsBuilder_;
+      }
+
+      private java.lang.Object userTags_ = "";
+      /**
+       * <pre>
+       * The user-defined tags for the cluster. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 4;</code>
+       */
+      public java.lang.String getUserTags() {
+        java.lang.Object ref = userTags_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          userTags_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the cluster. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUserTagsBytes() {
+        java.lang.Object ref = userTags_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          userTags_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the cluster. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 4;</code>
+       */
+      public Builder setUserTags(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        userTags_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the cluster. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 4;</code>
+       */
+      public Builder clearUserTags() {
+        
+        userTags_ = getDefaultInstance().getUserTags();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The user-defined tags for the cluster. These should not include automatically
+       * added tags that are product-specific. The format of this is a map serialized
+       * into a string as json. e.g.:   "tags": "{&#92;"key1&#92;":&#92;"value1&#92;",&#92;"key2&#92;":&#92;"value2&#92;"}"
+       * </pre>
+       *
+       * <code>string userTags = 4;</code>
+       */
+      public Builder setUserTagsBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        userTags_ = value;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -62958,6 +66509,13311 @@ public final class UsageProto {
 
   }
 
+  public interface CDPDFCatalogArtifactTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFCatalogArtifactType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * Supported types of catalog artifacts in DF.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFCatalogArtifactType}
+   */
+  public  static final class CDPDFCatalogArtifactType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFCatalogArtifactType)
+      CDPDFCatalogArtifactTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFCatalogArtifactType.newBuilder() to construct.
+    private CDPDFCatalogArtifactType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFCatalogArtifactType() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFCatalogArtifactType(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code usage.CDPDFCatalogArtifactType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * NiFi Flow
+       * </pre>
+       *
+       * <code>FLOW = 1;</code>
+       */
+      FLOW(1),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * NiFi Flow
+       * </pre>
+       *
+       * <code>FLOW = 1;</code>
+       */
+      public static final int FLOW_VALUE = 1;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return FLOW;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:usage.CDPDFCatalogArtifactType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType) obj;
+
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Supported types of catalog artifacts in DF.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFCatalogArtifactType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFCatalogArtifactType)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFCatalogArtifactType)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFCatalogArtifactType)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFCatalogArtifactType>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFCatalogArtifactType>() {
+      @java.lang.Override
+      public CDPDFCatalogArtifactType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFCatalogArtifactType(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFCatalogArtifactType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFCatalogArtifactType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFCatalogArtifactCreatedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFCatalogArtifactCreated)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the artifact created.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    java.lang.String getArtifactId();
+    /**
+     * <pre>
+     * The id of the artifact created.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getArtifactIdBytes();
+
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * The type of artifact created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    int getTypeValue();
+    /**
+     * <pre>
+     * The type of artifact created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value getType();
+  }
+  /**
+   * <pre>
+   * Generated periodically when users upload/create a new catalog artifact in DF
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFCatalogArtifactCreated}
+   */
+  public  static final class CDPDFCatalogArtifactCreated extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFCatalogArtifactCreated)
+      CDPDFCatalogArtifactCreatedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFCatalogArtifactCreated.newBuilder() to construct.
+    private CDPDFCatalogArtifactCreated(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFCatalogArtifactCreated() {
+      artifactId_ = "";
+      accountId_ = "";
+      crn_ = "";
+      type_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFCatalogArtifactCreated(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              artifactId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              crn_ = s;
+              break;
+            }
+            case 32: {
+              int rawValue = input.readEnum();
+
+              type_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactCreated_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactCreated_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder.class);
+    }
+
+    public static final int ARTIFACTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object artifactId_;
+    /**
+     * <pre>
+     * The id of the artifact created.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    public java.lang.String getArtifactId() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        artifactId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the artifact created.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getArtifactIdBytes() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        artifactId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object crn_;
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 4;
+    private int type_;
+    /**
+     * <pre>
+     * The type of artifact created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    public int getTypeValue() {
+      return type_;
+    }
+    /**
+     * <pre>
+     * The type of artifact created
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value getType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.valueOf(type_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getArtifactIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, artifactId_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, crn_);
+      }
+      if (type_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNSET.getNumber()) {
+        output.writeEnum(4, type_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getArtifactIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, artifactId_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, crn_);
+      }
+      if (type_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, type_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) obj;
+
+      boolean result = true;
+      result = result && getArtifactId()
+          .equals(other.getArtifactId());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getCrn()
+          .equals(other.getCrn());
+      result = result && type_ == other.type_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ARTIFACTID_FIELD_NUMBER;
+      hash = (53 * hash) + getArtifactId().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + type_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated periodically when users upload/create a new catalog artifact in DF
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFCatalogArtifactCreated}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFCatalogArtifactCreated)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreatedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactCreated_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactCreated_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        artifactId_ = "";
+
+        accountId_ = "";
+
+        crn_ = "";
+
+        type_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactCreated_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated(this);
+        result.artifactId_ = artifactId_;
+        result.accountId_ = accountId_;
+        result.crn_ = crn_;
+        result.type_ = type_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated.getDefaultInstance()) return this;
+        if (!other.getArtifactId().isEmpty()) {
+          artifactId_ = other.artifactId_;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          onChanged();
+        }
+        if (other.type_ != 0) {
+          setTypeValue(other.getTypeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object artifactId_ = "";
+      /**
+       * <pre>
+       * The id of the artifact created.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public java.lang.String getArtifactId() {
+        java.lang.Object ref = artifactId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          artifactId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the artifact created.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getArtifactIdBytes() {
+        java.lang.Object ref = artifactId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          artifactId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the artifact created.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public Builder setArtifactId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the artifact created.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public Builder clearArtifactId() {
+        
+        artifactId_ = getDefaultInstance().getArtifactId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the artifact created.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public Builder setArtifactIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder clearCrn() {
+        
+        crn_ = getDefaultInstance().getCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int type_ = 0;
+      /**
+       * <pre>
+       * The type of artifact created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public int getTypeValue() {
+        return type_;
+      }
+      /**
+       * <pre>
+       * The type of artifact created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public Builder setTypeValue(int value) {
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of artifact created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value getType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.valueOf(type_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The type of artifact created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public Builder setType(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of artifact created
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFCatalogArtifactCreated)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFCatalogArtifactCreated)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFCatalogArtifactCreated>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFCatalogArtifactCreated>() {
+      @java.lang.Override
+      public CDPDFCatalogArtifactCreated parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFCatalogArtifactCreated(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFCatalogArtifactCreated> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFCatalogArtifactCreated> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactCreated getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFCatalogArtifactDeletedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFCatalogArtifactDeleted)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the artifact deleted.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    java.lang.String getArtifactId();
+    /**
+     * <pre>
+     * The id of the artifact deleted.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getArtifactIdBytes();
+
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * The type of artifact deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    int getTypeValue();
+    /**
+     * <pre>
+     * The type of artifact deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value getType();
+  }
+  /**
+   * <pre>
+   * Generated periodically when users delete a catalog artifact in DF
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFCatalogArtifactDeleted}
+   */
+  public  static final class CDPDFCatalogArtifactDeleted extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFCatalogArtifactDeleted)
+      CDPDFCatalogArtifactDeletedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFCatalogArtifactDeleted.newBuilder() to construct.
+    private CDPDFCatalogArtifactDeleted(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFCatalogArtifactDeleted() {
+      artifactId_ = "";
+      accountId_ = "";
+      crn_ = "";
+      type_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFCatalogArtifactDeleted(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              artifactId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              crn_ = s;
+              break;
+            }
+            case 32: {
+              int rawValue = input.readEnum();
+
+              type_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactDeleted_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactDeleted_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder.class);
+    }
+
+    public static final int ARTIFACTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object artifactId_;
+    /**
+     * <pre>
+     * The id of the artifact deleted.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    public java.lang.String getArtifactId() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        artifactId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the artifact deleted.
+     * </pre>
+     *
+     * <code>string artifactId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getArtifactIdBytes() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        artifactId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object crn_;
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the catalog artifact.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 4;
+    private int type_;
+    /**
+     * <pre>
+     * The type of artifact deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    public int getTypeValue() {
+      return type_;
+    }
+    /**
+     * <pre>
+     * The type of artifact deleted
+     * </pre>
+     *
+     * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value getType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.valueOf(type_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getArtifactIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, artifactId_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, crn_);
+      }
+      if (type_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNSET.getNumber()) {
+        output.writeEnum(4, type_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getArtifactIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, artifactId_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, crn_);
+      }
+      if (type_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(4, type_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) obj;
+
+      boolean result = true;
+      result = result && getArtifactId()
+          .equals(other.getArtifactId());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getCrn()
+          .equals(other.getCrn());
+      result = result && type_ == other.type_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ARTIFACTID_FIELD_NUMBER;
+      hash = (53 * hash) + getArtifactId().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + type_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated periodically when users delete a catalog artifact in DF
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFCatalogArtifactDeleted}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFCatalogArtifactDeleted)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeletedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactDeleted_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactDeleted_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        artifactId_ = "";
+
+        accountId_ = "";
+
+        crn_ = "";
+
+        type_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactDeleted_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted(this);
+        result.artifactId_ = artifactId_;
+        result.accountId_ = accountId_;
+        result.crn_ = crn_;
+        result.type_ = type_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted.getDefaultInstance()) return this;
+        if (!other.getArtifactId().isEmpty()) {
+          artifactId_ = other.artifactId_;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          onChanged();
+        }
+        if (other.type_ != 0) {
+          setTypeValue(other.getTypeValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object artifactId_ = "";
+      /**
+       * <pre>
+       * The id of the artifact deleted.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public java.lang.String getArtifactId() {
+        java.lang.Object ref = artifactId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          artifactId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the artifact deleted.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getArtifactIdBytes() {
+        java.lang.Object ref = artifactId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          artifactId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the artifact deleted.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public Builder setArtifactId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the artifact deleted.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public Builder clearArtifactId() {
+        
+        artifactId_ = getDefaultInstance().getArtifactId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the artifact deleted.
+       * </pre>
+       *
+       * <code>string artifactId = 1;</code>
+       */
+      public Builder setArtifactIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 2;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder clearCrn() {
+        
+        crn_ = getDefaultInstance().getCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int type_ = 0;
+      /**
+       * <pre>
+       * The type of artifact deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public int getTypeValue() {
+        return type_;
+      }
+      /**
+       * <pre>
+       * The type of artifact deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public Builder setTypeValue(int value) {
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of artifact deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value getType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.valueOf(type_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The type of artifact deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public Builder setType(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of artifact deleted
+       * </pre>
+       *
+       * <code>.usage.CDPDFCatalogArtifactType.Value type = 4;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFCatalogArtifactDeleted)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFCatalogArtifactDeleted)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFCatalogArtifactDeleted>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFCatalogArtifactDeleted>() {
+      @java.lang.Override
+      public CDPDFCatalogArtifactDeleted parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFCatalogArtifactDeleted(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFCatalogArtifactDeleted> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFCatalogArtifactDeleted> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactDeleted getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFCatalogArtifactVersionCreatedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFCatalogArtifactVersionCreated)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    java.lang.String getVersionId();
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getVersionIdBytes();
+
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    java.lang.String getArtifactId();
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getArtifactIdBytes();
+
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+  }
+  /**
+   * <pre>
+   * Generated periodically when users upload/create a new version of a catalog artifact in DF
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFCatalogArtifactVersionCreated}
+   */
+  public  static final class CDPDFCatalogArtifactVersionCreated extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFCatalogArtifactVersionCreated)
+      CDPDFCatalogArtifactVersionCreatedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFCatalogArtifactVersionCreated.newBuilder() to construct.
+    private CDPDFCatalogArtifactVersionCreated(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFCatalogArtifactVersionCreated() {
+      versionId_ = "";
+      artifactId_ = "";
+      crn_ = "";
+      accountId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFCatalogArtifactVersionCreated(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              versionId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              artifactId_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              crn_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionCreated_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionCreated_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder.class);
+    }
+
+    public static final int VERSIONID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object versionId_;
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    public java.lang.String getVersionId() {
+      java.lang.Object ref = versionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        versionId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getVersionIdBytes() {
+      java.lang.Object ref = versionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        versionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ARTIFACTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object artifactId_;
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    public java.lang.String getArtifactId() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        artifactId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getArtifactIdBytes() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        artifactId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object crn_;
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 4;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getVersionIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, versionId_);
+      }
+      if (!getArtifactIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, artifactId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, crn_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accountId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getVersionIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, versionId_);
+      }
+      if (!getArtifactIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, artifactId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, crn_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accountId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) obj;
+
+      boolean result = true;
+      result = result && getVersionId()
+          .equals(other.getVersionId());
+      result = result && getArtifactId()
+          .equals(other.getArtifactId());
+      result = result && getCrn()
+          .equals(other.getCrn());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + VERSIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getVersionId().hashCode();
+      hash = (37 * hash) + ARTIFACTID_FIELD_NUMBER;
+      hash = (53 * hash) + getArtifactId().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated periodically when users upload/create a new version of a catalog artifact in DF
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFCatalogArtifactVersionCreated}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFCatalogArtifactVersionCreated)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreatedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionCreated_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionCreated_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        versionId_ = "";
+
+        artifactId_ = "";
+
+        crn_ = "";
+
+        accountId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionCreated_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated(this);
+        result.versionId_ = versionId_;
+        result.artifactId_ = artifactId_;
+        result.crn_ = crn_;
+        result.accountId_ = accountId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated.getDefaultInstance()) return this;
+        if (!other.getVersionId().isEmpty()) {
+          versionId_ = other.versionId_;
+          onChanged();
+        }
+        if (!other.getArtifactId().isEmpty()) {
+          artifactId_ = other.artifactId_;
+          onChanged();
+        }
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object versionId_ = "";
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public java.lang.String getVersionId() {
+        java.lang.Object ref = versionId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          versionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getVersionIdBytes() {
+        java.lang.Object ref = versionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          versionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public Builder setVersionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        versionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public Builder clearVersionId() {
+        
+        versionId_ = getDefaultInstance().getVersionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public Builder setVersionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        versionId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object artifactId_ = "";
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public java.lang.String getArtifactId() {
+        java.lang.Object ref = artifactId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          artifactId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getArtifactIdBytes() {
+        java.lang.Object ref = artifactId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          artifactId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public Builder setArtifactId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public Builder clearArtifactId() {
+        
+        artifactId_ = getDefaultInstance().getArtifactId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public Builder setArtifactIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder clearCrn() {
+        
+        crn_ = getDefaultInstance().getCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFCatalogArtifactVersionCreated)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFCatalogArtifactVersionCreated)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFCatalogArtifactVersionCreated>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFCatalogArtifactVersionCreated>() {
+      @java.lang.Override
+      public CDPDFCatalogArtifactVersionCreated parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFCatalogArtifactVersionCreated(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFCatalogArtifactVersionCreated> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFCatalogArtifactVersionCreated> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionCreated getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFCatalogArtifactVersionDeletedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFCatalogArtifactVersionDeleted)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    java.lang.String getVersionId();
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getVersionIdBytes();
+
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    java.lang.String getArtifactId();
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getArtifactIdBytes();
+
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+  }
+  /**
+   * <pre>
+   * Generated periodically when users delete a version of a catalog artifact in DF
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFCatalogArtifactVersionDeleted}
+   */
+  public  static final class CDPDFCatalogArtifactVersionDeleted extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFCatalogArtifactVersionDeleted)
+      CDPDFCatalogArtifactVersionDeletedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFCatalogArtifactVersionDeleted.newBuilder() to construct.
+    private CDPDFCatalogArtifactVersionDeleted(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFCatalogArtifactVersionDeleted() {
+      versionId_ = "";
+      artifactId_ = "";
+      crn_ = "";
+      accountId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFCatalogArtifactVersionDeleted(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              versionId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              artifactId_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              crn_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionDeleted_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionDeleted_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder.class);
+    }
+
+    public static final int VERSIONID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object versionId_;
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    public java.lang.String getVersionId() {
+      java.lang.Object ref = versionId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        versionId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string versionId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getVersionIdBytes() {
+      java.lang.Object ref = versionId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        versionId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ARTIFACTID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object artifactId_;
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    public java.lang.String getArtifactId() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        artifactId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the catalog artifact associated with the version.
+     * </pre>
+     *
+     * <code>string artifactId = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getArtifactIdBytes() {
+      java.lang.Object ref = artifactId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        artifactId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object crn_;
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the catalog artifact version.
+     * </pre>
+     *
+     * <code>string crn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 4;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID of the version.
+     * </pre>
+     *
+     * <code>string accountId = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getVersionIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, versionId_);
+      }
+      if (!getArtifactIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, artifactId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, crn_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accountId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getVersionIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, versionId_);
+      }
+      if (!getArtifactIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, artifactId_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, crn_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accountId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) obj;
+
+      boolean result = true;
+      result = result && getVersionId()
+          .equals(other.getVersionId());
+      result = result && getArtifactId()
+          .equals(other.getArtifactId());
+      result = result && getCrn()
+          .equals(other.getCrn());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + VERSIONID_FIELD_NUMBER;
+      hash = (53 * hash) + getVersionId().hashCode();
+      hash = (37 * hash) + ARTIFACTID_FIELD_NUMBER;
+      hash = (53 * hash) + getArtifactId().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated periodically when users delete a version of a catalog artifact in DF
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFCatalogArtifactVersionDeleted}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFCatalogArtifactVersionDeleted)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeletedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionDeleted_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionDeleted_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        versionId_ = "";
+
+        artifactId_ = "";
+
+        crn_ = "";
+
+        accountId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFCatalogArtifactVersionDeleted_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted(this);
+        result.versionId_ = versionId_;
+        result.artifactId_ = artifactId_;
+        result.crn_ = crn_;
+        result.accountId_ = accountId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted.getDefaultInstance()) return this;
+        if (!other.getVersionId().isEmpty()) {
+          versionId_ = other.versionId_;
+          onChanged();
+        }
+        if (!other.getArtifactId().isEmpty()) {
+          artifactId_ = other.artifactId_;
+          onChanged();
+        }
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object versionId_ = "";
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public java.lang.String getVersionId() {
+        java.lang.Object ref = versionId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          versionId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getVersionIdBytes() {
+        java.lang.Object ref = versionId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          versionId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public Builder setVersionId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        versionId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public Builder clearVersionId() {
+        
+        versionId_ = getDefaultInstance().getVersionId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string versionId = 1;</code>
+       */
+      public Builder setVersionIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        versionId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object artifactId_ = "";
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public java.lang.String getArtifactId() {
+        java.lang.Object ref = artifactId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          artifactId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getArtifactIdBytes() {
+        java.lang.Object ref = artifactId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          artifactId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public Builder setArtifactId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public Builder clearArtifactId() {
+        
+        artifactId_ = getDefaultInstance().getArtifactId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the catalog artifact associated with the version.
+       * </pre>
+       *
+       * <code>string artifactId = 2;</code>
+       */
+      public Builder setArtifactIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        artifactId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder clearCrn() {
+        
+        crn_ = getDefaultInstance().getCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the catalog artifact version.
+       * </pre>
+       *
+       * <code>string crn = 3;</code>
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the version.
+       * </pre>
+       *
+       * <code>string accountId = 4;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFCatalogArtifactVersionDeleted)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFCatalogArtifactVersionDeleted)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFCatalogArtifactVersionDeleted>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFCatalogArtifactVersionDeleted>() {
+      @java.lang.Override
+      public CDPDFCatalogArtifactVersionDeleted parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFCatalogArtifactVersionDeleted(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFCatalogArtifactVersionDeleted> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFCatalogArtifactVersionDeleted> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFCatalogArtifactVersionDeleted getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFServiceStatusOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFServiceStatus)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * The status of a CDP DataFlow service.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFServiceStatus}
+   */
+  public  static final class CDPDFServiceStatus extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFServiceStatus)
+      CDPDFServiceStatusOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFServiceStatus.newBuilder() to construct.
+    private CDPDFServiceStatus(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFServiceStatus() {
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFServiceStatus(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatus_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatus_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code usage.CDPDFServiceStatus.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * The status of a df service that is being requested to enable.
+       * </pre>
+       *
+       * <code>ENABLE_REQUESTED = 1;</code>
+       */
+      ENABLE_REQUESTED(1),
+      /**
+       * <pre>
+       * The status of a df service that is being enabled.
+       * </pre>
+       *
+       * <code>ENABLE_IN_PROGRESS = 2;</code>
+       */
+      ENABLE_IN_PROGRESS(2),
+      /**
+       * <pre>
+       * The status of a df service that is available for use.
+       * </pre>
+       *
+       * <code>ENABLE_COMPLETED = 3;</code>
+       */
+      ENABLE_COMPLETED(3),
+      /**
+       * <pre>
+       * The status of a df service that failed to enable.
+       * </pre>
+       *
+       * <code>ENABLE_FAILED = 4;</code>
+       */
+      ENABLE_FAILED(4),
+      /**
+       * <pre>
+       * The status of a df service that is being requested to enable.
+       * </pre>
+       *
+       * <code>DISABLE_REQUESTED = 5;</code>
+       */
+      DISABLE_REQUESTED(5),
+      /**
+       * <pre>
+       * The status of a df service that is being disabled.
+       * </pre>
+       *
+       * <code>DISABLE_IN_PROGRESS = 6;</code>
+       */
+      DISABLE_IN_PROGRESS(6),
+      /**
+       * <pre>
+       * The status of a df service that is successfully disabled.
+       * </pre>
+       *
+       * <code>DISABLE_COMPLETED = 7;</code>
+       */
+      DISABLE_COMPLETED(7),
+      /**
+       * <pre>
+       * The status of a df service that failed to disable.
+       * </pre>
+       *
+       * <code>DISABLE_FAILED = 8;</code>
+       */
+      DISABLE_FAILED(8),
+      /**
+       * <pre>
+       * The status of a df service that is being requested to update.
+       * </pre>
+       *
+       * <code>UPDATE_REQUESTED = 9;</code>
+       */
+      UPDATE_REQUESTED(9),
+      /**
+       * <pre>
+       * The status of a df service that is being updated.
+       * </pre>
+       *
+       * <code>UPDATE_IN_PROGRESS = 10;</code>
+       */
+      UPDATE_IN_PROGRESS(10),
+      /**
+       * <pre>
+       * The status of a df service that failed to update.
+       * </pre>
+       *
+       * <code>UPDATE_FAILED = 11;</code>
+       */
+      UPDATE_FAILED(11),
+      /**
+       * <pre>
+       * The status of a df service was updated successfully.
+       * </pre>
+       *
+       * <code>UPDATE_COMPLETED = 12;</code>
+       */
+      UPDATE_COMPLETED(12),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <pre>
+       * A value indicating the enum is unset.
+       * </pre>
+       *
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * The status of a df service that is being requested to enable.
+       * </pre>
+       *
+       * <code>ENABLE_REQUESTED = 1;</code>
+       */
+      public static final int ENABLE_REQUESTED_VALUE = 1;
+      /**
+       * <pre>
+       * The status of a df service that is being enabled.
+       * </pre>
+       *
+       * <code>ENABLE_IN_PROGRESS = 2;</code>
+       */
+      public static final int ENABLE_IN_PROGRESS_VALUE = 2;
+      /**
+       * <pre>
+       * The status of a df service that is available for use.
+       * </pre>
+       *
+       * <code>ENABLE_COMPLETED = 3;</code>
+       */
+      public static final int ENABLE_COMPLETED_VALUE = 3;
+      /**
+       * <pre>
+       * The status of a df service that failed to enable.
+       * </pre>
+       *
+       * <code>ENABLE_FAILED = 4;</code>
+       */
+      public static final int ENABLE_FAILED_VALUE = 4;
+      /**
+       * <pre>
+       * The status of a df service that is being requested to enable.
+       * </pre>
+       *
+       * <code>DISABLE_REQUESTED = 5;</code>
+       */
+      public static final int DISABLE_REQUESTED_VALUE = 5;
+      /**
+       * <pre>
+       * The status of a df service that is being disabled.
+       * </pre>
+       *
+       * <code>DISABLE_IN_PROGRESS = 6;</code>
+       */
+      public static final int DISABLE_IN_PROGRESS_VALUE = 6;
+      /**
+       * <pre>
+       * The status of a df service that is successfully disabled.
+       * </pre>
+       *
+       * <code>DISABLE_COMPLETED = 7;</code>
+       */
+      public static final int DISABLE_COMPLETED_VALUE = 7;
+      /**
+       * <pre>
+       * The status of a df service that failed to disable.
+       * </pre>
+       *
+       * <code>DISABLE_FAILED = 8;</code>
+       */
+      public static final int DISABLE_FAILED_VALUE = 8;
+      /**
+       * <pre>
+       * The status of a df service that is being requested to update.
+       * </pre>
+       *
+       * <code>UPDATE_REQUESTED = 9;</code>
+       */
+      public static final int UPDATE_REQUESTED_VALUE = 9;
+      /**
+       * <pre>
+       * The status of a df service that is being updated.
+       * </pre>
+       *
+       * <code>UPDATE_IN_PROGRESS = 10;</code>
+       */
+      public static final int UPDATE_IN_PROGRESS_VALUE = 10;
+      /**
+       * <pre>
+       * The status of a df service that failed to update.
+       * </pre>
+       *
+       * <code>UPDATE_FAILED = 11;</code>
+       */
+      public static final int UPDATE_FAILED_VALUE = 11;
+      /**
+       * <pre>
+       * The status of a df service was updated successfully.
+       * </pre>
+       *
+       * <code>UPDATE_COMPLETED = 12;</code>
+       */
+      public static final int UPDATE_COMPLETED_VALUE = 12;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return ENABLE_REQUESTED;
+          case 2: return ENABLE_IN_PROGRESS;
+          case 3: return ENABLE_COMPLETED;
+          case 4: return ENABLE_FAILED;
+          case 5: return DISABLE_REQUESTED;
+          case 6: return DISABLE_IN_PROGRESS;
+          case 7: return DISABLE_COMPLETED;
+          case 8: return DISABLE_FAILED;
+          case 9: return UPDATE_REQUESTED;
+          case 10: return UPDATE_IN_PROGRESS;
+          case 11: return UPDATE_FAILED;
+          case 12: return UPDATE_COMPLETED;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:usage.CDPDFServiceStatus.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus) obj;
+
+      boolean result = true;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The status of a CDP DataFlow service.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFServiceStatus}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFServiceStatus)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatus_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatus_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatus_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFServiceStatus)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFServiceStatus)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFServiceStatus>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFServiceStatus>() {
+      @java.lang.Override
+      public CDPDFServiceStatus parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFServiceStatus(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFServiceStatus> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFServiceStatus> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFOperationDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFOperationDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The id of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     */
+    java.lang.String getId();
+    /**
+     * <pre>
+     * The id of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getIdBytes();
+
+    /**
+     * <pre>
+     * The crn of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string crn = 2;</code>
+     */
+    java.lang.String getCrn();
+    /**
+     * <pre>
+     * The crn of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string crn = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getCrnBytes();
+
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The workflow id associated with the operation
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     */
+    java.lang.String getWorkflowId();
+    /**
+     * <pre>
+     * The workflow id associated with the operation
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getWorkflowIdBytes();
+
+    /**
+     * <pre>
+     * The run id of workflow execution.
+     * </pre>
+     *
+     * <code>string runId = 5;</code>
+     */
+    java.lang.String getRunId();
+    /**
+     * <pre>
+     * The run id of workflow execution.
+     * </pre>
+     *
+     * <code>string runId = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getRunIdBytes();
+  }
+  /**
+   * <pre>
+   * Common items among all async workflow executions of DF.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFOperationDetails}
+   */
+  public  static final class CDPDFOperationDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFOperationDetails)
+      CDPDFOperationDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFOperationDetails.newBuilder() to construct.
+    private CDPDFOperationDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFOperationDetails() {
+      id_ = "";
+      crn_ = "";
+      accountId_ = "";
+      workflowId_ = "";
+      runId_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFOperationDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              id_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              crn_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              workflowId_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              runId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFOperationDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFOperationDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder.class);
+    }
+
+    public static final int ID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object id_;
+    /**
+     * <pre>
+     * The id of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     */
+    public java.lang.String getId() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        id_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The id of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string id = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getIdBytes() {
+      java.lang.Object ref = id_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        id_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CRN_FIELD_NUMBER = 2;
+    private volatile java.lang.Object crn_;
+    /**
+     * <pre>
+     * The crn of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string crn = 2;</code>
+     */
+    public java.lang.String getCrn() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        crn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the resource that is the subject of the operation.
+     * </pre>
+     *
+     * <code>string crn = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCrnBytes() {
+      java.lang.Object ref = crn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        crn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 3;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID.
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int WORKFLOWID_FIELD_NUMBER = 4;
+    private volatile java.lang.Object workflowId_;
+    /**
+     * <pre>
+     * The workflow id associated with the operation
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     */
+    public java.lang.String getWorkflowId() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        workflowId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The workflow id associated with the operation
+     * </pre>
+     *
+     * <code>string workflowId = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getWorkflowIdBytes() {
+      java.lang.Object ref = workflowId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        workflowId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RUNID_FIELD_NUMBER = 5;
+    private volatile java.lang.Object runId_;
+    /**
+     * <pre>
+     * The run id of workflow execution.
+     * </pre>
+     *
+     * <code>string runId = 5;</code>
+     */
+    public java.lang.String getRunId() {
+      java.lang.Object ref = runId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The run id of workflow execution.
+     * </pre>
+     *
+     * <code>string runId = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getRunIdBytes() {
+      java.lang.Object ref = runId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, crn_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
+      }
+      if (!getWorkflowIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, workflowId_);
+      }
+      if (!getRunIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, runId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
+      }
+      if (!getCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, crn_);
+      }
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
+      }
+      if (!getWorkflowIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, workflowId_);
+      }
+      if (!getRunIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, runId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails) obj;
+
+      boolean result = true;
+      result = result && getId()
+          .equals(other.getId());
+      result = result && getCrn()
+          .equals(other.getCrn());
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getWorkflowId()
+          .equals(other.getWorkflowId());
+      result = result && getRunId()
+          .equals(other.getRunId());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ID_FIELD_NUMBER;
+      hash = (53 * hash) + getId().hashCode();
+      hash = (37 * hash) + CRN_FIELD_NUMBER;
+      hash = (53 * hash) + getCrn().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + WORKFLOWID_FIELD_NUMBER;
+      hash = (53 * hash) + getWorkflowId().hashCode();
+      hash = (37 * hash) + RUNID_FIELD_NUMBER;
+      hash = (53 * hash) + getRunId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Common items among all async workflow executions of DF.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFOperationDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFOperationDetails)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFOperationDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFOperationDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        id_ = "";
+
+        crn_ = "";
+
+        accountId_ = "";
+
+        workflowId_ = "";
+
+        runId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFOperationDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails(this);
+        result.id_ = id_;
+        result.crn_ = crn_;
+        result.accountId_ = accountId_;
+        result.workflowId_ = workflowId_;
+        result.runId_ = runId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance()) return this;
+        if (!other.getId().isEmpty()) {
+          id_ = other.id_;
+          onChanged();
+        }
+        if (!other.getCrn().isEmpty()) {
+          crn_ = other.crn_;
+          onChanged();
+        }
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getWorkflowId().isEmpty()) {
+          workflowId_ = other.workflowId_;
+          onChanged();
+        }
+        if (!other.getRunId().isEmpty()) {
+          runId_ = other.runId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object id_ = "";
+      /**
+       * <pre>
+       * The id of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       */
+      public java.lang.String getId() {
+        java.lang.Object ref = id_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          id_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getIdBytes() {
+        java.lang.Object ref = id_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          id_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The id of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       */
+      public Builder setId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        id_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       */
+      public Builder clearId() {
+        
+        id_ = getDefaultInstance().getId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The id of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string id = 1;</code>
+       */
+      public Builder setIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        id_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object crn_ = "";
+      /**
+       * <pre>
+       * The crn of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string crn = 2;</code>
+       */
+      public java.lang.String getCrn() {
+        java.lang.Object ref = crn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          crn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string crn = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCrnBytes() {
+        java.lang.Object ref = crn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          crn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string crn = 2;</code>
+       */
+      public Builder setCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string crn = 2;</code>
+       */
+      public Builder clearCrn() {
+        
+        crn_ = getDefaultInstance().getCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the resource that is the subject of the operation.
+       * </pre>
+       *
+       * <code>string crn = 2;</code>
+       */
+      public Builder setCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        crn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID.
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object workflowId_ = "";
+      /**
+       * <pre>
+       * The workflow id associated with the operation
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       */
+      public java.lang.String getWorkflowId() {
+        java.lang.Object ref = workflowId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          workflowId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The workflow id associated with the operation
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getWorkflowIdBytes() {
+        java.lang.Object ref = workflowId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          workflowId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The workflow id associated with the operation
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       */
+      public Builder setWorkflowId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        workflowId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The workflow id associated with the operation
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       */
+      public Builder clearWorkflowId() {
+        
+        workflowId_ = getDefaultInstance().getWorkflowId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The workflow id associated with the operation
+       * </pre>
+       *
+       * <code>string workflowId = 4;</code>
+       */
+      public Builder setWorkflowIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        workflowId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object runId_ = "";
+      /**
+       * <pre>
+       * The run id of workflow execution.
+       * </pre>
+       *
+       * <code>string runId = 5;</code>
+       */
+      public java.lang.String getRunId() {
+        java.lang.Object ref = runId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The run id of workflow execution.
+       * </pre>
+       *
+       * <code>string runId = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getRunIdBytes() {
+        java.lang.Object ref = runId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The run id of workflow execution.
+       * </pre>
+       *
+       * <code>string runId = 5;</code>
+       */
+      public Builder setRunId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The run id of workflow execution.
+       * </pre>
+       *
+       * <code>string runId = 5;</code>
+       */
+      public Builder clearRunId() {
+        
+        runId_ = getDefaultInstance().getRunId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The run id of workflow execution.
+       * </pre>
+       *
+       * <code>string runId = 5;</code>
+       */
+      public Builder setRunIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFOperationDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFOperationDetails)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFOperationDetails>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFOperationDetails>() {
+      @java.lang.Override
+      public CDPDFOperationDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFOperationDetails(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFOperationDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFOperationDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFServiceRequestedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFServiceRequested)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    boolean hasOperationDetails();
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getOperationDetails();
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder getOperationDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * The crn of the CDP environment being enabled for DF.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * The crn of the CDP environment being enabled for DF.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * The environment type / cloud provider.
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+     */
+    int getEnvironmentTypeValue();
+    /**
+     * <pre>
+     * The environment type / cloud provider.
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value getEnvironmentType();
+
+    /**
+     * <pre>
+     * The instance type of nodes used in the DF service
+     * </pre>
+     *
+     * <code>string instanceType = 4;</code>
+     */
+    java.lang.String getInstanceType();
+    /**
+     * <pre>
+     * The instance type of nodes used in the DF service
+     * </pre>
+     *
+     * <code>string instanceType = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getInstanceTypeBytes();
+
+    /**
+     * <pre>
+     * Minimum number of nodes.
+     * </pre>
+     *
+     * <code>int32 minNodes = 5;</code>
+     */
+    int getMinNodes();
+
+    /**
+     * <pre>
+     * Maximum number of nodes to scale to.
+     * </pre>
+     *
+     * <code>int32 maxNodes = 6;</code>
+     */
+    int getMaxNodes();
+
+    /**
+     * <pre>
+     * Version of k8s requested to be provisioned.
+     * </pre>
+     *
+     * <code>string k8sServerVersion = 7;</code>
+     */
+    java.lang.String getK8SServerVersion();
+    /**
+     * <pre>
+     * Version of k8s requested to be provisioned.
+     * </pre>
+     *
+     * <code>string k8sServerVersion = 7;</code>
+     */
+    com.google.protobuf.ByteString
+        getK8SServerVersionBytes();
+
+    /**
+     * <pre>
+     * Requested version of DataFlow service.
+     * </pre>
+     *
+     * <code>string version = 8;</code>
+     */
+    java.lang.String getVersion();
+    /**
+     * <pre>
+     * Requested version of DataFlow service.
+     * </pre>
+     *
+     * <code>string version = 8;</code>
+     */
+    com.google.protobuf.ByteString
+        getVersionBytes();
+
+    /**
+     * <pre>
+     * Is the load balancer publicly available on the internet?
+     * </pre>
+     *
+     * <code>bool publicEndpoint = 9;</code>
+     */
+    boolean getPublicEndpoint();
+
+    /**
+     * <pre>
+     * Is access restricted by ip ranges (CIDR)?
+     * </pre>
+     *
+     * <code>bool accessRestricted = 10;</code>
+     */
+    boolean getAccessRestricted();
+
+    /**
+     * <pre>
+     * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+     */
+    int getStatusValue();
+    /**
+     * <pre>
+     * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getStatus();
+  }
+  /**
+   * <pre>
+   * Generated when DataFlow Service enable, update, or disable has been requested
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPDFServiceRequested}
+   */
+  public  static final class CDPDFServiceRequested extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFServiceRequested)
+      CDPDFServiceRequestedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFServiceRequested.newBuilder() to construct.
+    private CDPDFServiceRequested(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFServiceRequested() {
+      environmentCrn_ = "";
+      environmentType_ = 0;
+      instanceType_ = "";
+      minNodes_ = 0;
+      maxNodes_ = 0;
+      k8SServerVersion_ = "";
+      version_ = "";
+      publicEndpoint_ = false;
+      accessRestricted_ = false;
+      status_ = 0;
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFServiceRequested(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder subBuilder = null;
+              if (operationDetails_ != null) {
+                subBuilder = operationDetails_.toBuilder();
+              }
+              operationDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationDetails_);
+                operationDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              environmentCrn_ = s;
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+
+              environmentType_ = rawValue;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              instanceType_ = s;
+              break;
+            }
+            case 40: {
+
+              minNodes_ = input.readInt32();
+              break;
+            }
+            case 48: {
+
+              maxNodes_ = input.readInt32();
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              k8SServerVersion_ = s;
+              break;
+            }
+            case 66: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              version_ = s;
+              break;
+            }
+            case 72: {
+
+              publicEndpoint_ = input.readBool();
+              break;
+            }
+            case 80: {
+
+              accessRestricted_ = input.readBool();
+              break;
+            }
+            case 88: {
+              int rawValue = input.readEnum();
+
+              status_ = rawValue;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceRequested_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceRequested_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder.class);
+    }
+
+    public static final int OPERATIONDETAILS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails operationDetails_;
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    public boolean hasOperationDetails() {
+      return operationDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getOperationDetails() {
+      return operationDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance() : operationDetails_;
+    }
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
+      return getOperationDetails();
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 2;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * The crn of the CDP environment being enabled for DF.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     */
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the CDP environment being enabled for DF.
+     * </pre>
+     *
+     * <code>string environmentCrn = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTTYPE_FIELD_NUMBER = 3;
+    private int environmentType_;
+    /**
+     * <pre>
+     * The environment type / cloud provider.
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+     */
+    public int getEnvironmentTypeValue() {
+      return environmentType_;
+    }
+    /**
+     * <pre>
+     * The environment type / cloud provider.
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value getEnvironmentType() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(environmentType_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int INSTANCETYPE_FIELD_NUMBER = 4;
+    private volatile java.lang.Object instanceType_;
+    /**
+     * <pre>
+     * The instance type of nodes used in the DF service
+     * </pre>
+     *
+     * <code>string instanceType = 4;</code>
+     */
+    public java.lang.String getInstanceType() {
+      java.lang.Object ref = instanceType_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        instanceType_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The instance type of nodes used in the DF service
+     * </pre>
+     *
+     * <code>string instanceType = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInstanceTypeBytes() {
+      java.lang.Object ref = instanceType_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        instanceType_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int MINNODES_FIELD_NUMBER = 5;
+    private int minNodes_;
+    /**
+     * <pre>
+     * Minimum number of nodes.
+     * </pre>
+     *
+     * <code>int32 minNodes = 5;</code>
+     */
+    public int getMinNodes() {
+      return minNodes_;
+    }
+
+    public static final int MAXNODES_FIELD_NUMBER = 6;
+    private int maxNodes_;
+    /**
+     * <pre>
+     * Maximum number of nodes to scale to.
+     * </pre>
+     *
+     * <code>int32 maxNodes = 6;</code>
+     */
+    public int getMaxNodes() {
+      return maxNodes_;
+    }
+
+    public static final int K8SSERVERVERSION_FIELD_NUMBER = 7;
+    private volatile java.lang.Object k8SServerVersion_;
+    /**
+     * <pre>
+     * Version of k8s requested to be provisioned.
+     * </pre>
+     *
+     * <code>string k8sServerVersion = 7;</code>
+     */
+    public java.lang.String getK8SServerVersion() {
+      java.lang.Object ref = k8SServerVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        k8SServerVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Version of k8s requested to be provisioned.
+     * </pre>
+     *
+     * <code>string k8sServerVersion = 7;</code>
+     */
+    public com.google.protobuf.ByteString
+        getK8SServerVersionBytes() {
+      java.lang.Object ref = k8SServerVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        k8SServerVersion_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int VERSION_FIELD_NUMBER = 8;
+    private volatile java.lang.Object version_;
+    /**
+     * <pre>
+     * Requested version of DataFlow service.
+     * </pre>
+     *
+     * <code>string version = 8;</code>
+     */
+    public java.lang.String getVersion() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        version_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Requested version of DataFlow service.
+     * </pre>
+     *
+     * <code>string version = 8;</code>
+     */
+    public com.google.protobuf.ByteString
+        getVersionBytes() {
+      java.lang.Object ref = version_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        version_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int PUBLICENDPOINT_FIELD_NUMBER = 9;
+    private boolean publicEndpoint_;
+    /**
+     * <pre>
+     * Is the load balancer publicly available on the internet?
+     * </pre>
+     *
+     * <code>bool publicEndpoint = 9;</code>
+     */
+    public boolean getPublicEndpoint() {
+      return publicEndpoint_;
+    }
+
+    public static final int ACCESSRESTRICTED_FIELD_NUMBER = 10;
+    private boolean accessRestricted_;
+    /**
+     * <pre>
+     * Is access restricted by ip ranges (CIDR)?
+     * </pre>
+     *
+     * <code>bool accessRestricted = 10;</code>
+     */
+    public boolean getAccessRestricted() {
+      return accessRestricted_;
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 11;
+    private int status_;
+    /**
+     * <pre>
+     * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+     */
+    public int getStatusValue() {
+      return status_;
+    }
+    /**
+     * <pre>
+     * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getStatus() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.valueOf(status_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNRECOGNIZED : result;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (operationDetails_ != null) {
+        output.writeMessage(1, getOperationDetails());
+      }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentCrn_);
+      }
+      if (environmentType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET.getNumber()) {
+        output.writeEnum(3, environmentType_);
+      }
+      if (!getInstanceTypeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, instanceType_);
+      }
+      if (minNodes_ != 0) {
+        output.writeInt32(5, minNodes_);
+      }
+      if (maxNodes_ != 0) {
+        output.writeInt32(6, maxNodes_);
+      }
+      if (!getK8SServerVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, k8SServerVersion_);
+      }
+      if (!getVersionBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 8, version_);
+      }
+      if (publicEndpoint_ != false) {
+        output.writeBool(9, publicEndpoint_);
+      }
+      if (accessRestricted_ != false) {
+        output.writeBool(10, accessRestricted_);
+      }
+      if (status_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNSET.getNumber()) {
+        output.writeEnum(11, status_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (operationDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getOperationDetails());
+      }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentCrn_);
+      }
+      if (environmentType_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, environmentType_);
+      }
+      if (!getInstanceTypeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, instanceType_);
+      }
+      if (minNodes_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(5, minNodes_);
+      }
+      if (maxNodes_ != 0) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeInt32Size(6, maxNodes_);
+      }
+      if (!getK8SServerVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, k8SServerVersion_);
+      }
+      if (!getVersionBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, version_);
+      }
+      if (publicEndpoint_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(9, publicEndpoint_);
+      }
+      if (accessRestricted_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(10, accessRestricted_);
+      }
+      if (status_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(11, status_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) obj;
+
+      boolean result = true;
+      result = result && (hasOperationDetails() == other.hasOperationDetails());
+      if (hasOperationDetails()) {
+        result = result && getOperationDetails()
+            .equals(other.getOperationDetails());
+      }
+      result = result && getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn());
+      result = result && environmentType_ == other.environmentType_;
+      result = result && getInstanceType()
+          .equals(other.getInstanceType());
+      result = result && (getMinNodes()
+          == other.getMinNodes());
+      result = result && (getMaxNodes()
+          == other.getMaxNodes());
+      result = result && getK8SServerVersion()
+          .equals(other.getK8SServerVersion());
+      result = result && getVersion()
+          .equals(other.getVersion());
+      result = result && (getPublicEndpoint()
+          == other.getPublicEndpoint());
+      result = result && (getAccessRestricted()
+          == other.getAccessRestricted());
+      result = result && status_ == other.status_;
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasOperationDetails()) {
+        hash = (37 * hash) + OPERATIONDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationDetails().hashCode();
+      }
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (37 * hash) + ENVIRONMENTTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + environmentType_;
+      hash = (37 * hash) + INSTANCETYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getInstanceType().hashCode();
+      hash = (37 * hash) + MINNODES_FIELD_NUMBER;
+      hash = (53 * hash) + getMinNodes();
+      hash = (37 * hash) + MAXNODES_FIELD_NUMBER;
+      hash = (53 * hash) + getMaxNodes();
+      hash = (37 * hash) + K8SSERVERVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getK8SServerVersion().hashCode();
+      hash = (37 * hash) + VERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getVersion().hashCode();
+      hash = (37 * hash) + PUBLICENDPOINT_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPublicEndpoint());
+      hash = (37 * hash) + ACCESSRESTRICTED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getAccessRestricted());
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + status_;
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated when DataFlow Service enable, update, or disable has been requested
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPDFServiceRequested}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFServiceRequested)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequestedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceRequested_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceRequested_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (operationDetailsBuilder_ == null) {
+          operationDetails_ = null;
+        } else {
+          operationDetails_ = null;
+          operationDetailsBuilder_ = null;
+        }
+        environmentCrn_ = "";
+
+        environmentType_ = 0;
+
+        instanceType_ = "";
+
+        minNodes_ = 0;
+
+        maxNodes_ = 0;
+
+        k8SServerVersion_ = "";
+
+        version_ = "";
+
+        publicEndpoint_ = false;
+
+        accessRestricted_ = false;
+
+        status_ = 0;
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceRequested_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested(this);
+        if (operationDetailsBuilder_ == null) {
+          result.operationDetails_ = operationDetails_;
+        } else {
+          result.operationDetails_ = operationDetailsBuilder_.build();
+        }
+        result.environmentCrn_ = environmentCrn_;
+        result.environmentType_ = environmentType_;
+        result.instanceType_ = instanceType_;
+        result.minNodes_ = minNodes_;
+        result.maxNodes_ = maxNodes_;
+        result.k8SServerVersion_ = k8SServerVersion_;
+        result.version_ = version_;
+        result.publicEndpoint_ = publicEndpoint_;
+        result.accessRestricted_ = accessRestricted_;
+        result.status_ = status_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested.getDefaultInstance()) return this;
+        if (other.hasOperationDetails()) {
+          mergeOperationDetails(other.getOperationDetails());
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        if (other.environmentType_ != 0) {
+          setEnvironmentTypeValue(other.getEnvironmentTypeValue());
+        }
+        if (!other.getInstanceType().isEmpty()) {
+          instanceType_ = other.instanceType_;
+          onChanged();
+        }
+        if (other.getMinNodes() != 0) {
+          setMinNodes(other.getMinNodes());
+        }
+        if (other.getMaxNodes() != 0) {
+          setMaxNodes(other.getMaxNodes());
+        }
+        if (!other.getK8SServerVersion().isEmpty()) {
+          k8SServerVersion_ = other.k8SServerVersion_;
+          onChanged();
+        }
+        if (!other.getVersion().isEmpty()) {
+          version_ = other.version_;
+          onChanged();
+        }
+        if (other.getPublicEndpoint() != false) {
+          setPublicEndpoint(other.getPublicEndpoint());
+        }
+        if (other.getAccessRestricted() != false) {
+          setAccessRestricted(other.getAccessRestricted());
+        }
+        if (other.status_ != 0) {
+          setStatusValue(other.getStatusValue());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails operationDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder> operationDetailsBuilder_;
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public boolean hasOperationDetails() {
+        return operationDetailsBuilder_ != null || operationDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getOperationDetails() {
+        if (operationDetailsBuilder_ == null) {
+          return operationDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance() : operationDetails_;
+        } else {
+          return operationDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder setOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails value) {
+        if (operationDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationDetails_ = value;
+          onChanged();
+        } else {
+          operationDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder setOperationDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder builderForValue) {
+        if (operationDetailsBuilder_ == null) {
+          operationDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder mergeOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails value) {
+        if (operationDetailsBuilder_ == null) {
+          if (operationDetails_ != null) {
+            operationDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.newBuilder(operationDetails_).mergeFrom(value).buildPartial();
+          } else {
+            operationDetails_ = value;
+          }
+          onChanged();
+        } else {
+          operationDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder clearOperationDetails() {
+        if (operationDetailsBuilder_ == null) {
+          operationDetails_ = null;
+          onChanged();
+        } else {
+          operationDetails_ = null;
+          operationDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder getOperationDetailsBuilder() {
+        
+        onChanged();
+        return getOperationDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
+        if (operationDetailsBuilder_ != null) {
+          return operationDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return operationDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance() : operationDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder> 
+          getOperationDetailsFieldBuilder() {
+        if (operationDetailsBuilder_ == null) {
+          operationDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder>(
+                  getOperationDetails(),
+                  getParentForChildren(),
+                  isClean());
+          operationDetails_ = null;
+        }
+        return operationDetailsBuilder_;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * The crn of the CDP environment being enabled for DF.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the CDP environment being enabled for DF.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the CDP environment being enabled for DF.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the CDP environment being enabled for DF.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the CDP environment being enabled for DF.
+       * </pre>
+       *
+       * <code>string environmentCrn = 2;</code>
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int environmentType_ = 0;
+      /**
+       * <pre>
+       * The environment type / cloud provider.
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+       */
+      public int getEnvironmentTypeValue() {
+        return environmentType_;
+      }
+      /**
+       * <pre>
+       * The environment type / cloud provider.
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+       */
+      public Builder setEnvironmentTypeValue(int value) {
+        environmentType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The environment type / cloud provider.
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value getEnvironmentType() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(environmentType_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The environment type / cloud provider.
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+       */
+      public Builder setEnvironmentType(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentsEnvironmentType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        environmentType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The environment type / cloud provider.
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentsEnvironmentType.Value environmentType = 3;</code>
+       */
+      public Builder clearEnvironmentType() {
+        
+        environmentType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object instanceType_ = "";
+      /**
+       * <pre>
+       * The instance type of nodes used in the DF service
+       * </pre>
+       *
+       * <code>string instanceType = 4;</code>
+       */
+      public java.lang.String getInstanceType() {
+        java.lang.Object ref = instanceType_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          instanceType_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The instance type of nodes used in the DF service
+       * </pre>
+       *
+       * <code>string instanceType = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInstanceTypeBytes() {
+        java.lang.Object ref = instanceType_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          instanceType_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The instance type of nodes used in the DF service
+       * </pre>
+       *
+       * <code>string instanceType = 4;</code>
+       */
+      public Builder setInstanceType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        instanceType_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The instance type of nodes used in the DF service
+       * </pre>
+       *
+       * <code>string instanceType = 4;</code>
+       */
+      public Builder clearInstanceType() {
+        
+        instanceType_ = getDefaultInstance().getInstanceType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The instance type of nodes used in the DF service
+       * </pre>
+       *
+       * <code>string instanceType = 4;</code>
+       */
+      public Builder setInstanceTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        instanceType_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int minNodes_ ;
+      /**
+       * <pre>
+       * Minimum number of nodes.
+       * </pre>
+       *
+       * <code>int32 minNodes = 5;</code>
+       */
+      public int getMinNodes() {
+        return minNodes_;
+      }
+      /**
+       * <pre>
+       * Minimum number of nodes.
+       * </pre>
+       *
+       * <code>int32 minNodes = 5;</code>
+       */
+      public Builder setMinNodes(int value) {
+        
+        minNodes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Minimum number of nodes.
+       * </pre>
+       *
+       * <code>int32 minNodes = 5;</code>
+       */
+      public Builder clearMinNodes() {
+        
+        minNodes_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int maxNodes_ ;
+      /**
+       * <pre>
+       * Maximum number of nodes to scale to.
+       * </pre>
+       *
+       * <code>int32 maxNodes = 6;</code>
+       */
+      public int getMaxNodes() {
+        return maxNodes_;
+      }
+      /**
+       * <pre>
+       * Maximum number of nodes to scale to.
+       * </pre>
+       *
+       * <code>int32 maxNodes = 6;</code>
+       */
+      public Builder setMaxNodes(int value) {
+        
+        maxNodes_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Maximum number of nodes to scale to.
+       * </pre>
+       *
+       * <code>int32 maxNodes = 6;</code>
+       */
+      public Builder clearMaxNodes() {
+        
+        maxNodes_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object k8SServerVersion_ = "";
+      /**
+       * <pre>
+       * Version of k8s requested to be provisioned.
+       * </pre>
+       *
+       * <code>string k8sServerVersion = 7;</code>
+       */
+      public java.lang.String getK8SServerVersion() {
+        java.lang.Object ref = k8SServerVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          k8SServerVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of k8s requested to be provisioned.
+       * </pre>
+       *
+       * <code>string k8sServerVersion = 7;</code>
+       */
+      public com.google.protobuf.ByteString
+          getK8SServerVersionBytes() {
+        java.lang.Object ref = k8SServerVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          k8SServerVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Version of k8s requested to be provisioned.
+       * </pre>
+       *
+       * <code>string k8sServerVersion = 7;</code>
+       */
+      public Builder setK8SServerVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        k8SServerVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of k8s requested to be provisioned.
+       * </pre>
+       *
+       * <code>string k8sServerVersion = 7;</code>
+       */
+      public Builder clearK8SServerVersion() {
+        
+        k8SServerVersion_ = getDefaultInstance().getK8SServerVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Version of k8s requested to be provisioned.
+       * </pre>
+       *
+       * <code>string k8sServerVersion = 7;</code>
+       */
+      public Builder setK8SServerVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        k8SServerVersion_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object version_ = "";
+      /**
+       * <pre>
+       * Requested version of DataFlow service.
+       * </pre>
+       *
+       * <code>string version = 8;</code>
+       */
+      public java.lang.String getVersion() {
+        java.lang.Object ref = version_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          version_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Requested version of DataFlow service.
+       * </pre>
+       *
+       * <code>string version = 8;</code>
+       */
+      public com.google.protobuf.ByteString
+          getVersionBytes() {
+        java.lang.Object ref = version_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          version_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Requested version of DataFlow service.
+       * </pre>
+       *
+       * <code>string version = 8;</code>
+       */
+      public Builder setVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        version_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested version of DataFlow service.
+       * </pre>
+       *
+       * <code>string version = 8;</code>
+       */
+      public Builder clearVersion() {
+        
+        version_ = getDefaultInstance().getVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Requested version of DataFlow service.
+       * </pre>
+       *
+       * <code>string version = 8;</code>
+       */
+      public Builder setVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        version_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean publicEndpoint_ ;
+      /**
+       * <pre>
+       * Is the load balancer publicly available on the internet?
+       * </pre>
+       *
+       * <code>bool publicEndpoint = 9;</code>
+       */
+      public boolean getPublicEndpoint() {
+        return publicEndpoint_;
+      }
+      /**
+       * <pre>
+       * Is the load balancer publicly available on the internet?
+       * </pre>
+       *
+       * <code>bool publicEndpoint = 9;</code>
+       */
+      public Builder setPublicEndpoint(boolean value) {
+        
+        publicEndpoint_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Is the load balancer publicly available on the internet?
+       * </pre>
+       *
+       * <code>bool publicEndpoint = 9;</code>
+       */
+      public Builder clearPublicEndpoint() {
+        
+        publicEndpoint_ = false;
+        onChanged();
+        return this;
+      }
+
+      private boolean accessRestricted_ ;
+      /**
+       * <pre>
+       * Is access restricted by ip ranges (CIDR)?
+       * </pre>
+       *
+       * <code>bool accessRestricted = 10;</code>
+       */
+      public boolean getAccessRestricted() {
+        return accessRestricted_;
+      }
+      /**
+       * <pre>
+       * Is access restricted by ip ranges (CIDR)?
+       * </pre>
+       *
+       * <code>bool accessRestricted = 10;</code>
+       */
+      public Builder setAccessRestricted(boolean value) {
+        
+        accessRestricted_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Is access restricted by ip ranges (CIDR)?
+       * </pre>
+       *
+       * <code>bool accessRestricted = 10;</code>
+       */
+      public Builder clearAccessRestricted() {
+        
+        accessRestricted_ = false;
+        onChanged();
+        return this;
+      }
+
+      private int status_ = 0;
+      /**
+       * <pre>
+       * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+       */
+      public int getStatusValue() {
+        return status_;
+      }
+      /**
+       * <pre>
+       * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+       */
+      public Builder setStatusValue(int value) {
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getStatus() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.valueOf(status_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+       */
+      public Builder setStatus(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        status_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value status = 11;</code>
+       */
+      public Builder clearStatus() {
+        
+        status_ = 0;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFServiceRequested)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFServiceRequested)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFServiceRequested>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFServiceRequested>() {
+      @java.lang.Override
+      public CDPDFServiceRequested parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFServiceRequested(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFServiceRequested> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFServiceRequested> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceRequested getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPDFServiceStatusChangedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPDFServiceStatusChanged)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    boolean hasOperationDetails();
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getOperationDetails();
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder getOperationDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * The status of the df service before the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+     */
+    int getOldStatusValue();
+    /**
+     * <pre>
+     * The status of the df service before the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getOldStatus();
+
+    /**
+     * <pre>
+     * The status of the df service after the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+     */
+    int getNewStatusValue();
+    /**
+     * <pre>
+     * The status of the df service after the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getNewStatus();
+
+    /**
+     * <pre>
+     * A failure message for the df service. This will only be set if newStatus is
+     * *_FAILED.
+     * </pre>
+     *
+     * <code>string failureReason = 4;</code>
+     */
+    java.lang.String getFailureReason();
+    /**
+     * <pre>
+     * A failure message for the df service. This will only be set if newStatus is
+     * *_FAILED.
+     * </pre>
+     *
+     * <code>string failureReason = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getFailureReasonBytes();
+  }
+  /**
+   * Protobuf type {@code usage.CDPDFServiceStatusChanged}
+   */
+  public  static final class CDPDFServiceStatusChanged extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPDFServiceStatusChanged)
+      CDPDFServiceStatusChangedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPDFServiceStatusChanged.newBuilder() to construct.
+    private CDPDFServiceStatusChanged(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPDFServiceStatusChanged() {
+      oldStatus_ = 0;
+      newStatus_ = 0;
+      failureReason_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPDFServiceStatusChanged(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder subBuilder = null;
+              if (operationDetails_ != null) {
+                subBuilder = operationDetails_.toBuilder();
+              }
+              operationDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationDetails_);
+                operationDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 16: {
+              int rawValue = input.readEnum();
+
+              oldStatus_ = rawValue;
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+
+              newStatus_ = rawValue;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              failureReason_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatusChanged_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatusChanged_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder.class);
+    }
+
+    public static final int OPERATIONDETAILS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails operationDetails_;
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    public boolean hasOperationDetails() {
+      return operationDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getOperationDetails() {
+      return operationDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance() : operationDetails_;
+    }
+    /**
+     * <pre>
+     * Operation metadata
+     * </pre>
+     *
+     * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
+      return getOperationDetails();
+    }
+
+    public static final int OLDSTATUS_FIELD_NUMBER = 2;
+    private int oldStatus_;
+    /**
+     * <pre>
+     * The status of the df service before the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+     */
+    public int getOldStatusValue() {
+      return oldStatus_;
+    }
+    /**
+     * <pre>
+     * The status of the df service before the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getOldStatus() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.valueOf(oldStatus_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int NEWSTATUS_FIELD_NUMBER = 3;
+    private int newStatus_;
+    /**
+     * <pre>
+     * The status of the df service after the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+     */
+    public int getNewStatusValue() {
+      return newStatus_;
+    }
+    /**
+     * <pre>
+     * The status of the df service after the change
+     * </pre>
+     *
+     * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getNewStatus() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.valueOf(newStatus_);
+      return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int FAILUREREASON_FIELD_NUMBER = 4;
+    private volatile java.lang.Object failureReason_;
+    /**
+     * <pre>
+     * A failure message for the df service. This will only be set if newStatus is
+     * *_FAILED.
+     * </pre>
+     *
+     * <code>string failureReason = 4;</code>
+     */
+    public java.lang.String getFailureReason() {
+      java.lang.Object ref = failureReason_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        failureReason_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * A failure message for the df service. This will only be set if newStatus is
+     * *_FAILED.
+     * </pre>
+     *
+     * <code>string failureReason = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getFailureReasonBytes() {
+      java.lang.Object ref = failureReason_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        failureReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (operationDetails_ != null) {
+        output.writeMessage(1, getOperationDetails());
+      }
+      if (oldStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNSET.getNumber()) {
+        output.writeEnum(2, oldStatus_);
+      }
+      if (newStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNSET.getNumber()) {
+        output.writeEnum(3, newStatus_);
+      }
+      if (!getFailureReasonBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, failureReason_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (operationDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getOperationDetails());
+      }
+      if (oldStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(2, oldStatus_);
+      }
+      if (newStatus_ != com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, newStatus_);
+      }
+      if (!getFailureReasonBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, failureReason_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) obj;
+
+      boolean result = true;
+      result = result && (hasOperationDetails() == other.hasOperationDetails());
+      if (hasOperationDetails()) {
+        result = result && getOperationDetails()
+            .equals(other.getOperationDetails());
+      }
+      result = result && oldStatus_ == other.oldStatus_;
+      result = result && newStatus_ == other.newStatus_;
+      result = result && getFailureReason()
+          .equals(other.getFailureReason());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasOperationDetails()) {
+        hash = (37 * hash) + OPERATIONDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationDetails().hashCode();
+      }
+      hash = (37 * hash) + OLDSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + oldStatus_;
+      hash = (37 * hash) + NEWSTATUS_FIELD_NUMBER;
+      hash = (53 * hash) + newStatus_;
+      hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getFailureReason().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code usage.CDPDFServiceStatusChanged}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPDFServiceStatusChanged)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChangedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatusChanged_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatusChanged_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (operationDetailsBuilder_ == null) {
+          operationDetails_ = null;
+        } else {
+          operationDetails_ = null;
+          operationDetailsBuilder_ = null;
+        }
+        oldStatus_ = 0;
+
+        newStatus_ = 0;
+
+        failureReason_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPDFServiceStatusChanged_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged(this);
+        if (operationDetailsBuilder_ == null) {
+          result.operationDetails_ = operationDetails_;
+        } else {
+          result.operationDetails_ = operationDetailsBuilder_.build();
+        }
+        result.oldStatus_ = oldStatus_;
+        result.newStatus_ = newStatus_;
+        result.failureReason_ = failureReason_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged.getDefaultInstance()) return this;
+        if (other.hasOperationDetails()) {
+          mergeOperationDetails(other.getOperationDetails());
+        }
+        if (other.oldStatus_ != 0) {
+          setOldStatusValue(other.getOldStatusValue());
+        }
+        if (other.newStatus_ != 0) {
+          setNewStatusValue(other.getNewStatusValue());
+        }
+        if (!other.getFailureReason().isEmpty()) {
+          failureReason_ = other.failureReason_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails operationDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder> operationDetailsBuilder_;
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public boolean hasOperationDetails() {
+        return operationDetailsBuilder_ != null || operationDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails getOperationDetails() {
+        if (operationDetailsBuilder_ == null) {
+          return operationDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance() : operationDetails_;
+        } else {
+          return operationDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder setOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails value) {
+        if (operationDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationDetails_ = value;
+          onChanged();
+        } else {
+          operationDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder setOperationDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder builderForValue) {
+        if (operationDetailsBuilder_ == null) {
+          operationDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder mergeOperationDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails value) {
+        if (operationDetailsBuilder_ == null) {
+          if (operationDetails_ != null) {
+            operationDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.newBuilder(operationDetails_).mergeFrom(value).buildPartial();
+          } else {
+            operationDetails_ = value;
+          }
+          onChanged();
+        } else {
+          operationDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public Builder clearOperationDetails() {
+        if (operationDetailsBuilder_ == null) {
+          operationDetails_ = null;
+          onChanged();
+        } else {
+          operationDetails_ = null;
+          operationDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder getOperationDetailsBuilder() {
+        
+        onChanged();
+        return getOperationDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder getOperationDetailsOrBuilder() {
+        if (operationDetailsBuilder_ != null) {
+          return operationDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return operationDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.getDefaultInstance() : operationDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Operation metadata
+       * </pre>
+       *
+       * <code>.usage.CDPDFOperationDetails operationDetails = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder> 
+          getOperationDetailsFieldBuilder() {
+        if (operationDetailsBuilder_ == null) {
+          operationDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFOperationDetailsOrBuilder>(
+                  getOperationDetails(),
+                  getParentForChildren(),
+                  isClean());
+          operationDetails_ = null;
+        }
+        return operationDetailsBuilder_;
+      }
+
+      private int oldStatus_ = 0;
+      /**
+       * <pre>
+       * The status of the df service before the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+       */
+      public int getOldStatusValue() {
+        return oldStatus_;
+      }
+      /**
+       * <pre>
+       * The status of the df service before the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+       */
+      public Builder setOldStatusValue(int value) {
+        oldStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the df service before the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getOldStatus() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.valueOf(oldStatus_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The status of the df service before the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+       */
+      public Builder setOldStatus(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        oldStatus_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the df service before the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value oldStatus = 2;</code>
+       */
+      public Builder clearOldStatus() {
+        
+        oldStatus_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int newStatus_ = 0;
+      /**
+       * <pre>
+       * The status of the df service after the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+       */
+      public int getNewStatusValue() {
+        return newStatus_;
+      }
+      /**
+       * <pre>
+       * The status of the df service after the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+       */
+      public Builder setNewStatusValue(int value) {
+        newStatus_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the df service after the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value getNewStatus() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value result = com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.valueOf(newStatus_);
+        return result == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * The status of the df service after the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+       */
+      public Builder setNewStatus(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatus.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        newStatus_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of the df service after the change
+       * </pre>
+       *
+       * <code>.usage.CDPDFServiceStatus.Value newStatus = 3;</code>
+       */
+      public Builder clearNewStatus() {
+        
+        newStatus_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object failureReason_ = "";
+      /**
+       * <pre>
+       * A failure message for the df service. This will only be set if newStatus is
+       * *_FAILED.
+       * </pre>
+       *
+       * <code>string failureReason = 4;</code>
+       */
+      public java.lang.String getFailureReason() {
+        java.lang.Object ref = failureReason_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          failureReason_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A failure message for the df service. This will only be set if newStatus is
+       * *_FAILED.
+       * </pre>
+       *
+       * <code>string failureReason = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getFailureReasonBytes() {
+        java.lang.Object ref = failureReason_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          failureReason_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * A failure message for the df service. This will only be set if newStatus is
+       * *_FAILED.
+       * </pre>
+       *
+       * <code>string failureReason = 4;</code>
+       */
+      public Builder setFailureReason(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        failureReason_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A failure message for the df service. This will only be set if newStatus is
+       * *_FAILED.
+       * </pre>
+       *
+       * <code>string failureReason = 4;</code>
+       */
+      public Builder clearFailureReason() {
+        
+        failureReason_ = getDefaultInstance().getFailureReason();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * A failure message for the df service. This will only be set if newStatus is
+       * *_FAILED.
+       * </pre>
+       *
+       * <code>string failureReason = 4;</code>
+       */
+      public Builder setFailureReasonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        failureReason_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPDFServiceStatusChanged)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPDFServiceStatusChanged)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPDFServiceStatusChanged>
+        PARSER = new com.google.protobuf.AbstractParser<CDPDFServiceStatusChanged>() {
+      @java.lang.Override
+      public CDPDFServiceStatusChanged parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPDFServiceStatusChanged(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPDFServiceStatusChanged> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPDFServiceStatusChanged> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDFServiceStatusChanged getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPUDXBundleInitiatedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPUDXBundleInitiated)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    boolean hasBundleDetails();
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getBundleDetails();
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder getBundleDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * The CRN of the user who initiated the diagnostics collection.
+     * </pre>
+     *
+     * <code>string initiatorCrn = 2;</code>
+     */
+    java.lang.String getInitiatorCrn();
+    /**
+     * <pre>
+     * The CRN of the user who initiated the diagnostics collection.
+     * </pre>
+     *
+     * <code>string initiatorCrn = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getInitiatorCrnBytes();
+
+    /**
+     * <pre>
+     * The support case number for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string caseNumber = 3;</code>
+     */
+    java.lang.String getCaseNumber();
+    /**
+     * <pre>
+     * The support case number for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string caseNumber = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getCaseNumberBytes();
+  }
+  /**
+   * <pre>
+   * Generated when users initiate diagnostics collection
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPUDXBundleInitiated}
+   */
+  public  static final class CDPUDXBundleInitiated extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPUDXBundleInitiated)
+      CDPUDXBundleInitiatedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPUDXBundleInitiated.newBuilder() to construct.
+    private CDPUDXBundleInitiated(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPUDXBundleInitiated() {
+      initiatorCrn_ = "";
+      caseNumber_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPUDXBundleInitiated(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder subBuilder = null;
+              if (bundleDetails_ != null) {
+                subBuilder = bundleDetails_.toBuilder();
+              }
+              bundleDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(bundleDetails_);
+                bundleDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              initiatorCrn_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              caseNumber_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleInitiated_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleInitiated_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder.class);
+    }
+
+    public static final int BUNDLEDETAILS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails bundleDetails_;
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    public boolean hasBundleDetails() {
+      return bundleDetails_ != null;
+    }
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getBundleDetails() {
+      return bundleDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance() : bundleDetails_;
+    }
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder getBundleDetailsOrBuilder() {
+      return getBundleDetails();
+    }
+
+    public static final int INITIATORCRN_FIELD_NUMBER = 2;
+    private volatile java.lang.Object initiatorCrn_;
+    /**
+     * <pre>
+     * The CRN of the user who initiated the diagnostics collection.
+     * </pre>
+     *
+     * <code>string initiatorCrn = 2;</code>
+     */
+    public java.lang.String getInitiatorCrn() {
+      java.lang.Object ref = initiatorCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        initiatorCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the user who initiated the diagnostics collection.
+     * </pre>
+     *
+     * <code>string initiatorCrn = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getInitiatorCrnBytes() {
+      java.lang.Object ref = initiatorCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        initiatorCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CASENUMBER_FIELD_NUMBER = 3;
+    private volatile java.lang.Object caseNumber_;
+    /**
+     * <pre>
+     * The support case number for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string caseNumber = 3;</code>
+     */
+    public java.lang.String getCaseNumber() {
+      java.lang.Object ref = caseNumber_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        caseNumber_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The support case number for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string caseNumber = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getCaseNumberBytes() {
+      java.lang.Object ref = caseNumber_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        caseNumber_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (bundleDetails_ != null) {
+        output.writeMessage(1, getBundleDetails());
+      }
+      if (!getInitiatorCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, initiatorCrn_);
+      }
+      if (!getCaseNumberBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, caseNumber_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (bundleDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getBundleDetails());
+      }
+      if (!getInitiatorCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, initiatorCrn_);
+      }
+      if (!getCaseNumberBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, caseNumber_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) obj;
+
+      boolean result = true;
+      result = result && (hasBundleDetails() == other.hasBundleDetails());
+      if (hasBundleDetails()) {
+        result = result && getBundleDetails()
+            .equals(other.getBundleDetails());
+      }
+      result = result && getInitiatorCrn()
+          .equals(other.getInitiatorCrn());
+      result = result && getCaseNumber()
+          .equals(other.getCaseNumber());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasBundleDetails()) {
+        hash = (37 * hash) + BUNDLEDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getBundleDetails().hashCode();
+      }
+      hash = (37 * hash) + INITIATORCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getInitiatorCrn().hashCode();
+      hash = (37 * hash) + CASENUMBER_FIELD_NUMBER;
+      hash = (53 * hash) + getCaseNumber().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated when users initiate diagnostics collection
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPUDXBundleInitiated}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPUDXBundleInitiated)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiatedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleInitiated_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleInitiated_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetails_ = null;
+        } else {
+          bundleDetails_ = null;
+          bundleDetailsBuilder_ = null;
+        }
+        initiatorCrn_ = "";
+
+        caseNumber_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleInitiated_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated(this);
+        if (bundleDetailsBuilder_ == null) {
+          result.bundleDetails_ = bundleDetails_;
+        } else {
+          result.bundleDetails_ = bundleDetailsBuilder_.build();
+        }
+        result.initiatorCrn_ = initiatorCrn_;
+        result.caseNumber_ = caseNumber_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated.getDefaultInstance()) return this;
+        if (other.hasBundleDetails()) {
+          mergeBundleDetails(other.getBundleDetails());
+        }
+        if (!other.getInitiatorCrn().isEmpty()) {
+          initiatorCrn_ = other.initiatorCrn_;
+          onChanged();
+        }
+        if (!other.getCaseNumber().isEmpty()) {
+          caseNumber_ = other.caseNumber_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails bundleDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder> bundleDetailsBuilder_;
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public boolean hasBundleDetails() {
+        return bundleDetailsBuilder_ != null || bundleDetails_ != null;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getBundleDetails() {
+        if (bundleDetailsBuilder_ == null) {
+          return bundleDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance() : bundleDetails_;
+        } else {
+          return bundleDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder setBundleDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails value) {
+        if (bundleDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          bundleDetails_ = value;
+          onChanged();
+        } else {
+          bundleDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder setBundleDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder builderForValue) {
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          bundleDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder mergeBundleDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails value) {
+        if (bundleDetailsBuilder_ == null) {
+          if (bundleDetails_ != null) {
+            bundleDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.newBuilder(bundleDetails_).mergeFrom(value).buildPartial();
+          } else {
+            bundleDetails_ = value;
+          }
+          onChanged();
+        } else {
+          bundleDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder clearBundleDetails() {
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetails_ = null;
+          onChanged();
+        } else {
+          bundleDetails_ = null;
+          bundleDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder getBundleDetailsBuilder() {
+        
+        onChanged();
+        return getBundleDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder getBundleDetailsOrBuilder() {
+        if (bundleDetailsBuilder_ != null) {
+          return bundleDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return bundleDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance() : bundleDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder> 
+          getBundleDetailsFieldBuilder() {
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder>(
+                  getBundleDetails(),
+                  getParentForChildren(),
+                  isClean());
+          bundleDetails_ = null;
+        }
+        return bundleDetailsBuilder_;
+      }
+
+      private java.lang.Object initiatorCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the user who initiated the diagnostics collection.
+       * </pre>
+       *
+       * <code>string initiatorCrn = 2;</code>
+       */
+      public java.lang.String getInitiatorCrn() {
+        java.lang.Object ref = initiatorCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          initiatorCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the user who initiated the diagnostics collection.
+       * </pre>
+       *
+       * <code>string initiatorCrn = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getInitiatorCrnBytes() {
+        java.lang.Object ref = initiatorCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          initiatorCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the user who initiated the diagnostics collection.
+       * </pre>
+       *
+       * <code>string initiatorCrn = 2;</code>
+       */
+      public Builder setInitiatorCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        initiatorCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the user who initiated the diagnostics collection.
+       * </pre>
+       *
+       * <code>string initiatorCrn = 2;</code>
+       */
+      public Builder clearInitiatorCrn() {
+        
+        initiatorCrn_ = getDefaultInstance().getInitiatorCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the user who initiated the diagnostics collection.
+       * </pre>
+       *
+       * <code>string initiatorCrn = 2;</code>
+       */
+      public Builder setInitiatorCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        initiatorCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object caseNumber_ = "";
+      /**
+       * <pre>
+       * The support case number for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string caseNumber = 3;</code>
+       */
+      public java.lang.String getCaseNumber() {
+        java.lang.Object ref = caseNumber_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          caseNumber_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The support case number for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string caseNumber = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getCaseNumberBytes() {
+        java.lang.Object ref = caseNumber_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          caseNumber_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The support case number for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string caseNumber = 3;</code>
+       */
+      public Builder setCaseNumber(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        caseNumber_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The support case number for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string caseNumber = 3;</code>
+       */
+      public Builder clearCaseNumber() {
+        
+        caseNumber_ = getDefaultInstance().getCaseNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The support case number for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string caseNumber = 3;</code>
+       */
+      public Builder setCaseNumberBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        caseNumber_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPUDXBundleInitiated)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPUDXBundleInitiated)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPUDXBundleInitiated>
+        PARSER = new com.google.protobuf.AbstractParser<CDPUDXBundleInitiated>() {
+      @java.lang.Override
+      public CDPUDXBundleInitiated parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPUDXBundleInitiated(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPUDXBundleInitiated> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPUDXBundleInitiated> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleInitiated getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPUDXBundleReceivedOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPUDXBundleReceived)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    boolean hasBundleDetails();
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getBundleDetails();
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder getBundleDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * The host for which the bundle was collected.
+     * </pre>
+     *
+     * <code>string host = 2;</code>
+     */
+    java.lang.String getHost();
+    /**
+     * <pre>
+     * The host for which the bundle was collected.
+     * </pre>
+     *
+     * <code>string host = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getHostBytes();
+
+    /**
+     * <pre>
+     * The processing status of the diagnostics collection.
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * The processing status of the diagnostics collection.
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+  }
+  /**
+   * <pre>
+   * Generated when a new diagnostics bundle is received.
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPUDXBundleReceived}
+   */
+  public  static final class CDPUDXBundleReceived extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPUDXBundleReceived)
+      CDPUDXBundleReceivedOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPUDXBundleReceived.newBuilder() to construct.
+    private CDPUDXBundleReceived(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPUDXBundleReceived() {
+      host_ = "";
+      status_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPUDXBundleReceived(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder subBuilder = null;
+              if (bundleDetails_ != null) {
+                subBuilder = bundleDetails_.toBuilder();
+              }
+              bundleDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(bundleDetails_);
+                bundleDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              host_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              status_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleReceived_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleReceived_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder.class);
+    }
+
+    public static final int BUNDLEDETAILS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails bundleDetails_;
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    public boolean hasBundleDetails() {
+      return bundleDetails_ != null;
+    }
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getBundleDetails() {
+      return bundleDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance() : bundleDetails_;
+    }
+    /**
+     * <pre>
+     * The details for the bundle.
+     * </pre>
+     *
+     * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder getBundleDetailsOrBuilder() {
+      return getBundleDetails();
+    }
+
+    public static final int HOST_FIELD_NUMBER = 2;
+    private volatile java.lang.Object host_;
+    /**
+     * <pre>
+     * The host for which the bundle was collected.
+     * </pre>
+     *
+     * <code>string host = 2;</code>
+     */
+    public java.lang.String getHost() {
+      java.lang.Object ref = host_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        host_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The host for which the bundle was collected.
+     * </pre>
+     *
+     * <code>string host = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getHostBytes() {
+      java.lang.Object ref = host_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        host_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 3;
+    private volatile java.lang.Object status_;
+    /**
+     * <pre>
+     * The processing status of the diagnostics collection.
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     */
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The processing status of the diagnostics collection.
+     * </pre>
+     *
+     * <code>string status = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (bundleDetails_ != null) {
+        output.writeMessage(1, getBundleDetails());
+      }
+      if (!getHostBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, host_);
+      }
+      if (!getStatusBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, status_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (bundleDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getBundleDetails());
+      }
+      if (!getHostBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, host_);
+      }
+      if (!getStatusBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, status_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) obj;
+
+      boolean result = true;
+      result = result && (hasBundleDetails() == other.hasBundleDetails());
+      if (hasBundleDetails()) {
+        result = result && getBundleDetails()
+            .equals(other.getBundleDetails());
+      }
+      result = result && getHost()
+          .equals(other.getHost());
+      result = result && getStatus()
+          .equals(other.getStatus());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasBundleDetails()) {
+        hash = (37 * hash) + BUNDLEDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getBundleDetails().hashCode();
+      }
+      hash = (37 * hash) + HOST_FIELD_NUMBER;
+      hash = (53 * hash) + getHost().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generated when a new diagnostics bundle is received.
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPUDXBundleReceived}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPUDXBundleReceived)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceivedOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleReceived_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleReceived_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetails_ = null;
+        } else {
+          bundleDetails_ = null;
+          bundleDetailsBuilder_ = null;
+        }
+        host_ = "";
+
+        status_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleReceived_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived(this);
+        if (bundleDetailsBuilder_ == null) {
+          result.bundleDetails_ = bundleDetails_;
+        } else {
+          result.bundleDetails_ = bundleDetailsBuilder_.build();
+        }
+        result.host_ = host_;
+        result.status_ = status_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived.getDefaultInstance()) return this;
+        if (other.hasBundleDetails()) {
+          mergeBundleDetails(other.getBundleDetails());
+        }
+        if (!other.getHost().isEmpty()) {
+          host_ = other.host_;
+          onChanged();
+        }
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails bundleDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder> bundleDetailsBuilder_;
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public boolean hasBundleDetails() {
+        return bundleDetailsBuilder_ != null || bundleDetails_ != null;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getBundleDetails() {
+        if (bundleDetailsBuilder_ == null) {
+          return bundleDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance() : bundleDetails_;
+        } else {
+          return bundleDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder setBundleDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails value) {
+        if (bundleDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          bundleDetails_ = value;
+          onChanged();
+        } else {
+          bundleDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder setBundleDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder builderForValue) {
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          bundleDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder mergeBundleDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails value) {
+        if (bundleDetailsBuilder_ == null) {
+          if (bundleDetails_ != null) {
+            bundleDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.newBuilder(bundleDetails_).mergeFrom(value).buildPartial();
+          } else {
+            bundleDetails_ = value;
+          }
+          onChanged();
+        } else {
+          bundleDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public Builder clearBundleDetails() {
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetails_ = null;
+          onChanged();
+        } else {
+          bundleDetails_ = null;
+          bundleDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder getBundleDetailsBuilder() {
+        
+        onChanged();
+        return getBundleDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder getBundleDetailsOrBuilder() {
+        if (bundleDetailsBuilder_ != null) {
+          return bundleDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return bundleDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance() : bundleDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * The details for the bundle.
+       * </pre>
+       *
+       * <code>.usage.CDPUDXBundleDetails bundleDetails = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder> 
+          getBundleDetailsFieldBuilder() {
+        if (bundleDetailsBuilder_ == null) {
+          bundleDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder>(
+                  getBundleDetails(),
+                  getParentForChildren(),
+                  isClean());
+          bundleDetails_ = null;
+        }
+        return bundleDetailsBuilder_;
+      }
+
+      private java.lang.Object host_ = "";
+      /**
+       * <pre>
+       * The host for which the bundle was collected.
+       * </pre>
+       *
+       * <code>string host = 2;</code>
+       */
+      public java.lang.String getHost() {
+        java.lang.Object ref = host_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          host_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The host for which the bundle was collected.
+       * </pre>
+       *
+       * <code>string host = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getHostBytes() {
+        java.lang.Object ref = host_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          host_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The host for which the bundle was collected.
+       * </pre>
+       *
+       * <code>string host = 2;</code>
+       */
+      public Builder setHost(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        host_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The host for which the bundle was collected.
+       * </pre>
+       *
+       * <code>string host = 2;</code>
+       */
+      public Builder clearHost() {
+        
+        host_ = getDefaultInstance().getHost();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The host for which the bundle was collected.
+       * </pre>
+       *
+       * <code>string host = 2;</code>
+       */
+      public Builder setHostBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        host_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * The processing status of the diagnostics collection.
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The processing status of the diagnostics collection.
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The processing status of the diagnostics collection.
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The processing status of the diagnostics collection.
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       */
+      public Builder clearStatus() {
+        
+        status_ = getDefaultInstance().getStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The processing status of the diagnostics collection.
+       * </pre>
+       *
+       * <code>string status = 3;</code>
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPUDXBundleReceived)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPUDXBundleReceived)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPUDXBundleReceived>
+        PARSER = new com.google.protobuf.AbstractParser<CDPUDXBundleReceived>() {
+      @java.lang.Override
+      public CDPUDXBundleReceived parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPUDXBundleReceived(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPUDXBundleReceived> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPUDXBundleReceived> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleReceived getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CDPUDXBundleDetailsOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:usage.CDPUDXBundleDetails)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The CDP account ID of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     * The CDP account ID of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     * The uuid for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string uuid = 2;</code>
+     */
+    java.lang.String getUuid();
+    /**
+     * <pre>
+     * The uuid for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string uuid = 2;</code>
+     */
+    com.google.protobuf.ByteString
+        getUuidBytes();
+
+    /**
+     * <pre>
+     * The CRN of the environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * The CRN of the environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * The CRN of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string resourceCrn = 4;</code>
+     */
+    java.lang.String getResourceCrn();
+    /**
+     * <pre>
+     * The CRN of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string resourceCrn = 4;</code>
+     */
+    com.google.protobuf.ByteString
+        getResourceCrnBytes();
+
+    /**
+     * <pre>
+     * The type of the diagnostics bundle.
+     * </pre>
+     *
+     * <code>string type = 5;</code>
+     */
+    java.lang.String getType();
+    /**
+     * <pre>
+     * The type of the diagnostics bundle.
+     * </pre>
+     *
+     * <code>string type = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getTypeBytes();
+  }
+  /**
+   * <pre>
+   * Details for a UDX diagnostics bundle
+   * </pre>
+   *
+   * Protobuf type {@code usage.CDPUDXBundleDetails}
+   */
+  public  static final class CDPUDXBundleDetails extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:usage.CDPUDXBundleDetails)
+      CDPUDXBundleDetailsOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CDPUDXBundleDetails.newBuilder() to construct.
+    private CDPUDXBundleDetails(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CDPUDXBundleDetails() {
+      accountId_ = "";
+      uuid_ = "";
+      environmentCrn_ = "";
+      resourceCrn_ = "";
+      type_ = "";
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CDPUDXBundleDetails(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              uuid_ = s;
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              environmentCrn_ = s;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              resourceCrn_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              type_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownFieldProto3(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleDetails_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleDetails_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder.class);
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     * The CDP account ID of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CDP account ID of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     */
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int UUID_FIELD_NUMBER = 2;
+    private volatile java.lang.Object uuid_;
+    /**
+     * <pre>
+     * The uuid for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string uuid = 2;</code>
+     */
+    public java.lang.String getUuid() {
+      java.lang.Object ref = uuid_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        uuid_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The uuid for the diagnostics collection.
+     * </pre>
+     *
+     * <code>string uuid = 2;</code>
+     */
+    public com.google.protobuf.ByteString
+        getUuidBytes() {
+      java.lang.Object ref = uuid_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        uuid_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 3;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * The CRN of the environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     */
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the environment.
+     * </pre>
+     *
+     * <code>string environmentCrn = 3;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int RESOURCECRN_FIELD_NUMBER = 4;
+    private volatile java.lang.Object resourceCrn_;
+    /**
+     * <pre>
+     * The CRN of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string resourceCrn = 4;</code>
+     */
+    public java.lang.String getResourceCrn() {
+      java.lang.Object ref = resourceCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        resourceCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the resource for which diagnostics is being collected.
+     * </pre>
+     *
+     * <code>string resourceCrn = 4;</code>
+     */
+    public com.google.protobuf.ByteString
+        getResourceCrnBytes() {
+      java.lang.Object ref = resourceCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        resourceCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 5;
+    private volatile java.lang.Object type_;
+    /**
+     * <pre>
+     * The type of the diagnostics bundle.
+     * </pre>
+     *
+     * <code>string type = 5;</code>
+     */
+    public java.lang.String getType() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        type_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The type of the diagnostics bundle.
+     * </pre>
+     *
+     * <code>string type = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getTypeBytes() {
+      java.lang.Object ref = type_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        type_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!getAccountIdBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (!getUuidBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, uuid_);
+      }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, environmentCrn_);
+      }
+      if (!getResourceCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, resourceCrn_);
+      }
+      if (!getTypeBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, type_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!getAccountIdBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (!getUuidBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, uuid_);
+      }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, environmentCrn_);
+      }
+      if (!getResourceCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, resourceCrn_);
+      }
+      if (!getTypeBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, type_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails other = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails) obj;
+
+      boolean result = true;
+      result = result && getAccountId()
+          .equals(other.getAccountId());
+      result = result && getUuid()
+          .equals(other.getUuid());
+      result = result && getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn());
+      result = result && getResourceCrn()
+          .equals(other.getResourceCrn());
+      result = result && getType()
+          .equals(other.getType());
+      result = result && unknownFields.equals(other.unknownFields);
+      return result;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + UUID_FIELD_NUMBER;
+      hash = (53 * hash) + getUuid().hashCode();
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      hash = (37 * hash) + RESOURCECRN_FIELD_NUMBER;
+      hash = (53 * hash) + getResourceCrn().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + getType().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Details for a UDX diagnostics bundle
+     * </pre>
+     *
+     * Protobuf type {@code usage.CDPUDXBundleDetails}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:usage.CDPUDXBundleDetails)
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetailsOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleDetails_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleDetails_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.class, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accountId_ = "";
+
+        uuid_ = "";
+
+        environmentCrn_ = "";
+
+        resourceCrn_ = "";
+
+        type_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.internal_static_usage_CDPUDXBundleDetails_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails build() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails buildPartial() {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails result = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails(this);
+        result.accountId_ = accountId_;
+        result.uuid_ = uuid_;
+        result.environmentCrn_ = environmentCrn_;
+        result.resourceCrn_ = resourceCrn_;
+        result.type_ = type_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return (Builder) super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return (Builder) super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return (Builder) super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return (Builder) super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return (Builder) super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails) {
+          return mergeFrom((com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails other) {
+        if (other == com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getUuid().isEmpty()) {
+          uuid_ = other.uuid_;
+          onChanged();
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        if (!other.getResourceCrn().isEmpty()) {
+          resourceCrn_ = other.resourceCrn_;
+          onChanged();
+        }
+        if (!other.getType().isEmpty()) {
+          type_ = other.type_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       * The CDP account ID of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CDP account ID of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object uuid_ = "";
+      /**
+       * <pre>
+       * The uuid for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string uuid = 2;</code>
+       */
+      public java.lang.String getUuid() {
+        java.lang.Object ref = uuid_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          uuid_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The uuid for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string uuid = 2;</code>
+       */
+      public com.google.protobuf.ByteString
+          getUuidBytes() {
+        java.lang.Object ref = uuid_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          uuid_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The uuid for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string uuid = 2;</code>
+       */
+      public Builder setUuid(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        uuid_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The uuid for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string uuid = 2;</code>
+       */
+      public Builder clearUuid() {
+        
+        uuid_ = getDefaultInstance().getUuid();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The uuid for the diagnostics collection.
+       * </pre>
+       *
+       * <code>string uuid = 2;</code>
+       */
+      public Builder setUuidBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        uuid_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the environment.
+       * </pre>
+       *
+       * <code>string environmentCrn = 3;</code>
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object resourceCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string resourceCrn = 4;</code>
+       */
+      public java.lang.String getResourceCrn() {
+        java.lang.Object ref = resourceCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          resourceCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string resourceCrn = 4;</code>
+       */
+      public com.google.protobuf.ByteString
+          getResourceCrnBytes() {
+        java.lang.Object ref = resourceCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          resourceCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string resourceCrn = 4;</code>
+       */
+      public Builder setResourceCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        resourceCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string resourceCrn = 4;</code>
+       */
+      public Builder clearResourceCrn() {
+        
+        resourceCrn_ = getDefaultInstance().getResourceCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the resource for which diagnostics is being collected.
+       * </pre>
+       *
+       * <code>string resourceCrn = 4;</code>
+       */
+      public Builder setResourceCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        resourceCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object type_ = "";
+      /**
+       * <pre>
+       * The type of the diagnostics bundle.
+       * </pre>
+       *
+       * <code>string type = 5;</code>
+       */
+      public java.lang.String getType() {
+        java.lang.Object ref = type_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          type_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The type of the diagnostics bundle.
+       * </pre>
+       *
+       * <code>string type = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getTypeBytes() {
+        java.lang.Object ref = type_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          type_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The type of the diagnostics bundle.
+       * </pre>
+       *
+       * <code>string type = 5;</code>
+       */
+      public Builder setType(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of the diagnostics bundle.
+       * </pre>
+       *
+       * <code>string type = 5;</code>
+       */
+      public Builder clearType() {
+        
+        type_ = getDefaultInstance().getType();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The type of the diagnostics bundle.
+       * </pre>
+       *
+       * <code>string type = 5;</code>
+       */
+      public Builder setTypeBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        type_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFieldsProto3(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:usage.CDPUDXBundleDetails)
+    }
+
+    // @@protoc_insertion_point(class_scope:usage.CDPUDXBundleDetails)
+    private static final com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails();
+    }
+
+    public static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CDPUDXBundleDetails>
+        PARSER = new com.google.protobuf.AbstractParser<CDPUDXBundleDetails>() {
+      @java.lang.Override
+      public CDPUDXBundleDetails parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CDPUDXBundleDetails(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CDPUDXBundleDetails> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CDPUDXBundleDetails> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPUDXBundleDetails getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_usage_Event_descriptor;
   private static final 
@@ -63218,6 +80074,66 @@ public final class UsageProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_usage_CDPDatahubSync_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFCatalogArtifactType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFCatalogArtifactType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFCatalogArtifactCreated_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFCatalogArtifactCreated_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFCatalogArtifactDeleted_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFCatalogArtifactDeleted_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFCatalogArtifactVersionCreated_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFCatalogArtifactVersionCreated_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFCatalogArtifactVersionDeleted_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFCatalogArtifactVersionDeleted_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFServiceStatus_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFServiceStatus_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFOperationDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFOperationDetails_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFServiceRequested_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFServiceRequested_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPDFServiceStatusChanged_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPDFServiceStatusChanged_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPUDXBundleInitiated_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPUDXBundleInitiated_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPUDXBundleReceived_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPUDXBundleReceived_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_usage_CDPUDXBundleDetails_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_usage_CDPUDXBundleDetails_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -63227,7 +80143,7 @@ public final class UsageProto {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\013usage.proto\022\005usage\"\202\017\n\005Event\022\n\n\002id\030\001 \001" +
+      "\n\013usage.proto\022\005usage\"\314\023\n\005Event\022\n\n\002id\030\001 \001" +
       "(\t\022\021\n\ttimestamp\030\002 \001(\004\022\017\n\007version\030\003 \001(\r\022?" +
       "\n\026altusIamAccountCreated\030\004 \001(\0132\035.usage.A" +
       "ltusIamAccountCreatedH\000\0229\n\023altusIamUserC" +
@@ -63273,244 +80189,311 @@ public final class UsageProto {
       "bStatusChanged\030# \001(\0132\036.usage.CDPDatahubS" +
       "tatusChangedH\000\0221\n\017cdpDatalakeSync\030$ \001(\0132" +
       "\026.usage.CDPDatalakeSyncH\000\022/\n\016cdpDatahubS" +
-      "ync\030% \001(\0132\025.usage.CDPDatahubSyncH\000B\t\n\007de" +
-      "tailsJ\004\010\010\020\tJ\004\010\t\020\nJ\004\010\n\020\013J\004\010\013\020\014J\004\010\014\020\rJ\004\010\r\020" +
-      "\016J\004\010\016\020\017J\004\010\017\020\020J\004\010\024\020\025J\004\010\025\020\026\"A\n\023AltusIamAcc" +
-      "ountType\"*\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020" +
-      "\001\022\t\n\005TRIAL\020\002\"\225\001\n\026AltusIamAccountCreated\022" +
-      "\021\n\taccountId\030\001 \001(\t\022\032\n\022identifyProviderId" +
-      "\030\003 \001(\t\022\025\n\rsfdcAccountId\030\004 \001(\t\0225\n\013account" +
-      "Type\030\005 \001(\0162 .usage.AltusIamAccountType.V" +
-      "alue\"\333\001\n\023AltusIamUserCreated\022\016\n\006userId\030\001" +
-      " \001(\t\022\021\n\taccountId\030\003 \001(\t\022\036\n\026identityProvi" +
-      "derUserId\030\004 \001(\t\022\025\n\rsfdcContactId\030\005 \001(\t\022\r" +
-      "\n\005admin\030\006 \001(\010\022\013\n\003crn\030\n \001(\t\022\033\n\023identityPr" +
-      "oviderCrn\030\013 \001(\t\022\031\n\021explicitlyCreated\030\014 \001" +
-      "(\010J\004\010\002\020\003J\004\010\007\020\010J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamUs" +
-      "erUpdated\022\016\n\006userId\030\001 \001(\t\022\r\n\005admin\030\005 \001(\010" +
-      "J\004\010\002\020\003J\004\010\003\020\004J\004\010\004\020\005\"%\n\023AltusIamUserDelete" +
-      "d\022\016\n\006userId\030\001 \001(\t\".\n\034AltusIamUserInterac" +
-      "tiveLogin\022\016\n\006userId\030\001 \001(\t\"5\n#AltusIamUse" +
-      "rInteractiveLoginFailure\022\016\n\006userId\030\001 \001(\t" +
-      "\"~\n\032AltusIamMachineUserCreated\022\025\n\rmachin" +
-      "eUserId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\027\n\017mach" +
-      "ineUserName\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010intern" +
-      "al\030\005 \001(\010\"3\n\032AltusIamMachineUserDeleted\022\025" +
-      "\n\rmachineUserId\030\001 \001(\t\"s\n\030AltusIamAccessK" +
-      "eyCreated\022\023\n\013accessKeyId\030\001 \001(\t\022\021\n\taccoun" +
-      "tId\030\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t" +
-      "\022\020\n\010internal\030\005 \001(\010\"/\n\030AltusIamAccessKeyD" +
-      "eleted\022\023\n\013accessKeyId\030\001 \001(\t\"e\n\032AltusIamA" +
-      "ccessTokenCreated\022\025\n\raccessTokenId\030\001 \001(\t" +
-      "\022\021\n\taccountId\030\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n" +
-      "\003crn\030\004 \001(\t\"3\n\032AltusIamAccessTokenDeleted" +
-      "\022\025\n\raccessTokenId\030\001 \001(\t\"e\n\036CDPEnvironmen" +
-      "tsEnvironmentType\"C\n\005Value\022\t\n\005UNSET\020\000\022\007\n" +
-      "\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\022\010\n\004" +
-      "MOCK\020\005\"\353\003\n\032CDPCloudbreakClusterStatus\"\314\003" +
-      "\n\005Value\022\t\n\005UNSET\020\000\022\r\n\tREQUESTED\020\001\022\026\n\022CRE" +
-      "ATE_IN_PROGRESS\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022UPDA" +
-      "TE_IN_PROGRESS\020\004\022\024\n\020UPDATE_REQUESTED\020\005\022\021" +
-      "\n\rUPDATE_FAILED\020\006\022\021\n\rCREATE_FAILED\020\007\022\032\n\026" +
-      "ENABLE_SECURITY_FAILED\020\010\022\032\n\026PRE_DELETE_I" +
-      "N_PROGRESS\020\t\022\026\n\022DELETE_IN_PROGRESS\020\n\022\021\n\r" +
-      "DELETE_FAILED\020\013\022\024\n\020DELETE_COMPLETED\020\014\022\013\n" +
-      "\007STOPPED\020\r\022\022\n\016STOP_REQUESTED\020\016\022\023\n\017START_" +
-      "REQUESTED\020\017\022\024\n\020STOP_IN_PROGRESS\020\020\022\025\n\021STA" +
-      "RT_IN_PROGRESS\020\021\022\020\n\014START_FAILED\020\022\022\017\n\013ST" +
-      "OP_FAILED\020\023\022\021\n\rWAIT_FOR_SYNC\020\024\022\034\n\030MAINTE" +
-      "NANCE_MODE_ENABLED\020\025\"\215\002\n\033CDPDatalakeClus" +
-      "terRequested\022\022\n\ndatalakeId\030\001 \001(\t\022\021\n\tacco" +
-      "untId\030\002 \001(\t\022\024\n\014datalakeName\030\003 \001(\t\022D\n\017env" +
-      "ironmentType\030\004 \001(\0162+.usage.CDPEnvironmen" +
-      "tsEnvironmentType.Value\022\026\n\016environmentCr" +
-      "n\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\013\n\003crn\030\007 \001(" +
-      "\t\022\022\n\ncreatorCrn\030\010 \001(\t\022\035\n\025clusterDefiniti" +
-      "onName\030\t \001(\t\"\304\001\n\037CDPDatalakeClusterStatu" +
-      "sChanged\022\022\n\ndatalakeId\030\001 \001(\t\022:\n\toldStatu" +
-      "s\030\002 \001(\0162\'.usage.CDPCloudbreakClusterStat" +
-      "us.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usage.CDPC" +
-      "loudbreakClusterStatus.Value\022\025\n\rfailureR" +
-      "eason\030\004 \001(\t\"\237\002\n\032CDPDatahubClusterRequest" +
-      "ed\022\021\n\tclusterId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t" +
-      "\022\023\n\013clusterName\030\003 \001(\t\022D\n\017environmentType" +
-      "\030\004 \001(\0162+.usage.CDPEnvironmentsEnvironmen" +
-      "tType.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013c" +
-      "dpdVersion\030\006 \001(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n" +
-      "\003crn\030\010 \001(\t\022\022\n\ncreatorCrn\030\t \001(\t\022\035\n\025cluste" +
-      "rDefinitionName\030\n \001(\t\"\302\001\n\036CDPDatahubClus" +
-      "terStatusChanged\022\021\n\tclusterId\030\001 \001(\t\022:\n\to" +
-      "ldStatus\030\002 \001(\0162\'.usage.CDPCloudbreakClus" +
-      "terStatus.Value\022:\n\tnewStatus\030\003 \001(\0162\'.usa" +
-      "ge.CDPCloudbreakClusterStatus.Value\022\025\n\rf" +
-      "ailureReason\030\004 \001(\t\"\222\004\n\025CDPCMLWorkspaceSt" +
-      "atus\"\370\003\n\005Value\022\t\n\005UNSET\020\000\022\025\n\021PROVISION_S" +
-      "TARTED\020\001\022\026\n\022PROVISION_FINISHED\020\002\022\024\n\020PROV" +
-      "ISION_FAILED\020\003\022\030\n\024INSTALLATION_STARTED\020\004" +
-      "\022\031\n\025INSTALLATION_FINISHED\020\005\022\027\n\023INSTALLAT" +
-      "ION_FAILED\020\006\022\027\n\023DEPROVISION_STARTED\020\007\022\030\n" +
-      "\024DEPROVISION_FINISHED\020\010\022\026\n\022DEPROVISION_F" +
-      "AILED\020\t\022\021\n\rRENEW_STARTED\020\n\022\022\n\016RENEW_FINI" +
-      "SHED\020\013\022\021\n\rRENEW_WARNING\020\014\022\023\n\017SUSPEND_STA" +
-      "RTED\020\r\022\024\n\020SUSPEND_FINISHED\020\016\022\022\n\016SUSPEND_" +
-      "FAILED\020\017\022\022\n\016RESUME_STARTED\020\020\022\023\n\017RESUME_F" +
-      "INISHED\020\021\022\021\n\rRESUME_FAILED\020\022\022\022\n\016RESUME_W" +
-      "ARNING\020\023\022\023\n\017UPGRADE_STARTED\020\024\022\024\n\020UPGRADE" +
-      "_FINISHED\020\025\022\022\n\016UPGRADE_FAILED\020\026\"\231\001\n\032CDPC" +
-      "MLAWSWorkspaceMetadata\022\022\n\nminWorkers\030\001 \001" +
-      "(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016" +
-      "\n\006maxGpu\030\004 \001(\005\022\032\n\022workerInstanceType\030\005 \001" +
-      "(\t\022\027\n\017gpuInstanceType\030\006 \001(\t\"\233\001\n\034CDPCMLAz" +
-      "ureWorkspaceMetadata\022\022\n\nminWorkers\030\001 \001(\005" +
-      "\022\022\n\nmaxWorkers\030\002 \001(\005\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006" +
-      "maxGpu\030\004 \001(\005\022\032\n\022workerInstanceType\030\005 \001(\t" +
-      "\022\027\n\017gpuInstanceType\030\006 \001(\t\"\224\003\n\030CDPCMLWork" +
-      "spaceRequested\022\013\n\003crn\030\001 \001(\t\022\021\n\taccountId" +
-      "\030\002 \001(\t\022\025\n\rworkspaceName\030\003 \001(\t\022D\n\017environ" +
-      "mentType\030\004 \001(\0162+.usage.CDPEnvironmentsEn" +
-      "vironmentType.Value\022\026\n\016environmentCrn\030\005 " +
-      "\001(\t\022\023\n\013cdpdVersion\030\006 \001(\t\022\022\n\ncreatorCrn\030\007" +
-      " \001(\t\022G\n\032cdpCMLAWSWorkspaceMetadata\030\010 \001(\013" +
-      "2!.usage.CDPCMLAWSWorkspaceMetadataH\000\022K\n" +
-      "\034cdpCMLAzureWorkspaceMetadata\030\t \001(\0132#.us" +
-      "age.CDPCMLAzureWorkspaceMetadataH\000\022\030\n\020wo" +
-      "rkspaceVersion\030\n \001(\tB\n\n\010metadata\"\330\001\n\034CDP" +
-      "CMLWorkspaceStatusChanged\022\013\n\003crn\030\001 \001(\t\0225" +
-      "\n\toldStatus\030\002 \001(\0162\".usage.CDPCMLWorkspac" +
-      "eStatus.Value\0225\n\tnewStatus\030\003 \001(\0162\".usage" +
-      ".CDPCMLWorkspaceStatus.Value\022\025\n\rfailureR" +
-      "eason\030\004 \001(\t\022\023\n\013fromVersion\030\005 \001(\t\022\021\n\ttoVe" +
-      "rsion\030\006 \001(\t\"M\n\030CDPRequestProcessingStep\"" +
-      "1\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004INIT\020\001\022\t\n\005FINAL\020\002" +
-      "\022\010\n\004SYNC\020\003\"\236\002\n\024CDPEnvironmentStatus\"\205\002\n\005" +
-      "Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017" +
-      "CREATE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016" +
-      "DELETE_STARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n" +
-      "\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n" +
-      "\020SUSPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022" +
-      "\022\n\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013" +
-      "\022\021\n\rRESUME_FAILED\020\014\"\226\007\n\020CDPClusterStatus" +
-      "\"\201\007\n\005Value\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020" +
-      "\001\022\023\n\017CREATE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020" +
-      "\003\022\022\n\016DELETE_STARTED\020\004\022\023\n\017DELETE_FINISHED" +
-      "\020\005\022\021\n\rDELETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED" +
-      "\020\007\022\024\n\020SUSPEND_FINISHED\020\010\022\022\n\016SUSPEND_FAIL" +
-      "ED\020\t\022\022\n\016RESUME_STARTED\020\n\022\023\n\017RESUME_FINIS" +
-      "HED\020\013\022\021\n\rRESUME_FAILED\020\014\022\023\n\017UPGRADE_STAR" +
-      "TED\020\r\022\024\n\020UPGRADE_FINISHED\020\016\022\022\n\016UPGRADE_F" +
-      "AILED\020\017\022\022\n\016REPAIR_STARTED\020\020\022\023\n\017REPAIR_FI" +
-      "NISHED\020\021\022\021\n\rREPAIR_FAILED\020\022\022\023\n\017UPSCALE_S" +
-      "TARTED\020\023\022\024\n\020UPSCALE_FINISHED\020\024\022\022\n\016UPSCAL" +
-      "E_FAILED\020\025\022\025\n\021DOWNSCALE_STARTED\020\026\022\026\n\022DOW" +
-      "NSCALE_FINISHED\020\027\022\024\n\020DOWNSCALE_FAILED\020\030\022" +
-      "\035\n\031RENEW_PUBLIC_CERT_STARTED\020\031\022\036\n\032RENEW_" +
-      "PUBLIC_CERT_FINISHED\020\032\022\034\n\030RENEW_PUBLIC_C" +
-      "ERT_FAILED\020\033\022\'\n#RENEW_CLUSTER_INTERNAL_C" +
-      "ERT_STARTED\020\034\022(\n$RENEW_CLUSTER_INTERNAL_" +
-      "CERT_FINISHED\020\035\022&\n\"RENEW_CLUSTER_INTERNA" +
-      "L_CERT_FAILED\020\036\022\022\n\016BACKUP_STARTED\020\037\022\023\n\017B" +
-      "ACKUP_FINISHED\020 \022\021\n\rBACKUP_FAILED\020!\022!\n\035D" +
-      "IAGNOSTIC_COLLECTION_STARTED\020\"\022\"\n\036DIAGNO" +
-      "STIC_COLLECTION_FINISHED\020#\022 \n\034DIAGNOSTIC" +
-      "_COLLECTION_FAILED\020$\"\343\002\n\023CDPOperationDet" +
-      "ails\022\021\n\taccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002" +
-      " \001(\t\022\024\n\014resourceName\030\003 \001(\t\022\024\n\014initiatorC" +
-      "rn\030\004 \001(\t\022\032\n\022applicationVersion\030\005 \001(\t\022G\n\030" +
-      "cdpRequestProcessingStep\030\006 \001(\0162%.usage.C" +
-      "DPRequestProcessingStep.Value\022\016\n\006flowId\030" +
-      "\007 \001(\t\022\023\n\013flowChainId\030\010 \001(\t\022\021\n\tflowState\030" +
-      "\t \001(\t\022\025\n\rcorrelationId\030\n \001(\t\022D\n\017environm" +
-      "entType\030\013 \001(\0162+.usage.CDPEnvironmentsEnv" +
-      "ironmentType.Value\"\313\002\n\025CDPEnvironmentDet" +
-      "ails\022D\n\017environmentType\030\001 \001(\0162+.usage.CD" +
-      "PEnvironmentsEnvironmentType.Value\022\016\n\006re" +
-      "gion\030\002 \001(\t\022!\n\031numberOfAvailabilityZones\030" +
-      "\003 \001(\005\022\031\n\021availabilityZones\030\004 \001(\t\0220\n\016netw" +
-      "orkDetails\030\005 \001(\0132\030.usage.CDPNetworkDetai" +
-      "ls\0223\n\nawsDetails\030\006 \001(\0132\037.usage.CDPEnviro" +
-      "nmentAwsDetails\0227\n\014azureDetails\030\007 \001(\0132!." +
-      "usage.CDPEnvironmentAzureDetails\"0\n\021CDPF" +
-      "reeIPADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n\004spot\030\002 \001" +
-      "(\010\"9\n\032CDPEnvironmentAzureDetails\022\033\n\023sing" +
-      "leResourceGroup\030\001 \001(\010\"\032\n\030CDPEnvironmentA" +
-      "wsDetails\"a\n%CDPEnvironmentTelemetryFeat" +
-      "ureDetails\022\031\n\021workloadAnalytics\030\001 \001(\t\022\035\n" +
-      "\025clusterLogsCollection\030\002 \001(\t\"J\n\017CDPProxy" +
-      "Details\022\r\n\005proxy\030\001 \001(\010\022\020\n\010protocol\030\002 \001(\t" +
-      "\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CDPNetworkD" +
-      "etails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014connectiv" +
-      "ity\030\002 \001(\t\022\033\n\023numberPublicSubnets\030\003 \001(\005\022\034" +
-      "\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n\027serviceE" +
-      "ndpointCreation\030\005 \001(\t\022,\n\014proxyDetails\030\006 " +
-      "\001(\0132\026.usage.CDPProxyDetails\022#\n\033publicEnd" +
-      "pointAccessGateway\030\007 \001(\t\022\032\n\022securityAcce" +
-      "ssType\030\010 \001(\t\"\203\002\n\027CDPEnvironmentRequested" +
-      "\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CDPOp" +
-      "erationDetails\0228\n\022environmentDetails\030\002 \001" +
-      "(\0132\034.usage.CDPEnvironmentDetails\022M\n\027tele" +
-      "metryFeatureDetails\030\003 \001(\0132,.usage.CDPEnv" +
-      "ironmentTelemetryFeatureDetails\022)\n\007freeI" +
-      "PA\030\004 \001(\0132\030.usage.CDPFreeIPADetails\"\326\001\n\033C" +
-      "DPEnvironmentStatusChanged\0224\n\020operationD" +
-      "etails\030\001 \001(\0132\032.usage.CDPOperationDetails" +
-      "\0224\n\toldStatus\030\002 \001(\0162!.usage.CDPEnvironme" +
-      "ntStatus.Value\0224\n\tnewStatus\030\003 \001(\0162!.usag" +
-      "e.CDPEnvironmentStatus.Value\022\025\n\rfailureR" +
-      "eason\030\004 \001(\t\"8\n\017CDPImageDetails\022\017\n\007imageI" +
-      "d\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t\n\017CDPClus" +
-      "terShape\022\033\n\023clusterTemplateName\030\001 \001(\t\022\r\n" +
-      "\005nodes\030\002 \001(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t" +
-      "\022\031\n\021definitionDetails\030\004 \001(\t\"\206\001\n\021CDPVersi" +
-      "onDetails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersio" +
-      "n\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n\013saltVers" +
-      "ion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006" +
-      " \001(\t\"\241\001\n\021CDPClusterDetails\022,\n\014clusterSha" +
-      "pe\030\001 \001(\0132\026.usage.CDPClusterShape\0220\n\016vers" +
-      "ionDetails\030\002 \001(\0132\030.usage.CDPVersionDetai" +
-      "ls\022,\n\014imageDetails\030\003 \001(\0132\026.usage.CDPImag" +
-      "eDetails\"\223\001\n\020CDPStatusDetails\022\023\n\013stackSt" +
-      "atus\030\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022" +
-      "\031\n\021stackStatusReason\030\003 \001(\t\022\025\n\rclusterSta" +
-      "tus\030\004 \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1" +
-      "\n\023CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usa" +
-      "ge.CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024" +
-      "CDPDatalakeRequested\0224\n\020operationDetails" +
-      "\030\001 \001(\0132\032.usage.CDPOperationDetails\022\026\n\016en" +
-      "vironmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001" +
-      "(\0132\030.usage.CDPClusterDetails\022,\n\010features" +
-      "\030\004 \001(\0132\032.usage.CDPDatalakeFeatures\"\344\001\n\030C" +
-      "DPDatalakeStatusChanged\0224\n\020operationDeta" +
-      "ils\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n" +
-      "\toldStatus\030\002 \001(\0162\035.usage.CDPClusterStatu" +
-      "s.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPCl" +
-      "usterStatus.Value\022.\n\rstatusDetails\030\004 \001(\013" +
-      "2\027.usage.CDPStatusDetails\"\225\001\n\023CDPDatahub" +
+      "ync\030% \001(\0132\025.usage.CDPDatahubSyncH\000\022I\n\033cd" +
+      "pDFCatalogArtifactCreated\030( \001(\0132\".usage." +
+      "CDPDFCatalogArtifactCreatedH\000\022I\n\033cdpDFCa" +
+      "talogArtifactDeleted\030) \001(\0132\".usage.CDPDF" +
+      "CatalogArtifactDeletedH\000\022W\n\"cdpDFCatalog" +
+      "ArtifactVersionCreated\030* \001(\0132).usage.CDP" +
+      "DFCatalogArtifactVersionCreatedH\000\022W\n\"cdp" +
+      "DFCatalogArtifactVersionDeleted\030+ \001(\0132)." +
+      "usage.CDPDFCatalogArtifactVersionDeleted" +
+      "H\000\022=\n\025cdpDFServiceRequested\030, \001(\0132\034.usag" +
+      "e.CDPDFServiceRequestedH\000\022E\n\031cdpDFServic" +
+      "eStatusChanged\030- \001(\0132 .usage.CDPDFServic" +
+      "eStatusChangedH\000\022=\n\025cdpUDXBundleInitiate" +
+      "d\030. \001(\0132\034.usage.CDPUDXBundleInitiatedH\000\022" +
+      ";\n\024cdpUDXBundleReceived\030/ \001(\0132\033.usage.CD" +
+      "PUDXBundleReceivedH\000B\t\n\007detailsJ\004\010\010\020\tJ\004\010" +
+      "\t\020\nJ\004\010\n\020\013J\004\010\013\020\014J\004\010\014\020\rJ\004\010\r\020\016J\004\010\016\020\017J\004\010\017\020\020J" +
+      "\004\010\024\020\025J\004\010\025\020\026\"A\n\023AltusIamAccountType\"*\n\005Va" +
+      "lue\022\t\n\005UNSET\020\000\022\013\n\007REGULAR\020\001\022\t\n\005TRIAL\020\002\"\225" +
+      "\001\n\026AltusIamAccountCreated\022\021\n\taccountId\030\001" +
+      " \001(\t\022\032\n\022identifyProviderId\030\003 \001(\t\022\025\n\rsfdc" +
+      "AccountId\030\004 \001(\t\0225\n\013accountType\030\005 \001(\0162 .u" +
+      "sage.AltusIamAccountType.Value\"\333\001\n\023Altus" +
+      "IamUserCreated\022\016\n\006userId\030\001 \001(\t\022\021\n\taccoun" +
+      "tId\030\003 \001(\t\022\036\n\026identityProviderUserId\030\004 \001(" +
+      "\t\022\025\n\rsfdcContactId\030\005 \001(\t\022\r\n\005admin\030\006 \001(\010\022" +
+      "\013\n\003crn\030\n \001(\t\022\033\n\023identityProviderCrn\030\013 \001(" +
+      "\t\022\031\n\021explicitlyCreated\030\014 \001(\010J\004\010\002\020\003J\004\010\007\020\010" +
+      "J\004\010\010\020\tJ\004\010\t\020\n\"F\n\023AltusIamUserUpdated\022\016\n\006u" +
+      "serId\030\001 \001(\t\022\r\n\005admin\030\005 \001(\010J\004\010\002\020\003J\004\010\003\020\004J\004" +
+      "\010\004\020\005\"%\n\023AltusIamUserDeleted\022\016\n\006userId\030\001 " +
+      "\001(\t\".\n\034AltusIamUserInteractiveLogin\022\016\n\006u" +
+      "serId\030\001 \001(\t\"5\n#AltusIamUserInteractiveLo" +
+      "ginFailure\022\016\n\006userId\030\001 \001(\t\"~\n\032AltusIamMa" +
+      "chineUserCreated\022\025\n\rmachineUserId\030\001 \001(\t\022" +
+      "\021\n\taccountId\030\002 \001(\t\022\027\n\017machineUserName\030\003 " +
+      "\001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005 \001(\010\"3\n\032Al" +
+      "tusIamMachineUserDeleted\022\025\n\rmachineUserI" +
+      "d\030\001 \001(\t\"s\n\030AltusIamAccessKeyCreated\022\023\n\013a" +
+      "ccessKeyId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\020\n\010a" +
+      "ctorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\022\020\n\010internal\030\005" +
+      " \001(\010\"/\n\030AltusIamAccessKeyDeleted\022\023\n\013acce" +
+      "ssKeyId\030\001 \001(\t\"e\n\032AltusIamAccessTokenCrea" +
+      "ted\022\025\n\raccessTokenId\030\001 \001(\t\022\021\n\taccountId\030" +
+      "\002 \001(\t\022\020\n\010actorCrn\030\003 \001(\t\022\013\n\003crn\030\004 \001(\t\"3\n\032" +
+      "AltusIamAccessTokenDeleted\022\025\n\raccessToke" +
+      "nId\030\001 \001(\t\"e\n\036CDPEnvironmentsEnvironmentT" +
+      "ype\"C\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003AWS\020\001\022\t\n\005AZUR" +
+      "E\020\002\022\007\n\003GCP\020\003\022\010\n\004YARN\020\004\022\010\n\004MOCK\020\005\"\353\003\n\032CDP" +
+      "CloudbreakClusterStatus\"\314\003\n\005Value\022\t\n\005UNS" +
+      "ET\020\000\022\r\n\tREQUESTED\020\001\022\026\n\022CREATE_IN_PROGRES" +
+      "S\020\002\022\r\n\tAVAILABLE\020\003\022\026\n\022UPDATE_IN_PROGRESS" +
+      "\020\004\022\024\n\020UPDATE_REQUESTED\020\005\022\021\n\rUPDATE_FAILE" +
+      "D\020\006\022\021\n\rCREATE_FAILED\020\007\022\032\n\026ENABLE_SECURIT" +
+      "Y_FAILED\020\010\022\032\n\026PRE_DELETE_IN_PROGRESS\020\t\022\026" +
+      "\n\022DELETE_IN_PROGRESS\020\n\022\021\n\rDELETE_FAILED\020" +
+      "\013\022\024\n\020DELETE_COMPLETED\020\014\022\013\n\007STOPPED\020\r\022\022\n\016" +
+      "STOP_REQUESTED\020\016\022\023\n\017START_REQUESTED\020\017\022\024\n" +
+      "\020STOP_IN_PROGRESS\020\020\022\025\n\021START_IN_PROGRESS" +
+      "\020\021\022\020\n\014START_FAILED\020\022\022\017\n\013STOP_FAILED\020\023\022\021\n" +
+      "\rWAIT_FOR_SYNC\020\024\022\034\n\030MAINTENANCE_MODE_ENA" +
+      "BLED\020\025\"\215\002\n\033CDPDatalakeClusterRequested\022\022" +
+      "\n\ndatalakeId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\024\n" +
+      "\014datalakeName\030\003 \001(\t\022D\n\017environmentType\030\004" +
+      " \001(\0162+.usage.CDPEnvironmentsEnvironmentT" +
+      "ype.Value\022\026\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdp" +
+      "dVersion\030\006 \001(\t\022\013\n\003crn\030\007 \001(\t\022\022\n\ncreatorCr" +
+      "n\030\010 \001(\t\022\035\n\025clusterDefinitionName\030\t \001(\t\"\304" +
+      "\001\n\037CDPDatalakeClusterStatusChanged\022\022\n\nda" +
+      "talakeId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\0162\'.usag" +
+      "e.CDPCloudbreakClusterStatus.Value\022:\n\tne" +
+      "wStatus\030\003 \001(\0162\'.usage.CDPCloudbreakClust" +
+      "erStatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"\237\002" +
+      "\n\032CDPDatahubClusterRequested\022\021\n\tclusterI" +
+      "d\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\023\n\013clusterNam" +
+      "e\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usage" +
+      ".CDPEnvironmentsEnvironmentType.Value\022\026\n" +
+      "\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 \001" +
+      "(\t\022\023\n\013datalakeCrn\030\007 \001(\t\022\013\n\003crn\030\010 \001(\t\022\022\n\n" +
+      "creatorCrn\030\t \001(\t\022\035\n\025clusterDefinitionNam" +
+      "e\030\n \001(\t\"\302\001\n\036CDPDatahubClusterStatusChang" +
+      "ed\022\021\n\tclusterId\030\001 \001(\t\022:\n\toldStatus\030\002 \001(\016" +
+      "2\'.usage.CDPCloudbreakClusterStatus.Valu" +
+      "e\022:\n\tnewStatus\030\003 \001(\0162\'.usage.CDPCloudbre" +
+      "akClusterStatus.Value\022\025\n\rfailureReason\030\004" +
+      " \001(\t\"\333\004\n\025CDPCMLWorkspaceStatus\"\301\004\n\005Value" +
+      "\022\t\n\005UNSET\020\000\022\025\n\021PROVISION_STARTED\020\001\022\026\n\022PR" +
+      "OVISION_FINISHED\020\002\022\024\n\020PROVISION_FAILED\020\003" +
+      "\022\030\n\024INSTALLATION_STARTED\020\004\022\031\n\025INSTALLATI" +
+      "ON_FINISHED\020\005\022\027\n\023INSTALLATION_FAILED\020\006\022\027" +
+      "\n\023DEPROVISION_STARTED\020\007\022\030\n\024DEPROVISION_F" +
+      "INISHED\020\010\022\026\n\022DEPROVISION_FAILED\020\t\022\021\n\rREN" +
+      "EW_STARTED\020\n\022\022\n\016RENEW_FINISHED\020\013\022\021\n\rRENE" +
+      "W_WARNING\020\014\022\023\n\017SUSPEND_STARTED\020\r\022\024\n\020SUSP" +
+      "END_FINISHED\020\016\022\022\n\016SUSPEND_FAILED\020\017\022\022\n\016RE" +
+      "SUME_STARTED\020\020\022\023\n\017RESUME_FINISHED\020\021\022\021\n\rR" +
+      "ESUME_FAILED\020\022\022\022\n\016RESUME_WARNING\020\023\022\023\n\017UP" +
+      "GRADE_STARTED\020\024\022\024\n\020UPGRADE_FINISHED\020\025\022\022\n" +
+      "\016UPGRADE_FAILED\020\026\022\026\n\022VALIDATION_STARTED\020" +
+      "\027\022\030\n\024VALIDATION_SUCCEEDED\020\030\022\025\n\021VALIDATIO" +
+      "N_FAILED\020\031\"\231\001\n\032CDPCMLAWSWorkspaceMetadat" +
+      "a\022\022\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(" +
+      "\005\022\016\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022wor" +
+      "kerInstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType" +
+      "\030\006 \001(\t\"\233\001\n\034CDPCMLAzureWorkspaceMetadata\022" +
+      "\022\n\nminWorkers\030\001 \001(\005\022\022\n\nmaxWorkers\030\002 \001(\005\022" +
+      "\016\n\006minGpu\030\003 \001(\005\022\016\n\006maxGpu\030\004 \001(\005\022\032\n\022worke" +
+      "rInstanceType\030\005 \001(\t\022\027\n\017gpuInstanceType\030\006" +
+      " \001(\t\"\271\003\n\030CDPCMLWorkspaceRequested\022\013\n\003crn" +
+      "\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\025\n\rworkspaceNa" +
+      "me\030\003 \001(\t\022D\n\017environmentType\030\004 \001(\0162+.usag" +
+      "e.CDPEnvironmentsEnvironmentType.Value\022\026" +
+      "\n\016environmentCrn\030\005 \001(\t\022\023\n\013cdpdVersion\030\006 " +
+      "\001(\t\022\022\n\ncreatorCrn\030\007 \001(\t\022G\n\032cdpCMLAWSWork" +
+      "spaceMetadata\030\010 \001(\0132!.usage.CDPCMLAWSWor" +
+      "kspaceMetadataH\000\022K\n\034cdpCMLAzureWorkspace" +
+      "Metadata\030\t \001(\0132#.usage.CDPCMLAzureWorksp" +
+      "aceMetadataH\000\022\030\n\020workspaceVersion\030\n \001(\t\022" +
+      "\021\n\trequestId\030\013 \001(\t\022\020\n\010userTags\030\014 \001(\tB\n\n\010" +
+      "metadata\"\217\002\n\034CDPCMLWorkspaceStatusChange" +
+      "d\022\013\n\003crn\030\001 \001(\t\0225\n\toldStatus\030\002 \001(\0162\".usag" +
+      "e.CDPCMLWorkspaceStatus.Value\0225\n\tnewStat" +
+      "us\030\003 \001(\0162\".usage.CDPCMLWorkspaceStatus.V" +
+      "alue\022\025\n\rfailureReason\030\004 \001(\t\022\023\n\013fromVersi" +
+      "on\030\005 \001(\t\022\021\n\ttoVersion\030\006 \001(\t\022\021\n\trequestId" +
+      "\030\007 \001(\t\022\020\n\010liftieId\030\010 \001(\t\022\020\n\010userTags\030\t \001" +
+      "(\t\"M\n\030CDPRequestProcessingStep\"1\n\005Value\022" +
+      "\t\n\005UNSET\020\000\022\010\n\004INIT\020\001\022\t\n\005FINAL\020\002\022\010\n\004SYNC\020" +
+      "\003\"\236\002\n\024CDPEnvironmentStatus\"\205\002\n\005Value\022\t\n\005" +
+      "UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREATE_FI" +
+      "NISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELETE_ST" +
+      "ARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDELETE_F" +
+      "AILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUSPEND_" +
+      "FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016RESUME" +
+      "_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\rRESUM" +
+      "E_FAILED\020\014\"\226\007\n\020CDPClusterStatus\"\201\007\n\005Valu" +
+      "e\022\t\n\005UNSET\020\000\022\022\n\016CREATE_STARTED\020\001\022\023\n\017CREA" +
+      "TE_FINISHED\020\002\022\021\n\rCREATE_FAILED\020\003\022\022\n\016DELE" +
+      "TE_STARTED\020\004\022\023\n\017DELETE_FINISHED\020\005\022\021\n\rDEL" +
+      "ETE_FAILED\020\006\022\023\n\017SUSPEND_STARTED\020\007\022\024\n\020SUS" +
+      "PEND_FINISHED\020\010\022\022\n\016SUSPEND_FAILED\020\t\022\022\n\016R" +
+      "ESUME_STARTED\020\n\022\023\n\017RESUME_FINISHED\020\013\022\021\n\r" +
+      "RESUME_FAILED\020\014\022\023\n\017UPGRADE_STARTED\020\r\022\024\n\020" +
+      "UPGRADE_FINISHED\020\016\022\022\n\016UPGRADE_FAILED\020\017\022\022" +
+      "\n\016REPAIR_STARTED\020\020\022\023\n\017REPAIR_FINISHED\020\021\022" +
+      "\021\n\rREPAIR_FAILED\020\022\022\023\n\017UPSCALE_STARTED\020\023\022" +
+      "\024\n\020UPSCALE_FINISHED\020\024\022\022\n\016UPSCALE_FAILED\020" +
+      "\025\022\025\n\021DOWNSCALE_STARTED\020\026\022\026\n\022DOWNSCALE_FI" +
+      "NISHED\020\027\022\024\n\020DOWNSCALE_FAILED\020\030\022\035\n\031RENEW_" +
+      "PUBLIC_CERT_STARTED\020\031\022\036\n\032RENEW_PUBLIC_CE" +
+      "RT_FINISHED\020\032\022\034\n\030RENEW_PUBLIC_CERT_FAILE" +
+      "D\020\033\022\'\n#RENEW_CLUSTER_INTERNAL_CERT_START" +
+      "ED\020\034\022(\n$RENEW_CLUSTER_INTERNAL_CERT_FINI" +
+      "SHED\020\035\022&\n\"RENEW_CLUSTER_INTERNAL_CERT_FA" +
+      "ILED\020\036\022\022\n\016BACKUP_STARTED\020\037\022\023\n\017BACKUP_FIN" +
+      "ISHED\020 \022\021\n\rBACKUP_FAILED\020!\022!\n\035DIAGNOSTIC" +
+      "_COLLECTION_STARTED\020\"\022\"\n\036DIAGNOSTIC_COLL" +
+      "ECTION_FINISHED\020#\022 \n\034DIAGNOSTIC_COLLECTI" +
+      "ON_FAILED\020$\"\343\002\n\023CDPOperationDetails\022\021\n\ta" +
+      "ccountId\030\001 \001(\t\022\023\n\013resourceCrn\030\002 \001(\t\022\024\n\014r" +
+      "esourceName\030\003 \001(\t\022\024\n\014initiatorCrn\030\004 \001(\t\022" +
+      "\032\n\022applicationVersion\030\005 \001(\t\022G\n\030cdpReques" +
+      "tProcessingStep\030\006 \001(\0162%.usage.CDPRequest" +
+      "ProcessingStep.Value\022\016\n\006flowId\030\007 \001(\t\022\023\n\013" +
+      "flowChainId\030\010 \001(\t\022\021\n\tflowState\030\t \001(\t\022\025\n\r" +
+      "correlationId\030\n \001(\t\022D\n\017environmentType\030\013" +
+      " \001(\0162+.usage.CDPEnvironmentsEnvironmentT" +
+      "ype.Value\"\335\002\n\025CDPEnvironmentDetails\022D\n\017e" +
+      "nvironmentType\030\001 \001(\0162+.usage.CDPEnvironm" +
+      "entsEnvironmentType.Value\022\016\n\006region\030\002 \001(" +
+      "\t\022!\n\031numberOfAvailabilityZones\030\003 \001(\005\022\031\n\021" +
+      "availabilityZones\030\004 \001(\t\0220\n\016networkDetail" +
+      "s\030\005 \001(\0132\030.usage.CDPNetworkDetails\0223\n\naws" +
+      "Details\030\006 \001(\0132\037.usage.CDPEnvironmentAwsD" +
+      "etails\0227\n\014azureDetails\030\007 \001(\0132!.usage.CDP" +
+      "EnvironmentAzureDetails\022\020\n\010userTags\030\010 \001(" +
+      "\t\"0\n\021CDPFreeIPADetails\022\r\n\005nodes\030\001 \001(\005\022\014\n" +
+      "\004spot\030\002 \001(\010\"9\n\032CDPEnvironmentAzureDetail" +
+      "s\022\033\n\023singleResourceGroup\030\001 \001(\010\"\032\n\030CDPEnv" +
+      "ironmentAwsDetails\"a\n%CDPEnvironmentTele" +
+      "metryFeatureDetails\022\031\n\021workloadAnalytics" +
+      "\030\001 \001(\t\022\035\n\025clusterLogsCollection\030\002 \001(\t\"J\n" +
+      "\017CDPProxyDetails\022\r\n\005proxy\030\001 \001(\010\022\020\n\010proto" +
+      "col\030\002 \001(\t\022\026\n\016authentication\030\003 \001(\t\"\211\002\n\021CD" +
+      "PNetworkDetails\022\023\n\013networkType\030\001 \001(\t\022\024\n\014" +
+      "connectivity\030\002 \001(\t\022\033\n\023numberPublicSubnet" +
+      "s\030\003 \001(\005\022\034\n\024numberPrivateSubnets\030\004 \001(\005\022\037\n" +
+      "\027serviceEndpointCreation\030\005 \001(\t\022,\n\014proxyD" +
+      "etails\030\006 \001(\0132\026.usage.CDPProxyDetails\022#\n\033" +
+      "publicEndpointAccessGateway\030\007 \001(\t\022\032\n\022sec" +
+      "urityAccessType\030\010 \001(\t\"\203\002\n\027CDPEnvironment" +
       "Requested\0224\n\020operationDetails\030\001 \001(\0132\032.us" +
-      "age.CDPOperationDetails\022\026\n\016environmentCr" +
-      "n\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage." +
-      "CDPClusterDetails\"\343\001\n\027CDPDatahubStatusCh" +
-      "anged\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
-      "CDPOperationDetails\0220\n\toldStatus\030\002 \001(\0162\035" +
-      ".usage.CDPClusterStatus.Value\0220\n\tnewStat" +
-      "us\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022" +
-      ".\n\rstatusDetails\030\004 \001(\0132\027.usage.CDPStatus" +
-      "Details\"y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(" +
-      "\t\022\026\n\016detailedStatus\030\002 \001(\t\022\036\n\026clusterCrea" +
-      "tionStarted\030\003 \001(\004\022\037\n\027clusterCreationFini" +
-      "shed\030\004 \001(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operat" +
-      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
-      "ails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSyn" +
-      "cDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usage" +
-      ".CDPClusterDetails\022.\n\rstatusDetails\030\004 \001(" +
-      "\0132\027.usage.CDPStatusDetails\"\324\001\n\016CDPDatahu" +
-      "bSync\0224\n\020operationDetails\030\001 \001(\0132\032.usage." +
-      "CDPOperationDetails\022*\n\013syncDetails\030\002 \001(\013" +
-      "2\025.usage.CDPSyncDetails\0220\n\016clusterDetail" +
-      "s\030\003 \001(\0132\030.usage.CDPClusterDetails\022.\n\rsta" +
-      "tusDetails\030\004 \001(\0132\027.usage.CDPStatusDetail" +
-      "sBV\n-com.cloudera.thunderhead.service.co" +
-      "mmon.usageB\nUsageProtoZ\031com/cloudera/cdp" +
-      "/protobufb\006proto3"
+      "age.CDPOperationDetails\0228\n\022environmentDe" +
+      "tails\030\002 \001(\0132\034.usage.CDPEnvironmentDetail" +
+      "s\022M\n\027telemetryFeatureDetails\030\003 \001(\0132,.usa" +
+      "ge.CDPEnvironmentTelemetryFeatureDetails" +
+      "\022)\n\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeIPADeta" +
+      "ils\"\326\001\n\033CDPEnvironmentStatusChanged\0224\n\020o" +
+      "perationDetails\030\001 \001(\0132\032.usage.CDPOperati" +
+      "onDetails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDP" +
+      "EnvironmentStatus.Value\0224\n\tnewStatus\030\003 \001" +
+      "(\0162!.usage.CDPEnvironmentStatus.Value\022\025\n" +
+      "\rfailureReason\030\004 \001(\t\"8\n\017CDPImageDetails\022" +
+      "\017\n\007imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t" +
+      "\n\017CDPClusterShape\022\033\n\023clusterTemplateName" +
+      "\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022hostGroupNodeCo" +
+      "unt\030\003 \001(\t\022\031\n\021definitionDetails\030\004 \001(\t\"\206\001\n" +
+      "\021CDPVersionDetails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n" +
+      "\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n" +
+      "\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t" +
+      "\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterDetails\022,\n\014c" +
+      "lusterShape\030\001 \001(\0132\026.usage.CDPClusterShap" +
+      "e\0220\n\016versionDetails\030\002 \001(\0132\030.usage.CDPVer" +
+      "sionDetails\022,\n\014imageDetails\030\003 \001(\0132\026.usag" +
+      "e.CDPImageDetails\022\020\n\010userTags\030\004 \001(\t\"\223\001\n\020" +
+      "CDPStatusDetails\022\023\n\013stackStatus\030\001 \001(\t\022\033\n" +
+      "\023stackDetailedStatus\030\002 \001(\t\022\031\n\021stackStatu" +
+      "sReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004 \001(\t\022\033\n\023" +
+      "clusterStatusReason\030\005 \001(\t\"1\n\023CDPDatalake" +
+      "Features\022\032\n\003raz\030\001 \001(\0132\r.usage.CDPRaz\"\030\n\006" +
+      "CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPDatalakeRe" +
+      "quested\0224\n\020operationDetails\030\001 \001(\0132\032.usag" +
+      "e.CDPOperationDetails\022\026\n\016environmentCrn\030" +
+      "\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CD" +
+      "PClusterDetails\022,\n\010features\030\004 \001(\0132\032.usag" +
+      "e.CDPDatalakeFeatures\"\344\001\n\030CDPDatalakeSta" +
+      "tusChanged\0224\n\020operationDetails\030\001 \001(\0132\032.u" +
+      "sage.CDPOperationDetails\0220\n\toldStatus\030\002 " +
+      "\001(\0162\035.usage.CDPClusterStatus.Value\0220\n\tne" +
+      "wStatus\030\003 \001(\0162\035.usage.CDPClusterStatus.V" +
+      "alue\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDPS" +
+      "tatusDetails\"\225\001\n\023CDPDatahubRequested\0224\n\020" +
+      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
+      "ionDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016cl" +
+      "usterDetails\030\003 \001(\0132\030.usage.CDPClusterDet" +
+      "ails\"\343\001\n\027CDPDatahubStatusChanged\0224\n\020oper" +
+      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
+      "etails\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClu" +
+      "sterStatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.us" +
+      "age.CDPClusterStatus.Value\022.\n\rstatusDeta" +
+      "ils\030\004 \001(\0132\027.usage.CDPStatusDetails\"y\n\016CD" +
+      "PSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016detailed" +
+      "Status\030\002 \001(\t\022\036\n\026clusterCreationStarted\030\003" +
+      " \001(\004\022\037\n\027clusterCreationFinished\030\004 \001(\004\"\325\001" +
+      "\n\017CDPDatalakeSync\0224\n\020operationDetails\030\001 " +
+      "\001(\0132\032.usage.CDPOperationDetails\022*\n\013syncD" +
+      "etails\030\002 \001(\0132\025.usage.CDPSyncDetails\0220\n\016c" +
+      "lusterDetails\030\003 \001(\0132\030.usage.CDPClusterDe" +
+      "tails\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDP" +
+      "StatusDetails\"\324\001\n\016CDPDatahubSync\0224\n\020oper" +
+      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
+      "etails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPS" +
+      "yncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usa" +
+      "ge.CDPClusterDetails\022.\n\rstatusDetails\030\004 " +
+      "\001(\0132\027.usage.CDPStatusDetails\"8\n\030CDPDFCat" +
+      "alogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004" +
+      "FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCreated\022\022" +
+      "\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n" +
+      "\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFCa" +
+      "talogArtifactType.Value\"\206\001\n\033CDPDFCatalog" +
+      "ArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\ta" +
+      "ccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(" +
+      "\0162%.usage.CDPDFCatalogArtifactType.Value" +
+      "\"k\n\"CDPDFCatalogArtifactVersionCreated\022\021" +
+      "\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n" +
+      "\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CDPDFCa" +
+      "talogArtifactVersionDeleted\022\021\n\tversionId" +
+      "\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022" +
+      "\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFServiceStatu" +
+      "s\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_REQUEST" +
+      "ED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENABLE_C" +
+      "OMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DISABLE" +
+      "_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS\020\006\022\025\n" +
+      "\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAILED\020\010" +
+      "\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PROG" +
+      "RESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE_COMP" +
+      "LETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n\002id\030\001" +
+      " \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022\n\n" +
+      "workflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n\025CDPD" +
+      "FServiceRequested\0226\n\020operationDetails\030\001 " +
+      "\001(\0132\034.usage.CDPDFOperationDetails\022\026\n\016env" +
+      "ironmentCrn\030\002 \001(\t\022D\n\017environmentType\030\003 \001" +
+      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
+      "e.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010minNode" +
+      "s\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sServerVe" +
+      "rsion\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016publicEn" +
+      "dpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n \001(\010\022/" +
+      "\n\006status\030\013 \001(\0162\037.usage.CDPDFServiceStatu" +
+      "s.Value\"\322\001\n\031CDPDFServiceStatusChanged\0226\n" +
+      "\020operationDetails\030\001 \001(\0132\034.usage.CDPDFOpe" +
+      "rationDetails\0222\n\toldStatus\030\002 \001(\0162\037.usage" +
+      ".CDPDFServiceStatus.Value\0222\n\tnewStatus\030\003" +
+      " \001(\0162\037.usage.CDPDFServiceStatus.Value\022\025\n" +
+      "\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundleInit" +
+      "iated\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDP" +
+      "UDXBundleDetails\022\024\n\014initiatorCrn\030\002 \001(\t\022\022" +
+      "\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleReceiv" +
+      "ed\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPUDX" +
+      "BundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006status\030\003 " +
+      "\001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccountId\030" +
+      "\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentCrn\030\003 " +
+      "\001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 \001(\tBV" +
+      "\n-com.cloudera.thunderhead.service.commo" +
+      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
+      "otobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -63529,7 +80512,7 @@ public final class UsageProto {
     internal_static_usage_Event_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_Event_descriptor,
-        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserDeleted", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusIamAccessTokenCreated", "AltusIamAccessTokenDeleted", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "CdpCMLWorkspaceRequested", "CdpCMLWorkspaceStatusChanged", "CdpEnvironmentRequested", "CdpEnvironmentStatusChanged", "CdpDatalakeRequested", "CdpDatalakeStatusChanged", "CdpDatahubRequested", "CdpDatahubStatusChanged", "CdpDatalakeSync", "CdpDatahubSync", "Details", });
+        new java.lang.String[] { "Id", "Timestamp", "Version", "AltusIamAccountCreated", "AltusIamUserCreated", "AltusIamUserUpdated", "AltusIamUserDeleted", "AltusIamUserInteractiveLogin", "AltusIamUserInteractiveLoginFailure", "AltusIamMachineUserCreated", "AltusIamMachineUserDeleted", "AltusIamAccessKeyCreated", "AltusIamAccessKeyDeleted", "AltusIamAccessTokenCreated", "AltusIamAccessTokenDeleted", "CdpDatalakeClusterRequested", "CdpDatalakeClusterStatusChanged", "CdpDatahubClusterRequested", "CdpDatahubClusterStatusChanged", "CdpCMLWorkspaceRequested", "CdpCMLWorkspaceStatusChanged", "CdpEnvironmentRequested", "CdpEnvironmentStatusChanged", "CdpDatalakeRequested", "CdpDatalakeStatusChanged", "CdpDatahubRequested", "CdpDatahubStatusChanged", "CdpDatalakeSync", "CdpDatahubSync", "CdpDFCatalogArtifactCreated", "CdpDFCatalogArtifactDeleted", "CdpDFCatalogArtifactVersionCreated", "CdpDFCatalogArtifactVersionDeleted", "CdpDFServiceRequested", "CdpDFServiceStatusChanged", "CdpUDXBundleInitiated", "CdpUDXBundleReceived", "Details", });
     internal_static_usage_AltusIamAccountType_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_usage_AltusIamAccountType_fieldAccessorTable = new
@@ -63667,13 +80650,13 @@ public final class UsageProto {
     internal_static_usage_CDPCMLWorkspaceRequested_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceRequested_descriptor,
-        new java.lang.String[] { "Crn", "AccountId", "WorkspaceName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "CreatorCrn", "CdpCMLAWSWorkspaceMetadata", "CdpCMLAzureWorkspaceMetadata", "WorkspaceVersion", "Metadata", });
+        new java.lang.String[] { "Crn", "AccountId", "WorkspaceName", "EnvironmentType", "EnvironmentCrn", "CdpdVersion", "CreatorCrn", "CdpCMLAWSWorkspaceMetadata", "CdpCMLAzureWorkspaceMetadata", "WorkspaceVersion", "RequestId", "UserTags", "Metadata", });
     internal_static_usage_CDPCMLWorkspaceStatusChanged_descriptor =
       getDescriptor().getMessageTypes().get(24);
     internal_static_usage_CDPCMLWorkspaceStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPCMLWorkspaceStatusChanged_descriptor,
-        new java.lang.String[] { "Crn", "OldStatus", "NewStatus", "FailureReason", "FromVersion", "ToVersion", });
+        new java.lang.String[] { "Crn", "OldStatus", "NewStatus", "FailureReason", "FromVersion", "ToVersion", "RequestId", "LiftieId", "UserTags", });
     internal_static_usage_CDPRequestProcessingStep_descriptor =
       getDescriptor().getMessageTypes().get(25);
     internal_static_usage_CDPRequestProcessingStep_fieldAccessorTable = new
@@ -63703,7 +80686,7 @@ public final class UsageProto {
     internal_static_usage_CDPEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentDetails_descriptor,
-        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "NetworkDetails", "AwsDetails", "AzureDetails", });
+        new java.lang.String[] { "EnvironmentType", "Region", "NumberOfAvailabilityZones", "AvailabilityZones", "NetworkDetails", "AwsDetails", "AzureDetails", "UserTags", });
     internal_static_usage_CDPFreeIPADetails_descriptor =
       getDescriptor().getMessageTypes().get(30);
     internal_static_usage_CDPFreeIPADetails_fieldAccessorTable = new
@@ -63775,7 +80758,7 @@ public final class UsageProto {
     internal_static_usage_CDPClusterDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterDetails_descriptor,
-        new java.lang.String[] { "ClusterShape", "VersionDetails", "ImageDetails", });
+        new java.lang.String[] { "ClusterShape", "VersionDetails", "ImageDetails", "UserTags", });
     internal_static_usage_CDPStatusDetails_descriptor =
       getDescriptor().getMessageTypes().get(42);
     internal_static_usage_CDPStatusDetails_fieldAccessorTable = new
@@ -63836,6 +80819,78 @@ public final class UsageProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubSync_descriptor,
         new java.lang.String[] { "OperationDetails", "SyncDetails", "ClusterDetails", "StatusDetails", });
+    internal_static_usage_CDPDFCatalogArtifactType_descriptor =
+      getDescriptor().getMessageTypes().get(52);
+    internal_static_usage_CDPDFCatalogArtifactType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFCatalogArtifactType_descriptor,
+        new java.lang.String[] { });
+    internal_static_usage_CDPDFCatalogArtifactCreated_descriptor =
+      getDescriptor().getMessageTypes().get(53);
+    internal_static_usage_CDPDFCatalogArtifactCreated_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFCatalogArtifactCreated_descriptor,
+        new java.lang.String[] { "ArtifactId", "AccountId", "Crn", "Type", });
+    internal_static_usage_CDPDFCatalogArtifactDeleted_descriptor =
+      getDescriptor().getMessageTypes().get(54);
+    internal_static_usage_CDPDFCatalogArtifactDeleted_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFCatalogArtifactDeleted_descriptor,
+        new java.lang.String[] { "ArtifactId", "AccountId", "Crn", "Type", });
+    internal_static_usage_CDPDFCatalogArtifactVersionCreated_descriptor =
+      getDescriptor().getMessageTypes().get(55);
+    internal_static_usage_CDPDFCatalogArtifactVersionCreated_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFCatalogArtifactVersionCreated_descriptor,
+        new java.lang.String[] { "VersionId", "ArtifactId", "Crn", "AccountId", });
+    internal_static_usage_CDPDFCatalogArtifactVersionDeleted_descriptor =
+      getDescriptor().getMessageTypes().get(56);
+    internal_static_usage_CDPDFCatalogArtifactVersionDeleted_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFCatalogArtifactVersionDeleted_descriptor,
+        new java.lang.String[] { "VersionId", "ArtifactId", "Crn", "AccountId", });
+    internal_static_usage_CDPDFServiceStatus_descriptor =
+      getDescriptor().getMessageTypes().get(57);
+    internal_static_usage_CDPDFServiceStatus_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFServiceStatus_descriptor,
+        new java.lang.String[] { });
+    internal_static_usage_CDPDFOperationDetails_descriptor =
+      getDescriptor().getMessageTypes().get(58);
+    internal_static_usage_CDPDFOperationDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFOperationDetails_descriptor,
+        new java.lang.String[] { "Id", "Crn", "AccountId", "WorkflowId", "RunId", });
+    internal_static_usage_CDPDFServiceRequested_descriptor =
+      getDescriptor().getMessageTypes().get(59);
+    internal_static_usage_CDPDFServiceRequested_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFServiceRequested_descriptor,
+        new java.lang.String[] { "OperationDetails", "EnvironmentCrn", "EnvironmentType", "InstanceType", "MinNodes", "MaxNodes", "K8SServerVersion", "Version", "PublicEndpoint", "AccessRestricted", "Status", });
+    internal_static_usage_CDPDFServiceStatusChanged_descriptor =
+      getDescriptor().getMessageTypes().get(60);
+    internal_static_usage_CDPDFServiceStatusChanged_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPDFServiceStatusChanged_descriptor,
+        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "FailureReason", });
+    internal_static_usage_CDPUDXBundleInitiated_descriptor =
+      getDescriptor().getMessageTypes().get(61);
+    internal_static_usage_CDPUDXBundleInitiated_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPUDXBundleInitiated_descriptor,
+        new java.lang.String[] { "BundleDetails", "InitiatorCrn", "CaseNumber", });
+    internal_static_usage_CDPUDXBundleReceived_descriptor =
+      getDescriptor().getMessageTypes().get(62);
+    internal_static_usage_CDPUDXBundleReceived_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPUDXBundleReceived_descriptor,
+        new java.lang.String[] { "BundleDetails", "Host", "Status", });
+    internal_static_usage_CDPUDXBundleDetails_descriptor =
+      getDescriptor().getMessageTypes().get(63);
+    internal_static_usage_CDPUDXBundleDetails_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_usage_CDPUDXBundleDetails_descriptor,
+        new java.lang.String[] { "AccountId", "Uuid", "EnvironmentCrn", "ResourceCrn", "Type", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

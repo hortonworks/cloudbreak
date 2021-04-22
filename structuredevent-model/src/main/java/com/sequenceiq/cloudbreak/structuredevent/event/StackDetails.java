@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
 import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
@@ -94,6 +98,8 @@ public class StackDetails implements Serializable {
     private Long datalakeId;
 
     private Long datalakeResourceId;
+
+    private Json tags;
 
     public Long getId() {
         return id;
@@ -285,5 +291,21 @@ public class StackDetails implements Serializable {
 
     public void setImage(ImageDetails image) {
         this.image = image;
+    }
+
+    public Json getTags() {
+        return tags;
+    }
+
+    public void setTags(Json tags) {
+        this.tags = tags;
+    }
+
+    public StackTags getStackTags() {
+        if (tags != null && tags.getValue() != null) {
+            return JsonUtil.readValueOpt(tags.getValue(), StackTags.class)
+                    .orElse(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
+        }
+        return new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>());
     }
 }

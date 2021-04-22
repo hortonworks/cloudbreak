@@ -44,6 +44,7 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         }
         stackDetails.setStatusReason(source.getStatusReason());
         stackDetails.setInstanceGroups(converterUtil.convertAll(source.getInstanceGroups(), InstanceGroupDetails.class));
+        stackDetails.setTags(source.getTags());
         convertComponents(stackDetails, source);
         return stackDetails;
     }

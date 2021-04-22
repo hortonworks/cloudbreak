@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
@@ -33,4 +34,6 @@ public interface EnvironmentDetails {
     FreeIpaCreationDto getFreeIpaCreation();
 
     String getSecurityAccessType();
+
+    Map<String, String> getUserDefinedTags();
 }

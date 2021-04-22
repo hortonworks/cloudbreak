@@ -338,6 +338,10 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.tags = tags;
     }
 
+    public Map<String, String> getUserDefinedTags() {
+        return tags.getUserDefinedTags();
+    }
+
     public String getParentEnvironmentCrn() {
         return parentEnvironmentCrn;
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -93,12 +95,13 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
             }
             cdpEnvironmentDetails.setNetworkDetails(networkDetailsConverter.convert(srcEnvironmentDetails));
 
-            ParametersDto parametersDto = srcEnvironmentDetails.getParameters();
-            if (parametersDto != null) {
-                cdpEnvironmentDetails.setAwsDetails(convertAwsDetails(parametersDto));
-                cdpEnvironmentDetails.setAzureDetails(convertAzureDetails(parametersDto));
-            }
+            cdpEnvironmentDetails.setAwsDetails(convertAwsDetails(srcEnvironmentDetails.getParameters()));
+            cdpEnvironmentDetails.setAzureDetails(convertAzureDetails(srcEnvironmentDetails.getParameters()));
 
+            Map<String, String> userTags = srcEnvironmentDetails.getUserDefinedTags();
+            if (userTags != null && !userTags.isEmpty()) {
+                cdpEnvironmentDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
+            }
         }
         return cdpEnvironmentDetails.build();
     }
@@ -110,10 +113,12 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
 
     private UsageProto.CDPEnvironmentAzureDetails convertAzureDetails(ParametersDto parametersDto) {
         UsageProto.CDPEnvironmentAzureDetails.Builder builder = UsageProto.CDPEnvironmentAzureDetails.newBuilder();
-        AzureParametersDto azureParametersDto = parametersDto.getAzureParametersDto();
-        if (azureParametersDto != null) {
-            builder.setSingleResourceGroup(
-                    azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern().isSingleResourceGroup());
+        if (parametersDto != null) {
+            AzureParametersDto azureParametersDto = parametersDto.getAzureParametersDto();
+            if (azureParametersDto != null) {
+                builder.setSingleResourceGroup(
+                        azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern().isSingleResourceGroup());
+            }
         }
         return builder.build();
     }
