@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
+import java.math.BigDecimal;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -142,7 +144,7 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
         args.setEndTime(parameters.getEndTime() == null ? new DateTime().toString() : new DateTime(parameters.getEndTime()).toString());
         args.setComments(parameters.getComments());
         args.setTicketNumber(parameters.getTicketNumber());
-        args.setBundleSizeBytes(parameters.getBundleSizeBytes() == null ? Integer.MAX_VALUE : parameters.getBundleSizeBytes().intValue());
+        args.setBundleSizeBytes(parameters.getBundleSizeBytes() == null ? new BigDecimal(Long.MAX_VALUE) : parameters.getBundleSizeBytes());
         args.setEnableMonitorMetricsCollection(parameters.getEnableMonitorMetricsCollection());
         if (CollectionUtils.isNotEmpty(parameters.getRoles())) {
             args.setRoles(parameters.getRoles());

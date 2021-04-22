@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -66,7 +67,7 @@ class ClouderaManagerRoleRefreshService {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
         ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
-        Optional<Integer> generateCredentialsCommandId = apiCommandList.getItems().stream()
+        Optional<BigDecimal> generateCredentialsCommandId = apiCommandList.getItems().stream()
                 .filter(toGenerateCredentialsCommand()).map(ApiCommand::getId).findFirst();
         generateCredentialsCommandId.ifPresent(pollCredentialGeneration(stack, client));
     }
@@ -75,7 +76,7 @@ class ClouderaManagerRoleRefreshService {
         return apiCommand -> GENERATE_CREDENTIALS_COMMAND_NAME.equals(apiCommand.getName());
     }
 
-    private Consumer<Integer> pollCredentialGeneration(Stack stack, ApiClient client) {
+    private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
         return id -> {
             LOGGER.debug("Generate Credentials command is still active.");
             clouderaManagerPollingServiceProvider.startPollingCmGenerateCredentials(stack, client, id);

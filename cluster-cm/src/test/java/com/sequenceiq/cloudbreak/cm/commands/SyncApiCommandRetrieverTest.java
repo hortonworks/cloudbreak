@@ -8,6 +8,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,7 +71,7 @@ public class SyncApiCommandRetrieverTest {
         given(activeCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(new ArrayList<>());
         given(recentCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(createSampleCommands());
         // WHEN
-        Optional<Integer> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
+        Optional<BigDecimal> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         // THEN
         assertEquals(2L, result.get().longValue());
         verify(clustersResourceApi, times(1)).listActiveCommandsWithHttpInfo(anyString(), isNull());
@@ -85,7 +86,7 @@ public class SyncApiCommandRetrieverTest {
         given(clustersResourceApi.listActiveCommandsWithHttpInfo(anyString(), isNull()))
                 .willReturn(createApiCommandListResponse());
         // WHEN
-        Optional<Integer> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
+        Optional<BigDecimal> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         // THEN
         assertEquals(5L, result.get().longValue());
     }
@@ -98,7 +99,7 @@ public class SyncApiCommandRetrieverTest {
                 .willReturn(createApiCommandListResponse());
         given(recentCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(createSampleCommands());
         // WHEN
-        Optional<Integer> result = underTest.getLastFinishedCommandId(
+        Optional<BigDecimal> result = underTest.getLastFinishedCommandId(
                 COMMAND_NAME, clustersResourceApi, stack);
         // THEN
         assertEquals(2L, result.get().longValue());
@@ -115,7 +116,7 @@ public class SyncApiCommandRetrieverTest {
         given(activeCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(new ArrayList<>());
         given(recentCommandTableResource.getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders)).willReturn(new ArrayList<>());
         // WHEN
-        Optional<Integer> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
+        Optional<BigDecimal> result = underTest.getCommandId(COMMAND_NAME, clustersResourceApi, stack);
         // THEN
         assertTrue(result.isEmpty());
         verify(activeCommandTableResource, times(1)).getCommands(COMMAND_NAME, clustersResourceApi, emptyHeaders);
@@ -129,17 +130,17 @@ public class SyncApiCommandRetrieverTest {
     private ApiResponse<ApiCommandList> createApiCommandListResponse(int statusCode) {
         ApiCommandList commandList = new ApiCommandList();
         ApiCommand command1 = new ApiCommand();
-        command1.setId(4);
+        command1.setId(new BigDecimal(4L));
         command1.setName("DeployClusterClientConfig");
         command1.setSuccess(true);
         command1.setStartTime(new DateTime(2000, 1, 1, 1, 1, 1).toString());
         ApiCommand command2 = new ApiCommand();
-        command2.setId(5);
+        command2.setId(new BigDecimal(5L));
         command2.setName("DeployClusterClientConfig");
         command2.setSuccess(true);
         command2.setStartTime(new DateTime(2000, 1, 1, 1, 1, 2).toString());
         ApiCommand command3 = new ApiCommand();
-        command3.setId(6);
+        command3.setId(new BigDecimal(6L));
         command3.setName("RestartServices");
         command3.setSuccess(true);
         command3.setStartTime(new DateTime(2000, 1, 1, 1, 1, 3).toString());

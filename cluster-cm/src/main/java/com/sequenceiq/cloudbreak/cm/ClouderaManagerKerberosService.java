@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -69,7 +70,7 @@ public class ClouderaManagerKerberosService {
             ApiCommand generateCredentials = clouderaManagerResourceApi.generateCredentialsCommand();
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, generateCredentials.getId());
             List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
-            Integer deployClusterConfigId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
+            BigDecimal deployClusterConfigId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
             clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, deployClusterConfigId);
             modificationService.startCluster();
         }

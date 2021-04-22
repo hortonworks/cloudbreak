@@ -1,5 +1,6 @@
 package com.sequenceiq.it.util.cleanup;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -49,7 +50,7 @@ public class ParcelMockActivatorUtil {
             apiParcel.setProduct(product.getName());
             apiParcel.setStage("ACTIVATED");
             ApiParcelState state = new ApiParcelState();
-            state.setCount(0);
+            state.setCount(new BigDecimal(0));
             apiParcel.setState(state);
             return apiParcel;
         }).collect(Collectors.toList());

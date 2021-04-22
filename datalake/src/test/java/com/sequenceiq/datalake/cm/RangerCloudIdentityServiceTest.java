@@ -10,17 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -30,6 +19,17 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncState;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class RangerCloudIdentityServiceTest {
@@ -55,7 +55,7 @@ class RangerCloudIdentityServiceTest {
     @Test
     public void testSetAzureCloudIdentityMappingSuccessSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
-        when(apiCommand.getId()).thenReturn(0);
+        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(apiCommand.getSuccess()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
@@ -65,7 +65,7 @@ class RangerCloudIdentityServiceTest {
     @Test
     public void testSetAzureCloudIdentityMappingActiveSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
-        when(apiCommand.getId()).thenReturn(0);
+        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(apiCommand.getActive()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);
@@ -75,7 +75,7 @@ class RangerCloudIdentityServiceTest {
     @Test
     public void testSetAzureCloudIdentityMappingFailSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
-        when(apiCommand.getId()).thenReturn(0);
+        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
         when(apiCommand.getSuccess()).thenReturn(false);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(sdxStatus);

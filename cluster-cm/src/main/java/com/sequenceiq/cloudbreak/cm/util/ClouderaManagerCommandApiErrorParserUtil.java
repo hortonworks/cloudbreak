@@ -55,7 +55,7 @@ public class ClouderaManagerCommandApiErrorParserUtil {
                     .forEach(cmd -> errors.addAll(getErrors(cmd, commandsResourceApi)));
 
             if (errors.isEmpty() && StringUtils.isNotEmpty(apiCommand.getResultMessage())) {
-                String reason = String.format("Command [%s], with id [%s] failed: %s",
+                String reason = String.format("Command [%s], with id [%.0f] failed: %s",
                         apiCommand.getName(), apiCommand.getId(), apiCommand.getResultMessage());
                 errors.add(reason);
             }

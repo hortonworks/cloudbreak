@@ -91,12 +91,12 @@ public class RangerCloudIdentityService {
         return checkIfUnapplicable(sdxCluster).orElseGet(() -> setAzureCloudIdentityMapping(envCrn, sdxCluster.get(), azureUserMapping));
     }
 
-    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, int commandId) {
+    public RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(String envCrn, long commandId) {
         Optional<SdxCluster> sdxCluster = getSdxCluster(envCrn);
         return checkIfUnapplicable(sdxCluster).orElseGet(() -> getRangerCloudIdentitySyncStatus(sdxCluster.get(), commandId));
     }
 
-    private RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(SdxCluster sdxCluster, int commandId) {
+    private RangerCloudIdentitySyncStatus getRangerCloudIdentitySyncStatus(SdxCluster sdxCluster, long commandId) {
         try {
             ApiCommand apiCommand = clouderaManagerRangerUtil.getApiCommand(sdxCluster.getStackCrn(), commandId);
             return toRangerCloudIdentitySyncStatus(apiCommand);
