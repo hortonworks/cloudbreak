@@ -105,6 +105,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @DisableCheckPermissions
     public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, String environmentCrn) {
+        measure(() -> blueprintService.updateDefaultBlueprintCollection(workspaceId), LOGGER, "Blueprints fetched in {}ms");
+        measure(() -> clusterTemplateService.updateDefaultClusterTemplates(workspaceId), LOGGER, "Cluster templates fetched in {}ms");
         List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
         Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
         Optional<String> runtimeVersion = sdxClusters.stream()

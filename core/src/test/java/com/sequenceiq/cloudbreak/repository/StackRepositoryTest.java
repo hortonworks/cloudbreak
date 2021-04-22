@@ -124,6 +124,7 @@ class StackRepositoryTest {
             ig1im1.setInstanceGroup(ig1);
             ig1im1.setInstanceStatus(InstanceStatus.CREATED);
             ig1im1.setImage(createImage(imageId));
+            ig1im1.setInstanceStatus(InstanceStatus.CREATED);
             ig1.setInstanceMetaData(Set.of(ig1im1));
 
             final InstanceGroup ig2 = new InstanceGroup();

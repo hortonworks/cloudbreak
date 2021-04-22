@@ -213,7 +213,7 @@ public class StackOperationServiceTest {
 
         when(transactionService.required(any(Supplier.class))).thenReturn(null);
 
-        underTest.updateNodeCount(stack, adjustment, false, new User());
+        underTest.updateNodeCount(stack, adjustment, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
     }
 }

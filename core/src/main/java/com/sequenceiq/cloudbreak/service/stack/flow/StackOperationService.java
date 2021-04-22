@@ -91,14 +91,14 @@ public class StackOperationService {
     private DataLakeStatusCheckerService dataLakeStatusCheckerService;
 
     public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
-        InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack, workspaceId, user);
+        InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
         return flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
     }
 
     public FlowIdentifier removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
-            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack, workspaceId, user);
+            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
         return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
@@ -198,7 +198,7 @@ public class StackOperationService {
         }
     }
 
-    public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent, User user) {
+    public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent) {
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
@@ -206,17 +206,23 @@ public class StackOperationService {
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateStackStatus(stackWithLists);
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
                 updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 if (withClusterEvent) {
                     updateNodeCountValidator.validateClusterStatus(stackWithLists);
-                    updateNodeCountValidator.validateHostGroupAdjustment(instanceGroupAdjustmentJson, stackWithLists,
+                    updateNodeCountValidator.validateHostGroupAdjustment(
+                            instanceGroupAdjustmentJson,
+                            stackWithLists,
                             instanceGroupAdjustmentJson.getScalingAdjustment());
                     updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
                     stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED);
-                    return flowManager.triggerStackUpscale(stackWithLists.getId(), instanceGroupAdjustmentJson, withClusterEvent);
+                    return flowManager.triggerStackUpscale(
+                            stackWithLists.getId(),
+                            instanceGroupAdjustmentJson,
+                            withClusterEvent);
                 } else {
                     stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED);
                     return flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);

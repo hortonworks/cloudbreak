@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.distrox.api.v1.distrox.model.CloudPlatformProvider;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -46,6 +47,10 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
+
+    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE,
+            allowableValues = "ALLOWED,FORBIDDEN,ONLY_UPSCALE,ONLY_DOWNSCALE")
+    private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
     public int getNodeCount() {
         return nodeCount;
@@ -113,5 +118,13 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
 
     public void setRecoveryMode(RecoveryMode recoveryMode) {
         this.recoveryMode = recoveryMode;
+    }
+
+    public ScalabilityOption getScalabilityOption() {
+        return scalabilityOption;
+    }
+
+    public void setScalabilityOption(ScalabilityOption scalabilityOption) {
+        this.scalabilityOption = scalabilityOption;
     }
 }
