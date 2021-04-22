@@ -85,6 +85,22 @@ message Event {
     CDPDatalakeSync cdpDatalakeSync = 36;
     // Sync event for a CDP Datahub cluster
     CDPDatahubSync cdpDatahubSync = 37;
+    // A CDP DF Catalog Artifact was created
+    CDPDFCatalogArtifactCreated cdpDFCatalogArtifactCreated = 40;
+    // A CDP DF Catalog Artifact was deleted
+    CDPDFCatalogArtifactDeleted cdpDFCatalogArtifactDeleted = 41;
+    // A CDP DF Catalog Artifact version was created
+    CDPDFCatalogArtifactVersionCreated cdpDFCatalogArtifactVersionCreated = 42;
+    // A CDP DF Catalog Artifact version was deleted
+    CDPDFCatalogArtifactVersionDeleted cdpDFCatalogArtifactVersionDeleted = 43;
+    // A CDP DataFlow Service was requested to be enabled, updated, or disabled.
+    CDPDFServiceRequested cdpDFServiceRequested = 44;
+    // A CDP DataFlow Service's status changed.
+    CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;
+    // A CDP UDX Bundle was initiated
+    CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;
+    // A CDP UDX Bundle was received
+    CDPUDXBundleReceived cdpUDXBundleReceived = 47;
   }
 }
 
@@ -450,6 +466,13 @@ message CDPCMLWorkspaceStatus {
     UPGRADE_FINISHED = 21;
     // The status when a workspace failed to upgrade.
     UPGRADE_FAILED = 22;
+
+    // The status when the pre-flight validation of a workspace request is started.
+    VALIDATION_STARTED = 23;
+    // The status when the pre-flight validation of a workspace results in validation success.
+    VALIDATION_SUCCEEDED = 24;
+    // The status when the pre-flight validation of a workspace results in validation failure.
+    VALIDATION_FAILED = 25;
   }
 }
 
@@ -510,6 +533,12 @@ message CDPCMLWorkspaceRequested {
   }
   // The CML workspace version deployed.
   string workspaceVersion = 10;
+  // the request id of the create event
+  string requestId = 11;
+  // The user-defined tags for the workspace. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 12;
 }
 
 // Generated when a CDP CML workspace's status changed.
@@ -525,6 +554,14 @@ message CDPCMLWorkspaceStatusChanged {
   string failureReason = 4;
   string fromVersion = 5;
   string toVersion = 6;
+  // the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
+  string requestId = 7;
+  // the liftie cluster id to use when watching the cluster logs
+  string liftieId = 8;
+  // The user-defined tags for the workspace. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 9;
 }
 
 // The status of a CDP request
@@ -707,6 +744,10 @@ message CDPEnvironmentDetails {
   CDPEnvironmentAwsDetails awsDetails = 6;
   // Azure specific details of the environment
   CDPEnvironmentAzureDetails azureDetails = 7;
+  // The user-defined tags for the environment. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 8;
 }
 
 message CDPFreeIPADetails {
@@ -824,6 +865,10 @@ message CDPClusterDetails {
   CDPVersionDetails versionDetails = 2;
   // Image details
   CDPImageDetails imageDetails = 3;
+  // The user-defined tags for the cluster. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 4;
 }
 
 message CDPStatusDetails {
@@ -928,4 +973,180 @@ message CDPDatahubSync {
   CDPClusterDetails clusterDetails = 3;
   // Describes the detailed status of the stack and the cluster of the datahub
   CDPStatusDetails statusDetails = 4;
+}
+
+// Supported types of catalog artifacts in DF.
+message CDPDFCatalogArtifactType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // NiFi Flow
+    FLOW = 1;
+  }
+}
+
+// Generated periodically when users upload/create a new catalog artifact in DF
+message CDPDFCatalogArtifactCreated {
+  // The id of the artifact created.
+  string artifactId = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The crn of the catalog artifact.
+  string crn = 3;
+  // The type of artifact created
+  CDPDFCatalogArtifactType.Value type = 4;
+}
+
+// Generated periodically when users delete a catalog artifact in DF
+message CDPDFCatalogArtifactDeleted {
+  // The id of the artifact deleted.
+  string artifactId = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The crn of the catalog artifact.
+  string crn = 3;
+  // The type of artifact deleted
+  CDPDFCatalogArtifactType.Value type = 4;
+}
+
+// Generated periodically when users upload/create a new version of a catalog artifact in DF
+message CDPDFCatalogArtifactVersionCreated {
+  // The id of the catalog artifact version.
+  string versionId = 1;
+  // The id of the catalog artifact associated with the version.
+  string artifactId = 2;
+  // The crn of the catalog artifact version.
+  string crn = 3;
+  // The CDP account ID of the version.
+  string accountId = 4;
+}
+
+// Generated periodically when users delete a version of a catalog artifact in DF
+message CDPDFCatalogArtifactVersionDeleted {
+  // The id of the catalog artifact version.
+  string versionId = 1;
+  // The id of the catalog artifact associated with the version.
+  string artifactId = 2;
+  // The crn of the catalog artifact version.
+  string crn = 3;
+  // The CDP account ID of the version.
+  string accountId = 4;
+}
+
+// The status of a CDP DataFlow service.
+message CDPDFServiceStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status of a df service that is being requested to enable.
+    ENABLE_REQUESTED = 1;
+    // The status of a df service that is being enabled.
+    ENABLE_IN_PROGRESS = 2;
+    // The status of a df service that is available for use.
+    ENABLE_COMPLETED = 3;
+    // The status of a df service that failed to enable.
+    ENABLE_FAILED = 4;
+    // The status of a df service that is being requested to enable.
+    DISABLE_REQUESTED = 5;
+    // The status of a df service that is being disabled.
+    DISABLE_IN_PROGRESS = 6;
+    // The status of a df service that is successfully disabled.
+    DISABLE_COMPLETED = 7;
+    // The status of a df service that failed to disable.
+    DISABLE_FAILED = 8;
+    // The status of a df service that is being requested to update.
+    UPDATE_REQUESTED = 9;
+    // The status of a df service that is being updated.
+    UPDATE_IN_PROGRESS = 10;
+    // The status of a df service that failed to update.
+    UPDATE_FAILED = 11;
+    // The status of a df service was updated successfully.
+    UPDATE_COMPLETED = 12;
+  }
+}
+
+// Common items among all async workflow executions of DF.
+message CDPDFOperationDetails {
+  // The id of the resource that is the subject of the operation.
+  string id = 1;
+  // The crn of the resource that is the subject of the operation.
+  string crn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The workflow id associated with the operation
+  string workflowId = 4;
+  // The run id of workflow execution.
+  string runId = 5;
+}
+
+// Generated when DataFlow Service enable, update, or disable has been requested
+message CDPDFServiceRequested {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The crn of the CDP environment being enabled for DF.
+  string environmentCrn = 2;
+  // The environment type / cloud provider.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 3;
+  // The instance type of nodes used in the DF service
+  string instanceType = 4;
+  // Minimum number of nodes.
+  int32 minNodes = 5;
+  // Maximum number of nodes to scale to.
+  int32 maxNodes = 6;
+  // Version of k8s requested to be provisioned.
+  string k8sServerVersion = 7;
+  // Requested version of DataFlow service.
+  string version = 8;
+  // Is the load balancer publicly available on the internet?
+  bool publicEndpoint = 9;
+  // Is access restricted by ip ranges (CIDR)?
+  bool accessRestricted = 10;
+  // The initial status of the df service. Should be ENABLE_REQUESTED, UPDATE_REQUESTED, or DISABLE_REQUESTED.
+  CDPDFServiceStatus.Value status = 11;
+}
+
+message CDPDFServiceStatusChanged {
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The status of the df service before the change
+  CDPDFServiceStatus.Value oldStatus = 2;
+  // The status of the df service after the change
+  CDPDFServiceStatus.Value newStatus = 3;
+  // A failure message for the df service. This will only be set if newStatus is
+  // *_FAILED.
+  string failureReason = 4;
+}
+
+// Generated when users initiate diagnostics collection
+message CDPUDXBundleInitiated {
+  // The details for the bundle.
+  CDPUDXBundleDetails bundleDetails = 1;
+  // The CRN of the user who initiated the diagnostics collection.
+  string initiatorCrn = 2;
+  // The support case number for the diagnostics collection.
+  string caseNumber = 3;
+}
+
+// Generated when a new diagnostics bundle is received.
+message CDPUDXBundleReceived {
+  // The details for the bundle.
+  CDPUDXBundleDetails bundleDetails = 1;
+  // The host for which the bundle was collected.
+  string host = 2;
+  // The processing status of the diagnostics collection.
+  string status = 3;
+}
+
+// Details for a UDX diagnostics bundle
+message CDPUDXBundleDetails {
+  // The CDP account ID of the resource for which diagnostics is being collected.
+  string accountId = 1;
+  // The uuid for the diagnostics collection.
+  string uuid = 2;
+  // The CRN of the environment.
+  string environmentCrn = 3;
+  // The CRN of the resource for which diagnostics is being collected.
+  string resourceCrn = 4;
+  // The type of the diagnostics bundle.
+  string type = 5;
 }

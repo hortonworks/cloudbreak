@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -310,5 +311,30 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
 
         Assertions.assertEquals(1, environmentRequested.getEnvironmentDetails().getNumberOfAvailabilityZones());
         Assertions.assertEquals("availibilityzone", environmentRequested.getEnvironmentDetails().getAvailabilityZones());
+    }
+
+    @Test
+    public void testUserTags() {
+        CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
+        cdpStructuredFlowEvent.setPayload(environmentDetails);
+
+        when(environmentDetails.getUserDefinedTags()).thenReturn(null);
+        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals("", environmentRequested.getEnvironmentDetails().getUserTags());
+
+        Map<String, String> userTags = new HashMap<>();
+        when(environmentDetails.getUserDefinedTags()).thenReturn(userTags);
+        environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals("", environmentRequested.getEnvironmentDetails().getUserTags());
+
+        userTags = new HashMap<>();
+        userTags.put("key1", "value1");
+        userTags.put("key2", "value2");
+        when(environmentDetails.getUserDefinedTags()).thenReturn(userTags);
+        environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+
+        Assertions.assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", environmentRequested.getEnvironmentDetails().getUserTags());
     }
 }
