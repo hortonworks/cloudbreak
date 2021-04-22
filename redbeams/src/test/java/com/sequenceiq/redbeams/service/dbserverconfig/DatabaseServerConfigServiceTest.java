@@ -80,6 +80,11 @@ public class DatabaseServerConfigServiceTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
+    private static final Crn CLUSTER_CRN = Crn.builder(CrnResourceDescriptor.DATAHUB)
+            .setAccountId(ACCOUNT_ID)
+            .setResource("resource")
+            .build();
+
     private static final Crn SERVER_CRN = Crn.builder(CrnResourceDescriptor.DATABASE_SERVER)
             .setAccountId(ACCOUNT_ID)
             .setResource("resource")
@@ -425,4 +430,40 @@ public class DatabaseServerConfigServiceTest {
         assertNotEquals(server.getConnectionUserName(), databaseUserName);
         assertEquals(PASSWORD, db.getConnectionPassword().getRaw());
     }
+
+    @Test
+    public void testGetByClusterCrnFound() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.of(server));
+
+        DatabaseServerConfig foundServer = underTest.getByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+
+        assertEquals(server, foundServer);
+    }
+
+    @Test
+    public void testGetByClusterCrnNotFound() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> underTest.getByClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString()));
+    }
+
+    @Test
+    public void testGetByClusterCrnOptionalFound() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.of(server));
+
+        Optional<DatabaseServerConfig> foundServer = underTest.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+
+        assertTrue(foundServer.isPresent());
+        assertEquals(server, foundServer.get());
+    }
+
+    @Test
+    public void testGetByClusterCrnNotOptionalFound() {
+        when(repository.findByEnvironmentIdAndClusterCrn(anyString(), anyString())).thenReturn(Optional.empty());
+
+        Optional<DatabaseServerConfig> foundServer = underTest.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN.toString());
+
+        assertFalse(foundServer.isPresent());
+    }
+
 }

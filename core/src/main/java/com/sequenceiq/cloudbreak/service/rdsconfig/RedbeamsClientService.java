@@ -5,6 +5,7 @@ import javax.ws.rs.NotFoundException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,30 @@ public class RedbeamsClientService {
             String message = String.format("Failed to stop DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public DatabaseServerV4Response getByClusterCrn(String environmentCrn, String clusterCrn) {
+        validateForGetByClusterCrn(environmentCrn, clusterCrn);
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.getByClusterCrn(environmentCrn, clusterCrn));
+        } catch (NotFoundException e) {
+            String message = String.format("DatabaseServer with Environment CRN %s and Cluster CRN %s was not found", environmentCrn, clusterCrn);
+            LOGGER.debug(message, e);
+            throw e;
+        } catch (WebApplicationException | ProcessingException e) {
+            String message = String.format("Failed to get DatabaseServer with Environment CRN %s and Cluster CRN %s", environmentCrn, clusterCrn);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    private void validateForGetByClusterCrn(String environmentCrn, String clusterCrn) {
+        if (StringUtils.isBlank(environmentCrn)) {
+            throw new CloudbreakServiceException("Environment CRN is empty");
+        }
+        if (StringUtils.isBlank(clusterCrn)) {
+            throw new CloudbreakServiceException("Cluster CRN is empty");
         }
     }
 }

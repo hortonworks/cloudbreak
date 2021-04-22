@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -32,6 +33,7 @@ import com.dyngr.core.AttemptResults;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.externaldatabase.DatabaseOperation;
@@ -49,7 +51,11 @@ class ExternalDatabaseServiceTest {
 
     private static final CloudPlatform CLOUD_PLATFORM = CloudPlatform.AZURE;
 
+    private static final String ENV_CRN = "envCRN";
+
     private static final String RDBMS_CRN = "rdbmsCRN";
+
+    private static final String CLUSTER_CRN = "clusterCRN";
 
     @Mock
     private RedbeamsClientService redbeamsClient;
@@ -77,6 +83,7 @@ class ExternalDatabaseServiceTest {
         underTest = new ExternalDatabaseService(redbeamsClient, clusterRepository, dbConfigs, parameterDecoratorMap, databaseObtainerService);
         environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM.name());
+        environmentResponse.setCrn(ENV_CRN);
         dbConfigs.put(CLOUD_PLATFORM, new DatabaseStackConfig("instance", "vendor", 1234));
         lenient().when(parameterDecoratorMap.get(CLOUD_PLATFORM)).thenReturn(dbServerParameterDecorator);
     }
@@ -97,12 +104,17 @@ class ExternalDatabaseServiceTest {
         DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
         createResponse.setResourceCrn(RDBMS_CRN);
         Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        cluster.setStack(stack);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(null);
         when(redbeamsClient.create(any())).thenReturn(createResponse);
         when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
                 .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
         underTest.provisionDatabase(cluster, availabilty, environmentResponse);
 
         ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
+        verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
         verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
         verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
         verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
@@ -127,6 +139,47 @@ class ExternalDatabaseServiceTest {
         ArgumentCaptor<Boolean> forceCaptor = ArgumentCaptor.forClass(Boolean.class);
         verify(redbeamsClient).deleteByCrn(eq(RDBMS_CRN), forceCaptor.capture());
         assertThat(forceCaptor.getValue()).isEqualTo(forced);
+    }
+
+    @Test
+    void provisionDatabaseWhenStackIsNullOnCluster() throws JsonProcessingException {
+        DatabaseServerStatusV4Response createResponse = new DatabaseServerStatusV4Response();
+        createResponse.setResourceCrn(RDBMS_CRN);
+        Cluster cluster = spy(new Cluster());
+        cluster.setStack(null);
+        when(redbeamsClient.create(any())).thenReturn(createResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        underTest.provisionDatabase(cluster, DatabaseAvailabilityType.NON_HA, environmentResponse);
+
+        verify(redbeamsClient, never()).getByClusterCrn(nullable(String.class), nullable(String.class));
+        ArgumentCaptor<DatabaseServerParameter> serverParameterCaptor = ArgumentCaptor.forClass(DatabaseServerParameter.class);
+        verify(redbeamsClient).create(any(AllocateDatabaseServerV4Request.class));
+        verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
+        verify(dbServerParameterDecorator).setParameters(any(), serverParameterCaptor.capture());
+        verify(clusterRepository).save(cluster);
+        DatabaseServerParameter paramValue = serverParameterCaptor.getValue();
+        assertThat(paramValue.isHighlyAvailable()).isFalse();
+    }
+
+    @Test
+    void provisionDatabaseWhenAlreadyExists() throws JsonProcessingException {
+        Cluster cluster = spy(new Cluster());
+        Stack stack = new Stack();
+        stack.setResourceCrn(CLUSTER_CRN);
+        cluster.setStack(stack);
+        DatabaseServerV4Response dbServerResponse = new DatabaseServerV4Response();
+        dbServerResponse.setCrn(RDBMS_CRN);
+        when(redbeamsClient.getByClusterCrn(nullable(String.class), nullable(String.class))).thenReturn(dbServerResponse);
+        when(databaseObtainerService.obtainAttemptResult(eq(cluster), eq(DatabaseOperation.CREATION), eq(RDBMS_CRN), eq(true)))
+                .thenReturn(AttemptResults.finishWith(new DatabaseServerV4Response()));
+        underTest.provisionDatabase(cluster, DatabaseAvailabilityType.NON_HA, environmentResponse);
+
+        verify(redbeamsClient).getByClusterCrn(ENV_CRN, CLUSTER_CRN);
+        verify(redbeamsClient, never()).create(any(AllocateDatabaseServerV4Request.class));
+        verify(dbServerParameterDecorator, never()).setParameters(any(), any());
+        verify(cluster).setDatabaseServerCrn(RDBMS_CRN);
+        verify(clusterRepository).save(cluster);
     }
 
     @Test

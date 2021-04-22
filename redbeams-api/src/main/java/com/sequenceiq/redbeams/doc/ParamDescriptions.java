@@ -25,6 +25,7 @@ public final class ParamDescriptions {
         public static final String CRNS = "CRNs of the database servers";
         public static final String NAME = "Name of the database server";
         public static final String ENVIRONMENT_CRN = "CRN of the environment of the database server(s)";
+        public static final String CLUSTER_CRN = "CRN of cluster of the database server";
 
         public static final String ALLOCATE_DATABASE_SERVER_REQUEST = ModelDescriptions.ALLOCATE_DATABASE_SERVER_REQUEST;
         public static final String CREATE_DATABASE_REQUEST = ModelDescriptions.CREATE_DATABASE_REQUEST;

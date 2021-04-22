@@ -220,8 +220,16 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
         return repository.findByResourceCrn(resourceCrn);
     }
 
-    public Optional<DatabaseServerConfig> getByClusterCrn(String clusterCrn) {
-        return repository.findByClusterCrn(clusterCrn);
+    public DatabaseServerConfig getByClusterCrn(String environmentCrn, String clusterCrn) {
+        DatabaseServerConfig databaseServerConfig = findByEnvironmentCrnAndClusterCrn(environmentCrn, clusterCrn)
+                .orElseThrow(() -> new NotFoundException(String.format("No %s found with cluster CRN '%s' in environment '%s'",
+                        DatabaseServerConfig.class.getSimpleName(), clusterCrn, environmentCrn)));
+        MDCBuilder.buildMdcContext(databaseServerConfig);
+        return databaseServerConfig;
+    }
+
+    public Optional<DatabaseServerConfig> findByEnvironmentCrnAndClusterCrn(String environmentCrn, String clusterCrn) {
+        return repository.findByEnvironmentIdAndClusterCrn(environmentCrn, clusterCrn);
     }
 
     public DatabaseServerConfig deleteByCrn(String crn) {

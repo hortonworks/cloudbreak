@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.BadRequestException;
@@ -64,17 +65,24 @@ public class ExternalDatabaseService {
 
     public void provisionDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment) {
         LOGGER.info("Create external {} database server in environment {} for DataHub {}", externalDatabase.name(), environment.getName(), cluster.getName());
-        AllocateDatabaseServerV4Request request = getDatabaseRequest(environment, externalDatabase, cluster);
         String databaseCrn;
         try {
-            databaseCrn = redbeamsClient.create(request).getResourceCrn();
+            Optional<DatabaseServerV4Response> existingDatabase = findExistingDatabase(cluster, environment.getCrn());
+            if (existingDatabase.isPresent()) {
+                String dbCrn = existingDatabase.get().getCrn();
+                LOGGER.debug("Found existing database with CRN {}", dbCrn);
+                databaseCrn = dbCrn;
+            } else {
+                LOGGER.debug("Requesting new database server creation");
+                AllocateDatabaseServerV4Request request = getDatabaseRequest(environment, externalDatabase, cluster);
+                databaseCrn = redbeamsClient.create(request).getResourceCrn();
+            }
             updateClusterWithDatabaseServerCrn(cluster, databaseCrn);
         } catch (BadRequestException badRequestException) {
             LOGGER.error("Redbeams create request failed, bad request", badRequestException);
             throw badRequestException;
         }
         waitAndGetDatabase(cluster, databaseCrn, DatabaseOperation.CREATION, true);
-
     }
 
     public void terminateDatabase(Cluster cluster, DatabaseAvailabilityType externalDatabase, DetailedEnvironmentResponse environment, boolean forced) {
@@ -122,6 +130,21 @@ public class ExternalDatabaseService {
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Database server not found on redbeams side {}", databaseCrn);
         }
+    }
+
+    private Optional<DatabaseServerV4Response> findExistingDatabase(Cluster cluster, String environmentCrn) {
+        if (cluster.getStack() != null) {
+            String clusterCrn = cluster.getStack().getResourceCrn();
+            LOGGER.debug("Trying to find existing database server for environment {} and cluster {}", environmentCrn, clusterCrn);
+            try {
+                return Optional.ofNullable(redbeamsClient.getByClusterCrn(environmentCrn, clusterCrn));
+            } catch (NotFoundException ignore) {
+                LOGGER.debug("External database in environment {} for cluster {} does not exist.", environmentCrn, cluster);
+                return Optional.empty();
+            }
+        }
+        LOGGER.warn("[INVESTIGATE] Stack is empty for cluster '{}' in environment {}", cluster.getName(), environmentCrn);
+        return Optional.empty();
     }
 
     private boolean externalDatabaseReferenceExist(String databaseCrn) {

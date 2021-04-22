@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver;
 
+import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.DENY;
+
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -75,6 +77,18 @@ public interface DatabaseServerV4Endpoint {
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
             @QueryParam("environmentCrn") String environmentCrn,
             @ApiParam(DatabaseServerParamDescriptions.NAME) @PathParam("name") String name
+    );
+
+    @GET
+    @Path("clusterCrn/{clusterCrn}")
+    @ApiOperation(value = DatabaseServerOpDescription.GET_BY_CLUSTER_CRN,
+            notes = DatabaseServerNotes.GET_BY_CLUSTER_CRN,
+            nickname = "getDatabaseServerByClusterCrn")
+    DatabaseServerV4Response getByClusterCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @NotNull @ApiParam(value = DatabaseServerParamDescriptions.ENVIRONMENT_CRN, required = true)
+            @QueryParam("environmentCrn") String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT, effect = DENY)
+            @NotNull @ApiParam(value = DatabaseServerParamDescriptions.CLUSTER_CRN, required = true) @PathParam("clusterCrn") String clusterCrn
     );
 
     @POST
