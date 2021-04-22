@@ -18,7 +18,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -32,12 +31,15 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
 
     private final EnvironmentService environmentService;
 
+    private HandlerExceptionProcessor exceptionProcessor;
+
     private final EnvironmentEncryptionService environmentEncryptionService;
 
     protected ResourceEncryptionDeleteHandler(EventSender eventSender, EnvironmentService environmentService,
-            EnvironmentEncryptionService environmentEncryptionService) {
+            EnvironmentEncryptionService environmentEncryptionService, HandlerExceptionProcessor exceptionProcessor) {
         super(eventSender);
         this.environmentService = environmentService;
+        this.exceptionProcessor = exceptionProcessor;
         this.environmentEncryptionService = environmentEncryptionService;
     }
 
@@ -67,15 +69,7 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
             });
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The {} was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = new EnvDeleteFailedEvent(environmentDto.getId(),
-                        environmentDto.getName(), e, environmentDto.getResourceCrn());
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            exceptionProcessor.handle(new HandlerFailureConjoiner(e, environmentDtoEvent, envDeleteEvent), LOGGER, eventSender(), selector());
         }
     }
 

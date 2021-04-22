@@ -24,11 +24,10 @@ import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
-import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -41,14 +40,18 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
 
     private final EnvironmentService environmentService;
 
+    private final HandlerExceptionProcessor exceptionProcessor;
+
     private final CloudPlatformConnectors cloudPlatformConnectors;
 
     private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     protected S3GuardTableDeleteHandler(EventSender eventSender, EnvironmentService environmentService,
-            CloudPlatformConnectors cloudPlatformConnectors, CredentialToCloudCredentialConverter credentialToCloudCredentialConverter) {
+            CloudPlatformConnectors cloudPlatformConnectors, CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
+            HandlerExceptionProcessor exceptionProcessor) {
         super(eventSender);
         this.environmentService = environmentService;
+        this.exceptionProcessor = exceptionProcessor;
         this.cloudPlatformConnectors = cloudPlatformConnectors;
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
     }
@@ -69,22 +72,9 @@ public class S3GuardTableDeleteHandler extends EventSenderAwareHandler<Environme
                     LOGGER.info("Environment parameters determine a non-AWS environment. DynamoDB table deletion is not necessary.");
                 }
             });
-
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The {} was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                        .withEnvironmentID(environmentDto.getId())
-                        .withException(e)
-                        .withResourceCrn(environmentDto.getResourceCrn())
-                        .withResourceName(environmentDto.getName())
-                        .build();
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            exceptionProcessor.handle(new HandlerFailureConjoiner(e, environmentDtoEvent, envDeleteEvent), LOGGER, eventSender(), selector());
         }
     }
 

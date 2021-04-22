@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -21,8 +20,11 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDelet
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdbmsDeleteHandler.class);
 
-    protected RdbmsDeleteHandler(EventSender eventSender) {
+    private HandlerExceptionProcessor exceptionProcessor;
+
+    protected RdbmsDeleteHandler(EventSender eventSender, HandlerExceptionProcessor exceptionProcessor) {
         super(eventSender);
+        this.exceptionProcessor = exceptionProcessor;
     }
 
     @Override
@@ -40,19 +42,7 @@ public class RdbmsDeleteHandler extends EventSenderAwareHandler<EnvironmentDelet
         try {
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
-            if (environmentDeletionDto.isForceDelete()) {
-                LOGGER.warn("The {} was not successful but the environment deletion was requested as force delete so " +
-                        "continue the deletion flow", selector());
-                eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
-            } else {
-                EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                        .withEnvironmentID(environmentDto.getId())
-                        .withException(e)
-                        .withResourceCrn(environmentDto.getResourceCrn())
-                        .withResourceName(environmentDto.getName())
-                        .build();
-                eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
-            }
+            exceptionProcessor.handle(new HandlerFailureConjoiner(e, environmentDtoEvent, envDeleteEvent), LOGGER, eventSender(), selector());
         }
     }
 

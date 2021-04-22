@@ -5,10 +5,12 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.slf4j.Logger;
 
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -57,6 +60,9 @@ class IdBrokerMappingsDeleteHandlerTest {
 
     @Mock
     private EnvironmentService environmentService;
+
+    @Mock
+    private HandlerExceptionProcessor mockExceptionProcessor;
 
     @Mock
     private GrpcIdbmmsClient idbmmsClient;
@@ -145,8 +151,9 @@ class IdBrokerMappingsDeleteHandlerTest {
         underTest.accept(environmentDtoEvent);
 
         verify(idbmmsClient).deleteMappings(INTERNAL_ACTOR_CRN, ENVIRONMENT_CRN, Optional.empty());
-        verify(eventSender).sendEvent(eventArgumentCaptor.capture(), headersArgumentCaptor.capture());
-        verifyEnvDeleteFailedEvent(exception);
+        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
+        verify(mockExceptionProcessor, times(1))
+                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_IDBROKER_MAPPINGS_EVENT.selector()));
     }
 
     // Lowering strictness to avoid UnnecessaryStubbingException for the stubs in setUp()
