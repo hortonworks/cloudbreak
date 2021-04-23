@@ -125,7 +125,7 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
-            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+            cloudbreakCrnClient.withUserCrn(userCrn).autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -157,7 +157,7 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             hostGroupAdjustmentJson.setValidateNodeCount(false);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint()
+            cloudbreakCrnClient.withUserCrn(userCrn).autoscaleEndpoint()
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();

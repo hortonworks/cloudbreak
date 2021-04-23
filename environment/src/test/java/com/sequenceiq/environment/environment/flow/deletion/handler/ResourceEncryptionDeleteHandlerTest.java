@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -161,6 +162,16 @@ class ResourceEncryptionDeleteHandlerTest {
     }
 
     @Test
+    void testErrorWhenDeleteEncryptionResourcesResultsInErrorWhileEnvironmentSave() {
+        Environment environment = new Environment();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(environmentService.save(environment)).thenThrow(new IllegalArgumentException("error"));
+        underTest.accept(environmentDtoEvent);
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
+        verifyEnvDeleteFailedEvent(new CloudbreakServiceException("Error occured while deleting encryption resources: error"));
+    }
+
+    @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void selector() {
         assertThat(underTest.selector()).isEqualTo("DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT");
@@ -188,7 +199,8 @@ class ResourceEncryptionDeleteHandlerTest {
         assertThat(envDeleteFailedEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(envDeleteFailedEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
         assertThat(envDeleteFailedEvent.selector()).isEqualTo(FAILED_ENV_DELETE_EVENT.selector());
-        assertThat(envDeleteFailedEvent.getException()).isSameAs(exceptionExpected);
+        assertEquals(envDeleteFailedEvent.getException().getMessage(), exceptionExpected.getMessage());
+        assertEquals(envDeleteFailedEvent.getException().getClass(), exceptionExpected.getClass());
 
         assertThat(headersArgumentCaptor.getValue()).isSameAs(headers);
     }
