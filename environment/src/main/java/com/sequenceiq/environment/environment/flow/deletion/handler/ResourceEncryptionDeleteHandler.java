@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -86,6 +87,7 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
             environmentService.save(environment);
         } catch (Exception e) {
             LOGGER.error("Failed to delete Encryption resources for environment {} with error {}", environment.getName(), e);
+            throw new CloudbreakServiceException("Error occured while deleting encryption resources: " + e.getMessage(), e);
         }
     }
 
