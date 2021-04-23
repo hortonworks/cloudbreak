@@ -39,7 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase.HbaseCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -90,7 +90,7 @@ public class CentralCmTemplateUpdaterTest {
     private BlueprintView blueprintView;
 
     @Mock
-    private S3GuardConfigProvider s3GuardConfigProvider;
+    private S3ConfigProvider s3ConfigProvider;
 
     @Mock
     private GeneralClusterConfigs generalClusterConfigs;
@@ -113,7 +113,7 @@ public class CentralCmTemplateUpdaterTest {
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
         when(templatePreparationObject.getHostgroupViews()).thenReturn(toHostgroupViews(getHostgroupMappings()));
         when(templatePreparationObject.getGeneralClusterConfigs()).thenReturn(generalClusterConfigs);
-        doNothing().when(s3GuardConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
+        doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         RDSConfig rdsConfig = TestUtil.rdsConfig(DatabaseType.HIVE);
         when(templatePreparationObject.getRdsConfigs()).thenReturn(Set.of(rdsConfig));
         when(templatePreparationObject.getRdsConfig(DatabaseType.HIVE)).thenReturn(rdsConfig);
@@ -215,7 +215,7 @@ public class CentralCmTemplateUpdaterTest {
     @Test
     public void getKafkaPropertiesWhenNoHdfsInClusterShouldPresentCoreSettings() {
         CoreConfigProvider coreConfigProvider = new CoreConfigProvider();
-        ReflectionTestUtils.setField(coreConfigProvider, "s3GuardConfigProvider", s3GuardConfigProvider);
+        ReflectionTestUtils.setField(coreConfigProvider, "s3ConfigProvider", s3ConfigProvider);
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(coreConfigProvider);
         ReflectionTestUtils.setField(cmTemplateComponentConfigProviderProcessor, "providers", cmTemplateComponentConfigProviders);
         S3FileSystem s3FileSystem = new S3FileSystem();

@@ -61,7 +61,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.cloudbreak.tracing",
         "com.sequenceiq.cloudbreak.tag",
         "com.sequenceiq.cloudbreak.filter",
-        "com.sequenceiq.cloudbreak.common"
+        "com.sequenceiq.cloudbreak.common",
+        "com.sequenceiq.cloudbreak.cloud.storage"
 },
         exclude = WebMvcMetricsAutoConfiguration.class)
 public class RedbeamsApplication {
