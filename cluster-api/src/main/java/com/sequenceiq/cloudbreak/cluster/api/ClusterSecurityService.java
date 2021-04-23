@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
 import java.security.KeyPair;
+import java.util.Optional;
 
-import com.sequenceiq.cloudbreak.dto.LdapView;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
+import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterSecurityService {
 
@@ -16,7 +18,7 @@ public interface ClusterSecurityService {
 
     void disableSecurity();
 
-    void deregisterServices(String clusterName);
+    void deregisterServices(String clusterName, Optional<DatalakeDto> datalakeDto);
 
     void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException;
 
