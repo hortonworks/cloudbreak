@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
@@ -63,6 +64,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterUpgradeAvailabilityServiceTest {
+    private static final String ACCOUNT_ID = "cloudera";
+
     private static final String CATALOG_NAME = "catalog";
 
     private static final String CATALOG_URL = "/images";
@@ -119,6 +122,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     @Mock
     private ImageFilterParamsFactory imageFilterParamsFactory;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     private boolean lockComponents;
 
@@ -391,8 +397,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setCreated(2);
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
+        when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        underTest.filterUpgradeOptions(response, request, true);
+        underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
         assertEquals(1, response.getUpgradeCandidates().size());
         assertEquals(IMAGE_ID_LAST, response.getUpgradeCandidates().get(0).getImageId());
@@ -413,7 +420,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
-        underTest.filterUpgradeOptions(response, request, true);
+        underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
         assertEquals(1, response.getUpgradeCandidates().size());
         assertEquals(IMAGE_ID, response.getUpgradeCandidates().get(0).getImageId());
@@ -434,7 +441,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(response, request, true));
+        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true));
         Assert.assertEquals("The given image (another-image-id) is not eligible for the cluster upgrade. "
                 + "Please choose an id from the following image(s): image-id-first,image-id-last", e.getMessage());
     }
@@ -454,7 +461,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
-        underTest.filterUpgradeOptions(response, request, true);
+        underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
         assertEquals(2, response.getUpgradeCandidates().size());
         assertEquals(2, response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).collect(Collectors.toSet()).size());
@@ -475,7 +482,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
-        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(response, request, true));
+        Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true));
         Assert.assertEquals("There is no image eligible for the cluster upgrade with runtime: 7.2.0. "
                 + "Please choose a runtime from the following: 7.0.2", e.getMessage());
     }
@@ -494,7 +501,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setCreated(2);
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
-        underTest.filterUpgradeOptions(response, request, true);
+        underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
         assertEquals(2, response.getUpgradeCandidates().size());
         assertTrue(response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).anyMatch(id -> id.equals(IMAGE_ID_LAST)));
@@ -515,7 +522,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         lastImageInfo.setCreated(2);
         lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
-        underTest.filterUpgradeOptions(response, request, true);
+        underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
         assertEquals(2, response.getUpgradeCandidates().size());
         assertEquals(2, response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).collect(Collectors.toSet()).size());

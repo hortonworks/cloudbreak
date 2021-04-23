@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.Upg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -44,6 +45,8 @@ import com.sequenceiq.distrox.v1.distrox.StackOperations;
 public class DistroXUpgradeAvailabilityServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bda7-be07183720d3";
+
+    private static final String ACCOUNT_ID = Crn.fromString(USER_CRN).getAccountId();
 
     private static final NameOrCrn CLUSTER = NameOrCrn.ofName("asdf");
 
@@ -74,7 +77,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
     @BeforeEach
     public void init() {
-        lenient().when(entitlementService.datahubRuntimeUpgradeEnabled("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.TRUE);
+        lenient().when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
     }
 
     @Test
@@ -92,12 +95,12 @@ public class DistroXUpgradeAvailabilityServiceTest {
         boolean result = underTest.isRuntimeUpgradeEnabled(USER_CRN);
 
         assertTrue(result);
-        verify(entitlementService).datahubRuntimeUpgradeEnabled("9d74eee4-1cad-45d7-b645-7ccf9edbb73d");
+        verify(entitlementService).datahubRuntimeUpgradeEnabled(ACCOUNT_ID);
     }
 
     @Test
     public void testVerifyRuntimeUpgradeEntitlement() {
-        when(entitlementService.datahubRuntimeUpgradeEnabled("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         UpgradeV4Request request = new UpgradeV4Request();
 
         assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN),
@@ -110,7 +113,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class), mock(ImageInfoV4Response.class)));
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
-        when(stackOperations.checkForClusterUpgrade(STACK, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -130,7 +133,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         image3.setCreated(5L);
         response.setUpgradeCandidates(List.of(image1, image2, image3));
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
-        when(stackOperations.checkForClusterUpgrade(STACK, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -154,7 +157,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image9 = createImageResponse(6L, "C");
         response.setUpgradeCandidates(List.of(image1, image2, image3, image4, image5, image6, image7, image8, image9));
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
-        when(stackOperations.checkForClusterUpgrade(STACK, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -190,7 +193,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         product.setName("CDH");
         List<ClouderaManagerProduct> products = List.of(product);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
-        when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
         when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
         when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("C"));
@@ -211,7 +214,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         Stack stackWithEnv = new Stack();
         stackWithEnv.setEnvironmentCrn("envcrn");
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
-        when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
 
         UpgradeV4Response result = underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN);
 
@@ -241,7 +244,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         product.setName("CDH");
         List<ClouderaManagerProduct> products = List.of(product);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
-        when(stackOperations.checkForClusterUpgrade(stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
+        when(stackOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
         when(stackViewService.findDatalakeViewByEnvironmentCrn(stackWithEnv.getEnvironmentCrn())).thenReturn(Optional.of(stackView));
         when(clusterComponentConfigProvider.getClouderaManagerProductDetails(1L)).thenReturn(products);
         when(stackRuntimeVersionValidator.getCdhVersionFromClouderaManagerProducts(products)).thenReturn(Optional.of("7.1.0"));

@@ -105,8 +105,7 @@ public class SdxRuntimeUpgradeService {
         return initSdxUpgrade(userCrn, imageInfoV4Responses, upgradeRequest, cluster);
     }
 
-    public boolean isRuntimeUpgradeEnabled(String userCrn) {
-        String accountId = sdxService.getAccountIdFromCrn(userCrn);
+    public boolean isRuntimeUpgradeEnabled(String accountId) {
         return entitlementService.runtimeUpgradeEnabled(accountId);
     }
 
@@ -117,18 +116,29 @@ public class SdxRuntimeUpgradeService {
 
     private SdxUpgradeResponse checkForSdxUpgradeResponse(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest,
             String clusterName, String accountId) {
-        verifyRuntimeUpgradeEntitlement(userCrn, upgradeSdxClusterRequest);
         UpgradeV4Response upgradeV4Response = ThreadBasedUserCrnProvider
                 .doAsInternalActor(() -> stackV4Endpoint.checkForClusterUpgradeByName(WORKSPACE_ID, clusterName,
                         sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(upgradeSdxClusterRequest), accountId));
-        filterSdxUpgradeResponse(upgradeSdxClusterRequest, upgradeV4Response);
-        return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4Response);
+        UpgradeV4Response filteredUpgradeV4Response = filterSdxUpgradeResponse(accountId, clusterName, upgradeSdxClusterRequest, upgradeV4Response);
+        return sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(filteredUpgradeV4Response);
     }
 
     @VisibleForTesting
-    void filterSdxUpgradeResponse(SdxUpgradeRequest upgradeSdxClusterRequest, UpgradeV4Response upgradeV4Response) {
-        List<ImageInfoV4Response> upgradeCandidates = upgradeV4Response.getUpgradeCandidates();
-        if (CollectionUtils.isNotEmpty(upgradeCandidates) && Objects.nonNull(upgradeSdxClusterRequest)) {
+    UpgradeV4Response filterSdxUpgradeResponse(String accountId, String clusterName, SdxUpgradeRequest upgradeSdxClusterRequest,
+            UpgradeV4Response upgradeV4Response) {
+        if (CollectionUtils.isNotEmpty(upgradeV4Response.getUpgradeCandidates()) && Objects.nonNull(upgradeSdxClusterRequest)) {
+            UpgradeV4Response filteredResponse =
+                    filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, clusterName, upgradeSdxClusterRequest, upgradeV4Response);
+            return filterBySdxUpgradeRequestParams(upgradeSdxClusterRequest, filteredResponse);
+        }
+        return upgradeV4Response;
+    }
+
+    private UpgradeV4Response filterBySdxUpgradeRequestParams(SdxUpgradeRequest upgradeSdxClusterRequest, UpgradeV4Response upgradeV4Response) {
+        UpgradeV4Response filteredUpgradeResponse =
+                new UpgradeV4Response(upgradeV4Response.getCurrent(), upgradeV4Response.getUpgradeCandidates(), upgradeV4Response.getReason());
+        if (CollectionUtils.isNotEmpty(filteredUpgradeResponse.getUpgradeCandidates())) {
+            List<ImageInfoV4Response> upgradeCandidates = filteredUpgradeResponse.getUpgradeCandidates();
             if (SdxUpgradeShowAvailableImages.LATEST_ONLY == upgradeSdxClusterRequest.getShowAvailableImages()) {
                 Map<String, Optional<ImageInfoV4Response>> latestImageByRuntime = upgradeCandidates.stream()
                         .collect(Collectors.groupingBy(imageInfoV4Response -> imageInfoV4Response.getComponentVersions().getCdp(),
@@ -137,16 +147,17 @@ public class SdxRuntimeUpgradeService {
                         .stream()
                         .flatMap(Optional::stream)
                         .collect(Collectors.toList());
-                upgradeV4Response.setUpgradeCandidates(latestImages);
+                filteredUpgradeResponse.setUpgradeCandidates(latestImages);
                 LOGGER.debug("Filtering for latest image per runtimes {}", latestImageByRuntime.keySet());
-
             } else if (upgradeSdxClusterRequest.isDryRun()) {
                 ImageInfoV4Response latestImage = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
-                upgradeV4Response.setUpgradeCandidates(List.of(latestImage));
+                filteredUpgradeResponse.setUpgradeCandidates(List.of(latestImage));
                 LOGGER.debug("Choosing latest image with id {} as dry-run is specified", latestImage.getImageId());
-
+            } else {
+                filteredUpgradeResponse.setUpgradeCandidates(upgradeCandidates);
             }
         }
+        return filteredUpgradeResponse;
     }
 
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
@@ -157,9 +168,49 @@ public class SdxRuntimeUpgradeService {
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
 
-    private void verifyRuntimeUpgradeEntitlement(String userCrn, SdxUpgradeRequest upgradeSdxClusterRequest) {
-        if (upgradeSdxClusterRequest != null && !Boolean.TRUE.equals(upgradeSdxClusterRequest.getLockComponents()) && !isRuntimeUpgradeEnabled(userCrn)) {
-            throw new BadRequestException("Runtime upgrade feature is not enabled");
+    private UpgradeV4Response filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(String accountId, String clusterName, SdxUpgradeRequest sdxUpgradeRequest,
+            UpgradeV4Response upgradeV4Response) {
+        UpgradeV4Response filteredUpgradeResponse =
+                new UpgradeV4Response(upgradeV4Response.getCurrent(), upgradeV4Response.getUpgradeCandidates(), upgradeV4Response.getReason());
+        if (!isRuntimeUpgradeEnabled(accountId)) {
+            if (upgradeV4Response.getCurrent() != null) {
+                List<ImageInfoV4Response> upgradeCandidates = filteredUpgradeResponse.getUpgradeCandidates();
+                String currentCdpVersion = filteredUpgradeResponse.getCurrent().getComponentVersions().getCdp();
+                LOGGER.debug("Only patch upgrade is possible on [{}] cluster for [{}] runtime as CDP_RUNTIME_UPGRADE is disabled in [{}] account.",
+                        clusterName, currentCdpVersion, accountId);
+                upgradeCandidates = upgradeCandidates.stream()
+                        .filter(upgradeCandidate -> upgradeCandidate.getComponentVersions().getCdp().equals(currentCdpVersion))
+                        .collect(Collectors.toList());
+                filteredUpgradeResponse.setUpgradeCandidates(upgradeCandidates);
+                updatePatchUpgradeReasonIfNeeded(accountId, clusterName, filteredUpgradeResponse, sdxUpgradeRequest, currentCdpVersion);
+                LOGGER.debug("Patch upgrade candidates for [{}] cluster: [{}]", clusterName, upgradeCandidates);
+            } else {
+                String message =
+                        String.format("No information about current image, cannot filter patch upgrade candidates based on it on [%s] cluster.", clusterName);
+                LOGGER.debug(message);
+                filteredUpgradeResponse.appendReason(message);
+                filteredUpgradeResponse.setUpgradeCandidates(List.of());
+            }
+        }
+        return filteredUpgradeResponse;
+    }
+
+    private void updatePatchUpgradeReasonIfNeeded(String accountId, String clusterName, UpgradeV4Response upgradeV4Response,
+            SdxUpgradeRequest sdxUpgradeRequest, String currentCdpVersion) {
+        String targetRuntime = sdxUpgradeRequest.getRuntime();
+        if (StringUtils.isNotEmpty(targetRuntime) && !currentCdpVersion.equals(targetRuntime)) {
+            String message = String.format(
+                    "Only patch upgrade is enabled in account [%s], it is not possible to upgrade from [%s] to [%s] runtime on [%s] cluster",
+                    accountId, currentCdpVersion, targetRuntime, clusterName);
+            LOGGER.info(message);
+            upgradeV4Response.setReason(message);
+        }
+        if (StringUtils.isNotEmpty(sdxUpgradeRequest.getImageId()) && upgradeV4Response.getUpgradeCandidates().isEmpty()) {
+            String message = String.format("Only patch upgrade is enabled in account [%s], the target image [%s] is not a patch upgrade." +
+                    " The version of target runtime has to be the same as the current one on [%s] cluster, current runtime: [%s]",
+                    accountId, sdxUpgradeRequest.getImageId(), clusterName, currentCdpVersion);
+            LOGGER.info(message);
+            upgradeV4Response.setReason(message);
         }
     }
 

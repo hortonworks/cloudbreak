@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
@@ -118,6 +119,9 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private LoadBalancerUpdateService loadBalancerUpdateService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -258,24 +262,26 @@ public class StackOperations implements ResourcePropertyProvider {
         return clusterCommonService.updatePillarConfiguration(nameOrCrn, workspaceId);
     }
 
-    public UpgradeV4Response checkForClusterUpgrade(@NotNull Stack stack, Long workspaceId, UpgradeV4Request request) {
+    public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, Long workspaceId, UpgradeV4Request request) {
         MDCBuilder.buildMdcContext(stack);
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
         boolean replacevms = determineReplaceVmsParameter(stack, request.getReplaceVms());
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replacevms);
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(upgradeResponse, request, stack.isDatalake());
+            clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }
-        validateDatalakeHasNoRunningDatahub(workspaceId, stack, upgradeResponse);
+        validateDatalakeHasNoRunningDatahub(accountId, workspaceId, stack, upgradeResponse);
         return upgradeResponse;
     }
 
-    public UpgradeV4Response checkForClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
-        return checkForClusterUpgrade(stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), workspaceId, request);
+    public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
+        return checkForClusterUpgrade(accountId, stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), workspaceId, request);
     }
 
-    private void validateDatalakeHasNoRunningDatahub(Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
-        if (StackType.DATALAKE == stack.getType()) {
+    private void validateDatalakeHasNoRunningDatahub(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
+        if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()) {
+            LOGGER.info("Checking that the attached DataHubs of the Datalake are in stopped state only in case if Datalake runtime upgarda is enabled" +
+                            " in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
             clusterUpgradeAvailabilityService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
         }

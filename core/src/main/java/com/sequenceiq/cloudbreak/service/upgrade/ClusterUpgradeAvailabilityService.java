@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -72,6 +73,9 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private ImageFilterParamsFactory imageFilterParamsFactory;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms) {
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents);
         upgradeOptions.setReplaceVms(replaceVms);
@@ -108,12 +112,12 @@ public class ClusterUpgradeAvailabilityService {
         return upgradeOptions;
     }
 
-    public void filterUpgradeOptions(UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {
+    public void filterUpgradeOptions(String accountId, UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {
         List<ImageInfoV4Response> upgradeCandidates = upgradeOptions.getUpgradeCandidates();
         List<ImageInfoV4Response> filteredUpgradeCandidates;
         // We would like to upgrade to latest available if no request params exist
         if ((Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) && datalake) {
-            filteredUpgradeCandidates = List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
+            filteredUpgradeCandidates = filterDatalakeUpgradeCandidates(accountId, upgradeOptions.getCurrent(), upgradeCandidates);
             LOGGER.info("No request param, defaulting to latest image {}", filteredUpgradeCandidates);
         } else {
             String requestImageId = upgradeRequest != null ? upgradeRequest.getImageId() : null;
@@ -132,6 +136,20 @@ public class ClusterUpgradeAvailabilityService {
             }
         }
         upgradeOptions.setUpgradeCandidates(filteredUpgradeCandidates);
+    }
+
+    public List<ImageInfoV4Response> filterDatalakeUpgradeCandidates(String accountId, ImageInfoV4Response currentImage,
+            List<ImageInfoV4Response> upgradeCandidates) {
+        if (entitlementService.runtimeUpgradeEnabled(accountId)) {
+            return List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
+        } else if (currentImage != null) {
+            List<ImageInfoV4Response> filteredUpdateCandidates = upgradeCandidates.stream()
+                    .filter(candidate -> candidate.getComponentVersions().getCdp().equals(currentImage.getComponentVersions().getCdp()))
+                    .collect(Collectors.toList());
+            return filteredUpdateCandidates.isEmpty() ? List.of() :
+                    List.of(filteredUpdateCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
+        }
+        return upgradeCandidates;
     }
 
     private UpgradeV4Response checkForUpgrades(Stack stack, boolean lockComponents) {

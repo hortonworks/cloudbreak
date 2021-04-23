@@ -67,7 +67,7 @@ public class DistroXUpgradeAvailabilityService {
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
         verifyRuntimeUpgradeEntitlement(userCrn, request);
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        UpgradeV4Response response = stackOperations.checkForClusterUpgrade(stack, workspaceId, request);
+        UpgradeV4Response response = stackOperations.checkForClusterUpgrade(Crn.safeFromString(userCrn).getAccountId(), stack, workspaceId, request);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(stack, request, response);
         response.setUpgradeCandidates(filteredCandidates);
         return response;
