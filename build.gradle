@@ -74,6 +74,7 @@ allprojects {
         force "org.codehaus.jackson:jackson-core-asl:1.9.13"
         force "org.codehaus.jackson:jackson-xc:1.9.13"
         force "org.testng:testng:$testNgVersion"
+        force "org.springframework:spring-messaging:$springFrameworkVersion"
       }
     }
   }
