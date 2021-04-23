@@ -63,7 +63,7 @@ public class ClouderaManagerClusterDecomissionService implements ClusterDecomiss
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }

@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -179,9 +180,9 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     }
 
     @Override
-    public void deregisterServices(String clusterName) {
+    public void deregisterServices(String clusterName, Optional<DatalakeDto> datalakeDto) {
         try {
-            clouderaManagerDeregisterService.deregisterServices(clientConfig, stack);
+            clouderaManagerDeregisterService.deregisterServices(clientConfig, stack, datalakeDto);
         } catch (Exception e) {
             LOGGER.warn("Couldn't remove services. It's possible that CM is not started.", e);
         }
@@ -251,7 +252,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
-        return clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+        return clouderaManagerApiClientProvider.getV40Client(stack.getGatewayPort(), user, password, clientConfig);
     }
 
     private void removeDefaultAdminUser(boolean ldapConfigured, Optional<String> userName) {

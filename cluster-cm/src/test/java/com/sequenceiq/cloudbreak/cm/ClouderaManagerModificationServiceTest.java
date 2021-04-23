@@ -46,7 +46,6 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
-import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
@@ -61,13 +60,13 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.cm.util.TestUtil;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -177,7 +176,7 @@ class ClouderaManagerModificationServiceTest {
 
     @Test
     void upscaleClusterListHostsException() throws Exception {
-        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null))).thenThrow(new ApiException("Failed to get hosts"));
+        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenThrow(new ApiException("Failed to get hosts"));
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -250,8 +249,8 @@ class ClouderaManagerModificationServiceTest {
     }
 
     private void setUpListClusterHosts() throws ApiException {
-        ApiHostRefList clusterHostsRef = new ApiHostRefList().items(List.of(new ApiHostRef().hostname("original")));
-        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null))).thenReturn(clusterHostsRef);
+        ApiHostList clusterHostsRef = new ApiHostList().items(List.of(new ApiHost().hostname("original")));
+        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenReturn(clusterHostsRef);
         when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
     }
 

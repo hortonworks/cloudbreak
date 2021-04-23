@@ -96,7 +96,7 @@ public class ClouderaManagerKerberosServiceTest {
         stack.setCluster(cluster);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
-        when(clouderaManagerApiClientProvider.getClient(anyInt(), anyString(), anyString(), any())).thenReturn(client);
+        when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any())).thenReturn(client);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);

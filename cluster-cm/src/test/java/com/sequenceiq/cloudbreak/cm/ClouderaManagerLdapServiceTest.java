@@ -82,7 +82,7 @@ public class ClouderaManagerLdapServiceTest {
         MockitoAnnotations.initMocks(this);
         String cmUser = cluster.getCloudbreakAmbariUser();
         String cmPassword = cluster.getCloudbreakAmbariPassword();
-        when(clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
+        when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerApiFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
         when(clouderaManagerApiFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);

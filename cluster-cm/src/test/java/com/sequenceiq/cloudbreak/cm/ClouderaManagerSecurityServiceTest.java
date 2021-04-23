@@ -204,7 +204,7 @@ public class ClouderaManagerSecurityServiceTest {
 
     private void setUpClientCreation(Cluster cluster) throws ClouderaManagerClientInitException {
         when(clouderaManagerApiClientProvider.getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31)).thenReturn(apiClient);
-        when(clouderaManagerApiClientProvider.getClient(GATEWAY_PORT, cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), clientConfig))
+        when(clouderaManagerApiClientProvider.getV40Client(GATEWAY_PORT, cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), clientConfig))
                 .thenReturn(apiClient);
     }
 
@@ -226,7 +226,7 @@ public class ClouderaManagerSecurityServiceTest {
     private void verifyClientCreation(UsersResourceApi usersResourceApi, Cluster cluster) throws ClouderaManagerClientInitException, ApiException {
         verify(clouderaManagerApiClientProvider).getDefaultClient(GATEWAY_PORT, clientConfig, ClouderaManagerApiClientProvider.API_V_31);
         verify(clouderaManagerApiClientProvider)
-                .getClient(GATEWAY_PORT, cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), clientConfig);
+                .getV40Client(GATEWAY_PORT, cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), clientConfig);
 
         verify(clouderaManagerApiClientProvider).getClouderaManagerClient(clientConfig, GATEWAY_PORT, cluster.getCloudbreakAmbariUser(),
                 cluster.getCloudbreakAmbariPassword(), ClouderaManagerApiClientProvider.API_V_31);

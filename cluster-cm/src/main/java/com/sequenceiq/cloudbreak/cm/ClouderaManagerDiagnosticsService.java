@@ -70,7 +70,7 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
         String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
         try {
             client = clouderaManagerApiClientProvider
-                    .getClient(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+                    .getV31Client(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
