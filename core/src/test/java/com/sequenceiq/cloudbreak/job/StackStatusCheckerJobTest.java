@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.job;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
-import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
@@ -180,7 +178,6 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncCMRunning() throws JobExecutionException {
         setupForCM();
-        when(clusterStatusResult.getClusterStatus()).thenReturn(ClusterStatus.CLUSTERMANAGER_RUNNING);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         underTest.executeTracedJob(jobExecutionContext);
@@ -209,7 +206,8 @@ public class StackStatusCheckerJobTest {
 
     private void setupForCM() {
         setStackStatus(DetailedStackStatus.AVAILABLE);
-        when(clusterStatusService.getStatus(anyBoolean())).thenReturn(clusterStatusResult);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
         ClusterManagerState clusterManagerState = new ClusterManagerState(ClusterManagerStatus.HEALTHY, null);
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), clusterManagerState), true);
         when(clusterStatusService.getExtendedHostStatuses()).thenReturn(extendedHostStatuses);

@@ -334,6 +334,7 @@ class StackStatusIntegrationTest {
 
     private void setUpClusterStatus(ClusterStatus clusterStatus) {
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(new ClusterStatusResult(clusterStatus, ""));
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
     }
 
     private void setUpClusterManagerStatus(String fqdn, ClusterManagerStatus clusterManagerStatus) {
