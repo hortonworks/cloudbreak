@@ -157,6 +157,22 @@ public class FreeIpaClientExceptionUtil {
         }
     }
 
+    public static <T> Optional<T> ignoreEmptyModExceptionWithValue(FreeIpaClientCallable<T> callable, String message, Object... messageParams)
+            throws FreeIpaClientException {
+        try {
+            return Optional.ofNullable(callable.run());
+        } catch (FreeIpaClientException e) {
+            if (isEmptyModlistException(e)) {
+                Optional.ofNullable(message).ifPresentOrElse(
+                        msg -> LOGGER.debug(msg, messageParams),
+                        () -> LOGGER.debug("No modification was needed in FreeIPA is ignored. Exception message: {}", e.getMessage()));
+                return Optional.empty();
+            } else {
+                throw e;
+            }
+        }
+    }
+
     private static boolean isRetryable(FreeIpaClientException e) {
         return isExceptionWithErrorCode(e, RETRYABLE_ERROR_CODES) || isExceptionWithHttpCode(retryableHttpCodes, e) || isExceptionWithIOExceptionCause(e);
     }
