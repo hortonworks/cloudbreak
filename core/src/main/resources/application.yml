@@ -36,7 +36,7 @@ management:
 
 info:
   app:
-    capabilities: gov_cloud, mock_idbroker_mapping
+    capabilities: gov_cloud
 
 spring:
   application:
