@@ -89,6 +89,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    LOGGER.debug("Environment init action went failed with EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_INITIALIZATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to validate environment creation request! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
@@ -115,6 +116,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    LOGGER.debug("Environment validation action went failed with EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_VALIDATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to validate environment creation request! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
@@ -141,6 +143,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    LOGGER.debug("Environment network creation action went failed with  EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_NETWORK_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create network for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
@@ -167,6 +170,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    LOGGER.debug("Environment public key creation action went failed with EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_PUBLICKEY_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create public key for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
@@ -195,6 +199,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    LOGGER.debug("Environment encryption init action went failed with  EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED,
                         context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create encryption resources for environment! No environment found with id '{}'.", payload.getResourceId());
@@ -222,6 +227,7 @@ public class EnvCreationActions {
                             payload.getResourceName(),
                             null,
                             payload.getResourceCrn());
+                    LOGGER.debug("Environment freeipa creation action went failed with EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_FREEIPA_CREATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to create freeipa for environment! No environment found with id '{}'.", payload.getResourceId());
                     sendEvent(context, failureEvent);
@@ -235,6 +241,7 @@ public class EnvCreationActions {
         return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Finished to create environment with payload {}", payload);
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
@@ -259,7 +266,7 @@ public class EnvCreationActions {
             @Override
             protected void doExecute(CommonContext context, EnvCreationFailureEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
-                LOGGER.warn("Failed to create environment", exception);
+                LOGGER.debug("Failed to create environment {} with payload {}", exception, payload);
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
