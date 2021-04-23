@@ -107,6 +107,48 @@
       "displayName": "Tokyo, Japan",
       "latitude": "35.68501691",
       "longitude": "139.7514074"
+    },
+    {
+      "name": "asia-northeast2",
+      "displayName": "Osaka, Japan",
+      "latitude": "34.693737",
+      "longitude": "135.502167"
+    },
+    {
+      "name": "asia-northeast3",
+      "displayName": "Seoul, South Korea",
+      "latitude": "37.566536",
+      "longitude": "126.977966"
+    },
+    {
+      "name": "asia-southeast2",
+      "displayName": "Jakarta, Indonesia",
+      "latitude": "-6.175110",
+      "longitude": "106.865036"
+    },
+    {
+      "name": "europe-central2",
+      "displayName": "Warsaw, Poland",
+      "latitude": "52.229675",
+      "longitude": "21.012230"
+    },
+    {
+      "name": "europe-west6",
+      "displayName": "Zurich, Switzerland",
+      "latitude": "47.369019",
+      "longitude": "8.538030"
+    },
+    {
+      "name": "us-west3",
+      "displayName": "Salt Lake City, Utah",
+      "latitude": "40.758701",
+      "longitude": "-111.876183"
+    },
+    {
+      "name": "us-west4",
+      "displayName": "Las Vegas, Nevada",
+      "latitude": "36.11",
+      "longitude": "-115.17"
     }
   ]
 }
