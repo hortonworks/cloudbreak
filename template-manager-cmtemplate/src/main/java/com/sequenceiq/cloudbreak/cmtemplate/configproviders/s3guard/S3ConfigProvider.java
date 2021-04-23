@@ -3,17 +3,22 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreCloudStorageServiceConfigProvider.HMS_METASTORE_DIR;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
 import com.sequenceiq.common.model.FileSystemType;
 
 @Component
-public class S3GuardConfigProvider {
+public class S3ConfigProvider {
 
     private static final String S3GUARD_METADATASTORE_IMPL_PARAM = "fs.s3a.metadatastore.impl";
 
@@ -35,15 +40,39 @@ public class S3GuardConfigProvider {
 
     private static final String S3GUARD_TABLE_TAG_VALUE = "s3guard";
 
+    private static final String S3_BUCKET_ENDPOINT_PARAM_TEMPLATE = "fs.s3a.bucket.%s.endpoint";
+
+    private static final String S3_ENDPOINT_TEMPLATE = "s3.%s.amazonaws.com";
+
+    @Inject
+    private LocationHelper locationHelper;
+
     public void getServiceConfigs(TemplatePreparationObject templatePreparationObject, StringBuilder hdfsCoreSiteSafetyValveValue) {
         if (isS3FileSystemConfigured(templatePreparationObject)) {
             configureS3GuardCoreSiteParameters(templatePreparationObject, hdfsCoreSiteSafetyValveValue);
+            configureS3BucketLocationCoreSiteParameters(templatePreparationObject, hdfsCoreSiteSafetyValveValue);
         }
     }
 
     private boolean isS3FileSystemConfigured(TemplatePreparationObject source) {
         return source.getFileSystemConfigurationView().isPresent()
                 && source.getFileSystemConfigurationView().get().getType().equals(FileSystemType.S3.name());
+    }
+
+    private void configureS3BucketLocationCoreSiteParameters(TemplatePreparationObject source, StringBuilder hdfsCoreSiteSafetyValveValue) {
+        S3FileSystemConfigurationsView s3FileSystemConfigurationsView =
+                (S3FileSystemConfigurationsView) source.getFileSystemConfigurationView().get();
+
+        source.getPlacementView().ifPresent(placementView -> {
+            Set<String> buckets = s3FileSystemConfigurationsView.getLocations().stream()
+                    .map(loc -> locationHelper.parseS3BucketName(loc.getValue()))
+                    .collect(Collectors.toSet());
+            buckets.forEach(bucketName -> {
+                String s3BucketEndpointParam = String.format(S3_BUCKET_ENDPOINT_PARAM_TEMPLATE, bucketName);
+                String s3BucketEndpoint = String.format(S3_ENDPOINT_TEMPLATE, placementView.getRegion());
+                hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(s3BucketEndpointParam, s3BucketEndpoint));
+            });
+        });
     }
 
     private void configureS3GuardCoreSiteParameters(TemplatePreparationObject source, StringBuilder hdfsCoreSiteSafetyValveValue) {

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -8,12 +10,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -28,17 +32,17 @@ import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class S3GuardConfigProviderTest {
-    private S3GuardConfigProvider underTest;
+@ExtendWith(MockitoExtension.class)
+public class S3ConfigProviderTest {
 
-    @Before
-    public void setUp() {
-        underTest = new S3GuardConfigProvider();
-    }
+    @Mock
+    private LocationHelper locationHelper;
+
+    @InjectMocks
+    private S3ConfigProvider underTest;
 
     @Test
-    public void testGetHdfsServiceConfigsWithS3GuardWithoutAuthoriative() {
+    void testGetHdfsServiceConfigsWithS3GuardWithoutAuthoriative() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, false);
         StringBuilder sb = new StringBuilder();
 
@@ -54,7 +58,8 @@ public class S3GuardConfigProviderTest {
     }
 
     @Test
-    public void testGetHdfsServiceConfigsWithS3GuardWithAuthoriativeWarehousePath() {
+    void testGetHdfsServiceConfigsWithS3GuardWithAuthoriativeWarehousePath() {
+        when(locationHelper.parseS3BucketName(anyString())).thenCallRealMethod();
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, true);
         StringBuilder sb = new StringBuilder();
 
@@ -68,7 +73,9 @@ public class S3GuardConfigProviderTest {
                 "<property><name>fs.s3a.s3guard.ddb.table</name><value>dynamoTable</value></property>" +
                 "<property><name>fs.s3a.s3guard.ddb.region</name><value>region</value></property>" +
                 "<property><name>fs.s3a.authoritative.path</name>" +
-                "<value>s3a://bucket/warehouse/managed</value></property>", sb.toString());
+                "<value>s3a://bucket-first/warehouse/managed</value></property>" +
+                "<property><name>fs.s3a.bucket.bucket-first.endpoint</name><value>s3.region.amazonaws.com</value></property>" +
+                "<property><name>fs.s3a.bucket.bucket-second.endpoint</name><value>s3.region.amazonaws.com</value></property>", sb.toString());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(boolean useS3FileSystem, boolean fillDynamoTableName, boolean includeLocations) {
@@ -78,8 +85,9 @@ public class S3GuardConfigProviderTest {
         List<StorageLocationView> locations = new ArrayList<>();
 
         if (includeLocations) {
-            locations.add(new StorageLocationView(getStorageLocation("hive.metastore.warehouse.dir", "s3a://bucket/warehouse/managed")));
-            locations.add(new StorageLocationView(getStorageLocation("hive.metastore.warehouse.external.dir", "s3a://bucket/warehouse/external")));
+            locations.add(new StorageLocationView(getStorageLocation("hive.metastore.warehouse.dir", "s3a://bucket-first/warehouse/managed")));
+            locations.add(new StorageLocationView(getStorageLocation("hive.metastore.warehouse.external.dir", "s3a://bucket-first/warehouse/external")));
+            locations.add(new StorageLocationView(getStorageLocation("ranger_plugin_hdfs_audit_url", "s3a://bucket-second/ranger/audit")));
         }
 
         BaseFileSystemConfigurationsView fileSystemConfigurationsView;

@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -38,7 +38,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     private static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
 
     @Inject
-    private S3GuardConfigProvider s3GuardConfigProvider;
+    private S3ConfigProvider s3ConfigProvider;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -52,7 +52,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
                 .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
 
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
-        s3GuardConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
+        s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
         if (!hdfsCoreSiteSafetyValveValue.toString().isEmpty()) {
             apiClusterTemplateConfigs.add(config(CORE_SITE_SAFETY_VALVE, hdfsCoreSiteSafetyValveValue.toString()));
         }
