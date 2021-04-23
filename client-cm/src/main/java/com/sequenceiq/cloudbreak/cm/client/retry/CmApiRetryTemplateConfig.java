@@ -17,6 +17,7 @@ public class CmApiRetryTemplateConfig {
         fixedBackOffPolicy.setBackOffPeriod(BACK_OFF_PERIOD);
         retryTemplate.setBackOffPolicy(fixedBackOffPolicy);
         retryTemplate.setRetryPolicy(new ApiExceptionRetryPolicy());
+        retryTemplate.setThrowLastExceptionOnExhausted(true);
         return retryTemplate;
     }
 

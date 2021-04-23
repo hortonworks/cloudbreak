@@ -24,4 +24,6 @@ public interface ClusterStatusService {
     Map<HostName, String> getHostStatusesRaw();
 
     boolean isClusterManagerRunning();
+
+    boolean isClusterManagerRunningQuickCheck();
 }

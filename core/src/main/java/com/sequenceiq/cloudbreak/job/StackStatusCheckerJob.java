@@ -33,8 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
-import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerState.ClusterManagerStatus;
@@ -257,7 +255,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
         return !stack.isStopped()
                 && !stack.isStackInDeletionOrFailedPhase()
-                && !queryClusterStatus(connector).getClusterStatus().equals(ClusterStatus.CLUSTERMANAGER_NOT_RUNNING);
+                && isCMRunning(connector);
     }
 
     private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData, boolean cmServerRunning) {
@@ -273,8 +271,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         ifFlowNotRunning(() -> syncService.autoSync(stack, runningInstances, instanceStatuses, defaultState, syncConfig));
     }
 
-    private ClusterStatusResult queryClusterStatus(ClusterApi connector) {
-        return connector.clusterStatusService().getStatus(false);
+    private boolean isCMRunning(ClusterApi connector) {
+        return connector.clusterStatusService().isClusterManagerRunningQuickCheck();
     }
 
     private Set<String> getNewHealthyHostNames(Map<HostName, ClusterManagerState> hostStatuses, Set<InstanceMetaData> runningInstances) {

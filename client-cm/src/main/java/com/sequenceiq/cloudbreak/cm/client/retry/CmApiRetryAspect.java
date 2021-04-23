@@ -21,7 +21,11 @@ public class CmApiRetryAspect {
     public void allCmApiCalls() {
     }
 
-    @Around("allCmApiCalls()")
+    @Pointcut("!execution(public * com.cloudera.api.swagger.ClouderaManagerResourceApi.getVersion())")
+    public void noGetVersion() {
+    }
+
+    @Around("allCmApiCalls() && noGetVersion()")
     // CHECKSTYLE:OFF
     public Object retryableApiCall(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         // CHECKSTYLE:ON

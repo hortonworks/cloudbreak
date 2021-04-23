@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.H
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -24,6 +25,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.retry.support.RetryTemplate;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
@@ -82,6 +84,9 @@ public class ClouderaManagerClusterStatusServiceTest {
 
     @Mock
     private HostsResourceApi hostsApi;
+
+    @Mock
+    private RetryTemplate retryTemplate;
 
     @InjectMocks
     private ClouderaManagerClusterStatusService subject;
@@ -355,7 +360,11 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     private void cmIsNotReachable() throws ApiException {
-        when(cmApi.getVersion()).thenThrow(new ApiException("CM is not reachable"));
+        try {
+            when(retryTemplate.execute(any(), any(), any())).thenThrow(new ApiException("CM is not reachable"));
+        } catch (Throwable t) {
+            throw new ApiException(t);
+        }
     }
 
     private void cmIsReachable() throws ApiException {
