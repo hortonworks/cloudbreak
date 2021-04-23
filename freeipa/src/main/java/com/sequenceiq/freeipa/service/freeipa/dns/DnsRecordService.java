@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.dns;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreEmptyModExceptionWithValue;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue;
 
@@ -157,7 +158,8 @@ public class DnsRecordService {
     private void createDnsARecord(FreeIpaClient client, String zone, String hostname, String ip, boolean createReverse) throws FreeIpaClientException {
         LOGGER.info("Creating A record in zone [{}] with hostname [{}] with IP [{}]. Create reverse set to [{}]",
                 zone, hostname, ip, createReverse);
-        DnsRecord record = client.addDnsARecord(zone, hostname, ip, createReverse);
+        Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsARecord(zone, hostname, ip, createReverse),
+                "Record [{}] pointing to [{}] is already exists, nothing to do.", hostname, ip);
         LOGGER.info("A record [{}] pointing to [{}] is created successfully. Created record: {}", hostname, ip, record);
     }
 
@@ -193,7 +195,8 @@ public class DnsRecordService {
 
     private void createDnsCnameRecord(FreeIpaClient client, String zone, String cname, String targetFqdn) throws FreeIpaClientException {
         LOGGER.info("Creating CNAME record in zone [{}] with name [{}] with target [{}].", zone, cname, targetFqdn);
-        DnsRecord record = client.addDnsCnameRecord(zone, cname, targetFqdn);
+        Optional<DnsRecord> record = ignoreEmptyModExceptionWithValue(() -> client.addDnsCnameRecord(zone, cname, targetFqdn),
+                "CNAME record created with name [{}] with target [{}] is already exists, nothing to do.", cname, targetFqdn);
         LOGGER.info("CNAME record created with name [{}] with target [{}]. Record: {}", cname, targetFqdn, record);
     }
 

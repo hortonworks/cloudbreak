@@ -135,6 +135,28 @@ public class DnsRecordServiceTest {
     }
 
     @Test
+    public void testARecordAddEmptyModListIgnored() throws FreeIpaClientException {
+        AddDnsARecordRequest request = new AddDnsARecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setHostname("Asdf");
+        request.setIp("1.1.1.2");
+        request.setCreateReverse(true);
+
+        Stack stack = createStack();
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FreeIpa freeIpa = createFreeIpa();
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        JsonRpcClientException noModEx = new JsonRpcClientException(FreeIpaErrorCodes.EMPTY_MODLIST.getValue(), "no modifications to be performed", null);
+        when(freeIpaClient.addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse()))
+                .thenThrow(new FreeIpaClientException("can't create", noModEx));
+
+        underTest.addDnsARecord(ACCOUNT_ID, request);
+
+        verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
+    }
+
+    @Test
     public void testARecordAddNotFound() throws FreeIpaClientException {
         AddDnsARecordRequest request = new AddDnsARecordRequest();
         request.setEnvironmentCrn(ENV_CRN);
@@ -289,6 +311,27 @@ public class DnsRecordServiceTest {
         FreeIpa freeIpa = createFreeIpa();
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+
+        underTest.addDnsCnameRecord(ACCOUNT_ID, request);
+
+        verify(freeIpaClient).addDnsCnameRecord(DOMAIN, request.getCname(), request.getTargetFqdn());
+    }
+
+    @Test
+    public void testCnameRecordAddEmptyModListIgnored() throws FreeIpaClientException {
+        AddDnsCnameRecordRequest request = new AddDnsCnameRecordRequest();
+        request.setEnvironmentCrn(ENV_CRN);
+        request.setCname("Asdf");
+        request.setTargetFqdn(TARGET_FQDN);
+
+        Stack stack = createStack();
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT_ID)).thenReturn(stack);
+        FreeIpa freeIpa = createFreeIpa();
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        JsonRpcClientException noModEx = new JsonRpcClientException(FreeIpaErrorCodes.EMPTY_MODLIST.getValue(), "no modifications to be performed", null);
+        when(freeIpaClient.addDnsCnameRecord(DOMAIN, request.getCname(), request.getTargetFqdn()))
+                .thenThrow(new FreeIpaClientException("can't create", noModEx));
 
         underTest.addDnsCnameRecord(ACCOUNT_ID, request);
 
