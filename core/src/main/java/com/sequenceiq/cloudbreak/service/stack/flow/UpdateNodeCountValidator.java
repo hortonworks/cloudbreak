@@ -98,7 +98,7 @@ public class UpdateNodeCountValidator {
     public void validateInstanceGroup(Stack stack, String instanceGroupName) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
-            throw new BadRequestException(format("Data Hub '%s' does not have an group named '%s'.", stack.getName(), instanceGroupName));
+            throw new BadRequestException(format("Data Hub '%s' does not have a group named '%s'.", stack.getName(), instanceGroupName));
         }
     }
 
@@ -112,7 +112,7 @@ public class UpdateNodeCountValidator {
             }
         } else if (downScaleEvent(instanceGroupAdjustmentJson)) {
             if (!instanceGroup.getScalabilityOption().downscalable()) {
-                throw new BadRequestException(format("Requested scaling down is forbidden on '%s' Data Hub '%s' group.",
+                throw new BadRequestException(format("Requested scaling down is forbidden on '%s' Data Hub's '%s' group.",
                         stack.getName(),
                         instanceGroup.getGroupName()));
             }
