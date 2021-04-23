@@ -45,18 +45,23 @@ public class FreeipaChecker {
         return checkedMeasure(() -> {
             Map<InstanceMetaData, DetailedStackStatus> statuses = new HashMap<>();
             List<RPCResponse<Boolean>> responses = new LinkedList<>();
+            LOGGER.info("Checking FreeIPA status for instance IDs {}",
+                    checkableInstances.stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toList()));
             for (InstanceMetaData instanceMetaData : checkableInstances) {
                 try {
                     RPCResponse<Boolean> response = checkedMeasure(() -> freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(stack, instanceMetaData), LOGGER,
                             ":::Auto sync::: FreeIPA health check ran in {}ms");
                     responses.add(response);
+                    DetailedStackStatus newDetailedStackStatus;
                     if (response.getResult()) {
-                        statuses.put(instanceMetaData, DetailedStackStatus.AVAILABLE);
+                        newDetailedStackStatus = DetailedStackStatus.AVAILABLE;
                     } else {
-                        statuses.put(instanceMetaData, DetailedStackStatus.UNHEALTHY);
+                        newDetailedStackStatus = DetailedStackStatus.UNHEALTHY;
                     }
+                    LOGGER.info("FreeIpa health check reported {} for {}", newDetailedStackStatus, instanceMetaData);
+                    statuses.put(instanceMetaData, newDetailedStackStatus);
                 } catch (Exception e) {
-                    LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
+                    LOGGER.info("FreeIpaClientException occurred during status fetch for {}: {}", instanceMetaData, e.getMessage(), e);
                     statuses.put(instanceMetaData, DetailedStackStatus.UNREACHABLE);
                 }
             }
