@@ -34,7 +34,6 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
     public SdxUpgradeResponse upgradeClusterByName(@ResourceName String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterName);
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             return sdxRuntimeUpgradeService.checkForUpgradeByName(userCrn, clusterName, request, ThreadBasedUserCrnProvider.getAccountId());
         } else {
@@ -46,18 +45,10 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
     public SdxUpgradeResponse upgradeClusterByCrn(@ResourceCrn String clusterCrn, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        lockComponentsIfRuntimeUpgradeIsDisabled(request, userCrn, clusterCrn);
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId());
         } else {
             return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId());
-        }
-    }
-
-    private void lockComponentsIfRuntimeUpgradeIsDisabled(SdxUpgradeRequest request, String userCrn, String clusterNameOrCrn) {
-        if (!sdxRuntimeUpgradeService.isRuntimeUpgradeEnabled(userCrn) && (!isUpgradeTypeSpecified(request) || isShowOnly(request))) {
-            LOGGER.info("Set lock-components since no upgrade type is specified and runtime upgrade is disabled for cluster: {}", clusterNameOrCrn);
-            request.setLockComponents(Boolean.TRUE);
         }
     }
 
