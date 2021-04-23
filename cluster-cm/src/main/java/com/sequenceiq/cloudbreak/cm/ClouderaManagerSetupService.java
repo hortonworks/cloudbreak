@@ -143,7 +143,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
                 apiClient = clouderaManagerApiClientProvider.getV40Client(stack.getGatewayPort(), user, password, clientConfig);
             } else {
-                apiClient = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+                apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
             }
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
@@ -325,7 +325,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         String password = cluster.getCloudbreakAmbariPassword();
         ApiClient client;
         try {
-            client = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }

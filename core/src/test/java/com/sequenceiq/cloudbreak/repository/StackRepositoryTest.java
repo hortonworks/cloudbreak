@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.envers.repository.support.EnversRevisionRepositoryFactoryBean;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
@@ -121,6 +122,7 @@ class StackRepositoryTest {
             ig1.setStack(stack);
             final InstanceMetaData ig1im1 = new InstanceMetaData();
             ig1im1.setInstanceGroup(ig1);
+            ig1im1.setInstanceStatus(InstanceStatus.CREATED);
             ig1im1.setImage(createImage(imageId));
             ig1.setInstanceMetaData(Set.of(ig1im1));
 
@@ -128,6 +130,7 @@ class StackRepositoryTest {
             ig2.setStack(stack);
             final InstanceMetaData ig2im1 = new InstanceMetaData();
             ig2im1.setInstanceGroup(ig2);
+            ig2im1.setInstanceStatus(InstanceStatus.CREATED);
             ig2im1.setImage(createImage(imageId));
             ig2.setInstanceMetaData(Set.of(ig2im1));
 

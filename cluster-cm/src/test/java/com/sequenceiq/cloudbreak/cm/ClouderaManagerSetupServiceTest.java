@@ -583,7 +583,7 @@ public class ClouderaManagerSetupServiceTest {
     public void testWaitForHostsWhenEverythingFineShouldCmHostStatus() throws Exception {
         ApiClient apiClient = mock(ApiClient.class);
 
-        when(clouderaManagerApiClientProvider.getClient(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
+        when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
                 .thenReturn(apiClient);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(any(Stack.class), any(ApiClient.class)))
             .thenReturn(PollingResult.EXIT);
@@ -599,7 +599,7 @@ public class ClouderaManagerSetupServiceTest {
     @Test
     public void testWaitForHostsWhenDropClouderaManagerClientInitExceptionShouldReturnClusterClientInitException() throws Exception {
         doThrow(new ClouderaManagerClientInitException()).when(clouderaManagerApiClientProvider)
-                .getClient(anyInt(), anyString(), anyString(), any(HttpClientConfig.class));
+                .getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class));
 
         ClusterClientInitException actual =
                 assertThrows(ClusterClientInitException.class, () -> underTest.waitForHosts(Set.of()));

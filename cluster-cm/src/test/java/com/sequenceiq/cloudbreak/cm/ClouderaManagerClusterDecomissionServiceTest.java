@@ -80,12 +80,12 @@ public class ClouderaManagerClusterDecomissionServiceTest {
     public void testInitApiClientShouldCreateTheApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException {
         ReflectionTestUtils.setField(underTest, "client", null);
         ApiClient client = Mockito.mock(ApiClient.class);
-        when(clouderaManagerApiClientProvider.getClient(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(client);
+        when(clouderaManagerApiClientProvider.getV31Client(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(client);
 
         underTest.initApiClient();
 
         assertEquals(client, ReflectionTestUtils.getField(underTest, "client"));
-        verify(clouderaManagerApiClientProvider).getClient(GATEWAY_PORT, USER, PASSWORD, clientConfig);
+        verify(clouderaManagerApiClientProvider).getV31Client(GATEWAY_PORT, USER, PASSWORD, clientConfig);
     }
 
     @Test

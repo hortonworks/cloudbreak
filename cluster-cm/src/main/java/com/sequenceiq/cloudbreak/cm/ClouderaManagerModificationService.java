@@ -136,7 +136,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
-            apiClient = clouderaManagerApiClientProvider.getClient(stack.getGatewayPort(), user, password, clientConfig);
+            apiClient = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -305,8 +305,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private List<String> getHostNamesFromCM(ClustersResourceApi clustersResourceApi, String clusterName) throws ApiException {
-        List<ApiHostRef> hostRefs = clustersResourceApi.listHosts(clusterName, null, null).getItems();
-        return hostRefs.stream().map(ApiHostRef::getHostname).collect(Collectors.toList());
+        List<ApiHost> hostRefs = clustersResourceApi.listHosts(clusterName, null, null, null).getItems();
+        return hostRefs.stream().map(ApiHost::getHostname).collect(Collectors.toList());
     }
 
     private void redistributeParcelsForRecovery() throws ApiException, CloudbreakException {

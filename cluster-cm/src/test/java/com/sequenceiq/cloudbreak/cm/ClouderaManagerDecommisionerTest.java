@@ -31,8 +31,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
-import com.cloudera.api.swagger.model.ApiHostRef;
-import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostTemplate;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiRoleConfigGroupRef;
@@ -224,19 +223,19 @@ public class ClouderaManagerDecommisionerTest {
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
-        ApiHostRefList apiHostRefList = new ApiHostRefList();
-        List<ApiHostRef> apiHosts = new ArrayList<>();
+        ApiHostList apiHostRefList = new ApiHostList();
+        List<ApiHost> apiHosts = new ArrayList<>();
         hostGroups.stream()
                 .flatMap(hostGroup -> hostGroup.getInstanceGroup().getAllInstanceMetaData().stream())
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .forEach(hostName -> {
-                    ApiHostRef apiHostRef = new ApiHostRef();
+                    ApiHost apiHostRef = new ApiHost();
                     apiHostRef.setHostname(hostName);
                     apiHostRef.setHostId(hostName);
                     apiHosts.add(apiHostRef);
                 });
         apiHostRefList.setItems(apiHosts);
-        when(clustersResourceApi.listHosts(stack.getName(), null, null)).thenReturn(apiHostRefList);
+        when(clustersResourceApi.listHosts(stack.getName(), null, null, null)).thenReturn(apiHostRefList);
         Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2, 0,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
         assertEquals(2, downscaleCandidates.size());
@@ -297,19 +296,19 @@ public class ClouderaManagerDecommisionerTest {
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
         Mockito.when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
-        ApiHostRefList apiHostRefList = new ApiHostRefList();
-        List<ApiHostRef> apiHosts = new ArrayList<>();
+        ApiHostList apiHostRefList = new ApiHostList();
+        List<ApiHost> apiHosts = new ArrayList<>();
         hostGroups.stream()
                 .flatMap(hostGroup -> hostGroup.getInstanceGroup().getAllInstanceMetaData().stream())
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .forEach(hostName -> {
-                    ApiHostRef apiHostRef = new ApiHostRef();
+                    ApiHost apiHostRef = new ApiHost();
                     apiHostRef.setHostname(hostName);
                     apiHostRef.setHostId(hostName);
                     apiHosts.add(apiHostRef);
                 });
         apiHostRefList.setItems(apiHosts);
-        when(clustersResourceApi.listHosts(stack.getName(), null, null)).thenReturn(apiHostRefList);
+        when(clustersResourceApi.listHosts(stack.getName(), null, null, null)).thenReturn(apiHostRefList);
         Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2, 0,
                 downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
         assertEquals(2, downscaleCandidates.size());

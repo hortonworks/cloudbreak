@@ -39,8 +39,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
-import com.cloudera.api.swagger.model.ApiHostRef;
-import com.cloudera.api.swagger.model.ApiHostRefList;
+import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
@@ -142,10 +141,10 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void testDecommissionForNodesNowKnownByCM() throws ApiException {
-        ApiHostRefList apiHostRefList = new ApiHostRefList();
+        ApiHostList apiHostRefList = new ApiHostList();
         apiHostRefList.setItems(List.of(createApiHostRef("host1.example.com"), createApiHostRef("host2.example.com"),
                 createApiHostRef("host5.example.com")));
-        when(clustersResourceApi.listHosts(STACK_NAME, null, null)).thenReturn(apiHostRefList);
+        when(clustersResourceApi.listHosts(STACK_NAME, null, null, null)).thenReturn(apiHostRefList);
         when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         ApiHostTemplateList apiHostTemplateList = new ApiHostTemplateList();
@@ -212,9 +211,9 @@ class ClouderaManagerDecomissionerTest {
     }
 
     private void mockListHosts() throws ApiException {
-        ApiHostRefList apiHostRefList = new ApiHostRefList();
+        ApiHostList apiHostRefList = new ApiHostList();
         apiHostRefList.setItems(List.of(createApiHostRef(DELETED_INSTANCE_FQDN), createApiHostRef(RUNNING_INSTANCE_FQDN)));
-        when(clustersResourceApi.listHosts(STACK_NAME, null, null)).thenReturn(apiHostRefList);
+        when(clustersResourceApi.listHosts(STACK_NAME, null, null, null)).thenReturn(apiHostRefList);
         when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
     }
 
@@ -236,8 +235,8 @@ class ClouderaManagerDecomissionerTest {
         return instanceMetaData;
     }
 
-    private ApiHostRef createApiHostRef(String instanceFqd) {
-        ApiHostRef deletedInstanceHostRef = new ApiHostRef();
+    private ApiHost createApiHostRef(String instanceFqd) {
+        ApiHost deletedInstanceHostRef = new ApiHost();
         deletedInstanceHostRef.setHostname(instanceFqd);
         deletedInstanceHostRef.setHostId(instanceFqd);
         return deletedInstanceHostRef;

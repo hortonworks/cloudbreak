@@ -64,7 +64,7 @@ public class ClouderaManagerCommunicator {
 
         Map<String, ApiConfig> roleConfigProperties = requestLogging.logResponseTime(() -> {
             try {
-                ApiClient client = clouderaManagerApiClientProvider.getClient(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
+                ApiClient client = clouderaManagerApiClientProvider.getV31Client(Integer.valueOf(cm.getPort()), user, pass, httpClientConfig);
                 client.getHttpClient().interceptors().add(cmOkHttpTracingInterceptor);
                 RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
 
