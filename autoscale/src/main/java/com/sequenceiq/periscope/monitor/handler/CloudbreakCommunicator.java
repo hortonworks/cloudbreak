@@ -36,13 +36,13 @@ public class CloudbreakCommunicator {
     }
 
     public AutoscaleStackV4Response getAutoscaleClusterByCrn(String stackCrn) {
-        return cloudbreakInternalCrnClient.withInternalCrn()
+        return cloudbreakInternalCrnClient.withUserCrn(restRequestThreadLocalService.getCloudbreakUser().getUserCrn())
                 .autoscaleEndpoint().getAutoscaleClusterByCrn(stackCrn);
     }
 
-    public AutoscaleStackV4Response getAutoscaleClusterByName(String stackName, String accountId) {
-        return cloudbreakInternalCrnClient.withInternalCrn()
-                .autoscaleEndpoint().getInternalAutoscaleClusterByName(stackName, accountId);
+    public AutoscaleStackV4Response getAutoscaleClusterByName(String stackName) {
+        return cloudbreakInternalCrnClient.withUserCrn(restRequestThreadLocalService.getCloudbreakUser().getUserCrn())
+                .autoscaleEndpoint().getAutoscaleClusterByName(stackName);
     }
 
     public AutoscaleRecommendationV4Response getRecommendationForCluster(String stackCrn) {
@@ -55,7 +55,7 @@ public class CloudbreakCommunicator {
 
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         requestLogging.logResponseTime(() -> {
-            cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint()
+            cloudbreakInternalCrnClient.withUserCrn(cluster.getClusterPertain().getUserCrn()).autoscaleEndpoint()
                     .decommissionInstancesForClusterCrn(cluster.getStackCrn(),
                             cluster.getClusterPertain().getWorkspaceId(),
                             decommissionNodeIds, false);

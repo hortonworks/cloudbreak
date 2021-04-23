@@ -20,7 +20,6 @@ public class OperationDescriptions {
         public static final String PUT_BY_NAME = "update stack by name";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String GET_ALL = "retrieve all stacks";
-        public static final String GET_ALL_INTERNAL = "retrieve all stacks internally";
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace and environment name";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get stack by crn in workspace";

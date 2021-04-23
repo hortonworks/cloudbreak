@@ -152,7 +152,7 @@ public class AutoScaleClusterCommonService  implements ResourcePropertyProvider 
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
         return nameOrCrn.hasName() ?
                 clusterService.findOneByStackNameAndTenant(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakTenant())
-                        .orElseGet(() -> syncCBClusterByName(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakTenant())) :
+                        .orElseGet(() -> syncCBClusterByName(nameOrCrn.getName())) :
                 clusterService.findOneByStackCrnAndTenant(nameOrCrn.getCrn(), restRequestThreadLocalService.getCloudbreakTenant())
                         .orElseGet(() -> syncCBClusterByCrn(nameOrCrn.getCrn()));
     }
@@ -164,8 +164,8 @@ public class AutoScaleClusterCommonService  implements ResourcePropertyProvider 
                 .orElseThrow(NotFoundException.notFound("cluster", stackCrn));
     }
 
-    protected Cluster syncCBClusterByName(String stackName, String accountId) {
-        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName, accountId))
+    protected Cluster syncCBClusterByName(String stackName) {
+        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName))
                 .filter(stack -> WORKLOAD.equals(stack.getStackType()))
                 .map(stack -> clusterService.create(stack))
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));
