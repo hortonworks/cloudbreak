@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +21,7 @@ import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @Component
@@ -30,10 +29,11 @@ public class AwsLogRolePermissionValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLogRolePermissionValidator.class);
 
-    private static final Pattern EXTRACT_BUCKET_PATTERN = Pattern.compile("^s3.?://([^/]*)");
-
     @Inject
     private AwsIamService awsIamService;
+
+    @Inject
+    private LocationHelper locationHelper;
 
     public void validate(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             CloudS3View cloudFileSystem, String logLocationBase, ValidationResultBuilder validationResultBuilder) {
@@ -43,7 +43,7 @@ public class AwsLogRolePermissionValidator {
         }
         Map<String, String> replacements = Map.ofEntries(
                 Map.entry("${LOGS_LOCATION_BASE}", removeProtocol(logLocationBase)),
-                Map.entry("${LOGS_BUCKET}", parseBucket(logLocationBase))
+                Map.entry("${LOGS_BUCKET}", locationHelper.parseS3BucketName(logLocationBase))
         );
         Policy policy = awsIamService.getPolicy("aws-cdp-log-policy.json", replacements);
         List<Role> roles = instanceProfile.getRoles();
@@ -75,15 +75,6 @@ public class AwsLogRolePermissionValidator {
 
     private String removeProtocol(String logLocationBase) {
         return logLocationBase.replaceFirst("^s3.?://", "");
-    }
-
-    private String parseBucket(String logLocationBase) {
-        String result = "";
-        Matcher m = EXTRACT_BUCKET_PATTERN.matcher(logLocationBase);
-        if (m.find()) {
-            result = m.group(1);
-        }
-        return result;
     }
 
     /**
