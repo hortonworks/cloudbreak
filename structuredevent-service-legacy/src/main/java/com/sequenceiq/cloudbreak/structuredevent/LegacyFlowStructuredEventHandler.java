@@ -89,12 +89,11 @@ public class LegacyFlowStructuredEventHandler<S, E> extends StateMachineListener
             String fromId = from != null ? from.getId().toString() : "unknown";
             String toId = to != null ? to.getId().toString() : "unknown";
             String eventId = trigger != null ? trigger.getEvent().toString() : "unknown";
-            Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
             FlowDetails flowDetails = new FlowDetails(flowChainType, flowType, flowChainId, flowId, fromId, toId, eventId,
                     lastStateChange == null ? 0L : currentTime - lastStateChange);
             StructuredEvent structuredEvent;
             if (exception == null) {
-                structuredEvent = legacyStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, detailed);
+                structuredEvent = legacyStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true);
             } else {
                 structuredEvent = legacyStructuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true, exception);
                 exception = null;
