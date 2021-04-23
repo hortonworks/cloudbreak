@@ -38,6 +38,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_2_8 = () -> "7.2.8";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_4_1 = () -> "7.4.1";
+
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CMRepositoryVersionUtil.class);
@@ -73,6 +75,11 @@ public class CMRepositoryVersionUtil {
     public static boolean isTagsResourceSupportedViaBlueprint(ClouderaManagerRepo clouderaManagerRepoDetails) {
         LOGGER.info("ClouderaManagerRepo is compared for tags resource support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
+    }
+
+    public static boolean isRangerTierDownSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepo is compared for ranger tier down support");
+        return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1);
     }
 
     public static boolean isRazConfigurationSupportedInDatalake(ClouderaManagerRepo clouderaManagerRepoDetails, CloudPlatform cloudPlatform) {
