@@ -77,8 +77,8 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_1_0);
     }
 
-    public static boolean isRangerTierDownSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for ranger tier down support");
+    public static boolean isRangerTearDownSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
+        LOGGER.info("ClouderaManagerRepo is compared for ranger tear down support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1);
     }
 
