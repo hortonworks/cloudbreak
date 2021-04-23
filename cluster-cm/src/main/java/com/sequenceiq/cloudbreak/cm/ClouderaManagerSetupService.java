@@ -300,9 +300,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             ApiConfigList apiConfigList = new ApiConfigList()
                     .addItemsItem(removeRemoteParcelRepos())
                     .addItemsItem(setHeader(stackType));
-            if (stack.getGatewayInstanceMetadata().size() > 1) {
-                //cm ha
-                //check cm ha
+
+            if (stack.getCluster().isCmHAEnabled()) {
                 apiConfigList.addItemsItem(setHostName(stack));
                 apiConfigList.addItemsItem(setHostNameValidation(stack));
             }

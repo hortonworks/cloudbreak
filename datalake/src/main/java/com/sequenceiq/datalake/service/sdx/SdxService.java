@@ -360,6 +360,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
         prepareProviderSpecificParameters(stackRequest, sdxClusterRequest, cloudPlatform);
         stackRequest.setResourceCrn(sdxCluster.getCrn());
+        enableClouderaManagerHighAvailability(sdxCluster, sdxClusterRequest, environment);
         try {
             sdxCluster.setStackRequest(JsonUtil.writeValueAsString(stackRequest));
         } catch (JsonProcessingException e) {
@@ -938,5 +939,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     @Override
     public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.DATALAKE);
+    }
+
+    private void enableClouderaManagerHighAvailability(SdxCluster sdxCluster, SdxClusterRequest sdxClusterRequest, DetailedEnvironmentResponse environment) {
+        boolean cmHAEnabled = true;
+        sdxCluster.setCmHAEnabled(cmHAEnabled && SdxClusterShape.MEDIUM_DUTY_HA.equals(sdxClusterRequest.getClusterShape()));
     }
 }

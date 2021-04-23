@@ -30,6 +30,9 @@ public class ClouderaManagerV4Response implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.CM_ENABLE_AUTOTLS)
     private Boolean enableAutoTls = Boolean.FALSE;
 
+    @ApiModelProperty(ClusterModelDescription.CM_ENABLE_AUTOTLS)
+    private Boolean enableCMHA = Boolean.FALSE;
+
     public ClouderaManagerRepositoryV4Response getRepository() {
         return repository;
     }
@@ -54,6 +57,10 @@ public class ClouderaManagerV4Response implements JsonEntity {
         this.enableAutoTls = enableAutoTls == null ? Boolean.FALSE : enableAutoTls;
     }
 
+    public void setEnableCMHA(Boolean enableCMHA) {
+        this.enableCMHA = enableCMHA;
+    }
+
     public ClouderaManagerV4Response withRepository(ClouderaManagerRepositoryV4Response repository) {
         setRepository(repository);
         return this;
@@ -69,12 +76,18 @@ public class ClouderaManagerV4Response implements JsonEntity {
         return this;
     }
 
+    public ClouderaManagerV4Response withCMHAEnabled(Boolean enabled) {
+        setEnableCMHA(enabled);
+        return this;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", ClouderaManagerV4Response.class.getSimpleName() + "[", "]")
                 .add("repository=" + repository)
                 .add("products=" + products)
                 .add("enableAutoTls=" + enableAutoTls)
+                .add("enableCMHA=" + enableCMHA)
                 .toString();
     }
 }

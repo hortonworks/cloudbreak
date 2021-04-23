@@ -114,6 +114,9 @@ public class SdxCluster implements AccountIdAwareResource {
     @Column(name = "sdx_cluster_service_version")
     private String sdxClusterServiceVersion;
 
+    @Column(name = "cm_ha_enabled")
+    private boolean cmHAEnabled;
+
     public Long getId() {
         return id;
     }
@@ -343,6 +346,14 @@ public class SdxCluster implements AccountIdAwareResource {
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
     }
 
+    public boolean isCmHAEnabled() {
+        return cmHAEnabled;
+    }
+
+    public void setCmHAEnabled(boolean cmHAEnabled) {
+        this.cmHAEnabled = cmHAEnabled;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -371,14 +382,15 @@ public class SdxCluster implements AccountIdAwareResource {
                 databaseAvailabilityType == that.databaseAvailabilityType &&
                 rangerRazEnabled == that.rangerRazEnabled &&
                 certExpirationState == that.certExpirationState &&
-                Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion);
+                Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
+                cmHAEnabled ==  that.cmHAEnabled;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion);
+                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, cmHAEnabled);
     }
 
     @Override

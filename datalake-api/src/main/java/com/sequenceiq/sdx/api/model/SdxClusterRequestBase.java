@@ -27,6 +27,8 @@ public class SdxClusterRequestBase implements TaggableRequest {
 
     private boolean enableRangerRaz;
 
+    private boolean enableCMHA;
+
     public String getEnvironment() {
         return environment;
     }
@@ -99,6 +101,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.enableRangerRaz = enableRangerRaz;
     }
 
+    public boolean isEnableCMHA() {
+        return enableCMHA;
+    }
+
+    public void setEnableCMHA(boolean enableCMHA) {
+        this.enableCMHA = enableCMHA;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -107,6 +117,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setExternalDatabase(externalDatabase);
         toInstance.setAws(aws);
         toInstance.setEnableRangerRaz(enableRangerRaz);
+        toInstance.setEnableCMHA(enableCMHA);
     }
 
     @Override
@@ -117,6 +128,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", externalDatabase=" + externalDatabase +
                 ", aws=" + aws +
                 ", enableRangerRaz=" + enableRangerRaz +
+                ", enableCMHA=" + enableCMHA +
                 '}';
     }
 }

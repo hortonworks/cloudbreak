@@ -359,7 +359,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
         if (StringUtils.isNotEmpty(source.getEnvironmentCrn()) && StackType.WORKLOAD.equals(source.getType())) {
             List<SdxClusterResponse> datalakes = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
             if (!datalakes.isEmpty()) {
-                datalakeView = new DatalakeView(datalakes.get(0).getRangerRazEnabled());
+                datalakeView = new DatalakeView(datalakes.get(0).getRangerRazEnabled(), datalakes.get(0).isCMHAEnabled());
             }
         }
         builder.withDataLakeView(datalakeView);

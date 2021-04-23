@@ -48,6 +48,8 @@ public class SdxClusterResponse {
 
     private String sdxClusterServiceVersion;
 
+    private boolean cmHAEnabled;
+
     public SdxClusterResponse() {
     }
 
@@ -56,7 +58,7 @@ public class SdxClusterResponse {
             SdxClusterShape clusterShape, String cloudStorageBaseLocation,
             FileSystemType cloudStorageFileSystemType, String runtime,
             boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState,
-            String sdxClusterServiceVersion) {
+            String sdxClusterServiceVersion, boolean cmHAEnabled) {
         this.crn = crn;
         this.name = name;
         this.status = status;
@@ -72,6 +74,7 @@ public class SdxClusterResponse {
         this.tags = tags;
         this.certExpirationState = certExpirationState;
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
+        this.cmHAEnabled = cmHAEnabled;
     }
 
     public String getCrn() {
@@ -218,6 +221,14 @@ public class SdxClusterResponse {
         this.sdxClusterServiceVersion = sdxClusterServiceVersion;
     }
 
+    public boolean isCMHAEnabled() {
+        return cmHAEnabled;
+    }
+
+    public void setCMHAEnabled(boolean cmHAEnabled) {
+        this.cmHAEnabled = cmHAEnabled;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -239,6 +250,7 @@ public class SdxClusterResponse {
                 ", tags=" + tags +
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
+                ", cmHAEnabled=" + cmHAEnabled +
                 '}';
     }
 }

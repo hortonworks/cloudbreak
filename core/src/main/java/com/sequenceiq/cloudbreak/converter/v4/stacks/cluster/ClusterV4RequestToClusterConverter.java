@@ -166,6 +166,7 @@ public class ClusterV4RequestToClusterConverter extends AbstractConversionServic
                 })
                 .forEach(components::add);
         cluster.setComponents(components);
+        //should auto set here?
     }
 
     private ClouderaManagerProduct convertCMProductRequestToCMProduct(ClouderaManagerProductV4Request request) {

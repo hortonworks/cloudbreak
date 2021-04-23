@@ -6,7 +6,9 @@ public class DatalakeView {
 
     private boolean razEnabled;
 
-    public DatalakeView(boolean razEnabled) {
+    private boolean cmHAEnabled;
+
+    public DatalakeView(boolean razEnabled, boolean cmHAEnabled) {
         this.razEnabled = razEnabled;
     }
 
@@ -29,5 +31,9 @@ public class DatalakeView {
 
     public boolean isRazEnabled() {
         return razEnabled;
+    }
+
+    public boolean isCmHAEnabled() {
+        return cmHAEnabled;
     }
 }

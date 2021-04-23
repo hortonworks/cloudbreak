@@ -179,7 +179,7 @@ public class RangerRazDatalakeConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();

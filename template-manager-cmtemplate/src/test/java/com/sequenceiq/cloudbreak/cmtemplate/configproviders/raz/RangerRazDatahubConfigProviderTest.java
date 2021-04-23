@@ -60,7 +60,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
                 .withGeneralClusterConfigs(generalClusterConfigs)
-                .withDataLakeView(new DatalakeView(false))
+                .withDataLakeView(new DatalakeView(false, false))
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
         Map<String, ApiClusterTemplateService> additionalServices = configProvider.getAdditionalServices(cmTemplateProcessor, preparationObject);
@@ -81,7 +81,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -103,7 +103,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -125,7 +125,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -147,7 +147,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(cmRepo, List.of())
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -218,7 +218,7 @@ public class RangerRazDatahubConfigProviderTest {
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
                 .withProductDetails(null, null)
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();
@@ -237,7 +237,7 @@ public class RangerRazDatahubConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withStackType(StackType.WORKLOAD)
                 .withCloudPlatform(cloudPlatform)
-                .withDataLakeView(new DatalakeView(true))
+                .withDataLakeView(new DatalakeView(true, false))
                 .withGeneralClusterConfigs(generalClusterConfigs)
                 .withHostgroupViews(Set.of(master, worker))
                 .build();

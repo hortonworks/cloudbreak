@@ -64,6 +64,7 @@ public class ClusterDecorator {
         prepareRds(cluster, request, stack);
         setupEmbeddedDatabase(cluster, stack);
         prepareAutoTlsFlag(cluster, request, stack, parentEnvironmentCloudPlatform);
+        prepareCMHAFlag(cluster, request);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
     }
@@ -95,6 +96,13 @@ public class ClusterDecorator {
         Optional.ofNullable(request.getDatabases())
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(
                         rdsConfigService.getByNameForWorkspace(confName, stack.getWorkspace()))));
+    }
+
+    private void prepareCMHAFlag(Cluster cluster, ClusterV4Request request) {
+        cluster.setCMHAEnabled(Optional.ofNullable(request.getCm())
+                .map(ClouderaManagerV4Request::getEnableCMHA)
+                .orElse(false)
+        );
     }
 
     private void prepareAutoTlsFlag(Cluster cluster, ClusterV4Request request, Stack stack, String parentEnvironmentCloudPlatform) {

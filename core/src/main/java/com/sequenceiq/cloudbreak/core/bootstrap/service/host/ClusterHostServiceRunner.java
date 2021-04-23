@@ -396,7 +396,7 @@ public class ClusterHostServiceRunner {
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, licenseOpt);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
-        decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar, primaryGatewayConfig);
+        decoratePillarWithClouderaManagerCommunicationSettings(cluster, servicePillar, primaryGatewayConfig, stack);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         csdParcelDecorator.decoratePillarWithCsdParcels(stack, servicePillar);
         decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
@@ -459,7 +459,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithClouderaManagerCommunicationSettings(Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
-            GatewayConfig primaryGatewayConfig) {
+            GatewayConfig primaryGatewayConfig, Stack stack) {
         Boolean autoTls = cluster.getAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
         String loadBalancer = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(cluster.getStack().getId());
@@ -469,7 +469,8 @@ public class ClusterHostServiceRunner {
         if (StringUtils.isNotEmpty(loadBalancer)) {
             communication.put("loadbalancer_url", loadBalancer);
         }
-        communication.put("ha", true);
+
+        communication.put("ha", cluster.isCmHAEnabled());
         communication.put("primary", primaryGatewayConfig.getHostname().split(".datalake")[0]);
         communication.put("primary_fqdn", primaryGatewayConfig.getHostname());
         servicePillar.put("cloudera-manager-communication", new SaltPillarProperties("/cloudera-manager/communication.sls",

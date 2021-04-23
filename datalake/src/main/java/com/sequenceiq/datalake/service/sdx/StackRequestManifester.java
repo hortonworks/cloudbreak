@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -125,7 +126,7 @@ public class StackRequestManifester {
 
             setupAuthentication(environment, stackRequest);
             setupSecurityAccess(environment, stackRequest);
-            setupClusterRequest(stackRequest);
+            setupClusterRequest(stackRequest, sdxCluster);
             prepareTelemetryForStack(stackRequest, environment, sdxCluster);
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             cloudStorageValidator.validate(stackRequest.getCluster().getCloudStorage(), environment, new ValidationResult.ValidationResultBuilder());
@@ -174,16 +175,25 @@ public class StackRequestManifester {
         }
     }
 
-    private void setupClusterRequest(StackV4Request stackRequest) {
+    private void setupClusterRequest(StackV4Request stackRequest, SdxCluster sdxCluster) {
         ClusterV4Request cluster = stackRequest.getCluster();
-        if (cluster != null && cluster.getBlueprintName() == null) {
-            throw new BadRequestException("BlueprintName not defined, should only happen on private API");
-        }
-        if (cluster != null && cluster.getUserName() == null) {
-            cluster.setUserName("admin");
-        }
-        if (cluster != null && cluster.getPassword() == null) {
-            cluster.setPassword(PasswordUtil.generatePassword());
+
+        if (cluster != null) {
+            if (cluster.getBlueprintName() == null) {
+                throw new BadRequestException("BlueprintName not defined, should only happen on private API");
+            }
+            if (cluster.getUserName() == null) {
+                cluster.setUserName("admin");
+            }
+            if (cluster.getPassword() == null) {
+                cluster.setPassword(PasswordUtil.generatePassword());
+            }
+            if (cluster.getCm() != null) {
+                cluster.getCm().setEnableCMHA(sdxCluster.isCmHAEnabled());
+            } else {
+                cluster.setCm(new ClouderaManagerV4Request());
+                cluster.getCm().setEnableCMHA(sdxCluster.isCmHAEnabled());
+            }
         }
     }
 

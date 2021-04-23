@@ -245,6 +245,9 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(nullable = false)
     private Boolean embeddedDatabaseOnAttachedDisk = Boolean.FALSE;
 
+    @Column(nullable = false, name = "cm_ha_enabled")
+    private boolean cmHAEnabled;
+
     public String getEnvironmentCrn() {
         return environmentCrn;
     }
@@ -806,6 +809,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.embeddedDatabaseOnAttachedDisk = embeddedDatabaseOnAttachedDisk;
     }
 
+    public boolean isCmHAEnabled() {
+        return cmHAEnabled;
+    }
+
+    public void setCMHAEnabled(boolean cmHAEnabled) {
+        this.cmHAEnabled = cmHAEnabled;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -822,5 +833,4 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     public int hashCode() {
         return Objects.hash(id);
     }
-
 }

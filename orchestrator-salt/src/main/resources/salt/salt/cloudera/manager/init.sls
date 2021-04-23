@@ -47,34 +47,6 @@ add_settings_file_to_cfm_server_args:
 #    - name: /etc/default/cloudera-scm-server
 #    - text: export CMF_JAVA_OPTS="$CMF_JAVA_OPTS -Dcom.cloudera.cmf.haMode=true"
 
-#stop_server_ha:
-#  service.running:
-#    - enable: false
-#    - name: cloudera-scm-server
-#    - require:
-#        - cmd: enable_cm_ha_cmd
-#
-#start_server_ha:
-#  service.running:
-#    - enable: True
-#    - name: cloudera-scm-server
-#    - require:
-#        - cmd: run_generate_agent_tokens
-#
-#/opt/salt/scripts/enable_cm_ha.sh:
-#  file.managed:
-#    - makedirs: True
-#    - source: salt://cloudera/manager/scripts/enable_cm_ha.sh.j2
-#    - template: jinja
-#    - mode: 755
-#
-#enable_cm_ha_cmd:
-#  cmd.run:
-#    - name: /opt/salt/scripts/enable_cm_ha.sh  2>&1 | tee -a /var/log/cm-setup-ha.log && exit ${PIPESTATUS[0]}
-#    - require:
-#        - file: /opt/salt/scripts/enable_cm_ha.sh
-#        - cmd: start_server_ha
-#    - shell: /bin/bash
 
 {% if salt['pillar.get']('ldap', None) != None and salt['pillar.get']('ldap:local', None) == None %}
 
