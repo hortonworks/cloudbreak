@@ -256,7 +256,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         when(databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(AWS_CLOUD_PLATFORM.name())).thenReturn(SINGLE_CERT);
         when(databaseServerSslCertificateConfig.getCertByPlatformAndVersion(AWS_CLOUD_PLATFORM.name(), VERSION_3)).thenReturn(sslCertificateEntryV3);
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
                 .withCrn(ENVIRONMENT_CRN)
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
@@ -331,7 +331,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 new CloudSubnet("subnet-1", "", "az-a", ""),
                 new CloudSubnet("subnet-2", "", "az-b", "")
         );
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(AWS_CLOUD_PLATFORM.name())
                 .withName(ENVIRONMENT_NAME)
                 .withCrn(ENVIRONMENT_CRN)
@@ -383,7 +383,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         allocateRequest.setCloudPlatform(AWS_CLOUD_PLATFORM);
         allocateRequest.setTags(new HashMap<>());
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(UNKNOWN_CLOUD_PLATFORM)
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
@@ -398,7 +398,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         allocateRequest.setCloudPlatform(CloudPlatform.YARN);
         allocateRequest.setTags(new HashMap<>());
         allocateRequest.setEnvironmentCrn(ENVIRONMENT_CRN);
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.YARN.name())
                 .build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
@@ -445,7 +445,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         allocateRequest.setClusterCrn(CLUSTER_CRN);
         allocateRequest.setSslConfig(sslConfigV4Request);
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(cloudPlatform.name())
                 .withCrn(ENVIRONMENT_CRN)
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())

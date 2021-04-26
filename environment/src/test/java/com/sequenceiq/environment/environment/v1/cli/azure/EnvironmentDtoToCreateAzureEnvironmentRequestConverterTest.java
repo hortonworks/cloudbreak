@@ -83,10 +83,11 @@ class EnvironmentDtoToCreateAzureEnvironmentRequestConverterTest {
         logging.setAdlsGen2(adls);
         telemetry.setLogging(logging);
         environmentDto.setTelemetry(telemetry);
-        AzureParams azureParams = new AzureParams();
-        azureParams.setNoPublicIp(true);
-        azureParams.setResourceGroupName("ResourceGroupName");
-        azureParams.setNetworkId("NetworkId");
+        AzureParams azureParams = AzureParams.builder()
+                .withNetworkId("NetworkId")
+                .withNoPublicIp(true)
+                .withResourceGroupName("ResourceGroupName")
+                .build();
         Map<String, CloudSubnet> subnets = Map.of("subnet1", new CloudSubnet(), "subnet2", new CloudSubnet());
         NetworkDto network = NetworkDto.builder()
                 .withNetworkCidr("networkCidr")

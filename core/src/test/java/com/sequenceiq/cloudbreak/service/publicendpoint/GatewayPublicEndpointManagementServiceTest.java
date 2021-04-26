@@ -143,8 +143,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setSecurityConfig(securityConfig);
         stack.setCluster(cluster);
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString()))
@@ -207,8 +206,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setCluster(cluster);
 
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -252,8 +250,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setCluster(cluster);
 
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -311,8 +308,7 @@ class GatewayPublicEndpointManagementServiceTest {
         String accountWorkloadSubdomain = "aWorkloadSubdomain";
         String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -351,8 +347,7 @@ class GatewayPublicEndpointManagementServiceTest {
         String envName = "anEnvName";
         String accountWorkloadSubdomain = "aWorkloadSubdomain";
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -392,8 +387,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setCluster(cluster);
 
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -438,8 +432,7 @@ class GatewayPublicEndpointManagementServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -459,8 +452,7 @@ class GatewayPublicEndpointManagementServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -481,8 +473,7 @@ class GatewayPublicEndpointManagementServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -508,8 +499,7 @@ class GatewayPublicEndpointManagementServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -541,8 +531,7 @@ class GatewayPublicEndpointManagementServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -574,8 +563,7 @@ class GatewayPublicEndpointManagementServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -628,8 +616,7 @@ class GatewayPublicEndpointManagementServiceTest {
         String endpointName = primaryGatewayInstance.getShortHostname();
         String gatewayIp = primaryGatewayInstance.getPublicIpWrapper();
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
@@ -670,11 +657,10 @@ class GatewayPublicEndpointManagementServiceTest {
         String cloudDns = loadBalancer.getDns();
         String hostedZoneId = loadBalancer.getHostedZoneId();
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
-        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
         UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
                 .setWorkloadSubdomain(accountWorkloadSubdomain)
                 .build();
@@ -732,11 +718,10 @@ class GatewayPublicEndpointManagementServiceTest {
         String accountWorkloadSubdomain = "aWorkloadSubdomain";
         String lbIp = loadBalancer.getIp();
 
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
-        when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
         UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
                 .setWorkloadSubdomain(accountWorkloadSubdomain)
                 .build();
@@ -859,8 +844,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setCluster(cluster);
         stack.setLoadBalancers(Set.of(loadBalancer));
         String envName = "anEnvName";
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder
-                .builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withName(envName)
                 .build();
         String accountWorkloadSubdomain = "aWorkloadSubdomain";

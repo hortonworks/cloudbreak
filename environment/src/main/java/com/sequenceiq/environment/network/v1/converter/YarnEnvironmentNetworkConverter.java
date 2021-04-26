@@ -60,8 +60,7 @@ public class YarnEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         YarnNetwork yarnNetwork = (YarnNetwork) network;
         return builder.withYarn(
-                YarnParams.YarnParamsBuilder
-                    .anYarnParams()
+                YarnParams.builder()
                     .withQueue(yarnNetwork.getQueue())
                     .withLifetime(yarnNetwork.getLifetime())
                     .build())

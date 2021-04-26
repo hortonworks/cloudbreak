@@ -76,7 +76,7 @@ public class EnvironmentResponseConverter {
     }
 
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
-        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())

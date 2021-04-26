@@ -102,7 +102,6 @@ import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse.Builder;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -301,7 +300,7 @@ public class StackToTemplatePreparationObjectConverterTest {
                 .crn("aCredentialCRN")
                 .attributes(new Json(""))
                 .build();
-        DetailedEnvironmentResponse environmentResponse = Builder.builder()
+        DetailedEnvironmentResponse environmentResponse = DetailedEnvironmentResponse.builder()
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withCredential(new CredentialResponse())
                 .withAdminGroupName(ADMIN_GROUP_NAME)

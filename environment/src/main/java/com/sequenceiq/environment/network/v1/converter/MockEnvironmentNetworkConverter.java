@@ -76,8 +76,7 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         MockNetwork mockNetwork = (MockNetwork) network;
         return builder.withMock(
-                MockParams.MockParamsBuilder
-                    .aMockParams()
+                MockParams.builder()
                     .withVpcId(mockNetwork.getVpcId())
                     .build())
                 .build();

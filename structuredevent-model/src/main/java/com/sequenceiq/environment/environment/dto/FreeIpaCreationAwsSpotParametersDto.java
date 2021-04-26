@@ -2,11 +2,13 @@ package com.sequenceiq.environment.environment.dto;
 
 public class FreeIpaCreationAwsSpotParametersDto {
 
-    private Integer percentage;
+    private final Integer percentage;
 
-    private Double maxPrice;
+    private final Double maxPrice;
 
-    private FreeIpaCreationAwsSpotParametersDto() {
+    private FreeIpaCreationAwsSpotParametersDto(Builder builder) {
+        percentage = builder.percentage;
+        maxPrice = builder.maxPrice;
     }
 
     public Integer getPercentage() {
@@ -35,6 +37,9 @@ public class FreeIpaCreationAwsSpotParametersDto {
 
         private Double maxPrice;
 
+        private Builder() {
+        }
+
         public Builder withPercentage(int percentage) {
             this.percentage = percentage;
             return this;
@@ -46,10 +51,7 @@ public class FreeIpaCreationAwsSpotParametersDto {
         }
 
         public FreeIpaCreationAwsSpotParametersDto build() {
-            FreeIpaCreationAwsSpotParametersDto response = new FreeIpaCreationAwsSpotParametersDto();
-            response.percentage = percentage;
-            response.maxPrice = maxPrice;
-            return response;
+            return new FreeIpaCreationAwsSpotParametersDto(this);
         }
     }
 }

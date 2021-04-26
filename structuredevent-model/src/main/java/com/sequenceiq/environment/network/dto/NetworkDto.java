@@ -65,7 +65,7 @@ public class NetworkDto {
 
     private final CloudPlatform cloudPlatform;
 
-    public NetworkDto(Builder builder) {
+    private NetworkDto(Builder builder) {
         id = builder.id;
         resourceCrn = builder.resourceCrn;
         name = builder.name;

@@ -8,6 +8,12 @@ public class AzureParams {
 
     private boolean noPublicIp;
 
+    private AzureParams(Builder builder) {
+        networkId = builder.networkId;
+        resourceGroupName = builder.resourceGroupName;
+        noPublicIp = builder.noPublicIp;
+    }
+
     public String getNetworkId() {
         return networkId;
     }
@@ -71,11 +77,7 @@ public class AzureParams {
         }
 
         public AzureParams build() {
-            AzureParams azureParams = new AzureParams();
-            azureParams.setNetworkId(networkId);
-            azureParams.setResourceGroupName(resourceGroupName);
-            azureParams.setNoPublicIp(noPublicIp);
-            return azureParams;
+            return new AzureParams(this);
         }
     }
 }

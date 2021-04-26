@@ -52,6 +52,9 @@ public class AzureEnvironmentParameters {
 
         private AzureResourceEncryptionParameters resourceEncryptionParameters;
 
+        private Builder() {
+        }
+
         public Builder withAzureResourceGroup(AzureResourceGroup azureResourceGroup) {
             this.azureResourceGroup = azureResourceGroup;
             return this;

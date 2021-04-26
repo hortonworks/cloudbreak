@@ -50,8 +50,9 @@ class SecurityAccessRequestTest {
     @ParameterizedTest
     @MethodSource("cidrDataProvider")
     void testCidrValidation(String cidr, boolean expected) {
-        SecurityAccessRequest request = new SecurityAccessRequest();
-        request.setCidr(cidr);
+        SecurityAccessRequest request = SecurityAccessRequest.builder()
+                .withCidr(cidr)
+                .build();
         Set<ConstraintViolation<SecurityAccessRequest>> violations = validator.validate(request);
         assertEquals(expected, violations.isEmpty());
     }

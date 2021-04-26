@@ -140,14 +140,14 @@ public class NetworkDtoToResponseConverterTest {
     }
 
     private YarnParams createYarnParams() {
-        return YarnParams.YarnParamsBuilder.anYarnParams()
+        return YarnParams.builder()
                 .withQueue("yarn-queue")
                 .withLifetime(1000)
                 .build();
     }
 
     private MockParams createMockParams() {
-        return MockParams.MockParamsBuilder.aMockParams()
+        return MockParams.builder()
                 .withInternetGatewayId("internet-gateway-id")
                 .withVpcId("vpc-id")
                 .build();
