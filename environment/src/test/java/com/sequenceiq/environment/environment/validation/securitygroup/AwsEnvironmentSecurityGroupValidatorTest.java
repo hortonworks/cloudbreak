@@ -179,8 +179,7 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
     }
 
     private NetworkDto getNetworkDto(String vpcId) {
-        AwsParams awsParams = new AwsParams();
-        awsParams.setVpcId(vpcId);
+        AwsParams awsParams = AwsParams.builder().withVpcId(vpcId).build();
 
         return NetworkDto.builder()
                 .withAws(awsParams)

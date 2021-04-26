@@ -6,6 +6,11 @@ public class YarnParams {
 
     private Integer lifetime;
 
+    private YarnParams(Builder builder) {
+        queue = builder.queue;
+        lifetime = builder.lifetime;
+    }
+
     public String getQueue() {
         return queue;
     }
@@ -22,6 +27,10 @@ public class YarnParams {
         this.lifetime = lifetime;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     @Override
     public String toString() {
         return "YarnParams{" +
@@ -30,34 +39,27 @@ public class YarnParams {
                 '}';
     }
 
-    public static final class YarnParamsBuilder {
+    public static final class Builder {
 
         private String queue;
 
         private Integer lifetime;
 
-        private YarnParamsBuilder() {
+        private Builder() {
         }
 
-        public static YarnParamsBuilder anYarnParams() {
-            return new YarnParamsBuilder();
-        }
-
-        public YarnParamsBuilder withQueue(String queue) {
+        public Builder withQueue(String queue) {
             this.queue = queue;
             return this;
         }
 
-        public YarnParamsBuilder withLifetime(Integer lifetime) {
+        public Builder withLifetime(Integer lifetime) {
             this.lifetime = lifetime;
             return this;
         }
 
         public YarnParams build() {
-            YarnParams yarnParams = new YarnParams();
-            yarnParams.setQueue(queue);
-            yarnParams.setLifetime(lifetime);
-            return yarnParams;
+            return new YarnParams(this);
         }
     }
 }

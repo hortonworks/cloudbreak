@@ -46,6 +46,10 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         this.proxyConfig = proxyConfig;
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
     public static final class Builder {
         private String crn;
 
@@ -112,10 +116,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
         private String environmentServiceVersion;
 
         private Builder() {
-        }
-
-        public static Builder builder() {
-            return new Builder();
         }
 
         public Builder withCrn(String crn) {

@@ -76,6 +76,9 @@ public class AzureResourceEncryptionParameters {
 
         private String diskEncryptionSetId;
 
+        private Builder() {
+        }
+
         public Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;
             return this;

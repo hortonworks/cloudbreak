@@ -24,7 +24,7 @@ public class YarnEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateWhenNoNetworkCidrAndNoNetworkId() {
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, YarnParams.builder().build(), null, null, 1);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
         underTest.validateDuringRequest(networkDto, resultBuilder);
@@ -34,7 +34,7 @@ public class YarnEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringFlowWhenNoQueueInYarnParams() {
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, YarnParams.builder().build(), null, null, 1);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
 
         EnvironmentDto environmentDto = new EnvironmentDto();
@@ -49,9 +49,10 @@ public class YarnEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateDuringFlowWhenLifetimeLessThenZeroInYarnParams() {
-        YarnParams yarnParams = new YarnParams();
-        yarnParams.setQueue("queue");
-        yarnParams.setLifetime(-1);
+        YarnParams yarnParams = YarnParams.builder()
+                .withQueue("queue")
+                .withLifetime(-1)
+                .build();
 
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, yarnParams, null, null, 1);
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();

@@ -43,6 +43,9 @@ public class AwsEnvironmentParameters {
     public static final class Builder {
         private S3GuardRequestParameters s3guard;
 
+        private Builder() {
+        }
+
         public Builder withS3guard(S3GuardRequestParameters s3guard) {
             this.s3guard = s3guard;
             return this;

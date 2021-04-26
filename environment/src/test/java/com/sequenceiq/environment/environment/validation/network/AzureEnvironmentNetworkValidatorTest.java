@@ -295,7 +295,7 @@ class AzureEnvironmentNetworkValidatorTest {
 
     @Test
     void testValidateWhenNoNetworkCidrAndNoNetworkId() {
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(new AzureParams(), null, null, null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(AzureParams.builder().build(), null, null, null, null, 1);
 
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         underTest.validateDuringRequest(networkDto, resultBuilder);

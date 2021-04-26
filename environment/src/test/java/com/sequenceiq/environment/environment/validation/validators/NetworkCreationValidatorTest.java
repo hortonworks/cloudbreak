@@ -103,7 +103,7 @@ public class NetworkCreationValidatorTest {
 
     @Test
     void testValidateWhenNoNetworkCidrAndNoNetworkIdOnYarn() {
-        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, new YarnParams(), null, null, 1);
+        NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, YarnParams.builder().build(), null, null, 1);
         environment.setCloudPlatform(CloudPlatform.YARN.name());
         environment.setCidr(null);
 

@@ -2,9 +2,10 @@ package com.sequenceiq.environment.environment.dto;
 
 public class FreeIpaCreationAwsParametersDto {
 
-    private FreeIpaCreationAwsSpotParametersDto spot;
+    private final FreeIpaCreationAwsSpotParametersDto spot;
 
-    private FreeIpaCreationAwsParametersDto() {
+    private FreeIpaCreationAwsParametersDto(Builder builder) {
+        spot = builder.spot;
     }
 
     public FreeIpaCreationAwsSpotParametersDto getSpot() {
@@ -26,15 +27,16 @@ public class FreeIpaCreationAwsParametersDto {
 
         private FreeIpaCreationAwsSpotParametersDto spot;
 
+        private Builder() {
+        }
+
         public Builder withSpot(FreeIpaCreationAwsSpotParametersDto spot) {
             this.spot = spot;
             return this;
         }
 
         public FreeIpaCreationAwsParametersDto build() {
-            FreeIpaCreationAwsParametersDto response = new FreeIpaCreationAwsParametersDto();
-            response.spot = spot;
-            return response;
+            return new FreeIpaCreationAwsParametersDto(this);
         }
 
     }

@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -12,8 +11,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
-import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
+import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -34,52 +34,56 @@ public class NetworkRequestToDtoConverter {
         NetworkDto.Builder builder = NetworkDto.builder();
         if (network.getAws() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "AWS");
-            AwsParams awsParams = new AwsParams();
-            awsParams.setVpcId(network.getAws().getVpcId());
+            AwsParams awsParams = AwsParams.builder().withVpcId(network.getAws().getVpcId()).build();
             builder.withAws(awsParams);
             builder.withNetworkId(network.getAws().getVpcId());
         }
         if (network.getAzure() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Azure");
-            AzureParams azureParams = new AzureParams();
-            azureParams.setNetworkId(network.getAzure().getNetworkId());
-            azureParams.setNoPublicIp(Boolean.TRUE.equals(network.getAzure().getNoPublicIp()));
-            azureParams.setResourceGroupName(network.getAzure().getResourceGroupName());
+            AzureParams azureParams = AzureParams.builder()
+                    .withNetworkId(network.getAzure().getNetworkId())
+                    .withNoPublicIp(Boolean.TRUE.equals(network.getAzure().getNoPublicIp()))
+                    .withResourceGroupName(network.getAzure().getResourceGroupName())
+                    .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
         }
         if (network.getGcp() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "GCP");
-            GcpParams gcpParams = new GcpParams();
-            gcpParams.setNetworkId(network.getGcp().getNetworkId());
-            gcpParams.setSharedProjectId(network.getGcp().getSharedProjectId());
-            gcpParams.setNoFirewallRules(network.getGcp().getNoFirewallRules());
-            gcpParams.setNoPublicIp(network.getGcp().getNoPublicIp());
+            GcpParams gcpParams = GcpParams.builder()
+                    .withNetworkId(network.getGcp().getNetworkId())
+                    .withSharedProjectId(network.getGcp().getSharedProjectId())
+                    .withNoFirewallRules(network.getGcp().getNoFirewallRules())
+                    .withNoPublicIp(network.getGcp().getNoPublicIp())
+                    .build();
             builder.withGcp(gcpParams);
             builder.withNetworkId(network.getGcp().getNetworkId());
         }
         if (network.getYarn() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Yarn");
-            YarnParams yarnParams = new YarnParams();
-            yarnParams.setQueue(network.getYarn().getQueue());
-            yarnParams.setLifetime(network.getYarn().getLifetime());
+            YarnParams yarnParams = YarnParams.builder()
+                    .withQueue(network.getYarn().getQueue())
+                    .withLifetime(network.getYarn().getLifetime())
+                    .build();
             builder.withYarn(yarnParams);
         }
         if (network.getMock() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Mock");
-            MockParams mockParams = new MockParams();
-            mockParams.setInternetGatewayId(network.getMock().getInternetGatewayId());
-            mockParams.setVpcId(network.getMock().getVpcId());
+            MockParams mockParams = MockParams.builder()
+                    .withVpcId(network.getMock().getVpcId())
+                    .withInternetGatewayId(network.getMock().getInternetGatewayId())
+                    .build();
             builder.withMock(mockParams);
             builder.withNetworkId(mockParams.getVpcId());
         }
         if (network.getGcp() != null) {
             LOGGER.debug(NETWORK_CONVERT_MESSAGE_TEMPLATE, "Gcp");
-            GcpParams gcpParams = new GcpParams();
-            gcpParams.setSharedProjectId(network.getGcp().getSharedProjectId());
-            gcpParams.setNetworkId(network.getGcp().getNetworkId());
-            gcpParams.setNoFirewallRules(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules()));
-            gcpParams.setNoPublicIp(Boolean.TRUE.equals(network.getGcp().getNoPublicIp()));
+            GcpParams gcpParams = GcpParams.builder()
+                    .withSharedProjectId(network.getGcp().getSharedProjectId())
+                    .withNetworkId(network.getGcp().getNetworkId())
+                    .withNoFirewallRules(Boolean.TRUE.equals(network.getGcp().getNoFirewallRules()))
+                    .withNoPublicIp(Boolean.TRUE.equals(network.getGcp().getNoPublicIp()))
+                    .build();
             builder.withGcp(gcpParams);
             builder.withNetworkId(gcpParams.getNetworkId());
         }

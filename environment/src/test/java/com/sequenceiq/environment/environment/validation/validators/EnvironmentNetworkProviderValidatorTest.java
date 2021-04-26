@@ -55,7 +55,7 @@ class EnvironmentNetworkProviderValidatorTest {
 
     @Test
     void testIfCloudPlatformMatchesWithTheGivenNetworkInstanceThenItShouldBeFine() {
-        NetworkDto network = NetworkDto.builder().withAws(new AwsParams()).build();
+        NetworkDto network = NetworkDto.builder().withAws(AwsParams.builder().build()).build();
 
         ValidationResult result = underTest.validate(getEnvDto(network));
 
@@ -64,7 +64,7 @@ class EnvironmentNetworkProviderValidatorTest {
 
     @Test
     void testIfCloudPlatformDoesNotMatchWithTheGivenNetworkParamInstanceThenErrorComes() {
-        NetworkDto network = NetworkDto.builder().withAzure(new AzureParams()).build();
+        NetworkDto network = NetworkDto.builder().withAzure(AzureParams.builder().build()).build();
 
         ValidationResult result = underTest.validate(getEnvDto(network));
 

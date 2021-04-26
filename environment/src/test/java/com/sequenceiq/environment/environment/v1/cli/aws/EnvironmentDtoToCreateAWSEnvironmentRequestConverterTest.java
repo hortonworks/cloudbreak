@@ -68,8 +68,7 @@ class EnvironmentDtoToCreateAWSEnvironmentRequestConverterTest {
         logging.setS3(s3);
         telemetry.setLogging(logging);
         environmentDto.setTelemetry(telemetry);
-        AwsParams awsNetwork = new AwsParams();
-        awsNetwork.setVpcId("vpcId");
+        AwsParams awsNetwork = AwsParams.builder().withVpcId("vpcId").build();
         Map<String, CloudSubnet> subnets = Map.of("subnet1", new CloudSubnet(), "subnet2", new CloudSubnet());
         NetworkDto network = NetworkDto.builder()
                 .withNetworkCidr("networkCidr")

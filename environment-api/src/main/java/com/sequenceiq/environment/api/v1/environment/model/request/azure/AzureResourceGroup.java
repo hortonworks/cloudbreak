@@ -47,6 +47,9 @@ public class AzureResourceGroup {
 
         private ResourceGroupUsage resourceGroupUsage;
 
+        private Builder() {
+        }
+
         public Builder withName(String name) {
             this.name = name;
             return this;

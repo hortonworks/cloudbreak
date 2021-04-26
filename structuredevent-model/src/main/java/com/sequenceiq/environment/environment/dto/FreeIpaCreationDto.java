@@ -12,7 +12,12 @@ public class FreeIpaCreationDto {
 
     private String imageId;
 
-    private FreeIpaCreationDto() {
+    private FreeIpaCreationDto(Builder builder) {
+        create = builder.create;
+        instanceCountByGroup = builder.instanceCountByGroup;
+        aws = builder.aws;
+        imageCatalog = builder.imageCatalog;
+        imageId = builder.imageId;
     }
 
     public void setCreate(boolean create) {
@@ -111,13 +116,7 @@ public class FreeIpaCreationDto {
         }
 
         public FreeIpaCreationDto build() {
-            FreeIpaCreationDto response = new FreeIpaCreationDto();
-            response.create = create;
-            response.instanceCountByGroup = instanceCountByGroup;
-            response.aws = aws;
-            response.imageCatalog = imageCatalog;
-            response.imageId = imageId;
-            return response;
+            return new FreeIpaCreationDto(this);
         }
     }
 }

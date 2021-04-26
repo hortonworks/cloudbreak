@@ -5,7 +5,7 @@ import io.swagger.annotations.ApiModel;
 @ApiModel(value = "GcpEnvironmentV1Parameters")
 public class GcpEnvironmentParameters {
 
-    private GcpEnvironmentParameters(GcpEnvironmentParameters.Builder builder) {
+    private GcpEnvironmentParameters(Builder builder) {
     }
 
     public static Builder builder() {
@@ -13,6 +13,9 @@ public class GcpEnvironmentParameters {
     }
 
     public static final class Builder {
+
+        private Builder() {
+        }
 
         public GcpEnvironmentParameters build() {
             return new GcpEnvironmentParameters(this);

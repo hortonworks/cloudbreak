@@ -44,6 +44,9 @@ public class S3GuardRequestParameters {
     public static final class Builder {
         private String dynamoDbTableName;
 
+        private Builder() {
+        }
+
         public Builder withDynamoDbTableName(String dynamoDbTableName) {
             this.dynamoDbTableName = dynamoDbTableName;
             return this;

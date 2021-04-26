@@ -2,14 +2,14 @@ package com.sequenceiq.environment.network.dto;
 
 public class AwsParams {
 
-    private String vpcId;
+    private final String vpcId;
+
+    private AwsParams(Builder builder) {
+        vpcId = builder.vpcId;
+    }
 
     public String getVpcId() {
         return vpcId;
-    }
-
-    public void setVpcId(String vpcId) {
-        this.vpcId = vpcId;
     }
 
     @Override
@@ -35,9 +35,7 @@ public class AwsParams {
         }
 
         public AwsParams build() {
-            AwsParams awsParams = new AwsParams();
-            awsParams.setVpcId(vpcId);
-            return awsParams;
+            return new AwsParams(this);
         }
     }
 }

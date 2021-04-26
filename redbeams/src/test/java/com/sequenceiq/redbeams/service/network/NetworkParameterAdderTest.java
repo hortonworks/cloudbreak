@@ -64,7 +64,7 @@ public class NetworkParameterAdderTest {
     public void testAddParametersWhenAws() {
         Map<String, Object> parameters = new HashMap<>();
         DBStack dbStack = new DBStack();
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AWS.name())
                 .withNetwork(EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                         .withAws(EnvironmentNetworkAwsParamsBuilder.anEnvironmentNetworkAwsParams().withVpcId(TEST_VPC_ID).build())
@@ -82,7 +82,7 @@ public class NetworkParameterAdderTest {
     public void testAddParametersWhenAzure() {
         Map<String, Object> parameters = new HashMap<>();
         DBStack dbStack = new DBStack();
-        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.Builder.builder()
+        DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
                 .withCloudPlatform(CloudPlatform.AZURE.name())
                 .withNetwork(EnvironmentNetworkResponseBuilder.anEnvironmentNetworkResponse()
                         .withSubnetMetas(Map.of())
