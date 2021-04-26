@@ -85,6 +85,82 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Create new user group if it does not exist.
+     *
+     * @param accountId          the account ID
+     * @param groupName          the newly created group name
+     * @param requestId          an optional request Id
+     * @return                   the new or existing user group.
+     */
+    public Group createGroup(String actorCrn, String accountId, String groupName, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        LOGGER.debug("Creating new user group '{}', for account '{}' using request ID '{}'...", groupName, accountId, requestId);
+        Group newGroup = client.createGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
+        LOGGER.debug("New user group '{}' has been created for account '{}'.", groupName, accountId);
+        return newGroup;
+    }
+
+    /**
+     * Delete user group if it exist.
+     *
+     * @param accountId          the account ID
+     * @param groupName          the newly created group name
+     * @param requestId          an optional request Id
+     */
+    public void deleteGroup(String actorCrn, String accountId, String groupName, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        LOGGER.debug("Deleting user group '{}', from account '{}' using request ID '{}'...", groupName, accountId, requestId);
+        client.deleteGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
+        LOGGER.debug("User group '{}' has been deleted from account '{}'.", groupName, accountId);
+    }
+
+    /**
+     * Add member to the selected user group if it exist.
+     *
+     * @param accountId          the account ID
+     * @param groupName          the group where user is going to be assigned
+     * @param memberCrn          member (e.g., user) CRN
+     * @param requestId          an optional request Id
+     */
+    public void addMemberToGroup(String actorCrn, String accountId, String groupName, String memberCrn, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        LOGGER.debug("Assigning user '{}' to '{}' group, at account '{}' using request ID '{}'...", memberCrn, groupName, accountId, requestId);
+        client.addMemberToGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName, memberCrn);
+        LOGGER.debug("User '{}' has been added to '{}' group successfully.", groupName, accountId);
+    }
+
+    /**
+     * Remove member from the selected user group if it is exist.
+     *
+     * @param accountId          the account ID
+     * @param groupName          the group where user is going to be assigned
+     * @param memberCrn          member (e.g., user) CRN
+     * @param requestId          an optional request Id
+     */
+    public void removeMemberFromGroup(String actorCrn, String accountId, String groupName, String memberCrn, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        LOGGER.debug("Removing user '{}' from '{}' group, at account '{}' using request ID '{}'...", memberCrn, groupName, accountId, requestId);
+        client.removeMemberFromGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName, memberCrn);
+        LOGGER.debug("User '{}' has been removed from '{}' group successfully.", groupName, accountId);
+    }
+
+    /**
+     * List members from the selected user group if it is exist.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupName          the group where user is going to be assigned
+     * @return                   list of user group member CRNs or NULL if the user group does not exist.
+     */
+    public List<String> listMembersFromGroup(String actorCrn, String accountId, String groupName, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        LOGGER.debug("Listing members from '{}' group, at account '{}' using request ID '{}'...", groupName, accountId, requestId);
+        List<String> members = client.listMembersFromGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
+        LOGGER.debug("User group '{}' contains [{}] members at account '{}'.", groupName, members, accountId);
+        return members;
+    }
+
+    /**
      * Retrieves list of all groups from UMS.
      *
      * @param accountId the account Id
