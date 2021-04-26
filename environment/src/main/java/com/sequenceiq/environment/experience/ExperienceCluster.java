@@ -11,10 +11,13 @@ public class ExperienceCluster {
 
     private final String status;
 
+    private final String statusReason;
+
     private ExperienceCluster(Builder builder) {
         name = builder.name;
         experienceName = builder.experienceName;
         status = builder.status;
+        statusReason = builder.statusReason;
     }
 
     public String getName() {
@@ -29,6 +32,10 @@ public class ExperienceCluster {
         return status;
     }
 
+    public String getStatusReason() {
+        return statusReason;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -39,6 +46,7 @@ public class ExperienceCluster {
                 .add("name='" + name + "'")
                 .add("experienceName='" + experienceName + "'")
                 .add("status='" + status + "'")
+                .add("statusReason='" + statusReason + "'")
                 .toString();
     }
 
@@ -51,12 +59,15 @@ public class ExperienceCluster {
             return false;
         }
         ExperienceCluster that = (ExperienceCluster) o;
-        return Objects.equals(name, that.name) && Objects.equals(experienceName, that.experienceName) && Objects.equals(status, that.status);
+        return Objects.equals(name, that.name)
+                && Objects.equals(experienceName, that.experienceName)
+                && Objects.equals(status, that.status)
+                && Objects.equals(statusReason, that.statusReason);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, experienceName, status);
+        return Objects.hash(name, experienceName, status, statusReason);
     }
 
     public static class Builder {
@@ -67,6 +78,8 @@ public class ExperienceCluster {
 
         private String experienceName;
 
+        private String statusReason;
+
         public Builder withName(String name) {
             this.name = name;
             return this;
@@ -74,6 +87,11 @@ public class ExperienceCluster {
 
         public Builder withStatus(String status) {
             this.status = status;
+            return this;
+        }
+
+        public Builder withStatusReason(String statusReason) {
+            this.statusReason = statusReason;
             return this;
         }
 

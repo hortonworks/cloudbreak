@@ -16,6 +16,8 @@ public class CpInternalCluster {
 
     private String status;
 
+    private String statusReason;
+
     public String getCrn() {
         return crn;
     }
@@ -40,12 +42,21 @@ public class CpInternalCluster {
         this.status = status;
     }
 
+    public String getStatusReason() {
+        return statusReason;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", CpInternalCluster.class.getSimpleName() + "[", "]")
                 .add("crn='" + crn + "'")
                 .add("name='" + name + "'")
                 .add("status='" + status + "'")
+                .add("statusReason='" + statusReason + "'")
                 .toString();
     }
 
@@ -58,11 +69,14 @@ public class CpInternalCluster {
             return false;
         }
         CpInternalCluster that = (CpInternalCluster) o;
-        return Objects.equals(crn, that.crn) && Objects.equals(name, that.name) && Objects.equals(status, that.status);
+        return Objects.equals(crn, that.crn)
+                && Objects.equals(name, that.name)
+                && Objects.equals(status, that.status)
+                && Objects.equals(statusReason, that.statusReason);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(crn, name, status);
+        return Objects.hash(crn, name, status, statusReason);
     }
 }

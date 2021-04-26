@@ -20,7 +20,7 @@ import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterRespo
 
 class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTestBase {
 
-    private static final String LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG = "Unable to resolve Liftie response!";
+    private static final String LIFTIE_RESPONSE_RESOLVE_EXCEPTION_MSG = "Unable to find the Kubernetes dependencies of this environment due to internal error.";
 
     private static final String TEST_CLUSTER_ID = "someClusterId";
 
