@@ -14,12 +14,18 @@ import org.slf4j.LoggerFactory;
 import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Actor;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest;
@@ -30,6 +36,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUs
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
@@ -43,6 +51,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
@@ -83,6 +93,208 @@ public class UmsClient {
         this.actorCrn = checkNotNull(actorCrn);
         this.umsClientConfig = checkNotNull(umsClientConfig);
         this.tracer = tracer;
+    }
+
+    /**
+     * Create new user group if it does not exist.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupName          the newly created group name
+     * @return                   the new or existing user group.
+     */
+    public Group createGroup(String requestId, String accountId, String groupName) {
+        checkNotNull(requestId);
+        checkNotNull(groupName);
+        validateAccountIdWithWarning(accountId);
+
+        try {
+            CreateGroupResponse createGroupResponse = newStub(requestId).createGroup(
+                    CreateGroupRequest.newBuilder()
+                            .setAccountId(accountId)
+                            .setGroupName(groupName)
+                            .build()
+            );
+            LOGGER.info("New user group has been created: \nId: {} \nCrn: {} \nName: {}.", createGroupResponse.getGroup().getGroupId(),
+                    createGroupResponse.getGroup().getCrn(), createGroupResponse.getGroup().getGroupName());
+            return createGroupResponse.getGroup();
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(io.grpc.Status.ALREADY_EXISTS.getCode())) {
+                Group existingGroup = listGroups(requestId, accountId, List.of(groupName))
+                        .stream()
+                        .filter(foundGroup -> foundGroup.getGroupName().equals(groupName))
+                        .findAny()
+                        .orElse(null);
+                LOGGER.info("User group already exists: \nId: {} \nCrn: {} \nName: {}.", existingGroup.getGroupId(), existingGroup.getCrn(),
+                        existingGroup.getGroupName());
+                return existingGroup;
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Delete user group if it exist.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupName          the newly created group name
+     */
+    public void deleteGroup(String requestId, String accountId, String groupName) {
+        checkNotNull(requestId);
+        checkNotNull(groupName);
+        validateAccountIdWithWarning(accountId);
+
+        try {
+            DeleteGroupResponse deleteGroupResponse = newStub(requestId).deleteGroup(
+                    DeleteGroupRequest.newBuilder()
+                            .setAccountId(accountId)
+                            .setGroupNameOrCrn(groupName)
+                            .build()
+            );
+            LOGGER.info("User group has been deleted: \nName{} \nResponse: {}.", groupName, deleteGroupResponse.getAllFields());
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
+                LOGGER.info("User group '{}' not found or has already been deleted.", groupName);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Add member to the selected user group if it exist.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupName          the group where user is going to be assigned
+     * @param memberCrn          member (e.g., user) CRN
+     */
+    public void addMemberToGroup(String requestId, String accountId, String groupName, String memberCrn) {
+        checkNotNull(requestId);
+        checkNotNull(groupName);
+        checkNotNull(memberCrn);
+        validateAccountIdWithWarning(accountId);
+
+        Actor member;
+        Crn crn = Crn.safeFromString(memberCrn);
+        Actor.Builder actor = Actor.newBuilder().setAccountId(accountId);
+        switch (crn.getResourceType()) {
+            case USER:
+                actor.setUserIdOrCrn(memberCrn);
+                member = actor.build();
+                LOGGER.info("Found user '{}' for member Crn: '{}'.", member.getUserIdOrCrn(), memberCrn);
+                break;
+            case MACHINE_USER:
+                actor.setMachineUserNameOrCrn(memberCrn);
+                member = actor.build();
+                LOGGER.info("Found machine user '{}' for member Crn: '{}'.", member.getMachineUserNameOrCrn(), memberCrn);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("memberCrn %s is not a USER or MACHINE_USER", memberCrn));
+        }
+
+        try {
+            AddMemberToGroupResponse addMemberToGroupResponse = newStub(requestId).addMemberToGroup(
+                    AddMemberToGroupRequest.newBuilder()
+                            .setGroupNameOrCrn(groupName)
+                            .setMember(member)
+                            .build()
+            );
+            LOGGER.info("User '{}' has been added to the '{}' group successfully.", addMemberToGroupResponse.getMemberCrn(), groupName);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
+                LOGGER.info("User group '{}' not found or has already been deleted.", groupName);
+            } else if (e.getStatus().getCode().equals(Status.ALREADY_EXISTS.getCode())) {
+                LOGGER.info("User '{}' for group '{}' has already assigned.", memberCrn, groupName);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * Remove member from the selected user group if it is exist.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupName          the group where user is going to be assigned
+     * @param memberCrn          member (e.g., user) CRN
+     */
+    public void removeMemberFromGroup(String requestId, String accountId, String groupName, String memberCrn) {
+        checkNotNull(requestId);
+        checkNotNull(groupName);
+        checkNotNull(memberCrn);
+        validateAccountIdWithWarning(accountId);
+
+        Actor member;
+        Crn crn = Crn.safeFromString(memberCrn);
+        Actor.Builder actor = Actor.newBuilder().setAccountId(accountId);
+        switch (crn.getResourceType()) {
+            case USER:
+                actor.setUserIdOrCrn(memberCrn);
+                member = actor.build();
+                LOGGER.info("Found user '{}' for member Crn: '{}'.", member.getUserIdOrCrn(), memberCrn);
+                break;
+            case MACHINE_USER:
+                actor.setMachineUserNameOrCrn(memberCrn);
+                member = actor.build();
+                LOGGER.info("Found machine user '{}' for member Crn: '{}'.", member.getMachineUserNameOrCrn(), memberCrn);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("memberCrn %s is not a USER or MACHINE_USER", memberCrn));
+        }
+
+        try {
+            RemoveMemberFromGroupResponse removeMemberFromGroupResponse = newStub(requestId).removeMemberFromGroup(
+                    RemoveMemberFromGroupRequest.newBuilder()
+                            .setGroupNameOrCrn(groupName)
+                            .setMember(member)
+                            .build()
+            );
+            LOGGER.info("User '{}' has been removed from the '{}' group successfully.", removeMemberFromGroupResponse.getMemberCrn(), groupName);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
+                LOGGER.info("User group '{}' or user '{}' membership not found or has already been deleted.", groupName, memberCrn);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
+     * List members from the selected user group if it is exist.
+     *
+     * @param requestId          the request ID for the request
+     * @param accountId          the account ID
+     * @param groupName          the group where user is going to be assigned
+     * @return                   list of user group member CRNs or NULL if the user group does not exist.
+     */
+    public List<String> listMembersFromGroup(String requestId, String accountId, String groupName) {
+        checkNotNull(requestId);
+        checkNotNull(groupName);
+        validateAccountIdWithWarning(accountId);
+
+        try {
+            ListGroupMembersResponse listGroupMembersResponse = newStub(requestId).listGroupMembers(
+                    ListGroupMembersRequest.newBuilder()
+                            .setGroupNameOrCrn(groupName)
+                            .setAccountId(accountId)
+                            .setIncludeDeleted(false)
+                            .build()
+            );
+            List<String> members = listGroupMembersResponse.getMemberCrnList();
+            LOGGER.info("User group '{}' contains: [{}] members.", groupName, members);
+            return members;
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
+                LOGGER.info("User group '{}' not found or has already been deleted.", groupName);
+                return null;
+            } else {
+                throw e;
+            }
+        }
     }
 
     /**
@@ -312,7 +524,7 @@ public class UmsClient {
                             .setMachineUserName(machineUserName)
                             .build());
             LOGGER.info("Machine user created: {}.", response.getMachineUser().getCrn());
-            if (response.getMachineUser() != null) {
+            if (response.hasMachineUser()) {
                 return Optional.of(response.getMachineUser().getCrn());
             }
         } catch (StatusRuntimeException e) {

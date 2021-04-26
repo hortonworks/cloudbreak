@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.action.ums;
+package com.sequenceiq.it.cloudbreak.request.ums;
 
 public class AssignResourceRequest {
 
