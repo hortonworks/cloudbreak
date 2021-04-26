@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.AmazonServiceException.ErrorType;
@@ -115,6 +116,10 @@ public class AwsTerminateService {
             retryService.testWith2SecDelayMax5Times(() -> isStackDeleted(amazonCloudFormationClient, describeStacksRequest, deleteStackRequest));
         } catch (Exception e) {
             String errorReason = awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.DELETE_FAILED);
+            if (!StringUtils.hasText(errorReason)) {
+                LOGGER.debug("Cannot fetch the error reason from AWS by DELETE_FAILED, fallback to exception message.");
+                errorReason = e.getMessage();
+            }
             String message = String.format("Cloudformation stack delete failed: %s", errorReason);
             LOGGER.debug(message, e);
             throw new CloudConnectorException(message, e);
