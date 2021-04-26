@@ -131,6 +131,10 @@ public class CommonCloudProperties {
 
         private String imageUuid;
 
+        private String freeIpaImageCatalog;
+
+        private String freeIpaImageUuid;
+
         public String getSourceCatalogName() {
             return sourceCatalogName;
         }
@@ -153,6 +157,22 @@ public class CommonCloudProperties {
 
         public void setImageUuid(String imageUuid) {
             this.imageUuid = imageUuid;
+        }
+
+        public String getFreeIpaImageCatalog() {
+            return freeIpaImageCatalog;
+        }
+
+        public void setFreeIpaImageCatalog(String freeIpaImageCatalog) {
+            this.freeIpaImageCatalog = freeIpaImageCatalog;
+        }
+
+        public String getFreeIpaImageUuid() {
+            return freeIpaImageUuid;
+        }
+
+        public void setFreeIpaImageUuid(String freeIpaImageUuid) {
+            this.freeIpaImageUuid = freeIpaImageUuid;
         }
     }
 

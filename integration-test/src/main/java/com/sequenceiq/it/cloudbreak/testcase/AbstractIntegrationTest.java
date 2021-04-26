@@ -224,6 +224,8 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withNetwork()
                 .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.TRUE)
+                .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
