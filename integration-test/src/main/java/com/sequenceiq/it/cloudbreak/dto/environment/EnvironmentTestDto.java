@@ -24,6 +24,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeI
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
@@ -47,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import org.testng.util.Strings;
 
 @Prototype
 public class EnvironmentTestDto
@@ -104,6 +106,17 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
         getRequest().getFreeIpa().setCreate(create);
+        return this;
+    }
+
+    public EnvironmentTestDto withFreeIpaImage(String imageCatalog, String imageUuid) {
+        if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
+            FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
+            imageRequest.setCatalog(imageCatalog);
+            imageRequest.setId(imageUuid);
+
+            getRequest().getFreeIpa().setImage(imageRequest);
+        }
         return this;
     }
 
