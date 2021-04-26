@@ -141,7 +141,10 @@ class EntitlementServiceTest {
                 {"CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION", (EntitlementCheckFunction) EntitlementService::endpointGatewaySkipValidation, true},
 
                 {"CDP_CM_HA", (EntitlementCheckFunction) EntitlementService::cmHAEnabled, false},
-                {"CDP_CM_HA", (EntitlementCheckFunction) EntitlementService::cmHAEnabled, true}
+                {"CDP_CM_HA", (EntitlementCheckFunction) EntitlementService::cmHAEnabled, true},
+
+                {"CDP_AWS_RESTRICTED_POLICY", (EntitlementCheckFunction) EntitlementService::awsRestrictedPolicy, false},
+                {"CDP_AWS_RESTRICTED_POLICY", (EntitlementCheckFunction) EntitlementService::awsRestrictedPolicy, true}
         };
     }
 
