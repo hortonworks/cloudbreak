@@ -118,6 +118,7 @@ public class ExperiencesByLiftie implements Experience {
         return ExperienceCluster.builder()
                 .withName(cv.getName())
                 .withStatus(cv.getClusterStatus().getStatus())
+                .withStatusReason(cv.getClusterStatus().getMessage())
                 .withExperienceName(LIFTIE)
                 .build();
     }

@@ -28,6 +28,8 @@ public class CommonExperienceService implements Experience {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceService.class);
 
+    private static final String DELETED = "DELETED";
+
     private final CommonExperienceConnectorService experienceConnectorService;
 
     private final CommonExperiencePathCreator commonExperiencePathCreator;
@@ -101,7 +103,9 @@ public class CommonExperienceService implements Experience {
                             .withName(cp.getName())
                             .withExperienceName(xp.getName())
                             .withStatus(cp.getStatus())
+                            .withStatusReason(cp.getStatusReason())
                             .build())
+                    .filter(cp -> !DELETED.equals(cp.getStatus()))
                     .collect(toSet());
         }
         return Set.of();

@@ -29,9 +29,9 @@ import com.sequenceiq.environment.experience.liftie.responses.ListClustersRespon
 @Service
 public class LiftieConnectorService implements LiftieApi {
 
-    private static final String LIFTIE_CALL_EXEC_FAILED_MSG = "Something happened while the Liftie connection has attempted!";
+    private static final String LIFTIE_CALL_EXEC_FAILED_MSG = "Something happened while the Kubernetes Experience connection has attempted!";
 
-    private static final String LIFTIE_RESPONSE_RESOLVE_ERROR_MSG = "Unable to resolve Liftie response!";
+    private static final String LIFTIE_RESPONSE_RESOLVE_ERROR_MSG = "Unable to find the Kubernetes dependencies of this environment due to internal error.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LiftieConnectorService.class);
 
@@ -57,7 +57,7 @@ public class LiftieConnectorService implements LiftieApi {
     @NotNull
     @Override
     public ListClustersResponse listClusters(@NotNull String env, @NotNull String tenant, @Nullable String workload, @Nullable Integer page) {
-        LOGGER.debug("About to connect Liftie API to list clusters for environment '{}' account '{}' workload '{}', page '{}'",
+        LOGGER.debug("About to connect Kubernetes Experience API to list clusters for environment '{}' account '{}' workload '{}', page '{}'",
                 env, tenant, workload, page == null ? Integer.valueOf(0) : page);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClustersEndpoint());
         Map<String, String> queryParams = new LinkedHashMap<>();
@@ -78,7 +78,7 @@ public class LiftieConnectorService implements LiftieApi {
 
     @Override
     public DeleteClusterResponse deleteCluster(@NotNull String clusterId) {
-        LOGGER.debug("About to connect Liftie API to delete cluster {}", clusterId);
+        LOGGER.debug("About to connect Kubernetes Experience API to delete cluster {}", clusterId);
         WebTarget webTarget = client.target(liftiePathProvider.getPathToClusterEndpoint(clusterId));
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
@@ -91,11 +91,11 @@ public class LiftieConnectorService implements LiftieApi {
     }
 
     private Response executeCall(URI path, Callable<Response> toCall) {
-        LOGGER.debug("About to connect to Liftie on path: {}", path);
+        LOGGER.debug("About to connect to Kubernetes Experience on path: {}", path);
         try {
             return toCall.call();
         } catch (Exception re) {
-            LOGGER.warn("Liftie http call execution has failed due to:", re);
+            LOGGER.warn("Kubernetes Experience http call execution has failed due to:", re);
             throw new ExperienceOperationFailedException(re);
         }
     }

@@ -1,14 +1,18 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
+
+import io.micrometer.core.instrument.util.StringUtils;
 
 public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<ExperiencePollerObject> {
 
@@ -29,15 +33,32 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
     @Override
     public boolean checkStatus(ExperiencePollerObject pollerObject) {
         EnvironmentExperienceDto dto = buildDto(pollerObject);
-        int quantity = experienceConnectorService.getConnectedExperienceCount(dto);
-        if (quantity == 0) {
+        Set<ExperienceCluster> connectedExperiences = experienceConnectorService.getConnectedExperiences(dto);
+        if (connectedExperiences.isEmpty()) {
             LOGGER.info("No active experience has been found for the environment (name: {}, crn: {})", pollerObject.getEnvironmentName(),
                     pollerObject.getEnvironmentCrn());
             return true;
+        } else {
+            Set<ExperienceCluster> experiencesWithDeleteFailed = connectedExperiences.stream()
+                    .filter(e -> DELETE_FAILED_STATUS.equals(e.getStatus()))
+                    .collect(Collectors.toSet());
+            if (experiencesWithDeleteFailed.isEmpty()) {
+                LOGGER.info(connectedExperiences.size() + " experience has found for the environment (name: {}, crn: {})",
+                        pollerObject.getEnvironmentName(), pollerObject.getEnvironmentCrn());
+                return false;
+            } else {
+                String collectedStatusReason = experiencesWithDeleteFailed.stream()
+                        .map(e -> "Failed to delete " + e.getName() + " experience, the problem was: " + getMessage(e))
+                        .collect(Collectors.joining(", "));
+                throw new ExperienceOperationFailedException(collectedStatusReason);
+            }
         }
-        LOGGER.info(quantity + " experience has found for the environment (name: {}, crn: {})",
-                pollerObject.getEnvironmentName(), pollerObject.getEnvironmentCrn());
-        return false;
+    }
+
+    private String getMessage(ExperienceCluster e) {
+        return StringUtils.isBlank(e.getStatusReason())
+                ? "Could not identify the problem, please contact with our support team"
+                : e.getStatusReason();
     }
 
     @Override
@@ -58,8 +79,7 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
     @Override
     public boolean exitPolling(ExperiencePollerObject experiencePollerObject) {
         EnvironmentExperienceDto dto = buildDto(experiencePollerObject);
-        Set<ExperienceCluster> connectedExperiences = experienceConnectorService.getConnectedExperiences(dto);
-        return connectedExperiences.stream().anyMatch(c -> DELETE_FAILED_STATUS.equals(c.getStatus()));
+        return experienceConnectorService.getConnectedExperienceCount(dto) == 0;
     }
 
     @Override

@@ -30,7 +30,7 @@ class ExperiencePollingFailureResolverTest {
         String result = underTest.getMessageForFailure(pollingResultPair);
 
         assertNotNull(result);
-        assertEquals("Timed out.", result);
+        assertEquals("Timed out happened in the Experience deletion.", result);
     }
 
     @ParameterizedTest

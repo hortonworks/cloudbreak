@@ -212,6 +212,36 @@ class CommonExperienceServiceTest {
     }
 
     @Test
+    void testHasExistingClusterForEnvironmentWhenExperienceIsConfiguredAndHasActiveWorkspaceAndDeleteForEnvThenItemReturnsOnlyNotDeleted() {
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
+        when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
+
+        CpInternalCluster cluster1 = new CpInternalCluster();
+        cluster1.setName("Workload1");
+        cluster1.setCrn("crn1");
+        cluster1.setStatus("AVAILABLE");
+        CpInternalCluster cluster2 = new CpInternalCluster();
+        cluster2.setName("Workload2");
+        cluster2.setCrn("crn2");
+        cluster2.setStatus("DELETED");
+        when(mockExperienceConnectorService.getExperienceClustersConnectedToEnv(any(), eq(ENV_CRN)))
+                .thenReturn(Set.of(cluster1, cluster2));
+
+        underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
+                mockCommonExperiencePathCreator);
+
+        Set<ExperienceCluster> clusters = underTest.getConnectedClustersForEnvironment(mockEnvironment);
+
+        ExperienceCluster expected = ExperienceCluster.builder()
+                .withExperienceName(TEST_XP_NAME)
+                .withName("Workload1")
+                .withStatus("AVAILABLE")
+                .build();
+
+        assertThat(clusters).containsOnly(expected);
+    }
+
+    @Test
     void testDeleteConnectedExperiences() {
         String xpPath = "somePath";
         when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);

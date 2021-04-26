@@ -20,7 +20,7 @@ public class ExperiencePollingFailureResolver {
     private Optional<String> attemptToProvideMessageForPollingFailure(PollingResult pollingResult) {
         switch (pollingResult) {
             case TIMEOUT:
-                return Optional.of("Timed out.");
+                return Optional.of("Timed out happened in the Experience deletion.");
             default:
                 return Optional.of("Other polling result: " + pollingResult);
         }
