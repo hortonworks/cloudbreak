@@ -119,8 +119,8 @@ freeipa:
     partitionsize:
       defaultSize: 100
       operations:
-        group_add_member: 50
-        group_remove_member: 50
+        group_add_member: 25
+        group_remove_member: 25
 
 info:
   app:
