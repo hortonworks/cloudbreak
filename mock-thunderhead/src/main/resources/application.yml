@@ -40,6 +40,7 @@ auth:
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub.runtime.upgrade.enable: true
+    datalake.loadbalancer.enable: true
     ccmv2.enable: false
     environment.experience.deletion.enable: true
     endpointgateway.enable: false
@@ -51,7 +52,7 @@ auth:
     azure:
       disk:
         SSEWithCMK.enable: true
-    cm.ha.enable: false
     conclusion.checker.send.user.event.enable: true
     ha.repair.enable: true
     ha.upgrade.enable: true
+    cmHA.enable: true

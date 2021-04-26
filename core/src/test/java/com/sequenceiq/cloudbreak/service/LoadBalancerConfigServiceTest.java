@@ -642,7 +642,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
                 .filter(ig -> "master".equals(ig.getGroupName()))
                 .findFirst().get();
-            assertEquals(1, masterInstanceGroup.getTargetGroups().size());
+            assertEquals(2, masterInstanceGroup.getTargetGroups().size());
 
             checkAvailabilitySetAttributes(loadBalancers);
         });
@@ -665,7 +665,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
                 .filter(ig -> "master".equals(ig.getGroupName()))
                 .findFirst().get();
-            assertEquals(1, masterInstanceGroup.getTargetGroups().size());
+            assertEquals(2, masterInstanceGroup.getTargetGroups().size());
 
             checkAvailabilitySetAttributes(loadBalancers);
         });
