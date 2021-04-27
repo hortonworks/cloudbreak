@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 @RunWith(MockitoJUnitRunner.class)
 public class AzureImageValidatorTest {
 
+    public static final String IMAGE_NAME = "https://cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd";
+
     @Mock
     private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
 
@@ -43,8 +45,7 @@ public class AzureImageValidatorTest {
 
     @Test
     public void testImageHasValidVhdFormat() {
-        Image image = new Image("https://cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd", new HashMap<>(), "centos7", "redhat7", "", "default",
-                "default-id", new HashMap<>());
+        Image image = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
         when(underTest.isVhdImageFormat(image)).thenReturn(true);
 

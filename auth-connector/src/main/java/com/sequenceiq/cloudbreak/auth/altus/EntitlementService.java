@@ -169,6 +169,7 @@ public class EntitlementService {
     public boolean azureSingleResourceGroupDeploymentEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_SINGLE_RESOURCE_GROUP);
     }
+
     public boolean azureMarketplaceImagesEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_IMAGE_MARKETPLACE);
     }

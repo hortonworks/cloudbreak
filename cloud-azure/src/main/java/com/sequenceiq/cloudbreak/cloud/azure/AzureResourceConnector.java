@@ -113,7 +113,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             AzureImage image = azureStorage.getCustomImage(client, ac, stack);
             if (!image.getAlreadyExists()) {
                 LOGGER.debug("Image {} has been created now, so we need to persist it", image.getName());
-                CloudResource imageCloudResource = azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
+                CloudResource imageCloudResource =
+                        azureCloudResourceService.buildCloudResource(image.getName(), image.getId(), ResourceType.AZURE_MANAGED_IMAGE);
                 azureCloudResourceService.saveCloudResources(notifier, ac.getCloudContext(), List.of(imageCloudResource));
             }
             String customImageId = image.getId();
