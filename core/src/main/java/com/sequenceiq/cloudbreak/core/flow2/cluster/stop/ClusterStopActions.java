@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -13,17 +14,24 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ClusterStopActions {
 
     @Inject
     private ClusterStopService clusterStopService;
+
+    @Inject
+    private StackService stackService;
 
     @Bean(name = "CLUSTER_STOPPING_STATE")
     public Action<?, ?> stoppingCluster() {
@@ -70,7 +78,15 @@ public class ClusterStopActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStopEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterStopEvent.FINALIZED_EVENT.event(), context.getStackView().getId());
+            }
+
+            @Override
+            protected StackFailureContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterStopState, ClusterStopEvent> stateContext,
+                    StackFailureEvent payload) {
+                StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
+                MDCBuilder.buildMdcContext(stack);
+                return new StackFailureContext(flowParameters, stack);
             }
         };
     }

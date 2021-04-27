@@ -10,13 +10,11 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -24,9 +22,6 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 public class ClusterStopService {
     @Inject
     private ClusterService clusterService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
@@ -53,8 +48,7 @@ public class ClusterStopService {
     }
 
     public void handleClusterStopFailure(StackView stackView, String errorReason) {
-        clusterService.updateClusterStatusByStackId(stackView.getId(), Status.STOP_FAILED);
-        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "The cluster could not be stopped: " + errorReason);
+        clusterService.updateClusterStatusByStackId(stackView.getId(), Status.STOPPED, errorReason);
         flowMessageService.fireEventAndLog(stackView.getId(), Status.STOP_FAILED.name(), CLUSTER_STOP_FAILED, errorReason);
     }
 }
