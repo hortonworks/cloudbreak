@@ -14,13 +14,13 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class AssignResourceRoleAction implements Action<UmsTestDto, UmsClient> {
+public class AssignResourceRoleUserAction implements Action<UmsTestDto, UmsClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AssignResourceRoleAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AssignResourceRoleUserAction.class);
 
     private final String userKey;
 
-    public AssignResourceRoleAction(String userKey) {
+    public AssignResourceRoleUserAction(String userKey) {
         this.userKey = userKey;
     }
 

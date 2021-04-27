@@ -5,17 +5,12 @@ import java.util.Arrays;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
-import com.sequenceiq.it.cloudbreak.testcase.authorization.AuthUserKeys;
 
 @Component
 public class RunningParameter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(RunningParameter.class);
 
     private CloudbreakUser who;
 
@@ -41,7 +36,7 @@ public class RunningParameter {
     public CloudbreakUser getWho() {
         if (doAsAdmin) {
             if (testContext.realUmsUserCacheReadyToUse()) {
-                return testContext.getRealUmsUserByKey(AuthUserKeys.ACCOUNT_ADMIN);
+                return testContext.getRealUmsAdmin();
             }
         }
         return who;

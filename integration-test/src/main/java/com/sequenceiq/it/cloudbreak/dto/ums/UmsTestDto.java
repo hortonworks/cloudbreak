@@ -32,6 +32,8 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
 
     private static final String SHARED_RESOURCE_USER = "crn:altus:iam:us-west-1:altus:resourceRole:SharedResourceUser";
 
+    private static final String IAM_GROUP_ADMIN = "crn:altus:iam:us-west-1:altus:resourceRole:IamGroupAdmin";
+
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
     }
@@ -76,6 +78,11 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
         return this;
     }
 
+    public UmsTestDto withGroupAdmin() {
+        getRequest().setRoleCrn(IAM_GROUP_ADMIN);
+        return this;
+    }
+
     public UmsTestDto assignTarget(String key) {
         try {
             Assignable dto = getTestContext().get(key);
@@ -84,6 +91,11 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
             throw new IllegalArgumentException(String.format("TestContext member with key %s does not implement %s interface",
                     key, Assignable.class.getCanonicalName()), e);
         }
+        return this;
+    }
+
+    public UmsTestDto assignTargetByCrn(String targetCrn) {
+        getRequest().setResourceCrn(targetCrn);
         return this;
     }
 

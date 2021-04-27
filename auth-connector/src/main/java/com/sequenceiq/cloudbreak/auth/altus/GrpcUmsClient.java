@@ -818,18 +818,18 @@ public class GrpcUmsClient {
     }
 
     public void assignResourceRole(
-            String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
+            String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
-        LOGGER.info("Assigning {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
-        client.assignResourceRole(RequestIdUtil.getOrGenerate(requestId), userCrn, resourceCrn, resourceRoleCrn);
-        LOGGER.info("Assigned {} role for resource {} to user {}", resourceRoleCrn, resourceCrn, userCrn);
+        LOGGER.info("Assigning {} role for resource {} to assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
+        client.assignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
+        LOGGER.info("Assigned {} role for resource {} to assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
-    public void unassignResourceRole(String userCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
+    public void unassignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
-        LOGGER.info("Unassigning {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
-        client.unassignResourceRole(RequestIdUtil.getOrGenerate(requestId), userCrn, resourceCrn, resourceRoleCrn);
-        LOGGER.info("Unassigned {} role for resource {} from user {}", resourceRoleCrn, resourceCrn, userCrn);
+        LOGGER.info("Unassigning {} role for resource {} from assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
+        client.unassignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
+        LOGGER.info("Unassigned {} role for resource {} from assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
     public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {

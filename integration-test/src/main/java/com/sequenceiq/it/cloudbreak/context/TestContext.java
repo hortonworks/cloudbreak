@@ -635,6 +635,27 @@ public abstract class TestContext implements ApplicationContextAware {
         return requestedRealUmsUser;
     }
 
+    /**
+     * Request the real UMS admin from the fetched ums-users json
+     *
+     * @return                   Returns with the UMS admin user (CloudbreakUser)
+     */
+    public CloudbreakUser getRealUmsAdmin() {
+        String accountId = Objects.requireNonNull(Crn.fromString(actingUser.getCrn())).getAccountId();
+        CloudbreakUser adminUser = cloudbreakActor.getAdminByAccountId(accountId);
+        if (actingUser.getDisplayName().equalsIgnoreCase(adminUser.getDisplayName())) {
+            LOGGER.info(" Requested real UMS user is the same as acting user:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {}" +
+                            " \nDescription: {} ", actingUser.getDisplayName(), actingUser.getAccessKey(), actingUser.getSecretKey(), actingUser.getCrn(),
+                    actingUser.getAdmin(), actingUser.getDescription());
+        } else {
+            LOGGER.info(" Found real UMS admin user:: \nDisplay Name: {} \nWorkload username: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {}" +
+                            " \nDescription: {} ", adminUser.getDisplayName(), adminUser.getWorkloadUserName(),
+                    adminUser.getAccessKey(), adminUser.getSecretKey(), adminUser.getCrn(), adminUser.getAdmin(),
+                    adminUser.getDescription());
+        }
+        return adminUser;
+    }
+
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
         return init(clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
     }

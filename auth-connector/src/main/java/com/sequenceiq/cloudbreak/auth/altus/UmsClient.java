@@ -34,10 +34,10 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUs
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest;
@@ -51,8 +51,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListW
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
@@ -595,17 +595,17 @@ public class UmsClient {
         }
     }
 
-    public void assignResourceRole(String requestId, String userCrn, String resourceCrn, String resourceRoleCrn) {
+    public void assignResourceRole(String requestId, String assigneeCrn, String resourceCrn, String resourceRoleCrn) {
         newStub(requestId).assignResourceRole(UserManagementProto.AssignResourceRoleRequest.newBuilder()
-                .setAssignee(getAssignee(userCrn))
+                .setAssignee(getAssignee(assigneeCrn))
                 .setResourceCrn(resourceCrn)
                 .setResourceRoleCrn(resourceRoleCrn)
                 .build());
     }
 
-    public void unassignResourceRole(String requestId, String userCrn, String resourceCrn, String resourceRoleCrn) {
+    public void unassignResourceRole(String requestId, String assigneeCrn, String resourceCrn, String resourceRoleCrn) {
         newStub(requestId).unassignResourceRole(UserManagementProto.UnassignResourceRoleRequest.newBuilder()
-                .setAssignee(getAssignee(userCrn))
+                .setAssignee(getAssignee(assigneeCrn))
                 .setResourceCrn(resourceCrn)
                 .setResourceRoleCrn(resourceRoleCrn)
                 .build());
@@ -1051,15 +1051,31 @@ public class UmsClient {
         return wags;
     }
 
-    private UserManagementProto.Assignee getAssignee(String userCrn) {
-        String accountId = Crn.fromString(userCrn).getAccountId();
+    /**
+     * Wraps calls to Assignee with an Assignee CRN.
+     *
+     * @param assigneeCrn          the assignee CRN
+     * @return the Assignee based on the provided CRN
+     */
+    private UserManagementProto.Assignee getAssignee(String assigneeCrn) {
+        checkNotNull(assigneeCrn);
+        Crn crn = Crn.safeFromString(assigneeCrn);
+        String accountId = crn.getAccountId();
         validateAccountIdWithWarning(accountId);
-        UserManagementProto.Assignee.Builder assignee = UserManagementProto.Assignee.newBuilder()
-                .setAccountId(accountId);
-        if (Crn.isCrn(userCrn) && Crn.ResourceType.MACHINE_USER.equals(Crn.fromString(userCrn).getResourceType())) {
-            assignee.setMachineUserNameOrCrn(userCrn);
-        } else {
-            assignee.setUserIdOrCrn(userCrn);
+
+        UserManagementProto.Assignee.Builder assignee = UserManagementProto.Assignee.newBuilder().setAccountId(accountId);
+        switch (crn.getResourceType()) {
+            case USER:
+                assignee.setUserIdOrCrn(assigneeCrn);
+                break;
+            case MACHINE_USER:
+                assignee.setMachineUserNameOrCrn(assigneeCrn);
+                break;
+            case GROUP:
+                assignee.setGroupNameOrCrn(assigneeCrn);
+                break;
+            default:
+                throw new IllegalArgumentException(String.format("assigneeCrn '%s' is not a USER, MACHINE_USER or a GROUP", assigneeCrn));
         }
         return assignee.build();
     }
