@@ -6,6 +6,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,10 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.util.StringUtils;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -27,6 +32,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -65,6 +71,12 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Inject
+    private ResourceService resourceService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(CollectDownscaleCandidatesRequest.class);
@@ -77,7 +89,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
         try {
             result = transactionService.required(() -> {
                 try {
-                    Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+                    Stack stack = stackService.getByIdWithResourcesInTransaction(request.getResourceId());
                     int defaultRootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(stack.cloudPlatform());
                     Set<Long> privateIds = request.getPrivateIds();
                     if (noSelectedInstancesForDownscale(privateIds)) {
@@ -97,6 +109,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
                             clusterApiConnectors.getConnector(stack).clusterDecomissionService()
                                     .verifyNodesAreRemovable(stack, removableAndNotDeletedInstances);
                         }
+                        fillDiscoveryFQDNForRepair(request, stack, removableInstances, removableAndNotDeletedInstances);
                     }
                     LOGGER.info("Moving ahead with " + CollectDownscaleCandidatesResult.class.getSimpleName() + " with the following request [{}] " +
                             "and private IDs: [{}]", request.toString(),
@@ -116,6 +129,35 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
             throw e.getCause();
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private void fillDiscoveryFQDNForRepair(CollectDownscaleCandidatesRequest request, Stack stack, List<InstanceMetaData> removableInstances,
+            List<InstanceMetaData> removableAndNotDeletedInstances) {
+        if (request.getDetails().isRepair()) {
+            List<Resource> diskResources = stack.getDiskResources();
+            List<String> removeableInstanceIds = removableAndNotDeletedInstances
+                    .stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toList());
+            for (Resource volumeSet : diskResources) {
+                Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
+                attributes.ifPresent(volumeSetAttributes ->
+                        fillDiscoveryFQDNInVolumeSetIfEmpty(removableInstances, removeableInstanceIds, volumeSet, volumeSetAttributes));
+            }
+            resourceService.saveAll(diskResources);
+        }
+    }
+
+    private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetaData> removableInstances, List<String> removeableInstanceIds, Resource volumeSet,
+            VolumeSetAttributes volumeSetAttributes) {
+        if (removeableInstanceIds.contains(volumeSet.getInstanceId())
+                && StringUtils.isNullOrEmpty(volumeSetAttributes.getDiscoveryFQDN())) {
+            Optional<InstanceMetaData> metaData = removableInstances.stream()
+                    .filter(instanceMetaData -> volumeSet.getInstanceId().equals(instanceMetaData.getInstanceId()))
+                    .findFirst();
+            metaData.ifPresent(im -> {
+                volumeSetAttributes.setDiscoveryFQDN(im.getDiscoveryFQDN());
+                resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
+            });
+        }
     }
 
     private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack, int defaultRootVolumeSize)

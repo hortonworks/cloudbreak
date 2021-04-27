@@ -289,10 +289,12 @@ public class AwsUpscaleService {
     }
 
     private List<CloudResource> getReattachableVolumeSets(List<Group> scaledGroups, List<CloudResource> resources) {
-        return resources.stream()
+        List<CloudResource> volumeSets = resources.stream()
                 .filter(cloudResource -> ResourceType.AWS_VOLUMESET.equals(cloudResource.getType()))
                 .filter(cloudResource -> CommonStatus.DETACHED.equals(cloudResource.getStatus()))
                 .collect(Collectors.toList());
+        LOGGER.debug("Collected detached volumesets for reattachment: {}", volumeSets);
+        return volumeSets;
     }
 
     private List<Group> getGroupsWithNewInstances(List<Group> scaledGroups) {
