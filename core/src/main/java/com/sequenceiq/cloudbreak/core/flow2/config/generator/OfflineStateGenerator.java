@@ -350,6 +350,11 @@ public class OfflineStateGenerator {
         }
 
         @Override
+        public Optional<Stack> findOneWithResources(Long id) {
+            return Optional.empty();
+        }
+
+        @Override
         public Optional<Stack> findOneWithGateway(Long id) {
             return Optional.empty();
         }
