@@ -90,7 +90,7 @@ dependencies {
     implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus', version: micrometerVersion
     implementation     group: 'io.springfox',              name: 'springfox-swagger2',             version: swagger2Version
     implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
-    implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: '1.5.21'
+    implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
     implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'

@@ -67,7 +67,7 @@ dependencies {
   implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus',  version: micrometerVersion
   implementation     group: 'io.springfox',              name: 'springfox-swagger2',              version: swagger2Version
   implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',            version: swagger2Version
-  implementation     ('io.swagger:swagger-jersey2-jaxrs:1.5.21') {
+  implementation     ("io.swagger:swagger-jersey2-jaxrs:$swaggerVersion") {
     exclude group: 'org.yaml'
   }
   implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                        version: '2.3.1'
