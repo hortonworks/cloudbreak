@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util;
 
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractMinimalTest.STACK_AVAILABLE;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -13,6 +14,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
+import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -21,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
@@ -30,7 +33,9 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -61,6 +66,9 @@ public class ResourceCreator {
 
     @Inject
     private DistroXTestClient distroXTestClient;
+
+    @Inject
+    private BlueprintTestClient blueprintTestClient;
 
     @Inject
     private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
@@ -130,6 +138,26 @@ public class ResourceCreator {
         return create(testContext.given(RecipeTestDto.class));
     }
 
+    public RecipeTestDto createDefaultRecipeInternal(TestContext testContext, String accountId) {
+        return createInternal(testContext.given(RecipeTestDto.class).withAccountId(accountId));
+    }
+
+    public BlueprintTestDto createDefaultBlueprintInternal(TestContext testContext, String accountId, String runtimeVersion) {
+        try {
+            String bluepint = ResourceUtil
+                    .readResourceAsString(testContext.getApplicationContext(), "classpath:/blueprint/clouderamanager.bp")
+                    .replaceAll("CDH_RUNTIME", runtimeVersion);
+            BlueprintTestDto testDto = testContext.given(BlueprintTestDto.class)
+                    .withAccountId(accountId)
+                    .withBlueprint(bluepint)
+                    .when(blueprintTestClient.createInternalV4());
+            testDto.validate();
+            return testDto;
+        } catch (IOException e) {
+            throw new TestFailException(e.getMessage());
+        }
+    }
+
     public RecipeTestDto createNewRecipe(TestContext testContext) {
         String name = resourcePropertyProvider.getName();
         return create(testContext.given(name, RecipeTestDto.class).withName(name));
@@ -194,6 +222,12 @@ public class ResourceCreator {
         return testDto;
     }
 
+    public RecipeTestDto createInternal(RecipeTestDto testDto) {
+        testDto.when(recipeTestClient.createInternalV4())
+                .validate();
+        return testDto;
+    }
+
     public ImageCatalogTestDto create(ImageCatalogTestDto testDto) {
         testDto.when(new ImageCatalogCreateRetryAction())
                 .validate();
@@ -203,6 +237,16 @@ public class ResourceCreator {
     @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
     public DistroXTestDto createAndWaitAs(DistroXTestDtoBase<DistroXTestDto> testDto, Optional<String> waitingUser) {
         testDto.when(distroXTestClient.create());
+        return waitForDistroX(testDto, waitingUser);
+    }
+
+    @SuppressFBWarnings("BC_UNCONFIRMED_CAST")
+    public DistroXTestDto createInternalAndWaitAs(DistroXTestDtoBase<DistroXTestDto> testDto, Optional<String> waitingUser) {
+        testDto.when(distroXTestClient.createInternal());
+        return waitForDistroX(testDto, waitingUser);
+    }
+
+    private DistroXTestDto waitForDistroX(DistroXTestDtoBase<DistroXTestDto> testDto, Optional<String> waitingUser) {
         if (waitingUser.isEmpty()) {
             testDto.await(STACK_AVAILABLE);
         } else {

@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
@@ -15,6 +16,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -79,6 +82,15 @@ public class BlueprintV4Controller extends NotificationController implements Blu
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Blueprint toSave = converterUtil.convert(request, Blueprint.class);
         Blueprint blueprint = blueprintService.createForLoggedInUser(toSave, workspaceId, accountId, creator);
+        notify(ResourceEvent.BLUEPRINT_CREATED);
+        return converterUtil.convert(blueprint, BlueprintV4Response.class);
+    }
+
+    @Override
+    @InternalOnly
+    public BlueprintV4Response postInternal(@AccountId String accountId, Long workspaceId, @Valid BlueprintV4Request request) {
+        Blueprint toSave = converterUtil.convert(request, Blueprint.class);
+        Blueprint blueprint = blueprintService.createWithInternalUser(toSave, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId);
         notify(ResourceEvent.BLUEPRINT_CREATED);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }

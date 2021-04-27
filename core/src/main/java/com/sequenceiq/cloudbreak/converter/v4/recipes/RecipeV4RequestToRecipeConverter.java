@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
+import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @Component
@@ -18,6 +19,7 @@ public class RecipeV4RequestToRecipeConverter extends AbstractConversionServiceA
         recipe.setDescription(source.getDescription());
         recipe.setRecipeType(recipeType(source.getType()));
         recipe.setContent(source.getContent());
+        recipe.setCreationType(CreationType.USER);
         return recipe;
     }
 

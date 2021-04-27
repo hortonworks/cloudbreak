@@ -11,10 +11,11 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.domain.converter.RecipeTypeConverter;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
+import com.sequenceiq.cloudbreak.domain.converter.CreationTypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.RecipeTypeConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
@@ -56,6 +57,9 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
     private Long deletionTimestamp = -1L;
 
     private Long created = System.currentTimeMillis();
+
+    @Convert(converter = CreationTypeConverter.class)
+    private CreationType creationType;
 
     public Long getId() {
         return id;
@@ -149,5 +153,13 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public CreationType getCreationType() {
+        return creationType;
+    }
+
+    public void setCreationType(CreationType creationType) {
+        this.creationType = creationType;
     }
 }

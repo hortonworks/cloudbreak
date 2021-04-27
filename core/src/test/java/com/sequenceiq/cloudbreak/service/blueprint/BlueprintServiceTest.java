@@ -6,19 +6,19 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,17 +29,17 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.reflect.Whitebox;
 import org.springframework.validation.Errors;
 
@@ -47,15 +47,17 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
@@ -64,17 +66,18 @@ import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class BlueprintServiceTest {
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
 
     private static final String CREATOR = "CREATOR";
 
-    @Rule
-    public final ExpectedException exceptionRule = ExpectedException.none();
+    @Mock
+    private TransactionService transactionService;
 
     @Mock
     private ClusterService clusterService;
@@ -112,19 +115,22 @@ public class BlueprintServiceTest {
     @Spy
     private BlueprintListFilters blueprintListFilters;
 
+    @Mock
+    private HueWorkaroundValidatorService hueWorkaroundValidatorService;
+
     @InjectMocks
     private BlueprintService underTest;
 
     private Blueprint blueprint = new Blueprint();
 
-    @Before
+    @BeforeEach
     public void setup() {
         blueprint = getBlueprint("name", USER_MANAGED);
         Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", new SupportedRuntimes());
-        when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
-        when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
+        lenient().when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
+        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
     }
 
     @Test
@@ -199,11 +205,11 @@ public class BlueprintServiceTest {
     @Test
     public void testDeletionWithNonTerminatedClusterAndStack() {
         Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE, AVAILABLE);
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage("c1");
         when(clusterService.findByBlueprint(any())).thenReturn(Set.of(cluster));
 
-        underTest.delete(blueprint);
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
+        assertEquals("There is a cluster ['c1'] which uses cluster template 'name'. Please remove this cluster before deleting the custer template.",
+                exception.getMessage());
     }
 
     @Test
@@ -214,10 +220,10 @@ public class BlueprintServiceTest {
         clusters.add(getCluster("c3", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
 
         when(clusterService.findByBlueprint(any())).thenReturn(clusters);
-        exceptionRule.expect(BadRequestException.class);
-        exceptionRule.expectMessage("c1");
 
-        underTest.delete(blueprint);
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
+        assertEquals("There is a cluster ['c1'] which uses cluster template 'name'. Please remove this cluster before deleting the custer template.",
+                exception.getMessage());
     }
 
     @Test
@@ -409,13 +415,44 @@ public class BlueprintServiceTest {
         doAnswer(invocation -> {
             invocation.getArgument(1, Errors.class).reject("test");
             return null;
-        })
-                .when(blueprintValidator).validate(any(), any());
+        }).when(blueprintValidator).validate(any(), any());
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(someBlueprintText);
 
-        exceptionRule.expect(BadRequestException.class);
-        underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone");
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone"));
+    }
+
+    @Test
+    public void testBadRequestExceptionRaisedWhenValidationIsFailingOnCreateWithInternalUser() {
+        String someBlueprintText = "someText";
+
+        doAnswer(invocation -> {
+            invocation.getArgument(1, Errors.class).reject("test");
+            return null;
+        }).when(blueprintValidator).validate(any(), any());
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(someBlueprintText);
+
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.createWithInternalUser(blueprint, 1L, "someAccountId"));
+    }
+
+    @Test
+    public void testCreateWithInternalUser() throws TransactionExecutionException {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText("{}");
+
+        doAnswer(invocation -> ((Supplier<Blueprint>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
+        when(workspaceService.getByIdWithoutAuth(1L)).thenReturn(workspace);
+        when(blueprintRepository.save(blueprint)).thenReturn(blueprint);
+
+        Blueprint savedBlueprint = underTest.createWithInternalUser(blueprint, 1L, ACCOUNT_ID);
+
+        assertEquals(workspace, savedBlueprint.getWorkspace());
+        assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clustertemplate:.*"));
+        assertEquals(ResourceStatus.SERVICE_MANAGED, savedBlueprint.getStatus());
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
