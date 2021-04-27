@@ -60,6 +60,7 @@ public class AzureImageSetupService {
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
 
+    // TODO: cyclomatic complexity is too high
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
 
         if (azureImageFormatValidator.isMarketplaceImageFormat(image)) {

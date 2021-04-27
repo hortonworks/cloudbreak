@@ -469,6 +469,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
+    // TODO: check if null is ok for AzureImageMarketplace class
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithGatewayInstanceGroupTypeAndLoadBalancer(String templatePath) {
@@ -512,6 +513,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
     }
 
+    // TODO: check if null is ok for AzureImageMarketplace class
     @ParameterizedTest(name = "{0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers(String templatePath) {

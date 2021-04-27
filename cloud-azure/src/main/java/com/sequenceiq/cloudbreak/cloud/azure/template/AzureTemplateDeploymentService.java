@@ -62,7 +62,8 @@ public class AzureTemplateDeploymentService {
                     azureMarketplaceImage);
         } else {
             String customImageId = azureStorage.getCustomImage(client, ac, stack).getId();
-            template = azureTemplateBuilder.build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation, null);
+            template = azureTemplateBuilder
+                    .build(stackName, customImageId, createCredential(ac), azureStackView, cloudContext, stack, azureInstanceTemplateOperation, null);
         }
         return template;
     }
