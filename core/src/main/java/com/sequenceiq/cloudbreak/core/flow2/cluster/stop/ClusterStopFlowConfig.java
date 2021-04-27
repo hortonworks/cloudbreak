@@ -27,6 +27,8 @@ public class ClusterStopFlowConfig extends AbstractFlowConfiguration<ClusterStop
                     .from(CLUSTER_STOPPING_STATE).to(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).event(ClusterStopEvent.CLUSTER_STOP_FINISHED_EVENT)
                     .failureEvent(ClusterStopEvent.CLUSTER_STOP_FINISHED_FAILURE_EVENT)
                     .from(ClusterStopState.CLUSTER_STOP_FINISHED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT).failureEvent(FAILURE_EVENT)
+                    .from(CLUSTER_STOP_FAILED_STATE).to(FINAL_STATE).event(FINALIZED_EVENT)
+                    .noFailureEvent()
                     .build();
 
     private static final FlowEdgeConfig<ClusterStopState, ClusterStopEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,

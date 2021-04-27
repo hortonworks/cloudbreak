@@ -31,7 +31,7 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
         List<ApiCommand> apiCommands = collectApiCommands(pollerObject, commandsResourceApi);
         boolean allCommandsFinished = apiCommands.stream().noneMatch(ApiCommand::getActive);
         if (allCommandsFinished) {
-            validateApiCommandResults(apiCommands);
+            validateApiCommandResults(apiCommands, commandsResourceApi);
             return true;
         } else {
             return false;
@@ -51,22 +51,20 @@ public abstract class AbstractClouderaManagerCommandListCheckerTask<T extends Cl
         return apiCommands;
     }
 
-    private void validateApiCommandResults(List<ApiCommand> apiCommands) {
+    private void validateApiCommandResults(List<ApiCommand> apiCommands, CommandsResourceApi commandsResourceApi) {
         List<ApiCommand> failedCommands = apiCommands.stream().filter(cmd -> !cmd.getSuccess()).collect(Collectors.toList());
         if (!failedCommands.isEmpty()) {
-            String message = failedCommands.stream().map(cmd -> createFailedCommandResultString(cmd)).collect(Collectors.joining(","));
+            String message = failedCommands.stream().map(cmd -> createFailedCommandResultString(cmd, commandsResourceApi)).collect(Collectors.joining(","));
             LOGGER.info(message);
             throw new ClouderaManagerOperationFailedException(message);
         }
     }
 
-    private String createFailedCommandResultString(ApiCommand cmd) {
-        String resultMessage = cmd.getResultMessage();
-        List<String> detailedMessages = ApiCommandUtil.getFailedCommandMessages(cmd.getChildren());
+    private String createFailedCommandResultString(ApiCommand cmd, CommandsResourceApi commandsResourceApi) {
         ApiHostRef hostRef = cmd.getHostRef();
         String hostRefStr = hostRef == null ? "Unknown" : hostRef.getHostname();
-        return "Command [" + cmd.getName() + ":" + cmd.getId() + "] failed on host [" + hostRefStr + "]: " + resultMessage +
-                ". Detailed messages: " + String.join("\n", detailedMessages);
+        return "Command [" + cmd.getName() + ":" + cmd.getId() + "] failed on host [" + hostRefStr + "]: " +
+                getResultMessageWithDetailedErrorsPostFix(cmd, commandsResourceApi);
     }
 
     protected String getOperationIdentifier(T pollerObject) {
