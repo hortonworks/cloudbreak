@@ -52,6 +52,9 @@ create-cloudbreak-context:
 fetch-secrets:
 	./scripts/fetch-secrets.sh
 
+fetch-l0-secrets:
+	SECRET_VERSION=9793d2c1afa84cbb9fdfeaee2f4327db USER_JSON_SECRET=l0-ums-users-dev USER_JSON_LOCATION=./src/main/resources/ums-users/l0-api-credentials.json ./scripts/fetch-secrets.sh
+
 fetch-secrets-docker:
 	docker run --rm -v "${PWD}/:/tmp/" \
 	-e AZURE_CLIENT_ID=${AZURE_CLIENT_ID} \

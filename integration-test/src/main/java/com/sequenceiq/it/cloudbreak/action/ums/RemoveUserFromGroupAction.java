@@ -13,15 +13,15 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
-public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> {
+public class RemoveUserFromGroupAction implements Action<UmsGroupTestDto, UmsClient> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AddUserToGroupAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoveUserFromGroupAction.class);
 
     private final String groupName;
 
     private final String memberCrn;
 
-    public AddUserToGroupAction(String groupName, String memberCrn) {
+    public RemoveUserFromGroupAction(String groupName, String memberCrn) {
         this.groupName = groupName;
         this.memberCrn = memberCrn;
     }
@@ -32,11 +32,11 @@ public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> 
         String accountId = testDto.getRequest().getAccountId();
         testDto.withName(groupName);
         testDto.withMember(memberCrn);
-        Log.when(LOGGER, format(" Assigning user '%s' to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
-        Log.whenJson(LOGGER, format(" Assign user to group request:%n "), testDto.getRequest());
-        client.getDefaultClient().addMemberToGroup(userCrn, accountId, groupName, memberCrn, Optional.of(""));
-        LOGGER.info(format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
-        Log.when(LOGGER, format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
+        Log.when(LOGGER, format(" Removing user '%s' from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
+        Log.whenJson(LOGGER, format(" Remove user from group request:%n "), testDto.getRequest());
+        client.getDefaultClient().removeMemberFromGroup(userCrn, accountId, groupName, memberCrn, Optional.of(""));
+        LOGGER.info(format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
+        Log.when(LOGGER, format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;
     }
 }

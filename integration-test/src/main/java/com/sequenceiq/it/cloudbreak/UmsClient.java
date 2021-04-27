@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
@@ -61,6 +62,7 @@ public class UmsClient extends MicroserviceClient<GrpcUmsClient, Void> {
 
     @Override
     public Set<String> supportedTestDtos() {
-        return Set.of(UmsTestDto.class.getSimpleName());
+        return Set.of(UmsTestDto.class.getSimpleName(),
+                UmsGroupTestDto.class.getSimpleName());
     }
 }

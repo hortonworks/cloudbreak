@@ -61,12 +61,21 @@ public class UmsGroupTestDto extends AbstractTestDto<CreateUserGroupRequest, Use
 
     @Override
     public String getCrn() {
+        if (getResponse() == null) {
+            throw new IllegalStateException("UMS Group response hasn't been set, therefore 'getCrn' cannot be fulfilled.");
+        }
         return getResponse().getCrn();
     }
 
     @Override
     public UmsGroupTestDto when(Action<UmsGroupTestDto, UmsClient> action) {
         return getTestContext().when((UmsGroupTestDto) this, UmsClient.class, action, emptyRunningParameter());
+    }
+
+    @Override
+    public <E extends Exception> UmsGroupTestDto whenException(Action<UmsGroupTestDto, UmsClient> action, Class<E> expectedException,
+            RunningParameter runningParameter) {
+        return getTestContext().whenException((UmsGroupTestDto) this, UmsClient.class, action, expectedException, runningParameter);
     }
 
     @Override

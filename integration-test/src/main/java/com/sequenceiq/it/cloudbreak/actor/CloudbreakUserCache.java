@@ -41,11 +41,19 @@ public class CloudbreakUserCache {
 
     @PostConstruct
     private void initRealUmsUserCache() {
-        String userConfigPath = "ums-users/api-credentials.json";
+        String userConfigPath;
+        String authUserConfigPath = "ums-users/api-credentials.json";
+        String l0UserConfigPath = "ums-users/l0-api-credentials.json";
         Map<String, Map<String, List<CloudbreakUser>>> fetchedUserStore;
         List<CloudbreakUser> cloudbreakUsers;
         Set<String> accountIds = new HashSet<>();
         String accountId;
+
+        if (new ClassPathResource(l0UserConfigPath).exists()) {
+            userConfigPath = l0UserConfigPath;
+        } else {
+            userConfigPath = authUserConfigPath;
+        }
 
         if (new ClassPathResource(userConfigPath).exists()) {
             LOGGER.info("Real UMS users are initializing by deployment: {} and account: {}. User store is present at: {} path", realUmsUserDeployment,
