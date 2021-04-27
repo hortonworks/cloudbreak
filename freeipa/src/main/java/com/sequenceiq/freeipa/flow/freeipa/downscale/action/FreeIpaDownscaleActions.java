@@ -62,6 +62,7 @@ import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateD
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.dnssoarecords.UpdateDnsSoaRecordsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removehosts.RemoveHostsFromOrchestrationSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removeserver.RemoveServersResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.stoptelemetry.StopTelemetryRequest;
@@ -239,11 +240,24 @@ public class FreeIpaDownscaleActions {
         };
     }
 
-    @Bean(name = "DOWNSCALE_REVOKE_CERTS_STATE")
-    public Action<?, ?> revokeCertsAction() {
+    @Bean(name = "DOWNSCALE_REMOVE_REPLICATION_AGREEMENTS_STATE")
+    public Action<?, ?> removeReplicationAgreementsAction() {
         return new AbstractDownscaleAction<>(RemoveServersResponse.class) {
             @Override
             protected void doExecute(StackContext context, RemoveServersResponse payload, Map<Object, Object> variables) {
+                CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
+                stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Removing servers");
+                RemoveReplicationAgreementsRequest request = new RemoveReplicationAgreementsRequest(cleanupEvent);
+                sendEvent(context, request);
+            }
+        };
+    }
+
+    @Bean(name = "DOWNSCALE_REVOKE_CERTS_STATE")
+    public Action<?, ?> revokeCertsAction() {
+        return new AbstractDownscaleAction<>(StackEvent.class) {
+            @Override
+            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), getInProgressStatus(variables), "Revoking certificates");
                 CleanupEvent cleanupEvent = buildCleanupEvent(context, getDownscaleHosts(variables));
                 RevokeCertsRequest request = new RevokeCertsRequest(cleanupEvent, context.getStack());

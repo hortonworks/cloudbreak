@@ -70,7 +70,7 @@ public class FreeIpaPostInstallService {
         LOGGER.debug("Performing post-install configuration for stack {}. {}.", stackId, fullPostInstall ? "Full post install" : "Partial post install");
         Stack stack = stackService.getStackById(stackId);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        freeIpaTopologyService.updateReplicationTopology(stackId, freeIpaClient);
+        freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
         }
