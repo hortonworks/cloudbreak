@@ -16,7 +16,7 @@ public class PostInstallFreeIpaFailedToUpscaleFailureEventConverter implements P
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         PostInstallFreeIpaFailed result = (PostInstallFreeIpaFailed) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Bootstrapping machines", Set.of(), Map.of(),
+        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Post installing FreeIPA", Set.of(), Map.of(),
                 new Exception("Payload failed: " + payload));
         return event;
     }

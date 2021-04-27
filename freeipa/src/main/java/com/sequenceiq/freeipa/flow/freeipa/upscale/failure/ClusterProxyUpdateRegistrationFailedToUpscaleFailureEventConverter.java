@@ -16,7 +16,7 @@ public class ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter 
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         ClusterProxyUpdateRegistrationFailed result = (ClusterProxyUpdateRegistrationFailed) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Bootstrapping machines", Set.of(), Map.of(),
+        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Updating cluster proxy", Set.of(), Map.of(),
                 new Exception("Payload failed: " + payload));
         return event;
     }
