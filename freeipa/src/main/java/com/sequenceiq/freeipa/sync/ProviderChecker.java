@@ -41,11 +41,11 @@ public class ProviderChecker {
     private boolean updateStatus;
 
     public List<ProviderSyncResult> updateAndGetStatuses(Stack stack, Set<InstanceMetaData> checkableInstances,
-        Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap) {
+        Map<InstanceMetaData, DetailedStackStatus> instanceHealthStatusMap, boolean updateStatusFromFlow) {
         return checkedMeasure(() -> {
             List<ProviderSyncResult> results = new ArrayList<>();
             List<CloudVmInstanceStatus> statuses = stackInstanceProviderChecker.checkStatus(stack, checkableInstances);
-            if (flowLogService.isOtherFlowRunning(stack.getId())) {
+            if (!updateStatusFromFlow && flowLogService.isOtherFlowRunning(stack.getId())) {
                 throw new InterruptSyncingException(":::Auto sync::: interrupt syncing in updateAndGetStatuses, flow is running on freeipa stack " +
                         stack.getName());
             } else {
