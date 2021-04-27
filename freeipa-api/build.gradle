@@ -33,7 +33,7 @@ dependencies {
 
   constraints {
     implementation group: 'org.glassfish.jersey.ext', name: 'jersey-proxy-client',   version: jerseyCoreVersion
-    implementation group: 'io.swagger',               name: 'swagger-jersey2-jaxrs', version: '1.5.21'
+    implementation group: 'io.swagger',               name: 'swagger-jersey2-jaxrs', version: swaggerVersion
   }
 
   testImplementation group: 'org.hamcrest',           name: 'hamcrest',              version: hamcrestVersion
