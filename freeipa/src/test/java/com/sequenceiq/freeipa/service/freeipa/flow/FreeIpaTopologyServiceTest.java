@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
@@ -25,6 +26,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaTopologyServiceTest {
+
+    private static final int NOT_FOUND = 4001;
 
     @InjectMocks
     private FreeIpaTopologyService underTest;
@@ -167,7 +170,7 @@ class FreeIpaTopologyServiceTest {
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("domain"), Mockito.any());
     }
 
-    @MethodSource("testUpdateReplicationTopologyParameters")
+    @Test
     void testUpdateReplicationTopologyForDownscale() throws FreeIpaClientException {
         Mockito.when(stackService.getByIdWithListsInTransaction(Mockito.anyLong())).thenReturn(stack);
         InstanceMetaData im1 = new InstanceMetaData();
@@ -179,9 +182,44 @@ class FreeIpaTopologyServiceTest {
         TopologySuffix caSuffix = new TopologySuffix();
         caSuffix.setCn("ca");
         Mockito.when(freeIpaClient.findAllTopologySuffixes()).thenReturn(List.of(caSuffix));
-
+        List<TopologySegment> topologySegments = new LinkedList<>();
+        TopologySegment segment = new TopologySegment();
+        segment.setLeftNode("ipaserver1.example.com");
+        segment.setRightNode("ipaserver2.example.com");
+        topologySegments.add(segment);
+        Mockito.when(freeIpaClient.findTopologySegments(Mockito.anyString())).thenReturn(topologySegments);
         Mockito.when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+
         underTest.updateReplicationTopology(1L, Set.of("ipaserver2.example.com"), freeIpaClient);
+
+        Mockito.verify(freeIpaClient, Mockito.never()).addTopologySegment(Mockito.any(), Mockito.any());
+        Mockito.verify(freeIpaClient, Mockito.times(1)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
+    }
+
+    @Test
+    void testUpdateReplicationTopologyForDownscaleAndSegmentIsNotPresent() throws FreeIpaClientException {
+        Mockito.when(stackService.getByIdWithListsInTransaction(Mockito.anyLong())).thenReturn(stack);
+        InstanceMetaData im1 = new InstanceMetaData();
+        InstanceMetaData im2 = new InstanceMetaData();
+        im1.setDiscoveryFQDN("ipaserver1.example.com");
+        im2.setDiscoveryFQDN("ipaserver2.example.com");
+        Set<InstanceMetaData> imSet = Set.of(im1, im2);
+        Mockito.when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(imSet);
+        TopologySuffix caSuffix = new TopologySuffix();
+        caSuffix.setCn("ca");
+        Mockito.when(freeIpaClient.findAllTopologySuffixes()).thenReturn(List.of(caSuffix));
+        List<TopologySegment> topologySegments = new LinkedList<>();
+        TopologySegment segment = new TopologySegment();
+        segment.setLeftNode("ipaserver1.example.com");
+        segment.setRightNode("ipaserver2.example.com");
+        topologySegments.add(segment);
+        Mockito.when(freeIpaClient.findTopologySegments(Mockito.anyString())).thenReturn(topologySegments);
+        String message = "already deleted";
+        Mockito.when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any()))
+                .thenThrow(new FreeIpaClientException(message, new JsonRpcClientException(NOT_FOUND, message, null)));
+
+        underTest.updateReplicationTopology(1L, Set.of("ipaserver2.example.com"), freeIpaClient);
+
         Mockito.verify(freeIpaClient, Mockito.never()).addTopologySegment(Mockito.any(), Mockito.any());
         Mockito.verify(freeIpaClient, Mockito.times(1)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
     }
