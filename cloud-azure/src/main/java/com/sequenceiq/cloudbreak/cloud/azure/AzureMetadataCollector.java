@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -143,17 +142,19 @@ public class AzureMetadataCollector implements MetadataCollector {
             String loadBalancerName = AzureLoadBalancer.getLoadBalancerName(type, stackName);
             LOGGER.debug("Attempting to collect metadata for load balancer {}, type {}", loadBalancerName, type);
             try {
-                String ip = null;
+                Optional<String> ip;
                 if (LoadBalancerType.PUBLIC.equals(type)) {
                     ip = lookupPublicIp(resourceGroup, azureClient, loadBalancerName);
                 } else if (LoadBalancerType.PRIVATE.equals(type)) {
                     ip = lookupPrivateIp(resourceGroup, azureClient, loadBalancerName);
+                } else {
+                    ip = Optional.empty();
                 }
 
-                if (StringUtils.isNotEmpty(ip)) {
+                if (ip.isPresent()) {
                     CloudLoadBalancerMetadata loadBalancerMetadata = new CloudLoadBalancerMetadata.Builder()
                         .withType(type)
-                        .withIp(ip)
+                        .withIp(ip.get())
                         .withName(loadBalancerName)
                         .build();
                     cloudLoadBalancerMetadata.add(loadBalancerMetadata);
@@ -169,37 +170,37 @@ public class AzureMetadataCollector implements MetadataCollector {
         return cloudLoadBalancerMetadata;
     }
 
-    private String lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
-        String ip = null;
+    private Optional<String> lookupPrivateIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
         List<String> privateIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, LoadBalancerType.PRIVATE);
         if (privateIps.isEmpty()) {
             LOGGER.warn("Unable to find private ip address for load balancer {}", loadBalancerName);
+            return Optional.empty();
         } else {
-            ip = privateIps.get(0);
+            String ip = privateIps.get(0);
             if (privateIps.size() > 1) {
                 LOGGER.warn("Found multiple private IPs ({}) for load balancer {}. Only one, {}, will be used.",
                         String.join(", ", privateIps),
                         loadBalancerName,
                         ip);
             }
+            return Optional.ofNullable(ip);
         }
-        return ip;
     }
 
-    private String lookupPublicIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
-        String ip = null;
+    private Optional<String> lookupPublicIp(String resourceGroup, AzureClient azureClient, String loadBalancerName) {
         List<String> publicIps = azureClient.getLoadBalancerIps(resourceGroup, loadBalancerName, LoadBalancerType.PUBLIC);
         if (publicIps.isEmpty()) {
             LOGGER.warn("Unable to find public ip address for load balancer {}", loadBalancerName);
+            return Optional.empty();
         } else {
-            ip = publicIps.get(0);
+            String ip = publicIps.get(0);
             if (publicIps.size() > 1) {
                 LOGGER.warn("Found multiple public IPs ({}) for load balancer {}. Only one, {}, will be used.",
                         String.join(", ", publicIps),
                         loadBalancerName,
                         ip);
             }
+            return Optional.ofNullable(ip);
         }
-        return ip;
     }
 }
