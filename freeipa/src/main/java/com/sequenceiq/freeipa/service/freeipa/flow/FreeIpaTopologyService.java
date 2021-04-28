@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
+
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -117,7 +119,8 @@ public class FreeIpaTopologyService {
                 .filter(segment -> !topologyToKeep.contains(new UnorderedPair(segment.getLeftNode(), segment.getRightNode())))
                 .collect(Collectors.toSet());
         for (TopologySegment segment : segmentsToRemove) {
-            freeIpaClient.deleteTopologySegment(topologySuffixCn, segment);
+            ignoreNotFoundException(() -> freeIpaClient.deleteTopologySegment(topologySuffixCn, segment),
+                    "Deleting topology segment for [{}] but it was not found", segment);
         }
     }
 
