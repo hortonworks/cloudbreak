@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 @Service
@@ -41,7 +42,7 @@ public class AzureImageTermsSignerService {
             AzureImageTerms responseImageTerms = azureRestOperationsService.httpPut(signUri, azureImageTerms, AzureImageTerms.class, tokenOptional.get());
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, responseImageTerms);
         } catch (Exception e) {
-            String message = String.format("Exception occurred when signing vm image terms and conditions, method azure-cli url. Message is %s",
+            String message = String.format("Exception occurred when signing vm image terms and conditions. Message is '%s'",
                     e.getMessage());
             LOGGER.warn(message);
             throw new CloudConnectorException(message, e);

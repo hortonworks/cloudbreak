@@ -22,11 +22,10 @@ public class AzureImageFormatValidator implements Validator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureImageFormatValidator.class);
 
-    private static final Pattern MARKETPLACE_PATTERN = Pattern.compile
-            ("^[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]+:[a-zA-Z0-9-_.]+:((\\d+\\.)?(\\d+\\.)?(\\*|\\d+)|(latest))$");
+    private static final Pattern MARKETPLACE_PATTERN =
+            Pattern.compile("^[a-zA-Z0-9-_]+:[a-zA-Z0-9-_]+:[a-zA-Z0-9-_.]+:((\\d+\\.)?(\\d+\\.)?(\\*|\\d+)|(latest))$");
 
-    private static final Pattern VHD_PATTERN = Pattern.compile
-            ("^(http).*(\\.vhd)$");
+    private static final Pattern VHD_PATTERN = Pattern.compile("^(http).*(\\.vhd)$");
 
     @Inject
     private EntitlementService entitlementService;

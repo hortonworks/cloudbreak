@@ -54,7 +54,7 @@ public class AzureImageValidatorTest {
 
     @Test
     public void testImageHasValidMarketplaceFormat() {
-        Image image = new Image("https://cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd", new HashMap<>(), "centos7", "redhat7", "", "default",
+        Image image = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
                 "default-id", new HashMap<>());
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
         when(underTest.isVhdImageFormat(image)).thenReturn(true);
@@ -64,7 +64,7 @@ public class AzureImageValidatorTest {
 
     @Test
     public void testImageHasInvalidFormat() {
-        Image image = new Image("https://cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd", new HashMap<>(), "centos7", "redhat7", "", "default",
+        Image image = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default",
                 "default-id", new HashMap<>());
         cloudStack = new CloudStack(List.of(), null, image, Map.of(), Map.of(), null, null, null, null, null);
         when(underTest.isVhdImageFormat(image)).thenReturn(true);
