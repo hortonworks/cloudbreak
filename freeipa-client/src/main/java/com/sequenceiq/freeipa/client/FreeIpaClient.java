@@ -181,7 +181,11 @@ public class FreeIpaClient {
     }
 
     public Host deleteServer(String fqdn) throws FreeIpaClientException {
-        Map<String, Object> params = Map.of();
+        Map<String, Object> params = Map.of(
+                "force", true,
+                "ignore_last_of_role", true,
+                "ignore_topology_disconnect", true
+        );
         return (Host) invoke("server_del", List.of(fqdn), params, Host.class).getResult();
     }
 

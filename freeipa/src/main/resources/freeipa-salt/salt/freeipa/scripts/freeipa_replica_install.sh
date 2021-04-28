@@ -56,6 +56,11 @@ ipa topologysuffix-find | grep "Suffix name" | cut -f2 -d":" | cut -f2 -d" " | w
   done
 done
 
+if ipa hostgroup-show ipaservers | grep "$FQDN"; then
+  echo "Cleaning up ipaservers host group for $FQDN"
+  ipa hostgroup-remove-member ipaservers "--hosts=$FQDN"
+fi
+
 FORWARDERS=$(grep -Ev '^#|^;' /etc/resolv.conf.orig | grep nameserver | awk '{print "--forwarder " $2}')
 PRIMARY_IPA=$(grep -Ev '^#|^;' /etc/resolv.conf | grep nameserver | awk '{print $2}')
 
