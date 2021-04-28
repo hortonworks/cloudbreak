@@ -4,17 +4,21 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -28,13 +32,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(Parameterized.class)
 public class AzureStackViewProviderTest {
 
     private static final String STACK_NAME = "Test Cluster";
@@ -48,6 +53,8 @@ public class AzureStackViewProviderTest {
     private static final String INSTANCE_ID = "instance-1";
 
     private static final String GROUP_NAME = "group-1";
+
+    private static final String IMAGE_NAME = "image-name";
 
     @InjectMocks
     private AzureStackViewProvider underTest;
@@ -69,14 +76,30 @@ public class AzureStackViewProviderTest {
 
     @Before
     public void before() {
+        initMocks(this);
         ReflectionTestUtils.setField(underTest, "stackNamePrefixLength", 255);
     }
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { true, null }, {false, "id" }
+        });
+    }
+
+    @Parameterized.Parameter
+    public boolean isMarketplaceImage;
+
+    @Parameterized.Parameter(1)
+    public String imageId;
 
     @Test
     public void testGetAzureStackShouldReturnsANewAzureStackView() {
         CloudCredential cloudCredential = createCloudCredential();
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
+        Image imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+
         Network network = mock(Network.class);
         AzureImage image = new AzureImage("id", "name", true);
         when(azureStorage.getCustomImage(any(), any(), any(), any())).thenReturn(image);
@@ -84,16 +107,23 @@ public class AzureStackViewProviderTest {
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getParameters()).thenReturn(Collections.emptyMap());
         when(cloudStack.getNetwork()).thenReturn(network);
-//        when(cloudStack.getImage()).thenReturn(network);
+        when(cloudStack.getImage()).thenReturn(imageModel);
         when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
         when(azureUtils.getCustomSubnetIds(network)).thenReturn(Collections.emptyList());
-//        when(azureImageFormatValidator.isMarketplaceImageFormat(image))
+        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(isMarketplaceImage);
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 
         assertEquals("i1", actual.getGroups().get(InstanceGroupType.CORE.name()).get(0).getInstanceId());
         assertEquals(GROUP_NAME, actual.getInstanceGroups().get(0).getName());
+        assertEquals(imageId, actual.getGroups().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
+
+//        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(true);
+//        AzureStackView actual2 = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
+//        assertEquals(null, actual2.getGroups().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
+
+
     }
 
     private CloudCredential createCloudCredential() {

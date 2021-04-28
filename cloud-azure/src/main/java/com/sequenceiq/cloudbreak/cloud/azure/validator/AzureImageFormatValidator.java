@@ -45,7 +45,7 @@ public class AzureImageFormatValidator implements Validator {
                 String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image! "
                         + "If you would like to use it please open Cloudera support ticket to enable this capability!", imageUri);
                 LOGGER.warn(errorMessage);
-//                throw new CloudConnectorException(errorMessage);
+                throw new CloudConnectorException(errorMessage);
             }
         } else {
             String errorMessage = String.format("Your image name %s is invalid. Please check the desired format in the documentation!", imageUri);
