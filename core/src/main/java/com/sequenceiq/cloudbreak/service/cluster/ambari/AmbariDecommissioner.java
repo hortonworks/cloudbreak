@@ -7,12 +7,12 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.DECOMMISSION_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE;
-import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.START_SERVICES_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE;
 import static com.sequenceiq.cloudbreak.service.cluster.ambari.DataNodeUtils.sortByUsedSpace;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.AMBARI_POLLING_INTERVAL;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationService.MAX_ATTEMPTS_FOR_HOSTS;
+
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static java.util.stream.Collectors.toMap;
@@ -36,7 +36,6 @@ import java.util.stream.Stream;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -109,8 +108,6 @@ public class AmbariDecommissioner {
     private static final String HBASE_REGIONSERVER = "HBASE_REGIONSERVER";
 
     private static final String NODEMANAGER = "NODEMANAGER";
-
-    private static final String NIFI = "NIFI_MASTER";
 
     private static final double SAFETY_PERCENTAGE = 1.2;
 
@@ -186,6 +183,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private NifiDecommissionService nifiDecommissionService;
 
     @PostConstruct
     public void init() {
@@ -327,7 +327,9 @@ public class AmbariDecommissioner {
             if (isSuccess(pollingResult)) {
                 LOGGER.info("All services started, let's decommission");
                 List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
-                retireNifiNodes(stack, ambariClient, hostList, hostStatusMap);
+                boolean nifiPresent = nifiDecommissionService.isNifiPresentInTheCluster(hostStatusMap);
+                nifiDecommissionService.setAutoRestartForNifi(ambariClient, nifiPresent, false);
+                nifiDecommissionService.retireNifiNodes(stack, ambariClient, hostList, hostStatusMap, nifiPresent);
                 Map<String, Integer> decommissionRequests = decommissionComponents(ambariClient, hostList, hostStatusMap);
                 if (!decommissionRequests.isEmpty()) {
                     LOGGER.info("Wait for Ambari decommission progress, decommission requests: ({})", decommissionRequests);
@@ -358,6 +360,7 @@ public class AmbariDecommissioner {
                 }
                 ambariDeleteHostsService.deleteHostsButFirstQueryThemFromAmbari(ambariClient, hostList);
                 result.addAll(hostsToRemove.keySet());
+                nifiDecommissionService.setAutoRestartForNifi(ambariClient, nifiPresent, true);
             }
         } catch (DecommissionException e) {
             throw e;
@@ -645,32 +648,6 @@ public class AmbariDecommissioner {
         Set<String> hostsToRemove = orderedByHealth.map(HostMetadata::getHostName).limit(adjustment).collect(Collectors.toSet());
         LOGGER.info("Hosts '{}' will be removed from Ambari cluster", hostsToRemove);
         return hostsToRemove;
-    }
-
-    private void retireNifiNodes(Stack stack, AmbariClient ambariClient, List<String> hostList, Map<String, HostStatus> hostStatusMap) {
-        List<String> hostsRunService = hostList.stream().filter(hn -> hostStatusMap.get(hn).getHostComponentsStatuses().containsKey(NIFI))
-                .collect(Collectors.toList());
-        hostsRunService.stream().forEach(nifiNode -> {
-            LOGGER.info("Retiring NiFi node {}", nifiNode);
-            Pair<PollingResult, Exception> retireResult = Pair.of(SUCCESS, null);
-            try {
-                int requestId = ambariClient.retire(List.of(nifiNode), "NIFI", NIFI);
-                retireResult = ambariOperationService.waitForOperations(stack, ambariClient,
-                        singletonMap("Retiring NiFi node", requestId), RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE);
-            } catch (Exception e) {
-                handleRetireError(nifiNode, e);
-            }
-            if (isSuccess(retireResult.getKey())) {
-                LOGGER.info("Retirement of NiFi node {} was successful.", nifiNode);
-            } else {
-                handleRetireError(nifiNode, retireResult.getValue());
-            }
-        });
-    }
-
-    private void handleRetireError(String node, Exception exception) {
-        LOGGER.error("Retirement of NiFi node {} failed: {}", node, exception.getMessage());
-        throw new DecommissionException(exception);
     }
 
     private Map<String, Integer> decommissionComponents(AmbariClient ambariClient, Collection<String> hosts,
