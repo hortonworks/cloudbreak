@@ -1,5 +1,25 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
+
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NicIPConfiguration;
@@ -19,25 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AzureMetadataCollectorTest {
@@ -297,6 +298,30 @@ public class AzureMetadataCollectorTest {
     }
 
     @Test
+    public void testCollectPrivateLoadBalancerWithMultipleIps() {
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource cloudResource = createCloudResource();
+
+        when(authenticatedContext.getCloudContext()).thenReturn(mockCloudContext);
+        when(mockCloudContext.getName()).thenReturn(RESOURCE_GROUP_NAME);
+
+        when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
+        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
+
+        final String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenReturn(List.of(PRIVATE_IP, "10.23.12.1"));
+
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PRIVATE), resources);
+
+        assertEquals(1, result.size());
+        assertEquals(LoadBalancerType.PRIVATE, result.get(0).getType());
+        assertEquals(PRIVATE_IP, result.get(0).getIp());
+    }
+
+    @Test
     public void testCollectLoadBalancerWithNoIps() {
         List<CloudResource> resources = new ArrayList<>();
         CloudResource cloudResource = createCloudResource();
@@ -313,6 +338,28 @@ public class AzureMetadataCollectorTest {
                 authenticatedContext,
                 List.of(LoadBalancerType.PRIVATE, LoadBalancerType.PUBLIC),
                 resources);
+
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testCollectLoadBalancerSkipsMetadataWhenRuntimeExceptionIsThrown() {
+        List<CloudResource> resources = new ArrayList<>();
+        CloudResource cloudResource = createCloudResource();
+
+        when(authenticatedContext.getCloudContext()).thenReturn(mockCloudContext);
+        when(mockCloudContext.getName()).thenReturn(RESOURCE_GROUP_NAME);
+
+        when(azureUtils.getTemplateResource(resources)).thenReturn(cloudResource);
+        when(azureUtils.getStackName(any())).thenReturn(STACK_NAME);
+
+        final String privateLoadBalancerName = AzureLoadBalancer.getLoadBalancerName(LoadBalancerType.PRIVATE, STACK_NAME);
+        when(azureClient.getLoadBalancerIps(RESOURCE_GROUP_NAME, privateLoadBalancerName, LoadBalancerType.PRIVATE))
+                .thenThrow(new RuntimeException());
+
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+
+        List<CloudLoadBalancerMetadata> result = underTest.collectLoadBalancer(authenticatedContext, List.of(LoadBalancerType.PRIVATE), resources);
 
         assertEquals(0, result.size());
     }
