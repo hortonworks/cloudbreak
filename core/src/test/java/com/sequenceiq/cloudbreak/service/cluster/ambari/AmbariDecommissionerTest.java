@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -149,6 +150,9 @@ public class AmbariDecommissionerTest {
     @Mock
     private AmbariDeleteHostsService ambariDeleteHostsService;
 
+    @Mock
+    private NifiDecommissionService nifiDecommissionService;
+
     @Before
     public void setUp() throws Exception {
         when(transactionService.required(any())).thenAnswer(answer -> ((Supplier) answer.getArgument(0)).get());
@@ -161,20 +165,20 @@ public class AmbariDecommissionerTest {
         HostStatus hostStatus = new HostStatus();
         hostStatus.setHostStatus("STARTED");
         hostStatus.setHostComponentsStatuses(Map.of("NIFI_MASTER", new HostComponentStatuses()));
-        when(ambariClientRetryer.getHostsStatuses(eq(ambariClient), anyList())).thenReturn(Map.of(EXAMPLE_IP, hostStatus, EXAMPLE_IP2, hostStatus));
-        when(ambariClient.retire(any(), eq("NIFI"), eq("NIFI_MASTER"))).thenReturn(1);
-        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE))).
-                thenReturn(Pair.of(PollingResult.SUCCESS, null));
-        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE))).
-                thenReturn(Pair.of(PollingResult.SUCCESS, null));
+
+        Map<String, HostStatus> hostStatusMap = Map.of(EXAMPLE_IP, hostStatus, EXAMPLE_IP2, hostStatus);
+        when(ambariClientRetryer.getHostsStatuses(eq(ambariClient), anyList())).thenReturn(hostStatusMap);
+        when(nifiDecommissionService.isNifiPresentInTheCluster(hostStatusMap)).thenReturn(true);
+        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.STOP_SERVICES_AMBARI_PROGRESS_STATE)))
+                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
         doNothing().when(ambariDeleteHostsService).deleteHostsButFirstQueryThemFromAmbari(eq(ambariClient), anyList());
 
         underTest.decommissionAmbariNodes(stack, Map.of(EXAMPLE_IP, getHostMetadata(EXAMPLE_IP, HostMetadataState.HEALTHY),
                 EXAMPLE_IP2, getHostMetadata(EXAMPLE_IP2, HostMetadataState.HEALTHY)));
 
-        verify(ambariClient, times(2)).retire(any(), eq("NIFI"), eq("NIFI_MASTER"));
-        verify(ambariOperationService, times(2)).waitForOperations(any(), any(), any(),
-                eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE));
+        verify(nifiDecommissionService).isNifiPresentInTheCluster(hostStatusMap);
+        verify(nifiDecommissionService).setAutoRestartForNifi(ambariClient, true, false);
+        verify(nifiDecommissionService).retireNifiNodes(eq(stack), eq(ambariClient), anyList(), eq(hostStatusMap), eq(true));
     }
 
     @Test
@@ -184,13 +188,13 @@ public class AmbariDecommissionerTest {
         HostStatus hostStatus = new HostStatus();
         hostStatus.setHostStatus("STARTED");
         hostStatus.setHostComponentsStatuses(Map.of("NIFI_MASTER", new HostComponentStatuses()));
+
+        Map<String, HostStatus> hostStatusMap = Map.of(EXAMPLE_IP, hostStatus, EXAMPLE_IP2, hostStatus);
+
         when(ambariClientRetryer.getHostsStatuses(eq(ambariClient), anyList())).thenReturn(Map.of(EXAMPLE_IP, hostStatus, EXAMPLE_IP2, hostStatus));
-        when(ambariClient.retire(any(), eq("NIFI"), eq("NIFI_MASTER")))
-                .thenReturn(1)
-                .thenReturn(2);
-        when(ambariOperationService.waitForOperations(eq(stack), eq(ambariClient), any(), eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE)))
-                .thenReturn(Pair.of(PollingResult.SUCCESS, null))
-                .thenReturn(Pair.of(PollingResult.FAILURE, new Exception("Retirement failed")));
+        when(nifiDecommissionService.isNifiPresentInTheCluster(hostStatusMap)).thenReturn(true);
+        doThrow(new DecommissionException("Retirement failed")).when(nifiDecommissionService).retireNifiNodes(eq(stack), eq(ambariClient), anyList(),
+                eq(hostStatusMap), eq(true));
 
         thrown.expect(DecommissionException.class);
         thrown.expectMessage("Retirement failed");
@@ -198,9 +202,9 @@ public class AmbariDecommissionerTest {
         underTest.decommissionAmbariNodes(stack, Map.of(EXAMPLE_IP, getHostMetadata(EXAMPLE_IP, HostMetadataState.HEALTHY),
                 EXAMPLE_IP2, getHostMetadata(EXAMPLE_IP2, HostMetadataState.HEALTHY)));
 
-        verify(ambariClient, times(2)).retire(any(), eq("NIFI"), eq("NIFI_MASTER"));
-        verify(ambariOperationService, times(2)).waitForOperations(any(), any(), any(),
-                eq(AmbariOperationType.RETIRE_NIFI_NODE_AMBARI_PROGRESS_STATE));
+        verify(nifiDecommissionService).isNifiPresentInTheCluster(hostStatusMap);
+        verify(nifiDecommissionService).setAutoRestartForNifi(ambariClient, true, false);
+        verify(nifiDecommissionService).retireNifiNodes(eq(stack), eq(ambariClient), anyList(), eq(hostStatusMap), eq(true));
     }
 
     @Test
@@ -341,16 +345,15 @@ public class AmbariDecommissionerTest {
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                        .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
         when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
 
-        List<InstanceMetaData> removableNodes =
-                slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
-                        .collect(Collectors.toList());
+        List<InstanceMetaData> removableNodes = slaveInstanceGroup.getAllInstanceMetaData().stream()
+                .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
+                .collect(Collectors.toList());
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
@@ -387,15 +390,14 @@ public class AmbariDecommissionerTest {
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                        .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), "3"));
 
-        List<InstanceMetaData> removableNodes =
-                slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
-                        .collect(Collectors.toList());
+        List<InstanceMetaData> removableNodes = slaveInstanceGroup.getAllInstanceMetaData().stream()
+                .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 3L)
+                .collect(Collectors.toList());
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
@@ -436,15 +438,14 @@ public class AmbariDecommissionerTest {
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                        .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
 
-        List<InstanceMetaData> removableNodes =
-                slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
-                        .collect(Collectors.toList());
+        List<InstanceMetaData> removableNodes = slaveInstanceGroup.getAllInstanceMetaData().stream()
+                .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
+                .collect(Collectors.toList());
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
@@ -484,16 +485,15 @@ public class AmbariDecommissionerTest {
         doAnswer(invocation -> slaveHostGroup.getHostMetadata().stream()
                 .filter(hostMetadata -> hostMetadata.getHostName().equals(invocation.getArguments()[1]))
                 .findFirst().get())
-                .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
+                        .when(hostGroupService).getHostMetadataByClusterAndHostName(any(), any());
         when(ambariClientRetryer.getBlueprintMap(ambariClient, EXAMPLE_NAME)).thenReturn(blueprintMap);
         when(configurationService.getConfiguration(ambariClient, slaveHostGroup.getName()))
                 .thenReturn(Collections.singletonMap(ConfigParam.DFS_REPLICATION.key(), replication));
         when(ambariClientPollingService.pollWithTimeoutSingleFailure(any(), any(), anyInt(), anyInt())).thenReturn(PollingResult.SUCCESS);
 
-        List<InstanceMetaData> removableNodes =
-                slaveInstanceGroup.getAllInstanceMetaData().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
-                        .collect(Collectors.toList());
+        List<InstanceMetaData> removableNodes = slaveInstanceGroup.getAllInstanceMetaData().stream()
+                .filter(instanceMetaData -> instanceMetaData.getPrivateId() < 9L)
+                .collect(Collectors.toList());
 
         doAnswer(invocation -> {
             List<String> removableFQDNs = removableNodes.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());

@@ -371,20 +371,20 @@ cb:
               - mpackUrl: https://archive.cloudera.com/p/HDF/3.x/3.3.1.0/centos7/tars/hdf_ambari_mp/hdf-ambari-mpack-3.3.1.0-10.tar.gz
                 stackDefault: true
       3.4:
-        version: 3.4.1.124-3
+        version: 3.4.1.124-5
         min-ambari: 2.7
         repo:
           stack:
             repoid: HDF-3.4
-            redhat7: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-3/centos7
-            repository-version: 3.4.1.124-3
-            vdf-redhat7: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-3/centos7/HDF-3.4.1.124-3.xml
+            redhat7: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-5/centos7
+            repository-version: 3.4.1.124-5
+            vdf-redhat7: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-5/centos7/HDF-3.4.1.124-5.xml
           util:
             repoid: HDP-UTILS-1.1.0.22
             redhat7: https://archive.cloudera.com/p/HDP-UTILS/1.1.0.22/repos/centos7
           mpacks:
             redhat7:
-              - mpackUrl: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-3/centos7/tars/hdf_ambari_mp/hdf-ambari-mpack-3.4.1.124-3.tar.gz
+              - mpackUrl: https://archive.cloudera.com/p/HDF/patch/3.x/3.4.1.124-5/centos7/tars/hdf_ambari_mp/hdf-ambari-mpack-3.4.1.124-5.tar.gz
                 stackDefault: true
       3.5:
         version: 3.5.2.0-99
