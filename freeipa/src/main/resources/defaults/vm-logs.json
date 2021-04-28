@@ -81,5 +81,9 @@
   {
     "path": "/var/log/ipareplica-install.log",
     "label": "ipa_replica_install"
+  },
+  {
+    "path": "/var/log/ccmv2-inverting-proxy-agent.log",
+    "label": "ccmv2_inverting_proxy_agent"
   }
 ]
