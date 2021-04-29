@@ -11,6 +11,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Reques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RecipeOpDescription;
@@ -60,6 +62,14 @@ public interface RecipeV4Endpoint {
     @ApiOperation(value = RecipeOpDescription.CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.RECIPE_NOTES,
             nickname = "createRecipeInWorkspace")
     RecipeV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid RecipeV4Request request);
+
+    @POST
+    @Path("internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.CREATE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "createRecipeInWorkspaceInternal")
+    RecipeV4Response postInternal(@AccountId @QueryParam("accountId") String accountId,
+            @PathParam("workspaceId") Long workspaceId, @Valid RecipeV4Request request);
 
     @DELETE
     @Path("name/{name}")

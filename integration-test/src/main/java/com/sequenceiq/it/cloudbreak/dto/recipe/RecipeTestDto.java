@@ -33,6 +33,8 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     @Inject
     private RecipeTestClient recipeTestClient;
 
+    private String accountId;
+
     public RecipeTestDto(TestContext testContext) {
         super(new RecipeV4Request(), testContext);
     }
@@ -83,6 +85,15 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     public RecipeTestDto withRecipeType(RecipeV4Type recipeType) {
         getRequest().setType(recipeType);
         return this;
+    }
+
+    public RecipeTestDto withAccountId(String accountId) {
+        this.accountId = accountId;
+        return this;
+    }
+
+    public String getAccountId() {
+        return accountId;
     }
 
     @Override

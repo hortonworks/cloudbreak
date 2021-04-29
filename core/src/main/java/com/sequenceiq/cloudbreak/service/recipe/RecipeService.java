@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
@@ -110,6 +111,24 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements R
                 ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getResourceCrn(),
                         ThreadBasedUserCrnProvider.getAccountId());
                 return created;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public Recipe createWithInternalUser(Recipe recipe, @Nonnull Long workspaceId, String accountId) {
+        if (recipeViewRepository.findByNameAndWorkspaceId(recipe.getName(), workspaceId).isPresent()) {
+            String message = String.format("%s already exists with name '%s'", recipe.getResourceName(), recipe.getName());
+            throw new BadRequestException(message);
+        }
+        recipe.setResourceCrn(createCRN(accountId));
+        try {
+            return transactionService.required(() -> {
+                Workspace workspace = getWorkspaceService().getByIdWithoutAuth(workspaceId);
+                recipe.setWorkspace(workspace);
+                recipe.setCreationType(CreationType.SERVICE);
+                return super.pureSave(recipe);
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw new TransactionService.TransactionRuntimeExecutionException(e);

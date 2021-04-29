@@ -7,6 +7,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get blueprint by name in workspace";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get blueprint by crn";
         public static final String CREATE_IN_WORKSPACE = "create blueprint in workspace";
+        public static final String CREATE_IN_WORKSPACE_INTERNAL = "create blueprint in workspace internal";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete blueprint by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete blueprint by crn";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple blueprints by name in workspace";
@@ -89,6 +90,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME_IN_WORKSPACE = "get recipe by name in workspace";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get recipe by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create recipe in workspace";
+        public static final String CREATE_IN_WORKSPACE_INTERNAL = "create recipe in workspace internal";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete recipe by name in workspace";
         public static final String DELETE_BY_CRN_IN_WORKSPACE = "delete recipe by crn in workspace";
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple recipes by name in workspace";

@@ -59,6 +59,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private Optional<String> removableInstanceId = Optional.empty();
 
+    private String initiatorUserCrn;
+
     @Inject
     private DistroXTestClient distroXTestClient;
 
@@ -243,6 +245,15 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         instanceGroupV1Request.setRecipeNames(Sets.newHashSet());
         instanceGroupV1Request.getRecipeNames().add(recipeName);
         return this;
+    }
+
+    public DistroXTestDto withInitiatorUserCrn(String initiatorUserCrn) {
+        this.initiatorUserCrn = initiatorUserCrn;
+        return this;
+    }
+
+    public String getInitiatorUserCrn() {
+        return initiatorUserCrn;
     }
 
     public DistroXTestDto addTags(Map<String, String> tags) {

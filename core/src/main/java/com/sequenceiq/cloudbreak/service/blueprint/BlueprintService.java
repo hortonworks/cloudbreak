@@ -33,6 +33,7 @@ import org.springframework.validation.MapBindingResult;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -126,6 +127,21 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 Blueprint created = super.createForLoggedInUser(blueprint, workspaceId);
                 ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, blueprint.getResourceCrn(), accountId);
                 return created;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public Blueprint createWithInternalUser(Blueprint blueprint, Long workspaceId, String accountId) {
+        validate(blueprint);
+        blueprint.setResourceCrn(createCRN(accountId));
+        try {
+            return transactionService.required(() -> {
+                Workspace workspace = getWorkspaceService().getByIdWithoutAuth(workspaceId);
+                blueprint.setWorkspace(workspace);
+                blueprint.setStatus(ResourceStatus.SERVICE_MANAGED);
+                return super.pureSave(blueprint);
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw new TransactionService.TransactionRuntimeExecutionException(e);
@@ -329,7 +345,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                                 + "The following clusters are using this blueprint: [%s]", blueprint.getName(), clusters));
             }
             throw new BadRequestException(String.format("There is a cluster ['%s'] which uses cluster template '%s'. Please remove this "
-                    + "cluster before deleting the custer template", notDeletedClustersWithThisCd.iterator().next().getName(), blueprint.getName()));
+                    + "cluster before deleting the custer template.", notDeletedClustersWithThisCd.iterator().next().getName(), blueprint.getName()));
         }
     }
 

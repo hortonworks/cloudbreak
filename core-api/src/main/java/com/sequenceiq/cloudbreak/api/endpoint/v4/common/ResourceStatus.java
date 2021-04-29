@@ -4,6 +4,7 @@ public enum ResourceStatus {
     DEFAULT,
     DEFAULT_DELETED,
     USER_MANAGED,
+    SERVICE_MANAGED,
     OUTDATED;
 
     public boolean isDefault() {

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ParametersQueryV4Response;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
@@ -65,6 +66,14 @@ public interface BlueprintV4Endpoint {
     @ApiOperation(value = BlueprintOpDescription.CREATE_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
             nickname = "createBlueprintInWorkspace")
     BlueprintV4Response post(@PathParam("workspaceId") Long workspaceId, @Valid BlueprintV4Request request);
+
+    @POST
+    @Path("internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.CREATE_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
+            nickname = "createBlueprintInWorkspaceInternal")
+    BlueprintV4Response postInternal(@AccountId @QueryParam("accountId") String accountId,  @PathParam("workspaceId") Long workspaceId,
+            @Valid BlueprintV4Request request);
 
     @DELETE
     @Path("name/{name}")

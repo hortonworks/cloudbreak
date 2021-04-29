@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -61,7 +62,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RetryableFlowRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -110,7 +110,8 @@ public interface DistroXV1Endpoint {
     @Path("internal")
     @ApiOperation(value = CREATE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "postDistroXInternalV1")
-    StackV4Response postInternal(@AccountId @QueryParam("accountId") String accountId, @Valid DistroXV1Request request);
+    StackV4Response postInternal(@QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn,
+            @QueryParam("accountId") String accountId, @Valid DistroXV1Request request);
 
     @GET
     @Path("name/{name}")
@@ -238,8 +239,8 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = REPAIR_CLUSTER_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_REPAIR_NOTES,
             nickname = "repairDistroXV1ByName")
     @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
-        @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
+            @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
+            @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
     })
     FlowIdentifier repairClusterByName(@PathParam("name") String name, @Valid DistroXRepairV1Request clusterRepairRequest);
 
