@@ -11,7 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
@@ -28,13 +27,6 @@ public class TargetGroup implements ProvisionEntity {
 
     @Convert(converter = TargetGroupTypeConverter.class)
     private TargetGroupType type;
-
-    /**
-     * @deprecated Use {@link #loadBalancerSet} instead.
-     */
-    @Deprecated
-    @ManyToOne(fetch = FetchType.LAZY)
-    private LoadBalancer loadBalancer;
 
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<LoadBalancer> loadBalancerSet = new HashSet<>();
@@ -54,38 +46,16 @@ public class TargetGroup implements ProvisionEntity {
         this.type = type;
     }
 
-    /**
-     * @deprecated Use {@link #getLoadBalancerSet()} instead.
-     */
-    @Deprecated
-    public LoadBalancer getLoadBalancer() {
-        return loadBalancer;
-    }
-
     public Set<LoadBalancer> getLoadBalancerSet() {
-        if (loadBalancerSet != null) {
-            return loadBalancerSet;
-        } else {
-            return Set.of(loadBalancer);
-        }
-    }
-
-    /**
-     * @deprecated Use {@link #setLoadBalancerSet()} instead.
-     */
-    @Deprecated
-    public void setLoadBalancer(LoadBalancer loadBalancer) {
-        this.loadBalancer = loadBalancer;
+        return loadBalancerSet;
     }
 
     public void setLoadBalancerSet(Set<LoadBalancer> loadBalancerSet) {
         this.loadBalancerSet = loadBalancerSet;
-        this.loadBalancer = loadBalancerSet.iterator().next();
     }
 
     public void addLoadBalancer(LoadBalancer loadBalancer) {
         loadBalancerSet.add(loadBalancer);
-        this.loadBalancer = loadBalancer;
     }
 
     public Set<InstanceGroup> getInstanceGroups() {
