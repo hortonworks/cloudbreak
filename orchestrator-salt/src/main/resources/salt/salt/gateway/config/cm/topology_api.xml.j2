@@ -414,9 +414,13 @@
     {% if 'NAMENODE' in exposed -%}
     <service>
         <role>NAMENODE</role>
+        {% if salt['pillar.get']('gateway:location')['NAMENODE']  is defined and salt['pillar.get']('gateway:location')['NAMENODE']|length > 1 %}
+        <url>hdfs://ns1</url>
+        {% else %}
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
         <url>hdfs://{{ hostloc }}:{{ ports['NAMENODE'] }}</url>
         {%- endfor %}
+        {% endif %}
     </service>
     {%- endif %}
     {%- endif %}
