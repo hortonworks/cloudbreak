@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -160,6 +161,9 @@ public class AwsRepairTest {
 
     @MockBean
     private DeleteFileSystemResult deleteFileSystemResult;
+
+    @MockBean
+    private LocationHelper locationHelper;
 
     @Inject
     private AwsResourceConnector underTest;
@@ -277,6 +281,7 @@ public class AwsRepairTest {
         when(amazonEfsClient.deleteFileSystem(any())).thenReturn(deleteFileSystemResult);
 
         when(entitlementService.awsCloudStorageValidationEnabled(any())).thenReturn(Boolean.TRUE);
+        when(locationHelper.parseS3BucketName(anyString())).thenCallRealMethod();
     }
 
     private void setupRetryService() {

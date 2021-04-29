@@ -78,6 +78,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
@@ -129,6 +130,9 @@ public class AwsLaunchTest {
 
     @Inject
     private ComponentTestUtil componentTestUtil;
+
+    @MockBean
+    private LocationHelper locationHelper;
 
     @MockBean
     private AmazonCloudFormationClient amazonCloudFormationClient;
@@ -278,6 +282,7 @@ public class AwsLaunchTest {
         when(customAmazonWaiterProvider.getAutoscalingActivitiesWaiter(any(), any())).thenReturn(describeScalingActivitiesRequestWaiter);
         when(awsClient.createCloudWatchClient(any(), anyString())).thenReturn(cloudWatchClient);
         when(entitlementService.awsCloudStorageValidationEnabled(any())).thenReturn(Boolean.TRUE);
+        when(locationHelper.parseS3BucketName(anyString())).thenCallRealMethod();
     }
 
     private void setupRetryService() {
