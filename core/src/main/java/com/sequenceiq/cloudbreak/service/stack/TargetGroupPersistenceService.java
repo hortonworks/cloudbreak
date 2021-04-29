@@ -24,11 +24,7 @@ public class TargetGroupPersistenceService {
     }
 
     public Set<TargetGroup> findByLoadBalancerId(Long loadBalancerId) {
-        Set<TargetGroup> targetGroups = repository.findTargetGroupsByLoadBalancerId(loadBalancerId);
-        if (targetGroups == null || targetGroups.isEmpty()) {
-            targetGroups = repository.findByLoadBalancerId(loadBalancerId);
-        }
-        return targetGroups;
+        return repository.findTargetGroupsByLoadBalancerId(loadBalancerId);
     }
 
     public Set<TargetGroup> findByInstanceGroupId(Long instanceGroupId) {
