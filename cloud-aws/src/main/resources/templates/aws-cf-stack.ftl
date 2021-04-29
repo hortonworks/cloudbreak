@@ -314,6 +314,9 @@
           "Protocol" : "TCP",
           "TargetType" : "instance",
           "HealthCheckPort" : "${listener.targetGroup.healthCheckPort}",
+          "HealthCheckIntervalSeconds" : 10,
+          "HealthyThresholdCount" : 2,
+          "UnhealthyThresholdCount" : 2,
           <#if existingVPC>
           "VpcId" : { "Ref" : "VPCId" }
           <#else>
