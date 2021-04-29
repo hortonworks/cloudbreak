@@ -156,6 +156,30 @@ public class UserV1ControllerTest {
     }
 
     @Test
+    void synchronizeAllUsersNullDeleteWorkloadUser() {
+        Set<String> environments = Set.of(ENV_CRN);
+        Set<String> users = Set.of(USER_CRN);
+        Set<String> machineUsers = Set.of(MACHINE_USER_CRN);
+        SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
+        request.setEnvironments(environments);
+        request.setUsers(users);
+        request.setMachineUsers(machineUsers);
+        request.setWorkloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        request.setDeletedWorkloadUsers(null);
+
+        Operation operation = mock(Operation.class);
+        when(userSyncService.synchronizeUsersWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
+        SyncOperationStatus status = mock(SyncOperationStatus.class);
+        when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
+
+        assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.synchronizeAllUsers(request)));
+
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, machineUsers, Optional.empty());
+        verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, environments,
+                userSyncFilter, WorkloadCredentialsUpdateType.FORCE_UPDATE, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
+    }
+
+    @Test
     void synchronizeAllUsersMultipleDeleteWorkloadUsers() {
         Set<String> users = Set.of(USER_CRN);
         SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();

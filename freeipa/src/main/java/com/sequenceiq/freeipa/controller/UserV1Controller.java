@@ -106,10 +106,10 @@ public class UserV1Controller implements UserV1Endpoint {
     }
 
     private Optional<String> getOptionalDeletedWorkloadUser(Set<String> deletedWorkloadUsers) {
-        if (deletedWorkloadUsers.size() == 1) {
-            return Optional.of(Iterables.getOnlyElement(deletedWorkloadUsers));
-        } else if (deletedWorkloadUsers.isEmpty()) {
+        if (deletedWorkloadUsers == null || deletedWorkloadUsers.isEmpty()) {
             return Optional.empty();
+        } else if (deletedWorkloadUsers.size() == 1) {
+            return Optional.of(Iterables.getOnlyElement(deletedWorkloadUsers));
         } else {
             throw new BadRequestException("Only 1 deleted workload user is supported");
         }
