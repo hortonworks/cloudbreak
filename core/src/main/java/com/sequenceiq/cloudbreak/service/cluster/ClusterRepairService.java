@@ -282,7 +282,7 @@ public class ClusterRepairService {
             }
             if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
                 validationResult.add(
-                        "Action is only supported if Cloudera Manager state is stored in external Database or in embedded database on attached disk.");
+                        "Action is only supported if Cloudera Manager state is stored in external Database or the cluster was launched after Mar/16/21.");
             }
         }
         return validationResult;
