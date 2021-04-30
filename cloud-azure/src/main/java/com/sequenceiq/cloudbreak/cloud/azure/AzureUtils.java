@@ -659,6 +659,12 @@ public class AzureUtils {
         }
     }
 
+    /**
+     * The functionality, offered by azure azure, does not work. Marketplace image users should accept the terms and conditions
+     * manually.
+     * @param azureClient AzureClient
+     * @param azureMarketplaceImage The image to be signed
+     */
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public void signImageConsent(AzureClient azureClient, AzureMarketplaceImage azureMarketplaceImage) {
         LOGGER.info("Signing terms and conditions for azure marketplace image: {}", azureMarketplaceImage);
