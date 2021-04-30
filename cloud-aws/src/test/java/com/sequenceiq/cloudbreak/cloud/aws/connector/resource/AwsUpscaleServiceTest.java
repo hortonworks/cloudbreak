@@ -38,6 +38,7 @@ import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
@@ -92,6 +93,9 @@ class AwsUpscaleServiceTest {
 
     @Mock
     private AwsCloudWatchService awsCloudWatchService;
+
+    @Mock
+    private AwsMetadataCollector awsMetadataCollector;
 
     @InjectMocks
     private AwsUpscaleService awsUpscaleService;
@@ -184,7 +188,8 @@ class AwsUpscaleServiceTest {
         List<CloudResource> cloudResourceList = Collections.emptyList();
         awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList);
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),  eq(amazonCloudFormationClient), any());
+        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
+                eq(amazonCloudFormationClient), any(), any());
         verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         ArgumentCaptor<List<CloudResource>> captor = ArgumentCaptor.forClass(List.class);
         verify(awsComputeResourceService, times(1))
@@ -302,7 +307,7 @@ class AwsUpscaleServiceTest {
 
         doThrow(new AmazonAutoscalingFailed("autoscaling failed"))
                 .when(awsAutoScalingService).scheduleStatusChecks(eq(List.of(worker)),
-                eq(authenticatedContext), eq(amazonCloudFormationClient), any(Date.class));
+                eq(authenticatedContext), eq(amazonCloudFormationClient), any(Date.class), any());
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList));
@@ -310,15 +315,13 @@ class AwsUpscaleServiceTest {
                 "(3 instances instead of 5), please check your quotas on AWS. Original autoscaling group state has been recovered.", exception.getMessage());
 
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),  eq(amazonCloudFormationClient), any());
+        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
+                eq(amazonCloudFormationClient), any(), any());
         verify(awsComputeResourceService, times(0)).buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack),
                 anyList(), anyList(), any(), any());
         verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker4"));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker5"));
-        Map<String, Integer> desiredGroups = new HashMap<>();
-        desiredGroups.put("workerASG", 3);
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(desiredGroups), eq(authenticatedContext), any(Date.class));
     }
 
     @Test
@@ -431,15 +434,13 @@ class AwsUpscaleServiceTest {
                 "Original autoscaling group state has been recovered. Exception: volume create error", exception.getMessage());
 
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),  eq(amazonCloudFormationClient), any());
+        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
+                eq(amazonCloudFormationClient), any(), any());
         verify(awsComputeResourceService, times(1)).buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack),
                 anyList(), anyList(), any(), any());
         verify(awsAutoScalingService, times(2)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker4"));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker5"));
-        Map<String, Integer> desiredGroups = new HashMap<>();
-        desiredGroups.put("workerASG", 3);
-        verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(desiredGroups), eq(authenticatedContext), any(Date.class));
         verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
     }
 

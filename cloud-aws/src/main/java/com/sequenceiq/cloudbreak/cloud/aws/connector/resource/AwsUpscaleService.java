@@ -22,6 +22,7 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
@@ -75,6 +76,9 @@ public class AwsUpscaleService {
     @Inject
     private AwsCloudWatchService awsCloudWatchService;
 
+    @Inject
+    private AwsMetadataCollector awsMetadataCollector;
+
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -91,8 +95,9 @@ public class AwsUpscaleService {
         LOGGER.info("Update autoscaling groups for stack: {}", ac.getCloudContext().getName());
         Date timeBeforeASUpdate = new Date();
         updateAutoscalingGroups(amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize);
+        List<String> knownInstances = getKnownInstancesByCloudbreak(stack);
         try {
-            awsAutoScalingService.scheduleStatusChecks(scaledGroups, ac, cloudFormationClient, timeBeforeASUpdate);
+            awsAutoScalingService.scheduleStatusChecks(scaledGroups, ac, cloudFormationClient, timeBeforeASUpdate, knownInstances);
         } catch (AmazonAutoscalingFailed amazonAutoscalingFailed) {
             LOGGER.info("Amazon autoscaling group update failed", amazonAutoscalingFailed);
             recoverOriginalState(ac, stack, amazonASClient, desiredAutoscalingGroupsByName, originalAutoScalingGroupsBySize, amazonAutoscalingFailed);
@@ -100,6 +105,7 @@ public class AwsUpscaleService {
         }
         try {
             awsAutoScalingService.suspendAutoScaling(ac, stack);
+            validateInstanceStatusesInScaledGroups(ac, amazonASClient, amazonEC2Client, cloudFormationClient, scaledGroups);
             List<CloudResource> instances = cfStackUtil.getInstanceCloudResources(ac, cloudFormationClient, amazonASClient, scaledGroups);
             associateElasticIpWithNewInstances(stack, resources, cloudFormationClient, amazonEC2Client, scaledGroups, instances);
 
@@ -131,6 +137,20 @@ public class AwsUpscaleService {
                             "Original autoscaling group state has been recovered. Exception: %s", runtimeException.getMessage()), runtimeException);
         }
         return singletonList(new CloudResourceStatus(cfStackUtil.getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
+    }
+
+    private void validateInstanceStatusesInScaledGroups(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
+            AmazonEc2Client amazonEC2Client, AmazonCloudFormationClient cloudFormationClient, List<Group> scaledGroups) {
+        for (Group group : scaledGroups) {
+            List<com.amazonaws.services.ec2.model.Instance> instancesForGroup =
+                    awsMetadataCollector.collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, cloudFormationClient, group.getName());
+            for (com.amazonaws.services.ec2.model.Instance i : instancesForGroup) {
+                if (!"running".equalsIgnoreCase(i.getState().getName())) {
+                    throw new RuntimeException(String.format("Instance (%s) in the group (%s) is not running (%s).",
+                            i.getInstanceId(), group.getName(), i.getState().getName()));
+                }
+            }
+        }
     }
 
     private void sendASGUpdateFailedMessage(AmazonAutoScalingClient amazonASClient, Map<String, Group> desiredAutoscalingGroupsByName,
@@ -167,7 +187,6 @@ public class AwsUpscaleService {
                     awsAutoScalingService.terminateInstance(amazonASClient, unknownInstance);
                 }
             }
-            Date timeBeforeASUpdate = new Date();
             for (Entry<String, Group> desiredAutoscalingGroup : desiredAutoscalingGroupsByName.entrySet()) {
                 String autoscalingGroupName = desiredAutoscalingGroup.getKey();
                 Integer originalInstanceSizeForTheGroup = originalAutoScalingGroupsBySize.get(autoscalingGroupName);
@@ -178,7 +197,6 @@ public class AwsUpscaleService {
                     awsAutoScalingService.updateAutoscalingGroup(amazonASClient, autoscalingGroupName, originalInstanceSizeForTheGroup);
                 }
             }
-            awsAutoScalingService.scheduleStatusChecks(originalAutoScalingGroupsBySize, ac, timeBeforeASUpdate);
         } catch (Exception recoverFailedException) {
             recoverFailedException.addSuppressed(originalException);
             LOGGER.info("Original autoscaling group state recover is failed", recoverFailedException);

@@ -164,7 +164,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         return instanceGroupMap;
     }
 
-    private List<Instance> collectInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
+    public List<Instance> collectInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient,
             AmazonEc2Client amazonEC2Client, AmazonCloudFormationClient amazonCFClient, String group) {
 
         LOGGER.debug("Collect aws instances for group: {}", group);
