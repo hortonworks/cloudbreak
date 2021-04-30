@@ -12,6 +12,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -30,6 +34,12 @@ public class AzureImageFormatValidator implements Validator {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
+
+    @Inject
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         Image image = cloudStack.getImage();
@@ -47,6 +57,17 @@ public class AzureImageFormatValidator implements Validator {
                 LOGGER.warn(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
+            LOGGER.debug("Checking if Terms and Conditions for your Azure Marketplace image {} are accepted", imageUri);
+            AzureClient azureClient = ac.getParameter(AzureClient.class);
+            AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image);
+            if (!azureImageTermsSignerService.isSigned(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient)) {
+                String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
+                        + "however its Terms and Conditions are not accepted! On how to accept them please refer to azure documentation " +
+                        "at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", imageUri);
+                LOGGER.warn(errorMessage);
+                throw new CloudConnectorException(errorMessage);
+            }
+
         } else {
             String errorMessage = String.format("Your image name %s is invalid. Please check the desired format in the documentation!", imageUri);
             LOGGER.warn(errorMessage);

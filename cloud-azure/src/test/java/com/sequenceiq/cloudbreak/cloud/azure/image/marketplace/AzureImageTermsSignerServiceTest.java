@@ -12,11 +12,11 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -35,6 +35,8 @@ public class AzureImageTermsSignerServiceTest {
 
     private static final String ACCESS_TOKEN = "accessToken";
 
+    private static final String AZURE_SUBSCRIPTION_ID = "azureSubscriptionId";
+
     @Mock
     private AzureRestOperationsService azureRestOperationsService;
 
@@ -46,9 +48,55 @@ public class AzureImageTermsSignerServiceTest {
 
     private AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
 
-    @BeforeEach
-    void setup() {
+    static Object[][] exceptionsFromHttpMethod() {
+        return new Object[][]{
+                {new AzureRestResponseException("myMessage"), "myMessage"},
+                {new RestClientException("myMessage"), "myMessage"}
+        };
+    }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testIsSignedReturnsSignedFromRestResponseBody(boolean signedFromRestResponse) {
+        when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(setupAzureImageTerms(signedFromRestResponse));
+
+        boolean signedFromService = underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
+
+        assertEquals(signedFromService, signedFromRestResponse);
+        verify(azureClient).getAccessToken();
+        verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+    }
+
+    @Test
+    void testIsSignedWhenNoToken() {
+        when(azureClient.getAccessToken()).thenReturn(Optional.empty());
+
+        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+                () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
+
+        assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
+                        "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
+                        "Reason: could not get access token. Please try again.",
+                exception.getMessage());
+        verify(azureClient).getAccessToken();
+    }
+
+    @ParameterizedTest
+    @MethodSource("exceptionsFromHttpMethod")
+    void testIsSignedWhenGetTermsThrowsError(Exception restException, String customErrorMessage) {
+        when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(restException);
+
+        Exception exception = Assertions.assertThrows(CloudConnectorException.class,
+                () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
+
+        assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
+                        "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
+                        "Reason: myMessage. Please try again.",
+                exception.getMessage());
+        verify(azureClient).getAccessToken();
+        verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 
     @Test
@@ -58,7 +106,7 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(azureImageTerms);
         when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenReturn(azureImageTerms);
 
-        underTest.sign("subscriptionId", azureMarketplaceImage, azureClient);
+        underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient);
 
         verify(azureClient).getAccessToken();
         ArgumentCaptor<AzureImageTerms> argumentCaptor = ArgumentCaptor.forClass(AzureImageTerms.class);
@@ -74,9 +122,13 @@ public class AzureImageTermsSignerServiceTest {
         when(azureClient.getAccessToken()).thenReturn(Optional.empty());
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.sign("subscriptionId", azureMarketplaceImage, azureClient));
+                () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
-        assertEquals("Could not get access token when trying to sign terms and conditions.", exception.getMessage());
+        assertEquals("Error when signing marketplace image terms and conditions for " +
+                "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
+                "Reason: could not get access token. Please try again. " +
+                "Alternatively you can also sign it manually, please refer to azure documentation at " +
+                "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService, never()).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         verify(azureRestOperationsService, never()).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
@@ -89,9 +141,13 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(restException);
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.sign("subscriptionId", azureMarketplaceImage, azureClient));
+                () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
-        assertEquals(String.format("Exception occurred when signing vm image terms and conditions. Message is '%s'", customErrorMessage),
+        assertEquals(String.format("Error when signing marketplace image terms and conditions for " +
+                        "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
+                        "Reason: error when signing vm image terms and conditions, message is '%s'. Please try again. " +
+                        "Alternatively you can also sign it manually, please refer to azure documentation at " +
+                        "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", customErrorMessage),
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
@@ -107,27 +163,29 @@ public class AzureImageTermsSignerServiceTest {
         when(azureRestOperationsService.httpPut(any(), any(), any(), anyString())).thenThrow(restException);
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.sign("subscriptionId", azureMarketplaceImage, azureClient));
+                () -> underTest.sign(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
 
-        assertEquals(String.format("Exception occurred when signing vm image terms and conditions. Message is '%s'", customErrorMessage),
+        assertEquals(String.format("Error when signing marketplace image terms and conditions for " +
+                        "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
+                        "Reason: error when signing vm image terms and conditions, message is '%s'. Please try again. " +
+                        "Alternatively you can also sign it manually, please refer to azure documentation at " +
+                        "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", customErrorMessage),
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         verify(azureRestOperationsService).httpPut(any(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
     }
 
-    static Object[][] exceptionsFromHttpMethod() {
-        return new Object[][] {
-                { new AzureRestResponseException("myMessage"), "myMessage"},
-                { new RestClientException("myMessage"), "myMessage"}
-        };
+    private AzureImageTerms setupAzureImageTerms() {
+        return setupAzureImageTerms(false);
     }
 
-    private AzureImageTerms setupAzureImageTerms() {
+    private AzureImageTerms setupAzureImageTerms(boolean signed) {
         AzureImageTerms azureImageTerms = new AzureImageTerms();
         AzureImageTerms.TermsProperties termProperties = new AzureImageTerms.TermsProperties();
-        termProperties.setAccepted(false);
+        termProperties.setAccepted(signed);
         azureImageTerms.setProperties(termProperties);
         return azureImageTerms;
     }
+
 }
