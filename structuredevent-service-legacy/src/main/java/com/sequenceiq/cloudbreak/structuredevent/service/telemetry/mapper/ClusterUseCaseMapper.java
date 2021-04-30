@@ -35,6 +35,8 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("ProperTerminationFlowEventChainFactory", "ClusterTerminationFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.DELETE_STARTED);
         firstStepUseCaseMap.put(Pair.of("UpscaleFlowEventChainFactory", "StackUpscaleConfig"), UsageProto.CDPClusterStatus.Value.UPSCALE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("MultiHostgroupDownscaleFlowEventChainFactory", "FlowChainInitFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.DOWNSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("DownscaleFlowEventChainFactory", "ClusterDownscaleFlowConfig"), UsageProto.CDPClusterStatus.Value.DOWNSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("StartFlowEventChainFactory", "StackStartFlowConfig"), UsageProto.CDPClusterStatus.Value.RESUME_STARTED);
         firstStepUseCaseMap.put(Pair.of("StopFlowEventChainFactory", "ClusterStopFlowConfig"), UsageProto.CDPClusterStatus.Value.SUSPEND_STARTED);
@@ -88,6 +90,10 @@ public class ClusterUseCaseMapper {
                 case "UpscaleFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "FINALIZE_UPSCALE_STATE",
                             UsageProto.CDPClusterStatus.Value.UPSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.UPSCALE_FAILED);
+                    break;
+                case "MultiHostgroupDownscaleFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.DOWNSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.DOWNSCALE_FAILED);
                     break;
                 case "DownscaleFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "DOWNSCALE_FINISHED_STATE",
