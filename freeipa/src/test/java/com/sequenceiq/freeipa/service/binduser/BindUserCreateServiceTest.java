@@ -26,6 +26,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -57,7 +58,11 @@ class BindUserCreateServiceTest {
 
     @BeforeEach
     public void init() {
-        when(stackService.getIdByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT)).thenReturn(STACK_ID);
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setEnvironmentCrn(ENV_CRN);
+        stack.setAccountId(ACCOUNT);
+        when(stackService.getByEnvironmentCrnAndAccountId(ENV_CRN, ACCOUNT)).thenReturn(stack);
     }
 
     @Test

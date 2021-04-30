@@ -11,11 +11,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.binduser.create.event.CreateBindUserEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -39,12 +41,13 @@ public class BindUserCreateService {
     private StackService stackService;
 
     public OperationStatus createBindUser(String accountId, BindUserCreateRequest request) {
-        Long stackId = stackService.getIdByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
+        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start 'BIND_USER_CREATE' operation from request: {}", request);
         Operation operation = operationService.startOperation(accountId, OperationType.BIND_USER_CREATE, List.of(request.getEnvironmentCrn()),
                 List.of(request.getBindUserNameSuffix()));
         if (RUNNING == operation.getStatus()) {
-            return operationConverter.convert(startCreateBindUserFLow(accountId, request, stackId, operation));
+            return operationConverter.convert(startCreateBindUserFLow(accountId, request, stack.getId(), operation));
         } else {
             LOGGER.info("Operation isn't in RUNNING state: {}", operation);
             return operationConverter.convert(operation);
