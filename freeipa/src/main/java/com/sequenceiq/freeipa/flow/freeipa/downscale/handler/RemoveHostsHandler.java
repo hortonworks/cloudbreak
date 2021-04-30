@@ -102,7 +102,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
                                     .anyMatch(hn -> hn.equals(instanceMetaData.getDiscoveryFQDN())))
                     .collect(Collectors.toMap(instanceMetaData -> instanceMetaData.getDiscoveryFQDN(), instanceMeataData -> instanceMeataData.getPrivateIp()));
             Set<InstanceMetaData> remainingInstanceMetaDatas = stack.getNotDeletedInstanceMetaDataList().stream()
-                    .filter(instanceMetaData -> !removeNodePrivateIPsByFQDN.containsValue(instanceMetaData.getPrivateIp()))
+                    .filter(instanceMetaData -> !shouldRemove(instanceMetaData, removeNodePrivateIPsByFQDN))
                     .collect(Collectors.toSet());
             Set<InstanceMetaData> invalidInstanceMetadata = remainingInstanceMetaDatas.stream()
                     .filter(instanceMetaData -> Objects.isNull(instanceMetaData.getDiscoveryFQDN()))
@@ -123,5 +123,15 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
             throw new CloudbreakException("Failed to delete orchestrator components while decommissioning: ", e);
         }
         return SUCCESS;
+    }
+
+    private boolean shouldRemove(InstanceMetaData instanceMetaData, Map<String, String> removeNodePrivateIPsByFQDN) {
+        if (removeNodePrivateIPsByFQDN.containsValue(instanceMetaData.getPrivateIp())) {
+            if (instanceMetaData.getDiscoveryFQDN() == null) {
+                return true;
+            }
+            return removeNodePrivateIPsByFQDN.containsKey(instanceMetaData.getDiscoveryFQDN());
+        }
+        return false;
     }
 }
