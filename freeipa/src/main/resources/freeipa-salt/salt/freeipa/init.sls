@@ -9,12 +9,13 @@ net.ipv6.conf.lo.disable_ipv6:
     - value: 0
 
 {% for host in salt['pillar.get']('freeipa:hosts') %}
-/etc/hosts/{{ host['fqdn'] }}:
-  host.present:
-    - ip:
-      - {{ host['ip'] }}
-    - names:
+{{ host['ip'] }}:
+  host.only:
+    - hostnames:
       - {{ host['fqdn'] }}
+{% if '.' in host['fqdn'] %}
+      - {{ host['fqdn'].split('.')[0] }}
+{% endif %}
 {% endfor %}
 
 /opt/salt/scripts/freeipa_install.sh:
