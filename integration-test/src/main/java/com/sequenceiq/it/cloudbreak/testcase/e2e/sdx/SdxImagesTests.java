@@ -28,6 +28,8 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxImagesTests extends PreconditionSdxE2ETest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxImagesTests.class);
@@ -45,8 +47,13 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
     public void testSDXWithPrewarmedImageCanBeCreatedSuccessfully(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+
         testContext
-                .given(sdx, SdxTestDto.class).withCloudStorage()
+                .given(sdx, SdxTestDto.class)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())
@@ -71,6 +78,9 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
         String idbrokerInstanceGroup = "idbroker";
         AtomicReference<String> selectedImageID = new AtomicReference<>();
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
                 .when((tc, dto, client) -> {
@@ -86,6 +96,7 @@ public class SdxImagesTests extends PreconditionSdxE2ETest {
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
                 .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
+                .withDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))

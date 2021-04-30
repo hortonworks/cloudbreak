@@ -16,6 +16,8 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
 
@@ -38,12 +40,17 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
     public void testSDXWithDataLakeAndFreeIpaStorageCanBeCreatedSuccessfully(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
         DescribeFreeIpaResponse describeFreeIpaResponse = testContext.given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .getResponse();
 
         testContext
-                .given(sdx, SdxTestDto.class).withCloudStorage()
+                .given(sdx, SdxTestDto.class)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(getSdxInstancesHealthyState())

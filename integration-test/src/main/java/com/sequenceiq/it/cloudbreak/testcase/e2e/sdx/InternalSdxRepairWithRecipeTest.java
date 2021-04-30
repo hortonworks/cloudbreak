@@ -28,6 +28,8 @@ import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
@@ -63,6 +65,9 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
 
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
         testContext
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class).withBlueprintName(getDefaultSDXBlueprintName()).withValidateBlueprint(Boolean.FALSE)
@@ -75,6 +80,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .given(stack, StackTestDto.class).withCluster(cluster).withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withCloudStorage(getCloudStorageRequest(testContext))
+                .withDatabase(sdxDatabaseRequest)
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
