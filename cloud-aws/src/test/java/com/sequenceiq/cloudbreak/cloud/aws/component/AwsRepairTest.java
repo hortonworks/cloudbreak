@@ -70,6 +70,7 @@ import com.amazonaws.services.elasticfilesystem.model.MountTargetDescription;
 import com.amazonaws.waiters.Waiter;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudWatchClient;
@@ -227,6 +228,9 @@ public class AwsRepairTest {
 
     @MockBean
     private EntitlementService entitlementService;
+
+    @MockBean
+    private AwsMetadataCollector awsMetadataCollector;
 
     @Test
     public void repairStack() throws Exception {

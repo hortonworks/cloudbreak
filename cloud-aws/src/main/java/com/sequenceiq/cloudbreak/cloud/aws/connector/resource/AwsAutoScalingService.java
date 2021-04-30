@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -80,7 +81,8 @@ public class AwsAutoScalingService {
         }
     }
 
-    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient, Date timeBeforeASUpdate)
+    public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient,
+            Date timeBeforeASUpdate, List<String> knownInstances)
             throws AmazonAutoscalingFailed {
         AmazonEc2Client amClient = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
@@ -90,7 +92,7 @@ public class AwsAutoScalingService {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
             checkLastScalingActivity(asClient, asGroupName, timeBeforeASUpdate, group);
             LOGGER.debug("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(), asGroupName);
-            waitForGroup(amClient, asClient, asGroupName, group.getInstancesSize(), ac.getCloudContext().getId());
+            waitForGroup(amClient, asClient, asGroupName, group.getInstancesSize(), ac.getCloudContext().getId(), knownInstances);
         }
     }
 
@@ -104,12 +106,12 @@ public class AwsAutoScalingService {
         for (Map.Entry<String, Integer> groupWithSize : groupsWithSize.entrySet()) {
             String autoScalingGroupName = groupWithSize.getKey();
             Integer expectedSize = groupWithSize.getValue();
-            waitForGroup(amClient, asClient, autoScalingGroupName, expectedSize, ac.getCloudContext().getId());
+            waitForGroup(amClient, asClient, autoScalingGroupName, expectedSize, ac.getCloudContext().getId(), null);
         }
     }
 
     private void waitForGroup(AmazonEc2Client amClient, AmazonAutoScalingClient asClient, String autoScalingGroupName, Integer requiredInstanceCount,
-            Long stackId) throws AmazonAutoscalingFailed {
+            Long stackId, List<String> knownInstances) throws AmazonAutoscalingFailed {
         Waiter<DescribeAutoScalingGroupsRequest> groupInServiceWaiter = asClient.waiters().groupInService();
         PollingStrategy backoff = getBackoffCancellablePollingStrategy(new StackCancellationCheck(stackId));
         try {
@@ -129,8 +131,9 @@ public class AwsAutoScalingService {
         }
 
         List<String> instanceIds = cloudFormationStackUtil.getInstanceIds(asClient, autoScalingGroupName);
+        List<String> instanceIdsForWait = getInstanceIdsForWait(instanceIds, knownInstances);
         if (requiredInstanceCount != 0) {
-            List<List<String>> partitionedInstanceIdsList = Lists.partition(instanceIds, MAX_INSTANCE_ID_SIZE);
+            List<List<String>> partitionedInstanceIdsList = Lists.partition(instanceIdsForWait, MAX_INSTANCE_ID_SIZE);
 
             Waiter<DescribeInstancesRequest> instanceRunningStateWaiter = amClient.waiters().instanceRunning();
             for (List<String> partitionedInstanceIds : partitionedInstanceIdsList) {
@@ -146,6 +149,19 @@ public class AwsAutoScalingService {
                 }
             }
         }
+    }
+
+    private List<String> getInstanceIdsForWait(List<String> instanceIds, List<String> knownInstances) {
+        List<String> result = null;
+        if (knownInstances == null) {
+            result = instanceIds;
+        } else {
+            result = instanceIds.stream()
+                    .filter(instanceId -> !knownInstances.contains(instanceId))
+                    .collect(Collectors.toList());
+        }
+
+        return result;
     }
 
     @VisibleForTesting
@@ -190,7 +206,7 @@ public class AwsAutoScalingService {
 
     public void scheduleStatusChecks(List<Group> groups, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient)
             throws AmazonAutoscalingFailed {
-        scheduleStatusChecks(groups, ac, cloudFormationClient, null);
+        scheduleStatusChecks(groups, ac, cloudFormationClient, null, null);
     }
 
     public List<AutoScalingGroup> getAutoscalingGroups(AmazonAutoScalingClient amazonASClient, Set<String> groupNames) {
