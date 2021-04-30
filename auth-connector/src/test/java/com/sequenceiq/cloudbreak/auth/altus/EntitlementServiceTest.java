@@ -144,7 +144,10 @@ class EntitlementServiceTest {
                 {"CDP_CM_HA", (EntitlementCheckFunction) EntitlementService::cmHAEnabled, true},
 
                 {"CDP_AWS_RESTRICTED_POLICY", (EntitlementCheckFunction) EntitlementService::awsRestrictedPolicy, false},
-                {"CDP_AWS_RESTRICTED_POLICY", (EntitlementCheckFunction) EntitlementService::awsRestrictedPolicy, true}
+                {"CDP_AWS_RESTRICTED_POLICY", (EntitlementCheckFunction) EntitlementService::awsRestrictedPolicy, true},
+
+                {"CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", (EntitlementCheckFunction) EntitlementService::conclusionCheckerSendUserEventEnabled, false},
+                {"CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", (EntitlementCheckFunction) EntitlementService::conclusionCheckerSendUserEventEnabled, true}
         };
     }
 

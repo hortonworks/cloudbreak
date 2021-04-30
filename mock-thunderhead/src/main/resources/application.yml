@@ -49,3 +49,4 @@ auth:
       disk:
         SSEWithCMK.enable: true
     cm.ha.enable: false
+    conclusion.checker.send.user.event.enable: false
