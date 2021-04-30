@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionChecker;
 import com.sequenceiq.cloudbreak.conclusion.ConclusionCheckerFactory;
@@ -35,6 +37,9 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpscaleFailedConclusionRequest.class);
@@ -52,8 +57,10 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
         try {
             ConclusionChecker conclusionChecker = conclusionCheckerFactory.getConclusionChecker(ConclusionCheckerType.DEFAULT);
             ConclusionResult conclusionResult = conclusionChecker.doCheck(request.getResourceId());
-            flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED,
-                    "added to", conclusionResult.getConclusions().toString());
+            if (entitlementService.conclusionCheckerSendUserEventEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED,
+                        "added to", conclusionResult.getConclusions().toString());
+            }
         } catch (Exception e) {
             LOGGER.error("Error happened during conclusion check", e);
         }
