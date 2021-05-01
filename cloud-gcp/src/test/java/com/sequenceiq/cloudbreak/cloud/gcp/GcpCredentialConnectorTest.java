@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -10,18 +11,19 @@ import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.json.MockJsonFactory;
@@ -36,8 +38,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.credential.CredentialVerificationContext;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
+import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
+import com.sequenceiq.common.model.CredentialType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GcpCredentialConnectorTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
@@ -73,6 +78,9 @@ public class GcpCredentialConnectorTest {
     @Mock
     private GcpContextBuilder contextBuilder;
 
+    @Mock
+    private GcpPlatformParameters gcpPlatformParameters;
+
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private GcpContext context;
 
@@ -82,7 +90,7 @@ public class GcpCredentialConnectorTest {
     @Mock
     private GcpCredentialFactory gcpCredentialFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
@@ -183,8 +191,7 @@ public class GcpCredentialConnectorTest {
      */
     @Test
     public void testInteractiveLoginIsProhibitedOnGcp() {
-        expectedException.expect(UnsupportedOperationException.class);
-        underTest.interactiveLogin(null, null, null);
+        assertThrows(UnsupportedOperationException.class, () -> underTest.interactiveLogin(null, null, null));
     }
 
 
@@ -212,6 +219,26 @@ public class GcpCredentialConnectorTest {
 
         Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
         Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.CREATED, status.getStatus());
+    }
+
+    @Test
+    public void testPrerequisites() {
+        final AuthenticatedContext authContext = createAuthContext();
+
+        when(gcpPlatformParameters.getPrerequisitesCreationCommand(CredentialType.ENVIRONMENT)).thenReturn("prerequisites");
+
+        CredentialPrerequisitesResponse prerequisites = underTest.getPrerequisites(
+                authContext.getCloudContext(),
+                "externalId",
+                "deploymentAddress",
+                CredentialType.ENVIRONMENT);
+
+        CredentialPrerequisitesResponse credentialPrerequisitesResponse = new CredentialPrerequisitesResponse(
+                "platform",
+                new GcpCredentialPrerequisites(Base64.encodeBase64String("prerequisites".getBytes()))
+        );
+
+        Assert.assertEquals(credentialPrerequisitesResponse, prerequisites);
     }
 
     private AuthenticatedContext createAuthContext() {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
@@ -11,17 +12,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -33,7 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class GcpMetadataCollectorTest {
 
     private static final String AZ = "europe-north1";
@@ -66,14 +68,18 @@ public class GcpMetadataCollectorTest {
     @Mock
     private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
 
+    @Mock
+    private GcpStackUtil gcpStackUtil;
+
     private AuthenticatedContext authenticatedContext;
 
     private List<CloudResource> resources;
 
-    @Before
+    @BeforeEach
     public void before() {
         authenticatedContext = createAuthenticatedContext();
         resources = createCloudResources();
+        when(gcpStackUtil.getPrivateId(anyString())).thenReturn(1L);
     }
 
     @Test

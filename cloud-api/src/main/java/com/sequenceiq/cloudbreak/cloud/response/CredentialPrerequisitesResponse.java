@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.GCP_CREDENTIAL_PREREQUISITES;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -63,5 +64,37 @@ public class CredentialPrerequisitesResponse implements Serializable {
 
     public GcpCredentialPrerequisites getGcp() {
         return gcp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CredentialPrerequisitesResponse that = (CredentialPrerequisitesResponse) o;
+        return Objects.equals(cloudPlatform, that.cloudPlatform)
+                && Objects.equals(accountId, that.accountId)
+                && Objects.equals(aws, that.aws)
+                && Objects.equals(azure, that.azure)
+                && Objects.equals(gcp, that.gcp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cloudPlatform, accountId, aws, azure, gcp);
+    }
+
+    @Override
+    public String toString() {
+        return "CredentialPrerequisitesResponse{" +
+                "cloudPlatform='" + cloudPlatform + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", aws=" + aws +
+                ", azure=" + azure +
+                ", gcp=" + gcp +
+                '}';
     }
 }

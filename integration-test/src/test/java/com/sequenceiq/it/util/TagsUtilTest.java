@@ -3,6 +3,7 @@ package com.sequenceiq.it.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -49,10 +51,14 @@ public class TagsUtilTest {
 
     private MockedTestContext testContext;
 
+    private GcpLabelUtil gcpLabelUtil;
+
     @BeforeMethod
     public void setUp() {
         underTest = new TagsUtil();
         testContext = Mockito.mock(MockedTestContext.class);
+        gcpLabelUtil = Mockito.mock(GcpLabelUtil.class);
+        ReflectionTestUtils.setField(underTest, "gcpLabelUtil", gcpLabelUtil);
         when(testContext.getTestMethodName()).thenReturn(Optional.of(TEST_NAME));
         when(testContext.getActingUserName()).thenReturn(ACTING_USER_NAME);
         when(testContext.getActingUserCrn()).thenReturn(Crn.fromString(ACTING_USER_CRN));
@@ -111,6 +117,7 @@ public class TagsUtilTest {
         tags.setDefaults(DEFAULT_TAGS);
         response.setTags(tags);
         testDto.setResponse(response);
+        when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenReturn(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY);
 
         assertThatCode(() -> underTest.verifyTags(testDto, testContext))
                 .doesNotThrowAnyException();
@@ -173,6 +180,7 @@ public class TagsUtilTest {
         tags.setDefaults(defaultTags);
         response.setTags(tags);
         testDto.setResponse(response);
+        when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenReturn(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY);
 
         assertThatCode(() -> underTest.verifyTags(testDto, testContext))
                 .doesNotThrowAnyException();
@@ -188,6 +196,7 @@ public class TagsUtilTest {
         response.setTags(tags);
         testDto.setResponse(response);
         when(testContext.getActingUserCrn()).thenReturn(Crn.fromString("crn:altus:iam:us-west-1:qe-gcp:user:cloudbreak-qe@hortonworks.com"));
+        when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenReturn(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY);
 
         assertThatCode(() -> underTest.verifyTags(testDto, testContext))
                 .doesNotThrowAnyException();
@@ -200,10 +209,11 @@ public class TagsUtilTest {
         TagsV4Response tags = new TagsV4Response();
         tags.setUserDefined(Map.of(TagsUtil.TEST_NAME_TAG, TEST_NAME));
         Map<String, String> defaultTags = new HashMap<>(DEFAULT_TAGS);
-        defaultTags.put(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY, GcpLabelUtil.transformLabelKeyOrValue(ACTING_USER_CRN));
+        defaultTags.put(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY, ACTING_USER_CRN);
         tags.setDefaults(defaultTags);
         response.setTags(tags);
         testDto.setResponse(response);
+        when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenReturn(CLOUDERA_CREATOR_RESOURCE_NAME_TAG_KEY);
 
         assertThatCode(() -> underTest.verifyTags(testDto, testContext))
                 .doesNotThrowAnyException();

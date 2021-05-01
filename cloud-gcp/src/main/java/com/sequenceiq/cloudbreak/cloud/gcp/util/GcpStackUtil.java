@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.http.HttpRequestInitializer;
@@ -33,7 +34,8 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 
-public final class GcpStackUtil {
+@Service
+public class GcpStackUtil {
 
     public static final String NETWORK_ID = "networkId";
 
@@ -79,14 +81,15 @@ public final class GcpStackUtil {
 
     private static final int MINUTES = 3;
 
-    private GcpStackUtil() {
-    }
-
-    public static String getServiceAccountId(CloudCredential credential) {
+    public String getServiceAccountId(CloudCredential credential) {
         return credential.getParameter(SERVICE_ACCOUNT, String.class);
     }
 
-    public static String getProjectId(CloudCredential credential) {
+    public boolean isLegacyNetwork(Network network) {
+        return isAnyEmpty(network.getSubnet().getCidr()) && isAnyEmpty(getSubnetId(network));
+    }
+
+    public String getProjectId(CloudCredential credential) {
         String projectId = credential.getParameter(PROJECT_ID, String.class);
         if (projectId == null) {
             throw new CredentialVerificationException("Missing Project Id from GCP Credential");
@@ -94,7 +97,11 @@ public final class GcpStackUtil {
         return projectId.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
     }
 
-    public static boolean isOperationFinished(Operation operation) throws Exception {
+    public boolean isNewNetworkAndSubnet(Network network) {
+        return !isExistingNetwork(network);
+    }
+
+    public boolean isOperationFinished(Operation operation) throws Exception {
         String errorMessage = checkForErrors(operation);
         if (errorMessage != null) {
             throw new Exception(errorMessage);
@@ -104,7 +111,7 @@ public final class GcpStackUtil {
         }
     }
 
-    public static boolean isOperationFinished(com.google.api.services.sqladmin.model.Operation operation) throws Exception {
+    public boolean isOperationFinished(com.google.api.services.sqladmin.model.Operation operation) throws Exception {
         String errorMessage = checkForErrors(operation);
         if (errorMessage != null) {
             throw new Exception(errorMessage);
@@ -114,7 +121,7 @@ public final class GcpStackUtil {
         }
     }
 
-    private static String checkForErrors(Operation operation) {
+    private String checkForErrors(Operation operation) {
         if (operation == null) {
             LOGGER.info("Operation is null!");
             return null;
@@ -137,7 +144,7 @@ public final class GcpStackUtil {
         return msg;
     }
 
-    private static String checkForErrors(com.google.api.services.sqladmin.model.Operation operation) {
+    private String checkForErrors(com.google.api.services.sqladmin.model.Operation operation) {
         if (operation == null) {
             LOGGER.info("Operation is null!");
             return null;
@@ -157,24 +164,24 @@ public final class GcpStackUtil {
         return msg;
     }
 
-    public static GlobalOperations.Get globalOperations(Compute compute, String projectId, String operationName) throws IOException {
+    public GlobalOperations.Get globalOperations(Compute compute, String projectId, String operationName) throws IOException {
         return compute.globalOperations().get(projectId, operationName);
     }
 
-    public static SQLAdmin.Operations.Get sqlAdminOperations(SQLAdmin sqlAdmin, String projectId, String operationName) throws IOException {
+    public SQLAdmin.Operations.Get sqlAdminOperations(SQLAdmin sqlAdmin, String projectId, String operationName) throws IOException {
         return sqlAdmin.operations().get(projectId, operationName);
     }
 
-    public static ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
+    public ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
             throws IOException {
         return compute.zoneOperations().get(projectId, region.value(), operationName);
     }
 
-    public static Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
+    public Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
         return compute.regionOperations().get(projectId, region.value(), operationName);
     }
 
-    public static HttpRequestInitializer setHttpTimeout(HttpRequestInitializer requestInitializer) {
+    public HttpRequestInitializer setHttpTimeout(HttpRequestInitializer requestInitializer) {
         return httpRequest -> {
             requestInitializer.initialize(httpRequest);
             httpRequest.setConnectTimeout(MINUTES * ONE_MINUTE_IN_MILISECOND);
@@ -182,7 +189,7 @@ public final class GcpStackUtil {
         };
     }
 
-    public static String getBucket(String image) {
+    public String getBucket(String image) {
         if (!StringUtils.isEmpty(image) && createParts(image).length > 1) {
             String[] parts = createParts(image.replaceAll("https://storage.googleapis.com/", ""));
             return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
@@ -192,7 +199,7 @@ public final class GcpStackUtil {
         }
     }
 
-    public static String getTarName(String image) {
+    public String getTarName(String image) {
         if (!StringUtils.isEmpty(image)) {
             String[] parts = createParts(image);
             return parts[parts.length - 1];
@@ -201,7 +208,7 @@ public final class GcpStackUtil {
         }
     }
 
-    public static String getBucketName(String objectStorageLocation) {
+    public String getBucketName(String objectStorageLocation) {
         String[] parts = createParts(objectStorageLocation.replaceAll(FileSystemType.GCS.getProtocol() + "://", ""));
         if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > 1) {
             return parts[FIRST];
@@ -211,7 +218,7 @@ public final class GcpStackUtil {
         }
     }
 
-    public static String getPath(String objectStorageLocation) {
+    public String getPath(String objectStorageLocation) {
         String[] parts = createParts(objectStorageLocation);
         if (!StringUtils.isEmpty(objectStorageLocation) && parts.length > MIN_PATH_PARTS) {
             return StringUtils.join(ArrayUtils.removeAll(parts, 0, 1), "/");
@@ -221,18 +228,18 @@ public final class GcpStackUtil {
         }
     }
 
-    public static String getImageName(String image) {
+    public String getImageName(String image) {
         if (image.contains("/")) {
             return getTarName(image).replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
         }
         return image.trim();
     }
 
-    public static String getAmbariImage(String projectId, String image) {
+    public String getAmbariImage(String projectId, String image) {
         return String.format(GCP_IMAGE_TYPE_PREFIX, projectId, getImageName(image));
     }
 
-    public static Long getPrivateId(String resourceName) {
+    public Long getPrivateId(String resourceName) {
         try {
             return Long.valueOf(resourceName.split("-")[PRIVATE_ID_PART]);
         } catch (RuntimeException e) {
@@ -241,47 +248,31 @@ public final class GcpStackUtil {
         return null;
     }
 
-    public static boolean isExistingNetwork(Network network) {
+    public boolean isExistingNetwork(Network network) {
         return isNotEmpty(getCustomNetworkId(network));
     }
 
-    public static String getNetworkIpRange(Network network) {
-        return network.getStringParameter(NETWORK_IP_RANGE);
-    }
-
-    public static boolean isNetworkIpRangeDefined(Network network) {
-        return isNotEmpty(getNetworkIpRange(network));
-    }
-
-    public static boolean isNewSubnetInExistingNetwork(Network network) {
+    public boolean isNewSubnetInExistingNetwork(Network network) {
         return isExistingNetwork(network) && !isExistingSubnet(network);
     }
 
-    public static boolean isNewNetworkAndSubnet(Network network) {
-        return !isExistingNetwork(network);
-    }
-
-    public static boolean isLegacyNetwork(Network network) {
-        return isAnyEmpty(network.getSubnet().getCidr()) && isAnyEmpty(getSubnetId(network));
-    }
-
-    public static boolean isExistingSubnet(Network network) {
+    public boolean isExistingSubnet(Network network) {
         return isNotEmpty(getSubnetId(network));
     }
 
-    public static String getCustomNetworkId(Network network) {
+    public String getCustomNetworkId(Network network) {
         return network.getStringParameter(NETWORK_ID);
     }
 
-    public static String getSubnetId(Network network) {
+    public String getSubnetId(Network network) {
         return network.getStringParameter(SUBNET_ID);
     }
 
-    public static String getSharedProjectId(Network network) {
+    public String getSharedProjectId(Network network) {
         return network.getStringParameter(SHARED_PROJECT_ID);
     }
 
-    public static Boolean noPublicIp(Network network) {
+    public Boolean noPublicIp(Network network) {
         Boolean noPublicIp = network.getParameter(NO_PUBLIC_IP, Boolean.class);
         if (noPublicIp == null) {
             return Boolean.FALSE;
@@ -289,7 +280,7 @@ public final class GcpStackUtil {
         return noPublicIp;
     }
 
-    public static GcpResourceException getMissingServiceAccountKeyError(TokenResponseException e, String projectId) {
+    public GcpResourceException getMissingServiceAccountKeyError(TokenResponseException e, String projectId) {
         if (e.getDetails() != null) {
             if (e.getDetails().getError() != null) {
                 if (e.getDetails().getError().equals("invalid_grant")) {
@@ -316,7 +307,7 @@ public final class GcpStackUtil {
         return new GcpResourceException(format);
     }
 
-    public static Boolean noFirewallRules(Network network) {
+    public Boolean noFirewallRules(Network network) {
         Boolean noFirewallRules = network.getParameter(NO_FIREWALL_RULES, Boolean.class);
         if (noFirewallRules == null) {
             return Boolean.FALSE;
@@ -324,22 +315,22 @@ public final class GcpStackUtil {
         return noFirewallRules;
     }
 
-    public static String getClusterTag(CloudContext cloudContext) {
+    public String getClusterTag(CloudContext cloudContext) {
         return cloudContext.getName() + cloudContext.getId();
     }
 
-    public static String getGroupClusterTag(CloudContext cloudContext, Group group) {
+    public String getGroupClusterTag(CloudContext cloudContext, Group group) {
         return group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
     }
 
-    public static String getGroupTypeTag(InstanceGroupType type) {
+    public String getGroupTypeTag(InstanceGroupType type) {
         if (type == null) {
             throw new CloudbreakServiceException("Type of the group must not be null");
         }
         return type.name().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
     }
 
-    private static String[] createParts(String splittable) {
+    private String[] createParts(String splittable) {
         return splittable.split("/");
     }
 

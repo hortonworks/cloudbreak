@@ -40,6 +40,9 @@ public class GcpDatabasePollerProvider {
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     public GcpDatabasePollerProvider(DatabaseServerCheckerService checker, GcpDatabaseResourceChecker gcpResourceChecker) {
         this.checker = checker;
         this.gcpResourceChecker = gcpResourceChecker;
@@ -111,7 +114,7 @@ public class GcpDatabasePollerProvider {
             try {
                 String operationId = resource.getStringParameter(OPERATION_ID);
                 com.google.api.services.sqladmin.model.Operation operation = gcpResourceChecker.check(sqlAdmin, auth, operationId);
-                boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
+                boolean finished = operation == null || gcpStackUtil.isOperationFinished(operation);
                 if (finished) {
                     result.add(new CloudResourceStatus(resource, waitedStatus));
                 } else {

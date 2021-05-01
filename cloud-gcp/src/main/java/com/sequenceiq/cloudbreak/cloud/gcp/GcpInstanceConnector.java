@@ -41,6 +41,9 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
     @Inject
     private GcpComputeFactory computeClient;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public List<CloudVmInstanceStatus> reboot(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> rebootedVmsStatus = new ArrayList<>();
@@ -150,7 +153,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
             GetSerialPortOutput instanceGet = computeClient.buildCompute(credential).instances()
-                    .getSerialPortOutput(GcpStackUtil.getProjectId(credential),
+                    .getSerialPortOutput(gcpStackUtil.getProjectId(credential),
                             authenticatedContext.getCloudContext().getLocation().getAvailabilityZone().value(), vm.getInstanceId());
             return instanceGet.execute().getContents();
         } catch (Exception e) {
@@ -159,7 +162,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
     }
 
     private Instance getInstance(CloudContext context, CloudCredential credential, Compute compute, String instanceName) throws IOException {
-        return compute.instances().get(GcpStackUtil.getProjectId(credential),
+        return compute.instances().get(gcpStackUtil.getProjectId(credential),
                 context.getLocation().getAvailabilityZone().value(), instanceName).execute();
     }
 }

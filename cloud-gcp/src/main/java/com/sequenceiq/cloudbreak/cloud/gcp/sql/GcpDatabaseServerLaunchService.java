@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -57,13 +56,19 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
 
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     public List<CloudResource> launch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
         Compute compute = gcpComputeFactory.buildCompute(ac.getCloudCredential());
 
-        String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
+        String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = new ArrayList<>();
         buildableResource.add(getGcpDatabase(deploymentName));
         buildableResource.add(getRdsPort());
@@ -101,8 +106,6 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                     }
                     buildableResource.forEach(dbr -> resourceNotifier.notifyAllocation(dbr, ac.getCloudContext()));
                     return Collections.singletonList(operationAwareCloudResource);
-
-
                 } catch (GoogleJsonResponseException e) {
                     throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
                 }
@@ -147,7 +150,6 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return ipAddress;
     }
 
-    @NotNull
     private DatabaseInstance getDatabaseInstance(DatabaseStack stack, String deploymentName, Compute compute, String projectId) throws java.io.IOException {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         GcpDatabaseNetworkView databaseNetworkView = new GcpDatabaseNetworkView(stack.getNetwork());
@@ -177,8 +179,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return databaseInstance;
     }
 
-    @NotNull
-    public Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams) {
+    private Settings getSettings(DatabaseStack stack, GcpDatabaseServerView databaseServerView, Subnetwork subnetworkForRedbeams) {
         return new Settings()
                 .setTier(stack.getDatabaseServer().getFlavor())
                 .setActivationPolicy("ALWAYS")
@@ -190,7 +191,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                         .setPrivateNetwork(subnetworkForRedbeams.getNetwork())
                         .setIpv4Enabled(false)
                 )
-                .setUserLabels(GcpLabelUtil.createLabelsFromTagsMap(stack.getTags()))
+                .setUserLabels(gcpLabelUtil.createLabelsFromTagsMap(stack.getTags()))
                 .setBackupConfiguration(
                         new BackupConfiguration()
                                 .setEnabled(true)
@@ -198,7 +199,6 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                 );
     }
 
-    @NotNull
     private User getRootUser(DatabaseStack stack, String projectId, String instanceName) {
         return new User()
                 .setProject(projectId)

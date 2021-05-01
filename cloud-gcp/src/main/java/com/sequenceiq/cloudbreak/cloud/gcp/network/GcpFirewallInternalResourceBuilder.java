@@ -1,18 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isLegacyNetwork;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -36,9 +31,12 @@ import com.sequenceiq.common.api.type.ResourceType;
 @Service
 public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilder {
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
-        if (noFirewallRules(network)) {
+        if (gcpStackUtil.noFirewallRules(network)) {
             throw new ResourceNotNeededException("Firewall rules won't be created.");
         }
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
@@ -46,7 +44,8 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
     }
 
     @Override
-    public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security, CloudResource buildableResource)
+    public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security,
+            CloudResource buildableResource)
             throws Exception {
         String projectId = context.getProjectId();
 
@@ -63,29 +62,31 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         allowed3.setIPProtocol("udp");
         allowed3.setPorts(Collections.singletonList("1-65535"));
 
-        firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
+        firewall.setTargetTags(Collections.singletonList(gcpStackUtil.getClusterTag(auth.getCloudContext())));
         firewall.setAllowed(Arrays.asList(allowed1, allowed2, allowed3));
         firewall.setName(buildableResource.getName());
-        if (isLegacyNetwork(network)) {
-            Networks.Get networkRequest = context.getCompute().networks().get(projectId, getCustomNetworkId(network));
+        if (gcpStackUtil.isLegacyNetwork(network)) {
+            Networks.Get networkRequest = context.getCompute().networks().get(projectId, gcpStackUtil.getCustomNetworkId(network));
             com.google.api.services.compute.model.Network existingNetwork = networkRequest.execute();
             firewall.setSourceRanges(Collections.singletonList(existingNetwork.getIPv4Range()));
-        } else if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
+        } else if (gcpStackUtil.isNewNetworkAndSubnet(network) || gcpStackUtil.isNewSubnetInExistingNetwork(network)) {
             firewall.setSourceRanges(Collections.singletonList(network.getSubnet().getCidr()));
-        } else if (isNotEmpty(getSharedProjectId(network))) {
-            Get sn = context.getCompute().subnetworks().get(getSharedProjectId(network), context.getLocation().getRegion().value(), getSubnetId(network));
+        } else if (isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
+            Get sn = context.getCompute().subnetworks().get(gcpStackUtil.getSharedProjectId(network),
+                    context.getLocation().getRegion().value(), gcpStackUtil.getSubnetId(network));
             com.google.api.services.compute.model.Subnetwork existingSubnet = sn.execute();
             List<String> strings = new ArrayList<>();
             strings.add(existingSubnet.getIpCidrRange());
             firewall.setSourceRanges(strings);
-        } else if (isNotEmpty(getSubnetId(network))) {
-            Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(), getSubnetId(network));
+        } else if (isNotEmpty(gcpStackUtil.getSubnetId(network))) {
+            Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(),
+                    gcpStackUtil.getSubnetId(network));
             com.google.api.services.compute.model.Subnetwork existingSubnet = sn.execute();
             firewall.setSourceRanges(Collections.singletonList(existingSubnet.getIpCidrRange()));
         }
-        if (isNotEmpty(getSharedProjectId(network))) {
+        if (isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
             firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                    getSharedProjectId(network),
+                    gcpStackUtil.getSharedProjectId(network),
                     context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
         } else {
             firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
@@ -104,7 +105,8 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
     }
 
     @Override
-    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
+    public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource,
+        Network network) throws Exception {
         try {
             Operation operation = context.getCompute().firewalls().delete(context.getProjectId(), resource.getName()).execute();
             return createOperationAwareCloudResource(resource, operation);

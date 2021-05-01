@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
-
 import java.io.IOException;
 import java.util.Optional;
 
@@ -28,12 +26,15 @@ public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService 
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public ExternalDatabaseStatus check(AuthenticatedContext ac, DatabaseStack stack) {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
-        String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
+        String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
 
         try {
             InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
@@ -55,7 +56,6 @@ public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService 
                     case "SUSPENDED":
                         return ExternalDatabaseStatus.STOPPED;
                     case "UNKNOWN_STATE":
-                        return ExternalDatabaseStatus.DELETED;
                     case "FAILED":
                         return ExternalDatabaseStatus.DELETED;
                     default:
@@ -65,7 +65,7 @@ public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService 
                 return ExternalDatabaseStatus.DELETED;
             }
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, projectId);
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
         } catch (IOException ex) {
             throw new CloudConnectorException(ex.getMessage(), ex);
         }

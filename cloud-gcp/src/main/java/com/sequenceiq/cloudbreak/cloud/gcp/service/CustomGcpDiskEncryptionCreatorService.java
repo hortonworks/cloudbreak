@@ -36,20 +36,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
-import com.google.api.services.compute.model.Disk;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.common.api.type.EncryptionType;
 
 @Service
-public class GcpDiskEncryptionService {
+public class CustomGcpDiskEncryptionCreatorService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcpDiskEncryptionService.class);
-
-    private static final String RAW_ENCRYPTION_METHOD = "RAW";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomGcpDiskEncryptionCreatorService.class);
 
     private static final String RSA_CIPHER_TRANSFORMATION = "RSA/ECB/OAEPWithSHA-1AndMGF1Padding";
 
@@ -59,25 +54,6 @@ public class GcpDiskEncryptionService {
 
     @Value("${cb.gcp.disk.encryption.url}")
     private String googlePublicCertUrl;
-
-    public void addEncryptionKeyToDisk(InstanceTemplate template, Disk disk) {
-        if (hasCustomEncryptionRequested(template)) {
-            CustomerEncryptionKey customerEncryptionKey = createCustomerEncryptionKey(template);
-            disk.setDiskEncryptionKey(customerEncryptionKey);
-        }
-    }
-
-    public void addEncryptionKeyToDisk(InstanceTemplate template, AttachedDisk disk) {
-        if (hasCustomEncryptionRequested(template)) {
-            CustomerEncryptionKey customerEncryptionKey = createCustomerEncryptionKey(template);
-            disk.setDiskEncryptionKey(customerEncryptionKey);
-        }
-    }
-
-    public boolean hasCustomEncryptionRequested(InstanceTemplate template) {
-        return EncryptionType.CUSTOM.name().equalsIgnoreCase(
-                Optional.ofNullable(template.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE)).orElse(EncryptionType.DEFAULT.name()));
-    }
 
     public CustomerEncryptionKey createCustomerEncryptionKey(InstanceTemplate template) {
         String key = Optional.ofNullable(template.getStringParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).orElse("");

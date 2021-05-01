@@ -31,13 +31,16 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     protected void startStop(AuthenticatedContext ac, DatabaseStack stack, DatabasePollerService databasePollerService, String policy)
             throws IOException {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
 
-        String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
+        String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> gcpDatabase = getGcpDatabase(stack);
 
         try {

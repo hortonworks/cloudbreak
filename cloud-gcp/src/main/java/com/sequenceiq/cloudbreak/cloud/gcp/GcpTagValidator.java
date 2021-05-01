@@ -18,6 +18,9 @@ public class GcpTagValidator extends CommonTagValidator implements TagValidator 
     @Inject
     private GcpPlatformParameters platformParameters;
 
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
+
     private Pattern keyValidator;
 
     private Pattern valueValidator;
@@ -45,6 +48,6 @@ public class GcpTagValidator extends CommonTagValidator implements TagValidator 
 
     @Override
     protected String transform(String tag) {
-        return GcpLabelUtil.transformLabelKeyOrValue(tag);
+        return gcpLabelUtil.transformLabelKeyOrValue(tag);
     }
 }

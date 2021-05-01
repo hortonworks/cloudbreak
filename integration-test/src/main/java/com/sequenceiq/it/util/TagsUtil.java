@@ -4,6 +4,8 @@ import static java.lang.String.format;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +46,9 @@ public class TagsUtil {
     private static final int GCP_TAG_MAX_LENGTH = 63;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TagsUtil.class);
+
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
 
     public void addTestNameTag(CloudbreakTestDto testDto, String testName) {
         if (testDto instanceof AbstractTestDto) {
@@ -132,7 +137,7 @@ public class TagsUtil {
     }
 
     private boolean gcpLabelTransformedValue(String tagValue, String rawValue) {
-        return tagValue.equals(GcpLabelUtil.transformLabelKeyOrValue(rawValue));
+        return tagValue.equals(gcpLabelUtil.transformLabelKeyOrValue(rawValue));
     }
 
     private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {

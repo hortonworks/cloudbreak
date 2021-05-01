@@ -23,6 +23,9 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Inject
     private GcpUtil gcpUtil;
 
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
+
     @Override
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
         return gcpUtil.listInstanceDiskNames(instanceIds);
@@ -75,6 +78,6 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public String transformTagKeyOrValue(String originalValue) {
-        return GcpLabelUtil.transformLabelKeyOrValue(originalValue);
+        return gcpLabelUtil.transformLabelKeyOrValue(originalValue);
     }
 }

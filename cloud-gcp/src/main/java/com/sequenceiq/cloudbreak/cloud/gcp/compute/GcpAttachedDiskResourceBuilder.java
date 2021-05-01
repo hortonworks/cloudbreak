@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -66,10 +64,16 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Inject
-    private GcpDiskEncryptionService gcpDiskEncryptionService;
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
 
     @Inject
     private PersistenceNotifier resourceNotifier;
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -131,10 +135,10 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
-                Map<String, String> labels = GcpLabelUtil.createLabelsFromTags(cloudStack);
+                Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
                 Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
 
-                gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
+                customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
                 Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
                     Insert insDisk = compute.disks().insert(projectId, volumeSetAttributes.getAvailabilityZone(), disk);
                     try {
@@ -144,7 +148,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                             throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
                         }
                     } catch (TokenResponseException e) {
-                        throw getMissingServiceAccountKeyError(e, projectId);
+                        throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
                     } catch (GoogleJsonResponseException e) {
                         throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
                     }
@@ -198,7 +202,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     }
                 } catch (TokenResponseException e) {
                     logVolumeDeletionProblem(e);
-                    getMissingServiceAccountKeyError(e, context.getProjectId());
+                    gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
                 } catch (GoogleJsonResponseException e) {
                     logVolumeDeletionProblem(e);
                     exceptionHandler(e, resource.getName(), resourceType());
@@ -250,7 +254,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     .allMatch(operationId -> {
                         try {
                             Operation operation = getResourceChecker().check(context, operationId);
-                            return operation == null || GcpStackUtil.isOperationFinished(operation);
+                            return operation == null || gcpStackUtil.isOperationFinished(operation);
                         } catch (Exception e) {
                             CloudContext cloudContext = auth.getCloudContext();
                             throw new GcpResourceException("Error during status check", resourceType(),

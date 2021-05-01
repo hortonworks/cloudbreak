@@ -37,12 +37,15 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public List<CloudResource> terminate(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier) throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
         SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(ac.getCloudCredential(), ac.getCloudCredential().getName());
-        String projectId = GcpStackUtil.getProjectId(ac.getCloudCredential());
+        String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = List.of(
                 new CloudResource.Builder()
                 .type(ResourceType.GCP_DATABASE)

@@ -1,12 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -18,6 +15,7 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -29,15 +27,20 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
     public static final String SUBNET_NAME = "subnetName";
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
-        String resourceName = isExistingSubnet(network) ? getSubnetId(network) : getResourceNameService().resourceName(resourceType(), context.getName());
+        String resourceName = gcpStackUtil.isExistingSubnet(network) ?
+                gcpStackUtil.getSubnetId(network) :
+                getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), resourceName);
     }
 
     @Override
     public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception {
-        if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
+        if (gcpStackUtil.isNewNetworkAndSubnet(network) || gcpStackUtil.isNewSubnetInExistingNetwork(network)) {
             Compute compute = context.getCompute();
             String projectId = context.getProjectId();
 
@@ -47,9 +50,9 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             gcpSubnet.setIpCidrRange(network.getSubnet().getCidr());
 
             String networkName = context.getStringParameter(GcpNetworkResourceBuilder.NETWORK_NAME);
-            if (isNotEmpty(getSharedProjectId(network))) {
+            if (isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
                 gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                        getSharedProjectId(network), networkName));
+                        gcpStackUtil.getSharedProjectId(network), networkName));
             } else {
                 gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
             }
@@ -72,7 +75,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
-        if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
+        if (gcpStackUtil.isNewNetworkAndSubnet(network) || gcpStackUtil.isNewSubnetInExistingNetwork(network)) {
             Compute compute = context.getCompute();
             String projectId = context.getProjectId();
             try {

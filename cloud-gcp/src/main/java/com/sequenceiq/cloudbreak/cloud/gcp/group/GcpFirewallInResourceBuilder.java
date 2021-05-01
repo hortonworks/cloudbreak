@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_FIREWALL_IN;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -14,6 +10,8 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -48,9 +46,12 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
     private static final String ICMP = "icmp";
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Group group, Network network) {
-        if (noFirewallRules(network)) {
+        if (gcpStackUtil.noFirewallRules(network)) {
             throw new ResourceNotNeededException("Firewall rules won't be created.");
         }
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName());
@@ -64,7 +65,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
         ComputeRequest<Operation> firewallRequest = (group.getSecurity() != null
                 && StringUtils.isNotBlank(group.getSecurity().getCloudSecurityId())
-                && isExistingNetwork(network))
+                && gcpStackUtil.isExistingNetwork(network))
                 ? updateExistingFirewallForNewTargets(context, auth, group)
                 : createNewFirewallRule(context, auth, group, network, security, buildableResource, projectId);
         try {
@@ -81,7 +82,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
     private Update updateExistingFirewallForNewTargets(GcpContext context, AuthenticatedContext auth, Group group)
             throws java.io.IOException {
         Firewall firewall = context.getCompute().firewalls().get(context.getProjectId(), group.getSecurity().getCloudSecurityId()).execute();
-        String groupTypeTag = GcpStackUtil.getGroupTypeTag(group.getType());
+        String groupTypeTag = gcpStackUtil.getGroupTypeTag(group.getType());
         if (firewall.getTargetTags() == null) {
             firewall.setTargetTags(List.of(groupTypeTag));
         } else if (firewallTagsDoesNotContainsTargetAlready(firewall, groupTypeTag)) {
@@ -104,12 +105,12 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
 
         List<Allowed> allowedRules = new ArrayList<>(createAllowedRules(group));
 
-        firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group)));
+        firewall.setTargetTags(Collections.singletonList(gcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group)));
         firewall.setAllowed(allowedRules);
         firewall.setName(buildableResource.getName());
-        if (isNotEmpty(getSharedProjectId(network))) {
+        if (isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
             firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s",
-                    getSharedProjectId(network),
+                    gcpStackUtil.getSharedProjectId(network),
                     context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
         } else {
             firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
@@ -132,7 +133,7 @@ public class GcpFirewallInResourceBuilder extends AbstractGcpGroupBuilder {
             CloudResource cloudResource = createOperationAwareCloudResource(resource, operation);
             return checkResources(context, auth, Collections.singletonList(cloudResource)).get(0);
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, context.getProjectId());
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
             throw new GcpResourceException("Failed to update resource!", GCP_FIREWALL_IN, resourceName, e);
         }

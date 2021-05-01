@@ -16,6 +16,9 @@ public class GcpUtil {
     @Inject
     private GcpClientActions gcpClientActions;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     private GcpUtil() {
     }
 
@@ -48,13 +51,13 @@ public class GcpUtil {
     }
 
     public void cloudStorageDeleteContainer(String baseLocation) {
-        String bucketName = GcpStackUtil.getBucketName(baseLocation);
+        String bucketName = gcpStackUtil.getBucketName(baseLocation);
         gcpClientActions.deleteNonVersionedBucket(bucketName);
     }
 
     private void listSelectedObject(String baseLocation) {
-        String bucketName = GcpStackUtil.getBucketName(baseLocation);
-        String objectPath = GcpStackUtil
+        String bucketName = gcpStackUtil.getBucketName(baseLocation);
+        String objectPath = gcpStackUtil
                 .getPath(baseLocation)
                 .replace(bucketName + "/", "")
                 + "/";

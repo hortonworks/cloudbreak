@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.SHARED_PROJECT_ID;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
@@ -124,6 +123,9 @@ public class GcpPlatformResources implements PlatformResources {
     @Inject
     private GcpCloudKMSFactory gcpCloudKMSFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
     private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> enabledDistroxInstanceTypes.stream()
@@ -161,7 +163,7 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         String networkId = null;
@@ -286,7 +288,7 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         FirewallList firewallList = compute.firewalls().list(projectId).execute();
@@ -330,7 +332,7 @@ public class GcpPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -418,7 +420,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -473,7 +475,7 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Iam iam = gcpIamFactory.buildIam(cloudCredential);
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
         Set<CloudAccessConfig> collect = new HashSet<>();
         try {
             Iam.Projects.ServiceAccounts.List listServiceAccountEmailsRequest = iam
@@ -507,7 +509,7 @@ public class GcpPlatformResources implements PlatformResources {
             return new CloudEncryptionKeys(new HashSet<>());
         }
 
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
         Set<CloudEncryptionKey> cloudEncryptionKeys = getKeyRingList(cloudKMS, projectId, region.getRegionName()).stream().parallel()
                 .map(KeyRing::getName)
                 .map(toCryptoKeyPathList(cloudKMS, projectId, region.getRegionName()))
@@ -537,7 +539,7 @@ public class GcpPlatformResources implements PlatformResources {
                     .execute();
             return Optional.ofNullable(response.getKeyRings()).orElse(List.of());
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, projectId);
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
         }  catch (IOException e) {
             LOGGER.info("Failed to get list of keyrings on keyring path: [{}].", keyRingPath, e);
             return List.of();

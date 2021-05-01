@@ -90,35 +90,6 @@ public class GcpPlatformParameters implements PlatformParameters {
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayNames());
     }
 
-    private Map<DiskType, DisplayName> diskDisplayNames() {
-        Map<DiskType, DisplayName> map = new HashMap<>();
-        map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
-        map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
-
-        return map;
-    }
-
-    private Map<String, VolumeParameterType> diskMappings() {
-        Map<String, VolumeParameterType> map = new HashMap<>();
-        map.put(GcpDiskType.HDD.name(), VolumeParameterType.MAGNETIC);
-        map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
-        map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
-
-        return map;
-    }
-
-    private Collection<DiskType> getDiskTypes() {
-        Collection<DiskType> disks = Lists.newArrayList();
-        for (GcpDiskType diskType : GcpDiskType.values()) {
-            disks.add(diskType(diskType.value()));
-        }
-        return disks;
-    }
-
-    private DiskType defaultDiskType() {
-        return diskType(GcpDiskType.HDD.value());
-    }
-
     @Override
     public String resourceDefinition(String resource) {
         return cloudbreakResourceReaderService.resourceDefinition("gcp", resource);
@@ -154,6 +125,35 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public VmRecommendations recommendedVms() {
         return vmRecommendations;
+    }
+
+    private Map<DiskType, DisplayName> diskDisplayNames() {
+        Map<DiskType, DisplayName> map = new HashMap<>();
+        map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
+        map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
+
+        return map;
+    }
+
+    private Map<String, VolumeParameterType> diskMappings() {
+        Map<String, VolumeParameterType> map = new HashMap<>();
+        map.put(GcpDiskType.HDD.name(), VolumeParameterType.MAGNETIC);
+        map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
+        map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
+
+        return map;
+    }
+
+    private Collection<DiskType> getDiskTypes() {
+        Collection<DiskType> disks = Lists.newArrayList();
+        for (GcpDiskType diskType : GcpDiskType.values()) {
+            disks.add(diskType(diskType.value()));
+        }
+        return disks;
+    }
+
+    private DiskType defaultDiskType() {
+        return diskType(GcpDiskType.HDD.value());
     }
 
     public String getPrerequisitesCreationCommand(CredentialType type) {

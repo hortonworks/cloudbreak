@@ -15,7 +15,7 @@ public class GcpConstants implements CloudConstant {
 
     public static final Variant GCP_VARIANT = Variant.variant(GCP);
 
-    private GcpConstants() {
+    public GcpConstants() {
     }
 
     @Override

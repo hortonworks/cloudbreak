@@ -37,6 +37,9 @@ public class GcpMetadataCollector implements MetadataCollector {
     @Inject
     private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudInstance> knownInstances) {
@@ -72,7 +75,7 @@ public class GcpMetadataCollector implements MetadataCollector {
         for (CloudResource resource : resources) {
             if (ResourceType.GCP_INSTANCE == resource.getType()) {
                 String resourceName = resource.getName();
-                Long privateId = GcpStackUtil.getPrivateId(resourceName);
+                Long privateId = gcpStackUtil.getPrivateId(resourceName);
                 if (privateId != null) {
                     privateIdMap.put(privateId, resource);
                 }

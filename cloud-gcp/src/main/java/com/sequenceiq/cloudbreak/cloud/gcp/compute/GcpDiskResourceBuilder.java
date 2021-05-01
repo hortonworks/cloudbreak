@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -36,7 +36,13 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpDiskResourceBuilder.class);
 
     @Inject
-    private GcpDiskEncryptionService gcpDiskEncryptionService;
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
+
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -58,13 +64,13 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setKind(GcpDiskType.SSD.getUrl(projectId, location.getAvailabilityZone()));
 
         InstanceTemplate template = group.getReferenceInstanceTemplate();
-        gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
+        customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
 
-        Map<String, String> labels = GcpLabelUtil.createLabelsFromTags(cloudStack);
+        Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
         disk.setLabels(labels);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
-        insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, cloudStack.getImage().getImageName()));
+        insDisk.setSourceImage(gcpStackUtil.getAmbariImage(projectId, cloudStack.getImage().getImageName()));
         try {
             Operation operation = insDisk.execute();
             if (operation.getHttpErrorStatusCode() != null) {

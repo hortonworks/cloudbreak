@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_NETWORK;
@@ -96,6 +95,9 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkCreationRequest) {
         CloudContext cloudContext = getCloudContext(networkCreationRequest);
@@ -111,7 +113,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             }
             return new CreatedCloudNetwork(networkCreationRequest.getEnvName(), networkResource.getName(), getCreatedSubnets(subnetList));
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, context.getProjectId());
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), GCP_NETWORK, networkCreationRequest.getEnvName());
         } catch (IOException e) {
@@ -132,7 +134,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             }
             deleteNetwork(context, auth, network, networkDeletionRequest.getNetworkId());
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, context.getProjectId());
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (GoogleJsonResponseException e) {
             exceptionHandler(e, networkDeletionRequest.getStackName(), GCP_NETWORK);
         } catch (IOException e) {
@@ -147,7 +149,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         String sharedProjectId = network.getStringParameter(GcpStackUtil.SHARED_PROJECT_ID);
         LOGGER.debug("Getting network cidrs for subnet {} in region {}", subnetId, region);
         Compute compute = gcpComputeFactory.buildCompute(credential);
-        String projectId = GcpStackUtil.getProjectId(credential);
+        String projectId = gcpStackUtil.getProjectId(credential);
         Subnetwork subnet = null;
         try {
             if (Strings.isNullOrEmpty(sharedProjectId)) {
@@ -176,7 +178,7 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             String ipCidrRange = subnet.getIpCidrRange();
             return new NetworkCidr(ipCidrRange, Collections.singletonList(ipCidrRange));
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, projectId);
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
         } catch (GoogleJsonResponseException e) {
             throw exceptionHandlerWithThrow(e, subnetId, GCP_NETWORK);
         } catch (IOException e) {

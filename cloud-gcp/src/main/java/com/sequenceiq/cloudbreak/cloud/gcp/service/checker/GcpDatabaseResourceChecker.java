@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.gcp.service.checker;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -19,6 +21,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 @Component
 public class GcpDatabaseResourceChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpDatabaseResourceChecker.class);
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
 
     @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
     public com.google.api.services.sqladmin.model.Operation check(SQLAdmin sqlAdmin, AuthenticatedContext ac, String operationId) throws IOException {
@@ -62,11 +67,11 @@ public class GcpDatabaseResourceChecker {
 
     @VisibleForTesting
     SQLAdmin.Operations.Get getSqlAdminOperations(SQLAdmin sqlAdmin, String operationId, String projectId) throws IOException {
-        return GcpStackUtil.sqlAdminOperations(sqlAdmin, projectId, operationId);
+        return gcpStackUtil.sqlAdminOperations(sqlAdmin, projectId, operationId);
     }
 
     @VisibleForTesting
     String getProjectId(AuthenticatedContext ac) {
-        return GcpStackUtil.getProjectId(ac.getCloudCredential());
+        return gcpStackUtil.getProjectId(ac.getCloudCredential());
     }
 }

@@ -37,7 +37,8 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -63,7 +64,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-class GcpAttachedDiskResourceBuilderTest {
+public class GcpAttachedDiskResourceBuilderTest {
 
     private static final String USER_ID = "horton@hortonworks.com";
 
@@ -76,7 +77,7 @@ class GcpAttachedDiskResourceBuilderTest {
     private Compute compute;
 
     @Mock
-    private GcpDiskEncryptionService gcpDiskEncryptionService;
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
 
     @Mock
     private AsyncTaskExecutor intermediateBuilderExecutor;
@@ -86,6 +87,12 @@ class GcpAttachedDiskResourceBuilderTest {
 
     @Mock
     private Insert insert;
+
+    @Mock
+    private GcpStackUtil gcpStackUtil;
+
+    @Mock
+    private GcpLabelUtil gcpLabelUtil;
 
     private GcpContext context;
 
@@ -116,7 +123,7 @@ class GcpAttachedDiskResourceBuilderTest {
     private Operation operation;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUpBuild() throws Exception {
         privateCrn = "crn";
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(privateId)
@@ -130,10 +137,8 @@ class GcpAttachedDiskResourceBuilderTest {
         cloudCredential.putParameter("projectId", "projectId");
 
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
-        String serviceAccountId = GcpStackUtil.getServiceAccountId(cloudCredential);
 
-        context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
+        context = new GcpContext(cloudContext.getName(), location, "projectId", "serviceAccountId", compute, false, 30, false);
         List<CloudResource> networkResources = Collections.singletonList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
         context.addNetworkResources(networkResources);
 
@@ -202,7 +207,7 @@ class GcpAttachedDiskResourceBuilderTest {
             Disk disk = invocation.getArgument(1);
             disk.setDiskEncryptionKey(encryptionKey);
             return invocation;
-        }).when(gcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), diskCaptor.capture());
+        }).when(customGcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), diskCaptor.capture());
         List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
