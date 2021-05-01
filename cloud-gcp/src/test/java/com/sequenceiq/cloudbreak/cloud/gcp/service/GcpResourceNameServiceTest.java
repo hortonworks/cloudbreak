@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.service.ResourceNameService;
@@ -14,7 +14,7 @@ public class GcpResourceNameServiceTest {
 
     private ResourceNameService subject;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         subject = new GcpResourceNameService();
         ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));

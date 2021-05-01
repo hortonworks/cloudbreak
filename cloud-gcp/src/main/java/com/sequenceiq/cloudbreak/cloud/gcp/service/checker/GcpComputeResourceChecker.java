@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.gcp.service.checker;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
+import javax.inject.Inject;
+
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,13 +23,16 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 public class GcpComputeResourceChecker {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpComputeResourceChecker.class);
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Retryable(value = CloudConnectorException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
     public Operation check(GcpContext context,  String operationId) throws IOException {
         if (operationId == null) {
             return null;
         }
         try {
-            Operation execute = GcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operationId).execute();
+            Operation execute = gcpStackUtil.globalOperations(context.getCompute(), context.getProjectId(), operationId).execute();
             checkComputeOperationError(execute);
             return execute;
         } catch (InterruptedIOException interruptedIOException) {
@@ -61,12 +66,12 @@ public class GcpComputeResourceChecker {
         if (e.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
             Location location = context.getLocation();
             try {
-                Operation execute = GcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, location.getRegion()).execute();
+                Operation execute = gcpStackUtil.regionOperations(context.getCompute(), context.getProjectId(), operationId, location.getRegion()).execute();
                 checkComputeOperationError(execute);
                 return execute;
             } catch (GoogleJsonResponseException e1) {
                 if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
-                    Operation execute = GcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
+                    Operation execute = gcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
                             location.getAvailabilityZone()).execute();
                     checkComputeOperationError(execute);
                     return execute;

@@ -28,14 +28,17 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public GcpContext contextInit(CloudContext context, AuthenticatedContext auth, Network network, List<CloudResource> resources, boolean build) {
         CloudCredential credential = auth.getCloudCredential();
-        String projectId = GcpStackUtil.getProjectId(credential);
-        String serviceAccountId = GcpStackUtil.getServiceAccountId(credential);
+        String projectId = gcpStackUtil.getProjectId(credential);
+        String serviceAccountId = gcpStackUtil.getServiceAccountId(credential);
         Compute compute = gcpComputeFactory.buildCompute(credential);
         Location location = context.getLocation();
-        boolean noPublicIp = network != null ? GcpStackUtil.noPublicIp(network) : false;
+        boolean noPublicIp = network != null ? gcpStackUtil.noPublicIp(network) : false;
         return new GcpContext(context.getName(), location, projectId, serviceAccountId, compute, noPublicIp, PARALLEL_RESOURCE_REQUEST, build);
     }
 

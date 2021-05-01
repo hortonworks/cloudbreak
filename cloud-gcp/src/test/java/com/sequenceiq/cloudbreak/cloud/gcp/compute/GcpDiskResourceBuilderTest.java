@@ -37,7 +37,8 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -75,13 +76,19 @@ class GcpDiskResourceBuilderTest {
     private Compute compute;
 
     @Mock
-    private GcpDiskEncryptionService gcpDiskEncryptionService;
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
 
     @Mock
     private Disks disks;
 
     @Mock
     private Insert insert;
+
+    @Mock
+    private GcpStackUtil gcpStackUtil;
+
+    @Mock
+    private GcpLabelUtil gcpLabelUtil;
 
     private GcpContext context;
 
@@ -122,9 +129,8 @@ class GcpDiskResourceBuilderTest {
         cloudCredential.putParameter("projectId", "projectId");
 
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        String projectId = GcpStackUtil.getProjectId(cloudCredential);
-        String serviceAccountId = GcpStackUtil.getServiceAccountId(cloudCredential);
-
+        String projectId = "projectId";
+        String serviceAccountId = "serviceAccountId";
         context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
         List<CloudResource> networkResources = Collections.singletonList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
         context.addNetworkResources(networkResources);
@@ -181,7 +187,7 @@ class GcpDiskResourceBuilderTest {
             Disk disk = invocation.getArgument(1);
             disk.setDiskEncryptionKey(encryptionKey);
             return invocation;
-        }).when(gcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), diskCaptor.capture());
+        }).when(customGcpDiskEncryptionService).addEncryptionKeyToDisk(any(InstanceTemplate.class), diskCaptor.capture());
         List<CloudResource> build = underTest.build(context, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);

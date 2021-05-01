@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingNetwork;
+import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
@@ -12,6 +11,7 @@ import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -23,15 +23,21 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
 
     public static final String NETWORK_NAME = "netName";
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
-        String name = isExistingNetwork(network) ? getCustomNetworkId(network) : getResourceNameService().resourceName(resourceType(), context.getName());
+        String name = gcpStackUtil.isExistingNetwork(network) ?
+                gcpStackUtil.getCustomNetworkId(network) :
+                getResourceNameService().resourceName(resourceType(), context.getName());
         return createNamedResource(resourceType(), name);
     }
 
     @Override
-    public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception {
-        if (!isExistingNetwork(network)) {
+    public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security,
+        CloudResource resource) throws Exception {
+        if (!gcpStackUtil.isExistingNetwork(network)) {
             Compute compute = context.getCompute();
             String projectId = context.getProjectId();
 
@@ -57,7 +63,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
-        if (!isExistingNetwork(network)) {
+        if (!gcpStackUtil.isExistingNetwork(network)) {
             Compute compute = context.getCompute();
             String projectId = context.getProjectId();
             try {

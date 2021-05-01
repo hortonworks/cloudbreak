@@ -18,6 +18,8 @@ class GcpLabelUtilTest {
 
     private static final String RESOURCE_CRN = "Cloudera-Resource-Name";
 
+    private GcpLabelUtil gcpLabelUtil = new GcpLabelUtil();
+
     @Test
     void createLabelsFromTags() {
         Map<String, String> tags = new HashMap<>();
@@ -26,7 +28,7 @@ class GcpLabelUtilTest {
         tags.put(ENVIRONMENT_CRN, "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:12474ddc-6e44-4f4c-806a-b197ef12cbb8");
         CloudStack cloudStack = new CloudStack(new HashSet<>(), null, null, new HashMap<>(), tags, null, null, null, null, null);
 
-        Map<String, String> result = GcpLabelUtil.createLabelsFromTags(cloudStack);
+        Map<String, String> result = gcpLabelUtil.createLabelsFromTags(cloudStack);
 
         assertEquals(3L, result.size());
         assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8", result.get(ENVIRONMENT_CRN.toLowerCase()));
@@ -38,7 +40,7 @@ class GcpLabelUtilTest {
     void transformValueWhenItsLengthLessThan63Chars() {
         String originalValue = "gpc-test-value-which-is-short";
 
-        String result = GcpLabelUtil.transformLabelKeyOrValue(originalValue);
+        String result = gcpLabelUtil.transformLabelKeyOrValue(originalValue);
 
         assertEquals(originalValue, result);
     }
@@ -47,7 +49,7 @@ class GcpLabelUtilTest {
     void transformValueWhenItsLengthMoreThan63Chars() {
         String originalValue = "gcp-dev-cloudbreak-gcp-test-9257bdae358342cca05e674b3893563-387";
 
-        String result = GcpLabelUtil.transformLabelKeyOrValue(originalValue);
+        String result = gcpLabelUtil.transformLabelKeyOrValue(originalValue);
 
         assertEquals(GcpLabelUtil.GCP_MAX_TAG_LEN, result.length());
         assertEquals(originalValue.substring(originalValue.length() - GcpLabelUtil.GCP_MAX_TAG_LEN), result);
@@ -57,7 +59,7 @@ class GcpLabelUtilTest {
     void transformValueWhenItsLengthMoreThan63CharsAndItIsACrn() {
         String originalValue = "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:12474ddc-6e44-4f4c-806a-b197ef12cbb8";
 
-        String result = GcpLabelUtil.transformLabelKeyOrValue(originalValue);
+        String result = gcpLabelUtil.transformLabelKeyOrValue(originalValue);
 
         assertTrue(result.length() < GcpLabelUtil.GCP_MAX_TAG_LEN);
         assertEquals("12474ddc-6e44-4f4c-806a-b197ef12cbb8", result);

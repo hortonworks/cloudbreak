@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AZURE_ROLE_DEF_JSON;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,5 +29,31 @@ public class AzureCredentialPrerequisites implements Serializable {
 
     public String getRoleDefitionJson() {
         return roleDefitionJson;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AzureCredentialPrerequisites that = (AzureCredentialPrerequisites) o;
+        return Objects.equals(appCreationCommand, that.appCreationCommand)
+                && Objects.equals(roleDefitionJson, that.roleDefitionJson);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(appCreationCommand, roleDefitionJson);
+    }
+
+    @Override
+    public String toString() {
+        return "AzureCredentialPrerequisites{" +
+                "appCreationCommand='" + appCreationCommand + '\'' +
+                ", roleDefitionJson='" + roleDefitionJson + '\'' +
+                '}';
     }
 }

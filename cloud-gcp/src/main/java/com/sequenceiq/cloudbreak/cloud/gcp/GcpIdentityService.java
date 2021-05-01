@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
@@ -11,9 +13,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 @Service
 public class GcpIdentityService implements IdentityService {
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public String getAccountId(String region, CloudCredential cloudCredential) {
-        return GcpStackUtil.getProjectId(cloudCredential);
+        return gcpStackUtil.getProjectId(cloudCredential);
     }
 
     @Override

@@ -36,6 +36,9 @@ public class GcpNetworkInterfaceProvider {
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     Map<String, Optional<NetworkInterface>> provide(AuthenticatedContext authenticatedContext, List<CloudResource> instances) {
         String instanceNamePrefix = getInstanceNamePrefix(instances);
         List<Instance> gcpInstances = getInstances(authenticatedContext, instanceNamePrefix);
@@ -86,7 +89,7 @@ public class GcpNetworkInterfaceProvider {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         Compute compute = gcpComputeFactory.buildCompute(credential);
         return compute.instances()
-                .list(GcpStackUtil.getProjectId(credential), authenticatedContext.getCloudContext().getLocation()
+                .list(gcpStackUtil.getProjectId(credential), authenticatedContext.getCloudContext().getLocation()
                         .getAvailabilityZone()
                         .value())
                 .setFilter(String.format("name=%s-*", instanceNamePrefix));

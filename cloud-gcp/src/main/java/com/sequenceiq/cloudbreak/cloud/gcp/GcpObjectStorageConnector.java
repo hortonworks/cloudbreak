@@ -39,11 +39,14 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         Storage storage = gcpStorageFactory.buildStorage(request.getCredential(), request.getCredential().getName());
         try {
-            storage.buckets().get(GcpStackUtil.getBucketName(request.getObjectStoragePath())).execute();
+            storage.buckets().get(gcpStackUtil.getBucketName(request.getObjectStoragePath())).execute();
             return ObjectStorageMetadataResponse.builder()
                     .withStatus(ResponseStatus.OK)
                     .build();
@@ -67,7 +70,7 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
         for (StorageLocationBase location : request.getCloudStorageRequest().getLocations()) {
-            String bucketName = GcpStackUtil.getBucketName(location.getValue());
+            String bucketName = gcpStackUtil.getBucketName(location.getValue());
             try {
                 storage.buckets().get(bucketName).execute();
             } catch (Exception e) {

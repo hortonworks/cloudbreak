@@ -32,6 +32,9 @@ public class GcpServiceAccountObjectStorageValidator {
     @Inject
     private GcpIamFactory gcpIamFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     public ValidationResultBuilder validateObjectStorage(CloudCredential cloudCredential,
             SpiFileSystem spiFileSystem,
             ValidationResultBuilder resultBuilder) throws IOException {
@@ -39,7 +42,7 @@ public class GcpServiceAccountObjectStorageValidator {
         Iam iam = gcpIamFactory.buildIam(cloudCredential);
         List<CloudFileSystemView> cloudFileSystems = spiFileSystem.getCloudFileSystems();
         if (Objects.nonNull(cloudFileSystems) && cloudFileSystems.size() > 0) {
-            String projectId = GcpStackUtil.getProjectId(cloudCredential);
+            String projectId = gcpStackUtil.getProjectId(cloudCredential);
             Set<String> serviceAccountEmailsToFind = cloudFileSystems
                     .stream()
                     .map(cloudFileSystemView -> ((CloudGcsView) cloudFileSystemView).getServiceAccountEmail())

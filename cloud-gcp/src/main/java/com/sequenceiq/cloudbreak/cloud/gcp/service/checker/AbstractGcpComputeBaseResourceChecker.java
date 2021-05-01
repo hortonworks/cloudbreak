@@ -35,6 +35,9 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
     @Inject
     private GcpComputeResourceChecker resourceChecker;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     protected List<CloudResourceStatus> checkResources(
         ResourceType type, GcpContext context, AuthenticatedContext auth, Iterable<CloudResource> resources) {
         List<CloudResourceStatus> result = new ArrayList<>();
@@ -43,7 +46,7 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
             try {
                 String operationId = resource.getStringParameter(OPERATION_ID);
                 Operation operation = resourceChecker.check(context, operationId);
-                boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
+                boolean finished = operation == null || gcpStackUtil.isOperationFinished(operation);
                 ResourceStatus successStatus = context.isBuild() ? ResourceStatus.CREATED : ResourceStatus.DELETED;
                 result.add(new CloudResourceStatus(resource, finished ? successStatus : ResourceStatus.IN_PROGRESS));
                 if (finished) {

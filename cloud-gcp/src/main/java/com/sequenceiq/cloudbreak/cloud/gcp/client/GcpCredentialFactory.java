@@ -12,6 +12,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.stereotype.Service;
 
@@ -44,6 +46,9 @@ public class GcpCredentialFactory {
 
     private static final String JSON = "json";
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     public GoogleCredential buildCredential(CloudCredential gcpCredential, HttpTransport httpTransport) throws IOException, GeneralSecurityException {
         String credentialJson = getServiceAccountCredentialJson(gcpCredential);
         if (isNotEmpty(credentialJson)) {
@@ -55,7 +60,7 @@ public class GcpCredentialFactory {
                         new ByteArrayInputStream(Base64.decodeBase64(getServiceAccountPrivateKey(gcpCredential))), "notasecret", "privatekey", "notasecret");
                 return new GoogleCredential.Builder().setTransport(httpTransport)
                         .setJsonFactory(JSON_FACTORY)
-                        .setServiceAccountId(GcpStackUtil.getServiceAccountId(gcpCredential))
+                        .setServiceAccountId(gcpStackUtil.getServiceAccountId(gcpCredential))
                         .setServiceAccountScopes(SCOPES)
                         .setServiceAccountPrivateKey(pk)
                         .build();

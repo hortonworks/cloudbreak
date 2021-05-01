@@ -2,10 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.CLOUD_STACK_TYPE_PARAMETER;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.FREEIPA_STACK_TYPE;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getMissingServiceAccountKeyError;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSharedProjectId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
@@ -50,7 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionCreatorService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -94,13 +91,22 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final int ORDER = 3;
 
     @Inject
-    private GcpDiskEncryptionService gcpDiskEncryptionService;
+    private CustomGcpDiskEncryptionCreatorService customGcpDiskEncryptionCreatorService;
+
+    @Inject
+    private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
 
     @Inject
     private PersistenceNotifier persistenceNotifier;
 
     @Inject
     private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
+
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private GcpLabelUtil gcpLabelUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -123,7 +129,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         listOfDisks.addAll(getBootDiskList(computeResources, projectId, location.getAvailabilityZone()));
         listOfDisks.addAll(getAttachedDisks(computeResources, projectId));
 
-        listOfDisks.forEach(disk -> gcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
+        listOfDisks.forEach(disk -> customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
         Instance instance = new Instance();
         instance.setMachineType(String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/machineTypes/%s",
@@ -166,10 +172,10 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
             addTag(tagList, group.getSecurity().getCloudSecurityId());
         }
-        addTag(tagList, GcpStackUtil.getClusterTag(auth.getCloudContext()));
-        addTag(tagList, GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        addTag(tagList, GcpStackUtil.getGroupTypeTag(group.getType()));
-        Map<String, String> labelsFromTags = GcpLabelUtil.createLabelsFromTags(cloudStack);
+        addTag(tagList, gcpStackUtil.getClusterTag(auth.getCloudContext()));
+        addTag(tagList, gcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
+        addTag(tagList, gcpStackUtil.getGroupTypeTag(group.getType()));
+        Map<String, String> labelsFromTags = gcpLabelUtil.createLabelsFromTags(cloudStack);
         labelsFromTags.forEach((key, value) -> addTag(tagList, mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
 
         tags.setItems(tagList);
@@ -412,9 +418,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
             List<CloudResource> subnet, String networkName) {
-        if (StringUtils.isNotEmpty(getSharedProjectId(network))) {
-            networkInterface.setNetwork(getNetworkUrl(getSharedProjectId(network), getCustomNetworkId(network)));
-            networkInterface.setSubnetwork(getSubnetUrl(getSharedProjectId(network), region.value(), getSubnetId(network)));
+        if (StringUtils.isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
+            networkInterface.setNetwork(getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));
+            networkInterface.setSubnetwork(getSubnetUrl(gcpStackUtil.getSharedProjectId(network), region.value(), gcpStackUtil.getSubnetId(network)));
         } else {
             if (subnet.isEmpty()) {
                 networkInterface.setNetwork(getNetworkUrl(projectId, networkName));
@@ -443,7 +449,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private CloudVmInstanceStatus stopStart(GcpContext context, AuthenticatedContext auth, CloudInstance instance, boolean stopRequest) {
-        String projectId = GcpStackUtil.getProjectId(auth.getCloudCredential());
+        String projectId = gcpStackUtil.getProjectId(auth.getCloudCredential());
         String availabilityZone = context.getLocation().getAvailabilityZone().value();
         Compute compute = context.getCompute();
         String instanceId = instance.getInstanceId();
@@ -462,7 +468,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
             return new CloudVmInstanceStatus(operationAwareCloudInstance, InstanceStatus.IN_PROGRESS);
         } catch (TokenResponseException e) {
-            throw getMissingServiceAccountKeyError(e, context.getProjectId());
+            throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
         } catch (IOException e) {
             throw new GcpResourceException(String.format("An error occurred while stopping the vm '%s'", instanceId), e);
         }
@@ -471,8 +477,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private Operation executeStartOperation(String projectId, String availabilityZone, Compute compute, String instanceId, InstanceTemplate template,
             List<AttachedDisk> disks) throws IOException {
 
-        if (gcpDiskEncryptionService.hasCustomEncryptionRequested(template)) {
-            CustomerEncryptionKey customerEncryptionKey = gcpDiskEncryptionService.createCustomerEncryptionKey(template);
+        if (customGcpDiskEncryptionService.hasCustomEncryptionRequested(template)) {
+            CustomerEncryptionKey customerEncryptionKey = customGcpDiskEncryptionCreatorService.createCustomerEncryptionKey(template);
             List<CustomerEncryptionKeyProtectedDisk> protectedDisks = disks
                     .stream()
                     .map(AttachedDisk::getSource)

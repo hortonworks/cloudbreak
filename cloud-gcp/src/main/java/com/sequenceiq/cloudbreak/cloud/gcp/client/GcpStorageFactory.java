@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.setHttpTimeout;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -12,6 +10,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.services.storage.Storage;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Service
@@ -26,12 +25,15 @@ public class GcpStorageFactory extends GcpServiceFactory {
     private GcpCredentialFactory gcpCredentialFactory;
 
     @Inject
+    private GcpStackUtil gcpStackUtil;
+
+    @Inject
     private HttpTransport httpTransport;
 
     public Storage buildStorage(CloudCredential gcpCredential, String name) {
         try {
             GoogleCredential credential = gcpCredentialFactory.buildCredential(gcpCredential, httpTransport);
-            return new Storage.Builder(httpTransport, jsonFactory, setHttpTimeout(requestInitializer(credential)))
+            return new Storage.Builder(httpTransport, jsonFactory, gcpStackUtil.setHttpTimeout(requestInitializer(credential)))
                     .setApplicationName(name)
                     .build();
         } catch (Exception e) {

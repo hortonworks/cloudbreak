@@ -223,7 +223,8 @@ public class TemplateValidator {
         if (isEmpty(supportedVmTypesDocPageLink)) {
             return String.format(baseMsg, instanceType, platform);
         }
-        return String.format("%s You can find the supported types here: %s", baseMsg, instanceType, platform, supportedVmTypesDocPageLink);
+        return String.format("Our platform currently not supporting the '%s' instance type for '%s'." +
+                " You can find the supported types here: %s", instanceType, platform, supportedVmTypesDocPageLink);
     }
 
 }

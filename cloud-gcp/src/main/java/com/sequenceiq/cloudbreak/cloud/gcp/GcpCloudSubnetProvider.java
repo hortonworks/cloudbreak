@@ -23,9 +23,12 @@ public class GcpCloudSubnetProvider {
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
+    @Inject
+    private GcpStackUtil gcpStackUtil;
+
     public List<CreatedSubnet> provide(NetworkCreationRequest request, List<String> subnetCidrs) throws IOException {
         Compute compute = gcpComputeFactory.buildCompute(request.getCloudCredential());
-        String projectId = GcpStackUtil.getProjectId(request.getCloudCredential());
+        String projectId = gcpStackUtil.getProjectId(request.getCloudCredential());
 
         List<String> az = getAvailabilityZones(compute, projectId, request.getRegion());
         List<CreatedSubnet> subnets = new ArrayList<>(subnetCidrs.size());

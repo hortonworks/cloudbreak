@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Objects;
+
 public class TagSpecification {
 
     private final Integer maxAmount;
@@ -53,5 +55,49 @@ public class TagSpecification {
 
     public Integer getMinValueLength() {
         return minValueLength;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        TagSpecification that = (TagSpecification) o;
+        return Objects.equals(maxAmount, that.maxAmount)
+                && Objects.equals(minKeyLength, that.minKeyLength)
+                && Objects.equals(maxKeyLength, that.maxKeyLength)
+                && Objects.equals(keyValidator, that.keyValidator)
+                && Objects.equals(minValueLength, that.minValueLength)
+                && Objects.equals(maxValueLength, that.maxValueLength)
+                && Objects.equals(valueValidator, that.valueValidator);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                maxAmount,
+                minKeyLength,
+                maxKeyLength,
+                keyValidator,
+                minValueLength,
+                maxValueLength,
+                valueValidator
+        );
+    }
+
+    @Override
+    public String toString() {
+        return "TagSpecification{" +
+                "maxAmount=" + maxAmount +
+                ", minKeyLength=" + minKeyLength +
+                ", maxKeyLength=" + maxKeyLength +
+                ", keyValidator='" + keyValidator + '\'' +
+                ", minValueLength=" + minValueLength +
+                ", maxValueLength=" + maxValueLength +
+                ", valueValidator='" + valueValidator + '\'' +
+                '}';
     }
 }
