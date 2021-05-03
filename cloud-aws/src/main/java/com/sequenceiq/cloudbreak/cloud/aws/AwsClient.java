@@ -101,8 +101,7 @@ public class AwsClient {
             AmazonEc2Client amazonEC2Client = region != null
                     ? createEc2Client(authenticatedContextView.getAwsCredentialView(), region)
                     : createEc2Client(authenticatedContextView.getAwsCredentialView());
-            authenticatedContext.putParameter(AmazonEc2Client.class,
-                    amazonEC2Client);
+            authenticatedContext.putParameter(AmazonEc2Client.class, amazonEC2Client);
         } catch (AmazonServiceException e) {
             throw new CredentialVerificationException(e.getErrorMessage(), e);
         }

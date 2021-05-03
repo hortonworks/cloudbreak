@@ -255,7 +255,7 @@ public class AzureNetworkConnectorTest {
 
         when(azureClient.getResourceGroup(networkDeletionRequest.getResourceGroup())).thenReturn(mock(ResourceGroup.class));
         when(azureClientService.getClient(networkDeletionRequest.getCloudCredential())).thenReturn(azureClient);
-        when(azureUtils.convertToCloudConnectorException(any(), anyString())).thenReturn(new CloudConnectorException(""));
+        when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenReturn(new CloudConnectorException(""));
         doThrow(createCloudException()).when(azureClient).deleteTemplateDeployment(RESOURCE_GROUP, STACK);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);

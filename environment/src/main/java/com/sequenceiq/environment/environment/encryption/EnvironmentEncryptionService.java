@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.encryption;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern.USE_MULTIPLE;
 
 import java.util.List;
@@ -14,11 +15,9 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
@@ -68,24 +67,18 @@ public class EnvironmentEncryptionService {
     EncryptionResources getEncryptionResources(String cloudPlatform) {
         CloudPlatformVariant cloudPlatformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.variant(cloudPlatform));
         return Optional.ofNullable(cloudPlatformConnectors.get(cloudPlatformVariant))
-                .map(CloudConnector<Object>::encryptionResources)
+                .map(CloudConnector::encryptionResources)
                 .orElseThrow(() -> new EncryptionResourcesNotFoundException("No Encryption resources component found for cloud platform: " + cloudPlatform));
     }
 
     @VisibleForTesting
     DiskEncryptionSetCreationRequest createEncryptionResourcesCreationRequest(EnvironmentDto environment) {
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
-        String uniqueId = Crn.safeFromString(environment.getResourceCrn()).getResource();
         DiskEncryptionSetCreationRequest.Builder builder = new DiskEncryptionSetCreationRequest.Builder()
-                .withId(uniqueId)
-                .withCloudCredential(cloudCredential)
-                .withRegion(Region.region(environment.getLocation().getName()))
-                .withEnvironmentName(environment.getName())
-                .withEnvironmentId(environment.getId())
+                .withId(Crn.safeFromString(environment.getResourceCrn()).getResource())
+                .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
                 .withTags(environmentTagProvider.getTags(environment, environment.getResourceCrn()))
                 .withCloudContext(getCloudContext(environment))
-                .withEncryptionKeyUrl(environment.getParameters().getAzureParametersDto()
-                        .getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
+                .withEncryptionKeyUrl(environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
         if (isSingleResourceGroup(environment)) {
             builder.withSingleResourceGroup(true);
             builder.withResourceGroupName(environment.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getName());
@@ -97,9 +90,8 @@ public class EnvironmentEncryptionService {
 
     @VisibleForTesting
     DiskEncryptionSetDeletionRequest createEncryptionResourcesDeletionRequest(EnvironmentDto environment) {
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
         return new DiskEncryptionSetDeletionRequest.Builder()
-                .withCloudCredential(cloudCredential)
+                .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
                 .withCloudContext(getCloudContext(environment))
                 .withCloudResources(getResourcesForDeletion(environment))
                 .build();
@@ -121,7 +113,8 @@ public class EnvironmentEncryptionService {
                 .withCrn(environment.getResourceCrn())
                 .withPlatform(environment.getCloudPlatform())
                 .withVariant(environment.getCloudPlatform())
-                .withLocation(location(Region.region(environment.getLocation().getName())))
+                .withLocation(location(region(environment.getLocation().getName())))
+                .withUserId(environment.getCreator())
                 .withUserName(environment.getCreator())
                 .withAccountId(environment.getAccountId())
                 .build();
@@ -131,7 +124,7 @@ public class EnvironmentEncryptionService {
         Optional<CloudResource> desCloudResourceOptional = resourceRetriever.findByResourceReferenceAndStatusAndType(
                 environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getDiskEncryptionSetId(),
                 CommonStatus.CREATED, ResourceType.AZURE_DISK_ENCRYPTION_SET);
-        return desCloudResourceOptional.map(r -> List.of(r)).orElse(List.of());
+        return desCloudResourceOptional.map(List::of).orElse(List.of());
     }
 
 }

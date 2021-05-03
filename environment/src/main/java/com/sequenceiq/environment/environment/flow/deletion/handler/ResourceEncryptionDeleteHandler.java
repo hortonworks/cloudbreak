@@ -19,6 +19,9 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
+import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 
@@ -31,7 +34,7 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
 
     private final EnvironmentService environmentService;
 
-    private HandlerExceptionProcessor exceptionProcessor;
+    private final HandlerExceptionProcessor exceptionProcessor;
 
     private final EnvironmentEncryptionService environmentEncryptionService;
 
@@ -58,30 +61,36 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 if (AZURE.name().equalsIgnoreCase(environmentDto.getCloudPlatform())) {
                     String diskEncryptionSetId = Optional.ofNullable(environmentDto.getParameters())
-                            .map(paramsDto -> paramsDto.getAzureParametersDto())
-                            .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
-                            .map(azureREParamsDto -> azureREParamsDto.getDiskEncryptionSetId()).orElse(null);
+                            .map(ParametersDto::getAzureParametersDto)
+                            .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
+                            .map(AzureResourceEncryptionParametersDto::getDiskEncryptionSetId)
+                            .orElse(null);
                     if (StringUtils.isNotEmpty(diskEncryptionSetId) &&
                             (environment.getStatus() != EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED)) {
                         deleteEncryptionResources(environmentDto, environment);
+                    } else {
+                        LOGGER.info("No encryption resources found to delete for environment \"{}\".", environment.getName());
                     }
                 }
             });
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
+            LOGGER.error("ResourceEncryptionDelete failed with error.", e);
             exceptionProcessor.handle(new HandlerFailureConjoiner(e, environmentDtoEvent, envDeleteEvent), LOGGER, eventSender(), selector());
         }
     }
 
     private void deleteEncryptionResources(EnvironmentDto environmentDto, Environment environment) {
-        LOGGER.info("Deleting Encryption resources for environment.");
+        String environmentName = environment.getName();
+        LOGGER.info("Deleting encryption resources for environment \"{}\".", environmentName);
         try {
             environmentEncryptionService.deleteEncryptionResources(environmentDto);
             environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
             environmentService.save(environment);
+            LOGGER.info("Finished deleting encryption resources for environment \"{}\".", environmentName);
         } catch (Exception e) {
-            LOGGER.error("Failed to delete Encryption resources for environment {} with error {}", environment.getName(), e);
-            throw new CloudbreakServiceException("Error occured while deleting encryption resources: " + e.getMessage(), e);
+            LOGGER.error(String.format("Failed to delete encryption resources for environment \"%s\"", environmentName), e);
+            throw new CloudbreakServiceException("Error occurred while deleting encryption resources: " + e.getMessage(), e);
         }
     }
 
@@ -95,4 +104,5 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
                 .withSelector(START_PUBLICKEY_DELETE_EVENT.selector())
                 .build();
     }
+
 }

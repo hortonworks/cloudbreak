@@ -24,8 +24,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -53,6 +53,8 @@ class ResourceEncryptionInitializationHandlerTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
+    private static final String DISK_ENCRYPTION_SET_ID = "dummmy-set-id";
+
     private EnvironmentDto eventDto;
 
     @Mock
@@ -66,9 +68,6 @@ class ResourceEncryptionInitializationHandlerTest {
 
     @Mock
     private Event<EnvironmentDto> environmentDtoEvent;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private Headers headers;
@@ -159,13 +158,27 @@ class ResourceEncryptionInitializationHandlerTest {
     }
 
     @Test
-    void acceptTestEnvironmentShouldBeUpdatedWhenEncryptionKeyUrlIsPresent() {
+    void acceptTestEnvironmentShouldNotBeUpdatedWhenEncryptionKeyUrlIsPresentButStatusAlreadyInitialized() {
+        doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
+        Environment environment = new Environment();
+        environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
+        verify(environmentService, never()).save(any(Environment.class));
+        verifyEnvCreationEvent();
+    }
+
+    @Test
+    void acceptTestEnvironmentShouldBeUpdatedWhenEncryptionKeyUrlIsPresentAndStatusNotYetInitialized() {
         doAnswer(i -> null).when(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Headers.class));
         Environment environment = new Environment();
         environment.setParameters(newAzureParameters());
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         CreatedDiskEncryptionSet createdDiskEncryptionSet = new CreatedDiskEncryptionSet.Builder()
-                .withDiskEncryptionSetId("dummmy-set-id")
+                .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
                 .build();
         when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenReturn(createdDiskEncryptionSet);
 
@@ -174,9 +187,24 @@ class ResourceEncryptionInitializationHandlerTest {
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
         verify(environmentService).save(environment);
         AzureParameters azureParameters = (AzureParameters) environment.getParameters();
-        assertEquals(azureParameters.getDiskEncryptionSetId(), "dummmy-set-id");
+        assertEquals(azureParameters.getDiskEncryptionSetId(), DISK_ENCRYPTION_SET_ID);
         assertEquals(environment.getStatus(), EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_INITIALIZED);
         verifyEnvCreationEvent();
+    }
+
+    @Test
+    void acceptTestEnvironmentShouldNotBeUpdatedWhenEncryptionKeyUrlIsPresentAndStatusNotYetInitializedAndCreationFailure() {
+        Environment environment = new Environment();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        IllegalStateException error = new IllegalStateException("error");
+        when(environmentEncryptionService.createEncryptionResources(any(EnvironmentDto.class))).thenThrow(error);
+
+        underTest.accept(environmentDtoEvent);
+
+        verify(eventBus).notify(anyString(), envCreationFailureEventEventCaptor.capture());
+        verify(environmentService, never()).save(any(Environment.class));
+
+        verifyEnvCreationFailedEvent(error, true, "Error occurred while initializing encryption resources: error");
     }
 
     @Test
@@ -200,16 +228,27 @@ class ResourceEncryptionInitializationHandlerTest {
     }
 
     private void verifyEnvCreationFailedEvent(Exception exceptionExpected) {
-        Event<EnvCreationFailureEvent> value = envCreationFailureEventEventCaptor.getValue();
-        EnvCreationFailureEvent event = value.getData();
-        assertThat(event).isInstanceOf(EnvCreationFailureEvent.class);
+        verifyEnvCreationFailedEvent(exceptionExpected, false, "");
+    }
 
-        EnvCreationFailureEvent envCreateFailedEvent = (EnvCreationFailureEvent) event;
-        assertThat(envCreateFailedEvent.getResourceName()).isEqualTo(ENVIRONMENT_NAME);
-        assertThat(envCreateFailedEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
-        assertThat(envCreateFailedEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
-        assertThat(envCreateFailedEvent.selector()).isEqualTo(FAILED_ENV_CREATION_EVENT.selector());
-        assertThat(envCreateFailedEvent.getException()).isSameAs(exceptionExpected);
+    private void verifyEnvCreationFailedEvent(Exception exceptionExpected, boolean wrappedInCloudbreakServiceException,
+            String messageCloudbreakServiceExceptionExpected) {
+        Event<EnvCreationFailureEvent> event = envCreationFailureEventEventCaptor.getValue();
+
+        EnvCreationFailureEvent envCreationFailureEvent = event.getData();
+        assertThat(envCreationFailureEvent.getResourceName()).isEqualTo(ENVIRONMENT_NAME);
+        assertThat(envCreationFailureEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
+        assertThat(envCreationFailureEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
+        assertThat(envCreationFailureEvent.selector()).isEqualTo(FAILED_ENV_CREATION_EVENT.selector());
+
+        Exception exception = envCreationFailureEvent.getException();
+        if (wrappedInCloudbreakServiceException) {
+            assertThat(exception).isInstanceOf(CloudbreakServiceException.class);
+            assertThat(exception).hasMessage(messageCloudbreakServiceExceptionExpected);
+            assertThat(exception.getCause()).isSameAs(exceptionExpected);
+        } else {
+            assertThat(exception).isSameAs(exceptionExpected);
+        }
     }
 
     private static AzureParameters newAzureParameters() {
@@ -217,4 +256,5 @@ class ResourceEncryptionInitializationHandlerTest {
         azureParameters.setId(10L);
         return azureParameters;
     }
+
 }

@@ -45,6 +45,7 @@ import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.compute.VirtualMachineSize;
+import com.microsoft.azure.management.compute.implementation.ComputeManager;
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetsInner;
 import com.microsoft.azure.management.compute.implementation.DiskInner;
@@ -127,11 +128,14 @@ public class AzureClient {
 
     private final AzureAuthExceptionHandler azureAuthExceptionHandler;
 
+    private final ComputeManager computeManager;
+
     public AzureClient(AzureClientCredentials azureClientCredentials, AzureAuthExceptionHandler azureAuthExceptionHandler) {
         this.azureClientCredentials = azureClientCredentials;
         azure = azureClientCredentials.getAzure();
         privatednsManager = azureClientCredentials.getPrivateDnsManager();
         marketplaceOrderingManager = azureClientCredentials.getMarketplaceOrderingManager();
+        computeManager = azureClientCredentials.getComputeManager();
         this.azureAuthExceptionHandler = azureAuthExceptionHandler;
     }
 
@@ -948,39 +952,47 @@ public class AzureClient {
                 .withTags(tags);
     }
 
-    public DiskEncryptionSetInner getDiskEncryptionSet(String resourceGroupName, String diskEncryptionSetName) {
-        // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
-        DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
-        return dSetsIn.getByResourceGroup(resourceGroupName, diskEncryptionSetName);
+    public DiskEncryptionSetInner getDiskEncryptionSetByName(String resourceGroupName, String diskEncryptionSetName) {
+        return handleAuthException(() -> {
+            // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
+            DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
+            return dSetsIn.getByResourceGroup(resourceGroupName, diskEncryptionSetName);
+        });
     }
 
     public DiskEncryptionSetInner createDiskEncryptionSet(String diskEncryptionSetName, String encryptionKeyUrl, String location,
             String resourceGroupName, String sourceVaultId, Map<String, String> tags) {
-        // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
-        DiskEncryptionSetInner desIn = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
-        DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
-        return dSetsIn.createOrUpdate(resourceGroupName, diskEncryptionSetName, desIn);
+        return handleAuthException(() -> {
+            // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
+            DiskEncryptionSetInner desIn = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
+            DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
+            return dSetsIn.createOrUpdate(resourceGroupName, diskEncryptionSetName, desIn);
+        });
     }
 
-    public void grantKeyVaultAccessPolicyToServicePrincipal(String resourceGroupName, String vaultName, String principalId) {
-        azureClientCredentials.getAzure()
-                .vaults()
-                .getByResourceGroup(resourceGroupName, vaultName)
-                .update()
-                .defineAccessPolicy()
-                .forObjectId(principalId)
-                .allowKeyPermissions(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))
-                .attach()
-                .apply();
+    public void grantKeyVaultAccessPolicyToServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
+        handleAuthException(() -> {
+            azure.vaults()
+                    .getByResourceGroup(resourceGroupName, vaultName)
+                    .update()
+                    .defineAccessPolicy()
+                    .forObjectId(principalObjectId)
+                    .allowKeyPermissions(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))
+                    .attach()
+                    .apply();
+        });
     }
 
     public void deleteDiskEncryptionSet(String resourceGroup, String diskEncryptionSetName) {
-        // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetInner
-        DiskEncryptionSetsInner dSetsIn = azureClientCredentials.getComputeManager().inner().diskEncryptionSets();
-        dSetsIn.delete(resourceGroup, diskEncryptionSetName);
+        handleAuthException(() -> {
+            // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
+            DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
+            dSetsIn.delete(resourceGroup, diskEncryptionSetName);
+        });
     }
 
     public Optional<String> getAccessToken() {
         return azureClientCredentials.getAccesToken();
     }
+
 }

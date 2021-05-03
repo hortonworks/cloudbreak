@@ -25,4 +25,5 @@ public class CloudResourceHelper {
                 .filter(resource -> resource.getType() == type)
                 .findFirst();
     }
+
 }

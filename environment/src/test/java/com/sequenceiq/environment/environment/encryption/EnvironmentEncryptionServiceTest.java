@@ -1,14 +1,17 @@
 package com.sequenceiq.environment.environment.encryption;
 
+import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -23,9 +26,13 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
@@ -33,7 +40,6 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
-import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
@@ -48,6 +54,24 @@ import com.sequenceiq.environment.resourcepersister.CloudResourceRetrieverServic
 class EnvironmentEncryptionServiceTest {
 
     private static final String CLOUD_PLATFORM = "AZURE";
+
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource";
+
+    private static final String ENVIRONMENT_NAME = "envName";
+
+    private static final String REGION = "dummyRegion";
+
+    private static final String USER_NAME = "dummyUser";
+
+    private static final String ACCOUNT_ID = "dummyAccountId";
+
+    private static final String DISK_ENCRYPTION_SET_ID = "dummyDesId";
+
+    private static final long ENVIRONMENT_ID = 1L;
+
+    private static final String KEY_URL = "dummyKeyUrl";
+
+    private static final String RESOURCE_GROUP_NAME = "dummyRG";
 
     @Mock
     private CloudConnector<Object> cloudConnector;
@@ -73,33 +97,46 @@ class EnvironmentEncryptionServiceTest {
     @Captor
     private ArgumentCaptor<DiskEncryptionSetDeletionRequest> diskEncryptionSetDeletionRequestCaptor;
 
+    @Mock
+    private Credential credential;
+
+    @Mock
+    private CloudCredential cloudCredential;
+
     @Test
     void testCreateEncryptionResourcesCreationRequestShouldReturnWithANewEncryptionResourcesCreationRequest() {
         EnvironmentDto environmentDto = EnvironmentDto.builder()
-                .withResourceCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
-                .withId(1L)
-                .withName("envName")
-                .withCloudPlatform("AZURE")
-                .withCredential(new Credential())
-                .withLocationDto(LocationDto.builder().withName("DummyRegion").build())
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
+                .withLocationDto(LocationDto.builder().withName(REGION).build())
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl("dummyKeyUrl").build())
+                                        .withEncryptionKeyUrl(KEY_URL).build())
                                 .withResourceGroup(AzureResourceGroupDto.builder()
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
-                                        .withName("dummyRG").build())
+                                        .withName(RESOURCE_GROUP_NAME).build())
                                 .build())
                         .build())
-                .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
                 .build();
-        DiskEncryptionSetCreationRequest createdDes = underTest.createEncryptionResourcesCreationRequest(environmentDto);
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+        Map<String, String> tags = Map.ofEntries(entry("tag1", "value1"), entry("tag2", "value2"));
+        when(environmentTagProvider.getTags(environmentDto, ENVIRONMENT_CRN)).thenReturn(tags);
 
-        assertEquals(createdDes.getEncryptionKeyUrl(), "dummyKeyUrl");
-        assertEquals(createdDes.getEnvironmentId(), 1L);
-        assertEquals(createdDes.getRegion(), Region.region("DummyRegion"));
-        assertEquals(createdDes.getResourceGroup(), "dummyRG");
-        assertEquals(createdDes.isSingleResourceGroup(), true);
+        DiskEncryptionSetCreationRequest creationRequest = underTest.createEncryptionResourcesCreationRequest(environmentDto);
+
+        assertEquals(creationRequest.getEncryptionKeyUrl(), KEY_URL);
+        assertEquals(creationRequest.getResourceGroupName(), RESOURCE_GROUP_NAME);
+        assertTrue(creationRequest.isSingleResourceGroup());
+        verifyCloudContext(creationRequest.getCloudContext());
+        assertThat(creationRequest.getCloudCredential()).isSameAs(cloudCredential);
+        assertThat(creationRequest.getId()).isEqualTo("randomGeneratedResource");
+        assertThat(creationRequest.getTags()).isSameAs(tags);
     }
 
     @Test
@@ -107,80 +144,113 @@ class EnvironmentEncryptionServiceTest {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
         EnvironmentDto environmentDto = EnvironmentDto.builder()
-                .withResourceCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
-                .withId(1L)
-                .withName("envName")
-                .withCloudPlatform("AZURE")
-                .withCredential(new Credential())
-                .withLocationDto(LocationDto.builder().withName("DummyRegion").build())
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
+                .withLocationDto(LocationDto.builder().withName(REGION).build())
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl("dummyKeyUrl").build())
+                                        .withEncryptionKeyUrl(KEY_URL).build())
                                 .withResourceGroup(AzureResourceGroupDto.builder()
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
-                                        .withName("dummyRG").build())
+                                        .withName(RESOURCE_GROUP_NAME).build())
                                 .build())
                         .build())
-                .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
                 .build();
         CreatedDiskEncryptionSet dummyDes = new CreatedDiskEncryptionSet.Builder()
-                .withDiskEncryptionSetId("dummyDesId")
+                .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
                 .build();
         when(encryptionResources.createDiskEncryptionSet(any(DiskEncryptionSetCreationRequest.class))).thenReturn(dummyDes);
+
         CreatedDiskEncryptionSet createdDes = underTest.createEncryptionResources(environmentDto);
-        assertEquals(createdDes.getDiskEncryptionSetId(), "dummyDesId");
+
+        assertEquals(createdDes.getDiskEncryptionSetId(), DISK_ENCRYPTION_SET_ID);
     }
 
     @Test
     void testShouldNotThrowExceptionWhenCloudPlatformAzure() {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
-        EncryptionResources encryptionResources = underTest.getEncryptionResources("AZURE");
+
+        EncryptionResources encryptionResources = underTest.getEncryptionResources(CLOUD_PLATFORM);
+
         assertNotNull(encryptionResources);
     }
 
     @Test
     void testShouldThrowExceptionWhenCloudPlatformNotAzure() {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+
         EncryptionResourcesNotFoundException exception = assertThrows(EncryptionResourcesNotFoundException.class,
                 () -> underTest.getEncryptionResources("NotAzure"));
+
         assertEquals("No Encryption resources component found for cloud platform: NotAzure", exception.getMessage());
     }
 
     @Test
     void testCreateEncryptionResourcesDeletionRequestShouldReturnWithANewDeletionRequest() {
         EnvironmentDto environmentDto = EnvironmentDto.builder()
-                .withResourceCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
-                .withId(1L)
-                .withName("envName")
-                .withCloudPlatform("AZURE")
-                .withCredential(new Credential())
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
                 .withLocationDto(LocationDto.builder()
-                        .withName("dummyRegion")
+                        .withName(REGION)
                         .build())
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withDiskEncryptionSetId("dummyDesId").build())
+                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID).build())
                                 .build())
                         .build())
-                .withCreator("dummyUser")
-                .withAccountId("dummyAccountId")
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
                 .name("Des")
                 .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
-                .reference("dummyDesId")
+                .reference(DISK_ENCRYPTION_SET_ID)
                 .status(CommonStatus.CREATED)
                 .build();
         when(resourceRetriever.findByResourceReferenceAndStatusAndType(any(), any(), any())).thenReturn(Optional.ofNullable(desCloudResource));
+        when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
+
         DiskEncryptionSetDeletionRequest deletionRequest = underTest.createEncryptionResourcesDeletionRequest(environmentDto);
-        Optional<CloudResource> dummyResource = deletionRequest.getCloudResources().stream()
+
+        Optional<CloudResource> dummyResourceOptional = deletionRequest.getCloudResources().stream()
                 .filter(r -> r.getType() == ResourceType.AZURE_DISK_ENCRYPTION_SET)
                 .findFirst();
-        assertNotNull(dummyResource);
-        assertEquals(dummyResource.get().getReference(), "dummyDesId");
+        assertNotNull(dummyResourceOptional);
+        assertThat(dummyResourceOptional).isNotEmpty();
+        assertEquals(dummyResourceOptional.get().getReference(), DISK_ENCRYPTION_SET_ID);
+
+        verifyCloudContext(deletionRequest.getCloudContext());
+        assertThat(deletionRequest.getCloudCredential()).isSameAs(cloudCredential);
+    }
+
+    private void verifyCloudContext(CloudContext cloudContext) {
+        assertThat(cloudContext).isNotNull();
+        assertThat(cloudContext.getId()).isEqualTo(ENVIRONMENT_ID);
+        assertThat(cloudContext.getName()).isEqualTo(ENVIRONMENT_NAME);
+        assertThat(cloudContext.getCrn()).isEqualTo(ENVIRONMENT_CRN);
+        Platform platform = cloudContext.getPlatform();
+        assertThat(platform).isNotNull();
+        assertThat(platform.value()).isEqualTo(CLOUD_PLATFORM);
+        Variant variant = cloudContext.getVariant();
+        assertThat(variant).isNotNull();
+        assertThat(variant.value()).isEqualTo(CLOUD_PLATFORM);
+        Location location = cloudContext.getLocation();
+        assertThat(location).isNotNull();
+        Region region = location.getRegion();
+        assertThat(region).isNotNull();
+        assertThat(region.getRegionName()).isEqualTo(REGION);
+        assertThat(cloudContext.getUserId()).isEqualTo(USER_NAME);
+        assertThat(cloudContext.getUserName()).isEqualTo(USER_NAME);
+        assertThat(cloudContext.getAccountId()).isEqualTo(ACCOUNT_ID);
     }
 
     @Test
@@ -188,32 +258,34 @@ class EnvironmentEncryptionServiceTest {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
         EnvironmentDto environmentDto = EnvironmentDto.builder()
-                .withResourceCrn("crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource")
-                .withId(1L)
-                .withName("envName")
-                .withCloudPlatform("AZURE")
-                .withCredential(new Credential())
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
                 .withLocationDto(LocationDto.builder()
-                        .withName("dummyRegion")
+                        .withName(REGION)
                         .build())
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withDiskEncryptionSetId("dummyDesId").build())
+                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID).build())
                                 .build())
                         .build())
-                .withCreator("dummyUser")
-                .withAccountId("dummyAccountId")
-                .withCredential(new Credential())
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .withCredential(credential)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
                 .name("Des")
                 .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
-                .reference("dummyDesId")
+                .reference(DISK_ENCRYPTION_SET_ID)
                 .status(CommonStatus.CREATED)
                 .build();
         when(resourceRetriever.findByResourceReferenceAndStatusAndType(any(), any(), any())).thenReturn(Optional.ofNullable(desCloudResource));
+
         underTest.deleteEncryptionResources(environmentDto);
+
         verify(encryptionResources).deleteDiskEncryptionSet(diskEncryptionSetDeletionRequestCaptor.capture());
         verifyDiskEncryptionSetDeletionRequest();
     }
@@ -225,10 +297,12 @@ class EnvironmentEncryptionServiceTest {
         Optional<CloudResource> desCloudResourceOptional = cloudResources.stream()
                 .filter(r -> r.getType() == ResourceType.AZURE_DISK_ENCRYPTION_SET)
                 .findFirst();
-        assertEquals(desCloudResourceOptional.get().getReference(), "dummyDesId");
+        assertThat(desCloudResourceOptional).isNotEmpty();
+        assertEquals(desCloudResourceOptional.get().getReference(), DISK_ENCRYPTION_SET_ID);
         assertEquals(desCloudResourceOptional.get().getName(), "Des");
         assertEquals(desCloudResourceOptional.get().getType(), ResourceType.AZURE_DISK_ENCRYPTION_SET);
-        assertEquals(cloudContext.getAccountId(), "dummyAccountId");
-        assertEquals(cloudContext.getCrn(), "crn:cdp:environments:us-west-1:dummyUser:environment:randomGeneratedResource");
+        assertEquals(cloudContext.getAccountId(), ACCOUNT_ID);
+        assertEquals(cloudContext.getCrn(), ENVIRONMENT_CRN);
     }
+
 }

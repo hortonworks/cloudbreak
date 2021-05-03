@@ -3,28 +3,24 @@ package com.sequenceiq.cloudbreak.cloud.model.encryption;
 import java.util.Map;
 
 public class CreatedDiskEncryptionSet {
-    private String diskEncryptionSetId;
+    private final String diskEncryptionSetId;
 
-    private String diskEncryptionSetPrincipalId;
+    private final String diskEncryptionSetPrincipalObjectId;
 
-    private String diskEncryptionSetLocation;
+    private final String diskEncryptionSetLocation;
 
-    private String diskEncryptionSetName;
+    private final String diskEncryptionSetName;
 
-    private Map<String, String> tags;
+    private final Map<String, String> tags;
 
-    private String diskEncryptionSetResourceGroup;
-
-    public CreatedDiskEncryptionSet(String diskEncryptionSetId) {
-        this.diskEncryptionSetId = diskEncryptionSetId;
-    }
+    private final String diskEncryptionSetResourceGroupName;
 
     private CreatedDiskEncryptionSet(CreatedDiskEncryptionSet.Builder builder) {
         this.diskEncryptionSetId = builder.diskEncryptionSetId;
-        this.diskEncryptionSetPrincipalId = builder.diskEncryptionSetPrincipalId;
+        this.diskEncryptionSetPrincipalObjectId = builder.diskEncryptionSetPrincipalObjectId;
         this.diskEncryptionSetLocation = builder.diskEncryptionSetLocation;
         this.diskEncryptionSetName = builder.diskEncryptionSetName;
-        this.diskEncryptionSetResourceGroup = builder.diskEncryptionSetResourceGroup;
+        this.diskEncryptionSetResourceGroupName = builder.diskEncryptionSetResourceGroupName;
         this.tags = builder.tags;
     }
 
@@ -32,8 +28,8 @@ public class CreatedDiskEncryptionSet {
         return diskEncryptionSetId;
     }
 
-    public String getDiskEncryptionSetPrincipalId() {
-        return diskEncryptionSetPrincipalId;
+    public String getDiskEncryptionSetPrincipalObjectId() {
+        return diskEncryptionSetPrincipalObjectId;
     }
 
     public String getDiskEncryptionSetLocation() {
@@ -44,25 +40,38 @@ public class CreatedDiskEncryptionSet {
         return diskEncryptionSetName;
     }
 
-    public String getDiskEncryptionSetResourceGroup() {
-        return diskEncryptionSetResourceGroup;
+    public String getDiskEncryptionSetResourceGroupName() {
+        return diskEncryptionSetResourceGroupName;
     }
 
     public Map<String, String> getTags() {
         return tags;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CreatedDiskEncryptionSet{");
+        sb.append("diskEncryptionSetId='").append(diskEncryptionSetId).append('\'');
+        sb.append(", diskEncryptionSetPrincipalObjectId='").append(diskEncryptionSetPrincipalObjectId).append('\'');
+        sb.append(", diskEncryptionSetLocation='").append(diskEncryptionSetLocation).append('\'');
+        sb.append(", diskEncryptionSetName='").append(diskEncryptionSetName).append('\'');
+        sb.append(", tags=").append(tags);
+        sb.append(", diskEncryptionSetResourceGroupName='").append(diskEncryptionSetResourceGroupName).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+
     public static final class Builder {
 
         private String diskEncryptionSetId;
 
-        private String diskEncryptionSetPrincipalId;
+        private String diskEncryptionSetPrincipalObjectId;
 
         private String diskEncryptionSetLocation;
 
         private String diskEncryptionSetName;
 
-        private String diskEncryptionSetResourceGroup;
+        private String diskEncryptionSetResourceGroupName;
 
         private Map<String, String> tags;
 
@@ -74,8 +83,8 @@ public class CreatedDiskEncryptionSet {
             return this;
         }
 
-        public CreatedDiskEncryptionSet.Builder withDiskEncryptionSetPrincipalId(String diskEncryptionSetPrincipalId) {
-            this.diskEncryptionSetPrincipalId = diskEncryptionSetPrincipalId;
+        public CreatedDiskEncryptionSet.Builder withDiskEncryptionSetPrincipalObjectId(String diskEncryptionSetPrincipalObjectId) {
+            this.diskEncryptionSetPrincipalObjectId = diskEncryptionSetPrincipalObjectId;
             return this;
         }
 
@@ -94,8 +103,8 @@ public class CreatedDiskEncryptionSet {
             return this;
         }
 
-        public CreatedDiskEncryptionSet.Builder withDiskEncryptionSetResourceGroup(String diskEncryptionSetResourceGroup) {
-            this.diskEncryptionSetResourceGroup = diskEncryptionSetResourceGroup;
+        public CreatedDiskEncryptionSet.Builder withDiskEncryptionSetResourceGroupName(String diskEncryptionSetResourceGroupName) {
+            this.diskEncryptionSetResourceGroupName = diskEncryptionSetResourceGroupName;
             return this;
         }
 

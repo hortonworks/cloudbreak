@@ -5,7 +5,10 @@ import javax.inject.Inject;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
+import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCheckerTask;
 import com.sequenceiq.cloudbreak.cloud.azure.task.image.AzureManagedImageCreationCheckerContext;
@@ -47,6 +50,11 @@ public class AzurePollTaskFactory {
     public PollTask<Boolean> dnsZoneCreationCheckerTask(AuthenticatedContext authenticatedContext,
             AzureDnsZoneCreationCheckerContext azureDnsZoneCreationCheckerContext) {
         return createPollTask(AzureDnsZoneCreationCheckerTask.NAME, authenticatedContext, azureDnsZoneCreationCheckerContext);
+    }
+
+    public PollTask<DiskEncryptionSetInner> diskEncryptionSetCreationCheckerTask(AuthenticatedContext authenticatedContext,
+            DiskEncryptionSetCreationCheckerContext checkerContext) {
+        return createPollTask(DiskEncryptionSetCreationCheckerTask.NAME, authenticatedContext, checkerContext);
     }
 
     @SuppressWarnings("unchecked")

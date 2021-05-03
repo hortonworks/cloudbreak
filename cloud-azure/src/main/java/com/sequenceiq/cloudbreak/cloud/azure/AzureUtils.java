@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorServ
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudExceptionConverter;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -103,6 +104,9 @@ public class AzureUtils {
 
     @Inject
     private AzureVirtualMachineService azureVirtualMachineService;
+
+    @Inject
+    private CloudExceptionConverter cloudExceptionConverter;
 
     public CloudResource getTemplateResource(Iterable<CloudResource> resourceList) {
         for (CloudResource resource : resourceList) {
@@ -662,8 +666,7 @@ public class AzureUtils {
     }
 
     /**
-     * The functionality, offered by azure azure, does not work. Marketplace image users should accept the terms and conditions
-     * manually.
+     * The functionality offered by Azure does not work. Marketplace image users should accept the terms and conditions manually.
      * @param azureClient AzureClient
      * @param azureMarketplaceImage The image to be signed
      */
@@ -717,14 +720,28 @@ public class AzureUtils {
     }
 
     public CloudConnectorException convertToCloudConnectorException(CloudException e, String actionDescription) {
-        LOGGER.warn("{} failed, cloud exception happened: ", actionDescription, e);
+        LOGGER.warn(String.format("%s failed, cloud exception happened:", actionDescription), e);
         if (e.body() != null && e.body().details() != null) {
             String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
             return new CloudConnectorException(String.format("%s failed, status code %s, error message: %s, details: %s",
-                    actionDescription, e.body().code(), e.body().message(), details));
+                    actionDescription, e.body().code(), e.body().message(), details), e);
         } else {
-            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e), e);
         }
+    }
+
+    public CloudConnectorException convertToCloudConnectorException(Throwable e, String actionDescription) {
+        CloudConnectorException result;
+        if (e instanceof CloudException) {
+            result = convertToCloudConnectorException((CloudException) e, actionDescription);
+        } else {
+            result = cloudExceptionConverter.convertToCloudConnectorException(e, actionDescription);
+        }
+        return result;
+    }
+
+    public Retry.ActionFailedException convertToActionFailedExceptionCausedByCloudConnectorException(Throwable e, String actionDescription) {
+        return Retry.ActionFailedException.ofCause(convertToCloudConnectorException(e, actionDescription));
     }
 
     // Encode input to 8 digit hex output

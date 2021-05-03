@@ -136,4 +136,5 @@ public class AzureClientCredentials {
             return Optional.empty();
         }
     }
+
 }

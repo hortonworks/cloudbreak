@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import static org.junit.Assert.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,23 +25,29 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.microsoft.azure.CloudError;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudExceptionConverter;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 import rx.Completable;
 import rx.plugins.RxJavaHooks;
@@ -65,6 +72,9 @@ public class AzureUtilsTest {
 
     @Mock
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
+
+    @Mock
+    private CloudExceptionConverter cloudExceptionConverter;
 
     @InjectMocks
     private AzureUtils underTest;
@@ -374,9 +384,8 @@ public class AzureUtilsTest {
         when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer2"))).thenReturn(Completable.error(new RuntimeException("failure message 1")));
         when(azureClient.deleteLoadBalancerAsync(anyString(), eq("loadbalancer3"))).thenReturn(Completable.error(new RuntimeException("failure message 2")));
 
-        assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2", "loadbalancer3"));
-        });
+        assertThrows(CloudbreakServiceException.class,
+                () -> underTest.deleteLoadBalancers(azureClient, "resourceGroup", List.of("loadbalancer1", "loadbalancer2", "loadbalancer3")));
 
         verify(azureClient, times(3)).deleteLoadBalancerAsync(anyString(), anyString());
     }
@@ -437,10 +446,93 @@ public class AzureUtilsTest {
         String desName = underTest.generateDesNameByNameAndId(name, id);
 
         assertNotNull(desName, "The generated name must not be null!");
-        assertNotEquals("aVeryVeryVeryLoooooooooooooooooooooooooooooooooooooongNaaaaaaaaaaaaaaaaaaaaame",
-                desName, "The resource name is not the excepted one!");
+        assertNotEquals(
+                desName, "The resource name is not the excepted one!", "aVeryVeryVeryLoooooooooooooooooooooooooooooooooooooongNaaaaaaaaaaaaaaaaaaaaame");
         assertEquals(MAX_DISK_ENCRYPTION_SET_NAME_LENGTH, desName.length(), "The resource name length is wrong");
 
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenCloudExceptionAndDetails() {
+        CloudError cloudError = new CloudError()
+                .withCode("123")
+                .withMessage("foobar");
+        cloudError.details().add(new CloudError().withMessage("detail1"));
+        cloudError.details().add(new CloudError().withMessage("detail2"));
+        CloudException e = new CloudException("Serious problem", null, cloudError);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
+
+        verifyCloudConnectorException(result, e,
+                "Checking resources failed, status code 123, error message: foobar, details: detail1, detail2");
+    }
+
+    private void verifyCloudConnectorException(CloudConnectorException cloudConnectorException, Throwable causeExpected, String messageExpected) {
+        assertThat(cloudConnectorException).isNotNull();
+        assertThat(cloudConnectorException).hasMessage(messageExpected);
+        assertThat(cloudConnectorException).hasCauseReference(causeExpected);
+    }
+
+    private static CloudException createCloudExceptionWithNoDetails(boolean withBody) {
+        CloudException e;
+        if (withBody) {
+            CloudError cloudError = new CloudError();
+            ReflectionTestUtils.setField(cloudError, "details", null);
+            e = new CloudException("Serious problem", null, cloudError);
+        } else {
+            e = new CloudException("Serious problem", null);
+        }
+        return e;
+    }
+
+    static Object[][] convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider() {
+        return new Object[][]{
+                // testCaseName e
+                {"CloudException without body", createCloudExceptionWithNoDetails(false)},
+                {"CloudException with body but null details", createCloudExceptionWithNoDetails(true)},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider")
+    void convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetails(String testCaseName, CloudException e) {
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
+
+        verifyCloudConnectorException(result, e,
+                "Checking resources failed: 'com.microsoft.azure.CloudException: Serious problem', please go to Azure Portal for detailed message");
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenThrowableAndCloudException() {
+        Throwable e = createCloudExceptionWithNoDetails(false);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
+
+        verifyCloudConnectorException(result, e,
+                "Checking resources failed: 'com.microsoft.azure.CloudException: Serious problem', please go to Azure Portal for detailed message");
+    }
+
+    @Test
+    void convertToCloudConnectorExceptionTestWhenThrowableAndNotCloudException() {
+        Throwable e = new UnsupportedOperationException("Serious problem");
+        CloudConnectorException cloudConnectorException = new CloudConnectorException("foobar");
+        when(cloudExceptionConverter.convertToCloudConnectorException(e, "Checking resources")).thenReturn(cloudConnectorException);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
+
+        assertThat(result).isSameAs(cloudConnectorException);
+    }
+
+    @Test
+    void convertToActionFailedExceptionCausedByCloudConnectorExceptionTest() {
+        Throwable e = new UnsupportedOperationException("Serious problem");
+        CloudConnectorException cloudConnectorException = new CloudConnectorException("foobar");
+        when(cloudExceptionConverter.convertToCloudConnectorException(e, "Checking resources")).thenReturn(cloudConnectorException);
+
+        Retry.ActionFailedException result = underTest.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Checking resources");
+
+        assertThat(result).isNotNull();
+        assertThat(result.getCause()).isSameAs(cloudConnectorException);
     }
 
     @NotNull

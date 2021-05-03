@@ -57,4 +57,15 @@ public class CloudCredential extends DynamicModel {
         this.verifyPermissions = verifyPermissions;
     }
 
+    // Must not reveal any secrets, hence not including DynamicModel.toString()!
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("CloudCredential{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", verifyPermissions=").append(verifyPermissions);
+        sb.append('}');
+        return sb.toString();
+    }
+
 }
