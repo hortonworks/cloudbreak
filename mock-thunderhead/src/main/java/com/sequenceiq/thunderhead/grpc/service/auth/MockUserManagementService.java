@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
@@ -338,6 +339,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.conclusion.checker.send.user.event.enable}")
     private boolean conclusionCheckerSendUserEvent;
+
+    @Value("${auth.mock.datahub.nodestatus.check.enable}")
+    private boolean datahubNodestatusCheck;
 
     private String cbLicense;
 
@@ -687,6 +691,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (conclusionCheckerSendUserEvent) {
             builder.addEntitlements(createEntitlement(CDP_CONCLUSION_CHECKER_SEND_USER_EVENT));
+        }
+        if (datahubNodestatusCheck) {
+            builder.addEntitlements(createEntitlement(CDP_DATAHUB_NODESTATUS_CHECK));
         }
         if (enableAzureDiskSSEWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));

@@ -44,6 +44,7 @@ auth:
     endpointgateway.skip.validation: false
     cm.sync.command.poller.enable: true
     network.preflight.notifications.enable: true
+    datahub.nodestatus.check.enable: true
     user.sync.credentials.update.optimization.enable: true
     azure:
       disk:

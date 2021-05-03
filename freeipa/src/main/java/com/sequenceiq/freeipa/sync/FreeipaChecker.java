@@ -109,6 +109,10 @@ public class FreeipaChecker {
                         () -> freeIpaNodeStatusService.nodeServicesReport(stack, instanceMetaData), LOGGER,
                         ":::Auto sync::: FreeIPA services report ran in {}ms");
                 logReportResult(instanceMetaData, servicesReportRPCResponse, "services");
+                RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsReportRPCResponse = checkedMeasure(
+                        () -> freeIpaNodeStatusService.nodeSystemMetricsReport(stack, instanceMetaData), LOGGER,
+                        ":::Auto sync::: FreeIPA system metrics report ran in {}ms");
+                logReportResult(instanceMetaData, systemMetricsReportRPCResponse, "system metrics");
             } catch (Exception e) {
                 LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
             }

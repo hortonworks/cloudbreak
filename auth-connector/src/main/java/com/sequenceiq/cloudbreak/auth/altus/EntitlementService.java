@@ -17,6 +17,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
@@ -103,6 +104,10 @@ public class EntitlementService {
 
     public boolean networkPreflightNotificationsEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_NETWORK_PREFLIGHT_NOTIFICATIONS);
+    }
+
+    public boolean datahubNodestatusCheckEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATAHUB_NODESTATUS_CHECK);
     }
 
     public boolean automaticUsersyncPollerEnabled(String accountId) {

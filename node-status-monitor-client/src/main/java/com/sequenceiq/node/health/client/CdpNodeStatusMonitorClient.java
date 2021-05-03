@@ -25,6 +25,8 @@ import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.client.RpcListener;
+import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
+import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
 public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
@@ -59,31 +61,73 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
         restClient.close();
     }
 
+    public CdpNodeStatuses nodeStatusReport(CdpNodeStatusRequest request) throws CdpNodeStatusMonitorClientException {
+        CdpNodeStatuses.Builder responseBuilder = CdpNodeStatuses.Builder.builder()
+                .withNetworkReport(nodeNetworkReport(true))
+                .withServicesReport(nodeServicesReport(true))
+                .withSystemMetricsReport(systemMetricsReport(true));
+        if (request.isMetering()) {
+            responseBuilder.withMeteringReport(nodeMeteringReport(true));
+        }
+        if (request.isCmMonitoring()) {
+            responseBuilder.withCmMetricsReport(cmMetricsReport(true));
+        }
+        return responseBuilder.build();
+    }
+
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeMeteringReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node metering check", "/api/v1/metering", nodeStatusReportBuilderFunction());
+        return nodeMeteringReport(false);
+    }
+
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeMeteringReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node metering check", "/api/v1/metering", nodeStatusReportBuilderFunction(), acceptNotFound);
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeNetworkReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node network check", "/api/v1/network", nodeStatusReportBuilderFunction());
+        return nodeNetworkReport(false);
+    }
+
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeNetworkReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node network check", "/api/v1/network", nodeStatusReportBuilderFunction(), acceptNotFound);
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeServicesReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node services check", "/api/v1/services", nodeStatusReportBuilderFunction());
+        return nodeServicesReport(false);
+    }
+
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeServicesReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node services check", "/api/v1/services", nodeStatusReportBuilderFunction(), acceptNotFound);
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node system metrics check", "/api/v1/system/metrics", nodeStatusReportBuilderFunction());
+        return systemMetricsReport(false);
+    }
+
+    public RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node system metrics check", "/api/v1/system/metrics", nodeStatusReportBuilderFunction(), acceptNotFound);
     }
 
     public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport() throws CdpNodeStatusMonitorClientException {
-        return invoke("node salt health check", "/api/v1/salt", saltHealthBuilderFunction());
+        return saltReport(false);
     }
 
-    public RPCResponse<NodeStatusProto.SaltHealthReport> saltPing() throws CdpNodeStatusMonitorClientException {
-        return invoke("node salt ping", "/api/v1/salt/ping", saltHealthBuilderFunction());
+    public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node salt health check", "/api/v1/salt", saltHealthBuilderFunction(), acceptNotFound);
     }
 
-    private <T> RPCResponse<T> invoke(String name, String path, Function<String, T> buildProtoFunction)
+    public RPCResponse<NodeStatusProto.SaltHealthReport> saltPing(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node salt ping", "/api/v1/salt/ping", saltHealthBuilderFunction(), acceptNotFound);
+    }
+
+    public RPCResponse<NodeStatusProto.CmMetricsReport> cmMetricsReport() throws CdpNodeStatusMonitorClientException {
+        return cmMetricsReport(false);
+    }
+
+    public RPCResponse<NodeStatusProto.CmMetricsReport> cmMetricsReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
+        return invoke("node cm metrics check", "/api/v1/cm_services/metrics", cmMetricsReportBuilderFunction(), acceptNotFound);
+    }
+
+    private <T> RPCResponse<T> invoke(String name, String path, Function<String, T> buildProtoFunction, boolean acceptNotFound)
             throws CdpNodeStatusMonitorClientException {
         Builder builder = rpcTarget.path(path)
                 .request()
@@ -94,9 +138,13 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
             checkResponseStatus(response);
             return toRpcResponse(name, response, buildProtoFunction);
         } catch (CdpNodeStatusMonitorClientException e) {
+            if (acceptNotFound) {
+                LOGGER.debug("Get 404 from node status response for {}, but it is accepted as an empty response.", path);
+                return null;
+            }
             throw e;
         } catch (Throwable throwable) {
-            String message = String.format("Invoke FreeIPA node status check failed: %s", throwable.getLocalizedMessage());
+            String message = String.format("Invoke node status check failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
             throw new CdpNodeStatusMonitorClientException(message, throwable);
         }
@@ -117,7 +165,7 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
     private void checkResponseStatus(Response response) throws CdpNodeStatusMonitorClientException {
         if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL &&
                 response.getStatus() != Status.SERVICE_UNAVAILABLE.getStatusCode()) {
-            String message = String.format("Invoke FreeIPA health check failed: %d", response.getStatus());
+            String message = String.format("Invoke node status check check failed: %d", response.getStatus());
             LOGGER.warn("{}, reason: {}", message, response.readEntity(String.class));
             throw new CdpNodeStatusMonitorClientException(message, response.getStatus());
         }
@@ -158,6 +206,22 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
         return message -> {
             NodeStatusProto.SaltHealthReport.Builder builder =
                     NodeStatusProto.SaltHealthReport.newBuilder();
+            try {
+                JsonFormat.parser()
+                        .ignoringUnknownFields()
+                        .merge(message, builder);
+                return builder.build();
+            } catch (InvalidProtocolBufferException e) {
+                // skip
+            }
+            return null;
+        };
+    }
+
+    private  Function<String, NodeStatusProto.CmMetricsReport> cmMetricsReportBuilderFunction() {
+        return message -> {
+            NodeStatusProto.CmMetricsReport.Builder builder =
+                    NodeStatusProto.CmMetricsReport.newBuilder();
             try {
                 JsonFormat.parser()
                         .ignoringUnknownFields()
