@@ -10,11 +10,9 @@ class SpotTestResultProvider {
 
     private static final String MESSAGE_PREFIX = "[Spot test result]";
 
-    private static final String AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. " +
-            "InsufficientInstanceCapacity - There is no Spot capacity available that matches your request.";
+    private static final String AWS_INSUFFICIENT_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. InsufficientInstanceCapacity";
 
-    private static final String AWS_UNFULFILLABLE_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. " +
-            "UnfulfillableCapacity - There is no capacity available that matches your request.";
+    private static final String AWS_UNFULFILLABLE_SPOT_CAPACITY_MESSAGE = "Could not launch Spot Instances. UnfulfillableCapacity";
 
     private final String type;
 
