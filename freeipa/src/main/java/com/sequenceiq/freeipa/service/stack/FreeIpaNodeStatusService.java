@@ -51,6 +51,18 @@ public class FreeIpaNodeStatusService {
         }
     }
 
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeSystemMetricsReport(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+        try (CdpNodeStatusMonitorClient client = getClient(stack, instance)) {
+            LOGGER.debug("Fetching system metrics report for instance: {}", instance.getInstanceId());
+            return client.systemMetricsReport();
+        } catch (FreeIpaClientException e) {
+            throw new RetryableFreeIpaClientException("Error during getting node system metrics report", e);
+        } catch (Exception e) {
+            LOGGER.error("Getting FreeIPA node services report failed", e);
+            throw new RetryableFreeIpaClientException("Getting FreeIPA node services report failed", e);
+        }
+    }
+
     public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
         try (CdpNodeStatusMonitorClient client = getClient(stack, instance)) {
             LOGGER.debug("Fetching salt report for instance: {}", instance.getInstanceId());
