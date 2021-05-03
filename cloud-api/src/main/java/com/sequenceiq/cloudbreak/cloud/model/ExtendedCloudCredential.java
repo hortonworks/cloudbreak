@@ -40,4 +40,18 @@ public class ExtendedCloudCredential extends CloudCredential {
     public String getAccountId() {
         return accountId;
     }
+
+    // Must not reveal any secrets, hence not including DynamicModel.toString()!
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("ExtendedCloudCredential{");
+        sb.append("description='").append(description).append('\'');
+        sb.append(", cloudPlatform='").append(cloudPlatform).append('\'');
+        sb.append(", userCrn='").append(userCrn).append('\'');
+        sb.append(", accountId='").append(accountId).append('\'');
+        sb.append(", cloudCredential=").append(super.toString());
+        sb.append('}');
+        return sb.toString();
+    }
+
 }

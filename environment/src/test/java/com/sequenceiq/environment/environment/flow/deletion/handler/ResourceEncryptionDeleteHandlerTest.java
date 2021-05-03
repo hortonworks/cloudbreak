@@ -1,15 +1,14 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PUBLICKEY_DELETE_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -27,13 +26,13 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -80,6 +79,9 @@ class ResourceEncryptionDeleteHandlerTest {
     @Captor
     private ArgumentCaptor<Headers> headersArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<HandlerFailureConjoiner> handlerFailureConjoinerCaptor;
+
     @BeforeEach
     void setUp() {
         EnvironmentDto eventDto = EnvironmentDto.builder()
@@ -123,16 +125,19 @@ class ResourceEncryptionDeleteHandlerTest {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenThrow(error);
 
         underTest.accept(environmentDtoEvent);
-        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
-        verify(mockExceptionProcessor, times(1))
-                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector()));
+
+        verify(mockExceptionProcessor).handle(handlerFailureConjoinerCaptor.capture(), any(Logger.class), eq(eventSender),
+                eq(DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector()));
+        verifyEnvDeleteFailedEvent(error);
     }
 
     @Test
     void testEnvironmentStatusShouldBeUpdatedWhenDesIsDeleted() {
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+
         underTest.accept(environmentDtoEvent);
+
         verify(environmentEncryptionService).deleteEncryptionResources(environmentDtoEvent.getData().getEnvironmentDto());
         assertEquals(environment.getStatus(), EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
@@ -144,7 +149,9 @@ class ResourceEncryptionDeleteHandlerTest {
         Environment environment = new Environment();
         environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+
         underTest.accept(environmentDtoEvent);
+
         assertEquals(environment.getStatus(), EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
         verify(environmentEncryptionService, never()).deleteEncryptionResources(environmentDtoEvent.getData().getEnvironmentDto());
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
@@ -161,8 +168,10 @@ class ResourceEncryptionDeleteHandlerTest {
                 .withName(ENVIRONMENT_NAME)
                 .withCloudPlatform("AZURE")
                 .build());
+
         underTest.accept(environmentDtoEvent);
-        assertEquals(environment.getStatus(), null);
+
+        assertNull(environment.getStatus());
         verify(environmentEncryptionService, never()).deleteEncryptionResources(environmentDtoEvent.getData().getEnvironmentDto());
         verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), headersArgumentCaptor.capture());
         verifyEnvDeleteEvent();
@@ -172,13 +181,14 @@ class ResourceEncryptionDeleteHandlerTest {
     void testErrorWhenDeleteEncryptionResourcesResultsInErrorWhileEnvironmentSave() {
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
-        when(environmentService.save(environment)).thenThrow(new IllegalArgumentException("error"));
+        IllegalArgumentException error = new IllegalArgumentException("error");
+        when(environmentService.save(environment)).thenThrow(error);
 
         underTest.accept(environmentDtoEvent);
 
-        verify(mockExceptionProcessor, times(1)).handle(any(), any(), any(), any());
-        verify(mockExceptionProcessor, times(1))
-                .handle(any(HandlerFailureConjoiner.class), any(Logger.class), eq(eventSender), eq(DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector()));
+        verify(mockExceptionProcessor).handle(handlerFailureConjoinerCaptor.capture(), any(Logger.class), eq(eventSender),
+                eq(DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector()));
+        verifyEnvDeleteFailedEvent(error, true, "Error occurred while deleting encryption resources: error");
     }
 
     @Test
@@ -201,17 +211,21 @@ class ResourceEncryptionDeleteHandlerTest {
     }
 
     private void verifyEnvDeleteFailedEvent(Exception exceptionExpected) {
-        BaseNamedFlowEvent event = baseNamedFlowEventCaptor.getValue();
-        assertThat(event).isInstanceOf(EnvDeleteFailedEvent.class);
-
-        EnvDeleteFailedEvent envDeleteFailedEvent = (EnvDeleteFailedEvent) event;
-        assertThat(envDeleteFailedEvent.getResourceName()).isEqualTo(ENVIRONMENT_NAME);
-        assertThat(envDeleteFailedEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
-        assertThat(envDeleteFailedEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
-        assertThat(envDeleteFailedEvent.selector()).isEqualTo(FAILED_ENV_DELETE_EVENT.selector());
-        assertEquals(envDeleteFailedEvent.getException().getMessage(), exceptionExpected.getMessage());
-        assertEquals(envDeleteFailedEvent.getException().getClass(), exceptionExpected.getClass());
-
-        assertThat(headersArgumentCaptor.getValue()).isSameAs(headers);
+        verifyEnvDeleteFailedEvent(exceptionExpected, false, "");
     }
+
+    private void verifyEnvDeleteFailedEvent(Exception exceptionExpected, boolean wrappedInCloudbreakServiceException,
+            String messageCloudbreakServiceExceptionExpected) {
+        HandlerFailureConjoiner conjoiner = handlerFailureConjoinerCaptor.getValue();
+
+        Exception exception = conjoiner.getException();
+        if (wrappedInCloudbreakServiceException) {
+            assertThat(exception).isInstanceOf(CloudbreakServiceException.class);
+            assertThat(exception).hasMessage(messageCloudbreakServiceExceptionExpected);
+            assertThat(exception.getCause()).isSameAs(exceptionExpected);
+        } else {
+            assertThat(exception).isSameAs(exceptionExpected);
+        }
+    }
+
 }

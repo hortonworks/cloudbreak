@@ -36,4 +36,5 @@ public interface Retry {
             return new ActionFailedException(cause != null ? cause.getMessage() : null, cause);
         }
     }
+
 }

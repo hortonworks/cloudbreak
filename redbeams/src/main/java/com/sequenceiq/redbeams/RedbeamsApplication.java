@@ -26,6 +26,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
         "com.sequenceiq.cloudbreak.cloud.gcp",
         "com.sequenceiq.cloudbreak.cloud.configuration",
         "com.sequenceiq.cloudbreak.cloud.credential",
+        "com.sequenceiq.cloudbreak.cloud.exception",
         "com.sequenceiq.cloudbreak.cloud.handler",
         "com.sequenceiq.cloudbreak.cloud.handler.service",
         "com.sequenceiq.cloudbreak.cloud.init",
