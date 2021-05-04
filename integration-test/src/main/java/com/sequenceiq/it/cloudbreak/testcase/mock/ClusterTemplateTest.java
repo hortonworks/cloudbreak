@@ -362,7 +362,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
             assertNotNull(entity);
             assertNotNull(entity.getResponses());
             long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
-            long expectedCount = 392;
+            long expectedCount = 440;
             assertEquals("Should have " + expectedCount + " of default cluster templates.", expectedCount, defaultCount);
         } catch (Exception e) {
             throw new TestFailException(String.format("Failed to validate default count of cluster templates: %s", e.getMessage()), e);
