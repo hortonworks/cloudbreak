@@ -231,7 +231,8 @@ class SdxServiceTest {
         existing.setEnvName("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Collections.singletonList(existing));
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("SDX cluster exists for environment name: envir", badRequestException.getMessage());
     }
 
@@ -241,7 +242,8 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Cloud storage parameter is required.", badRequestException.getMessage());
     }
 
@@ -253,7 +255,7 @@ class SdxServiceTest {
         StackV4Request stackV4Request = new StackV4Request();
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         stackV4Request.setCluster(clusterV4Request);
-        underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
     }
 
     @Test
@@ -272,7 +274,8 @@ class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -323,7 +326,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
@@ -343,7 +347,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         // AWS 7.1.0 light duty contains exactly 2 instance groups
         assertThat(createdSdxCluster.getStackRequest()).containsSubsequence(
@@ -367,7 +372,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         assertEquals("s3a://some/dir", createdSdxCluster.getCloudStorageBaseLocation());
     }
@@ -396,7 +402,8 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "BadRequestException should thrown");
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)),
+                "BadRequestException should thrown");
         assertEquals(exceptionMessage, badRequestException.getMessage());
     }
 
@@ -431,7 +438,8 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "BadRequestException should thrown");
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)),
+                "BadRequestException should thrown");
         assertEquals("The environment is in delete in progress phase. Please create a new environment first!", badRequestException.getMessage());
     }
 
@@ -459,7 +467,8 @@ class SdxServiceTest {
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null), "BadRequestException should thrown");
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)),
+                "BadRequestException should thrown");
         assertEquals("The environment is in failed phase. Please fix the environment or create a new one first!", badRequestException.getMessage());
     }
 
@@ -589,7 +598,8 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(false);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -626,7 +636,8 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform);
         sdxClusterRequest.setEnableRangerRaz(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(true);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -645,7 +656,7 @@ class SdxServiceTest {
         sdxClusterRequest.setEnableRangerRaz(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning Ranger Raz is not enabled for this account.", badRequestException.getMessage());
     }
 
@@ -657,7 +668,7 @@ class SdxServiceTest {
         sdxClusterRequest.setEnableRangerRaz(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
     }
 
@@ -669,7 +680,7 @@ class SdxServiceTest {
         sdxClusterRequest.setEnableRangerRaz(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("1. Provisioning Ranger Raz is not enabled for this account.\n" +
                 "2. Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
     }
@@ -693,7 +704,7 @@ class SdxServiceTest {
         sdxClusterRequest.setEnableRangerRaz(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());
     }
 
@@ -716,7 +727,7 @@ class SdxServiceTest {
         sdxClusterRequest.setEnableRangerRaz(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());
     }
 
@@ -739,7 +750,8 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -756,7 +768,7 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE);
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
                 "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
     }
@@ -769,7 +781,7 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.GCP);
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.GCP.name()) +
                 "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
     }
@@ -793,7 +805,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
         Assertions.assertEquals(id, createdSdxCluster.getId());
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -810,7 +823,7 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
                 + invalidRuntime, badRequestException.getMessage());
     }
@@ -823,7 +836,7 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
                 + invalidRuntime, badRequestException.getMessage());
     }
@@ -892,7 +905,7 @@ class SdxServiceTest {
         when(entitlementService.dataLakeCustomImageEnabled(anyString())).thenReturn(true);
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.imageCatalogV4Endpoint()).thenReturn(imageCatalogV4Endpoint);
-        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any())).thenReturn(imagesV4Response);
+        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any(), any())).thenReturn(imagesV4Response);
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
@@ -907,7 +920,7 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        Pair<SdxCluster, FlowIdentifier> result = underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest);
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest));
 
         SdxCluster createdSdxCluster = result.getLeft();
         StackV4Request stackV4Request = JsonUtil.readValue(createdSdxCluster.getStackRequest(), StackV4Request.class);
