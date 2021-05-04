@@ -221,20 +221,21 @@ public class ImageService {
     public Set<Component> getComponents(Stack stack, Map<InstanceGroupType, String> userData, StatedImage statedImage, String imageName)
             throws CloudbreakImageCatalogException {
         Set<Component> components = new HashSet<>();
-        Image image = new Image(imageName, userData, statedImage.getImage().getOs(), statedImage.getImage().getOsType(),
-                statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), statedImage.getImage().getUuid(),
-                statedImage.getImage().getPackageVersions());
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage = statedImage.getImage();
+        Image image = new Image(imageName, userData, catalogBasedImage.getOs(), catalogBasedImage.getOsType(),
+                statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), catalogBasedImage.getUuid(),
+                catalogBasedImage.getPackageVersions());
         Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(image), stack);
         components.add(imageComponent);
-        if (statedImage.getImage().getStackDetails() != null) {
-            StackDetails stackDetails = statedImage.getImage().getStackDetails();
+        if (catalogBasedImage.getStackDetails() != null) {
+            StackDetails stackDetails = catalogBasedImage.getStackDetails();
             StackType stackType = determineStackType(stackDetails);
-            Component stackRepoComponent = getStackComponent(stack, stackDetails, stackType, statedImage.getImage().getOsType());
+            Component stackRepoComponent = getStackComponent(stack, stackDetails, stackType, catalogBasedImage.getOsType());
             components.add(stackRepoComponent);
-            components.add(getClusterManagerComponent(stack, statedImage.getImage(), stackType));
+            components.add(getClusterManagerComponent(stack, catalogBasedImage, stackType));
         }
-        statedImage.getImage().getPreWarmParcels().forEach(parcel -> {
-            Optional<ClouderaManagerProduct> product = preWarmParcelParser.parseProductFromParcel(parcel, statedImage.getImage().getPreWarmCsd());
+        catalogBasedImage.getPreWarmParcels().forEach(parcel -> {
+            Optional<ClouderaManagerProduct> product = preWarmParcelParser.parseProductFromParcel(parcel, catalogBasedImage.getPreWarmCsd());
             product.ifPresent(p -> components.add(new Component(CDH_PRODUCT_DETAILS, p.getName(), new Json(p), stack)));
         });
         return components;
