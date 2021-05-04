@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -56,7 +57,15 @@ public class AzureImageSetupService {
     @Inject
     private CustomVMImageNameProvider customVMImageNameProvider;
 
+    @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
+
     public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
+
+        if (azureImageFormatValidator.isMarketplaceImageFormat(image)) {
+            LOGGER.info("Skipping image copy check as target image ({}) is an Azure Marketplace image!", image.getImageName());
+            return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+        }
         CloudContext cloudContext = ac.getCloudContext();
         String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -71,30 +80,7 @@ public class AzureImageSetupService {
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, cloudContext, stack);
         try {
-            CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, azureImageInfo.getImageName());
-            boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName());
-            if (copyState == null && storageContainsImage) {
-                LOGGER.debug("The copy has been finished because the storage account already contains the image.");
-                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-            } else if (copyState == null && !storageContainsImage) {
-                throw new CloudConnectorException(
-                        "Image copy failed because the copy state is not available and the storage account does not contains the image.");
-            }
-            if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
-                if (!storageContainsImage) {
-                    LOGGER.error("The image has not been found in the storage account.");
-                    return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
-                }
-                LOGGER.info("The image copy has been finished.");
-                return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
-            } else if (isCopyStatusFailed(copyState)) {
-                LOGGER.error("The image copy has failed with status: {}", copyState.getStatus());
-                return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
-            } else {
-                int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
-                LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
-                return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
-            }
+            return getImageStatusResult(imageResourceGroupName, client, azureImageInfo, imageStorageName);
         } catch (RuntimeException ex) {
             String msg = String.format("Failed to check the status of the image in resource group '%s', image storage name '%s'",
                     imageResourceGroupName, imageStorageName);
@@ -103,11 +89,42 @@ public class AzureImageSetupService {
         }
     }
 
+    private ImageStatusResult getImageStatusResult(String imageResourceGroupName, AzureClient client, AzureImageInfo azureImageInfo, String imageStorageName) {
+        CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES_CONTAINER, azureImageInfo.getImageName());
+        boolean storageContainsImage = storageContainsImage(client, imageResourceGroupName, imageStorageName, azureImageInfo.getImageName());
+        if (copyState == null && storageContainsImage) {
+            LOGGER.debug("The copy has been finished because the storage account already contains the image.");
+            return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+        } else if (copyState == null && !storageContainsImage) {
+            throw new CloudConnectorException(
+                    "Image copy failed because the copy state is not available and the storage account does not contains the image.");
+        }
+        if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
+            if (!storageContainsImage) {
+                LOGGER.error("The image has not been found in the storage account.");
+                return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
+            }
+            LOGGER.info("The image copy has been finished.");
+            return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
+        } else if (isCopyStatusFailed(copyState)) {
+            LOGGER.error("The image copy has failed with status: {}", copyState.getStatus());
+            return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
+        } else {
+            int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
+            LOGGER.info("CopyStatus, Total:{} / Pending:{} bytes, {}%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage);
+            return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
+        }
+    }
+
     private boolean isCopyStatusFailed(CopyState copyState) {
         return CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus());
     }
 
     public void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String region, AzureClient client) {
+        if (azureImageFormatValidator.isMarketplaceImageFormat(image)) {
+            LOGGER.info("Skipping image copy as target image ({}) is an Azure Marketplace image!", image.getImageName());
+            return;
+        }
         CloudContext cloudContext = ac.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
         String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);

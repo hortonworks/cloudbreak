@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.junit.Before;
@@ -21,6 +22,9 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentExportResult;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -28,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -44,6 +49,8 @@ public class AzureResourceConnectorTest {
     private static final String STACK_NAME = "someStackNameValue";
 
     private static final String RESOURCE_GROUP_NAME = "resourceGroupName";
+
+    private static final String IMAGE_NAME = "image-name";
 
     @Mock
     private AuthenticatedContext ac;
@@ -90,11 +97,22 @@ public class AzureResourceConnectorTest {
     @Mock
     private AzureCloudResourceService azureCloudResourceService;
 
+    @Mock
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService;
+
+    @Mock
+    private AzureImageFormatValidator azureImageFormatValidator;
+
+    @Mock
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+
     private List<CloudResource> instances;
 
     private List<Group> groups;
 
     private Network network;
+
+    private Image imageModel;
 
     @Before
     public void setUp() {
@@ -106,8 +124,11 @@ public class AzureResourceConnectorTest {
         instances = List.of(cloudResource);
         network = new Network(new Subnet("0.0.0.0/16"));
         AzureImage image = new AzureImage("id", "name", true);
+        imageModel = new Image(IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
+
         when(stack.getGroups()).thenReturn(groups);
         when(stack.getNetwork()).thenReturn(network);
+        when(stack.getImage()).thenReturn(imageModel);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(ac.getParameter(AzureClient.class)).thenReturn(client);
         when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName"));
@@ -121,9 +142,10 @@ public class AzureResourceConnectorTest {
     }
 
     @Test
-    public void testWhenTemplateDeploymentDoesNotExistsThenComputeResourceServiceBuildsTheResources() {
+    public void testWhenTemplateDeploymentDoesNotExistThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(false);
 
         underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
 
@@ -132,12 +154,15 @@ public class AzureResourceConnectorTest {
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+        verify(azureImageTermsSignerService, times(0)).sign(any(), any(), any());
     }
 
     @Test
     public void testWhenTemplateDeploymentExistsThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
 
         underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
 
@@ -145,6 +170,20 @@ public class AzureResourceConnectorTest {
                 any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+        verify(azureImageTermsSignerService, times(0)).sign(any(), any(), any());
+    }
+
+    @Test
+    public void testWhenMarketplaceImageThenTemplateBuilderUsesMarketplaceImagee() {
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(false);
+        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(true);
+
+        underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
+
+        verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
+        verify(azureImageTermsSignerService, times(1)).sign(any(), any(), any());
     }
 
 }

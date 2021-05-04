@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.microsoft.azure.management.network.Subnet;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
+import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 @Component
@@ -39,6 +41,9 @@ class AzureStackViewProvider {
     @Inject
     private AzureStorage azureStorage;
 
+    @Inject
+    private AzureImageFormatValidator azureImageFormatValidator;
+
     AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
         Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
         Network network = cloudStack.getNetwork();
@@ -51,16 +56,20 @@ class AzureStackViewProvider {
     }
 
     private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {
-        AzureClient client = ac.getParameter(AzureClient.class);
-        Map<String, String> imageNameMap = new HashMap<>();
+        Image stackImage = cloudStack.getImage();
         Map<String, String> customImageNamePerInstance = new HashMap<>();
-        for (Group group : cloudStack.getGroups()) {
-            for (CloudInstance instance : group.getInstances()) {
-                String imageId = instance.getTemplate().getImageId();
-                if (StringUtils.isNotBlank(imageId)) {
-                    String imageCustomName = imageNameMap.computeIfAbsent(
-                            imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
-                    customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
+
+        if (!azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
+            AzureClient client = ac.getParameter(AzureClient.class);
+            Map<String, String> imageNameMap = new HashMap<>();
+            for (Group group : cloudStack.getGroups()) {
+                for (CloudInstance instance : group.getInstances()) {
+                    String imageId = instance.getTemplate().getImageId();
+                    if (StringUtils.isNotBlank(imageId)) {
+                        String imageCustomName = imageNameMap.computeIfAbsent(
+                                imageId, s -> azureStorage.getCustomImage(client, ac, cloudStack, imageId).getId());
+                        customImageNamePerInstance.put(instance.getInstanceId(), imageCustomName);
+                    }
                 }
             }
         }

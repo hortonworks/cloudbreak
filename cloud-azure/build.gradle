@@ -35,6 +35,7 @@ dependencies {
   compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
   }
+  implementation 'com.microsoft.azure.marketplaceordering.v2015_06_01:azure-mgmt-marketplaceordering:1.0.0-beta'
   compile group: 'commons-net',                   name: 'commons-net',                      version: '3.6'
 
   testCompile project(path: ':core-model', configuration: 'tests')

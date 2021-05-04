@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_BASE_IMAGE;
@@ -299,6 +300,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.azure.single.resourcegroup.dedicated.storage.account.enable}")
     private boolean enableAzureSingleResourceGroupDedicatedStorageAccount;
+
+    @Value("${auth.mock.azure.marketplace.images.enable}")
+    private boolean enableAzureMarketplaceImages;
 
     @Value("${auth.mock.cloudidentitymappinng.enable}")
     private boolean enableCloudIdentityMappinng;
@@ -648,6 +652,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));
+        }
+        if (enableAzureMarketplaceImages) {
+            builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE));
         }
         if (enableCloudIdentityMappinng) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));

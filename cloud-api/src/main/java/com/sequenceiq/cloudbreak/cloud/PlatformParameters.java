@@ -76,7 +76,7 @@ public interface PlatformParameters {
     TagSpecification tagSpecification();
 
     /**
-     * Return the platform specific tag specification
+     * Return the platform specific tag validator
      *
      * @return the {@link TagValidator} of a platform
      */

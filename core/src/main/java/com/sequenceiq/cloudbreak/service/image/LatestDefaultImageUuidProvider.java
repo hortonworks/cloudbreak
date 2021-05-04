@@ -21,7 +21,7 @@ public class LatestDefaultImageUuidProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
-    private ImageComparator comparator;
+    private final ImageComparator comparator;
 
     @Inject
     public LatestDefaultImageUuidProvider(ImageComparator comparator) {
@@ -34,7 +34,7 @@ public class LatestDefaultImageUuidProvider {
                         .filter(isPlatformMatching(p))
                         .collect(Collectors.toMap(Image::getVersion, Function.identity(), BinaryOperator.maxBy(comparator)))
                         .values().stream())
-                .map(image -> image.getUuid())
+                .map(Image::getUuid)
                 .collect(Collectors.toList());
 
         LOGGER.info("The following images are the latest default ones: {}", latestDefaultImageUuids);
@@ -43,6 +43,6 @@ public class LatestDefaultImageUuidProvider {
     }
 
     private Predicate<Image> isPlatformMatching(String platform) {
-        return image -> image.getImageSetsByProvider().keySet().stream().anyMatch(p -> platform.equalsIgnoreCase(p));
+        return image -> image.getImageSetsByProvider().keySet().stream().anyMatch(platform::equalsIgnoreCase);
     }
 }
