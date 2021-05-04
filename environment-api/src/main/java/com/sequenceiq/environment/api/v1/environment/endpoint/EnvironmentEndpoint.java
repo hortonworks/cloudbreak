@@ -21,6 +21,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -28,6 +29,7 @@ import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -259,4 +261,10 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.LIST_FLOW_PROGRESS, produces = "application/json", notes = ENVIRONMENT_NOTES,
             nickname = "getEnvironmentFlowLogsProgressByResourceCrn")
     List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+
+    @POST
+    @Path("/validate_cloud_storage")
+    @Produces(MediaType.APPLICATION_JSON)
+    ObjectStorageValidateResponse validateCloudStorage(@Valid EnvironmentCloudStorageValidationRequest environmentCloudStorageValidationRequest);
+
 }
