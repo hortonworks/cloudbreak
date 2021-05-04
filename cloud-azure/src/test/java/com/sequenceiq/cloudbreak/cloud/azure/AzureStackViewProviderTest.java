@@ -56,6 +56,12 @@ public class AzureStackViewProviderTest {
 
     private static final String IMAGE_NAME = "image-name";
 
+    @Parameterized.Parameter
+    public boolean marketplaceImage;
+
+    @Parameterized.Parameter(1)
+    public String imageId;
+
     @InjectMocks
     private AzureStackViewProvider underTest;
 
@@ -87,12 +93,6 @@ public class AzureStackViewProviderTest {
         });
     }
 
-    @Parameterized.Parameter
-    public boolean isMarketplaceImage;
-
-    @Parameterized.Parameter(1)
-    public String imageId;
-
     @Test
     public void testGetAzureStackShouldReturnsANewAzureStackView() {
         CloudCredential cloudCredential = createCloudCredential();
@@ -111,7 +111,7 @@ public class AzureStackViewProviderTest {
         when(network.getStringParameter("resourceGroupName")).thenReturn(RESOURCE_GROUP);
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
         when(azureUtils.getCustomSubnetIds(network)).thenReturn(Collections.emptyList());
-        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(isMarketplaceImage);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(marketplaceImage);
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 

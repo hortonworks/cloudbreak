@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
-import static org.junit.Assert.*;
-
 import java.util.HashMap;
 
 import org.junit.jupiter.api.Assertions;
