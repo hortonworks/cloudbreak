@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.freeipa.cleanup;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -13,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -21,6 +24,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.util.Pair;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Cert;
@@ -29,6 +34,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
+import com.sequenceiq.freeipa.service.freeipa.host.HostDeletionService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,6 +58,12 @@ public class CleanupServiceTest {
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private HostDeletionService hostDeletionService;
+
+    @Mock
+    private PollingService<FreeIpaServerDeletionPollerObject> freeIpaDeletionPollerService;
 
     @Test
     public void testRevokeCertsWithLongHostnames() throws FreeIpaClientException {
@@ -453,6 +465,23 @@ public class CleanupServiceTest {
         assertTrue(result.getFirst().stream().anyMatch("kerberosbind-test-wl-1"::equals));
         verify(kerberosConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
         verify(ldapConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
+    }
+
+    @Test
+    public void testRemoveFreeIpaServer() throws FreeIpaClientException {
+        Set<String> hosts = Set.of("example1.com", "example2.com");
+        FreeIpaClient client = mock(FreeIpaClient.class);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(anyLong())).thenReturn(client);
+        when(hostDeletionService.removeServers(any(), any())).thenReturn(Pair.of(hosts, Map.of()));
+        when(client.findAllService()).thenReturn(Set.of());
+        when(freeIpaDeletionPollerService.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt()))
+                .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
+
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeServers(STACK_ID, hosts);
+
+        assertEquals(hosts, result.getFirst());
+        assertTrue(result.getSecond().isEmpty());
+        verify(freeIpaDeletionPollerService, times(1)).pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt());
     }
 
     private Cert createCert(String subject, long serialNumber, boolean revoked) {

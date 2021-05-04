@@ -17,11 +17,14 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -54,6 +57,8 @@ public class CleanupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CleanupService.class);
 
+    private static final int ONE_MAX_CONSECUTIVE_FAILURE = 1;
+
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
@@ -83,6 +88,18 @@ public class CleanupService {
 
     @Inject
     private CleanupStepToStateNameConverter cleanupStepToStateNameConverter;
+
+    @Inject
+    private FreeIpaServerDeletionListenerTask freeIpaServerDeletionPollerTask;
+
+    @Inject
+    private PollingService<FreeIpaServerDeletionPollerObject> freeIpaDeletionPollerService;
+
+    @Value("${freeipa.server.deletion.check.maxWaitSeconds}")
+    private int serverDeletionCheckMaxWaitSeconds;
+
+    @Value("${freeipa.server.deletion.check.interval}")
+    private long serverDeletionCheckInterval;
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
@@ -202,6 +219,7 @@ public class CleanupService {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Pair<Set<String>, Map<String, String>> hostDeleteResult = hostDeletionService.removeServers(client, hosts);
         removeHostRelatedServices(client, hosts);
+        waitForIpaServerDeletion(stackId, hosts);
         return hostDeleteResult;
     }
 
@@ -313,6 +331,22 @@ public class CleanupService {
             }
         }
         return Pair.of(vaultCleanupSuccess, vaultCleanupFailed);
+    }
+
+    private void waitForIpaServerDeletion(Long stackId, Set<String> hosts) throws FreeIpaClientException {
+        FreeIpaServerDeletionPollerObject pollerObject = new FreeIpaServerDeletionPollerObject(stackId, hosts);
+        org.apache.commons.lang3.tuple.Pair<PollingResult, Exception> resultPair = freeIpaDeletionPollerService.pollWithAbsoluteTimeout(
+                freeIpaServerDeletionPollerTask, pollerObject, serverDeletionCheckInterval, serverDeletionCheckMaxWaitSeconds, ONE_MAX_CONSECUTIVE_FAILURE);
+        PollingResult result = resultPair.getLeft();
+        if (result.equals(PollingResult.TIMEOUT)) {
+            LOGGER.debug(
+                    "FreeIPA server deletion did not complete, but a later step in the downscale process will attempt to cleanup the remaining LDAP entires");
+        } else if (!result.equals(PollingResult.SUCCESS)) {
+            String errMsg = String.format("Failed to poll FreeIPA server deletion, polling result = %s", result);
+            Exception ex = resultPair.getRight();
+            LOGGER.error(errMsg, ex);
+            throw new FreeIpaClientException("FreeIPA server deletion poll failed", ex);
+        }
     }
 
     private FreeIpaClient getFreeIpaClient(Long stackId) throws FreeIpaClientException {
