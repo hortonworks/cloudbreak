@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
-import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -131,10 +130,7 @@ public class AwsConnector implements CloudConnector<Object> {
     }
 
     @Override
-    public List<Validator> validators(ValidatorType validatorType) {
-        if (ValidatorType.IMAGE.equals(validatorType)) {
-            return List.of();
-        }
+    public List<Validator> validators() {
         return Arrays.asList(awsTagValidator, awsStackValidator);
     }
 

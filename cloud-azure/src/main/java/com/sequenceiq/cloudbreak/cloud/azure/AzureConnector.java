@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
-import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureImageFormatValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureSubnetValidator;
@@ -101,10 +100,7 @@ public class AzureConnector implements CloudConnector<List<CloudResource>> {
     }
 
     @Override
-    public List<Validator> validators(ValidatorType validatorType) {
-        if (ValidatorType.IMAGE.equals(validatorType)) {
-            return List.of(azureImageFormatValidator);
-        }
+    public List<Validator> validators() {
         return Arrays.asList(azureTagValidator, azureSubnetValidator, azureStorageValidator, azureImageFormatValidator);
     }
 

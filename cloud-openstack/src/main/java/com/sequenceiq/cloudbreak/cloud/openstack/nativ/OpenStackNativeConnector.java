@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
-import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -99,10 +98,7 @@ public class OpenStackNativeConnector implements CloudConnector<List<CloudResour
     }
 
     @Override
-    public List<Validator> validators(ValidatorType validatorType) {
-        if (ValidatorType.IMAGE.equals(validatorType)) {
-            return List.of();
-        }
+    public List<Validator> validators() {
         return Collections.singletonList(openStackTagValidator);
     }
 
