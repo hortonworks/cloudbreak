@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -73,6 +75,49 @@ public class StructuredFlowEventToStatusDetailsConverterTest {
         Assert.assertEquals("statusreason", syncStatusDetails.getStackStatusReason());
         Assert.assertEquals("AVAILABLE", syncStatusDetails.getClusterStatus());
         Assert.assertEquals("statusreason", syncStatusDetails.getClusterStatusReason());
+    }
+
+    @Test
+    public void testStatusReasonStringTrimming() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = new StackDetails();
+        ClusterDetails clusterDetails = new ClusterDetails();
+        structuredFlowEvent.setStack(stackDetails);
+        structuredFlowEvent.setCluster(clusterDetails);
+
+        UsageProto.CDPStatusDetails flowStatusDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals("", flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals("", flowStatusDetails.getClusterStatusReason());
+
+        stackDetails.setStatusReason("");
+        clusterDetails.setStatusReason("");
+        flowStatusDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals("", flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals("", flowStatusDetails.getClusterStatusReason());
+
+        stackDetails.setStatusReason(StringUtils.repeat("*", 10));
+        clusterDetails.setStatusReason(StringUtils.repeat("*", 10));
+        flowStatusDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getClusterStatusReason());
+
+        stackDetails.setStatusReason(StringUtils.repeat("*", 5000));
+        clusterDetails.setStatusReason(StringUtils.repeat("*", 5000));
+        flowStatusDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getClusterStatusReason());
+
+        stackDetails.setStatusReason(StringUtils.repeat("*", 10000));
+        clusterDetails.setStatusReason(StringUtils.repeat("*", 10000));
+        flowStatusDetails = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getClusterStatusReason());
+
     }
 
     private StackDetails createStackDetails() {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
@@ -12,6 +13,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
 @Component
 public class StructuredEventToStatusDetailsConverter {
+
+    private static final int MAX_STRING_LENGTH = 5000;
 
     public UsageProto.CDPStatusDetails convert(StructuredFlowEvent structuredFlowEvent) {
 
@@ -42,12 +45,14 @@ public class StructuredEventToStatusDetailsConverter {
         if (stackDetails != null) {
             cdpStatusDetails.setStackStatus(defaultIfEmpty(stackDetails.getStatus(), ""));
             cdpStatusDetails.setStackDetailedStatus(defaultIfEmpty(stackDetails.getDetailedStatus(), ""));
-            cdpStatusDetails.setStackStatusReason(defaultIfEmpty(stackDetails.getStatusReason(), ""));
+            cdpStatusDetails.setStackStatusReason(defaultIfEmpty(StringUtils.substring(stackDetails.getStatusReason(),
+                    0, Math.min(StringUtils.length(stackDetails.getStatusReason()), MAX_STRING_LENGTH)), ""));
         }
 
         if (clusterDetails != null) {
             cdpStatusDetails.setClusterStatus(defaultIfEmpty(clusterDetails.getStatus(), ""));
-            cdpStatusDetails.setClusterStatusReason(defaultIfEmpty(clusterDetails.getStatusReason(), ""));
+            cdpStatusDetails.setClusterStatusReason(defaultIfEmpty(StringUtils.substring(clusterDetails.getStatusReason(),
+                    0, Math.min(StringUtils.length(clusterDetails.getStatusReason()), MAX_STRING_LENGTH)), ""));
         }
 
         return cdpStatusDetails;
