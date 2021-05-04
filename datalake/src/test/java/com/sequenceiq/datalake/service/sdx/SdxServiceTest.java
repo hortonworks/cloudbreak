@@ -920,7 +920,8 @@ class SdxServiceTest {
             return sdxWithId;
         });
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest));
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest));
 
         SdxCluster createdSdxCluster = result.getLeft();
         StackV4Request stackV4Request = JsonUtil.readValue(createdSdxCluster.getStackRequest(), StackV4Request.class);

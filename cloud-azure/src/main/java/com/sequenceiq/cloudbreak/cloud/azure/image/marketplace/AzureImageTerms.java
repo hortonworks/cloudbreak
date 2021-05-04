@@ -44,6 +44,16 @@ public class AzureImageTerms {
         this.properties = properties;
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", AzureImageTerms.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("name='" + name + "'")
+                .add("type='" + type + "'")
+                .add("properties=" + properties)
+                .toString();
+    }
+
     public static class TermsProperties {
 
         private boolean accepted;
@@ -106,15 +116,16 @@ public class AzureImageTerms {
             this.signature = signature;
         }
 
-    }
-
-    @Override
-    public String toString() {
-        return new StringJoiner(", ", AzureImageTerms.class.getSimpleName() + "[", "]")
-                .add("id='" + id + "'")
-                .add("name='" + name + "'")
-                .add("type='" + type + "'")
-                .add("properties=" + properties)
-                .toString();
+        @Override
+        public String toString() {
+            return new StringJoiner(", ", TermsProperties.class.getSimpleName() + "[", "]")
+                    .add("accepted=" + accepted)
+                    .add("licenseTextLink='" + licenseTextLink + "'")
+                    .add("product='" + product + "'")
+                    .add("publisher='" + publisher + "'")
+                    .add("retrieveDatetime='" + retrieveDatetime + "'")
+                    .add("signature='" + signature + "'")
+                    .toString();
+        }
     }
 }
