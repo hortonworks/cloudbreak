@@ -28,8 +28,9 @@ public interface CloudConnector<R> extends CloudPlatformAware {
      * Access to the available {@link Validator}s.
      *
      * @return the available {@link Validator} objects
+     * @param validatorType Describes the type of validator to use
      */
-    List<Validator> validators();
+    List<Validator> validators(ValidatorType validatorType);
 
     /**
      * Access to the {@link CredentialConnector} object.
