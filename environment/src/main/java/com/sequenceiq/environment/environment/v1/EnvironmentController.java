@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -45,6 +47,7 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCloudStorageValidationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -71,6 +74,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpdateService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
+import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
@@ -113,6 +117,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentFiltering environmentFiltering;
 
+    private final CloudStorageValidator cloudStorageValidator;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -128,7 +134,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EntitlementService entitlementService,
             EnvironmentLoadBalancerService environmentLoadBalancerService,
             FlowService flowService,
-            EnvironmentFiltering environmentFiltering) {
+            EnvironmentFiltering environmentFiltering,
+            CloudStorageValidator cloudStorageValidator) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -144,6 +151,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentLoadBalancerService = environmentLoadBalancerService;
         this.flowService = flowService;
         this.environmentFiltering = environmentFiltering;
+        this.cloudStorageValidator = cloudStorageValidator;
     }
 
     @Override
@@ -402,6 +410,15 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
         return flowService.getFlowProgressListByResourceCrn(resourceCrn);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "credentialCrn", type = CRN, action = DESCRIBE_CREDENTIAL)
+    public ObjectStorageValidateResponse validateCloudStorage(@RequestObject @Valid EnvironmentCloudStorageValidationRequest
+            environmentCloudStorageValidationRequest) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return cloudStorageValidator.validateCloudStorage(accountId, environmentCloudStorageValidationRequest);
     }
 
     private void checkEndpointGatewayEntitlement(EnvironmentRequest request) {

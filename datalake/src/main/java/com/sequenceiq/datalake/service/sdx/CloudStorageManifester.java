@@ -11,13 +11,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.S3Guard;
@@ -41,6 +38,9 @@ public class CloudStorageManifester {
     @Inject
     private FileSystemV4Endpoint fileSystemV4Endpoint;
 
+    @Inject
+    private StorageValidationService storageValidationService;
+
     public CloudStorageRequest initCloudStorageRequest(DetailedEnvironmentResponse environment,
             ClusterV4Request clusterRequest, SdxCluster sdxCluster, SdxClusterRequest sdxClusterRequest) {
         CloudStorageRequest cloudStorageRequest = null;
@@ -50,8 +50,8 @@ public class CloudStorageManifester {
         if (isCloudStorageConfigured(sdxClusterRequest)) {
             LOGGER.debug("Cloud storage configurations found in SDX cluster request.");
             cloudStorageRequest =
-                    initSdxCloudStorageRequest(environment,
-                            clusterRequest.getBlueprintName(), sdxCluster, sdxClusterRequest);
+                    initSdxCloudStorageRequest(environment.getCloudPlatform(),
+                            clusterRequest.getBlueprintName(), sdxCluster.getClusterName(), sdxClusterRequest.getCloudStorage());
         } else if (isInternalCloudStorageConfigured(clusterRequest)) {
             LOGGER.debug("Cloud storage configurations found in internal SDX stack request.");
             cloudStorageRequest = clusterRequest.getCloudStorage();
@@ -71,15 +71,14 @@ public class CloudStorageManifester {
         return cloudStorageRequest;
     }
 
-    private CloudStorageRequest initSdxCloudStorageRequest(DetailedEnvironmentResponse environment,
-            String blueprint, SdxCluster sdxCluster, SdxClusterRequest clusterRequest) {
+    public CloudStorageRequest initSdxCloudStorageRequest(String cloudPlatform,
+            String blueprint, String clusterName, SdxCloudStorageRequest cloudStorage) {
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
-        SdxCloudStorageRequest cloudStorage = clusterRequest.getCloudStorage();
         normalizeCloudStorageRequest(cloudStorage);
-        validateCloudStorage(environment.getCloudPlatform(), cloudStorage);
+        storageValidationService.validateCloudStorage(cloudPlatform, cloudStorage);
         FileSystemParameterV4Responses fileSystemRecommendations = getFileSystemRecommendations(
                 blueprint,
-                sdxCluster.getClusterName(),
+                clusterName,
                 cloudStorage);
         LOGGER.info("File recommendations {}", fileSystemRecommendations);
         setStorageLocations(fileSystemRecommendations, cloudStorageRequest);
@@ -124,46 +123,6 @@ public class CloudStorageManifester {
                 cloudStorageRequest.setAws(awsStorageParameters);
             }
         }
-    }
-
-    @VisibleForTesting
-    protected void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {
-        if (CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform)) {
-            if (!isS3AuthenticationConfigured(cloudStorage)) {
-                throw new BadRequestException("instance profile must be defined for S3");
-            }
-            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.S3.getProtocol() + "://")) {
-                throw new BadRequestException("AWS baselocation missing protocol. please specify s3a://");
-            }
-        } else  if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudPlatform)) {
-            if (!isAzureAuthenticationConfigured(cloudStorage)) {
-                throw new BadRequestException("managed identity or account key and account name must be defined for ABFS");
-            }
-            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.ADLS_GEN_2.getProtocol() + "://")) {
-                throw new BadRequestException("AZURE baselocation missing protocol. please specify abfs://");
-            }
-        } else if (CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform)) {
-            if (!isGcsAuthenticationConfigured(cloudStorage)) {
-                throw new BadRequestException("service account email must be defined for GCS");
-            }
-            if (!cloudStorage.getBaseLocation().startsWith(FileSystemType.GCS.getProtocol() + "://")) {
-                throw new BadRequestException("GCP baselocation missing protocol. please specify gcs://");
-            }
-        }
-    }
-
-    private boolean isS3AuthenticationConfigured(SdxCloudStorageRequest cloudStorage) {
-        return cloudStorage.getS3() != null && !StringUtils.isEmpty(cloudStorage.getS3().getInstanceProfile());
-    }
-
-    private boolean isGcsAuthenticationConfigured(SdxCloudStorageRequest cloudStorage) {
-        return cloudStorage.getGcs() != null && !StringUtils.isEmpty(cloudStorage.getGcs().getServiceAccountEmail());
-    }
-
-    private boolean isAzureAuthenticationConfigured(SdxCloudStorageRequest cloudStorage) {
-        return cloudStorage.getAdlsGen2() != null
-                && (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getManagedIdentity())
-                || (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey()) && !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName())));
     }
 
     protected void normalizeCloudStorageRequest(SdxCloudStorageRequest cloudStorageRequest) {

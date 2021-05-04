@@ -1,5 +1,8 @@
 package com.sequenceiq.datalake.controller.sdx;
 
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -11,11 +14,13 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.FilterParam;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -24,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
@@ -38,6 +44,7 @@ import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.StorageValidationService;
 import com.sequenceiq.datalake.service.sdx.cert.CertRotationService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.start.SdxStartService;
@@ -57,6 +64,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 
 @Controller
@@ -98,6 +106,9 @@ public class SdxController implements SdxEndpoint {
     @Inject
     private DataLakeFiltering dataLakeFiltering;
 
+    @Inject
+    private StorageValidationService storageValidationService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxClusterResponse create(@ValidStackNameFormat @ValidStackNameLength String name,
@@ -123,6 +134,16 @@ public class SdxController implements SdxEndpoint {
         sdxClusterResponse.setName(sdxCluster.getClusterName());
         sdxClusterResponse.setFlowIdentifier(result.getRight());
         return sdxClusterResponse;
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "credentialCrn", type = CRN, action = DESCRIBE_CREDENTIAL)
+    public ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength String clusterName,
+            @RequestObject @Valid SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest) {
+        return storageValidationService.validateObjectStorage(sdxValidateCloudStorageRequest.getCredentialCrn(),
+                sdxValidateCloudStorageRequest.getSdxCloudStorageRequest(), sdxValidateCloudStorageRequest.getBlueprintName(), clusterName,
+                sdxValidateCloudStorageRequest.getDataAccessRole(), sdxValidateCloudStorageRequest.getRangerAuditRole());
     }
 
     @Override

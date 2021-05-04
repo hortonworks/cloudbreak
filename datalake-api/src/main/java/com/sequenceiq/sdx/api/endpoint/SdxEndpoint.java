@@ -23,6 +23,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -39,6 +40,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseBackupStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
 import com.sequenceiq.sdx.api.model.SdxBackupStatusResponse;
@@ -262,4 +264,11 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "create custom SDX cluster", produces = MediaType.APPLICATION_JSON, nickname = "createCustomSdx")
     SdxClusterResponse create(@PathParam("name") String name, @Valid SdxCustomClusterRequest createSdxClusterRequest);
+
+    @POST
+    @Path("validate_cloud_storage/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "validate cloud storage", produces = MediaType.APPLICATION_JSON, nickname = "validateCloudStorage")
+    ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength @PathParam("name") String clusterName,
+            @Valid SdxValidateCloudStorageRequest sdxValidateCloudStorageRequest);
 }

@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,11 +22,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoin
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
-import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
@@ -50,28 +47,15 @@ public class CloudStorageManifesterTest {
     private static final String EMAIL = "blah@blah.blah";
 
     @Mock
+    private StorageValidationService storageValidationService;
+
+    @Mock
     private FileSystemV4Endpoint fileSystemV4Endpoint;
 
     @InjectMocks
     private CloudStorageManifester underTest;
 
     private String exampleBlueprintName = "SDX HA dummy BP";
-
-    @Test
-    public void whenInvalidConfigIsProvidedThrowBadRequest() {
-        SdxCluster sdxCluster = new SdxCluster();
-        SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        SdxCloudStorageRequest sdxCloudStorageRequest = new SdxCloudStorageRequest();
-        sdxCloudStorageRequest.setBaseLocation("s3a://example-path");
-        sdxClusterRequest.setCloudStorage(sdxCloudStorageRequest);
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        ClusterV4Request clusterV4Request = new ClusterV4Request();
-        clusterV4Request.setBlueprintName(exampleBlueprintName);
-        environment.setCloudPlatform("AWS");
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.initCloudStorageRequest(environment, clusterV4Request, sdxCluster, sdxClusterRequest));
-        assertEquals(exception.getMessage(), "instance profile must be defined for S3");
-    }
 
     @Test
     public void whenConfigIsProvidedReturnFileSystemParameters() {
@@ -99,6 +83,7 @@ public class CloudStorageManifesterTest {
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
+        verify(storageValidationService).validateCloudStorage("AWS", cloudStorageRequest);
     }
 
     @Test
@@ -147,6 +132,7 @@ public class CloudStorageManifesterTest {
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
+        verify(storageValidationService).validateCloudStorage("AWS", cloudStorageRequest);
     }
 
     @Test
@@ -170,114 +156,6 @@ public class CloudStorageManifesterTest {
                 .filter(r -> r.getType().equals(CloudIdentityType.LOG))
                 .collect(Collectors.toSet()).size());
         assertEquals("logprofile", cloudStorageConfigReq.getIdentities().get(0).getS3().getInstanceProfile());
-    }
-
-    @Test
-    public void whenAzureNotEvenConfiguredWithManagedIdentityShouldNotThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("abfs://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
-        cloudStorageRequest.setAdlsGen2(null);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage("AZURE", cloudStorageRequest));
-    }
-
-    @Test
-    public void whenAzureConfiguredWithManagedIdentityShouldNotThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("abfs://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
-        AdlsGen2CloudStorageV1Parameters adlsGen2 = new AdlsGen2CloudStorageV1Parameters();
-        adlsGen2.setManagedIdentity("managedidentity");
-        cloudStorageRequest.setAdlsGen2(adlsGen2);
-
-        underTest.validateCloudStorage("AZURE", cloudStorageRequest);
-    }
-
-    @Test
-    public void whenAzureConfiguredWithoutManagedIdentityShouldThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("abfs://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
-        AdlsGen2CloudStorageV1Parameters adlsGen2 = new AdlsGen2CloudStorageV1Parameters();
-        adlsGen2.setManagedIdentity(null);
-        cloudStorageRequest.setAdlsGen2(adlsGen2);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage("AZURE", cloudStorageRequest));
-    }
-
-    @Test
-    public void whenAwsNotEvenConfiguredWithRoleShouldNotThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("s3a://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
-        cloudStorageRequest.setS3(null);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage("AWS", cloudStorageRequest));
-    }
-
-    @Test
-    public void whenAwsConfiguredWithRoleShouldNotThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("s3a://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
-        S3CloudStorageV1Parameters s3 = new S3CloudStorageV1Parameters();
-        s3.setInstanceProfile("role");
-        cloudStorageRequest.setS3(s3);
-
-        underTest.validateCloudStorage("AWS", cloudStorageRequest);
-    }
-
-    @Test
-    public void whenAwsConfiguredWithoutRoleShouldThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("s3a://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.S3);
-        S3CloudStorageV1Parameters s3 = new S3CloudStorageV1Parameters();
-        s3.setInstanceProfile(null);
-        cloudStorageRequest.setS3(s3);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage("AWS", cloudStorageRequest));
-    }
-
-    @Test
-    public void whenGcsNotEvenConfiguredWithServiceAccountShouldNotThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("gs://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
-        cloudStorageRequest.setGcs(null);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage("GCP", cloudStorageRequest));
-    }
-
-    @Test
-    public void whenGcsConfiguredWithServiceAccountShouldNotThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("gs://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
-        GcsCloudStorageV1Parameters gcs = new GcsCloudStorageV1Parameters();
-        gcs.setServiceAccountEmail("mail");
-        cloudStorageRequest.setGcs(gcs);
-
-        underTest.validateCloudStorage("GCP", cloudStorageRequest);
-    }
-
-    @Test
-    public void whenGcsConfiguredWithoutRoleShouldThrowException() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("gs://example-path");
-        cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
-        GcsCloudStorageV1Parameters gcs = new GcsCloudStorageV1Parameters();
-        gcs.setServiceAccountEmail(null);
-        cloudStorageRequest.setGcs(gcs);
-
-        Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage("GCP", cloudStorageRequest));
     }
 
     @Test
@@ -324,6 +202,7 @@ public class CloudStorageManifesterTest {
         assertEquals(1, cloudStorageConfigReq.getLocations().size());
         assertEquals(CloudStorageCdpService.RANGER_AUDIT, singleRequest.getType());
         assertEquals("ranger/example-path", singleRequest.getValue());
+        verify(storageValidationService).validateCloudStorage("GCP", cloudStorageRequest);
     }
 
     @Test
@@ -420,19 +299,6 @@ public class CloudStorageManifesterTest {
     }
 
     @Test
-    public void throwErrorWhenS3LocationInvalid() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("cloudbreakbucket/something");
-        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
-        params.setInstanceProfile("instanceProfile");
-        cloudStorageRequest.setS3(params);
-
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest));
-        assertEquals(exception.getMessage(), "AWS baselocation missing protocol. please specify s3a://");
-    }
-
-    @Test
     public void stripWhitespacesWhenBaseLocationHasWhiteSpaces() {
         String baseLocationWithWhiteSpaces = "s3a://cloudbreak bucket/something ";
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
@@ -443,15 +309,5 @@ public class CloudStorageManifesterTest {
 
         underTest.normalizeCloudStorageRequest(cloudStorageRequest);
         assertEquals("s3a://cloudbreak bucket/something", cloudStorageRequest.getBaseLocation());
-    }
-
-    @Test
-    public void okWhenS3LocationIsValid() {
-        SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
-        cloudStorageRequest.setBaseLocation("s3a://cloudbreakbucket/something");
-        S3CloudStorageV1Parameters params = new S3CloudStorageV1Parameters();
-        params.setInstanceProfile("instanceProfile");
-        cloudStorageRequest.setS3(params);
-        underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest);
     }
 }

@@ -6,6 +6,8 @@ import javax.ws.rs.WebApplicationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler;
+import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -14,6 +16,9 @@ public class EnvironmentClientService {
 
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
+
+    @Inject
+    private CredentialEndpoint credentialEndpoint;
 
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
@@ -32,5 +37,9 @@ public class EnvironmentClientService {
         } catch (WebApplicationException e) {
             throw webApplicationExceptionHandler.handleException(e);
         }
+    }
+
+    public CredentialResponse getCredentialByCrn(String credentialCrn) {
+        return credentialEndpoint.getByResourceCrn(credentialCrn);
     }
 }

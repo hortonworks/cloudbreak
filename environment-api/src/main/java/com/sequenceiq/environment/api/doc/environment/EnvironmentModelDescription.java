@@ -48,6 +48,7 @@ public class EnvironmentModelDescription {
             + "the detailed credential is ignored in the request.";
     public static final String CREDENTIAL_REQUEST = "If credentialName is not specified, the credential is used to create the new credential for "
             + "the environment.";
+    public static final String CREDENTIAL_CRN = "Credential CRN";
     public static final String INTERACTIVE_LOGIN_CREDENTIAL_VERIFICATION_URL = "The url provided by Azure where the user has to use the given user code "
             + "to sign in";
     public static final String INTERACTIVE_LOGIN_CREDENTIAL_USER_CODE = "The user code what has to be used for the sign-in process on the Azure portal";
