@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -32,10 +33,9 @@ public class GrpcClusterDnsClient {
     @Inject
     private Tracer tracer;
 
-    public String signCertificate(String actorCrn, String accountId, String environment, byte[] csr,
-            Optional<String> requestId) {
+    public String signCertificate(String accountId, String environment, byte[] csr, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             String requestIdValue = requestId.orElse(UUID.randomUUID().toString());
             LOGGER.info("Fire a create certification request with account id:{}, and requestId: {}", accountId, requestIdValue);
             String signingWorkflowId = client.signCertificate(requestIdValue, accountId, environment, csr);
@@ -44,21 +44,20 @@ public class GrpcClusterDnsClient {
         }
     }
 
-    public PollCertificateSigningResponse pollCertificateSigning(String actorCrn, String signingWorkflowId, Optional<String> requestId) {
+    public PollCertificateSigningResponse pollCertificateSigning(String signingWorkflowId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
-            LOGGER.info("Get the result of certification creation with actorCrn:{}, signingWorkflowId: {} and requestId: {}",
-                    actorCrn, signingWorkflowId, requestId);
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+            LOGGER.info("Get the result of certification creation with signingWorkflowId: {} and requestId: {}", signingWorkflowId, requestId);
             PollCertificateSigningResponse response = client.pollCertificateSigning(requestId.orElse(UUID.randomUUID().toString()), signingWorkflowId);
             LOGGER.info("The workflow id for polling the result of creation: {}", signingWorkflowId);
             return response;
         }
     }
 
-    public CreateDnsEntryResponse createOrUpdateDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard,
+    public CreateDnsEntryResponse createOrUpdateDnsEntryWithIp(String accountId, String endpoint, String environment, boolean wildcard,
             List<String> ips, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Create a dns entry with account id: {} and requestId: {} for ips: {}", accountId, requestId, String.join(",", ips));
             CreateDnsEntryResponse response = client.createDnsEntryWithIp(requestId.orElse(UUID.randomUUID().toString()), accountId, endpoint, environment,
                     wildcard, ips);
@@ -67,10 +66,10 @@ public class GrpcClusterDnsClient {
         }
     }
 
-    public DeleteDnsEntryResponse deleteDnsEntryWithIp(String actorCrn, String accountId, String endpoint, String environment, boolean wildcard,
+    public DeleteDnsEntryResponse deleteDnsEntryWithIp(String accountId, String endpoint, String environment, boolean wildcard,
             List<String> ips, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Delete a dns entry with account id: {} and requestId: {} for ips: {}", accountId, requestId, String.join(",", ips));
             DeleteDnsEntryResponse response = client.deleteDnsEntryWithIp(requestId.orElse(UUID.randomUUID().toString()), accountId, endpoint, environment,
                     wildcard, ips);
@@ -79,10 +78,10 @@ public class GrpcClusterDnsClient {
         }
     }
 
-    public CreateDnsEntryResponse createOrUpdateDnsEntryWithCloudDns(String actorCrn, String accountId, String endpoint, String environment,
+    public CreateDnsEntryResponse createOrUpdateDnsEntryWithCloudDns(String accountId, String endpoint, String environment,
             String cloudDns, String hostedZoneId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Create a dns entry with account id: {} and requestId: {} for cloud DNS: {}", accountId, requestId, cloudDns);
             CreateDnsEntryResponse response = client.createDnsEntryWithCloudDns(requestId.orElse(UUID.randomUUID().toString()), accountId,
                 endpoint, environment, cloudDns, hostedZoneId);
@@ -91,10 +90,10 @@ public class GrpcClusterDnsClient {
         }
     }
 
-    public DeleteDnsEntryResponse deleteDnsEntryWithCloudDns(String actorCrn, String accountId, String endpoint, String environment,
+    public DeleteDnsEntryResponse deleteDnsEntryWithCloudDns(String accountId, String endpoint, String environment,
             String cloudDns, String hostedZoneId, Optional<String> requestId) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
-            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Delete a dns entry with account id: {} and requestId: {} for cloud DNS: {}", accountId, requestId, client);
             DeleteDnsEntryResponse response = client.deleteDnsEntryWithCloudDns(requestId.orElse(UUID.randomUUID().toString()), accountId,
                 endpoint, environment, cloudDns, hostedZoneId);

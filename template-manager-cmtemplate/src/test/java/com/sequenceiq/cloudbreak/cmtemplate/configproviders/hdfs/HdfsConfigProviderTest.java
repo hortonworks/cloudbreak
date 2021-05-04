@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3guard.S3GuardConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -45,11 +45,11 @@ public class HdfsConfigProviderTest {
     private HdfsConfigProvider underTest;
 
     @Mock
-    private S3GuardConfigProvider s3GuardConfigProvider;
+    private S3ConfigProvider s3ConfigProvider;
 
     @Test
     public void testGetHdfsServiceConfigsWithoutS3Guard() {
-        doNothing().when(s3GuardConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
+        doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
 
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
@@ -62,7 +62,7 @@ public class HdfsConfigProviderTest {
 
     @Test
     public void testGetHdfsServiceConfigsWithS3FileSystemNoDynamoTable() {
-        doNothing().when(s3GuardConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
+        doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
 
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");

@@ -297,5 +297,9 @@
   {
     "path": "/var/log/cm_generate_agent_tokens.log",
     "label": "generate_agent_token"
+  },
+  {
+    "path": "/var/log/ccmv2-inverting-proxy-agent.log",
+    "label": "ccmv2_inverting_proxy_agent"
   }
 ]

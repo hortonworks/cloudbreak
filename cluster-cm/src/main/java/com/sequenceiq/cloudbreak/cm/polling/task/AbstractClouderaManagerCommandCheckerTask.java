@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,14 +22,12 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     protected boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
         if (apiCommand.getActive()) {
-            LOGGER.debug("Command [" + getCommandName() + "] with id [" + pollerObject.getId() + "] is active, so it hasn't finished yet");
+            LOGGER.debug("Command [{}] with id [{}] is active, so it hasn't finished yet", getCommandName(), pollerObject.getId());
             return false;
         } else if (apiCommand.getSuccess()) {
             return true;
         } else {
-            String resultMessage = apiCommand.getResultMessage();
-            List<String> failedMessages = ApiCommandUtil.getFailedCommandMessages(apiCommand.getChildren());
-            String message = "Command [" + getCommandName() + "] failed: " + resultMessage + ". Detailed messages: " + String.join("\n", failedMessages);
+            String message = "Command [" + getCommandName() + "] failed: " + getResultMessageWithDetailedErrorsPostFix(apiCommand, commandsResourceApi);
             LOGGER.info(message);
             throw new ClouderaManagerOperationFailedException(message);
         }

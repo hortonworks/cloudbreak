@@ -1,5 +1,22 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -9,22 +26,8 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.Iterator;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Service
-class FreeIpaTopologyService {
+public class FreeIpaTopologyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaTopologyService.class);
 
@@ -33,10 +36,12 @@ class FreeIpaTopologyService {
     @Inject
     private StackService stackService;
 
-    public void updateReplicationTopology(Long stackId, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
+    public void updateReplicationTopology(Long stackId, Set<String> fqdnsToExclude, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<String> allNodesFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(Objects::nonNull)
+                .filter(fqdn -> fqdnsToExclude.isEmpty() || !fqdnsToExclude.contains(fqdn))
                 .collect(Collectors.toSet());
         Set<TopologySegment> topology = generateTopology(allNodesFqdn).stream()
                 .map(pair -> {
@@ -114,7 +119,8 @@ class FreeIpaTopologyService {
                 .filter(segment -> !topologyToKeep.contains(new UnorderedPair(segment.getLeftNode(), segment.getRightNode())))
                 .collect(Collectors.toSet());
         for (TopologySegment segment : segmentsToRemove) {
-            freeIpaClient.deleteTopologySegment(topologySuffixCn, segment);
+            ignoreNotFoundException(() -> freeIpaClient.deleteTopologySegment(topologySuffixCn, segment),
+                    "Deleting topology segment for [{}] but it was not found", segment);
         }
     }
 

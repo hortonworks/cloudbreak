@@ -23,6 +23,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.R
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_HOSTS_FROM_ORCHESTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_INSTANCES_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_INSTANCES_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_REPLICATION_AGREEMENTS_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_REPLICATION_AGREEMENTS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_SERVERS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REMOVE_SERVERS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.REVOKE_CERTS_FAILED_EVENT;
@@ -39,6 +41,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNS
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_DNS_ENTRIES_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_HOSTS_FROM_ORCHESTRATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_INSTANCES_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_REPLICATION_AGREEMENTS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REMOVE_SERVERS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_REVOKE_CERTS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState.DOWNSCALE_STOP_TELEMETRY_STATE;
@@ -94,9 +97,13 @@ public class DownscaleFlowConfig extends AbstractFlowConfiguration<DownscaleStat
                     .event(REMOVE_INSTANCES_FINISHED_EVENT)
                     .failureEvent(REMOVE_INSTANCES_FAILED_EVENT)
 
-                    .from(DOWNSCALE_REMOVE_SERVERS_STATE).to(DOWNSCALE_REVOKE_CERTS_STATE)
+                    .from(DOWNSCALE_REMOVE_SERVERS_STATE).to(DOWNSCALE_REMOVE_REPLICATION_AGREEMENTS_STATE)
                     .event(REMOVE_SERVERS_FINISHED_EVENT)
                     .failureEvent(REMOVE_SERVERS_FAILED_EVENT)
+
+                    .from(DOWNSCALE_REMOVE_REPLICATION_AGREEMENTS_STATE).to(DOWNSCALE_REVOKE_CERTS_STATE)
+                    .event(REMOVE_REPLICATION_AGREEMENTS_FINISHED_EVENT)
+                    .failureEvent(REMOVE_REPLICATION_AGREEMENTS_FAILED_EVENT)
 
                     .from(DOWNSCALE_REVOKE_CERTS_STATE).to(DOWNSCALE_REMOVE_DNS_ENTRIES_STATE)
                     .event(REVOKE_CERTS_FINISHED_EVENT)

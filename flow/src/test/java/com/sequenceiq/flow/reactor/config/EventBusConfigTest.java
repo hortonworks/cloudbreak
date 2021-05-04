@@ -51,9 +51,9 @@ class EventBusConfigTest {
         headers.set("FLOW_ID", "123");
         eventBus.notify("notexist", new Event<>(headers, null));
         verify(flowLogDBService, timeout(2000).times(1)).getLastFlowLog("123");
-        verify(applicationFlowInformation, times(1)).handleFlowFail(flowLog);
-        verify(flowLogDBService, times(1)).updateLastFlowLogStatus(flowLog, true);
-        verify(flowLogDBService, times(1)).finalize(flowLog.getFlowId());
+        verify(applicationFlowInformation, timeout(1000).times(1)).handleFlowFail(flowLog);
+        verify(flowLogDBService, timeout(1000).times(1)).updateLastFlowLogStatus(flowLog, true);
+        verify(flowLogDBService, timeout(1000).times(1)).finalize(flowLog.getFlowId());
     }
 
     @Test
@@ -82,9 +82,9 @@ class EventBusConfigTest {
         });
         eventBus.notify("exampleselector", new Event<>(headers, null));
         verify(flowLogDBService, timeout(2000).times(1)).getLastFlowLog("123");
-        verify(applicationFlowInformation, times(1)).handleFlowFail(flowLog);
-        verify(flowLogDBService, times(1)).updateLastFlowLogStatus(flowLog, true);
-        verify(flowLogDBService, times(1)).finalize(flowLog.getFlowId());
+        verify(applicationFlowInformation, timeout(1000).times(1)).handleFlowFail(flowLog);
+        verify(flowLogDBService, timeout(1000).times(1)).updateLastFlowLogStatus(flowLog, true);
+        verify(flowLogDBService, timeout(1000).times(1)).finalize(flowLog.getFlowId());
     }
 
     @Test

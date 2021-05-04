@@ -16,7 +16,7 @@ public class DownscaleStackResultToDownscaleFailureEventConverter implements Pay
     @Override
     public DownscaleFailureEvent convert(Object payload) {
         DownscaleStackResult downscaleStackResult = (DownscaleStackResult) payload;
-        DownscaleFailureEvent event = new DownscaleFailureEvent(downscaleStackResult.getResourceId(),  "Instance removal",
+        DownscaleFailureEvent event = new DownscaleFailureEvent(downscaleStackResult.getResourceId(),  "Downscale Stack",
                 Set.of(), Map.of(), new Exception("Payload failed: " + payload));
         return event;
     }

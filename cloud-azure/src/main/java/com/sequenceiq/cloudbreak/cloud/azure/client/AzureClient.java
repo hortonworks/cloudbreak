@@ -725,12 +725,15 @@ public class AzureClient {
      * @return IP addresses
      */
     public List<String> getLoadBalancerIps(String resourceGroupName, String loadBalancerName, LoadBalancerType loadBalancerType) {
-        if (loadBalancerType == LoadBalancerType.PRIVATE) {
-            return getLoadBalancerPrivateIps(resourceGroupName, loadBalancerName);
-        } else if (loadBalancerType == LoadBalancerType.PUBLIC) {
-            return getLoadBalancerIps(resourceGroupName, loadBalancerName);
-        } else {
-            return List.of();
+        switch (loadBalancerType) {
+            case PRIVATE:
+                return getLoadBalancerPrivateIps(resourceGroupName, loadBalancerName);
+            case PUBLIC:
+                return getLoadBalancerIps(resourceGroupName, loadBalancerName);
+            default:
+                LOGGER.warn("Cannot get IPs for load balancer {}, it has an unknown type {}. Using an empty list instead.", loadBalancerName, loadBalancerType);
+                return List.of();
+
         }
     }
 

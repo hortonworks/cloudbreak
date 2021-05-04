@@ -30,6 +30,11 @@ public class AzureTerminationHelperService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureTerminationHelperService.class);
 
+    private enum TerminationOperations {
+        DOWNSCALE,
+        TERMINATE;
+    }
+
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
@@ -71,78 +76,96 @@ public class AzureTerminationHelperService {
     public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudInstance> vms,
             List<CloudResource> allResources, List<CloudResource> resourcesToRemove) {
         List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(allResources);
-        return terminateResources(ac, stack, vms, resourcesToRemove, networkResources, false);
+        return terminateResources(ac, stack, vms, resourcesToRemove, networkResources, TerminationOperations.DOWNSCALE);
     }
 
     public List<CloudResourceStatus> terminate(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resourcesToRemove) {
         List<CloudInstance> vms = new ArrayList<>();
         stack.getGroups().forEach(group -> vms.addAll(group.getInstances()));
         List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resourcesToRemove);
-        return terminateResources(ac, stack, vms, resourcesToRemove, networkResources, true);
+        return terminateResources(ac, stack, vms, resourcesToRemove, networkResources, TerminationOperations.TERMINATE);
     }
 
     private List<CloudResourceStatus> terminateResources(AuthenticatedContext ac, CloudStack stack, List<CloudInstance> vms,
-            List<CloudResource> resourcesToRemove, List<CloudResource> networkResources, boolean deleteWholeDeployment) {
-        LOGGER.debug("Terminating the following resources: {}", resourcesToRemove);
-        LOGGER.debug("Operation is: {}", deleteWholeDeployment ? "terminate" : "downscale");
+            List<CloudResource> resourcesToRemove, List<CloudResource> networkResources, TerminationOperations operation) {
+        LOGGER.debug("Terminating the following resources: [{}], Operation is: [{}]", resourcesToRemove, operation);
         AzureClient client = ac.getParameter(AzureClient.class);
 
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
 
-        deleteInstancesInProgress(ac, vms, resourcesToRemove, resourceGroupName);
-        azureUtils.deleteInstances(ac, vms);
-        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_INSTANCE);
-
-        List<String> networkInterfaceNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
-        azureUtils.waitForDetachNetworkInterfaces(ac, client, resourceGroupName, networkInterfaceNames);
-        azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
-        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
+        deleteInstances(ac, vms, resourcesToRemove, resourceGroupName);
+        deleteNetworkInterfaces(ac, resourcesToRemove, client, resourceGroupName);
 
         // load balancers must be deleted before public IP addresses
-        deleteLoadBalancersIfNecessary(ac, resourcesToRemove, deleteWholeDeployment, client, resourceGroupName);
+        if (operation == TerminationOperations.TERMINATE) {
+            deleteLoadBalancers(ac, resourcesToRemove, client, resourceGroupName);
+        }
+        deletePublicIpAddresses(ac, resourcesToRemove, client, resourceGroupName);
 
-        List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
-        azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
-        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
-
-        List<String> managedDiskNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_DISK);
-        azureUtils.deleteManagedDisks(client, resourceGroupName, managedDiskNames);
-        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_DISK);
-
+        deleteManagedDisks(ac, resourcesToRemove, client, resourceGroupName);
         deleteVolumeSets(ac, stack, resourcesToRemove, networkResources, resourceGroupName);
 
-        if (deleteWholeDeployment) {
-            // deleting availability sets
-            List<String> availabiltySetNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_AVAILABILITY_SET);
-            azureUtils.deleteAvailabilitySets(client, resourceGroupName, availabiltySetNames);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_AVAILABILITY_SET);
-
-            // deleting networks
-            List<String> networkIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK);
-            azureUtils.deleteNetworks(client, networkIds);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SUBNET);
-
-            // deleting security groups
-            List<String> securityGroupIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
-            azureUtils.deleteSecurityGroups(client, securityGroupIds);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
+        if (operation == TerminationOperations.TERMINATE) {
+            deleteAvailabilitySets(ac, resourcesToRemove, client, resourceGroupName);
+            deleteNetworks(ac, resourcesToRemove, client);
+            deleteSecurityGroups(ac, resourcesToRemove, client);
         }
 
         LOGGER.debug("All the necessary resources have been deleted successfully");
         return azureResourceConnector.check(ac, resourcesToRemove);
     }
 
-    private void deleteLoadBalancersIfNecessary(AuthenticatedContext ac,
+    private void deleteSecurityGroups(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client) {
+        List<String> securityGroupIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
+        azureUtils.deleteSecurityGroups(client, securityGroupIds);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SECURITY_GROUP);
+    }
+
+    private void deleteNetworks(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client) {
+        List<String> networkIds = getResourceIdsByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK);
+        azureUtils.deleteNetworks(client, networkIds);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_SUBNET);
+    }
+
+    private void deleteAvailabilitySets(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName) {
+        List<String> availabiltySetNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_AVAILABILITY_SET);
+        azureUtils.deleteAvailabilitySets(client, resourceGroupName, availabiltySetNames);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_AVAILABILITY_SET);
+    }
+
+    private void deleteManagedDisks(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName) {
+        List<String> managedDiskNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_DISK);
+        azureUtils.deleteManagedDisks(client, resourceGroupName, managedDiskNames);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_DISK);
+    }
+
+    private void deletePublicIpAddresses(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName) {
+        List<String> publicAddressNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
+        azureUtils.deletePublicIps(client, resourceGroupName, publicAddressNames);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_PUBLIC_IP);
+    }
+
+    private void deleteNetworkInterfaces(AuthenticatedContext ac, List<CloudResource> resourcesToRemove, AzureClient client, String resourceGroupName) {
+        List<String> networkInterfaceNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
+        azureUtils.waitForDetachNetworkInterfaces(ac, client, resourceGroupName, networkInterfaceNames);
+        azureUtils.deleteNetworkInterfaces(client, resourceGroupName, networkInterfaceNames);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_NETWORK_INTERFACE);
+    }
+
+    private void deleteInstances(AuthenticatedContext ac, List<CloudInstance> vms, List<CloudResource> resourcesToRemove, String resourceGroupName) {
+        deleteInstancesInProgress(ac, vms, resourcesToRemove, resourceGroupName);
+        azureUtils.deleteInstances(ac, vms);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_INSTANCE);
+    }
+
+    private void deleteLoadBalancers(AuthenticatedContext ac,
                                                 List<CloudResource> resourcesToRemove,
-                                                boolean deleteWholeDeployment,
                                                 AzureClient client,
                                                 String resourceGroupName) {
-        if (deleteWholeDeployment) {
-            List<String> loadBalancerNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_LOAD_BALANCER);
-            azureUtils.deleteLoadBalancers(client, resourceGroupName, loadBalancerNames);
-            deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_LOAD_BALANCER);
-        }
+        List<String> loadBalancerNames = getResourceNamesByResourceType(resourcesToRemove, ResourceType.AZURE_LOAD_BALANCER);
+        azureUtils.deleteLoadBalancers(client, resourceGroupName, loadBalancerNames);
+        deleteCloudResourceList(ac, resourcesToRemove, ResourceType.AZURE_LOAD_BALANCER);
     }
 
     private void deleteInstancesInProgress(AuthenticatedContext ac, List<CloudInstance> vms, List<CloudResource> resourcesToRemove, String resourceGroupName) {

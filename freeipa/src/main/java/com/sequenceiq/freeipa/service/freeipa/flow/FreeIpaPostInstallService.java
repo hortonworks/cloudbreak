@@ -18,7 +18,6 @@ import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -32,18 +31,6 @@ public class FreeIpaPostInstallService {
     private static final String USER_ADMIN_PRIVILEGE = "User Administrators";
 
     private static final int MAX_USERNAME_LENGTH = 255;
-
-    private static final String HOST_ENROLLMENT_PRIVILEGE = "Host Enrollment";
-
-    private static final String ADD_HOSTS_PERMISSION = "System: Add Hosts";
-
-    private static final String REMOVE_SERVICES_PERMISSION = "System: Remove Services";
-
-    private static final String REMOVE_HOSTS_PERMISSION = "System: Remove Hosts";
-
-    private static final String DNS_ADMINISTRATORS_PRIVILEGE = "DNS Administrators";
-
-    private static final String ENROLLMENT_ADMINISTRATOR_ROLE = "Enrollment Administrator";
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -63,14 +50,11 @@ public class FreeIpaPostInstallService {
     @Inject
     private FreeIpaTopologyService freeIpaTopologyService;
 
-    @Inject
-    private FreeIpaService freeIpaService;
-
     public void postInstallFreeIpa(Long stackId, boolean fullPostInstall) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}. {}.", stackId, fullPostInstall ? "Full post install" : "Partial post install");
         Stack stack = stackService.getStackById(stackId);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        freeIpaTopologyService.updateReplicationTopology(stackId, freeIpaClient);
+        freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
         }

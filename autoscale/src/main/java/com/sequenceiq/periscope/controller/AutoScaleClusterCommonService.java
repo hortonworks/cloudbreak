@@ -165,7 +165,8 @@ public class AutoScaleClusterCommonService  implements ResourcePropertyProvider 
     }
 
     protected Cluster syncCBClusterByName(String stackName) {
-        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName))
+        String accountId = restRequestThreadLocalService.getCloudbreakTenant();
+        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName, accountId))
                 .filter(stack -> WORKLOAD.equals(stack.getStackType()))
                 .map(stack -> clusterService.create(stack))
                 .orElseThrow(NotFoundException.notFound("cluster", stackName));

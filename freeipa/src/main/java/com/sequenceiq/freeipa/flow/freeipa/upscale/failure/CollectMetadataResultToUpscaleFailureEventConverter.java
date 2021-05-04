@@ -16,7 +16,7 @@ public class CollectMetadataResultToUpscaleFailureEventConverter implements Payl
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         CollectMetadataResult result = (CollectMetadataResult) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Adding instances", Set.of(), Map.of(),
+        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Collecting metadata", Set.of(), Map.of(),
                 new Exception("Payload failed: " + payload));
         return event;
     }

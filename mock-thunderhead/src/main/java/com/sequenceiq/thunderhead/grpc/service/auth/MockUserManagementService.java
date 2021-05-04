@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -338,6 +339,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.network.preflight.notifications.enable}")
     private boolean networkPreflightNotifications;
+
+    @Value("${auth.mock.conclusion.checker.send.user.event.enable}")
+    private boolean conclusionCheckerSendUserEvent;
 
     private String cbLicense;
 
@@ -687,6 +691,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (networkPreflightNotifications) {
             builder.addEntitlements(createEntitlement(CDP_NETWORK_PREFLIGHT_NOTIFICATIONS));
+        }
+        if (conclusionCheckerSendUserEvent) {
+            builder.addEntitlements(createEntitlement(CDP_CONCLUSION_CHECKER_SEND_USER_EVENT));
         }
         if (enableAzureDiskSSEWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));

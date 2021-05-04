@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -19,11 +19,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -32,7 +33,9 @@ import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
@@ -43,9 +46,8 @@ import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalSer
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
+@ExtendWith(MockitoExtension.class)
 public class RecipeServiceTest {
-
-    private static final String INVALID_DTO_MESSAGE = "One and only one value of the crn and name should be filled!";
 
     @InjectMocks
     private RecipeService underTest;
@@ -77,13 +79,12 @@ public class RecipeServiceTest {
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
-    @Before
-    public void setUp() throws TransactionService.TransactionExecutionException {
-        MockitoAnnotations.initMocks(this);
-        when(clock.getCurrentTimeMillis()).thenReturn(659602800L);
+    @BeforeEach
+    public void setUp() throws TransactionExecutionException {
+        lenient().when(clock.getCurrentTimeMillis()).thenReturn(659602800L);
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
     }
 
     @Test
@@ -139,7 +140,7 @@ public class RecipeServiceTest {
     }
 
     @Test
-    public void testPopulateCrnCorrectly() {
+    public void testCreateForLoggedInUser() {
         Recipe recipe = getRecipe();
 
         when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(mock(CloudbreakUser.class));
@@ -149,11 +150,29 @@ public class RecipeServiceTest {
         when(workspaceService.retrieveForUser(any())).thenReturn(Set.of(workspace));
         when(recipeRepository.save(any())).thenReturn(recipe);
 
-        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                underTest.createForLoggedInUser(recipe, 1L, "account_id", "creator"));
+        String userCrn = Crn.builder(CrnResourceDescriptor.USER).setResource("user_id").setAccountId("account_id").build().toString();
+        ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.createForLoggedInUser(recipe, 1L, "account_id", userCrn));
 
-        assertThat(recipe.getCreator(), is("creator"));
+        assertThat(recipe.getCreator(), is(userCrn));
         assertTrue(recipe.getResourceCrn().matches("crn:cdp:datahub:us-west-1:account_id:recipe:.*"));
+    }
+
+    @Test
+    public void testCreateWithInternalUser() {
+        Recipe recipe = getRecipe();
+        recipe.setCreator(null);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(1L);
+        when(workspaceService.getByIdWithoutAuth(any())).thenReturn(workspace);
+        when(recipeRepository.save(any())).thenReturn(recipe);
+
+        Recipe savedRecipe = underTest.createWithInternalUser(recipe, 1L, "account_id");
+
+        assertThat(recipe.getCreator(), nullValue());
+        assertTrue(recipe.getResourceCrn().matches("crn:cdp:datahub:us-west-1:account_id:recipe:.*"));
+        assertEquals(workspace, savedRecipe.getWorkspace());
+        assertEquals(CreationType.SERVICE, savedRecipe.getCreationType());
     }
 
     private Recipe getRecipe() {

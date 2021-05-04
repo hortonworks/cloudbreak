@@ -8,9 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackStartStopService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceUpdater;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 @Component
@@ -23,6 +25,9 @@ public class StackStopService {
 
     @Inject
     private StackStartStopService stackStartStopService;
+
+    @Inject
+    private InstanceUpdater instanceUpdater;
 
     public void startStackStop(StackStopContext context) {
         stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.STOP_IN_PROGRESS, "Stack infrastructure is now stopping.");
@@ -39,6 +44,7 @@ public class StackStopService {
         stackStartStopService.validateResourceResults(context.getCloudContext(),
                 stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Stack infrastructure stopped successfully.");
+        instanceUpdater.updateStatuses(stack, InstanceStatus.STOPPED);
     }
 
     public boolean isStopPossible(Stack stack) {

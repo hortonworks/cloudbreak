@@ -16,7 +16,7 @@ public class InstallFreeIpaServicesFailedToUpscaleFailureEventConverter implemen
     @Override
     public UpscaleFailureEvent convert(Object payload) {
         InstallFreeIpaServicesFailed result = (InstallFreeIpaServicesFailed) payload;
-        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Bootstrapping machines", Set.of(), Map.of(),
+        UpscaleFailureEvent event = new UpscaleFailureEvent(result.getResourceId(), "Installing FreeIPA services", Set.of(), Map.of(),
                 new Exception("Payload failed: " + payload));
         return event;
     }

@@ -607,9 +607,8 @@ public class ClusterHostServiceRunner {
             }
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
                 String accountId = ThreadBasedUserCrnProvider.getAccountId();
-                String actorCrn = ThreadBasedUserCrnProvider.getUserCrn();
                 try {
-                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId, actorCrn);
+                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId);
                     gateway.put("saml", metadataXml);
                 } catch (Exception e) {
                     LOGGER.debug("Could not get SAML metadata file to set up IdP in KNOXSSO.", e);

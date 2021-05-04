@@ -25,7 +25,7 @@ auth:
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
     raz.enable: true
-    raws3.enable: true
+    raws3.enable: false
     azure.marketplace.images.enable: true
     azure.single.resourcegroup.enable: true
     azure.single.resourcegroup.dedicated.storage.account.enable: true
@@ -50,3 +50,4 @@ auth:
       disk:
         SSEWithCMK.enable: true
     cm.ha.enable: false
+    conclusion.checker.send.user.event.enable: false

@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.certificate.service.CertificateCreationService;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
@@ -48,9 +48,10 @@ public abstract class BasePublicEndpointManagementService {
         return certificateCreationService;
     }
 
-    String getWorkloadSubdomain(String actorCrn) {
+    String getWorkloadSubdomain(String accountId) {
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(actorCrn, Crn.safeFromString(actorCrn).getAccountId(), requestIdOptional);
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN,
+                accountId, requestIdOptional);
         return account.getWorkloadSubdomain();
     }
 

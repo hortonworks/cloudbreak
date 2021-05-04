@@ -40,9 +40,6 @@ public class DnsManagementServiceTest {
     @Inject
     private DnsManagementService dnsManagementService;
 
-    @Value("${actor.crn}")
-    private String actorCrn;
-
     @Value("${account.id}")
     private String accountId;
 
@@ -52,9 +49,9 @@ public class DnsManagementServiceTest {
         String environment = "gtopolyai-without-freeipa";
         boolean wildcard = false;
         List<String> ips = List.of("10.65.65.152");
-        dnsManagementService.createOrUpdateDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        dnsManagementService.createOrUpdateDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
         LOGGER.info("dns is registered");
-        dnsManagementService.deleteDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        dnsManagementService.deleteDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
         LOGGER.info("dns is deleted");
 
     }
@@ -67,7 +64,7 @@ public class DnsManagementServiceTest {
         String environment = "gtopolyai-without-freeipa";
         boolean wildcard = false;
         List<String> ips = List.of("10.65.65.212");
-        dnsManagementService.createOrUpdateDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        dnsManagementService.createOrUpdateDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
         LOGGER.info("dns is registered");
     }
 
@@ -78,7 +75,7 @@ public class DnsManagementServiceTest {
         String environment = "gtopolyai-without-freeipa";
         boolean wildcard = false;
         List<String> ips = List.of("10.65.65.66");
-        dnsManagementService.deleteDnsEntryWithIp(actorCrn, accountId, endpoint, environment, wildcard, ips);
+        dnsManagementService.deleteDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
         verifyHost(endpoint);
         LOGGER.info("dns is deleted");
     }

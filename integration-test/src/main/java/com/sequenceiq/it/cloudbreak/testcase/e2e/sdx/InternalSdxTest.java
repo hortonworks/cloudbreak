@@ -26,7 +26,7 @@ public class InternalSdxTest extends PreconditionSdxE2ETest {
             then = "SDX is created")
     public void testCreateInternalSdx(TestContext testContext) {
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext
                 .given(SdxInternalTestDto.class)

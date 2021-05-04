@@ -16,7 +16,7 @@ public class DownscaleStackCollectResourcesResultToDownscaleFailureEventConverte
     @Override
     public DownscaleFailureEvent convert(Object payload) {
         DownscaleStackCollectResourcesResult downscaleStackCollectResourcesResult = (DownscaleStackCollectResourcesResult) payload;
-        DownscaleFailureEvent event = new DownscaleFailureEvent(downscaleStackCollectResourcesResult.getResourceId(),  "Instance removal",
+        DownscaleFailureEvent event = new DownscaleFailureEvent(downscaleStackCollectResourcesResult.getResourceId(),  "Collecting resources",
                 Set.of(), Map.of(), new Exception("Payload failed: " + payload));
         return event;
     }

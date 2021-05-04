@@ -50,6 +50,7 @@ public class ClusterStopHandler implements EventHandler<ClusterStopRequest> {
             }
             result = new ClusterStopResult(request);
         } catch (Exception e) {
+            LOGGER.warn("Cannot stop the cluster: ", e);
             result = new ClusterStopResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));

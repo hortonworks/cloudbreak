@@ -118,7 +118,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                             updateStackStatus(stack, syncResult, null, alreadyDeletedCount, updateStatusFromFlow);
                         } else {
                             List<ProviderSyncResult> results = providerChecker.updateAndGetStatuses(stack, checkableInstances,
-                                    syncResult.getInstanceStatusMap());
+                                    syncResult.getInstanceStatusMap(), updateStatusFromFlow);
                             if (!results.isEmpty()) {
                                 updateStackStatus(stack, syncResult, results, alreadyDeletedCount, updateStatusFromFlow);
                             } else {

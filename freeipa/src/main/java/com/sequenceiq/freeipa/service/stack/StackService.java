@@ -76,6 +76,7 @@ public class StackService implements ResourcePropertyProvider {
 
     public Stack getByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
+                .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId))
                 .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 

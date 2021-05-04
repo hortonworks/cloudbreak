@@ -5,6 +5,7 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
@@ -16,6 +17,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -29,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.authorization.RecipeFiltering;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -83,6 +86,16 @@ public class RecipesV4Controller extends NotificationController implements Recip
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
         Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, workspaceId, accountId, creator);
+        notify(ResourceEvent.RECIPE_CREATED);
+        return converterUtil.convert(recipe, RecipeV4Response.class);
+    }
+
+    @Override
+    @InternalOnly
+    public RecipeV4Response postInternal(@AccountId String accountId, Long workspaceId, @Valid RecipeV4Request request) {
+        Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
+        Recipe recipe = recipeService.createWithInternalUser(recipeToSave,
+                restRequestThreadLocalService.getRequestedWorkspaceId(), accountId);
         notify(ResourceEvent.RECIPE_CREATED);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }

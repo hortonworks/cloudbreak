@@ -26,6 +26,8 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
 
     private Collection<BlueprintV4ViewResponse> viewResponses;
 
+    private String accountId;
+
     @Inject
     private BlueprintTestClient blueprintTestClient;
 
@@ -76,6 +78,15 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
     public BlueprintTestDto withBlueprint(String blueprint) {
         getRequest().setBlueprint(blueprint);
         return this;
+    }
+
+    public BlueprintTestDto withAccountId(String accountId) {
+        this.accountId = accountId;
+        return this;
+    }
+
+    public String getAccountId() {
+        return accountId;
     }
 
     public Map<String, Object> getTag() {
