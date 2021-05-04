@@ -62,7 +62,7 @@ public class AzureStackView {
                             .withManagedDisk(true)
                             .withSubnetId(getInstanceSubnetId(instance, subnetStrategy))
                             .withRootVolumeSize(group.getRootVolumeSize())
-                            .withCustomImageId(customImageNamePerInstance.get(instance.getInstanceId()))
+                            .withCustomImageId(!customImageNamePerInstance.isEmpty() ? customImageNamePerInstance.get(instance.getInstanceId()) : null)
                             .withManagedIdentity(getManagedIdentity(group))
                             .build();
                     existingInstances.add(azureInstance);

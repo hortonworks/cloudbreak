@@ -40,6 +40,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.util.CustomVMImageNameProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureAcceleratedNetworkValidator;
@@ -171,6 +172,8 @@ public class AzureTemplateBuilderTest {
 
     private AzureStackView azureStackView;
 
+    private AzureMarketplaceImage azureMarketplaceImage;
+
     private final Gson gson = new Gson();
 
     private final Map<String, String> tags = new HashMap<>();
@@ -258,7 +261,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                AzureInstanceTemplateOperation.PROVISION);
+                AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
@@ -296,7 +299,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                AzureInstanceTemplateOperation.PROVISION);
+                AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
@@ -329,7 +332,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("publicIPAddress"));
@@ -362,7 +365,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("publicIPAddress"));
@@ -398,7 +401,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
@@ -429,7 +432,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
@@ -460,7 +463,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
@@ -498,7 +501,7 @@ public class AzureTemplateBuilderTest {
 
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, null);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
@@ -543,7 +546,7 @@ public class AzureTemplateBuilderTest {
 
         String templateString =
             azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                AzureInstanceTemplateOperation.PROVISION);
+                AzureInstanceTemplateOperation.PROVISION, null);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
@@ -589,7 +592,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
@@ -622,7 +625,7 @@ public class AzureTemplateBuilderTest {
         when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
@@ -656,7 +659,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("resourceGroupName"));
@@ -693,7 +696,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("existingVNETName"));
@@ -728,7 +731,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertFalse(templateString.contains("existingSubnetName"));
@@ -761,7 +764,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("virtualNetworkNamePrefix"));
@@ -794,7 +797,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("subnet1Prefix"));
@@ -829,7 +832,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertThat(templateString).contains("[concat('datadisk', 'm0', '0')]");
@@ -863,7 +866,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
@@ -898,7 +901,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("[concat(parameters('vmNamePrefix'),'-osDisk', 'm0')]"));
@@ -943,7 +946,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         //THEN
         gson.fromJson(templateString, Map.class);
         assertTrue(templateString.contains("\"gatewayAsName\": \"gateway-as\","));
@@ -980,7 +983,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -1014,7 +1017,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -1053,7 +1056,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -1091,7 +1094,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
         //THEN
         gson.fromJson(templateString, Map.class);
@@ -1129,7 +1132,7 @@ public class AzureTemplateBuilderTest {
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
                 azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
-                        AzureInstanceTemplateOperation.PROVISION);
+                        AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
 
         //THEN
         gson.fromJson(templateString, Map.class);

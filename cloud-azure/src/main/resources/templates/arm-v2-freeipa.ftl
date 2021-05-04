@@ -221,6 +221,11 @@
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
+                   "plan": {
+                        "name": "${marketplaceImageDetails.planId}",
+                        "product": "${marketplaceImageDetails.offerId}",
+                        "publisher": "${marketplaceImageDetails.publisherId}"
+                   },
                     <#if instance.managedIdentity?? && instance.managedIdentity?has_content>
                     "identity": {
                         "type": "userAssigned",
@@ -294,10 +299,17 @@
                            },
                            <#if instance.managedDisk == true>
                            "imageReference": {
-                               <#if instance.customImageId?? && instance.customImageId?has_content>
-                               "id": "${instance.customImageId}"
+                               <#if usePartnerCenter>
+                                    "publisher": "${marketplaceImageDetails.publisherId}",
+                                    "offer": "${marketplaceImageDetails.offerId}",
+                                    "sku": "${marketplaceImageDetails.planId}",
+                                    "version": "${marketplaceImageDetails.version}"
                                <#else>
-                               "id": "${customImageId}"
+                                   <#if instance.customImageId?? && instance.customImageId?has_content>
+                                   "id": "${instance.customImageId}"
+                                   <#else>
+                                   "id": "${customImageId}"
+                                   </#if>
                                </#if>
                            }
                            </#if>
