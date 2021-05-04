@@ -134,12 +134,13 @@ public interface ImageCatalogV4Endpoint {
     ImagesV4Response getImageByImageId(@PathParam("workspaceId") Long workspaceId, @QueryParam("imageId") String imageId) throws Exception;
 
     @GET
-    @Path("{name}/image")
+    @Path("{userId}/{userCrn}/{userName}/{tenant}/{name}/image")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageByNameAndId")
-    ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId) throws Exception;
+    ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("userId") String userId,
+        @PathParam("userCrn") String userCrn, @PathParam("userName") String userName, @PathParam("tenant") String tenant,
+        @PathParam("name") String name, @QueryParam("imageId") String imageId) throws Exception;
 
     @GET
     @Path("{name}/singleimage")

@@ -56,8 +56,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.SecurityRuleV4Request;
-import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnParseException;
@@ -126,9 +127,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
     @Inject
-    private ConverterUtil converterUtil;
-
-    @Inject
     private DistroxService distroxService;
 
     @Inject
@@ -160,6 +158,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private UserProfileV4Endpoint userProfileV4Endpoint;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -222,7 +223,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         }
     }
 
-    public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, CloudPlatform cloudPlatform) {
+    public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, CloudPlatform cloudPlatform, String userCrn) {
         if (imageSettingsV4Request == null) {
             return null;
         }
@@ -237,8 +238,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
                 if (Strings.isBlank(imageSettingsV4Request.getCatalog())) {
                     imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId());
                 } else {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(
-                            WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+                    UserProfileV4Response userResponse = userProfileV4Endpoint.get();
+                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT, userResponse.getUserId(), userCrn,
+                            userResponse.getUsername(), userResponse.getTenant(), imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
                 }
             } catch (Exception e) {
                 LOGGER.error("Sdx service fails to get image using image id", e);
@@ -317,7 +319,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         DetailedEnvironmentResponse environment = getEnvironment(sdxClusterRequest.getEnvironment());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        ImageV4Response imageV4Response = getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
+        ImageV4Response imageV4Response = getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform, userCrn);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateEnv(environment);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);

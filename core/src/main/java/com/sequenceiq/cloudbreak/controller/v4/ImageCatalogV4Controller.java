@@ -11,9 +11,6 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -31,19 +28,27 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
+import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -58,6 +63,12 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Inject
     private ImageCatalogFiltering imageCatalogFiltering;
+
+    @Inject
+    private WorkspaceService workspaceService;
+
+    @Inject
+    private UserService userService;
 
     @Override
     @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
@@ -165,8 +176,12 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
-    public ImagesV4Response getImageByCatalogNameAndImageId(Long workspaceId, @ResourceName String name, String imageId) throws Exception {
-        StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspaceId, imageId, name);
+    public ImagesV4Response getImageByCatalogNameAndImageId(Long workspaceId, String userId, String userCrn, String userName, String tenant,
+            @ResourceName String name, String imageId) throws Exception {
+        CloudbreakUser cbUser = new CloudbreakUser(userId, userCrn, userName, "", tenant);
+        User user = userService.getOrCreate(cbUser);
+        Workspace workspace = workspaceService.get(workspaceId, user);
+        StatedImage statedImage = imageCatalogService.getImageByCatalogName(workspace.getId(), imageId, name);
         Images images = new Images(List.of(), List.of(statedImage.getImage()), Set.of());
         return converterUtil.convert(images, ImagesV4Response.class);
     }

@@ -892,7 +892,7 @@ class SdxServiceTest {
         when(entitlementService.dataLakeCustomImageEnabled(anyString())).thenReturn(true);
         when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
         when(cloudbreakServiceCrnEndpoints.imageCatalogV4Endpoint()).thenReturn(imageCatalogV4Endpoint);
-        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any())).thenReturn(imagesV4Response);
+        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any(), any(), any(), any(), any())).thenReturn(imagesV4Response);
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
