@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
+import java.util.StringJoiner;
+
 public class AzureImageTerms {
 
     private String id;
@@ -106,4 +108,13 @@ public class AzureImageTerms {
 
     }
 
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", AzureImageTerms.class.getSimpleName() + "[", "]")
+                .add("id='" + id + "'")
+                .add("name='" + name + "'")
+                .add("type='" + type + "'")
+                .add("properties=" + properties)
+                .toString();
+    }
 }
