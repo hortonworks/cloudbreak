@@ -121,6 +121,9 @@ freeipa:
       operations:
         group_add_member: 25
         group_remove_member: 25
+  server.deletion.check:
+    maxWaitSeconds: 300
+    interval: 10000
 
 info:
   app:
