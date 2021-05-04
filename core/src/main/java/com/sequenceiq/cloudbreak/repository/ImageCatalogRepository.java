@@ -38,7 +38,7 @@ public interface ImageCatalogRepository extends WorkspaceResourceRepository<Imag
     List<String> findAllResourceCrnsByNamesAndTenantId(@Param("names") Collection<String> names, @Param("tenantId") String tenantId);
 
     @Query("SELECT i.resourceCrn FROM ImageCatalog i " +
-            "WHERE i.workspace.tenant.name = :tenantId AND i.name = :name AND i.imageCatalogUrl is not null")
+            "WHERE i.workspace.tenant.name = :tenantId AND i.name = :name")
     Optional<String> findResourceCrnByNameAndTenantId(@Param("name") String name, @Param("tenantId") String tenantId);
 
     @Query("SELECT i.name as name, i.resourceCrn as crn FROM ImageCatalog i " +
