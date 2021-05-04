@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ImageCatalogOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -131,7 +132,8 @@ public interface ImageCatalogV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_ID, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageById")
-    ImagesV4Response getImageByImageId(@PathParam("workspaceId") Long workspaceId, @QueryParam("imageId") String imageId) throws Exception;
+    ImagesV4Response getImageByImageId(@PathParam("workspaceId") Long workspaceId, @QueryParam("imageId") String imageId,
+            @AccountId @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("{name}/image")
@@ -139,7 +141,7 @@ public interface ImageCatalogV4Endpoint {
     @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_BY_NAME_AND_ID, produces = MediaType.APPLICATION_JSON,
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageByNameAndId")
     ImagesV4Response getImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("imageId") String imageId) throws Exception;
+            @QueryParam("imageId") String imageId, @AccountId @QueryParam("accountId") String accountId) throws Exception;
 
     @GET
     @Path("{name}/singleimage")

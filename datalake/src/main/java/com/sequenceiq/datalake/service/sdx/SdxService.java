@@ -223,6 +223,8 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     }
 
     public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, CloudPlatform cloudPlatform) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+
         if (imageSettingsV4Request == null) {
             return null;
         }
@@ -235,10 +237,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
             ImagesV4Response imagesV4Response = null;
             try {
                 if (Strings.isBlank(imageSettingsV4Request.getCatalog())) {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId());
+                    imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId(), accountId);
                 } else {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(
-                            WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
+                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT,
+                            imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId(), accountId);
                 }
             } catch (Exception e) {
                 LOGGER.error("Sdx service fails to get image using image id", e);
