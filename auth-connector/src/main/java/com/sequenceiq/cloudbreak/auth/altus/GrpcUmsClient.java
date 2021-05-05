@@ -93,7 +93,7 @@ public class GrpcUmsClient {
      * @return                   the new or existing user group.
      */
     public Group createGroup(String actorCrn, String accountId, String groupName, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Creating new user group '{}', for account '{}' using request ID '{}'...", groupName, accountId, requestId);
         Group newGroup = client.createGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
         LOGGER.debug("New user group '{}' has been created for account '{}'.", groupName, accountId);
@@ -108,7 +108,7 @@ public class GrpcUmsClient {
      * @param requestId          an optional request Id
      */
     public void deleteGroup(String actorCrn, String accountId, String groupName, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Deleting user group '{}', from account '{}' using request ID '{}'...", groupName, accountId, requestId);
         client.deleteGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
         LOGGER.debug("User group '{}' has been deleted from account '{}'.", groupName, accountId);
@@ -123,7 +123,7 @@ public class GrpcUmsClient {
      * @param requestId          an optional request Id
      */
     public void addMemberToGroup(String actorCrn, String accountId, String groupName, String memberCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Assigning user '{}' to '{}' group, at account '{}' using request ID '{}'...", memberCrn, groupName, accountId, requestId);
         client.addMemberToGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName, memberCrn);
         LOGGER.debug("User '{}' has been added to '{}' group successfully.", groupName, accountId);
@@ -138,7 +138,7 @@ public class GrpcUmsClient {
      * @param requestId          an optional request Id
      */
     public void removeMemberFromGroup(String actorCrn, String accountId, String groupName, String memberCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Removing user '{}' from '{}' group, at account '{}' using request ID '{}'...", memberCrn, groupName, accountId, requestId);
         client.removeMemberFromGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName, memberCrn);
         LOGGER.debug("User '{}' has been removed from '{}' group successfully.", groupName, accountId);
@@ -153,7 +153,7 @@ public class GrpcUmsClient {
      * @return                   list of user group member CRNs or NULL if the user group does not exist.
      */
     public List<String> listMembersFromGroup(String actorCrn, String accountId, String groupName, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing members from '{}' group, at account '{}' using request ID '{}'...", groupName, accountId, requestId);
         List<String> members = client.listMembersFromGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
         LOGGER.debug("User group '{}' contains [{}] members at account '{}'.", groupName, members, accountId);
@@ -180,7 +180,7 @@ public class GrpcUmsClient {
      * @return the list of groups associated with this account
      */
     public List<Group> listGroups(String actorCrn, String accountId, List<String> groupCrns, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
         List<Group> groups = client.listGroups(RequestIdUtil.getOrGenerate(requestId), accountId, groupCrns);
         LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
@@ -196,7 +196,7 @@ public class GrpcUmsClient {
      * @return the list of group crns associated with this member
      */
     public List<String> listGroupsForMember(String actorCrn, String accountId, String memberCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing group information for member {} in account {} using request ID {}", memberCrn, accountId, requestId);
         List<String> groups = client.listGroupsForMembers(RequestIdUtil.getOrGenerate(requestId), accountId, memberCrn);
         LOGGER.debug("{} Groups found for member {} in account {}", groups.size(), memberCrn, accountId);
@@ -213,7 +213,7 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsUserCache", key = "{ #actorCrn, #userCrn }")
     public User getUserDetails(String actorCrn, String userCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting user information for {} using request ID {}", userCrn, requestId);
         User user = client.getUser(RequestIdUtil.getOrGenerate(requestId), userCrn);
         LOGGER.debug("User information retrieved for userCrn: {}", user.getCrn());
@@ -230,7 +230,7 @@ public class GrpcUmsClient {
      */
     public UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadPassword(String actorCrn, String userCrn, String password,
             Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         String workloadUserName = getUserDetails(actorCrn, userCrn, requestId).getWorkloadUsername();
         LOGGER.debug("Setting workload password for user {} with workload name {}", userCrn, workloadUserName);
         UserManagementProto.SetActorWorkloadCredentialsResponse response = client.setActorWorkloadPassword(RequestIdUtil.getOrGenerate(requestId), userCrn,
@@ -248,7 +248,7 @@ public class GrpcUmsClient {
      * @return the workload credentials associated with this user CRN
      */
     public UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String actorCrn, String userCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting workload credentials for user {}", userCrn);
         UserManagementProto.GetActorWorkloadCredentialsResponse response = client.getActorWorkloadCredentials(RequestIdUtil.getOrGenerate(requestId), userCrn);
         LOGGER.debug("Got workload credentials for user {}", userCrn);
@@ -275,7 +275,7 @@ public class GrpcUmsClient {
      * @return the list of users associated with this account
      */
     public List<User> listUsers(String actorCrn, String accountId, List<String> userCrns, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing user information for account {} using request ID {}", accountId, requestId);
         List<User> users = client.listUsers(RequestIdUtil.getOrGenerate(requestId), accountId, userCrns);
         LOGGER.debug("{} Users found for account {}", users.size(), accountId);
@@ -292,7 +292,7 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #actorCrn, #userCrn, #accountId }")
     public MachineUser getMachineUserDetails(String actorCrn, String userCrn, String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting machine user information for {} using request ID {}", userCrn, requestId);
         MachineUser machineUser = client.getMachineUser(RequestIdUtil.getOrGenerate(requestId), userCrn, accountId);
         LOGGER.debug("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
@@ -331,7 +331,7 @@ public class GrpcUmsClient {
             String actorCrn, String accountId, List<String> machineUserCrns,
             boolean includeInternal, boolean includeWorkloadMachineUsers,
             Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing machine user information for account {} using request ID {}", accountId, requestId);
         List<MachineUser> machineUsers = client.listMachineUsers(RequestIdUtil.getOrGenerate(requestId),
                 accountId, machineUserCrns, includeInternal, includeWorkloadMachineUsers);
@@ -350,7 +350,7 @@ public class GrpcUmsClient {
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public Optional<String> createMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId) {
         try {
-            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel());
             String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
             Optional<String> machineUserCrn = client.createMachineUser(generatedRequestId, userCrn, accountId, machineUserName);
@@ -384,7 +384,7 @@ public class GrpcUmsClient {
      * @param requestId       request id for deleting machine user
      */
     public void deleteMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
         LOGGER.debug("Deleting machine user {} by {} using request ID {} (for accountId: {})",
                 machineUserName, userCrn, generatedRequestId, accountId);
@@ -402,7 +402,7 @@ public class GrpcUmsClient {
     public List<ServicePrincipalCloudIdentities> listServicePrincipalCloudIdentities(
             String actorCrn, String accountId, String environmentCrn, Optional<String> requestId) {
         List<ServicePrincipalCloudIdentities> spCloudIds = new ArrayList<>();
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Listing service principal cloud identities for account {} using request ID {}", accountId, requestId);
         ListServicePrincipalCloudIdentitiesResponse response;
         Optional<PageToken> pageToken = Optional.empty();
@@ -425,7 +425,7 @@ public class GrpcUmsClient {
      * @return the rights associated with this user or machine user
      */
     public GetRightsResponse getRightsForUser(String actorCrn, String userCrn, String environmentCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting rights for user {} in environment {}", userCrn, environmentCrn);
         return client.getRightsForUser(RequestIdUtil.getOrGenerate(requestId), userCrn, environmentCrn);
     }
@@ -442,7 +442,7 @@ public class GrpcUmsClient {
             String actorCrn, String memberCrn, Optional<String> requestId) {
         requireNonNull(memberCrn);
         List<String> wags = new ArrayList<>();
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting workload administration groups for member {}", memberCrn);
         ListWorkloadAdministrationGroupsForMemberResponse response;
         Optional<PageToken> pageToken = Optional.empty();
@@ -465,14 +465,14 @@ public class GrpcUmsClient {
      */
     @Cacheable(cacheNames = "umsAccountCache", key = "{ #actorCrn, #accountId }")
     public Account getAccountDetails(String actorCrn, String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting information for account ID {} using request ID {}", accountId, requestId);
         return client.getAccount(RequestIdUtil.getOrGenerate(requestId), accountId);
     }
 
     @Cacheable(cacheNames = "umsUserRoleAssigmentsCache", key = "{ #actorCrn, #userCrn }")
     public List<ResourceAssignment> listResourceRoleAssigments(String actorCrn, String userCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         return client.listAssigmentsOfUser(RequestIdUtil.getOrGenerate(requestId), userCrn);
     }
 
@@ -629,7 +629,7 @@ public class GrpcUmsClient {
     @Cacheable(cacheNames = "umsResourceAssigneesCache", key = "{ #actorCrn, #userCrn, #resourceCrn }")
     public List<ResourceAssignee> listAssigneesOfResource(String actorCrn, String userCrn,
             String resourceCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         return client.listResourceAssigneesForResource(RequestIdUtil.getOrGenerate(requestId), resourceCrn);
     }
 
@@ -644,7 +644,7 @@ public class GrpcUmsClient {
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public void assignMachineUserRole(String userCrn, String accountId, String machineUserCrn, String roleCrn, Optional<String> requestId) {
         try {
-            UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel());
             client.assignMachineUserRole(RequestIdUtil.getOrGenerate(requestId), userCrn, accountId, machineUserCrn, roleCrn);
         } catch (StatusRuntimeException ex) {
             if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
@@ -668,7 +668,7 @@ public class GrpcUmsClient {
      */
     public void unassignMachineUserRole(String userCrn, String machineUserCrn,
             String roleCrn, Optional<String> requestId, String accountId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), userCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         client.unassignMachineUserRole(RequestIdUtil.getOrGenerate(requestId), machineUserCrn, roleCrn, accountId);
     }
 
@@ -685,7 +685,7 @@ public class GrpcUmsClient {
     public AltusCredential generateAccessSecretKeyPair(String actorCrn, String accountId, String machineUserCrn,
             Optional<String> requestId, AccessKeyType.Value accessKeyType) {
         try {
-            UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+            UmsClient client = makeClient(channelWrapper.getChannel());
             LOGGER.info("Generating new access / secret key pair for {}", machineUserCrn);
             CreateAccessKeyResponse accessKeyResponse = client.createAccessPrivateKeyPair(
                     RequestIdUtil.getOrGenerate(requestId), actorCrn, accountId, machineUserCrn, accessKeyType);
@@ -758,7 +758,7 @@ public class GrpcUmsClient {
      * @param requestId      id for the request
      */
     public void deleteMachineUserAccessKeys(String actorCrn, String accountId, String machineUserCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.info("Getting access keys for {}", machineUserCrn);
         List<String> accessKeys = client.listMachineUserAccessKeys(RequestIdUtil.getOrGenerate(requestId), actorCrn, accountId, machineUserCrn);
         LOGGER.info("Deleting access keys for {}", machineUserCrn);
@@ -776,7 +776,7 @@ public class GrpcUmsClient {
      */
     public boolean doesMachineUserHasAccessKey(String actorCrn, String accountId,
             String machineUserCrn, String accessKeyId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         List<String> accessKeys = client.listMachineUserAccessKeys(RequestIdUtil.newRequestId(), actorCrn, accountId, machineUserCrn, true);
         return accessKeys.contains(accessKeyId);
     }
@@ -795,8 +795,8 @@ public class GrpcUmsClient {
     }
 
     @VisibleForTesting
-    UmsClient makeClient(ManagedChannel channel, String actorCrn) {
-        return new UmsClient(channel, actorCrn, umsClientConfig, tracer);
+    UmsClient makeClient(ManagedChannel channel) {
+        return new UmsClient(channel, umsClientConfig, tracer);
     }
 
     @VisibleForTesting
@@ -811,7 +811,7 @@ public class GrpcUmsClient {
      * @return metadata as string
      */
     public String getIdentityProviderMetadataXml(String accountId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         String requestId = RequestIdUtil.newRequestId();
         LOGGER.debug("Getting IdP metadata through account ID: {}, request id: {}", accountId, requestId);
         return client.getIdentityProviderMetadataXml(requestId, accountId);
@@ -819,14 +819,14 @@ public class GrpcUmsClient {
 
     public void assignResourceRole(
             String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.info("Assigning {} role for resource {} to assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
         client.assignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
         LOGGER.info("Assigned {} role for resource {} to assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
     public void unassignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.info("Unassigning {} role for resource {} from assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
         client.unassignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
         LOGGER.info("Unassigned {} role for resource {} from assignee {}", resourceRoleCrn, resourceCrn, assigneeCrn);
@@ -835,7 +835,7 @@ public class GrpcUmsClient {
     public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
         try {
             LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
-            UmsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+            UmsClient client = makeClient(channelWrapper.getChannel());
             client.notifyResourceDeleted(RequestIdUtil.getOrGenerate(requestId), resourceCrn);
             LOGGER.info("Notified UMS about deletion of resource {}", resourceCrn);
         } catch (Exception e) {
@@ -844,25 +844,25 @@ public class GrpcUmsClient {
     }
 
     public String setWorkloadAdministrationGroupName(String actorCrn, String accountId, Optional<String> requestId, String right, String resource) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         return client.setWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId),
                 accountId, right, resource).getWorkloadAdministrationGroupName();
     }
 
     public String getWorkloadAdministrationGroupName(String actorCrn, String accountId, Optional<String> requestId, String right, String resource) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         return client.getWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId),
                 accountId, right, resource).getWorkloadAdministrationGroupName();
     }
 
     public void deleteWorkloadAdministrationGroupName(String actorCrn, String accountId, Optional<String> requestId, String right, String resource) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         client.deleteWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId), accountId, right, resource);
     }
 
     public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String actorCrn, String accountId,
             Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         return client.listWorkloadAdministrationGroups(RequestIdUtil.getOrGenerate(requestId), accountId);
     }
 
@@ -875,7 +875,7 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     public GetEventGenerationIdsResponse getEventGenerationIds(String actorCrn, String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         LOGGER.debug("Getting event generation ids for account {} using request ID {}", accountId, requestId);
         return client.getEventGenerationIds(RequestIdUtil.getOrGenerate(requestId), accountId);
     }
@@ -891,7 +891,7 @@ public class GrpcUmsClient {
     public GetUserSyncStateModelResponse getUserSyncStateModel(
             String actorCrn, String accountId,
             List<RightsCheck> rightsChecks, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel(), actorCrn);
+        UmsClient client = makeClient(channelWrapper.getChannel());
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
         LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, generatedRequestId);
         return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks);

@@ -56,6 +56,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Remov
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -76,8 +77,6 @@ public class UmsClient {
 
     private final ManagedChannel channel;
 
-    private final String actorCrn;
-
     private final UmsClientConfig umsClientConfig;
 
     private final Tracer tracer;
@@ -85,12 +84,10 @@ public class UmsClient {
     /**
      * Constructor.
      *  @param channel  the managed channel.
-     * @param actorCrn the actor CRN.
      * @param tracer tracer
      */
-    UmsClient(ManagedChannel channel, String actorCrn, UmsClientConfig umsClientConfig, Tracer tracer) {
+    UmsClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer) {
         this.channel = checkNotNull(channel);
-        this.actorCrn = checkNotNull(actorCrn);
         this.umsClientConfig = checkNotNull(umsClientConfig);
         this.tracer = tracer;
     }
@@ -962,7 +959,7 @@ public class UmsClient {
         checkNotNull(requestId);
         return UserManagementGrpc.newBlockingStub(channel)
                 .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, actorCrn));
+                        new AltusMetadataInterceptor(requestId, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN));
     }
 
     /**
