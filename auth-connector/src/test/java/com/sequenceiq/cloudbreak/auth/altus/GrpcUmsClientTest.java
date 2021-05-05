@@ -82,7 +82,7 @@ public class GrpcUmsClientTest {
     public void setUp() {
         underTest = spy(rawGrpcUmsClient);
         lenient().doReturn(managedChannel).when(channelWrapper).getChannel();
-        lenient().doReturn(umsClient).when(underTest).makeClient(any(ManagedChannel.class), anyString());
+        lenient().doReturn(umsClient).when(underTest).makeClient(any(ManagedChannel.class));
         lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient(anyString());
     }
 
