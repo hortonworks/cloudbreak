@@ -10,7 +10,7 @@ public class Cert {
     private String cacn;
 
     @JsonProperty("serial_number")
-    private int serialNumber;
+    private long serialNumber;
 
     @JsonProperty("valid_not_before")
     private String validNotBefore;
@@ -40,11 +40,11 @@ public class Cert {
         this.cacn = cacn;
     }
 
-    public int getSerialNumber() {
+    public long getSerialNumber() {
         return serialNumber;
     }
 
-    public void setSerialNumber(int serialNumber) {
+    public void setSerialNumber(long serialNumber) {
         this.serialNumber = serialNumber;
     }
 

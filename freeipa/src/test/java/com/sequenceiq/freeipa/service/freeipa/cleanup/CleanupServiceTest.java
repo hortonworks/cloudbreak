@@ -455,7 +455,7 @@ public class CleanupServiceTest {
         verify(ldapConfigService, times(1)).delete("envCrn", "accountId", "test-wl-1");
     }
 
-    private Cert createCert(String subject, int serialNumber, boolean revoked) {
+    private Cert createCert(String subject, long serialNumber, boolean revoked) {
         Cert cert = new Cert();
         cert.setSubject(subject);
         cert.setRevoked(revoked);
@@ -463,8 +463,8 @@ public class CleanupServiceTest {
         return cert;
     }
 
-    private void verifyRevokeNotInvoked(FreeIpaClient freeIpaClient, int... serialNumber) throws FreeIpaClientException {
-        for (int num : serialNumber) {
+    private void verifyRevokeNotInvoked(FreeIpaClient freeIpaClient, long... serialNumber) throws FreeIpaClientException {
+        for (long num : serialNumber) {
             verify(freeIpaClient, times(0)).revokeCert(num);
         }
     }
