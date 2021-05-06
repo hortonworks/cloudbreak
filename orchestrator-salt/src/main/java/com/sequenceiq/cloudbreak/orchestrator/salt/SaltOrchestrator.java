@@ -109,6 +109,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String CM_SERVER_RESTART = "cloudera.manager.restart";
 
+    private static final String CM_AGENT_CERTDIR_PERMISSION = "cloudera.agent.agent-cert-permission";
+
     private static final String DISK_INITIALIZE = "format-and-mount-initialize.sh";
 
     private static final String DISK_COMMON = "format-and-mount-common.sh";
@@ -629,6 +631,20 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.error("Error occurred during CM Server restart", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void updateAgentCertDirectoryPermission(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException {
+        try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
+            StateRunner stateRunner = new StateRunner(target, allNodes, CM_AGENT_CERTDIR_PERMISSION);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel);
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during CM Agent certdir permission update", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
