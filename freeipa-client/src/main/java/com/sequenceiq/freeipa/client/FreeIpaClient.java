@@ -267,7 +267,7 @@ public class FreeIpaClient {
         return (Set<Cert>) invoke("cert_find", List.of(), Map.of(), type).getResult();
     }
 
-    public void revokeCert(int serialNumber) throws FreeIpaClientException {
+    public void revokeCert(long serialNumber) throws FreeIpaClientException {
         List<Object> flags = List.of(String.valueOf(serialNumber));
         Map<String, Object> params = Map.of("revocation_reason", CESSATION_OF_OPERATION);
         invoke("cert_revoke", flags, params, Object.class);
