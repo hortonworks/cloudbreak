@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
+import com.sequenceiq.flow.core.chain.finalize.flowevents.FlowChainFinalizePayload;
+import com.sequenceiq.flow.core.chain.init.flowevents.FlowChainInitPayload;
 
 @Component
 public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventChainFactory<MultiHostgroupClusterAndStackDownscaleTriggerEvent> {
@@ -31,6 +33,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(MultiHostgroupClusterAndStackDownscaleTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
+        flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
         for (Entry<String, Set<Long>> entry : event.getInstanceIdsByHostgroupMap().entrySet()) {
             ClusterScaleTriggerEvent cste;
             cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), entry.getKey(), entry.getValue(), event.accepted(),
@@ -42,6 +45,7 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
                 flowEventChain.add(sste);
             }
         }
+        flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), flowEventChain);
     }
 }

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.DECOMMISSION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
+import static com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT;
+import static com.sequenceiq.flow.core.chain.init.config.FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT;
 import static org.junit.Assert.assertEquals;
 
 import java.util.HashMap;
@@ -37,11 +39,13 @@ public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent("selector", 1L,
                 instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event).getQueue();
-        assertEquals(4L, queue.size());
+        assertEquals(6L, queue.size());
+        assertEquals(FLOWCHAIN_INIT_TRIGGER_EVENT.event(), queue.poll().selector());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
         assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
         assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());
+        assertEquals(FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(), queue.poll().selector());
     }
 
 }

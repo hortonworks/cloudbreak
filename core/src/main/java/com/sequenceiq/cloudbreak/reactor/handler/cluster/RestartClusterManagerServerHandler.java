@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import java.util.Collections;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterManagerServerRequest;
@@ -83,6 +85,9 @@ public class RestartClusterManagerServerHandler  extends ExceptionCatcherEventHa
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), exitModel);
+        Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+        Set<String> agentTargets = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+        hostOrchestrator.updateAgentCertDirectoryPermission(gatewayConfig, agentTargets, nodes, exitModel);
+        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, nodes, exitModel);
     }
 }
