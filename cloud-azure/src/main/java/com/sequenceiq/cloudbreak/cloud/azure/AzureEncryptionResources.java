@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.microsoft.azure.management.compute.implementation.DiskEncryptionSetInner;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.DiskEncryptionSetDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -43,6 +45,10 @@ public class AzureEncryptionResources implements EncryptionResources {
 
     @Inject
     private AzureUtils azureUtils;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     @Inject
     private PersistenceNotifier persistenceNotifier;
@@ -86,7 +92,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                 desResourceGroupName,
                 sourceVaultId,
                 diskEncryptionSetCreationRequest);
-        azureClient.grantKeyVaultAccessPolicyToServicePrincipal(vaultResourceGroupName, vaultName,
+        grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(azureClient, vaultResourceGroupName, vaultName,
                 diskEncryptionSet.getDiskEncryptionSetPrincipalId());
         return diskEncryptionSet;
     }
@@ -161,6 +167,22 @@ public class AzureEncryptionResources implements EncryptionResources {
         } else {
             throw new CloudConnectorException("Creating Disk Encryption Set resulted in failure from Azure cloud.");
         }
+    }
+
+    private void grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(AzureClient azureClient, String vaultResourceGroupName, String vaultName,
+            String diskEncryptionSetPrincipalId) {
+        String description = String.format("access to Key Vault \"%s\"", vaultName);
+        retryService.testWith2SecDelayMax15Times(() -> {
+            try {
+                LOGGER.info("Granting {}.", description);
+                azureClient.grantKeyVaultAccessPolicyToServicePrincipal(vaultResourceGroupName, vaultName, diskEncryptionSetPrincipalId);
+                LOGGER.info("Granted {}.", description);
+                return true;
+            } catch (Exception e) {
+                LOGGER.warn(String.format("Granting %s failed, %s happened:", description, e.getClass().getName()), e);
+                throw Retry.ActionFailedException.ofCause(e);
+            }
+        });
     }
 
     private void deleteDiskEncryptionSetOnCloud(AzureClient azureClient, String desResourceGroupName, String diskEncryptionSetName) {

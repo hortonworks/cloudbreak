@@ -19,5 +19,21 @@ public interface Retry {
         public ActionFailedException(String message) {
             super(message);
         }
+
+        public ActionFailedException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ActionFailedException(Throwable cause) {
+            super(cause);
+        }
+
+        public ActionFailedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
+
+        public static ActionFailedException ofCause(Throwable cause) {
+            return new ActionFailedException(cause != null ? cause.getMessage() : null, cause);
+        }
     }
 }
