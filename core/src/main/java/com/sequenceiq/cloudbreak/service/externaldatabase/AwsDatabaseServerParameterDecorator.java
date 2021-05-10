@@ -17,15 +17,11 @@ public class AwsDatabaseServerParameterDecorator implements DatabaseServerParame
     @Value("${cb.aws.externaldatabase.nonha.retentionperiod}")
     private int retentionPeriodNonHa;
 
-    @Value("${cb.aws.externaldatabase.engineversion}")
-    private String engineVersion;
-
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter) {
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
         parameters.setBackupRetentionPeriod(serverParameter.isHighlyAvailable() ? retentionPeriodHa : retentionPeriodNonHa);
         parameters.setMultiAZ(Boolean.toString(serverParameter.isHighlyAvailable()));
-        parameters.setEngineVersion(engineVersion);
         request.setAws(parameters);
     }
 

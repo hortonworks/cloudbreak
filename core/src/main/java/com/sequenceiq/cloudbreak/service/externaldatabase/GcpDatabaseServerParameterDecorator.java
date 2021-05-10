@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.externaldatabase;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -11,13 +10,9 @@ import com.sequenceiq.redbeams.api.endpoint.v4.stacks.gcp.GcpDatabaseServerV4Par
 @Component
 public class GcpDatabaseServerParameterDecorator implements DatabaseServerParameterDecorator {
 
-    @Value("${cb.gcp.externaldatabase.engineversion}")
-    private String engineVersion;
-
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter) {
         GcpDatabaseServerV4Parameters parameters = new GcpDatabaseServerV4Parameters();
-        parameters.setEngineVersion(engineVersion);
         request.setGcp(parameters);
     }
 

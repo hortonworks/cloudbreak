@@ -20,9 +20,6 @@ public class AwsDatabaseServerParameterSetter implements DatabaseServerParameter
     @Value("${sdx.db.aws.nonha.backupretentionperiod}")
     int backupRetentionPeriodNonHa;
 
-    @Value("${sdx.db.aws.engineversion}")
-    private String engineVersion;
-
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
@@ -35,7 +32,6 @@ public class AwsDatabaseServerParameterSetter implements DatabaseServerParameter
         } else {
             throw new IllegalArgumentException(availabilityType + " database availability type is not supported on AWS.");
         }
-        parameters.setEngineVersion(engineVersion);
         request.setAws(parameters);
     }
 

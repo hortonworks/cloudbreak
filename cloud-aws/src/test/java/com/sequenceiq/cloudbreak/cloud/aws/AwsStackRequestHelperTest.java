@@ -143,16 +143,18 @@ public class AwsStackRequestHelperTest {
     static Object[][] testGetStackParametersDbDataProvider() {
         return new Object[][]{
                 // testCaseName sslCertificateIdentifier sslCertificateIdentifierParameterDefinedExpected sslCertificateIdentifierParameterExpected
-                {"sslCertificateIdentifier=null", null, false, null},
-                {"sslCertificateIdentifier=empty", "", false, null},
-                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER, true, SSL_CERTIFICATE_IDENTIFIER},
+                // engineVersion expectedEngineVersion
+                {"sslCertificateIdentifier=null", null, false, null, "10.6", "10.6", "postgres10"},
+                {"sslCertificateIdentifier=null, only major version", null, false, null, "10", "10", "postgres10"},
+                {"sslCertificateIdentifier=empty", "", false, null, "10.6", "10.6", "postgres10"},
+                {"sslCertificateIdentifier=mycert", SSL_CERTIFICATE_IDENTIFIER, true, SSL_CERTIFICATE_IDENTIFIER, "10.6", "10.6", "postgres10"},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("testGetStackParametersDbDataProvider")
     public void testGetStackParametersDb(String testCaseName, String sslCertificateIdentifier, boolean sslCertificateIdentifierParameterDefinedExpected,
-            String sslCertificateIdentifierParameterExpected) {
+            String sslCertificateIdentifierParameterExpected, String engineVersion, String expectedEngineVersion, String expectedFamily) {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
 
         when(databaseServer.getStorageSize()).thenReturn(50L);
@@ -160,7 +162,7 @@ public class AwsStackRequestHelperTest {
         when(databaseServer.getFlavor()).thenReturn("db.m3.medium");
         when(databaseServer.getServerId()).thenReturn("myserver");
         when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
-        when(databaseServer.getStringParameter("engineVersion")).thenReturn("10.6");
+        when(databaseServer.getStringParameter("engineVersion")).thenReturn(engineVersion);
         when(databaseServer.getStringParameter("multiAZ")).thenReturn("true");
         when(databaseServer.getStringParameter("storageType")).thenReturn("gp2");
         when(databaseServer.getPort()).thenReturn(5432);
@@ -181,7 +183,7 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "DBSubnetGroupNameParameter", "dsg-myserver");
         assertContainsParameter(parameters, "DBSubnetGroupSubnetIdsParameter", "subnet-1234");
         assertContainsParameter(parameters, "EngineParameter", "postgres");
-        assertContainsParameter(parameters, "EngineVersionParameter", "10.6");
+        assertContainsParameter(parameters, "EngineVersionParameter", expectedEngineVersion);
         assertContainsParameter(parameters, "MasterUsernameParameter", "root");
         assertContainsParameter(parameters, "MasterUserPasswordParameter", "cloudera");
         assertContainsParameter(parameters, "MultiAZParameter", "true");
@@ -190,7 +192,7 @@ public class AwsStackRequestHelperTest {
         assertContainsParameter(parameters, "VPCSecurityGroupsParameter", "sg-1234,sg-5678");
         assertContainsParameter(parameters, "DeletionProtectionParameter", "false");
         assertContainsParameter(parameters, "DBParameterGroupNameParameter", "dpg-myserver");
-        assertContainsParameter(parameters, "DBParameterGroupFamilyParameter", "postgres10");
+        assertContainsParameter(parameters, "DBParameterGroupFamilyParameter", expectedFamily);
         if (sslCertificateIdentifierParameterDefinedExpected) {
             assertContainsParameter(parameters, "SslCertificateIdentifierParameter", sslCertificateIdentifierParameterExpected);
         } else {
@@ -303,8 +305,8 @@ public class AwsStackRequestHelperTest {
 
     private void assertContainsParameter(Collection<Parameter> parameters, String key, String value) {
         Optional<Parameter> foundParameterOpt = parameters.stream()
-            .filter(p -> p.getParameterKey().equals(key))
-            .findFirst();
+                .filter(p -> p.getParameterKey().equals(key))
+                .findFirst();
         assertTrue(foundParameterOpt.isPresent(), "Parameters are missing " + key);
         String foundValue = foundParameterOpt.get().getParameterValue();
         assertEquals(
@@ -313,8 +315,8 @@ public class AwsStackRequestHelperTest {
 
     private void assertDoesNotContainParameter(Collection<Parameter> parameters, String key) {
         Optional<Parameter> foundParameterOpt = parameters.stream()
-            .filter(p -> p.getParameterKey().equals(key))
-            .findFirst();
+                .filter(p -> p.getParameterKey().equals(key))
+                .findFirst();
         assertFalse(foundParameterOpt.isPresent(), "Parameters include " + key);
     }
 

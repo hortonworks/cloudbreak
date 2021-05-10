@@ -90,16 +90,16 @@ public class AwsStackRequestHelper {
 
     public UpdateStackRequest createUpdateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
         return new UpdateStackRequest()
-            .withStackName(cFStackName)
-            .withParameters(getStackParameters(ac, stack, cFStackName, subnet))
-            .withTemplateBody(cfTemplate)
-            .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
-            .withCapabilities(CAPABILITY_IAM);
+                .withStackName(cFStackName)
+                .withParameters(getStackParameters(ac, stack, cFStackName, subnet))
+                .withTemplateBody(cfTemplate)
+                .withTags(awsTaggingService.prepareCloudformationTags(ac, stack.getTags()))
+                .withCapabilities(CAPABILITY_IAM);
     }
 
     public ListStackResourcesRequest createListStackResourcesRequest(String cFStackName) {
         return new ListStackResourcesRequest()
-            .withStackName(cFStackName);
+                .withStackName(cFStackName);
     }
 
     private Collection<Parameter> getStackParameters(AuthenticatedContext ac, CloudStack stack, String stackName, String newSubnetCidr) {
@@ -154,12 +154,12 @@ public class AwsStackRequestHelper {
     private Parameter getStackOwner(AuthenticatedContext ac, String tagValue, String referenceName) {
         if (Strings.isNullOrEmpty(tagValue)) {
             return new Parameter()
-                .withParameterKey(referenceName)
-                .withParameterValue(String.valueOf(ac.getCloudContext().getUserName()));
+                    .withParameterKey(referenceName)
+                    .withParameterValue(String.valueOf(ac.getCloudContext().getUserName()));
         } else {
             return new Parameter()
-                .withParameterKey(referenceName)
-                .withParameterValue(tagValue);
+                    .withParameterKey(referenceName)
+                    .withParameterValue(tagValue);
         }
     }
 

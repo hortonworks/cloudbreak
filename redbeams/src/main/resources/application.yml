@@ -51,6 +51,9 @@ redbeams:
       schema: public
       cert.file: database.crt
       ssl: false
+    postgres:
+      major:
+        version: 10
   threadpool:
     core.size: 40
     capacity.size: 4000

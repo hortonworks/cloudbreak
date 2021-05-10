@@ -4,6 +4,12 @@ import static com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbParameterGroupVie
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -12,6 +18,12 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 
 class AwsRdsDbParameterGroupViewTest {
+
+    private static final String ENGINE_VERSION_PARAMETER_REGEX = ".*EngineVersionParameter.*Default\": \"(\\d*)\".*";
+
+    private static final String DBSTACK_TEMPLATE_FILE = "templates/aws-cf-dbstack.ftl";
+
+    private static final Pattern DEFAULT_ENGINE_VERSION = Pattern.compile(ENGINE_VERSION_PARAMETER_REGEX);
 
     @Test
     void getDBParameterGroupNameTestWhenNullServerId() {
@@ -43,15 +55,6 @@ class AwsRdsDbParameterGroupViewTest {
     // Note: There is no easy way to test the "bad engine variant" case as enum classes are final and hard to mock.
 
     @Test
-    void getDBParameterGroupFamilyTestWhenPgSqlAndNullVersion() {
-        DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
-
-        AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
-
-        assertThatCode(underTest::getDBParameterGroupFamily).isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndBadVersionFormat() {
         DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
         databaseServer.putParameter(ENGINE_VERSION, "latest");
@@ -68,7 +71,7 @@ class AwsRdsDbParameterGroupViewTest {
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
 
-        assertThatCode(underTest::getDBParameterGroupFamily).isInstanceOf(IllegalStateException.class);
+        assertThat(underTest.getDBParameterGroupFamily()).isEqualTo("postgres10");
     }
 
     @Test
@@ -129,6 +132,30 @@ class AwsRdsDbParameterGroupViewTest {
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
 
         assertThat(underTest.getDBParameterGroupFamily()).isEqualTo(familyExpected);
+    }
+
+    private String getDefaultEngineVersionFromTemplate() throws IOException {
+        String template = getTemplate();
+        Matcher engineVersionMatcher = DEFAULT_ENGINE_VERSION.matcher(template);
+        String version = null;
+        if (engineVersionMatcher.matches()) {
+            version = engineVersionMatcher.group(1);
+        }
+        return version;
+    }
+
+    private String getTemplate() throws IOException {
+        String template;
+        try (BufferedReader bs = new BufferedReader(
+                new InputStreamReader(AwsRdsDbParameterGroupViewTest.class.getClassLoader().getResourceAsStream(DBSTACK_TEMPLATE_FILE)))) {
+            StringBuilder out = new StringBuilder();
+            String line;
+            while ((line = bs.readLine()) != null) {
+                out.append(line);
+            }
+            template = out.toString();
+        }
+        return template;
     }
 
 }

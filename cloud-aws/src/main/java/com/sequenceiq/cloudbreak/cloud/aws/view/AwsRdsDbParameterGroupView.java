@@ -12,13 +12,15 @@ public class AwsRdsDbParameterGroupView {
     @VisibleForTesting
     static final String ENGINE_VERSION = "engineVersion";
 
-    private static final Pattern ENGINE_VERSION_PATTERN = Pattern.compile("^(\\d+)(?:\\.\\d+)$");
+    private static final Pattern ENGINE_VERSION_PATTERN = Pattern.compile("^(\\d+)(?:\\.\\d+)?$");
 
     private static final int GROUP_MAJOR_VERSION = 1;
 
     private static final int VERSION_9 = 9;
 
     private static final int VERSION_13 = 13;
+
+    private static final String POSTGRES = "postgres";
 
     private final DatabaseServer databaseServer;
 
@@ -38,18 +40,21 @@ public class AwsRdsDbParameterGroupView {
         switch (engine) {
             case POSTGRESQL:
                 String engineVersion = databaseServer.getStringParameter(ENGINE_VERSION);
-                Matcher engineVersionMatcher = ENGINE_VERSION_PATTERN.matcher(engineVersion);
                 String familyVersion = null;
-                if (engineVersionMatcher.matches()) {
-                    String engineMajorVersion = engineVersionMatcher.group(GROUP_MAJOR_VERSION);
-                    int engineMajorVersionNumber = Integer.parseInt(engineMajorVersion);
-                    if (engineMajorVersionNumber >= VERSION_9 && engineMajorVersionNumber <= VERSION_13) {
-                        // Family version matches the engine version for 9.5 and 9.6, and simply equals the major version otherwise
-                        familyVersion = engineMajorVersionNumber == VERSION_9 ? engineVersion : engineMajorVersion;
+                if (engineVersion != null) {
+                    Matcher engineVersionMatcher = ENGINE_VERSION_PATTERN.matcher(engineVersion);
+                    if (engineVersionMatcher.matches()) {
+                        String engineMajorVersion = engineVersionMatcher.group(GROUP_MAJOR_VERSION);
+                        int engineMajorVersionNumber = Integer.parseInt(engineMajorVersion);
+                        if (engineMajorVersionNumber >= VERSION_9 && engineMajorVersionNumber <= VERSION_13) {
+                            // Family version matches the engine version for 9.5 and 9.6, and simply equals the major version otherwise
+                            familyVersion = engineMajorVersionNumber == VERSION_9 ? engineVersion : engineMajorVersion;
+                        } else {
+                            throw new IllegalStateException("Unsupported RDS POSTGRESQL engine version " + engineVersion);
+                        }
+                    } else {
+                        throw new IllegalStateException("Unsupported RDS POSTGRESQL engine version " + engineVersion);
                     }
-                }
-                if (familyVersion == null) {
-                    throw new IllegalStateException("Unsupported RDS POSTGRESQL engine version " + engineVersion);
                 }
                 return "postgres" + familyVersion;
             default:
