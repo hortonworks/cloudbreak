@@ -66,3 +66,4 @@ ${customUserData}
 
 chmod o-rwx /var/log/user-data.log
 chmod o-rwx /cdp/bin/*
+chmod o-rwx -R /etc/certs/ || :
