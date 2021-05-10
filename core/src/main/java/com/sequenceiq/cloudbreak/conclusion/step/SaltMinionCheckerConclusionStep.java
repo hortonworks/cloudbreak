@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
-public class SaltMinionCheckerConclusionStep implements ConclusionStep {
+public class SaltMinionCheckerConclusionStep extends ConclusionStep {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltMinionCheckerConclusionStep.class);
 
@@ -27,18 +27,19 @@ public class SaltMinionCheckerConclusionStep implements ConclusionStep {
     private StackUtil stackUtil;
 
     @Override
-    public ConclusionStepResult check(Long resourceId) {
+    public Conclusion check(Long resourceId) {
         Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
         Set<String> allNodes = stackUtil.collectNodes(stack).stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
             stackUtil.collectAndCheckReachableNodes(stack, allNodes);
         } catch (NodesUnreachableException e) {
             Set<String> unreachableNodes = e.getUnreachableNodes();
-            LOGGER.error("Unreachable salt minions: {}", unreachableNodes);
             String conclusion = String.format("Unreachable nodes: %s. Please check the instances on your cloud provider for further details.",
                     unreachableNodes);
-            return ConclusionStepResult.failed(conclusion);
+            String details = String.format("Unreachable salt minions: %s", unreachableNodes);
+            LOGGER.error(details);
+            return failed(conclusion, details);
         }
-        return ConclusionStepResult.succeeded();
+        return succeeded();
     }
 }
