@@ -39,7 +39,7 @@ public class ResourceFilteringService {
         }
         Map<Optional<String>, List<R>> resourcesByParents = sortByParentResources(resources);
         List<String> resourceCrns = flattenByParentResources(resourcesByParents);
-        List<Boolean> result = umsClient.hasRightsOnResources(userCrn.toString(), userCrn.toString(), resourceCrns, action.getRight(), getRequestId());
+        List<Boolean> result = umsClient.hasRightsOnResources(userCrn.toString(), resourceCrns, action.getRight(), getRequestId());
         Map<String, Boolean> resultMap = calculateResultMap(resourcesByParents, result);
         return resultMapper.apply(resourceCrn -> resultMap.getOrDefault(resourceCrn, Boolean.FALSE));
     }

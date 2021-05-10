@@ -36,8 +36,8 @@ public class UmsTestClient {
         return new SetWorkloadPasswordAction(newPassword);
     }
 
-    public Action<UmsTestDto, UmsClient> getUserDetails(String actorCrn, String userCrn) {
-        return new GetUserDetailsAction(actorCrn, userCrn);
+    public Action<UmsTestDto, UmsClient> getUserDetails(String userCrn) {
+        return new GetUserDetailsAction(userCrn);
     }
 
     public Action<UmsGroupTestDto, UmsClient> createUserGroup(String groupName) {

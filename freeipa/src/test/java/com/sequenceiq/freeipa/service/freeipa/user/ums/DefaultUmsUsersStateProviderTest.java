@@ -1,17 +1,10 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
-import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -19,12 +12,20 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
@@ -59,7 +60,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
         setupMocks();
 
         Map<String, UmsUsersState> umsUsersStateMap = underTest.get(
-                ACCOUNT_ID, ACTOR_CRN, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), Optional.empty(), true);
+                ACCOUNT_ID, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), Optional.empty(), true);
 
         verifyUmsUsersStateBuilderMap(umsUsersStateMap);
     }
@@ -73,47 +74,46 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     authorizationRightChecksFactory.create(environmentCrn));
         }).when(environmentAccessCheckerFactory).create(anyString());
 
-        when(grpcUmsClient.listAllGroups(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class)))
+        when(grpcUmsClient.listAllGroups(eq(ACCOUNT_ID), any(Optional.class)))
                 .thenReturn(testData.groups);
-        when(grpcUmsClient.listWorkloadAdministrationGroups(eq(INTERNAL_ACTOR_CRN),
-                eq(ACCOUNT_ID), any(Optional.class)))
+        when(grpcUmsClient.listWorkloadAdministrationGroups(eq(ACCOUNT_ID), any(Optional.class)))
                 .thenReturn(testData.allWags);
 
 
-        when(grpcUmsClient.listAllUsers(eq(ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class)))
+        when(grpcUmsClient.listAllUsers(eq(ACCOUNT_ID), any(Optional.class)))
                 .thenReturn(testData.users);
 
-        when(grpcUmsClient.listAllMachineUsers(eq(ACTOR_CRN), eq(ACCOUNT_ID),
+        when(grpcUmsClient.listAllMachineUsers(eq(ACCOUNT_ID),
                 eq(DefaultUmsUsersStateProvider.DONT_INCLUDE_INTERNAL_MACHINE_USERS),
                 eq(DefaultUmsUsersStateProvider.INCLUDE_WORKLOAD_MACHINE_USERS),
                 any(Optional.class)))
                 .thenReturn(testData.machineUsers);
 
         doAnswer(invocation -> {
-            String crn = invocation.getArgument(1, String.class);
+            String crn = invocation.getArgument(0, String.class);
             Map<String, Boolean> actorRights = testData.memberCrnToActorRights.get(crn);
             return UserSyncConstants.RIGHTS.stream()
                     .map(right -> actorRights.get(right))
                     .collect(Collectors.toList());
-        }).when(grpcUmsClient).hasRightsNoCache(eq(INTERNAL_ACTOR_CRN), anyString(), any(List.class), any(Optional.class));
+        }).when(grpcUmsClient).hasRightsNoCache(anyString(), any(List.class), any(Optional.class));
 
         doAnswer(invocation -> {
-            String memberCrn = invocation.getArgument(2, String.class);
+            String memberCrn = invocation.getArgument(1, String.class);
             return testData.memberCrnToGroupMembership.get(memberCrn).entrySet().stream()
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
         }).when(grpcUmsClient)
-                .listGroupsForMember(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), anyString(), any(Optional.class));
+                .listGroupsForMember(eq(ACCOUNT_ID), anyString(), any(Optional.class));
 
         doAnswer(invocation -> {
-            String memberCrn = invocation.getArgument(1, String.class);
+            String memberCrn = invocation.getArgument(0, String.class);
             return testData.memberCrnToWagMembership.get(memberCrn).entrySet().stream()
                     .filter(Map.Entry::getValue)
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
         }).when(grpcUmsClient)
-                .listWorkloadAdministrationGroupsForMember(eq(INTERNAL_ACTOR_CRN), anyString(), any(Optional.class));
+                .listWorkloadAdministrationGroupsForMember(anyString(), any(Optional.class));
 
         doAnswer(invocation -> workloadCredentialConverter
                 .toWorkloadCredential(

@@ -28,13 +28,12 @@ public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> 
 
     @Override
     public UmsGroupTestDto action(TestContext testContext, UmsGroupTestDto testDto, UmsClient client) throws Exception {
-        String userCrn = testContext.getActingUserCrn().toString();
         String accountId = testDto.getRequest().getAccountId();
         testDto.withName(groupName);
         testDto.withMember(memberCrn);
         Log.when(LOGGER, format(" Assigning user '%s' to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Assign user to group request:%n "), testDto.getRequest());
-        client.getDefaultClient().addMemberToGroup(userCrn, accountId, groupName, memberCrn, Optional.of(""));
+        client.getDefaultClient().addMemberToGroup(accountId, groupName, memberCrn, Optional.of(""));
         LOGGER.info(format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.when(LOGGER, format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;

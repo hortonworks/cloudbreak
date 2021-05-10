@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
@@ -218,8 +217,7 @@ public class StackToTemplatePreparationObjectConverter extends AbstractConversio
             VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(envCrnForVirtualGroups, ldapView.map(LdapView::getAdminGroup).orElse(""));
             String accountId = source.getCreator().getTenant().getName();
             List<UserManagementProto.ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities =
-                    grpcUmsClient.listServicePrincipalCloudIdentities(INTERNAL_ACTOR_CRN,
-                            accountId,
+                    grpcUmsClient.listServicePrincipalCloudIdentities(accountId,
                             source.getEnvironmentCrn(),
                             MDCUtils.getRequestId());
 

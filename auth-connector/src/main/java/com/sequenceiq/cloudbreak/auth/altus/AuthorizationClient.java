@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import java.util.List;
 
@@ -22,20 +23,16 @@ public class AuthorizationClient {
 
     private final ManagedChannel channel;
 
-    private final String actorCrn;
-
     private final Tracer tracer;
 
     /**
      * Constructor.
      *
      * @param channel  the managed channel.
-     * @param actorCrn the actor CRN.
      * @param tracer   tracer
      */
-    AuthorizationClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
+    AuthorizationClient(ManagedChannel channel, Tracer tracer) {
         this.channel = checkNotNull(channel);
-        this.actorCrn = checkNotNull(actorCrn);
         this.tracer = tracer;
     }
 
@@ -78,7 +75,7 @@ public class AuthorizationClient {
         checkNotNull(requestId);
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTracingInterceptor(tracer),
-                new AltusMetadataInterceptor(requestId, actorCrn)
+                new AltusMetadataInterceptor(requestId, INTERNAL_ACTOR_CRN)
         );
     }
 }

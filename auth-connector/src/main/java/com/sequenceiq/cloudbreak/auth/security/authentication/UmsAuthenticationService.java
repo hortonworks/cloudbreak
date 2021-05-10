@@ -47,7 +47,7 @@ public class UmsAuthenticationService implements AuthenticationService {
                 if (InternalCrnBuilder.isInternalCrn(userCrn)) {
                     return InternalCrnBuilder.createInternalCrnUser(Crn.fromString(userCrn));
                 } else {
-                    User userInfo = umsClient.getUserDetails(userCrn, userCrn, Optional.ofNullable(requestId));
+                    User userInfo = umsClient.getUserDetails(userCrn, Optional.ofNullable(requestId));
                     String userName = principal != null ? principal : userInfo.getEmail();
                     cloudbreakUser = new CloudbreakUser(userInfo.getUserId(), userCrn,
                             userName, userInfo.getEmail(), crn.getAccountId());
@@ -55,7 +55,7 @@ public class UmsAuthenticationService implements AuthenticationService {
                 break;
             case MACHINE_USER:
                 MachineUser machineUserInfo =
-                        umsClient.getMachineUserDetails(userCrn, userCrn, Crn.fromString(userCrn).getAccountId(), Optional.ofNullable(requestId));
+                        umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId(), Optional.ofNullable(requestId));
                 String machineUserName = principal != null ? principal : machineUserInfo.getMachineUserName();
                 cloudbreakUser = new CloudbreakUser(machineUserInfo.getMachineUserId(), userCrn,
                         machineUserName, machineUserInfo.getMachineUserName(), crn.getAccountId());

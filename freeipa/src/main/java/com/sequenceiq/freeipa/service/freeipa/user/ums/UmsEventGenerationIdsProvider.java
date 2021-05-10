@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.util.Map;
 import java.util.Optional;
 
@@ -22,7 +20,7 @@ public class UmsEventGenerationIdsProvider {
 
     public UmsEventGenerationIds getEventGenerationIds(String accountId, Optional<String> requestId) {
         EventGenerationIds eventGenerationIds =
-                grpcUmsClient.getEventGenerationIds(INTERNAL_ACTOR_CRN, accountId, requestId)
+                grpcUmsClient.getEventGenerationIds(accountId, requestId)
                 .getEventGenerationIds();
 
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();

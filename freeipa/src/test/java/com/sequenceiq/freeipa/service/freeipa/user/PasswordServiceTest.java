@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -130,6 +129,6 @@ class PasswordServiceTest {
                         .setWorkloadPasswordMaxLifetime(lifetime)
                         .build()));
 
-        when(grpcUmsClient.getAccountDetails(eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any())).thenReturn(builder.build());
+        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(builder.build());
     }
 }

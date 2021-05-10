@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.kerberosmgmt.v1;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
@@ -90,7 +89,7 @@ public class UserKeytabService {
         String realm = getKerberosRealm(userAccountId, environmentCrn);
 
         GetActorWorkloadCredentialsResponse getActorWorkloadCredentialsResponse =
-                grpcUmsClient.getActorWorkloadCredentials(INTERNAL_ACTOR_CRN, userCrn, MDCUtils.getRequestId());
+                grpcUmsClient.getActorWorkloadCredentials(userCrn, MDCUtils.getRequestId());
 
         validateHasCredentials(getActorWorkloadCredentialsResponse);
 

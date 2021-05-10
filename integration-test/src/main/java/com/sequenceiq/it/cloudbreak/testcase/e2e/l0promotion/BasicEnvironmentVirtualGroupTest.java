@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static java.lang.String.format;
 
@@ -248,7 +247,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
         for (UmsRight right : UmsRight.values()) {
             try {
-                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId(),
+                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(),
                         right.getRight(), environmentCrn);
             } catch (StatusRuntimeException ex) {
                 if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
@@ -302,7 +301,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
             String groupName, boolean expectedPresence) {
         String accountId = testContext.getActingUserCrn().getAccountId();
 
-        List<String> groupMembers = client.getDefaultClient().listMembersFromGroup(testContext.getActingUserCrn().toString(), accountId, groupName,
+        List<String> groupMembers = client.getDefaultClient().listMembersFromGroup(accountId, groupName,
                 Optional.of(""));
         boolean memberPresent = groupMembers.stream().anyMatch(memberCrn -> groupMember.getCrn().equals(memberCrn));
         if (expectedPresence) {

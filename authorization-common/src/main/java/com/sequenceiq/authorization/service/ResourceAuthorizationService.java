@@ -101,12 +101,12 @@ public class ResourceAuthorizationService {
         if (authzEntitled) {
             List<RightCheck> rightChecks = convertToRightChecks(authorization, rightMapper);
             LOGGER.debug("Ums resource right check request: {}", rightChecks);
-            return grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, requestId);
+            return grpcUmsClient.hasRights(userCrn, rightChecks, requestId);
         } else {
             List<Boolean> readRightResults = convertReadRightsToTrueOthersToNull(authorization, rightMapper);
             List<RightCheck> rightChecks = createRightChecksFromNonReadRights(authorization, rightMapper);
             LOGGER.debug("Legacy ums right check request: {}", rightChecks);
-            List<Boolean> umsResults = grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, requestId);
+            List<Boolean> umsResults = grpcUmsClient.hasRights(userCrn, rightChecks, requestId);
             return merge(readRightResults, umsResults);
         }
     }

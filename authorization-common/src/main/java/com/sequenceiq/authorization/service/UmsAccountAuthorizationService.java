@@ -41,12 +41,12 @@ public class UmsAccountAuthorizationService {
 
     private void checkRightOfUser(String userCrn, String right, String unauthorizedMessage) {
         if (entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
-            if (!umsClient.checkAccountRight(userCrn, userCrn, right, getRequestId())) {
+            if (!umsClient.checkAccountRight(userCrn, right, getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);
             }
         } else {
-            if (!umsClient.checkAccountRightLegacy(userCrn, userCrn, right, getRequestId())) {
+            if (!umsClient.checkAccountRightLegacy(userCrn, right, getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);
             }

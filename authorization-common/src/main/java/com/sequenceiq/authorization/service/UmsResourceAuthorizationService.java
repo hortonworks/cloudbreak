@@ -49,7 +49,7 @@ public class UmsResourceAuthorizationService {
     }
 
     public Map<String, Boolean> getRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, List<String> resourceCrns) {
-        return umsClient.hasRights(userCrn, userCrn, resourceCrns, umsRightProvider.getRight(action), getRequestId());
+        return umsClient.hasRights(userCrn, resourceCrns, umsRightProvider.getRight(action), getRequestId());
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, Collection<String> resourceCrns) {
@@ -63,19 +63,19 @@ public class UmsResourceAuthorizationService {
 
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
         if (entitlementService.isAuthorizationEntitlementRegistered(ThreadBasedUserCrnProvider.getAccountId())) {
-            if (!umsClient.checkResourceRight(userCrn, userCrn, right, resourceCrn, getRequestId())) {
+            if (!umsClient.checkResourceRight(userCrn, right, resourceCrn, getRequestId())) {
                 LOGGER.error(unauthorizedMessage);
                 throw new AccessDeniedException(unauthorizedMessage);
             }
         }
-        if (!umsClient.checkResourceRightLegacy(userCrn, userCrn, right, resourceCrn, getRequestId())) {
+        if (!umsClient.checkResourceRightLegacy(userCrn, right, resourceCrn, getRequestId())) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
     private void checkRightOfUserOnResources(String userCrn, String right, Collection<String> resourceCrns, String unauthorizedMessage) {
-        if (!umsClient.hasRights(userCrn, userCrn, Lists.newArrayList(resourceCrns), right, getRequestId())
+        if (!umsClient.hasRights(userCrn, Lists.newArrayList(resourceCrns), right, getRequestId())
                 .values().stream().allMatch(Boolean::booleanValue)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
@@ -90,12 +90,12 @@ public class UmsResourceAuthorizationService {
         return Optional.of(requestId);
     }
 
-    public boolean isEntitled(String actorCrn, String accountId, Entitlement entitlement) {
+    public boolean isEntitled(String accountId, Entitlement entitlement) {
         boolean entitled;
         if (Entitlement.CB_AUTHZ_POWER_USERS.equals(entitlement) && StringUtils.equals(accountId, InternalCrnBuilder.INTERNAL_ACCOUNT)) {
             entitled = false;
         } else {
-            return umsClient.getAccountDetails(actorCrn, accountId, MDCUtils.getRequestId()).getEntitlementsList()
+            return umsClient.getAccountDetails(accountId, MDCUtils.getRequestId()).getEntitlementsList()
                     .stream()
                     .map(e -> e.getEntitlementName().toUpperCase())
                     .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));

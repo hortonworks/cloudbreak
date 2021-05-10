@@ -479,8 +479,7 @@ public class ClusterHostServiceRunner {
 
     public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String userCrn = stackService.get(stackId).getCreator().getUserCrn();
-        Account account = umsClient.getAccountDetails(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN,
-                Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
+        Account account = umsClient.getAccountDetails(Crn.safeFromString(userCrn).getAccountId(), Optional.empty());
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
         if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
             String license = licenseOpt.get();

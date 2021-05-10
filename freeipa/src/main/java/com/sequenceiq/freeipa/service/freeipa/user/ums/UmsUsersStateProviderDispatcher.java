@@ -26,7 +26,7 @@ public class UmsUsersStateProviderDispatcher {
     private BulkUmsUsersStateProvider bulkUmsUsersStateProvider;
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(
-            String accountId, String actorCrn, Collection<String> environmentCrns,
+            String accountId, Collection<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional) {
         try {
             LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
@@ -34,10 +34,10 @@ public class UmsUsersStateProviderDispatcher {
             boolean fullSync = userCrns.isEmpty() && machineUserCrns.isEmpty();
 
             if (fullSync) {
-                return dispatchBulk(accountId, actorCrn, environmentCrns, userCrns, machineUserCrns,
+                return dispatchBulk(accountId, environmentCrns, userCrns, machineUserCrns,
                         requestIdOptional, fullSync);
             } else {
-                return dispatchDefault(accountId, actorCrn, environmentCrns, userCrns, machineUserCrns,
+                return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns,
                         requestIdOptional, fullSync);
             }
         } catch (RuntimeException e) {
@@ -46,24 +46,24 @@ public class UmsUsersStateProviderDispatcher {
     }
 
     private Map<String, UmsUsersState> dispatchBulk(
-            String accountId, String actorCrn, Collection<String> environmentCrns,
+            String accountId, Collection<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
             boolean fullSync) {
         try {
             return bulkUmsUsersStateProvider.get(accountId, environmentCrns, requestIdOptional);
         } catch (RuntimeException e) {
             LOGGER.debug("Failed to retrieve UMS user sync state through bulk request. Falling back on default approach");
-            return dispatchDefault(accountId, actorCrn, environmentCrns, userCrns, machineUserCrns,
+            return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns,
                     requestIdOptional, fullSync);
         }
     }
 
     private Map<String, UmsUsersState> dispatchDefault(
-            String accountId, String actorCrn, Collection<String> environmentCrns,
+            String accountId, Collection<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
             boolean fullSync) {
         return defaultUmsUsersStateProvider.get(
-                accountId, actorCrn,
+                accountId,
                 environmentCrns, userCrns, machineUserCrns,
                 requestIdOptional, fullSync);
     }

@@ -160,9 +160,9 @@ public class FreeIpaCreationService {
         Future<String> ownerFuture;
         if (Crn.safeFromString(userCrn).getResourceType().equals(Crn.ResourceType.MACHINE_USER)) {
             ownerFuture = intermediateBuilderExecutor.submit(() ->
-                    umsClient.getMachineUserDetails(userCrn, userCrn, Crn.fromString(userCrn).getAccountId(), MDCUtils.getRequestId()).getMachineUserName());
+                    umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId(), MDCUtils.getRequestId()).getMachineUserName());
         } else {
-            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, userCrn, MDCUtils.getRequestId()).getEmail());
+            ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn, MDCUtils.getRequestId()).getEmail());
         }
         return ownerFuture;
     }

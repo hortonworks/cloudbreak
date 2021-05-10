@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -40,24 +39,20 @@ public class VirtualGroupServiceTest {
     private GrpcUmsClient grpcUmsClient;
 
     @Captor
-    private final ArgumentCaptor<String> crnCaptor = ArgumentCaptor.forClass(String.class);
-
-    @Captor
     private final ArgumentCaptor<String> rightCaptor = ArgumentCaptor.forClass(String.class);
 
     @Test
     public void testCreateVirtualGroupsWithNonExistingGroups() {
         doThrow(new StatusRuntimeException(Status.NOT_FOUND))
-                .when(grpcUmsClient).getWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID), eq(Optional.empty()), anyString(), eq(ENV_CRN));
-        when(grpcUmsClient.setWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+                .when(grpcUmsClient).getWorkloadAdministrationGroupName(eq(ACCOUNT_ID), eq(Optional.empty()), anyString(), eq(ENV_CRN));
+        when(grpcUmsClient.setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN))).thenReturn(MOCK_VIRTUAL_GROUP);
 
         Map<UmsRight, String> result = virtualGroupService.createVirtualGroups(ACCOUNT_ID, ENV_CRN);
 
         assertEquals(UmsRight.values().length, result.size());
-        verify(grpcUmsClient, times(UmsRight.values().length)).setWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(UmsRight.values().length)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         for (UmsRight umsRight : UmsRight.values()) {
             assertEquals(MOCK_VIRTUAL_GROUP, result.get(umsRight));
             assertTrue(rightCaptor.getAllValues().contains(umsRight.getRight()));
@@ -66,13 +61,13 @@ public class VirtualGroupServiceTest {
 
     @Test
     public void testCreateVirtualGroupsWithExistingGroups() {
-        when(grpcUmsClient.getWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+        when(grpcUmsClient.getWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN))).thenReturn(MOCK_VIRTUAL_GROUP);
 
         Map<UmsRight, String> result = virtualGroupService.createVirtualGroups(ACCOUNT_ID, ENV_CRN);
 
         assertEquals(UmsRight.values().length, result.size());
-        verify(grpcUmsClient, times(0)).setWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(0)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN));
         for (UmsRight umsRight : UmsRight.values()) {
             assertEquals(MOCK_VIRTUAL_GROUP, result.get(umsRight));
@@ -82,16 +77,15 @@ public class VirtualGroupServiceTest {
     @Test
     public void testGetVirtualGroupWithNoAdminGroupProvidedAndNewGroupNeedsToBeCreated() {
         doThrow(new StatusRuntimeException(Status.NOT_FOUND))
-                .when(grpcUmsClient).getWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID), eq(Optional.empty()), anyString(), eq(ENV_CRN));
-        when(grpcUmsClient.setWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+                .when(grpcUmsClient).getWorkloadAdministrationGroupName(eq(ACCOUNT_ID), eq(Optional.empty()), anyString(), eq(ENV_CRN));
+        when(grpcUmsClient.setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN))).thenReturn(MOCK_VIRTUAL_GROUP);
 
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(ENV_CRN, null);
         String result = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight());
 
-        verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         assertEquals(MOCK_VIRTUAL_GROUP, result);
         assertTrue(rightCaptor.getAllValues().contains(UmsRight.ENVIRONMENT_ACCESS.getRight()));
     }
@@ -99,16 +93,15 @@ public class VirtualGroupServiceTest {
     @Test
     public void testGetVirtualGroupWithEmptyGroupProvidedAndNewGroupNeedsToBeCreated() {
         doThrow(new StatusRuntimeException(Status.NOT_FOUND))
-                .when(grpcUmsClient).getWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID), eq(Optional.empty()), anyString(), eq(ENV_CRN));
-        when(grpcUmsClient.setWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+                .when(grpcUmsClient).getWorkloadAdministrationGroupName(eq(ACCOUNT_ID), eq(Optional.empty()), anyString(), eq(ENV_CRN));
+        when(grpcUmsClient.setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN))).thenReturn(MOCK_VIRTUAL_GROUP);
 
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(ENV_CRN, "");
         String result = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight());
 
-        verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         assertEquals(MOCK_VIRTUAL_GROUP, result);
         assertTrue(rightCaptor.getAllValues().contains(UmsRight.ENVIRONMENT_ACCESS.getRight()));
     }
@@ -118,9 +111,9 @@ public class VirtualGroupServiceTest {
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(ENV_CRN, "mockgroup");
         String result = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight());
 
-        verify(grpcUmsClient, times(0)).getWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(0)).getWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN));
-        verify(grpcUmsClient, times(0)).setWorkloadAdministrationGroupName(anyString(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(0)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN));
         assertEquals("mockgroup", result);
     }
@@ -129,9 +122,8 @@ public class VirtualGroupServiceTest {
     public void testCleanupVirtualGroups() {
         virtualGroupService.cleanupVirtualGroups(ACCOUNT_ID, ENV_CRN);
 
-        verify(grpcUmsClient, times(UmsRight.values().length)).deleteWorkloadAdministrationGroupName(crnCaptor.capture(), eq(ACCOUNT_ID),
+        verify(grpcUmsClient, times(UmsRight.values().length)).deleteWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), rightCaptor.capture(), eq(ENV_CRN));
-        assertEquals(INTERNAL_ACTOR_CRN, crnCaptor.getValue());
         for (UmsRight right : UmsRight.values()) {
             assertTrue(rightCaptor.getAllValues().contains(right.getRight()));
         }

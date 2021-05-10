@@ -69,7 +69,7 @@ class UmsEventGenerationIdsProviderTest {
     @Test
     void testGetEventGenerationIds() {
         GetEventGenerationIdsResponse response = createGetEventGenerationIdsResponse();
-        when(grpcUmsClient.getEventGenerationIds(any(), any(), any())).thenReturn(response);
+        when(grpcUmsClient.getEventGenerationIds(any(), any())).thenReturn(response);
 
         UmsEventGenerationIds umsEventGenerationIds =
                 underTest.getEventGenerationIds(ACCOUNT_ID, Optional.of(UUID.randomUUID().toString()));

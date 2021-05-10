@@ -78,7 +78,7 @@ class UserKeytabServiceTest {
                 .setWorkloadUsername("workloadUserName")
                 .addAllKerberosKeys(newActorKerberosKeys())
                 .build();
-        when(grpcUmsClient.getActorWorkloadCredentials(any(), any(), any())).thenReturn(response);
+        when(grpcUmsClient.getActorWorkloadCredentials(any(), any())).thenReturn(response);
     }
 
     private FreeIpaClient newfreeIpaClient(boolean hasPasswordHashSuppport) throws FreeIpaClientException {
@@ -163,7 +163,7 @@ class UserKeytabServiceTest {
                 .setWorkloadUsername("workloadUserName")
                 .clearKerberosKeys()
                 .build();
-        when(grpcUmsClient.getActorWorkloadCredentials(any(), any(), any())).thenReturn(response);
+        when(grpcUmsClient.getActorWorkloadCredentials(any(), any())).thenReturn(response);
 
         Exception exception =  assertThrows(NotFoundException.class, () -> underTest.getKeytabBase64(USER_CRN, ENV_CRN));
         assertEquals("Could not retrieve workload credentials. A workload password may not have been set for this user or machine user.",

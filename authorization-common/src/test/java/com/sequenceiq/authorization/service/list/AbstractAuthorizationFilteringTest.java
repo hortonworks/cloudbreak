@@ -92,7 +92,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(true));
@@ -109,7 +108,6 @@ public class AbstractAuthorizationFilteringTest {
         LongFiltering underTest = longFiltering(new ResourceWithId(1L, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
-                eq(USER_CRN.toString()),
                 eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN)),
                 eq(ACTION.getRight()),
@@ -128,7 +126,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(true, false));
@@ -146,7 +143,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(false, true));
@@ -163,7 +159,6 @@ public class AbstractAuthorizationFilteringTest {
         LongFiltering underTest = longFiltering(new ResourceWithId(1L, DATAHUB_CRN, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
-                eq(USER_CRN.toString()),
                 eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN)),
                 eq(ACTION.getRight()),
@@ -187,7 +182,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(true, false, false, false));
@@ -210,7 +204,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(false, true, false, true));
@@ -232,7 +225,6 @@ public class AbstractAuthorizationFilteringTest {
                 new ResourceWithId(3L, datahubCrn3, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
-                eq(USER_CRN.toString()),
                 eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
@@ -257,7 +249,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, environmentCrn2, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(false, false, true, false, false));
@@ -280,7 +271,6 @@ public class AbstractAuthorizationFilteringTest {
                 new ResourceWithId(3L, datahubCrn3, environmentCrn2));
 
         when(grpcUmsClient.hasRightsOnResources(
-                eq(USER_CRN.toString()),
                 eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, environmentCrn2, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
@@ -305,7 +295,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, environmentCrn2, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(false, false, false, false, true));
@@ -328,7 +317,6 @@ public class AbstractAuthorizationFilteringTest {
                 new ResourceWithId(3L, datahubCrn3, environmentCrn2));
 
         when(grpcUmsClient.hasRightsOnResources(
-                eq(USER_CRN.toString()),
                 eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, environmentCrn2, datahubCrn2, datahubCrn3)),
                 eq(ACTION.getRight()),
@@ -356,7 +344,6 @@ public class AbstractAuthorizationFilteringTest {
 
         when(grpcUmsClient.hasRightsOnResources(
                 eq(USER_CRN.toString()),
-                eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, datahubCrn2, datahubCrn3, datahubCrn4, datahubCrn5)),
                 eq(ACTION.getRight()),
                 any())).thenReturn(List.of(true, false, false, true, false, true));
@@ -383,7 +370,6 @@ public class AbstractAuthorizationFilteringTest {
                 new ResourceWithId(5L, datahubCrn5, ENVIRONMENT_CRN));
 
         when(grpcUmsClient.hasRightsOnResources(
-                eq(USER_CRN.toString()),
                 eq(USER_CRN.toString()),
                 eq(List.of(ENVIRONMENT_CRN, DATAHUB_CRN, datahubCrn3, datahubCrn5, environmentCrn2, datahubCrn2, datahubCrn4)),
                 eq(ACTION.getRight()),

@@ -75,7 +75,7 @@ public class UmsResourceAuthorizationServiceTest {
     @Test
     public void testCheckRightOnResource() {
         when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(TRUE);
-        when(umsClient.checkResourceRight(anyString(), anyString(), anyString(), anyString(), any())).thenReturn(false);
+        when(umsClient.checkResourceRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkRightOfUserOnResource(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, RESOURCE_CRN)));
@@ -85,7 +85,7 @@ public class UmsResourceAuthorizationServiceTest {
 
     @Test
     public void testCheckRightOnResourcesFailure() {
-        when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(hasRightsResultMap());
+        when(umsClient.hasRights(anyString(), anyList(), anyString(), any())).thenReturn(hasRightsResultMap());
         when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(TRUE);
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
@@ -103,7 +103,7 @@ public class UmsResourceAuthorizationServiceTest {
     public void testCheckRightOnResources() {
         Map<String, Boolean> resultMap = hasRightsResultMap();
         resultMap.put(RESOURCE_CRN2, TRUE);
-        when(umsClient.hasRights(anyString(), anyString(), anyList(), anyString(), any())).thenReturn(resultMap);
+        when(umsClient.hasRights(anyString(), anyList(), anyString(), any())).thenReturn(resultMap);
         when(entitlementService.isAuthorizationEntitlementRegistered(anyString())).thenReturn(TRUE);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkRightOfUserOnResources(USER_CRN, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, Lists.newArrayList(RESOURCE_CRN, RESOURCE_CRN2)));

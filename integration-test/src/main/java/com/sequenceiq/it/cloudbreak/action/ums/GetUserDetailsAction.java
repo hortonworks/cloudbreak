@@ -18,12 +18,9 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GetUserDetailsAction.class);
 
-    private final String actorCrn;
-
     private final String userCrn;
 
-    public GetUserDetailsAction(String actorCrn, String userCrn) {
-        this.actorCrn = actorCrn;
+    public GetUserDetailsAction(String userCrn) {
         this.userCrn = userCrn;
     }
 
@@ -32,7 +29,7 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
         Log.when(LOGGER, format(" Getting UMS user '%s' details. ", userCrn));
         Log.whenJson(LOGGER, " Get UMS user details request: ", testDto.getRequest());
         testDto.setResponse(client.getDefaultClient()
-                .getUserDetails(actorCrn, userCrn, Optional.of("")));
+                .getUserDetails(userCrn, Optional.of("")));
         UserManagementProto.User user = testDto.getResponse();
         LOGGER.info(format(" User details %ncrn: %s %nworkload username: %s %nfirst name: %s %nlast name: %s %nstate: %s %ncreation date: %s " +
                         "%nemail: %s %nexternal user id: %s %nSFDC contact id: %s ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),

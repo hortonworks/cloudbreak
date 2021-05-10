@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Collection;
@@ -56,17 +55,17 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private FmsUserConverter fmsUserConverter;
 
     public Map<String, UmsUsersState> get(
-            String accountId, String actorCrn,
-            Collection<String> environmentCrns, Set<String> userCrns, Set<String> machineUserCrns,
+            String accountId, Collection<String> environmentCrns,
+            Set<String> userCrns, Set<String> machineUserCrns,
             Optional<String> requestIdOptional, boolean fullSync) {
-        List<UserManagementProto.User> users = getUsers(actorCrn, accountId, requestIdOptional, fullSync, userCrns);
+        List<UserManagementProto.User> users = getUsers(accountId, requestIdOptional, fullSync, userCrns);
         List<UserManagementProto.MachineUser> machineUsers =
-                getMachineUsers(actorCrn, accountId, requestIdOptional, fullSync, machineUserCrns);
+                getMachineUsers(accountId, requestIdOptional, fullSync, machineUserCrns);
 
         Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(
-                grpcUmsClient.listAllGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional));
+                grpcUmsClient.listAllGroups(accountId, requestIdOptional));
         Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags = convertWagsToFmsGroups(
-                grpcUmsClient.listWorkloadAdministrationGroups(INTERNAL_ACTOR_CRN, accountId, requestIdOptional));
+                grpcUmsClient.listWorkloadAdministrationGroups(accountId, requestIdOptional));
         List<String> requestedWorkloadUsernames = Streams.concat(
                 users.stream().map(UserManagementProto.User::getWorkloadUsername),
                 machineUsers.stream().map(UserManagementProto.MachineUser::getWorkloadUsername))
@@ -97,7 +96,7 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
             addServicePrincipalsCloudIdentities(
                     umsUsersStateBuilder,
                     grpcUmsClient.listServicePrincipalCloudIdentities(
-                            INTERNAL_ACTOR_CRN, accountId, environmentCrn, requestIdOptional));
+                            accountId, environmentCrn, requestIdOptional));
 
             umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
             umsUsersStateMap.put(environmentCrn, umsUsersStateBuilder.build());
@@ -124,10 +123,10 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
 
                     Supplier<Collection<String>> groupMembershipSupplier = () ->
                             grpcUmsClient.listGroupsForMember(
-                                    INTERNAL_ACTOR_CRN, accountId, memberCrn, requestIdOptional);
+                                    accountId, memberCrn, requestIdOptional);
                     Supplier<Collection<String>> wagMembershipSupplier = () ->
                             grpcUmsClient.listWorkloadAdministrationGroupsForMember(
-                                    INTERNAL_ACTOR_CRN, memberCrn, requestIdOptional);
+                                    memberCrn, requestIdOptional);
                     Supplier<WorkloadCredential> workloadCredentialSupplier = () ->
                             umsCredentialProvider.getCredentials(memberCrn, requestIdOptional);
 
@@ -154,28 +153,27 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                 });
     }
 
-    private List<UserManagementProto.User> getUsers(
-            String actorCrn, String accountId,
+    private List<UserManagementProto.User> getUsers(String accountId,
             Optional<String> requestIdOptional,
             boolean fullSync, Set<String> userCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllUsers(actorCrn, accountId, requestIdOptional);
+            return grpcUmsClient.listAllUsers(accountId, requestIdOptional);
         } else if (!userCrns.isEmpty()) {
-            return grpcUmsClient.listUsers(actorCrn, accountId, List.copyOf(userCrns), requestIdOptional);
+            return grpcUmsClient.listUsers(accountId, List.copyOf(userCrns), requestIdOptional);
         } else {
             return List.of();
         }
     }
 
     private List<UserManagementProto.MachineUser> getMachineUsers(
-            String actorCrn, String accountId, Optional<String> requestIdOptional,
+            String accountId, Optional<String> requestIdOptional,
             boolean fullSync, Set<String> machineUserCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllMachineUsers(actorCrn, accountId,
+            return grpcUmsClient.listAllMachineUsers(accountId,
                     DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
                     requestIdOptional);
         } else if (!machineUserCrns.isEmpty()) {
-            return grpcUmsClient.listMachineUsers(actorCrn, accountId, List.copyOf(machineUserCrns),
+            return grpcUmsClient.listMachineUsers(accountId, List.copyOf(machineUserCrns),
                     DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
                     requestIdOptional);
         } else {

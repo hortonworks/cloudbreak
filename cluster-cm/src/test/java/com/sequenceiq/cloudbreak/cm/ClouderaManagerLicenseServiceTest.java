@@ -40,25 +40,25 @@ public class ClouderaManagerLicenseServiceTest {
     public void validWhenLicenseIsNotEmpty() {
         User user = createUser();
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey(LICENSE).build();
-        when(umsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
+        when(umsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
 
         underTest.validateClouderaManagerLicense(user);
 
-        verify(umsClient).getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty());
+        verify(umsClient).getAccountDetails(ACCOUNT_ID, Optional.empty());
     }
 
     @Test
     public void invalidWhenLicenseIsEmpty() {
         User user = createUser();
         UserManagementProto.Account account = UserManagementProto.Account.newBuilder().setClouderaManagerLicenseKey("").build();
-        when(umsClient.getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty())).thenReturn(account);
+        when(umsClient.getAccountDetails(ACCOUNT_ID, Optional.empty())).thenReturn(account);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("User doesn't have a valid cloudera manager license.");
 
         underTest.validateClouderaManagerLicense(user);
 
-        verify(umsClient).getAccountDetails(USER_CRN, ACCOUNT_ID, Optional.empty());
+        verify(umsClient).getAccountDetails(ACCOUNT_ID, Optional.empty());
     }
 
     private User createUser() {
