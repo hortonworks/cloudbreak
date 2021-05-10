@@ -15,7 +15,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,15 +67,15 @@ public final class FileReaderUtils {
         return new String(Files.readAllBytes(path));
     }
 
-    public static String readFileFromCustomPath(String filePath) throws IOException {
-        File file = new File(filePath);
-        if (!file.isFile()) {
-            throw new IOException("Given path should be a file");
+    public static String readFileFromCustomPath(Path filePath) throws IOException {
+        Path absolutePath = filePath.getFileName().toAbsolutePath().normalize();
+        if (!Files.exists(filePath)) {
+            throw new IOException(String.format("File at [%s] path does not exists!", absolutePath));
         }
-        if (!file.exists()) {
-            throw new IOException("File must be exists");
+        if (!Files.isRegularFile(filePath)) {
+            throw new IOException(String.format("Given path [%s] does not contains regular file", absolutePath));
         }
-        return FileUtils.readFileToString(file);
+        return Files.readString(filePath);
     }
 
     public static File getDirFromClasspath(String dirPath) throws IOException {

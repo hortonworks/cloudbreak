@@ -40,6 +40,10 @@ integrationtest:
     accountKey: default
     # Possible values: dev, int, stage, prod
     deploymentKey: dev
+    jsonSecret:
+      name: real-ums-users-dev
+      version: 69f803e3ff3c42d79be1f87bb04341e9
+      destinationPath: "./src/main/resources/ums-users/api-credentials.json"
   user:
     accesskey: Y3JuOmFsdHVzOmlhbTp1cy13ZXN0LTE6Y2xvdWRlcmE6dXNlcjptb2NrdXNlckB1bXMubW9jaw==
     secretkey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
@@ -79,7 +83,7 @@ integrationtest:
 
   spot:
     enabledCloudPlatforms:
-      # disabled
+    # disabled
     retryEnabled: false
 
   # aws parameters

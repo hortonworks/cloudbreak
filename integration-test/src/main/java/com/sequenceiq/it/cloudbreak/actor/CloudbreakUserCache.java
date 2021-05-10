@@ -1,17 +1,23 @@
 package com.sequenceiq.it.cloudbreak.actor;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,28 +45,33 @@ public class CloudbreakUserCache {
     @Value("${integrationtest.ums.deploymentKey:}")
     private String realUmsUserDeployment;
 
+    @Value("${integrationtest.ums.jsonSecret.destinationPath:}")
+    private String fetchedFilePath;
+
+    @Value("${integrationtest.outputdir:.}")
+    private String workspace;
+
     @PostConstruct
     private void initRealUmsUserCache() {
-        String userConfigPath;
-        String authUserConfigPath = "ums-users/api-credentials.json";
-        String l0UserConfigPath = "ums-users/l0-api-credentials.json";
-        Map<String, Map<String, List<CloudbreakUser>>> fetchedUserStore;
-        List<CloudbreakUser> cloudbreakUsers;
-        Set<String> accountIds = new HashSet<>();
-        String accountId;
+        UmsUserStoreConfig umsUserStore = findUmsStore();
+        if (umsUserStore.getFilePresent()) {
+            Map<String, Map<String, List<CloudbreakUser>>> fetchedUserStore;
+            List<CloudbreakUser> cloudbreakUsers;
+            Set<String> accountIds = new HashSet<>();
+            String accountId;
 
-        if (new ClassPathResource(l0UserConfigPath).exists()) {
-            userConfigPath = l0UserConfigPath;
-        } else {
-            userConfigPath = authUserConfigPath;
-        }
-
-        if (new ClassPathResource(userConfigPath).exists()) {
-            LOGGER.info("Real UMS users are initializing by deployment: {} and account: {}. User store is present at: {} path", realUmsUserDeployment,
-                    realUmsUserAccount, userConfigPath);
+            LOGGER.info("Real UMS users are initializing by deployment: {} and account: {}.", realUmsUserDeployment, realUmsUserAccount);
             try {
-                fetchedUserStore = JsonUtil.readValue(
-                        FileReaderUtils.readFileFromClasspathQuietly(userConfigPath), new TypeReference<Map<String, Map<String, List<CloudbreakUser>>>>() { });
+                if (umsUserStore.getAtCustomPath()) {
+                    fetchedUserStore = JsonUtil.readValue(
+                            FileReaderUtils.readFileFromCustomPath(umsUserStore.getCustomFilePath()),
+                            new TypeReference<Map<String, Map<String, List<CloudbreakUser>>>>() { });
+                } else {
+                    fetchedUserStore = JsonUtil.readValue(
+                            FileReaderUtils.readFileFromClasspathQuietly(umsUserStore.getClassFilePath()),
+                            new TypeReference<Map<String, Map<String, List<CloudbreakUser>>>>() { });
+                }
+
                 cloudbreakUsers = fetchedUserStore.entrySet().stream()
                         .filter(mowEnvs -> mowEnvs.getKey().equalsIgnoreCase(realUmsUserDeployment))
                         .flatMap(selectedEnv -> selectedEnv.getValue().entrySet().stream()
@@ -68,15 +79,15 @@ public class CloudbreakUserCache {
                                 .flatMap(selectedAcc -> selectedAcc.getValue().stream())).collect(Collectors.toList());
                 cloudbreakUsers.forEach(user -> accountIds.add(Objects.requireNonNull(Crn.fromString(user.getCrn())).getAccountId()));
             } catch (Exception e) {
-                throw new TestFailException(String.format(" Can't read UMS user store: %s It's possible you did run 'make fetch-secrets'",
-                        userConfigPath), e);
+                throw new TestFailException(" Can't read UMS user store! It's possible you did run 'make fetch-secrets'. ", e);
             }
             if (CollectionUtils.isEmpty(accountIds)) {
                 LOGGER.error(" Cannot gather account Ids from the initialized real UMS user CRNs. ");
                 throw new TestFailException("Cannot gather account Ids from the initialized real UMS user CRNs.");
             } else {
                 LOGGER.info(" Gathered account Ids based on the initialized real UMS user CRNs:: {}", accountIds);
-                accountId = accountIds.stream().findFirst().orElseThrow(() -> new TestFailException(String.format("Account Id Not Found in:: %s", accountIds)));
+                accountId = accountIds.stream().findFirst().orElseThrow(() -> new TestFailException(String.format("Account Id Not Found in:: %s",
+                        accountIds)));
                 setUsersByAccount(Map.of(accountId, cloudbreakUsers));
             }
             usersByAccount.values().stream().flatMap(Collection::stream).forEach(user -> {
@@ -85,8 +96,49 @@ public class CloudbreakUserCache {
                 CloudbreakUser.validateRealUmsUser(user);
             });
         } else {
-            LOGGER.info("UMS user store [{}] is not available. So initialization of real UMS user cache is not possible!", userConfigPath);
+            LOGGER.info("UMS user store is not available at path: '{}'. So initialization of real UMS user cache is not possible!",
+                    umsUserStore.getFetchedFilePath());
         }
+    }
+
+    private UmsUserStoreConfig findUmsStore() {
+        UmsUserStoreConfig umsUserStoreConfig = new UmsUserStoreConfig();
+        umsUserStoreConfig.setWorkspace(workspace);
+        umsUserStoreConfig.setFetchedFilePath(fetchedFilePath);
+        umsUserStoreConfig.setAtCustomPath(false);
+        umsUserStoreConfig.setFilePresent(false);
+        if (StringUtils.isEmpty(umsUserStoreConfig.getFetchedFilePath())) {
+            LOGGER.info("UMS user store json file destination path has not been set via 'integrationtest.ums.jsonSecret.destinationPath'!");
+        } else {
+            String[] credentialsFilePathElements = StringUtils.split(umsUserStoreConfig.getFetchedFilePath(), "/");
+            String credentialsFile = StringUtils.substringAfterLast(umsUserStoreConfig.getFetchedFilePath(), "/");
+            String credentialsFolder = credentialsFilePathElements[credentialsFilePathElements.length - 2];
+            umsUserStoreConfig.setClassFilePath(StringUtils.join(List.of(credentialsFolder, credentialsFile), "/"));
+            try {
+                Stream<Path> foundFiles = Files.find(Paths.get(umsUserStoreConfig.getWorkspace()), Integer.MAX_VALUE,
+                        (filePath, fileAttr) -> filePath.toString().endsWith(credentialsFile));
+                umsUserStoreConfig.setCustomFilePath(foundFiles
+                        .filter(path -> path.getFileName().toString().equalsIgnoreCase(credentialsFile))
+                        .findFirst().get());
+                if (Files.exists(umsUserStoreConfig.getCustomFilePath())) {
+                    LOGGER.info("Found UMS user store file at custom path: '{}'", umsUserStoreConfig.getCustomFilePath().toAbsolutePath().normalize());
+                    umsUserStoreConfig.setAtCustomPath(true);
+                    umsUserStoreConfig.setFilePresent(true);
+                }
+            } catch (NoSuchElementException e) {
+                if (new ClassPathResource(umsUserStoreConfig.getClassFilePath()).exists()) {
+                    LOGGER.info("Found UMS user store file at classpath: '{}'", umsUserStoreConfig.getClassFilePath());
+                    umsUserStoreConfig.setFilePresent(true);
+                } else {
+                    LOGGER.info("Cannot find UMS user store file neither at custom path: '{}', nor at classpath: '{}'!",
+                            Paths.get(umsUserStoreConfig.getWorkspace()).toAbsolutePath().normalize(), umsUserStoreConfig.getClassFilePath());
+                }
+            } catch (Exception e) {
+                LOGGER.info("Cannot find UMS user store file at path: '{}', because of: {}", Paths.get(umsUserStoreConfig.getWorkspace()).toAbsolutePath()
+                                .normalize(), e.getMessage(), e);
+            }
+        }
+        return umsUserStoreConfig;
     }
 
     private void setUsersByAccount(Map<String, List<CloudbreakUser>> users) {
