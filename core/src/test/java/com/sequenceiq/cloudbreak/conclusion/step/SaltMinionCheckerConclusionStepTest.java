@@ -43,10 +43,12 @@ class SaltMinionCheckerConclusionStepTest {
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
-        ConclusionStepResult stepResult = underTest.check(1L);
+        Conclusion stepResult = underTest.check(1L);
 
-        assertFalse(stepResult.isStepFailed());
+        assertFalse(stepResult.isFailureFound());
         assertNull(stepResult.getConclusion());
+        assertNull(stepResult.getDetails());
+        assertEquals(SaltMinionCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(stackService, times(1)).getByIdWithListsInTransaction(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
@@ -57,18 +59,19 @@ class SaltMinionCheckerConclusionStepTest {
         when(stackService.getByIdWithListsInTransaction(eq(1L))).thenReturn(new Stack());
         when(stackUtil.collectNodes(any())).thenReturn(Set.of(createNode("host1"), createNode("host2")));
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenThrow(new NodesUnreachableException("error", Set.of("host1")));
-        ConclusionStepResult stepResult = underTest.check(1L);
+        Conclusion stepResult = underTest.check(1L);
 
-        assertTrue(stepResult.isStepFailed());
+        assertTrue(stepResult.isFailureFound());
         assertEquals("Unreachable nodes: [host1]. Please check the instances on your cloud provider for further details.", stepResult.getConclusion());
+        assertEquals("Unreachable salt minions: [host1]", stepResult.getDetails());
+        assertEquals(SaltMinionCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(stackService, times(1)).getByIdWithListsInTransaction(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
 
     private Node createNode(String fqdn) {
-        return new Node("privateIp", "publicIp", "instanceId", "instanceType",
-                fqdn, "hostGroup");
+        return new Node("privateIp", "publicIp", "instanceId", "instanceType", fqdn, "hostGroup");
     }
 
 }

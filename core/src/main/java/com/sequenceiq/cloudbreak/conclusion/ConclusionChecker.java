@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.conclusion;
 
+import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.conclusion.step.Conclusion;
 import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStep;
-import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStepResult;
 
 public class ConclusionChecker {
 
@@ -25,25 +27,28 @@ public class ConclusionChecker {
 
     public ConclusionResult doCheck(Long resourceId) {
         LOGGER.info("Conclusion checker started, steps: {}, resourceId: {}", conclusionSteps, resourceId);
-        List<String> conclusions = new ArrayList<>();
+        List<Conclusion> conclusions = new ArrayList<>();
         try {
             while (hasMoreSteps() && doNext()) {
                 ConclusionStep conclusionStep = conclusionSteps.get(actualStep++);
                 LOGGER.debug("Conclusion step: {}", conclusionStep);
 
-                ConclusionStepResult stepResult = conclusionStep.check(resourceId);
-                LOGGER.debug("Conclusion step {}, conclusion: {}", stepResult.isStepFailed() ? "failed" : "succeeded", stepResult.getConclusion());
-                if (stepResult.getConclusion() != null) {
-                    conclusions.add(stepResult.getConclusion());
+                Conclusion conclusion = measure(() -> conclusionStep.check(resourceId),
+                        LOGGER, "Conclusion step finished in {} ms for resourceId {}, step {}", resourceId, conclusionStep.getClass().getSimpleName());
+                if (conclusion.isFailureFound()) {
+                    LOGGER.debug("Conclusion step found a failure, conclusion: {}, details: {}", conclusion.getConclusion(), conclusion.getDetails());
+                } else {
+                    LOGGER.debug("Conclusion step succeeded");
                 }
-                doNext = stepResult.isStepFailed();
+                conclusions.add(conclusion);
+                doNext = conclusion.isFailureFound();
             }
-            return new ConclusionResult(conclusions);
+            ConclusionResult result = new ConclusionResult(conclusions);
+            LOGGER.info("Conclusion checker finished: {}", result.isFailureFound() ? "failure not found" : conclusions);
+            return result;
         } catch (RuntimeException e) {
-            LOGGER.error("Conclusion checker error: {}", e.getMessage(), e);
+            LOGGER.error("Conclusion checker error: {}, collected conclusions before error happened: {}", e.getMessage(), conclusions, e);
             throw e;
-        } finally {
-            LOGGER.info("Conclusion checker finished, conclusions: {}", conclusions);
         }
     }
 

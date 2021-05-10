@@ -57,9 +57,9 @@ public class ClusterUpscaleFailedConclusionHandler extends ExceptionCatcherEvent
         try {
             ConclusionChecker conclusionChecker = conclusionCheckerFactory.getConclusionChecker(ConclusionCheckerType.DEFAULT);
             ConclusionResult conclusionResult = conclusionChecker.doCheck(request.getResourceId());
-            if (entitlementService.conclusionCheckerSendUserEventEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (entitlementService.conclusionCheckerSendUserEventEnabled(ThreadBasedUserCrnProvider.getAccountId()) && conclusionResult.isFailureFound()) {
                 flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED,
-                        "added to", conclusionResult.getConclusions().toString());
+                        "added to", conclusionResult.getFailedConclusionTexts().toString());
             }
         } catch (Exception e) {
             LOGGER.error("Error happened during conclusion check", e);
