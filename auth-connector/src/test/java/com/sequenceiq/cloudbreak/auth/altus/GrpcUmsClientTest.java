@@ -83,7 +83,7 @@ public class GrpcUmsClientTest {
         underTest = spy(rawGrpcUmsClient);
         lenient().doReturn(managedChannel).when(channelWrapper).getChannel();
         lenient().doReturn(umsClient).when(underTest).makeClient(any(ManagedChannel.class));
-        lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient(anyString());
+        lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient();
     }
 
     @Test
@@ -107,7 +107,7 @@ public class GrpcUmsClientTest {
         when(umsClient.listWorkloadAdministrationGroupsForMember(anyString(), eq(memberCrn), eq(Optional.of(pageToken))))
                 .thenReturn(response2);
 
-        List<String> wags = underTest.listWorkloadAdministrationGroupsForMember("actor-crn", memberCrn, REQUEST_ID);
+        List<String> wags = underTest.listWorkloadAdministrationGroupsForMember(memberCrn, REQUEST_ID);
 
         verify(umsClient, times(2)).listWorkloadAdministrationGroupsForMember(anyString(), eq(memberCrn), any(Optional.class));
         assertTrue(wags.containsAll(wags1));
@@ -141,8 +141,7 @@ public class GrpcUmsClientTest {
         when(umsClient.listServicePrincipalCloudIdentities(anyString(), eq(accountId), eq(envCrn), eq(Optional.of(pageToken))))
                 .thenReturn(response2);
 
-        List<ServicePrincipalCloudIdentities> spCloudIds = underTest.listServicePrincipalCloudIdentities("actor-crn", accountId, envCrn,
-                REQUEST_ID);
+        List<ServicePrincipalCloudIdentities> spCloudIds = underTest.listServicePrincipalCloudIdentities(accountId, envCrn, REQUEST_ID);
 
         verify(umsClient, times(2)).listServicePrincipalCloudIdentities(anyString(), eq(accountId), eq(envCrn), any(Optional.class));
         assertTrue(spCloudIds.containsAll(spIdsList01));
@@ -152,7 +151,7 @@ public class GrpcUmsClientTest {
     @Test
     public void testCheckRightWithInvalidCrn() {
         assertEquals(
-                assertThrows(IllegalArgumentException.class, () -> underTest.checkResourceRight(USER_CRN, USER_CRN,
+                assertThrows(IllegalArgumentException.class, () -> underTest.checkResourceRight(USER_CRN,
                         "environments/describeEnvironment", "invalidCrn", REQUEST_ID)).getMessage(),
                 "Provided resource [invalidCrn] is not in CRN format");
     }
@@ -160,11 +159,11 @@ public class GrpcUmsClientTest {
     @Test
     public void testHasRightsWithInvalidCrn() {
         assertEquals(
-                assertThrows(IllegalArgumentException.class, () -> underTest.hasRights(USER_CRN, USER_CRN,
+                assertThrows(IllegalArgumentException.class, () -> underTest.hasRights(USER_CRN,
                         List.of("invalidCrn", "*"), "environments/describeEnvironment", REQUEST_ID)).getMessage(),
                 "Following resources are not provided in CRN format: invalidCrn.");
         assertEquals(
-                assertThrows(IllegalArgumentException.class, () -> underTest.hasRightsOnResources(USER_CRN, USER_CRN,
+                assertThrows(IllegalArgumentException.class, () -> underTest.hasRightsOnResources(USER_CRN,
                         List.of("invalidCrn", "*"), "environments/describeEnvironment", REQUEST_ID)).getMessage(),
                 "Following resources are not provided in CRN format: invalidCrn.");
     }
@@ -176,7 +175,7 @@ public class GrpcUmsClientTest {
         doNothing().when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn1);
         doThrow(new RuntimeException("Permission denied")).when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn2);
 
-        Map<String, Boolean> result = underTest.hasRights(USER_CRN, USER_CRN, List.of(resourceCrn1, resourceCrn2), "right", REQUEST_ID);
+        Map<String, Boolean> result = underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right", REQUEST_ID);
 
         assertEquals(Map.of(resourceCrn1, true, resourceCrn2, false), result);
         InOrder inOrder = inOrder(authorizationClient);
@@ -192,7 +191,7 @@ public class GrpcUmsClientTest {
         doAnswer(m -> Lists.newArrayList((Iterable<AuthorizationProto.RightCheck>) m.getArgument(2)).stream().map(i -> true).collect(Collectors.toList()))
                 .when(authorizationClient).hasRights(any(), anyString(), any());
 
-        underTest.hasRights(USER_CRN, USER_CRN, List.of(resourceCrn1, resourceCrn2, resourceCrn3), "right", REQUEST_ID);
+        underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2, resourceCrn3), "right", REQUEST_ID);
 
         verify(authorizationClient).hasRights(eq(REQUEST_ID.get()), eq(USER_CRN), captor.capture());
 

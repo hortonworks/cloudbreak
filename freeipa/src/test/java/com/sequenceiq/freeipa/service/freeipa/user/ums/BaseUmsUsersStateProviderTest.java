@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -65,7 +64,7 @@ class BaseUmsUsersStateProviderTest {
 
     protected void setupServicePrincipals() {
         when(grpcUmsClient.listServicePrincipalCloudIdentities(
-                eq(INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), any(Optional.class)))
+                eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN), any(Optional.class)))
                 .thenReturn(testData.servicePrincipalCloudIdentities);
     }
 

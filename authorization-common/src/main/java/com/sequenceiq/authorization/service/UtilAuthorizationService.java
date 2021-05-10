@@ -70,7 +70,7 @@ public class UtilAuthorizationService {
         List<AuthorizationProto.RightCheck> rightChecks = rightReq.getRights().stream()
                 .map(rightV4 -> createRightCheckObject(umsRightProvider.getRight(rightV4.getAction()), null))
                 .collect(Collectors.toList());
-        List<Boolean> results = grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, MDCUtils.getRequestId());
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, MDCUtils.getRequestId());
         return new CheckRightV4Response(rightReq.getRights().stream()
                 .map(rightV4 -> new CheckRightV4SingleResponse(rightV4, results.get(rightReq.getRights().indexOf(rightV4))))
                 .collect(Collectors.toList()));
@@ -85,7 +85,7 @@ public class UtilAuthorizationService {
         List<AuthorizationProto.RightCheck> rightChecks = Lists.newLinkedList(resourceRightsChecks.values());
 
         LOGGER.info("Check rights: {}", rightChecks);
-        List<Boolean> results = grpcUmsClient.hasRights(userCrn, userCrn, rightChecks, MDCUtils.getRequestId());
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, MDCUtils.getRequestId());
 
         Map<AuthorizationProto.RightCheck, Boolean> rightCheckResultMap = new HashMap<>();
         for (AuthorizationProto.RightCheck rightCheck : rightChecks) {

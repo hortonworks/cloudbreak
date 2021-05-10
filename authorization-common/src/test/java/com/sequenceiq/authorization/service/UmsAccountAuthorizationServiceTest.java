@@ -41,7 +41,7 @@ public class UmsAccountAuthorizationServiceTest {
 
     @Test
     public void testCheckRight() {
-        when(umsClient.checkAccountRightLegacy(anyString(), anyString(), anyString(), any())).thenReturn(false);
+        when(umsClient.checkAccountRightLegacy(anyString(), anyString(), any())).thenReturn(false);
         when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DATALAKE_READ.getRight());
 
         AccessDeniedException exception = assertThrows(AccessDeniedException.class, () -> {
@@ -55,13 +55,13 @@ public class UmsAccountAuthorizationServiceTest {
     @Test
     public void testHasRightOfUserWithValidResourceTypeAndAction() {
         when(entitlementService.isAuthorizationEntitlementRegistered(any())).thenReturn(false);
-        when(umsClient.checkAccountRightLegacy(anyString(), anyString(), anyString(), any())).thenReturn(true);
+        when(umsClient.checkAccountRightLegacy(anyString(), anyString(), any())).thenReturn(true);
         when(umsRightProvider.getRight(any())).thenReturn(AuthorizationResourceAction.DATALAKE_READ.getRight());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DATALAKE_READ));
 
         when(entitlementService.isAuthorizationEntitlementRegistered(any())).thenReturn(true);
-        when(umsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(false);
+        when(umsClient.checkAccountRight(anyString(), anyString(), any())).thenReturn(false);
 
         assertThrows(AccessDeniedException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
@@ -94,7 +94,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testActorAndTargetDifferentHasRequiredRight() {
         String user2 = "crn:cdp:iam:us-west-1:1234:user:someOtherUserId";
 
-        when(umsClient.checkAccountRightLegacy(any(), any(), any(), any())).thenReturn(true);
+        when(umsClient.checkAccountRightLegacy(any(), any(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DATALAKE_READ));

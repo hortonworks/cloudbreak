@@ -1,5 +1,18 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -10,19 +23,6 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 @Component
 public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
@@ -43,7 +43,6 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
             Optional<String> requestIdOptional) {
         List<String> environmentCrnList = List.copyOf(environmentCrns);
         UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(
-                INTERNAL_ACTOR_CRN,
                 accountId,
                 umsRightsChecksFactory.get(environmentCrnList),
                 requestIdOptional);
@@ -84,7 +83,7 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                     addServicePrincipalsCloudIdentities(
                             umsUsersStateBuilder,
                             grpcUmsClient.listServicePrincipalCloudIdentities(
-                                    INTERNAL_ACTOR_CRN, accountId, environmentCrn, requestIdOptional));
+                                    accountId, environmentCrn, requestIdOptional));
 
                     umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
                     umsUsersStateMap.put(environmentCrn, umsUsersStateBuilder.build());

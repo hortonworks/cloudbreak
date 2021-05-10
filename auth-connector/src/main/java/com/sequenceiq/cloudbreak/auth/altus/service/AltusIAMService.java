@@ -103,7 +103,7 @@ public class AltusIAMService {
         clearMachineUser(machineUserName, actorCrn, accountId, false);
     }
 
-    public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String actorCrn, String accountId) {
-        return umsClient.listAllMachineUsers(actorCrn, accountId, true, true, Optional.empty());
+    public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String accountId) {
+        return umsClient.listAllMachineUsers(accountId, true, true, Optional.empty());
     }
 }

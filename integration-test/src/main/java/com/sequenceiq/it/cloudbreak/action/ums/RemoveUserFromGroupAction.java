@@ -28,13 +28,12 @@ public class RemoveUserFromGroupAction implements Action<UmsGroupTestDto, UmsCli
 
     @Override
     public UmsGroupTestDto action(TestContext testContext, UmsGroupTestDto testDto, UmsClient client) throws Exception {
-        String userCrn = testContext.getActingUserCrn().toString();
         String accountId = testDto.getRequest().getAccountId();
         testDto.withName(groupName);
         testDto.withMember(memberCrn);
         Log.when(LOGGER, format(" Removing user '%s' from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Remove user from group request:%n "), testDto.getRequest());
-        client.getDefaultClient().removeMemberFromGroup(userCrn, accountId, groupName, memberCrn, Optional.of(""));
+        client.getDefaultClient().removeMemberFromGroup(accountId, groupName, memberCrn, Optional.of(""));
         LOGGER.info(format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.when(LOGGER, format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;

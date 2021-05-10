@@ -155,8 +155,8 @@ public class AuditCredentialAuthorizationIntegrationTest {
     }
 
     private void mockPermissions() {
-        when(grpcUmsClient.checkAccountRight(eq(FIRST_USER_CRN), eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
-        when(grpcUmsClient.checkAccountRight(eq(SECOND_USER_CRN), eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
+        when(grpcUmsClient.checkAccountRight(eq(FIRST_USER_CRN), anyString(), any())).thenReturn(Boolean.TRUE);
+        when(grpcUmsClient.checkAccountRight(eq(SECOND_USER_CRN), anyString(), any())).thenReturn(Boolean.FALSE);
     }
 
     private CredentialRequest getAwsCredentialRequest(String name) {

@@ -19,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Entitlement;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 
 @ExtendWith(MockitoExtension.class)
 class EntitlementServiceTest {
@@ -160,7 +159,7 @@ class EntitlementServiceTest {
 
     @Test
     void getEntitlementsTest() {
-        when(umsClient.getAccountDetails(eq(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any(Optional.class)))
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any(Optional.class)))
                 .thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
@@ -174,7 +173,7 @@ class EntitlementServiceTest {
                                 .setEntitlementName(entitlement)
                                 .build());
         }
-        when(umsClient.getAccountDetails(eq(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN), eq(ACCOUNT_ID), any()))
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
                 .thenReturn(builder.build());
     }
 

@@ -6,12 +6,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,9 +17,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 @ExtendWith(MockitoExtension.class)
 class UmsCredentialProviderTest {
@@ -56,7 +58,7 @@ class UmsCredentialProviderTest {
                 .setPasswordHashExpirationDate(EXPIRATION_DATE)
                 .setWorkloadCredentialsVersion(WORKLOAD_CREDENTIALS_VERSION)
                 .build();
-        when(grpcUmsClient.getActorWorkloadCredentials(any(), eq("user"), any())).thenReturn(response);
+        when(grpcUmsClient.getActorWorkloadCredentials(eq("user"), any())).thenReturn(response);
         WorkloadCredential credential = underTest.getCredentials("user", Optional.empty());
         assertEquals(credential.getHashedPassword(), PASSWORD_HASH);
         assertEquals(credential.getExpirationDate(), Optional.of(Instant.ofEpochMilli(EXPIRATION_DATE)));
@@ -72,7 +74,7 @@ class UmsCredentialProviderTest {
                 .setPasswordHashExpirationDate(0)
                 .setWorkloadCredentialsVersion(WORKLOAD_CREDENTIALS_VERSION)
                 .build();
-        when(grpcUmsClient.getActorWorkloadCredentials(any(), eq("user"), any())).thenReturn(response);
+        when(grpcUmsClient.getActorWorkloadCredentials(eq("user"), any())).thenReturn(response);
         WorkloadCredential credential = underTest.getCredentials("user", Optional.empty());
         assertEquals(credential.getExpirationDate(), Optional.empty());
         assertEquals(WORKLOAD_CREDENTIALS_VERSION, credential.getVersion());

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.auth;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -24,7 +22,7 @@ public class ClouderaManagerLicenseProvider {
 
     public JsonCMLicense getLicense(String userCrn) {
         String accountId = getAccountIdFromCrn(userCrn);
-        UserManagementProto.Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId());
         return cmLicenseParser.parseLicense(account.getClouderaManagerLicenseKey())
                 .orElseThrow(() -> new BadRequestException("No valid CM license is present"));
     }

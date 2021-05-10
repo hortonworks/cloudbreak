@@ -163,12 +163,12 @@ public class EnvironmentServiceIntegrationTest {
 
         when(entitlementService.azureEnabled(any())).thenReturn(true);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
-        lenient().when(grpcUmsClient.hasRights(anyString(), anyString(), anyList(), any())).then(i -> {
-            List<RightCheck> rightChecks = i.getArgument(2);
+        lenient().when(grpcUmsClient.hasRights(anyString(), anyList(), any())).then(i -> {
+            List<RightCheck> rightChecks = i.getArgument(1);
             return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
         });
-        lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), anyString(), any())).thenReturn(true);
-        lenient().when(grpcUmsClient.checkAccountRightLegacy(anyString(), anyString(), anyString(), any())).thenReturn(true);
+        lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), any())).thenReturn(true);
+        lenient().when(grpcUmsClient.checkAccountRightLegacy(anyString(), anyString(), any())).thenReturn(true);
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
         when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), anyList())).thenReturn(rightCheckMap);

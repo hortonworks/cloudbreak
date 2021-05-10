@@ -276,13 +276,13 @@ public class UserV1ControllerTest {
         when(request.getPassword()).thenReturn(password);
 
         Operation operation = mock(Operation.class);
-        when(passwordService.setPasswordWithCustomPermissionCheck(any(), any(), any(), any(), any(), any())).thenReturn(operation);
+        when(passwordService.setPasswordWithCustomPermissionCheck(any(), any(), any(), any(), any())).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
         assertEquals(status, ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setPassword(request)));
 
-        verify(passwordService, times(1)).setPasswordWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, USER_CRN,
+        verify(passwordService, times(1)).setPasswordWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN,
                 password, new HashSet<>(), AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
@@ -293,7 +293,7 @@ public class UserV1ControllerTest {
         when(request.getPassword()).thenReturn(password);
 
         Operation operation = mock(Operation.class);
-        when(passwordService.setPasswordWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, USER_CRN, password, new HashSet<>(),
+        when(passwordService.setPasswordWithCustomPermissionCheck(ACCOUNT_ID, USER_CRN, password, new HashSet<>(),
                 AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)).thenReturn(operation);
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(status.getStatus()).thenReturn(SynchronizationStatus.REJECTED);

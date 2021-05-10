@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -77,25 +75,25 @@ public class PasswordService {
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
-    public Operation setPassword(String accountId, String actorCrn, String userCrn, String password, Set<String> environmentCrnFilter) {
+    public Operation setPassword(String accountId, String userCrn, String password, Set<String> environmentCrnFilter) {
         List<Stack> stacks = getStacksForSetPassword(accountId, userCrn, password, environmentCrnFilter);
-        return setPasswordForStacks(accountId, actorCrn, userCrn, password, environmentCrnFilter, stacks);
+        return setPasswordForStacks(accountId, userCrn, password, environmentCrnFilter, stacks);
     }
 
-    public Operation setPasswordWithCustomPermissionCheck(String accountId, String actorCrn, String userCrn,
+    public Operation setPasswordWithCustomPermissionCheck(String accountId, String userCrn,
             String password, Set<String> environmentCrnFilter, AuthorizationResourceAction action) {
         List<Stack> stacks = getStacksForSetPassword(accountId, userCrn, password, environmentCrnFilter);
         List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
-        CustomCheckUtil.run(actorCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns));
-        return setPasswordForStacks(accountId, actorCrn, userCrn, password, environmentCrnFilter, stacks);
+        CustomCheckUtil.run(userCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, relatedEnvironmentCrns));
+        return setPasswordForStacks(accountId, userCrn, password, environmentCrnFilter, stacks);
     }
 
-    private Operation setPasswordForStacks(String accountId, String actorCrn, String userCrn, String password,
+    private Operation setPasswordForStacks(String accountId, String userCrn, String password,
             Set<String> environmentCrnFilter, List<Stack> stacks) {
         Operation operation = operationService.startOperation(accountId, OperationType.SET_PASSWORD,
                 environmentCrnFilter, List.of(userCrn));
         if (operation.getStatus() == OperationState.RUNNING) {
-            asyncSetPasswords(operation.getOperationId(), accountId, actorCrn, userCrn, password, stacks);
+            asyncSetPasswords(operation.getOperationId(), accountId, userCrn, password, stacks);
         }
         return operation;
     }
@@ -112,18 +110,18 @@ public class PasswordService {
         return stacks;
     }
 
-    private void asyncSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
+    private void asyncSetPasswords(String operationId, String accountId, String userCrn, String password, List<Stack> stacks) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, actorCrn, userCrn, password, stacks));
+            asyncTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, userCrn, password, stacks));
         } finally {
             MDCBuilder.removeOperationId();
         }
     }
 
-    private void internalSetPasswords(String operationId, String accountId, String actorCrn, String userCrn, String password, List<Stack> stacks) {
+    private void internalSetPasswords(String operationId, String accountId, String userCrn, String password, List<Stack> stacks) {
         try {
-            String userId = getUserIdFromUserCrn(actorCrn, userCrn);
+            String userId = getUserIdFromUserCrn(userCrn);
 
             Optional<Instant> expirationInstant = calculateExpirationTime(userCrn, accountId);
 
@@ -159,7 +157,7 @@ public class PasswordService {
     @VisibleForTesting
     Optional<Instant> calculateExpirationTime(String userCrn, String accountId) {
         LOGGER.debug("calculating expiration time for password in account {}", accountId);
-        UserManagementProto.Account account = umsClient.getAccountDetails(INTERNAL_ACTOR_CRN, accountId, MDCUtils.getRequestId());
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId());
         Optional<UserManagementProto.WorkloadPasswordPolicy> passwordPolicy = getPasswordPolicyForUser(account, userCrn);
         if (passwordPolicy.isPresent()) {
             long maxLifetime = passwordPolicy.get().getWorkloadPasswordMaxLifetime();
@@ -191,15 +189,14 @@ public class PasswordService {
         }
     }
 
-    private String getUserIdFromUserCrn(String actorCrn, String userCrn) {
+    private String getUserIdFromUserCrn(String userCrn) {
         Crn crn = Crn.safeFromString(userCrn);
         switch (crn.getResourceType()) {
             case USER:
-                return umsClient.getUserDetails(actorCrn, userCrn, MDCUtils.getRequestId()).getWorkloadUsername();
+                return umsClient.getUserDetails(userCrn, MDCUtils.getRequestId()).getWorkloadUsername();
             case MACHINE_USER:
-                return umsClient.getMachineUserDetails(actorCrn,
-                        userCrn,
-                        Crn.fromString(actorCrn).getAccountId(),
+                return umsClient.getMachineUserDetails(userCrn,
+                        Crn.fromString(userCrn).getAccountId(),
                         MDCUtils.getRequestId()).getWorkloadUsername();
             default:
                 throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));

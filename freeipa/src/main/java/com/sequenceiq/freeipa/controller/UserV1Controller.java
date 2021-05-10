@@ -124,7 +124,7 @@ public class UserV1Controller implements UserV1Endpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         LOGGER.debug("setPassword() requested for user {} in account {}", userCrn, accountId);
 
-        Operation setPasswordOperation = passwordService.setPasswordWithCustomPermissionCheck(accountId, userCrn, userCrn,
+        Operation setPasswordOperation = passwordService.setPasswordWithCustomPermissionCheck(accountId, userCrn,
                 request.getPassword(), nullToEmpty(request.getEnvironments()), AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return checkOperationRejected(operationToSyncOperationStatus.convert(setPasswordOperation));
     }

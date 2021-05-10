@@ -54,7 +54,7 @@ class FreeIpaServerRequestProvider {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getMdcContextMap().get(LoggerContextKey.REQUEST_ID.toString()));
         // I think this should be better/safer if we could use the account id of environment,
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), requestIdOptional);
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(Crn.safeFromString(userCrn).getAccountId(), requestIdOptional);
         String accountSubdomain = account.getWorkloadSubdomain();
         if (accountSubdomain == null || accountSubdomain.isEmpty()) {
             accountSubdomain = FREEIPA_DEFAULT_ACCOUNT_DOMAIN;

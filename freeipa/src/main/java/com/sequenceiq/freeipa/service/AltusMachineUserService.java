@@ -64,9 +64,7 @@ public class AltusMachineUserService {
 
     public List<UserManagementProto.MachineUser> getAllInternalMachineUsers(String accountId) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                () -> altusIAMService.getAllMachineUsersForAccount(
-                        ThreadBasedUserCrnProvider.getUserCrn(),
-                        accountId)
+                () -> altusIAMService.getAllMachineUsersForAccount(accountId)
         );
     }
 

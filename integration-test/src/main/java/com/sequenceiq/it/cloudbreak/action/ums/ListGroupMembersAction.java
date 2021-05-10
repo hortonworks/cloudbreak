@@ -26,13 +26,11 @@ public class ListGroupMembersAction implements Action<UmsGroupTestDto, UmsClient
 
     @Override
     public UmsGroupTestDto action(TestContext testContext, UmsGroupTestDto testDto, UmsClient client) throws Exception {
-
-        String userCrn = testContext.getActingUserCrn().toString();
         String accountId = testDto.getRequest().getAccountId();
         testDto.withName(groupName);
         Log.when(LOGGER, format(" Listing user group '%s' members at account '%s'. ", groupName, accountId));
         Log.whenJson(LOGGER, format(" List user group members request:%n "), testDto.getRequest());
-        List<String> members = client.getDefaultClient().listMembersFromGroup(userCrn, accountId, groupName, Optional.of(""));
+        List<String> members = client.getDefaultClient().listMembersFromGroup(accountId, groupName, Optional.of(""));
         LOGGER.info(format(" User group '%s' contains members: [%s] ", groupName, members));
         Log.when(LOGGER, format(" User group '%s' contains members: [%s] ", groupName, members));
         return testDto;

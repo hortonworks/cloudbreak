@@ -175,11 +175,11 @@ class UserSyncServiceTest {
         doAnswer(invocation -> {
             assertEquals(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
             return null;
-        }).when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), any());
+        }).when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), any(), any());
 
         spyService.synchronizeUsers("accountId", "actorCrn", Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
 
-        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyString(), anyList(), any(), any());
+        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), any(), any());
     }
 
     @Test

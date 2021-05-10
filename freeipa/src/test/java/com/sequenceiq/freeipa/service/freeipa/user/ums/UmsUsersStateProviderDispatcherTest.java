@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -62,12 +61,12 @@ class UmsUsersStateProviderDispatcherTest {
 
         Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
-                ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
+                ACCOUNT_ID, ENVIRONMENT_CRNS,
                 userCrns, machineUserCrns, requestIdOptional);
 
         assertEquals(expected, response);
         verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional);
-        verify(defaultUmsUsersStateProvider, never()).get(anyString(), anyString(), any(Set.class),
+        verify(defaultUmsUsersStateProvider, never()).get(anyString(), any(Set.class),
                 any(Set.class), any(Set.class), any(Optional.class), anyBoolean());
     }
 
@@ -79,18 +78,18 @@ class UmsUsersStateProviderDispatcherTest {
         when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class)))
                 .thenThrow(StatusRuntimeException.class);
         Map<String, UmsUsersState> expected = createExpectedResponse();
-        when(defaultUmsUsersStateProvider.get(anyString(), anyString(), any(Set.class),
+        when(defaultUmsUsersStateProvider.get(anyString(), any(Set.class),
                 any(Set.class), any(Set.class), any(Optional.class), anyBoolean()))
                 .thenReturn(expected);
 
         Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
-                ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
+                ACCOUNT_ID, ENVIRONMENT_CRNS,
                 userCrns, machineUserCrns, requestIdOptional);
 
         assertEquals(expected, response);
         verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional);
-        verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
+        verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS,
                 userCrns, machineUserCrns, requestIdOptional, true);
     }
 
@@ -100,18 +99,18 @@ class UmsUsersStateProviderDispatcherTest {
         Set<String> machineUserCrns = Set.of(createActorCrn(CrnResourceDescriptor.MACHINE_USER));
 
         Map<String, UmsUsersState> expected = createExpectedResponse();
-        when(defaultUmsUsersStateProvider.get(anyString(), anyString(), any(Set.class),
+        when(defaultUmsUsersStateProvider.get(anyString(), any(Set.class),
                 any(Set.class), any(Set.class), any(Optional.class), anyBoolean()))
                 .thenReturn(expected);
 
         Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
-                ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
+                ACCOUNT_ID, ENVIRONMENT_CRNS,
                 userCrns, machineUserCrns, requestIdOptional);
 
         assertEquals(expected, response);
         verify(bulkUmsUsersStateProvider, never()).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional);
-        verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, INTERNAL_ACTOR_CRN, ENVIRONMENT_CRNS,
+        verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS,
                 userCrns, machineUserCrns, requestIdOptional, false);
     }
 

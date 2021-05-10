@@ -150,8 +150,8 @@ public class DistroXAutoScaleClusterV1EndpointTest {
                         .orElseGet(() -> clusterPertainRepsitory.save(clusterPertain)));
         clusterRepository.save(testCluster);
 
-        when(grpcUmsClient.getUserDetails(anyString(), anyString(), any())).thenReturn(user);
-        when(grpcUmsClient.getAccountDetails(anyString(), anyString(), any())).thenReturn(UserManagementProto.Account.newBuilder().build());
+        when(grpcUmsClient.getUserDetails(anyString(), any())).thenReturn(user);
+        when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(UserManagementProto.Account.newBuilder().build());
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any(), any());
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
         when(recommendationService.getAutoscaleRecommendations(TEST_CLUSTER_CRN))

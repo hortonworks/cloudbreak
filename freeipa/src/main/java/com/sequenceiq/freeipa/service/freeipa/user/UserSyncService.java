@@ -158,7 +158,7 @@ public class UserSyncService {
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
         List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
         UserSyncOptions options = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), workloadCredentialsUpdateType);
-        return performSyncForStacks(accountId, actorCrn, userSyncFilter, options, stacks);
+        return performSyncForStacks(accountId, userSyncFilter, options, stacks);
     }
 
     public Operation synchronizeUsersWithCustomPermissionCheck(String accountId, String actorCrn, Set<String> environmentCrnFilter,
@@ -167,7 +167,7 @@ public class UserSyncService {
         List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
         CustomCheckUtil.run(actorCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns));
         UserSyncOptions options = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), workloadCredentialsUpdateType);
-        return performSyncForStacks(accountId, actorCrn, userSyncFilter, options, stacks);
+        return performSyncForStacks(accountId, userSyncFilter, options, stacks);
     }
 
     private UserSyncOptions getUserSyncOptions(String accountId, boolean fullSync, WorkloadCredentialsUpdateType requestedCredentialsUpdateType) {
@@ -181,7 +181,7 @@ public class UserSyncService {
         return userSyncOptions;
     }
 
-    private Operation performSyncForStacks(String accountId, String actorCrn, UserSyncRequestFilter userSyncFilter, UserSyncOptions options,
+    private Operation performSyncForStacks(String accountId, UserSyncRequestFilter userSyncFilter, UserSyncOptions options,
             List<Stack> stacks) {
         logAffectedStacks(stacks);
         Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
@@ -204,7 +204,7 @@ public class UserSyncService {
                                 userSyncStatusService.save(userSyncStatus);
                             });
                         }
-                        asyncSynchronizeUsers(operation.getOperationId(), accountId, actorCrn, stacks, userSyncFilter, options);
+                        asyncSynchronizeUsers(operation.getOperationId(), accountId, stacks, userSyncFilter, options);
                     }));
         }
 
@@ -234,11 +234,11 @@ public class UserSyncService {
     }
 
     @VisibleForTesting
-    void asyncSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
+    void asyncSynchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
             UserSyncOptions options) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, actorCrn, stacks, userSyncFilter, options));
+            asyncTaskExecutor.submit(() -> internalSynchronizeUsers(operationId, accountId, stacks, userSyncFilter, options));
         } finally {
             MDCBuilder.removeOperationId();
         }
@@ -262,7 +262,7 @@ public class UserSyncService {
         }
     }
 
-    private void internalSynchronizeUsers(String operationId, String accountId, String actorCrn, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
+    private void internalSynchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
             UserSyncOptions options) {
         tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
@@ -282,7 +282,7 @@ public class UserSyncService {
                 LogEvent logRetrieveUmsEvent = options.isFullSync() ? LogEvent.RETRIEVE_FULL_UMS_STATE : LogEvent.RETRIEVE_PARTIAL_UMS_STATE;
                 LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
                 Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProviderDispatcher
-                        .getEnvToUmsUsersStateMap(accountId, actorCrn, environmentCrns, userSyncFilter.getUserCrnFilter(),
+                        .getEnvToUmsUsersStateMap(accountId, environmentCrns, userSyncFilter.getUserCrnFilter(),
                                 userSyncFilter.getMachineUserCrnFilter(), requestId);
                 LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
                 statusFutures = stacks.stream()

@@ -26,10 +26,10 @@ public class SetWorkloadPasswordAction implements Action<UmsTestDto, UmsClient> 
     @Override
     public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         String userCrn = testContext.getActingUserCrn().toString();
-        String workloadUsername = client.getDefaultClient().getUserDetails(userCrn, userCrn, Optional.of("")).getWorkloadUsername();
+        String workloadUsername = client.getDefaultClient().getUserDetails(userCrn, Optional.of("")).getWorkloadUsername();
         LOGGER.info("Setting new workload password '{}' for user '{}' with workload username '{}'", newPassword, userCrn, workloadUsername);
         Log.when(LOGGER, format(" Setting new workload password '%s' for user '%s' workload username '%s' ", newPassword, userCrn, workloadUsername));
-        client.getDefaultClient().setActorWorkloadPassword(userCrn, userCrn, newPassword, Optional.of(""));
+        client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword, Optional.of(""));
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);
         LOGGER.info("New workload password has been set for '{}' with workload username '{}'!", userCrn, workloadUsername);

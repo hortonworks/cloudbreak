@@ -29,7 +29,7 @@ class ClouderaManagerLicenseService {
     }
 
     private boolean hasNoLicense(String userCrn) {
-        return StringUtils.isEmpty(umsClient.getAccountDetails(userCrn, Crn.safeFromString(userCrn).getAccountId(), Optional.empty())
+        return StringUtils.isEmpty(umsClient.getAccountDetails(Crn.safeFromString(userCrn).getAccountId(), Optional.empty())
                 .getClouderaManagerLicenseKey());
     }
 
