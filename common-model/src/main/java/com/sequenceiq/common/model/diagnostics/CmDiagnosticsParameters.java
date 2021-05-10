@@ -1,6 +1,6 @@
 package com.sequenceiq.common.model.diagnostics;
 
-import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.FILECOLLECTOR_ROOT;
+import static com.sequenceiq.common.model.diagnostics.DiagnosticParameters.DEFAULT_ROOT;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -224,7 +224,7 @@ public class CmDiagnosticsParameters implements Serializable {
         parameters.put("gcs_bucket", gcsBucket);
         parameters.put("gcs_location", gcsLocation);
         Map<String, Object> fileCollector = new HashMap<>();
-        fileCollector.put(FILECOLLECTOR_ROOT, parameters);
+        fileCollector.put(DEFAULT_ROOT, parameters);
         return fileCollector;
     }
 

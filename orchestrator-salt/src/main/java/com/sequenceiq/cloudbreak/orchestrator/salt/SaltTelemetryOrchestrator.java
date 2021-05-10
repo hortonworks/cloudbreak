@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,13 +15,16 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
@@ -43,9 +47,11 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     public static final String NODESTATUS_COLLECT = "nodestatus.collect";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltTelemetryOrchestrator.class);
+
     private static final String FLUENT_AGENT_STOP = "fluent.agent-stop";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltTelemetryOrchestrator.class);
+    private static final String TELEMETRY_CLOUD_STORAGE_TEST = "telemetry.test-cloud-storage";
 
     private final ExitCriteria exitCriteria;
 
@@ -59,6 +65,9 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private final int maxDiagnosticsCollectionRetry;
 
+    @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
+    private int maxCloudStorageValidationRetry;
+
     public SaltTelemetryOrchestrator(ExitCriteria exitCriteria, SaltService saltService, SaltRunner saltRunner,
             @Value("${cb.max.salt.new.service.telemetry.stop.retry:5}") int maxTelemetryStopRetry,
             @Value("${cb.max.salt.new.service.telemetry.nodestatus.collect.retry:3}") int maxNodeStatusCollectRetry,
@@ -69,6 +78,35 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         this.maxTelemetryStopRetry = maxTelemetryStopRetry;
         this.maxNodeStatusCollectRetry = maxNodeStatusCollectRetry;
         this.maxDiagnosticsCollectionRetry = maxDiagnosticsCollectionRetry;
+    }
+
+    @Override
+    public void validateCloudStorage(List<GatewayConfig> allGateways, Set<Node> allNodes, Set<String> targetHostNames,
+            Map<String, Object> parameters, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            runValidation(sc, new ParameterizedStateRunner(targetHostNames, allNodes, TELEMETRY_CLOUD_STORAGE_TEST, parameters), exitCriteriaModel);
+            LOGGER.debug("Completed validating cloud storage");
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.warn("CloudbreakOrchestratorException occurred during cloud storage validation", e);
+            throw e;
+        } catch (ExecutionException e) {
+            LOGGER.warn("Error occurred during cloud storage validation", e);
+            if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during cloud storage validation", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
+        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, true);
+        Callable<Boolean> saltJobRunBootstrapRunner =
+                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry, false);
+        saltJobRunBootstrapRunner.call();
     }
 
     @Override

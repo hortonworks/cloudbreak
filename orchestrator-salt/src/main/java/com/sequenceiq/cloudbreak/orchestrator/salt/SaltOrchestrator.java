@@ -501,6 +501,13 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
+        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, true);
+        Callable<Boolean> saltJobRunBootstrapRunner =
+                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry, false);
+        saltJobRunBootstrapRunner.call();
+    }
+
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void installFreeIpa(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
@@ -902,7 +909,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 LOGGER.debug("Applying role 'cloudera_manager_agent_stop' on nodes: [{}]", responsiveNodesUnderStopping);
                 Set<String> targetHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
-                                "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
+                        "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
                 if (adJoinable || ipaJoinable) {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
                     LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodesUnderStopping);
@@ -911,7 +918,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     String removeIdentityRole = adJoinable ? "ad_member" : "ipa_member";
                     LOGGER.debug("Removing role '{}' on nodes: [{}]", removeIdentityRole, responsiveNodesUnderStopping);
                     saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
-                                    removeIdentityRole), exitCriteriaModel, exitCriteria);
+                            removeIdentityRole), exitCriteriaModel, exitCriteria);
                 }
 
                 Set<String> allHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
@@ -921,7 +928,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodesUnderStopping), exitCriteriaModel, maxRetry, true);
 
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
-                                "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
+                        "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
                 if (adJoinable || ipaJoinable) {
                     String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
                     saltCommandRunner.runModifyGrainCommand(sc,
@@ -1118,13 +1125,6 @@ public class SaltOrchestrator implements HostOrchestrator {
             throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, retryOnFail);
         Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, true);
-        saltJobRunBootstrapRunner.call();
-    }
-
-    private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
-        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, true);
-        Callable<Boolean> saltJobRunBootstrapRunner =
-                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry, false);
         saltJobRunBootstrapRunner.call();
     }
 

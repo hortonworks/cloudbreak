@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
+package com.sequenceiq.cloudbreak.core.flow2.stack.provision.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
