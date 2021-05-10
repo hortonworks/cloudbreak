@@ -39,6 +39,40 @@ ipa-client-install \
   --no-ntp
 
 echo "$FPW" | kinit $ADMIN_USER
+# hostname is set to FQDN for FreeIPA server. We need the short one, without domain here
+HOSTNAME=$(hostname -s)
+REVERSE_IP=$(echo "$IPADDR" | awk -F. '{print $4"."$3"." $2"."$1}')
+
+echo "Check A record for ${HOSTNAME}"
+if ! ipa dnsrecord-find {{ pillar['freeipa']['domain'] }}. "--name=${HOSTNAME}" "--a-rec=${IPADDR}" --all; then
+  echo "Missing A record for ${HOSTNAME} with ${IPADDR}. Adding..."
+  ipa dnsrecord-add {{ pillar['freeipa']['domain'] }}. "${HOSTNAME}" "--a-rec=${IPADDR}"
+fi
+
+if ! ipa dnsrecord-find {{ pillar['freeipa']['domain'] }}. "--name=${HOSTNAME}" "--a-rec=${IPADDR}" --all; then
+  echo "Failed to set DNS A-record for ${HOSTNAME}"
+  false
+fi
+
+for zone in $(ipa dnszone-find --raw | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
+do
+    ZONE_NET=${zone//.in-addr.arpa./}
+    if echo "$REVERSE_IP" | grep -qE "\.$ZONE_NET$"; then
+        REVERSE_RECORD_NAME=$(echo "$REVERSE_IP" | sed "s/\.$ZONE_NET$//g")
+        # dnsrecord-add must either add the record or modify it
+        if ! ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}."; then
+          echo "Missing PTR record for ${FQDN}, creating ${REVERSE_RECORD_NAME}"
+          ipa dnsrecord-add "$zone" "$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}."
+        fi
+        if ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}."; then
+          echo "PTR record for ${FQDN} with ${REVERSE_RECORD_NAME} already exists"
+          break
+        else
+          echo "Failed to set Reverse DNS PTR-record for ${FQDN}"
+          false
+        fi
+    fi
+done
 
 if ipa server-find "$FQDN"; then
   echo "Cleaning up a prior installation for $FQDN. Deleting the server."
