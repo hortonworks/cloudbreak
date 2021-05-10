@@ -28,7 +28,7 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
 
     private DatabaseAvailabilityType convertAvailabilityType(DistroXDatabaseAvailabilityType availabilityType) {
         if (availabilityType == null) {
-            throw new IllegalArgumentException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, null));
+            throw new IllegalArgumentException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, "null"));
         }
         switch (availabilityType) {
             case NONE:
@@ -46,7 +46,7 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
 
     private DistroXDatabaseAvailabilityType convertAvailabilityType(DatabaseAvailabilityType availabilityType) {
         if (availabilityType == null) {
-            throw new IllegalArgumentException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, null));
+            throw new IllegalArgumentException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, "null"));
         }
         switch (availabilityType) {
             case NONE:

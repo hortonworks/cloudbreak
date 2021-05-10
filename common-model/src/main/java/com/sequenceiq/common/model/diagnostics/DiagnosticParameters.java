@@ -8,12 +8,16 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
 
 public class DiagnosticParameters {
 
-    public static final String FILECOLLECTOR_ROOT = "filecollector";
+    public static final String DEFAULT_ROOT = "filecollector";
+
+    private String root;
 
     private String issue;
 
@@ -69,7 +73,8 @@ public class DiagnosticParameters {
 
     public Map<String, Object> toMap() {
         Map<String, Object> parameters = new HashMap<>();
-        parameters.put("destination", destination.toString());
+        parameters.put("destination", Optional.ofNullable(destination)
+                .map(Enum::toString).orElse(null));
         parameters.put("issue", issue);
         parameters.put("description", description);
         parameters.put("labelFilter", labels);
@@ -103,7 +108,11 @@ public class DiagnosticParameters {
             }
         }
         Map<String, Object> fileCollector = new HashMap<>();
-        fileCollector.put(FILECOLLECTOR_ROOT, parameters);
+        if (StringUtils.isEmpty(root)) {
+            fileCollector.put(DEFAULT_ROOT, parameters);
+        } else {
+            fileCollector.put(root, parameters);
+        }
         return fileCollector;
     }
 
@@ -311,6 +320,14 @@ public class DiagnosticParameters {
         return supportBundleDbusStreamName;
     }
 
+    public String getRoot() {
+        return root;
+    }
+
+    public void setRoot(String root) {
+        this.root = root;
+    }
+
     public CloudStorageDiagnosticsParameters getCloudStorageDiagnosticsParameters() {
         return cloudStorageDiagnosticsParameters;
     }
@@ -326,7 +343,7 @@ public class DiagnosticParameters {
             diagnosticParameters = new DiagnosticParameters();
         }
 
-        public static DiagnosticParametersBuilder aDiagnosticParameters() {
+        public static DiagnosticParametersBuilder builder() {
             return new DiagnosticParametersBuilder();
         }
 
@@ -442,6 +459,11 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withSupportBundleDbusAppName(String supportBundleDbusAppName) {
             diagnosticParameters.setSupportBundleDbusAppName(supportBundleDbusAppName);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withRoot(String root) {
+            diagnosticParameters.setRoot(root);
             return this;
         }
 
