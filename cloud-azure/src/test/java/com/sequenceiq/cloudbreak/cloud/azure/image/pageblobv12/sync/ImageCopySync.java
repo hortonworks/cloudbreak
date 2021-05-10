@@ -13,6 +13,7 @@ import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.models.BlobProperties;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureTestCredentials;
+import com.sequenceiq.cloudbreak.cloud.azure.image.ImageNameCombinator;
 
 public class ImageCopySync {
 
@@ -44,14 +45,13 @@ public class ImageCopySync {
 
     @Test
     public void newStorageBlobSdk() {
-        List<String> sourceBlobList = freeipaSourceBlobs;
-
+        ImageNameCombinator imageNameCombinator = new ImageNameCombinator(true, "copyTask_8c_", NUMBER_OF_PARALLEL_COPIES);
         ThreadPoolManager threadPoolManager = new ThreadPoolManager(THREAD_POOL_COUNT, THREAD_POOL_SIZE);
 
         List<ImageCopyTask> imageCopyTasks = new ArrayList<>();
         for (int i = 0; i < NUMBER_OF_PARALLEL_COPIES; i++) {
-            String sourceBlob = sourceBlobList.get(i % sourceBlobList.size());
-            String destinationFileName = "copyTask_8c_" + i + ".vhd";
+            String sourceBlob = imageNameCombinator.getSource(i);
+            String destinationFileName = imageNameCombinator.getDestinationFilename(i);
             imageCopyTasks.add(new ImageCopyTask(azureTestCredentials, sourceBlob, destinationFileName, threadPoolManager.get(i)));
         }
 

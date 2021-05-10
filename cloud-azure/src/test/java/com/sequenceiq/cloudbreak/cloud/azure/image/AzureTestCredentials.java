@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.microsoft.azure.management.Azure;
+import com.microsoft.rest.LogLevel;
+
+import okhttp3.JavaNetAuthenticator;
 
 /**
  * In order to prevent leaking credential info in unit tests the tests use this class to get credentials.
@@ -39,6 +43,16 @@ public class AzureTestCredentials {
                 AzureEnvironment.AZURE);
     }
 
+    public Azure getAzure() {
+        return Azure
+                .configure()
+                .withProxyAuthenticator(new JavaNetAuthenticator())
+                .withLogLevel(LogLevel.BODY_AND_HEADERS)
+                .authenticate(getCredentials())
+                .withSubscription(getSubscriptionId());
+
+    }
+
     public String getTenantId() {
         return getVariableFromFile("azure.cred.tenant");
     }
@@ -50,6 +64,8 @@ public class AzureTestCredentials {
     public String getClientSecret() {
         return getVariableFromFile("azure.cred.secret");
     }
+
+    public String getSubscriptionId() { return getVariableFromFile("azure.cred.subscription"); }
 
     public String getStorageAccountConnectionString() {
         return getVariableFromFile("azure.storage.connectionstring");

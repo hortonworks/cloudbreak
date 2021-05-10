@@ -22,11 +22,15 @@ import okhttp3.JavaNetAuthenticator;
 
 public class ImageCopy {
 
+    private static final int NUMBER_OF_PARALLEL_COPIES = 1;
+
     public static final long NO_OFFSET = 0L;
     private AzureTestCredentials azureTestCredentials = new AzureTestCredentials();
 
     @Test
     public void copyImage() throws URISyntaxException, InvalidKeyException, StorageException {
+        ImageNameCombinator imageNameCombinator = new ImageNameCombinator(true, "originalCopy", NUMBER_OF_PARALLEL_COPIES);
+
         Azure azure = Azure
                 .configure()
                 .withProxyAuthenticator(new JavaNetAuthenticator())
@@ -37,12 +41,16 @@ public class ImageCopy {
         String destResourceGroup = "rg-gpapp-single-rg";
         String destStorageName = "cbimgwu9d62091440e606d4";
         String destContainerName = "images";
-        String sourceBlob = "https://cldrwestus.blob.core.windows.net/images/freeipa-cdh--2008121423.vhd";
 
-        copyImage(azure, destResourceGroup, destStorageName, destContainerName, sourceBlob);
+        for (int i = 0; i < NUMBER_OF_PARALLEL_COPIES; i++) {
+            String sourceBlobUri = imageNameCombinator.getSource(i);
+            String destinationFileName = imageNameCombinator.getDestinationFilename(i);
+            copyImage(azure, destResourceGroup, destStorageName, destContainerName, sourceBlobUri, destinationFileName);
+            System.out.println(sourceBlobUri + ", " + destinationFileName);
+        }
     }
 
-    private void copyImage(Azure azure, String resourceGroup, String storageName, String containerName, String sourceBlob) throws URISyntaxException, InvalidKeyException, StorageException {
+    private void copyImage(Azure azure, String resourceGroup, String storageName, String containerName, String sourceBlob, String destinationFileName) throws URISyntaxException, InvalidKeyException, StorageException {
         List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName, azure);
         String storageConnectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
 
@@ -51,7 +59,7 @@ public class ImageCopy {
         setDefaultPageBlobOptions(blobClient);
         CloudBlobContainer container = blobClient.getContainerReference(containerName);
 
-        CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+        CloudPageBlob cloudPageBlob = container.getPageBlobReference(destinationFileName);
 //        String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
 
         String copyId = copyWithPageBlobOptions(sourceBlob, cloudPageBlob);
@@ -86,4 +94,50 @@ public class ImageCopy {
         return azure.storageAccounts().getByResourceGroup(resourceGroup, storageName);
     }
 
+    private final class ImageCopyTask implements Runnable {
+
+        private Azure azure;
+
+        private String resourceGroup;
+
+        private String storageName;
+
+        private String containerName;
+
+        private String sourceBlob;
+
+        public ImageCopyTask(Azure azure, String resourceGroup, String storageName, String containerName, String sourceBlob) {
+            this.azure = azure;
+            this.resourceGroup = resourceGroup;
+            this.storageName = storageName;
+            this.containerName = containerName;
+            this.sourceBlob = sourceBlob;
+        }
+
+        @Override
+        public void run() {
+            try {
+                List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName, azure);
+                String storageConnectionString = String.format("DefaultEndpointsProtocol=https;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
+
+                CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
+                CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+                setDefaultPageBlobOptions(blobClient);
+                CloudBlobContainer container = blobClient.getContainerReference(containerName);
+
+                CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
+                String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
+
+//                String copyId = copyWithPageBlobOptions(sourceBlob, cloudPageBlob);
+                System.out.println(copyId);
+            } catch (StorageException e) {
+                e.printStackTrace();
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            } catch (InvalidKeyException e) {
+                e.printStackTrace();
+            }
+
+        }
+    }
 }
