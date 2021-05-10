@@ -700,7 +700,7 @@ cb:
     readTimeoutMs: 5000
 
   loadBalancer:
-    supportedPlatforms: AWS,YARN
+    supportedPlatforms: AWS,YARN,AZURE
 
   upgrade:
     validation:
