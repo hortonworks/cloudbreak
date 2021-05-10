@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableList;
@@ -18,6 +19,7 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureDatabaseResourceService;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImageTermsSignerService;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImageProviderService;
 import com.sequenceiq.cloudbreak.cloud.azure.upscale.AzureUpscaleService;
@@ -85,9 +87,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     @Inject
     private AzureImageFormatValidator azureImageFormatValidator;
 
-    // Automatic image consent - turned off due to legal considerations
-//    @Inject
-//    private AzureImageTermsSignerService azureImageTermsSignerService;
+    @Inject
+    private AzureImageTermsSignerService azureImageTermsSignerService;
+
+    @Value("${cb.arm.marketplace.image.automatic.signer:false}")
+    private boolean enableAzureImageTermsAutomaticSigner;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
@@ -104,8 +108,9 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         if (azureImageFormatValidator.isMarketplaceImageFormat(stackImage)) {
             LOGGER.debug("Launching with Azure Marketplace image {}", stackImage);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(stackImage);
-            // Automatic image consent - turned off due to legal considerations
-//            azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+            if (enableAzureImageTermsAutomaticSigner) {
+                azureImageTermsSignerService.sign(azureCredentialView.getSubscriptionId(), azureMarketplaceImage, client);
+            }
             template = azureTemplateBuilder.build(stackName, null, azureCredentialView, azureStackView,
                     cloudContext, stack, AzureInstanceTemplateOperation.PROVISION, azureMarketplaceImage);
         } else {

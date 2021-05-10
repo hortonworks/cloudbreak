@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -40,6 +41,9 @@ public class AzureImageFormatValidator implements Validator {
     @Inject
     private AzureImageTermsSignerService azureImageTermsSignerService;
 
+    @Value("${cb.arm.marketplace.image.automatic.signer:false}")
+    private boolean enableAzureImageTermsAutomaticSigner;
+
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
         Image image = cloudStack.getImage();
@@ -60,7 +64,8 @@ public class AzureImageFormatValidator implements Validator {
             LOGGER.debug("Checking if Terms and Conditions for your Azure Marketplace image {} are accepted", imageUri);
             AzureClient azureClient = ac.getParameter(AzureClient.class);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image);
-            if (!azureImageTermsSignerService.isSigned(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient)) {
+            if (!enableAzureImageTermsAutomaticSigner
+                    && !azureImageTermsSignerService.isSigned(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient)) {
                 String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
                         + "however its Terms and Conditions are not accepted! On how to accept them please refer to azure documentation " +
                         "at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", imageUri);

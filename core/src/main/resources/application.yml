@@ -536,7 +536,7 @@ cb:
       resource:
         app.id: 797f4846-ba00-4fd7-ba43-dac1f8f63013
         access.scope.id: 41094075-9dad-400e-a0bd-54e686782033
-
+    marketplace.image.automatic.signer: false
 
   openstack:
     heat.template.path: templates/openstack-heat.ftl
