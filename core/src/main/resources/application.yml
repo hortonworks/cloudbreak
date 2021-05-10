@@ -243,7 +243,6 @@ cb:
     vpcendpoints:
       enabled.gateway.services: s3,dynamodb
     externaldatabase:
-      engineversion: 10.14
       ha:
         retentionperiod: 30
       nonha:
@@ -573,7 +572,6 @@ cb:
     stopStart.batch.size: 10
     create.batch.size: 5
     externaldatabase:
-      engineversion: 10
       ha:
         retentionperiod: 30
         georedundantbackup: true

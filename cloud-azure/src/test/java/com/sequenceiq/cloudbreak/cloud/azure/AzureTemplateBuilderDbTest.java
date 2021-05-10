@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -145,6 +146,7 @@ public class AzureTemplateBuilderDbTest {
                 .rootUserName(ROOT_USER_NAME)
                 .rootPassword(ROOT_PASSWORD)
                 .location(REGION)
+                .params(Map.of("dbVersion", "10"))
                 .build();
 
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), template);

@@ -65,7 +65,7 @@
         },
         "dbVersion": {
             "type": "string",
-            "defaultValue": "${dbVersion!10}",
+            "defaultValue": "${dbVersion}",
             "metadata": {
                 "description": "PostgreSQL version."
             }

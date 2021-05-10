@@ -100,7 +100,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
 
     private static final Map<String, Object> SUBNET_ID_REQUEST_PARAMETERS = Map.of("netkey", "netvalue");
 
-    private static final Map<String, Object> DATABASE_SERVER_REQUEST_PARAMETERS = Map.of("dbkey", "dbvalue");
+    private static final Map<String, Object> DATABASE_SERVER_REQUEST_PARAMETERS = new HashMap<>(Map.of("dbkey", "dbvalue"));
 
     private static final String PASSWORD = "password";
 
@@ -290,7 +290,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
         assertEquals(databaseServerRequest.getStorageSize(), dbStack.getDatabaseServer().getStorageSize());
         assertEquals(databaseServerRequest.getRootUserName(), dbStack.getDatabaseServer().getRootUserName());
         assertEquals(databaseServerRequest.getRootUserPassword(), dbStack.getDatabaseServer().getRootPassword());
-        assertEquals(1, dbStack.getDatabaseServer().getAttributes().getMap().size());
+        assertEquals(2, dbStack.getDatabaseServer().getAttributes().getMap().size());
         assertEquals("dbvalue", dbStack.getDatabaseServer().getAttributes().getMap().get("dbkey"));
         assertEquals(securityGroupRequest.getSecurityGroupIds(), dbStack.getDatabaseServer().getSecurityGroup().getSecurityGroupIds());
         assertEquals(dbStack.getTags().get(StackTags.class).getUserDefinedTags().get("DistroXKey1"), "DistroXValue1");

@@ -78,6 +78,9 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     @Value("${redbeams.ssl.enabled:}")
     private boolean sslEnabled;
 
+    @Value("${redbeams.db.postgres.major.version:}")
+    private String redbeamsDbMajorVersion;
+
     @Inject
     private EnvironmentService environmentService;
 
@@ -396,6 +399,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         if (parameters != null) {
             try {
+                setDbVersion(parameters, cloudPlatform);
                 server.setAttributes(new Json(parameters));
             } catch (IllegalArgumentException e) {
                 throw new BadRequestException("Invalid database server parameters", e);
@@ -403,6 +407,22 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         }
 
         return server;
+    }
+
+    private void setDbVersion(Map<String, Object> parameters, CloudPlatform cloudPlatform) {
+        String dbVersionKey = getDbVersionKey(cloudPlatform);
+        if (parameters.get(dbVersionKey) == null) {
+            parameters.put(dbVersionKey, redbeamsDbMajorVersion);
+        }
+    }
+
+    private String getDbVersionKey(CloudPlatform cloudPlatform) {
+        switch (cloudPlatform) {
+            case AZURE:
+                return "dbVersion";
+            default:
+                return "engineVersion";
+        }
     }
 
     /**

@@ -46,7 +46,6 @@
     },
     "EngineVersionParameter": {
         "Type": "String",
-        "Default": "10.14",
         "Description": "Engine version",
         "MinLength": 1,
         "MaxLength": 64
