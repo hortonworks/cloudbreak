@@ -6,11 +6,27 @@ set -ex
 : ${USER_JSON_LOCATION:="./src/main/resources/ums-users/api-credentials.json"}
 : ${USER_JSON_SECRET:="real-ums-users-dev"}
 
-init-ums-users-temp() {
-    if [[ -d ./src/main/resources/ums-users ]]; then
-        rm -rf ./src/main/resources/ums-users
+init-secret-parameters() {
+    echo "Setting up UMS users secret parameters based on environment variables..."
+    if [[ ! -z $INTEGRATIONTEST_UMS_JSONSECRET_VERSION ]]; then
+        SECRET_VERSION=$INTEGRATIONTEST_UMS_JSONSECRET_VERSION
     fi
-    mkdir -p ./src/main/resources/ums-users
+    if [[ ! -z $INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH ]]; then
+        USER_JSON_LOCATION=$INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH
+    fi
+    if [[ ! -z $INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH ]]; then
+        USER_JSON_SECRET=$INTEGRATIONTEST_UMS_JSONSECRET_NAME
+    fi
+}
+
+init-ums-users-temp() {
+    USER_JSON_FOLDER=${USER_JSON_LOCATION%/*}
+    echo "Updating UMS users Json file..."
+    if [[ ! -d $USER_JSON_FOLDER ]]; then
+        mkdir -p $USER_JSON_FOLDER
+    elif [[ -f $USER_JSON_LOCATION ]]; then
+        rm -f $USER_JSON_LOCATION
+    fi
 }
 
 init-azure-auth() {
@@ -31,6 +47,7 @@ fetch-real-ums-users() {
 }
 
 main() {
+  init-secret-parameters
   init-ums-users-temp
   init-azure-auth
   fetch-real-ums-users

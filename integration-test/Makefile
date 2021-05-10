@@ -52,16 +52,8 @@ create-cloudbreak-context:
 fetch-secrets:
 	./scripts/fetch-secrets.sh
 
-fetch-l0-secrets:
-	SECRET_VERSION=9793d2c1afa84cbb9fdfeaee2f4327db USER_JSON_SECRET=l0-ums-users-dev USER_JSON_LOCATION=./src/main/resources/ums-users/l0-api-credentials.json ./scripts/fetch-secrets.sh
-
 fetch-secrets-docker:
-	docker run --rm -v "${PWD}/:/tmp/" \
-	-e AZURE_CLIENT_ID=${AZURE_CLIENT_ID} \
-	-e AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET} \
-	-e AZURE_TENANT_ID=${AZURE_TENANT_ID} \
-	-e AZURE_SUBSCRIPTION_ID=${AZURE_SUBSCRIPTION_ID} \
-	docker-private.infra.cloudera.com/cloudera_thirdparty/mcr.microsoft.com/azure-cli:1.0 /bin/bash -c 'cd /tmp/ && ./scripts/fetch-secrets.sh'
+	./scripts/fetch-ums-docker.sh
 
 docker-compose:
 	CB_VERSION=$(CB_VERSION) ./scripts/docker-compose.sh
