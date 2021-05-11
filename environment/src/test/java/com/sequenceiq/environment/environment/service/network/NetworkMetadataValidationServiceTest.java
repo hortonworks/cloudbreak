@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.service.network;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,7 +20,6 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.CloudNetworkService;
@@ -40,7 +38,6 @@ public class NetworkMetadataValidationServiceTest extends NetworkTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
         when(entitlementService.endpointGatewaySkipValidation(any())).thenReturn(false);
     }
 
@@ -149,24 +146,5 @@ public class NetworkMetadataValidationServiceTest extends NetworkTest {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEndpointGatewaySubnetMetadata(environment, environmentDto)));
 
         assertTrue(exception.getMessage().startsWith(UNMATCHED_AZ_MSG));
-    }
-
-    @Test
-    public void testEndpointGatewayFieldsUnsetIfEntitlementIsMissing() {
-        EnvironmentDto environmentDto = createEnvironmentDto();
-        Environment environment = createEnvironment(createNetwork());
-
-        Map<String, CloudSubnet> subnets = createDefaultPrivateSubnets();
-        Map<String, CloudSubnet> endpointGatewaySubnets = createDefaultPublicSubnets();
-
-        when(cloudNetworkService.retrieveSubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(subnets);
-        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(EnvironmentDto.class), any())).thenReturn(endpointGatewaySubnets);
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(false);
-
-        Map<String, CloudSubnet> subnetResult =
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEndpointGatewaySubnetMetadata(environment, environmentDto));
-
-        assertNull(subnetResult);
-        assertEquals(PublicEndpointAccessGateway.DISABLED, environmentDto.getNetwork().getPublicEndpointAccessGateway());
     }
 }

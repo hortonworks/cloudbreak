@@ -26,7 +26,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -50,9 +49,6 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
     @Mock
     private MissingResourceNameGenerator missingResourceNameGenerator;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private SubnetSelector subnetSelector;
@@ -100,7 +96,6 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
         when(subnetSelector.chooseSubnet(any(), eq(source.getSubnetMetas()), eq(AZ_1), eq(SelectionFallbackStrategy.ALLOW_FALLBACK)))
             .thenReturn(Optional.of(privateSubnet));
         when(subnetSelector.chooseSubnetForEndpointGateway(eq(source), eq(privateSubnet.getId()))).thenReturn(Optional.of(publicSubnet));
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
 
         Network[] network = new Network[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
@@ -120,32 +115,11 @@ public class EnvironmentBaseNetworkConverterTest extends SubnetTest {
 
         when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.of(privateSubnet));
         when(subnetSelector.chooseSubnetForEndpointGateway(any(), anyString())).thenReturn(Optional.empty());
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
 
         Exception exception = assertThrows(BadRequestException.class, () ->
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convertToLegacyNetwork(source, AZ_1))
         );
         assertEquals("Could not find public subnet in availability zone: AZ-1", exception.getMessage());
-    }
-
-    @Test
-    public void testEndpointGatewaySubnetNotSetWhenEntitlementIsDisabled() {
-        CloudSubnet privateSubnet = getCloudSubnet(AZ_1);
-        CloudSubnet publicSubnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
-        EnvironmentNetworkResponse source = setupResponse();
-        source.setSubnetMetas(Map.of("key", privateSubnet));
-        source.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
-        source.setGatewayEndpointSubnetMetas(Map.of("public-key", publicSubnet));
-
-        when(subnetSelector.chooseSubnet(any(), anyMap(), anyString(), any())).thenReturn(Optional.of(privateSubnet));
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(false);
-
-        Network[] network = new Network[1];
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            network[0] = underTest.convertToLegacyNetwork(source, AZ_1);
-        });
-
-        assertNull(network[0].getAttributes().getValue(ENDPOINT_GATEWAY_SUBNET_ID));
     }
 
     @Test

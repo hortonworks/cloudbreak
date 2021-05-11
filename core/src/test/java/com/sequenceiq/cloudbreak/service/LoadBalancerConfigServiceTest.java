@@ -278,7 +278,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, true);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 
@@ -296,7 +295,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, true);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 
@@ -314,7 +312,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(false);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 
@@ -331,7 +328,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(false);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 
@@ -348,7 +344,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, true);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 
@@ -393,7 +388,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         DetailedEnvironmentResponse environment = createEnvironment(getPrivateCloudSubnet(PUBLIC_ID_1, AZ_1), true);
         environment.setNetwork(null);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
@@ -599,7 +593,6 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, true);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
         when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
 

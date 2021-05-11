@@ -14,8 +14,6 @@ import javax.ws.rs.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -29,9 +27,6 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private SubnetSelector subnetSelector;
@@ -54,8 +49,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         attributes.put(SUBNET_ID, cloudSubnet.get().getId());
         attributes.put(CLOUD_PLATFORM, getCloudPlatform().name());
         attributes.putAll(getAttributesForLegacyNetwork(source));
-        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())
-            && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+        if (PublicEndpointAccessGateway.ENABLED.equals(source.getPublicEndpointAccessGateway())) {
             Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(source, cloudSubnet.get().getId());
             if (endpointGatewaySubnet.isPresent()) {
                 attributes.put(ENDPOINT_GATEWAY_SUBNET_ID, endpointGatewaySubnet.get().getId());
