@@ -120,6 +120,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
+    @InternalOnly
+    public void decommissionInternalInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn,
+            List<String> instanceIds, Boolean forced) {
+        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                new HashSet(instanceIds), forced);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public AutoscaleStackV4Responses getAllForAutoscale() {
         Set<AutoscaleStackV4Response> allForAutoscale = stackCommonService.getAllForAutoscale();

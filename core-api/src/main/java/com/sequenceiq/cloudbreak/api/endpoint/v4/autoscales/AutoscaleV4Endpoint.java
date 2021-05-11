@@ -16,6 +16,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 
+import org.springframework.web.bind.annotation.RequestBody;
+
 import com.cloudera.cdp.shaded.javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
@@ -115,6 +117,15 @@ public interface AutoscaleV4Endpoint {
     void decommissionInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @QueryParam("workspaceId") @Valid Long workspaceId,
             @QueryParam("instanceId") @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @DELETE
+    @Path("/stack/crn/{crn}/instances/internal")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "decommissionInternalInstancesForClusterCrn")
+    void decommissionInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @GET

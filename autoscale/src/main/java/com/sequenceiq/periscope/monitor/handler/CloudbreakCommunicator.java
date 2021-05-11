@@ -56,9 +56,7 @@ public class CloudbreakCommunicator {
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         requestLogging.logResponseTime(() -> {
             cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint()
-                    .decommissionInstancesForClusterCrn(cluster.getStackCrn(),
-                            cluster.getClusterPertain().getWorkspaceId(),
-                            decommissionNodeIds, false);
+                    .decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);
             return Optional.empty();
         }, String.format("DecommissionInstancesForCluster query for cluster crn %s, NodeIds %s",
                 cluster.getStackCrn(), decommissionNodeIds));
