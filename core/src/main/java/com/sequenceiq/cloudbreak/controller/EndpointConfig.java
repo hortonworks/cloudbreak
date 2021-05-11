@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
+import com.sequenceiq.cloudbreak.controller.v4.CustomImageCatalogV4Controller;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -65,6 +66,7 @@ public class EndpointConfig extends ResourceConfig {
             DatabaseV4Controller.class,
             DatabaseConfigV4Controller.class,
             ImageCatalogV4Controller.class,
+            CustomImageCatalogV4Controller.class,
             RecipesV4Controller.class,
             UserProfileV4Controller.class,
             FileSystemV4Controller.class,

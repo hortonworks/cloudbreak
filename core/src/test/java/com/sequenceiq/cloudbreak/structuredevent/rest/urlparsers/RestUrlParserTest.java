@@ -67,6 +67,8 @@ public class RestUrlParserTest {
 
     private static final String PATH_IMAGE_CATALOGS = "image_catalogs";
 
+    private static final String PATH_CUSTOM_IMAGE_CATALOGS = "custom_image_catalogs";
+
     private static final String PATH_IMAGE = "image";
 
     private static final String CRN = "crn";
@@ -175,6 +177,10 @@ public class RestUrlParserTest {
             // Specialized image catalog related endpoints that have nothing in the URLs that qualify as a resource event,
             // so this is just a fake for the sake of backward compatibility...
             resourceEvent = PATH_IMAGE_CATALOGS;
+        } else if (List.of(parts).contains(PATH_CUSTOM_IMAGE_CATALOGS) && parts.length > 3) {
+            // Specialized custom image catalog related endpoints that have nothing in the URLs that qualify as a resource event,
+            // so this is just a fake for the sake of backward compatibility...
+            resourceEvent = PATH_CUSTOM_IMAGE_CATALOGS;
         } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && (parts[3].equals(CRN) || parts[3].equals(NAME))) {
             resourceEvent = parts[2];
         } else if (parts.length >= 4 && PATH_V_4.equals(parts[0]) && !("audits".equals(parts[2]) && parts[3].matches(ID_REGEX))

@@ -177,6 +177,17 @@ public class OperationDescriptions {
         public static final String GET_IMAGE_FROM_DEFAULT_BY_ID = "returns an image from the default catalog by id";
     }
 
+    public static class CustomImageCatalogOpDescription {
+        public static final String LIST = "list image catalogs";
+        public static final String GET_BY_NAME = "get custom image catalog by name";
+        public static final String CREATE = "create custom image catalog";
+        public static final String DELETE_BY_NAME = "delete custom image catalog by name";
+        public static final String GET_BY_NAME_IN_CATALOG = "get custom image by name in custom image catalog";
+        public static final String CREATE_IN_CATALOG = "create a new image in an already existing custom image catalog";
+        public static final String UPDATE_IN_CATALOG = "update an existing image in a custom image catalog";
+        public static final String DELETE_FROM_CATALOG = "delete an existing image from a custom image catalog";
+    }
+
     public static class SecurityRuleOpDescription {
         public static final String GET_DEFAULT_SECURITY_RULES = "get default security rules";
     }
