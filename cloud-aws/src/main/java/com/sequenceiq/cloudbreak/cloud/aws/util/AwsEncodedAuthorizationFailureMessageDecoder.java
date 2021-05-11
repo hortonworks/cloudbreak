@@ -24,6 +24,10 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
 
     private static final Pattern ENCODED_AUTHORIZATION_FAILURE_MESSAGE_PATTERN = Pattern.compile("Encoded authorization failure message: ([^\\s]+)");
 
+    private static final String AWS_ERROR_MESSAGE = "You are not authorized to perform this operation. ";
+
+    private static final String DEFAULT_AUTHORIZATION_ERROR_MESSAGE = "Your credential is not authorized to perform the requested action on AWS side.";
+
     @Inject
     private AwsClient awsClient;
 
@@ -36,12 +40,15 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
                 result = getResultMessage(credentialView, region, matcher.group(1));
             } catch (AWSSecurityTokenServiceException e) {
                 if ("AccessDenied".equals(e.getErrorCode())) {
-                    result = message.replaceAll(matcher.group(0), "(Please add sts:DecodeAuthorizationMessage right to your IAM policy to get more details.)");
+                    result = replaceAwsMessage(message, matcher.group(0)) + " Please contact your system administrator to update your AWS policy with the " +
+                            "sts:DecodeAuthorizationMessage permission to get more details next time.";
                 } else {
                     LOGGER.error("Failed to decode authorization failure message", e);
+                    result = replaceAwsMessage(message, matcher.group(0));
                 }
             } catch (Exception e) {
                 LOGGER.error("Failed to decode authorization failure message", e);
+                result = replaceAwsMessage(message, matcher.group(0));
             }
         } else {
             LOGGER.debug("Message is not an authorization error, no modification needed: {}", result);
@@ -60,6 +67,15 @@ public class AwsEncodedAuthorizationFailureMessageDecoder {
         String action = authorizationError.getValue("context.action");
         String resource = authorizationError.getValue("context.resource");
 
-        return String.format("You are not authorized to perform action %s on resource %s", action, resource);
+        return String.format("Your AWS credential is not authorized to perform action %s on resource %s. " +
+                "Please contact your system administrator to update your AWS policy.", action, resource);
     }
+
+    private String replaceAwsMessage(String message, String match) {
+        String result = message.replace(match, "");
+        result = result.replace(AWS_ERROR_MESSAGE, "");
+        result += DEFAULT_AUTHORIZATION_ERROR_MESSAGE;
+        return result;
+    }
+
 }
