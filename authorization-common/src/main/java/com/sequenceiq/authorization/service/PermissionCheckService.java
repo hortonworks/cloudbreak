@@ -1,6 +1,7 @@
 package com.sequenceiq.authorization.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sequenceiq.cloudbreak.auth.altus.InternalCrnBuilder.INTERNAL_ACCOUNT;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CustomPermissionCheck;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
@@ -75,8 +77,17 @@ public class PermissionCheckService {
             return ThreadBasedUserCrnProvider.doAs(initiatorUserCrnParameter.get(), () ->
                     commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         } else {
+            if (INTERNAL_ACCOUNT.equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
+                LOGGER.error("Method {} is not prepared to call internally, please check readme in authorization module.",
+                        methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
+                throw new AccessDeniedException("This API is not prepared to use it in service-to-service communication.");
+            }
             return commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime);
         }
+    }
+
+    private boolean accountIdNeeded(MethodSignature methodSignature) {
+        return !hasAnnotationOnMethod(methodSignature, AccountIdNotNeeded.class);
     }
 
     private Optional<String> persistInitiatorUserIfParameterPresent(ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {

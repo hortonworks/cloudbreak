@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
@@ -159,7 +160,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    // for this logic, we do not need account id, thus internal call should work without account id
+    @AccountIdNotNeeded
     @InternalOnly
     public ClusterProxyConfiguration getClusterProxyconfiguration() {
         return clusterProxyService.getClusterProxyConfigurationForAutoscale();

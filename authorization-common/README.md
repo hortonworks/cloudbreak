@@ -88,6 +88,8 @@ You should use one of the following annotations on parameter of controller's met
 - `@AccountId` - on an account id (please note that this annotation is also a validation annotation, thus endpoint's method parameter should be annotated too),
 - `@InitiatorUserCrn` - on an initiator user crn parameter, and the service operations will be done in the name of the given user.
 
+If you are sure, that your new API and the underlying service logic does not require account id to behave correctly, you can indicate this fact and annotate the controller method with `@AccountIdNotNeeded`.
+
 ### Rules for annotation usage
 
 #### DisableCheckPermissions
