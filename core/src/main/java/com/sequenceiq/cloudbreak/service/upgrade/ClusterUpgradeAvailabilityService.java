@@ -165,7 +165,7 @@ public class ClusterUpgradeAvailabilityService {
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
             LOGGER.warn("Failed to get images", e);
-            upgradeOptions.setReason(String.format("Failed to retrieve imaged due to %s", e.getMessage()));
+            upgradeOptions.setReason(String.format("Failed to retrieve image due to %s", e.getMessage()));
         }
         return upgradeOptions;
     }

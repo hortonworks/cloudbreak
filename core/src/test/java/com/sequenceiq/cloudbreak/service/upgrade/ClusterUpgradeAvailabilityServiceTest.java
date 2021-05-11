@@ -244,7 +244,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
         assertNull(actual.getCurrent());
         assertNull(actual.getUpgradeCandidates());
-        assertEquals("Failed to retrieve imaged due to Image not found.", actual.getReason());
+        assertEquals("Failed to retrieve image due to Image not found.", actual.getReason());
     }
 
     @Test
