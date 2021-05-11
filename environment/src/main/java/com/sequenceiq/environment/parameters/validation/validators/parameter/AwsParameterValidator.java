@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
@@ -53,7 +54,7 @@ public class AwsParameterValidator implements ParameterValidator {
                         + "Please select another unattached table or specify a non-existing name to create it. "
                         + "Refer to Cloudera documentation at %s for the required setup.",
                         awsParametersDto.getS3GuardTableName(),
-                        "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-environment-aws-dynamodb.html"));
+                        DocumentationLinkProvider.awsDynamoDbSetupLink()));
             } else {
                 determineAwsParameters(environmentDto, parametersDto);
             }

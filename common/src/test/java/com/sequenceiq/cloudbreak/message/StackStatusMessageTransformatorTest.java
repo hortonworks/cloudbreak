@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
+
 class StackStatusMessageTransformatorTest {
 
     private StackStatusMessageTransformator underTest;
@@ -24,7 +26,7 @@ class StackStatusMessageTransformatorTest {
         String expected = "The Control Plane was not able to establish the connection with the gateway instance. This means that the reverse SSH tunnel "
                 + "(autossh process) running on this instance could not connect to the Cloudera server. Please check your connection and proxy settings and "
                 + "make sure the instance can reach *.ccm.cdp.cloudera.com. Refer to Cloudera documentation at "
-                + "https://docs.cloudera.com/management-console/cloud/connection-to-private-subnets/topics/mc-ccm-overview.html";
+                + DocumentationLinkProvider.ccmSetupLink();
         Assertions.assertEquals(expected, result);
     }
 

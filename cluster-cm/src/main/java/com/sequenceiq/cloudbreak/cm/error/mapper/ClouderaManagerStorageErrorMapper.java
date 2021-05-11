@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudIdentity;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 
@@ -84,7 +85,7 @@ public class ClouderaManagerStorageErrorMapper {
                         "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessRole, rangerAuditRole, auditLocation, assumerInstanceProfile, assumerInstanceProfile,
-                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
+                DocumentationLinkProvider.awsCloudStorageSetupLink());
     }
 
     private String gcpError(CloudStorage cloudStorage) {
@@ -113,7 +114,7 @@ public class ClouderaManagerStorageErrorMapper {
                         "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessRole, rangerAuditRole, auditLocation, serviceAccountEmail, serviceAccountEmail,
-                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
+                DocumentationLinkProvider.awsCloudStorageSetupLink());
     }
 
     private String azureError(CloudStorage cloudStorage) {
@@ -142,7 +143,7 @@ public class ClouderaManagerStorageErrorMapper {
                         "permissions must, at a minimum, allow to attach the Data Access Identity and Ranger Access Identity. " +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessIdentity, rangerAuditIdentity, auditLocation, assumerIdentity, assumerIdentity,
-                "https://docs.cloudera.com/management-console/cloud/environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
+                DocumentationLinkProvider.googleCloudStorageSetupLink());
     }
 
     private String getRangerAuditDir(CloudStorage cloudStorage) {
