@@ -25,7 +25,7 @@ public class CustomImageCatalogV4UpdateImageResponse implements JsonEntity {
 
     @JsonProperty
     private String baseParcelUrl;
-
+    
     @JsonProperty
     private Set<CustomImageCatalogV4VmImageResponse> vmImages = new HashSet<>();
 
