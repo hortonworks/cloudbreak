@@ -124,16 +124,38 @@ public class LoadBalancerConfigService {
         }
     }
 
+    /*
+     * favors public over private
+     */
     public String getLoadBalancerUserFacingFQDN(Long stackId) {
         Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId).stream()
-            .filter(lb -> StringUtils.isNotEmpty(lb.getFqdn()))
-            .collect(Collectors.toSet());
-        LoadBalancer loadBalancer = loadBalancers.stream()
-            .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
-            .findAny()
-            .orElseGet(() -> loadBalancers.stream().findAny().orElse(null));
+                .filter(lb -> StringUtils.isNotBlank(lb.getDns()) ||
+                        StringUtils.isNotBlank(lb.getIp()) || StringUtils.isNotBlank(lb.getFqdn()))
+                .collect(Collectors.toSet());
 
-        return loadBalancer == null ? null : loadBalancer.getFqdn();
+        return findPublicLbName(loadBalancers)
+                .orElseGet(() -> findPrivateLbNameOrNull(loadBalancers));
+    }
+
+    private Optional<String> findPublicLbName(Set<LoadBalancer> loadBalancers) {
+        return loadBalancers.stream()
+                .filter(lb -> LoadBalancerType.PUBLIC.equals(lb.getType()))
+                .findAny().map(this::getBestAddressable);
+    }
+
+    private String findPrivateLbNameOrNull(Set<LoadBalancer> loadBalancers) {
+        return loadBalancers.stream().findAny()
+                .map(this::getBestAddressable).orElse(null);
+    }
+
+    private String getBestAddressable(LoadBalancer lb) {
+        if (StringUtils.isNotBlank(lb.getFqdn())) {
+            return lb.getFqdn();
+        }
+        if (StringUtils.isNotBlank(lb.getDns())) {
+            return lb.getDns();
+        }
+        return lb.getIp();
     }
 
     public Optional<LoadBalancer> selectLoadBalancer(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
