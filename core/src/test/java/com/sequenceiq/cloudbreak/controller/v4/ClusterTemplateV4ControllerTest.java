@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterTemplateV4ControllerTest {
@@ -28,6 +29,9 @@ class ClusterTemplateV4ControllerTest {
     @Mock
     private ClusterTemplateService clusterTemplateService;
 
+    @Mock
+    private CloudbreakRestRequestThreadLocalService threadLocalService;
+
     @InjectMocks
     private ClusterTemplateV4Controller underTest;
 
@@ -35,6 +39,7 @@ class ClusterTemplateV4ControllerTest {
     void testList() {
         Set<ClusterTemplateViewV4Response> responses = Set.of();
         when(clusterTemplateService.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID)).thenReturn(responses);
+        when(threadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
 
         ClusterTemplateViewV4Responses result = underTest.list(WORKSPACE_ID);
 

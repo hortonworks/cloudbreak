@@ -90,6 +90,8 @@ You should use one of the following annotations on parameter of controller's met
 
 If you are sure, that your new API and the underlying service logic does not require account id to behave correctly, you can indicate this fact and annotate the controller method with `@AccountIdNotNeeded`.
 
+Please be aware: if you are about to make an old, workspace related CB API internally callable, you should use `getRequestedWorkspaceId()` method from `CloudbreakRestRequestThreadLocalService` in Controller instead of the workspace id method parameter, because we are changing workspace id first (and that belongs to default workspace of `altus` tenant), then we are changing internal actor CRN.
+
 ### Rules for annotation usage
 
 #### DisableCheckPermissions

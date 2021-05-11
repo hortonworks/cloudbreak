@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
@@ -82,39 +83,46 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    @Inject
+    private CloudbreakRestRequestThreadLocalService threadLocalService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response post(Long workspaceId, @Valid ClusterTemplateV4Request request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
-        ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class), workspaceId,
-                accountId, creator);
-        return getByName(workspaceId, clusterTemplate.getName());
+        ClusterTemplate clusterTemplate = clusterTemplateService.createForLoggedInUser(converterUtil.convert(request, ClusterTemplate.class),
+                threadLocalService.getRequestedWorkspaceId(), accountId, creator);
+        return getByName(threadLocalService.getRequestedWorkspaceId(), clusterTemplate.getName());
     }
 
     @Override
     @DisableCheckPermissions
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
-        measure(() -> blueprintService.updateDefaultBlueprintCollection(workspaceId), LOGGER, "Blueprints fetched in {}ms");
-        measure(() -> clusterTemplateService.updateDefaultClusterTemplates(workspaceId), LOGGER, "Cluster templates fetched in {}ms");
-        Set<ClusterTemplateViewV4Response> result = measure(() -> clusterTemplateService.listInWorkspaceAndCleanUpInvalids(workspaceId),
-                LOGGER, "cluster templates cleaned in {}ms");
+        measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
+                LOGGER, "Blueprints fetched in {}ms");
+        measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
+                LOGGER, "Cluster templates fetched in {}ms");
+        Set<ClusterTemplateViewV4Response> result = measure(() -> clusterTemplateService.listInWorkspaceAndCleanUpInvalids(
+                threadLocalService.getRequestedWorkspaceId()), LOGGER, "cluster templates cleaned in {}ms");
         return new ClusterTemplateViewV4Responses(result);
     }
 
     @Override
     @DisableCheckPermissions
     public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, String environmentCrn) {
-        measure(() -> blueprintService.updateDefaultBlueprintCollection(workspaceId), LOGGER, "Blueprints fetched in {}ms");
-        measure(() -> clusterTemplateService.updateDefaultClusterTemplates(workspaceId), LOGGER, "Cluster templates fetched in {}ms");
+        measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
+                LOGGER, "Blueprints fetched in {}ms");
+        measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
+                LOGGER, "Cluster templates fetched in {}ms");
         List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
         Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
         Optional<String> runtimeVersion = sdxClusters.stream()
                 .map(SdxClusterResponse::getRuntime)
                 .filter(e -> !Strings.isNullOrEmpty(e))
                 .findFirst();
-        Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService
-                .findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null));
+        Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService.findAllUserManagedAndDefaultByEnvironmentCrn(
+                threadLocalService.getRequestedWorkspaceId(), environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null));
         Set<ClusterTemplateViewV4Response> result = converterUtil.convertAllAsSet(clusterTemplateViews, ClusterTemplateViewV4Response.class);
         return new ClusterTemplateViewV4Responses(result);
     }
@@ -123,7 +131,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response getByName(Long workspaceId, @ResourceName String name) {
         try {
-            ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByNameForWorkspaceId(name, workspaceId));
+            ClusterTemplate clusterTemplate = transactionService.required(() ->
+                    clusterTemplateService.getByNameForWorkspaceId(name, threadLocalService.getRequestedWorkspaceId()));
             ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
             Optional.ofNullable(response.getEnvironmentCrn()).ifPresent(crn -> environmentServiceDecorator.prepareEnvironment(response));
             return response;
@@ -136,7 +145,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response deleteByName(Long workspaceId, @ResourceName String name) {
-        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByName(name, workspaceId);
+        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByName(name, threadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
     }
 
@@ -144,7 +153,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response getByCrn(Long workspaceId, @ResourceCrn String crn) {
         try {
-            ClusterTemplate clusterTemplate = transactionService.required(() -> clusterTemplateService.getByCrn(crn, workspaceId));
+            ClusterTemplate clusterTemplate = transactionService.required(() ->
+                    clusterTemplateService.getByCrn(crn, threadLocalService.getRequestedWorkspaceId()));
             ClusterTemplateV4Response response = transactionService.required(() -> converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class));
             if (!StringUtils.isEmpty(response.getEnvironmentCrn())) {
                 environmentServiceDecorator.prepareEnvironment(response);
@@ -161,7 +171,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
-        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, workspaceId);
+        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, threadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
     }
 
@@ -170,16 +180,17 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     public ClusterTemplateV4Responses deleteMultiple(Long workspaceId, @ResourceNameList Set<String> names, String environmentName, String environmentCrn) {
         Set<ClusterTemplate> clusterTemplates;
         if (Objects.nonNull(names) && !names.isEmpty()) {
-            clusterTemplates = clusterTemplateService.deleteMultiple(names, workspaceId);
+            clusterTemplates = clusterTemplateService.deleteMultiple(names, threadLocalService.getRequestedWorkspaceId());
         } else {
             Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
             Set<String> namesByEnv = clusterTemplateService
-                    .findAllByEnvironment(workspaceId, environmentCrn, cloudPlatformByCrn.orElse(null), null)
+                    .findAllByEnvironment(threadLocalService.getRequestedWorkspaceId(), environmentCrn,
+                            cloudPlatformByCrn.orElse(null), null)
                     .stream()
                     .filter(e -> !ResourceStatus.DEFAULT.equals(e.getStatus()))
                     .map(ClusterTemplateView::getName)
                     .collect(toSet());
-            clusterTemplates = clusterTemplateService.deleteMultiple(namesByEnv, workspaceId);
+            clusterTemplates = clusterTemplateService.deleteMultiple(namesByEnv, threadLocalService.getRequestedWorkspaceId());
         }
         return new ClusterTemplateV4Responses(converterUtil.convertAllAsSet(clusterTemplates, ClusterTemplateV4Response.class));
     }

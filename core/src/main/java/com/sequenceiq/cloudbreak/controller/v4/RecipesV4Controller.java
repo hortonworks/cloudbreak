@@ -68,7 +68,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public RecipeV4Response getByName(Long workspaceId, @ResourceName String name) {
-        Recipe recipe = recipeService.get(NameOrCrn.ofName(name), workspaceId);
+        Recipe recipe = recipeService.get(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
 
@@ -85,7 +85,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Recipe recipeToSave = converterUtil.convert(request, Recipe.class);
-        Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, workspaceId, accountId, creator);
+        Recipe recipe = recipeService.createForLoggedInUser(recipeToSave, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator);
         notify(ResourceEvent.RECIPE_CREATED);
         return converterUtil.convert(recipe, RecipeV4Response.class);
     }
@@ -103,7 +103,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_RECIPE)
     public RecipeV4Response deleteByName(Long workspaceId, @ResourceName String name) {
-        Recipe deleted = recipeService.delete(NameOrCrn.ofName(name), workspaceId);
+        Recipe deleted = recipeService.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }
@@ -111,7 +111,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_RECIPE)
     public RecipeV4Response deleteByCrn(Long workspaceId, @NotNull @ResourceCrn String crn) {
-        Recipe deleted = recipeService.delete(NameOrCrn.ofCrn(crn), workspaceId);
+        Recipe deleted = recipeService.delete(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
         return converterUtil.convert(deleted, RecipeV4Response.class);
     }
@@ -119,7 +119,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DELETE_RECIPE)
     public RecipeV4Responses deleteMultiple(Long workspaceId, @ResourceNameList Set<String> names) {
-        Set<Recipe> deleted = recipeService.deleteMultipleByNameFromWorkspace(names, workspaceId);
+        Set<Recipe> deleted = recipeService.deleteMultipleByNameFromWorkspace(names, restRequestThreadLocalService.getRequestedWorkspaceId());
         notify(ResourceEvent.RECIPE_DELETED);
         return new RecipeV4Responses(converterUtil.convertAllAsSet(deleted, RecipeV4Response.class));
     }
@@ -127,7 +127,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public RecipeV4Request getRequest(Long workspaceId, @ResourceName String name) {
-        Recipe recipe = recipeService.getByNameForWorkspaceId(name, workspaceId);
+        Recipe recipe = recipeService.getByNameForWorkspaceId(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(recipe, RecipeV4Request.class);
     }
 

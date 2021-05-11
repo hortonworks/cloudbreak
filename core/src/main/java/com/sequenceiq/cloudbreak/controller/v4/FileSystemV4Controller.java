@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSyste
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 
@@ -27,6 +28,9 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
     @Inject
     private ConverterUtil converterUtil;
 
+    @Inject
+    private CloudbreakRestRequestThreadLocalService threadLocalService;
+
     @Override
     public FileSystemParameterV4Responses getFileSystemParameters(
             Long workspaceId,
@@ -38,7 +42,7 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
             Boolean attachedCluster,
             Boolean secure) {
         Set<ConfigQueryEntry> entries = blueprintService.queryFileSystemParameters(blueprintName, clusterName, storageName,
-                fileSystemType, accountName, attachedCluster, secure, workspaceId);
+                fileSystemType, accountName, attachedCluster, secure, threadLocalService.getRequestedWorkspaceId());
         return new FileSystemParameterV4Responses(converterUtil.convertAll(entries, FileSystemParameterV4Response.class));
     }
 }
