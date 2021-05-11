@@ -221,11 +221,13 @@
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
+                   <#if usePartnerCenter>
                    "plan": {
                         "name": "${marketplaceImageDetails.planId}",
                         "product": "${marketplaceImageDetails.offerId}",
                         "publisher": "${marketplaceImageDetails.publisherId}"
                    },
+                   </#if>
                     <#if instance.managedIdentity?? && instance.managedIdentity?has_content>
                     "identity": {
                         "type": "userAssigned",
