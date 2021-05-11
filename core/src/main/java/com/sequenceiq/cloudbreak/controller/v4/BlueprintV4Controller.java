@@ -57,14 +57,15 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     @Override
     @DisableCheckPermissions
     public BlueprintV4ViewResponses list(Long workspaceId, Boolean withSdx) {
-        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspaceAndFilterBySdxReady(workspaceId, withSdx);
+        Set<BlueprintView> allAvailableViewInWorkspace = blueprintService.getAllAvailableViewInWorkspaceAndFilterBySdxReady(
+                restRequestThreadLocalService.getRequestedWorkspaceId(), withSdx);
         return new BlueprintV4ViewResponses(converterUtil.convertAllAsSet(allAvailableViewInWorkspace, BlueprintV4ViewResponse.class));
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public BlueprintV4Response getByName(Long workspaceId, @ResourceName @NotNull String name) {
-        Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofName(name), workspaceId);
+        Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }
 
@@ -81,7 +82,7 @@ public class BlueprintV4Controller extends NotificationController implements Blu
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         Blueprint toSave = converterUtil.convert(request, Blueprint.class);
-        Blueprint blueprint = blueprintService.createForLoggedInUser(toSave, workspaceId, accountId, creator);
+        Blueprint blueprint = blueprintService.createForLoggedInUser(toSave, restRequestThreadLocalService.getRequestedWorkspaceId(), accountId, creator);
         notify(ResourceEvent.BLUEPRINT_CREATED);
         return converterUtil.convert(blueprint, BlueprintV4Response.class);
     }

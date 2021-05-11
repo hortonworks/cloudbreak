@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Re
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @Controller
 @DisableCheckPermissions
@@ -25,6 +26,9 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
     @Inject
     private AuditEventService auditEventService;
 
+    @Inject
+    private CloudbreakRestRequestThreadLocalService threadLocalService;
+
     @Override
     public AuditEventV4Response getAuditEventById(Long workspaceId, Long auditId) {
         return auditEventService.getAuditEventByWorkspaceId(workspaceId, auditId);
@@ -32,14 +36,16 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
 
     @Override
     public AuditEventV4Responses getAuditEvents(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
-        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(workspaceId, resourceType, resourceId, resourceCrn);
+        List<AuditEventV4Response> auditEventsByWorkspaceId = auditEventService.getAuditEventsByWorkspaceId(threadLocalService.getRequestedWorkspaceId(),
+                resourceType, resourceId, resourceCrn);
         return new AuditEventV4Responses(auditEventsByWorkspaceId);
 
     }
 
     @Override
     public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
-        Collection<AuditEventV4Response> auditEvents = getAuditEvents(workspaceId, resourceType, resourceId, resourceCrn).getResponses();
+        Collection<AuditEventV4Response> auditEvents = getAuditEvents(threadLocalService.getRequestedWorkspaceId(),
+                resourceType, resourceId, resourceCrn).getResponses();
         return getAuditEventsZipResponse(auditEvents, resourceType);
     }
 
