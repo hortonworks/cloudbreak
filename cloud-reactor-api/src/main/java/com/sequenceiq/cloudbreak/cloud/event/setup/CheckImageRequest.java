@@ -25,4 +25,12 @@ public class CheckImageRequest<T> extends CloudPlatformRequest<CheckImageResult>
     public CloudStack getStack() {
         return stack;
     }
+
+    @Override
+    public String toString() {
+        return "CheckImageRequest{" +
+                "image=" + image +
+                ", stack=" + stack +
+                '}';
+    }
 }

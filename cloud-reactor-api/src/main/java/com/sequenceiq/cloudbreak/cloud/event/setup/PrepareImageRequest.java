@@ -25,4 +25,12 @@ public class PrepareImageRequest<T> extends CloudPlatformRequest<PrepareImageRes
     public CloudStack getStack() {
         return stack;
     }
+
+    @Override
+    public String toString() {
+        return "PrepareImageRequest{" +
+                "image=" + image +
+                ", stack=" + stack +
+                '}';
+    }
 }
