@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
+import static java.util.function.Predicate.not;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -44,7 +46,8 @@ public class MinionAcceptor {
             MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, minions);
             List<String> unacceptedMinions = minionKeysOnMaster.getUnacceptedMinions();
             List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
-            cleanupMinionIds(sc, deniedMinions, unacceptedMinions);
+            List<String> removedUnacceptedMinions = cleanupMinionIds(sc, deniedMinions, unacceptedMinions);
+            unacceptedMinions = unacceptedMinions.stream().filter(not(removedUnacceptedMinions::contains)).collect(Collectors.toList());
             if (!unacceptedMinions.isEmpty()) {
                 proceedWithAcceptingMinions(sc, unacceptedMinions);
             } else {
@@ -53,13 +56,16 @@ public class MinionAcceptor {
         }
     }
 
-    private void cleanupMinionIds(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
+    private List<String> cleanupMinionIds(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
             throws CloudbreakOrchestratorFailedException {
-        removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions);
+        ArrayList<String> removedUnacceptedMinions = new ArrayList<String>();
+        removedUnacceptedMinions.addAll(removeMinionIdsInBothDeniedAndUnacceptedState(sc, deniedMinions, unacceptedMinions));
         removeMinionIdsOnlyInDeniedState(sc, deniedMinions, unacceptedMinions);
+        removedUnacceptedMinions.addAll(removeMinionIdsThatAreNotExpected(sc, unacceptedMinions));
+        return removedUnacceptedMinions;
     }
 
-    private void removeMinionIdsInBothDeniedAndUnacceptedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
+    private List<String> removeMinionIdsInBothDeniedAndUnacceptedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
             throws CloudbreakOrchestratorFailedException {
         LOGGER.info("Unaccepted minions: {}", unacceptedMinions);
         LOGGER.info("Denied minions: {}", deniedMinions);
@@ -72,23 +78,40 @@ public class MinionAcceptor {
             throw new CloudbreakOrchestratorFailedException("There were minions in denied and unaccepted state at the same time: " +
                     minionIdsInBothDeniedAndUnacceptedState);
         }
+        return minionIdsInBothDeniedAndUnacceptedState;
     }
 
     private void removeMinionIdsOnlyInDeniedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions) {
         ArrayList<String> minionIdsOnlyDenied = new ArrayList<String>(deniedMinions);
         minionIdsOnlyDenied.removeAll(unacceptedMinions);
         if (!minionIdsOnlyDenied.isEmpty()) {
-            LOGGER.info("There are minions in denied state, removing: ", minionIdsOnlyDenied);
+            LOGGER.info("There are minions in denied state, removing: {}", minionIdsOnlyDenied);
             sc.wheel("key.delete", minionIdsOnlyDenied, Object.class);
         }
+    }
+
+    private List<String> removeMinionIdsThatAreNotExpected(SaltConnector sc, List<String> unacceptedMinions) {
+        List<String> expectedMinionIds = minions.stream().map(Minion::getId).collect(Collectors.toList());
+        List<String> unexpectedMinionIds = unacceptedMinions.stream()
+                .filter(not(expectedMinionIds::contains))
+                .collect(Collectors.toList());
+        if (!unexpectedMinionIds.isEmpty()) {
+            LOGGER.info("There are minions that are not expected, removing: {}", unexpectedMinionIds);
+            sc.wheel("key.delete", unexpectedMinionIds, Object.class);
+        }
+        return unexpectedMinionIds;
     }
 
     private void proceedWithAcceptingMinions(SaltConnector sc, List<String> unacceptedMinions) throws CloudbreakOrchestratorFailedException {
         LOGGER.info("There are unaccepted minions on master: {}", unacceptedMinions);
         Map<String, String> fingerprintsFromMaster = fetchFingerprintsFromMaster(sc, unacceptedMinions);
         List<Minion> minionsToAccept = minions.stream().filter(minion -> unacceptedMinions.contains(minion.getId())).collect(Collectors.toList());
-        FingerprintsResponse fingerprintsResponse = fingerprintCollector.collectFingerprintFromMinions(sc, minionsToAccept);
-        acceptMatchingFingerprints(sc, fingerprintsFromMaster, fingerprintsResponse, minionsToAccept);
+        LOGGER.info("Processing the following minions so they are accepted on the master: {}",
+                minionsToAccept.stream().map(Minion::getId).collect(Collectors.toList()));
+        if (!minionsToAccept.isEmpty()) {
+            FingerprintsResponse fingerprintsResponse = fingerprintCollector.collectFingerprintFromMinions(sc, minionsToAccept);
+            acceptMatchingFingerprints(sc, fingerprintsFromMaster, fingerprintsResponse, minionsToAccept);
+        }
     }
 
     private void acceptMatchingFingerprints(SaltConnector sc, Map<String, String> fingerprintsFromMaster, FingerprintsResponse fingerprintsResponse,
@@ -96,7 +119,9 @@ public class MinionAcceptor {
         Map<String, String> fingerprintByMinion = mapFingerprintByMinion(fingerprintsResponse, minions);
         List<String> minionsToAccept = fingerprintMatcher.collectMinionsWithMatchingFp(fingerprintsFromMaster, fingerprintByMinion);
         LOGGER.info("Following minions will be accepted: {}", minionsToAccept);
-        sc.wheel("key.accept", minionsToAccept, Object.class);
+        if (!minionsToAccept.isEmpty()) {
+            sc.wheel("key.accept", minionsToAccept, Object.class);
+        }
     }
 
     private Map<String, String> mapFingerprintByMinion(FingerprintsResponse fingerprintsResponse, List<Minion> minions) {
