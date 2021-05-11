@@ -83,8 +83,8 @@ class AwsEncodedAuthorizationFailureMessageDecoderTest {
     void shouldDecodeEncodedMessage() {
         String result = underTest.decodeAuthorizationFailureMessageIfNeeded(awsCredentialView, REGION, ENCODED_AUTHORIZATION_FAILURE_MESSAGE);
 
-        assertThat(result).isEqualTo("You are not authorized to perform action ec2:CreateSecurityGroup " +
-                "on resource arn:aws:ec2:eu-central-1:123456789101:vpc/vpc-id");
+        assertThat(result).isEqualTo("Your AWS credential is not authorized to perform action ec2:CreateSecurityGroup on resource " +
+                "arn:aws:ec2:eu-central-1:123456789101:vpc/vpc-id. Please contact your system administrator to update your AWS policy.");
         verify(awsClient).createSecurityTokenService(awsCredentialView, REGION);
         verify(awsSecurityTokenService).decodeAuthorizationMessage(requestCaptor.capture());
         DecodeAuthorizationMessageRequest request = requestCaptor.getValue();
@@ -99,32 +99,33 @@ class AwsEncodedAuthorizationFailureMessageDecoderTest {
                 .thenThrow(exception);
 
         String result = underTest.decodeAuthorizationFailureMessageIfNeeded(awsCredentialView, REGION, ENCODED_AUTHORIZATION_FAILURE_MESSAGE);
-        assertThat(result).isEqualTo("API: ec2:CreateSecurityGroup You are not authorized to perform this operation. " +
-                "(Please add sts:DecodeAuthorizationMessage right to your IAM policy to get more details.)");
+        assertThat(result).isEqualTo("API: ec2:CreateSecurityGroup Your credential is not authorized to perform the requested action on AWS side. " +
+                "Please contact your system administrator to update your AWS policy with the sts:DecodeAuthorizationMessage " +
+                "permission to get more details next time.");
         verify(awsClient).createSecurityTokenService(awsCredentialView, REGION);
         verify(awsSecurityTokenService).decodeAuthorizationMessage(any());
     }
 
     @Test
-    void shouldReturnUnmodifiedMessageWhenStsThrowsOtherException() {
+    void shouldReturnDefaultMessageWhenStsThrowsOtherException() {
         AWSSecurityTokenServiceException exception = new AWSSecurityTokenServiceException("SomethingWentWrong");
         when(awsSecurityTokenService.decodeAuthorizationMessage(any()))
                 .thenThrow(exception);
 
         String result = underTest.decodeAuthorizationFailureMessageIfNeeded(awsCredentialView, REGION, ENCODED_AUTHORIZATION_FAILURE_MESSAGE);
-        assertThat(result).isEqualTo(ENCODED_AUTHORIZATION_FAILURE_MESSAGE);
+        assertThat(result).isEqualTo("API: ec2:CreateSecurityGroup Your credential is not authorized to perform the requested action on AWS side.");
         verify(awsClient).createSecurityTokenService(awsCredentialView, REGION);
         verify(awsSecurityTokenService).decodeAuthorizationMessage(any());
     }
 
     @Test
-    void shouldReturnUnmodifiedMessageWhenNonStsExceptionIsThrown() {
+    void shouldReturnDefaultMessageWhenNonStsExceptionIsThrown() {
         Exception exception = new RuntimeException("SomethingWentWrong");
         when(awsSecurityTokenService.decodeAuthorizationMessage(any()))
                 .thenThrow(exception);
 
         String result = underTest.decodeAuthorizationFailureMessageIfNeeded(awsCredentialView, REGION, ENCODED_AUTHORIZATION_FAILURE_MESSAGE);
-        assertThat(result).isEqualTo(ENCODED_AUTHORIZATION_FAILURE_MESSAGE);
+        assertThat(result).isEqualTo("API: ec2:CreateSecurityGroup Your credential is not authorized to perform the requested action on AWS side.");
         verify(awsClient).createSecurityTokenService(awsCredentialView, REGION);
         verify(awsSecurityTokenService).decodeAuthorizationMessage(any());
     }
