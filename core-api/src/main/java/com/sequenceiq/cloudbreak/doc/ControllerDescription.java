@@ -30,6 +30,7 @@ public class ControllerDescription {
     public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String CLUSTER_TEMPLATE_V4_DESCRIPTION = "Operations on ClusterTemplates by workspace";
     public static final String IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Image Catalog by workspace";
+    public static final String CUSTOM_IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Custom Image Catalog by workspace";
     public static final String SMARTSENSE_SUBSCRIPTION_V4_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";
     public static final String WORKSPACE_V4_DESCRIPTION = "Operations on workspaces";
     public static final String STACK_V4_DESCRIPTION = "Operations on stack by workspace";

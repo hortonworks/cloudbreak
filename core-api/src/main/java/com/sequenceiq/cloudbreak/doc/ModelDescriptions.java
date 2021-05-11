@@ -106,6 +106,19 @@ public class ModelDescriptions {
         public static final String VMS_TO_REGIONS = "VM image references mapped to cloud regions";
     }
 
+    public static class CustomImageDescription {
+        public static final String IMAGE_ID = "id of the image";
+        public static final String IMAGE_TYPE = "type of the image - datalake, datahub or freeipa";
+        public static final String SOURCE_IMAGE_ID = "id of the source image serving as the base of the customized image";
+        public static final String BASE_PARCEL_URL = "base url of of parcels in the image";
+        public static final String VM_IMAGES = "image references of the custom image in different regions";
+    }
+
+    public static class VmImageDescription {
+        public static final String REGION = "vm image region";
+        public static final String IMAGE_REFERENCE = "vm image reference";
+    }
+
     public static class StructuredEventResponseDescription {
         public static final String TYPE = "Type of the Audit event. REST|FLOW|NOTIFICATION";
         public static final String OPERATION = "Basic details about the Audit event";
@@ -668,6 +681,11 @@ public class ModelDescriptions {
         public static final String IMAGE_CATALOG_URL = "custom image catalog's URL";
         public static final String DEFAULT = "true if image catalog is the default one";
         public static final String IMAGE_RESPONSES = "image response in imagecatalog";
+    }
+
+    public static class CustomImageCatalogDescription {
+        public static final String NAME = "custom image catalog name";
+        public static final String DESCRIPTION = "custom image catalog description";
     }
 
     public static class SecurityRulesModelDescription {
