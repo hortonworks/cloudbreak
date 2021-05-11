@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NAME_NODE_INSTANCE_TYPE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CDPD_VERSION_7_2_11;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
@@ -20,13 +26,22 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
 
     private static final String CAPACITY_SCHEDULER_CLASS = "yarn_resourcemanager_scheduler_class";
 
+    private static final String RESOURCE_MANAGER_YARN_SITE_SAFETY_VALVE = "resourcemanager_config_safety_valve";
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
             case YarnRoles.RESOURCEMANAGER:
-                return List.of(
-                        config(CAPACITY_SCHEDULER_SAFETY_VALVE, ConfigUtils.getSafetyValveConfiguration(getCapacitySchedulerValveValue())),
-                        config(CAPACITY_SCHEDULER_CLASS, "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"));
+                List<ApiClusterTemplateConfig> configs = new LinkedList<>();
+                if (isContainerPlacementConfigRequired(source)) {
+                    configs.add(config(RESOURCE_MANAGER_YARN_SITE_SAFETY_VALVE, getYarnSiteContainerPlacementSafetyValveValues()));
+                }
+                if (isLlapBasedConfigNeeded((CmTemplateProcessor) source.getBlueprintView().getProcessor())) {
+                    configs.add(config(CAPACITY_SCHEDULER_SAFETY_VALVE, ConfigUtils.getSafetyValveConfiguration(getCapacitySchedulerValveValue())));
+                    configs.add(config(CAPACITY_SCHEDULER_CLASS, "org.apache.hadoop.yarn.server.resourcemanager.scheduler.capacity.CapacityScheduler"));
+                }
+                return configs;
+
             default:
                 return List.of();
         }
@@ -44,6 +59,10 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return isLlapBasedConfigNeeded(cmTemplateProcessor) || isContainerPlacementConfigRequired(source);
+    }
+
+    private boolean isLlapBasedConfigNeeded(CmTemplateProcessor cmTemplateProcessor) {
         return cmTemplateProcessor.getServiceByType(HiveRoles.HIVELLAP).isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes());
     }
@@ -76,5 +95,22 @@ public class YarnResourceManagerRoleConfigProvider extends AbstractRoleConfigPro
                 + ConfigUtils.getSafetyValveProperty("yarn.scheduler.capacity.schedule-asynchronously.enable", "true")
                 + ConfigUtils.getSafetyValveProperty("yarn.scheduler.capacity.schedule-asynchronously.maximum-threads", "1")
                 + ConfigUtils.getSafetyValveProperty("yarn.scheduler.capacity.schedule-asynchronously.scheduling-interval-ms", "10");
+    }
+
+    private boolean isContainerPlacementConfigRequired(TemplatePreparationObject source) {
+        String cdpdVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
+        return isVersionNewerOrEqualThanLimited(cdpdVersion, CDPD_VERSION_7_2_11);
+    }
+
+    private String getYarnSiteContainerPlacementSafetyValveValues() {
+        return
+                ConfigUtils.getSafetyValveProperty("yarn.resourcemanager.am.placement-preference-with-node-attributes",
+                        String.format("ORDER NODES IN %s WITH %s > %s", ATTRIBUTE_NAME_NODE_INSTANCE_TYPE,
+                                ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER, ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE))
+                        + ConfigUtils.getSafetyValveProperty("yarn.resourcemanager.non-am.placement-preference-with-node-attributes",
+                        String.format("ORDER NODES IN %s WITH %s > %s", ATTRIBUTE_NAME_NODE_INSTANCE_TYPE,
+                                ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE, ATTRIBUTE_NODE_INSTANCE_TYPE_WORKER));
+
     }
 }
