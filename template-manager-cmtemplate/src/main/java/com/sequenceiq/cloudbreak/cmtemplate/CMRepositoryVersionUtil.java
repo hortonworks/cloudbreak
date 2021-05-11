@@ -52,6 +52,8 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
+    public static final Versioned CDPD_VERSION_7_2_11 = () -> "7.2.11";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CMRepositoryVersionUtil.class);
 
     private CMRepositoryVersionUtil() {
