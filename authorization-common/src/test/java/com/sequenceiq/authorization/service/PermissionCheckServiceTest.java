@@ -1,5 +1,6 @@
 package com.sequenceiq.authorization.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -10,44 +11,42 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
-import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class PermissionCheckServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
-    private static final String INTERNAL_ACTOR_CRN = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+    private static final String MODIFIED_INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__";
 
     @Mock
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -76,7 +75,7 @@ public class PermissionCheckServiceTest {
     @Mock
     private MethodSignature methodSignature;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(proceedingJoinPoint.getSignature()).thenReturn(methodSignature);
         lenient().when(proceedingJoinPoint.getTarget()).thenReturn(new ExampleClass());
@@ -113,9 +112,8 @@ public class PermissionCheckServiceTest {
     public void testUserValidation() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethod"));
 
-        thrown.expect(NullPointerException.class);
-
-        ThreadBasedUserCrnProvider.doAs(null, () -> underTest.hasPermission(proceedingJoinPoint));
+        assertThrows(NullPointerException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(null, () -> underTest.hasPermission(proceedingJoinPoint)));
     }
 
     @Test
@@ -189,18 +187,17 @@ public class PermissionCheckServiceTest {
     public void testInternalOnlyMethodIfNotInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("This API is not publicly available and therefore not usable by end users. " +
-                "Please refer to our documentation about public APIs used by our UI and CLI.");
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+        assertThrows(AccessDeniedException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint)),
+                "This API is not publicly available and therefore not usable by end users. " +
+                        "Please refer to our documentation about public APIs used by our UI and CLI.");
     }
 
     @Test
-    public void testInternalOnlyMethodIfInternalActor() throws NoSuchMethodException {
+    public void testInternalOnlyMethodIfModifiedInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
-        ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+        ThreadBasedUserCrnProvider.doAs(MODIFIED_INTERNAL_ACTOR, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verifyNoInteractions(
@@ -210,22 +207,62 @@ public class PermissionCheckServiceTest {
     }
 
     @Test
+    public void testInternalOnlyMethodIfOriginalInternalActor() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
+
+        assertThrows(AccessDeniedException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint)),
+                "This API is not prepared to use it in service-to-service communication.");
+
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                resourceAuthorizationService);
+    }
+
+    @Test
+    public void testInternalOnlyMethodIfOriginalInternalActorButAccountIdNotNeeded() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethodAccountIdNotNeeded"));
+
+        ThreadBasedUserCrnProvider.doAs(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verifyNoInteractions(
+                internalUserModifier,
+                accountAuthorizationService,
+                resourceAuthorizationService);
+    }
+
+    @Test
+    public void testInternalOnlyMethodIfInitiatorUserCrn() throws NoSuchMethodException {
+        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
+        when(reflectionUtil.getParameter(eq(proceedingJoinPoint), eq(methodSignature), eq(InitiatorUserCrn.class)))
+                .thenReturn(Optional.of(USER_CRN));
+
+        ThreadBasedUserCrnProvider.doAs(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verify(internalUserModifier).persistModifiedInternalUser(any());
+        verifyNoInteractions(
+                accountAuthorizationService,
+                resourceAuthorizationService);
+    }
+
+    @Test
     public void testInternalOnlyClassIfNotInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(InternalOnlyClassExample.class.getMethod("get"));
         when(proceedingJoinPoint.getTarget()).thenReturn(new InternalOnlyClassExample());
 
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("This API is not publicly available and therefore not usable by end users. " +
-                "Please refer to our documentation about public APIs used by our UI and CLI.");
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+        assertThrows(AccessDeniedException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint)),
+                "This API is not publicly available and therefore not usable by end users. " +
+                        "Please refer to our documentation about public APIs used by our UI and CLI.");
     }
 
     @Test
-    public void testInternalOnlyClassIfInternalActor() throws NoSuchMethodException {
+    public void testInternalOnlyClassIfModifiedInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(InternalOnlyClassExample.class.getMethod("get"));
 
-        ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+        ThreadBasedUserCrnProvider.doAs(MODIFIED_INTERNAL_ACTOR, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verifyNoInteractions(
@@ -278,6 +315,12 @@ public class PermissionCheckServiceTest {
 
         @InternalOnly
         public void internalOnlyMethod() {
+
+        }
+
+        @InternalOnly
+        @AccountIdNotNeeded
+        public void internalOnlyMethodAccountIdNotNeeded() {
 
         }
     }

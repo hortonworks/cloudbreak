@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
@@ -22,11 +23,13 @@ public class FlowController implements FlowEndpoint {
     private FlowService flowService;
 
     @Override
+    @AccountIdNotNeeded
     public FlowLogResponse getLastFlowById(String flowId) {
         return flowService.getLastFlowById(flowId);
     }
 
     @Override
+    @AccountIdNotNeeded
     public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
         return flowService.getFlowLogsByFlowId(flowId);
     }
@@ -52,11 +55,13 @@ public class FlowController implements FlowEndpoint {
     }
 
     @Override
+    @AccountIdNotNeeded
     public FlowCheckResponse hasFlowRunningByChainId(String chainId) {
         return flowService.getFlowChainState(chainId);
     }
 
     @Override
+    @AccountIdNotNeeded
     public FlowCheckResponse hasFlowRunningByFlowId(String flowId) {
         return flowService.getFlowState(flowId);
     }

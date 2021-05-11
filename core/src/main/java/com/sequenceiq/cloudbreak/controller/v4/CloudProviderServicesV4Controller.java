@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -33,6 +34,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
     }
 
     @Override
+    @AccountIdNotNeeded
     public ObjectStorageMetadataResponse getObjectStorageMetaData(@Valid ObjectStorageMetadataRequest request) {
         try {
             return cloudProviderService.getObjectStorageMetaData(request);
@@ -42,6 +44,7 @@ public class CloudProviderServicesV4Controller implements CloudProviderServicesV
     }
 
     @Override
+    @AccountIdNotNeeded
     public ObjectStorageValidateResponse validateObjectStorage(@Valid ObjectStorageValidateRequest request) {
         try {
             LOGGER.info("Validate Object Storage request: {}", request);

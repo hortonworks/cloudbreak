@@ -8,6 +8,7 @@ import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
@@ -137,6 +138,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     @InternalOnly
+    @AccountIdNotNeeded
     public UsedImagesListV4Response usedImages(Integer thresholdInDays) {
         return usedImagesProvider.getUsedImages(thresholdInDays);
     }

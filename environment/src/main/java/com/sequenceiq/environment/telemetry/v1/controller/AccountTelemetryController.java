@@ -11,6 +11,7 @@ import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
@@ -84,7 +85,7 @@ public class AccountTelemetryController extends NotificationController implement
 
     @Override
     @InternalOnly
-    public List<AnonymizationRule> listRulesInAccount(String accountId) {
+    public List<AnonymizationRule> listRulesInAccount(@AccountId String accountId) {
         AccountTelemetryResponse response = accountTelemetryConverter.convert(accountTelemetryService.getOrDefault(accountId));
         return response.getRules();
     }

@@ -19,6 +19,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.environment.api.v1.tags.endpoint.AccountTagEndpoint;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
@@ -75,7 +76,7 @@ public class AccountTagController extends NotificationController implements Acco
 
     @Override
     @InternalOnly
-    public AccountTagResponses listInAccount(String accountId) {
+    public AccountTagResponses listInAccount(@AccountId String accountId) {
         Set<AccountTag> accountTags = accountTagService.get(accountId);
         List<AccountTagResponse> accountTagResponses = accountTagToAccountTagResponsesConverter.convert(accountTags);
         defaultInternalAccountTagService.merge(accountTagResponses);

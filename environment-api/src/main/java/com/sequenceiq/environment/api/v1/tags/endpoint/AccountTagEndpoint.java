@@ -10,6 +10,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.environment.api.doc.tag.TagDescription;
 import com.sequenceiq.environment.api.v1.tags.model.request.AccountTagRequests;
@@ -35,7 +36,7 @@ public interface AccountTagEndpoint {
     @Path("{accountId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TagDescription.GET, produces = MediaType.APPLICATION_JSON, notes = TagDescription.GET_NOTES, nickname = "listTagsInAccountV1")
-    AccountTagResponses listInAccount(@PathParam("accountId") String accountId);
+    AccountTagResponses listInAccount(@AccountId @PathParam("accountId") String accountId);
 
     @PUT
     @Path("")
