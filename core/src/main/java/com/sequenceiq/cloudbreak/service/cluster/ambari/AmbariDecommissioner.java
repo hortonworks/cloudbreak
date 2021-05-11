@@ -38,6 +38,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -187,11 +188,16 @@ public class AmbariDecommissioner {
     @Inject
     private NifiDecommissionService nifiDecommissionService;
 
+    @Value("${hbase.decommission.enabled:false}")
+    private boolean hbaseDecommissionEnabled;
+
     @PostConstruct
     public void init() {
         COMPONENTS_NEED_TO_DECOMMISSION.put(DATANODE, "HDFS");
         COMPONENTS_NEED_TO_DECOMMISSION.put(NODEMANAGER, "YARN");
-        COMPONENTS_NEED_TO_DECOMMISSION.put(HBASE_REGIONSERVER, "HBASE");
+        if (hbaseDecommissionEnabled) {
+            COMPONENTS_NEED_TO_DECOMMISSION.put(HBASE_REGIONSERVER, "HBASE");
+        }
     }
 
     public Set<String> collectDownscaleCandidates(Stack stack, String hostGroupName, Integer scalingAdjustment, boolean forced) throws CloudbreakException {
