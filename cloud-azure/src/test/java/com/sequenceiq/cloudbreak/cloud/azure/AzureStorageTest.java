@@ -115,6 +115,8 @@ public class AzureStorageTest {
 
         when(azureResourceGroupMetadataProvider.useSingleResourceGroup(cloudStack)).thenReturn(true);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP);
+        when(armUtils.encodeString(RESOURCE_GROUP)).thenReturn("2b8305c3");
+        when(armUtils.encodeString("subscriptionone")).thenReturn("33890668");
 
         String imageStorageName = underTest.getImageStorageName(azureCredentialView, cloudContext, cloudStack);
         assertEquals("cbimgwu2338906682b8305c3", imageStorageName);
@@ -128,6 +130,8 @@ public class AzureStorageTest {
         CloudContext cloudContext = createCloudContext();
 
         when(azureResourceGroupMetadataProvider.useSingleResourceGroup(cloudStack)).thenReturn(false);
+        when(armUtils.encodeString("subscriptionone")).thenReturn("33890668");
+        when(armUtils.encodeString(null)).thenReturn("");
 
         String imageStorageName = underTest.getImageStorageName(azureCredentialView, cloudContext, cloudStack);
         assertEquals("cbimgwu2subscriptionone", imageStorageName);

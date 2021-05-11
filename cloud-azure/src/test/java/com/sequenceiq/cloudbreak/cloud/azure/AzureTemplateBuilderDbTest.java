@@ -56,7 +56,11 @@ public class AzureTemplateBuilderDbTest {
 
     private static final String SUBNET_CIDR = "0.0.0.0/0";
 
+    private static final String RESOURCE_GROUP = "rg";
+
     private static final String SUBNET_ID = "subnet-lkewflerwkj";
+
+    private static final String FULL_SUBNET_ID = RESOURCE_GROUP + '/' + SUBNET_ID;
 
     private static final String NETWORK_CIDR = "127.0.0.1/32";
 
@@ -74,6 +78,9 @@ public class AzureTemplateBuilderDbTest {
 
     @Mock
     private AzureDatabaseTemplateProvider azureDatabaseTemplateProvider;
+
+    @Mock
+    private AzureUtils azureUtils;
 
     private CloudContext cloudContext;
 
@@ -125,20 +132,27 @@ public class AzureTemplateBuilderDbTest {
                 }).orElseThrow();
         DatabaseStack databaseStack = createDatabaseStack(useSslEnforcement, template.toString());
         Mockito.when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
+        Mockito.when(azureUtils.encodeString(SUBNET_ID)).thenReturn("hash");
 
         String result = underTest.build(cloudContext, databaseStack);
 
         assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
         assertThat(result).contains(
                 "        \"useSslEnforcement\": {\n" +
-                "            \"type\": \"bool\",\n" +
-                "            \"defaultValue\": " + useSslEnforcement + ",");
+                        "            \"type\": \"bool\",\n" +
+                        "            \"defaultValue\": " + useSslEnforcement + ",");
+        assertThat(result).contains(
+                "        \"privateEndpointName\": {\n" +
+                        "            \"defaultValue\": \"pe-hash-to-myServer\",\n" +
+                        "            \"type\": \"String\"\n" +
+                        "        }"
+        );
     }
 
     private DatabaseStack createDatabaseStack(boolean useSslEnforcement, String template) {
         Subnet subnet = new Subnet(SUBNET_CIDR);
         Network network = new Network(subnet, List.of(NETWORK_CIDR), OutboundInternetTraffic.ENABLED);
-        network.putParameter("subnets", SUBNET_ID);
+        network.putParameter("subnets", FULL_SUBNET_ID);
 
         DatabaseServer databaseServer = DatabaseServer.builder()
                 .useSslEnforcement(useSslEnforcement)

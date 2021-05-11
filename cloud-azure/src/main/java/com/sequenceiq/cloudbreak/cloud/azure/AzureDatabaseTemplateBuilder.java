@@ -48,6 +48,9 @@ public class AzureDatabaseTemplateBuilder {
     @Inject
     private AzureDatabaseTemplateProvider azureDatabaseTemplateProvider;
 
+    @Inject
+    private AzureUtils azureUtils;
+
     public String build(CloudContext cloudContext, DatabaseStack databaseStack) {
         try {
             String location = cloudContext.getLocation().getRegion().getRegionName();
@@ -81,7 +84,7 @@ public class AzureDatabaseTemplateBuilder {
             model.put("batchSize", azureNetworkView.getSubnets().split(",").length >= defaultBatchSize ? defaultBatchSize : 1);
             model.put("location", azureDatabaseServerView.getLocation());
             model.put("privateEndpointName", String.format("pe-%s-to-%s",
-                    getSubnetName(azureNetworkView.getSubnetList().get(0)), azureDatabaseServerView.getDbServerName()));
+                    azureUtils.encodeString(getSubnetName(azureNetworkView.getSubnetList().get(0))), azureDatabaseServerView.getDbServerName()));
             String generatedTemplate = freeMarkerTemplateUtils.processTemplateIntoString(azureDatabaseTemplateProvider.getTemplate(databaseStack), model);
             LOGGER.debug("Generated ARM database template: {}", AnonymizerUtil.anonymize(generatedTemplate));
             return generatedTemplate;
