@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller.join;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -89,6 +91,30 @@ class MinionAcceptorTest {
 
         MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
         underTest.acceptMinions();
+    }
+
+    @Test
+    public void testOldUnacceptedMinionFromMaster() throws CloudbreakOrchestratorFailedException {
+        MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
+        FingerprintCollector fingerprintCollector = mock(FingerprintCollector.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        Minion m2 = new Minion();
+        m2.setHostName("m2");
+        m2.setDomain("d");
+
+        List<String> unacceptedMinions = List.of("md.d");
+
+        when(response.getAllMinions()).thenReturn(List.of("m2.d", "m1.d"));
+        when(response.getUnacceptedMinions()).thenReturn(unacceptedMinions);
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
+
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), fingerprintCollector);
+        underTest.acceptMinions();
+        verify(sc).wheel(eq("key.delete"), eq(unacceptedMinions), eq(Object.class));
+        verify(fingerprintCollector, never()).collectFingerprintFromMinions(any(), any());
     }
 
     @Test
