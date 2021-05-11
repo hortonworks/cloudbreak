@@ -49,24 +49,6 @@ public class EnvironmentLoadBalancerServiceTest {
     private EnvironmentLoadBalancerService underTest;
 
     @Test
-    public void testEntitlementDisabled() {
-        EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
-            .withEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
-            .build();
-        String expectedError = "Public Endpoint Gateway entitlement is not enabled.";
-
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(false);
-
-        final BadRequestException[] exception = new BadRequestException[1];
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            exception[0] = assertThrows(BadRequestException.class, () ->
-                underTest.updateLoadBalancerInEnvironmentAndStacks(new EnvironmentDto(), environmentLbDto));
-        });
-
-        assertEquals(expectedError, exception[0].getMessage());
-    }
-
-    @Test
     public void testNoEnvironmentFound() {
         EnvironmentLoadBalancerDto environmentLbDto = EnvironmentLoadBalancerDto.builder()
             .withEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED)
@@ -77,7 +59,6 @@ public class EnvironmentLoadBalancerServiceTest {
             .build();
         String expectedError = String.format("Could not find environment '%s' using crn '%s'", ENV_NAME, ENV_CRN);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(anyString(), anyString()))
             .thenReturn(Optional.empty());
 
@@ -99,7 +80,6 @@ public class EnvironmentLoadBalancerServiceTest {
             .withResourceCrn(ENV_CRN)
             .build();
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(anyString(), anyString()))
             .thenReturn(Optional.of(new Environment()));
         doNothing().when(reactorFlowManager).triggerLoadBalancerUpdateFlow(any(), any(), any(), any(), any(), any(), anyString());
@@ -145,7 +125,6 @@ public class EnvironmentLoadBalancerServiceTest {
         String expectedError = "Neither Endpoint Gateway nor Data Lake load balancer is enabled. Nothing to do.";
 
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(false);
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(false);
 
         final BadRequestException[] exception = new BadRequestException[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {

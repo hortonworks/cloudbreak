@@ -41,15 +41,10 @@ public class NetworkMetadataValidationService {
 
     public Map<String, CloudSubnet> getEndpointGatewaySubnetMetadata(Environment environment, EnvironmentDto environmentDto) {
         Map<String, CloudSubnet> endpointGatewaySubnetMetas = null;
-        if (entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            LOGGER.debug("Fetching subnet metadata for from cloud providers.");
-            endpointGatewaySubnetMetas = removePrivateSubnets(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
-                environmentDto, environmentDto.getNetwork()));
-            validateSubnetsIfProvided(environment, environmentDto.getNetwork().getSubnetMetas(), endpointGatewaySubnetMetas);
-        } else {
-            LOGGER.warn("Endpoint gateway entitlement is not enabled. Endpoint gateway network information will be unset.");
-            environmentDto.getNetwork().setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
-        }
+        LOGGER.debug("Fetching subnet metadata for from cloud providers.");
+        endpointGatewaySubnetMetas = removePrivateSubnets(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(
+            environmentDto, environmentDto.getNetwork()));
+        validateSubnetsIfProvided(environment, environmentDto.getNetwork().getSubnetMetas(), endpointGatewaySubnetMetas);
         return endpointGatewaySubnetMetas;
     }
 
@@ -82,8 +77,7 @@ public class NetworkMetadataValidationService {
     }
 
     private boolean shouldValidateEndpointGatewaySubnets(Environment environment, Map<String, CloudSubnet> subnetMetas) {
-        return entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
-            hasSupportedNetwork(environment) &&
+        return hasSupportedNetwork(environment) &&
             environment.getNetwork().getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED &&
             environment.getNetwork().getRegistrationType() != RegistrationType.CREATE_NEW &&
             subnetMetas != null &&

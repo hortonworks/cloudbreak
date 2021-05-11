@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -160,9 +159,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     private CredentialResponse credentialResponse;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private CostTagging costTagging;
 
     @Mock
@@ -193,7 +189,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
-        when(entitlementService.internalTenant(anyString())).thenReturn(true);
         when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         credential = Credential.builder()
                 .cloudPlatform("AWS")
@@ -438,7 +433,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Test
     public void testNoEndpointGatewayLoadBalancerWhenEntitlementIsDisabled() {
         StackV4Request request = setupForEndpointGateway(true);
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(false);
         // WHEN
         Stack stack = underTest.convert(request);
         // THEN
@@ -448,7 +442,6 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Test
     public void testNoEndpointGatewayLoadBalancerWhenFlagIsDisabled() {
         StackV4Request request = setupForEndpointGateway(false);
-        when(entitlementService.publicEndpointAccessGatewayEnabled(anyString())).thenReturn(true);
         // WHEN
         Stack stack = underTest.convert(request);
         // THEN

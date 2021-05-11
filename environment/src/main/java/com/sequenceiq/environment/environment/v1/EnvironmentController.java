@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.type.DataHubStartAction;
-import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -158,7 +157,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     public DetailedEnvironmentResponse post(@RequestObject @Valid EnvironmentRequest request) {
-        checkEndpointGatewayEntitlement(request);
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
         return environmentResponseConverter.dtoToDetailedResponse(envDto);
@@ -369,7 +367,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @DisableCheckPermissions
     public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
-        checkEndpointGatewayEntitlement(environmentRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         return environmentService.getCreateEnvironmentForCli(environmentRequest, credential.getCloudPlatform());
@@ -419,15 +416,5 @@ public class EnvironmentController implements EnvironmentEndpoint {
             environmentCloudStorageValidationRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return cloudStorageValidator.validateCloudStorage(accountId, environmentCloudStorageValidationRequest);
-    }
-
-    private void checkEndpointGatewayEntitlement(EnvironmentRequest request) {
-        if (!entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            if (request.getNetwork() != null && PublicEndpointAccessGateway.ENABLED.equals(request.getNetwork().getPublicEndpointAccessGateway())) {
-                LOGGER.debug("Disabling public endpoint gateway in environnment request because entitlement is not enabled.");
-                request.getNetwork().setPublicEndpointAccessGateway(PublicEndpointAccessGateway.DISABLED);
-                request.getNetwork().setEndpointGatewaySubnetIds(Set.of());
-            }
-        }
     }
 }

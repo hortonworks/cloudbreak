@@ -20,8 +20,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.loadbalancer.EndpointGatewayNetworkValidator;
@@ -43,9 +41,6 @@ public class NetworkV1ToNetworkV4Converter {
 
     @Inject
     private SubnetSelector subnetSelector;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Inject
     private EndpointGatewayNetworkValidator endpointGatewayNetworkValidator;
@@ -186,20 +181,14 @@ public class NetworkV1ToNetworkV4Converter {
                 response.setSubnetId(value.getPreferedSubnetId());
             }
 
-            if (entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            if (PublicEndpointAccessGateway.ENABLED.equals(value.getPublicEndpointAccessGateway())) {
                 ValidationResult validationResult = endpointGatewayNetworkValidator.validate(new ImmutablePair<>(response.getSubnetId(), value));
                 if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {
                     throw new BadRequestException("Endpoint gateway subnet validation failed: " + validationResult.getFormattedErrors());
                 }
-
-                if (PublicEndpointAccessGateway.ENABLED.equals(value.getPublicEndpointAccessGateway())) {
-                    Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(value, response.getSubnetId());
-                    if (endpointGatewaySubnet.isPresent()) {
-                        // This should always be true because the endpointGatewayNetworkValidator verifies this optional is set
-                        response.setEndpointGatewaySubnetId(endpointGatewaySubnet.get().getId());
-                    } else {
-                        throw new AssertionError("Could not find endpoint gateway subnet even though network passed validation.");
-                    }
+                Optional<CloudSubnet> endpointGatewaySubnet = subnetSelector.chooseSubnetForEndpointGateway(value, response.getSubnetId());
+                if (endpointGatewaySubnet.isPresent()) {
+                    response.setEndpointGatewaySubnetId(endpointGatewaySubnet.get().getId());
                 }
             }
         }

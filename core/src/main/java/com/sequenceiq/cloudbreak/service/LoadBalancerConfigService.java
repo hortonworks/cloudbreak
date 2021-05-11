@@ -333,8 +333,7 @@ public class LoadBalancerConfigService {
     }
 
     private boolean isEndpointGatewayEnabled(EnvironmentNetworkResponse network) {
-        boolean result =  network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED
-            && entitlementService.publicEndpointAccessGatewayEnabled(ThreadBasedUserCrnProvider.getAccountId());
+        boolean result =  network != null && network.getPublicEndpointAccessGateway() == PublicEndpointAccessGateway.ENABLED;
         if (result) {
             LOGGER.debug("Public endpoint access gateway is enabled. A public load balancer will be created.");
         } else {

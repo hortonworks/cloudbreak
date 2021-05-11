@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
@@ -40,9 +39,6 @@ public class EnvironmentControllerTest {
     @Mock
     private EnvironmentResponseConverter environmentResponseConverter;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @InjectMocks
     private EnvironmentController underTest;
 
@@ -52,28 +48,12 @@ public class EnvironmentControllerTest {
     }
 
     @Test
-    public void testEndpointGatewayOptionsUnsetIfEntitlementIsDisabled() {
+    public void testEndpointGatewayOptionsPreserved() {
         EnvironmentNetworkRequest networkRequest = setupNetworkRequestWithEndpointGatway();
         EnvironmentRequest environmentRequest = new EnvironmentRequest();
         environmentRequest.setNetwork(networkRequest);
 
         setupServiceResponses();
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(false);
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.post(environmentRequest));
-
-        assertEquals(PublicEndpointAccessGateway.DISABLED, networkRequest.getPublicEndpointAccessGateway());
-        assert networkRequest.getEndpointGatewaySubnetIds().isEmpty();
-    }
-
-    @Test
-    public void testEndpointGatewayOptionsPreservedIfEntitlementIsEnabled() {
-        EnvironmentNetworkRequest networkRequest = setupNetworkRequestWithEndpointGatway();
-        EnvironmentRequest environmentRequest = new EnvironmentRequest();
-        environmentRequest.setNetwork(networkRequest);
-
-        setupServiceResponses();
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.post(environmentRequest));
 

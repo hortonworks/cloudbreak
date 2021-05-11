@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.G
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -66,9 +65,6 @@ public class NetworkV1ToNetworkV4ConverterTest {
 
     @InjectMocks
     private NetworkV1ToNetworkV4Converter underTest;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private SubnetSelector subnetSelector;
@@ -314,7 +310,6 @@ public class NetworkV1ToNetworkV4ConverterTest {
         CloudSubnet publicSubnet = new CloudSubnet(PUBLIC_SUBNET_ID, "name", "az-1", "cidr", false, true, true, SubnetType.PUBLIC);
 
         when(subnetSelector.chooseSubnetForEndpointGateway(any(), any())).thenReturn(Optional.of(publicSubnet));
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
         when(endpointGatewayNetworkValidator.validate(any())).thenReturn(ValidationResult.empty());
 
         NetworkV4Request[] networkV4Request = new NetworkV4Request[1];
@@ -335,7 +330,6 @@ public class NetworkV1ToNetworkV4ConverterTest {
         EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
         network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
 
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(true);
         when(endpointGatewayNetworkValidator.validate(any())).thenReturn(ValidationResult.builder().error("error").build());
 
         Exception exception = assertThrows(BadRequestException.class, () -> {
@@ -345,24 +339,6 @@ public class NetworkV1ToNetworkV4ConverterTest {
         });
 
         assert exception.getMessage().startsWith("Endpoint gateway subnet validation failed:");
-    }
-
-    @Test
-    public void testConvertToStackRequestWhenEndpointGatewayEnabledAndEntitlementDisabled() {
-        NetworkV1Request networkV1Request = awsNetworkV1Request();
-        DetailedEnvironmentResponse environmentNetworkResponse = awsEnvironmentNetwork();
-        EnvironmentNetworkResponse network = environmentNetworkResponse.getNetwork();
-        network.setPublicEndpointAccessGateway(PublicEndpointAccessGateway.ENABLED);
-
-        when(entitlementService.publicEndpointAccessGatewayEnabled(any())).thenReturn(false);
-
-        NetworkV4Request[] networkV4Request = new NetworkV4Request[1];
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            networkV4Request[0] = underTest
-                .convertToNetworkV4Request(new ImmutablePair<>(networkV1Request, environmentNetworkResponse));
-        });
-
-        assertNull(networkV4Request[0].createAws().getEndpointGatewaySubnetId());
     }
 
     private DetailedEnvironmentResponse awsEnvironmentNetwork() {
