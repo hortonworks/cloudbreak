@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.zip.Adler32;
-import java.util.zip.Checksum;
 
 import javax.inject.Inject;
 
@@ -176,29 +174,15 @@ public class AzureStorage {
     private String getPersistentStorageName(String prefix, AzureCredentialView acv, String region, String resourceGroup) {
         String subscriptionIdPart = StringUtils.isBlank(resourceGroup)
                 ? acv.getSubscriptionId().replaceAll("-", "").toLowerCase()
-                : encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase());
+                : armUtils.encodeString(acv.getSubscriptionId().replaceAll("-", "").toLowerCase());
         String regionInitials = WordUtils.initials(Region.findByLabelOrName(region).label(), ' ').toLowerCase();
-        String resourceGroupPart = encodeString(resourceGroup);
+        String resourceGroupPart = armUtils.encodeString(resourceGroup);
         String result = String.format("%s%s%s%s", prefix, regionInitials, subscriptionIdPart, resourceGroupPart);
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);
         }
         LOGGER.debug("Storage account name: {}", result);
         return result;
-    }
-
-    // Encode input to 8 digit hex output
-    private String encodeString(String string) {
-        if (StringUtils.isNotBlank(string)) {
-            byte[] bytes = string.getBytes();
-            Checksum checksum = new Adler32();
-            checksum.reset();
-            checksum.update(bytes, 0, bytes.length);
-            long checksumValue = checksum.getValue();
-            return Long.toHexString(checksumValue).toLowerCase();
-        } else {
-            return "";
-        }
     }
 
     public String getDiskContainerName(CloudContext cloudContext) {

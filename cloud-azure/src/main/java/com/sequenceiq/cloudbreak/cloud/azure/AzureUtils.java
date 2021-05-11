@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.zip.Adler32;
+import java.util.zip.Checksum;
 
 import javax.inject.Inject;
 
@@ -722,6 +724,20 @@ public class AzureUtils {
                     actionDescription, e.body().code(), e.body().message(), details));
         } else {
             return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+        }
+    }
+
+    // Encode input to 8 digit hex output
+    public String encodeString(String string) {
+        if (StringUtils.isNotBlank(string)) {
+            byte[] bytes = string.getBytes();
+            Checksum checksum = new Adler32();
+            checksum.reset();
+            checksum.update(bytes, 0, bytes.length);
+            long checksumValue = checksum.getValue();
+            return Long.toHexString(checksumValue).toLowerCase();
+        } else {
+            return "";
         }
     }
 
