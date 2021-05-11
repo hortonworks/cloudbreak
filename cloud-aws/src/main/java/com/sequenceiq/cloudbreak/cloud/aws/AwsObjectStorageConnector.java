@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadata
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
@@ -63,7 +64,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
                         + "Refer to Cloudera documentation at %s for the required setup. "
                         + "The message from Amazon S3 was: %s.",
                         request.getObjectStoragePath(),
-                        "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html",
+                        DocumentationLinkProvider.awsCloudStorageSetupLink(),
                         e.getErrorMessage()),
                         e);
             }

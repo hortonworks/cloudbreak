@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -67,7 +68,7 @@ public class FreeIpaCloudStorageValidationService {
                                     "Specifically verify the logStorage.instanceProfile and logStorage.storageLocationBase. " +
                                     "Refer to Cloudera documentation at %s for the required rights.",
                             backup.getS3().getInstanceProfile(), backup.getStorageLocation(),
-                            "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
+                            DocumentationLinkProvider.awsCloudStorageSetupLink());
                 } else if (backup.getAdlsGen2() != null) {
                     errorMsg = String.format("Validating FreeIPA cloud storage permission for backup failed. " +
                                     "The managed profile %s did not have permission to write to %s. " +
@@ -77,7 +78,7 @@ public class FreeIpaCloudStorageValidationService {
                                     "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
                                     "Refer to Cloudera documentation at %s for the required rights.",
                             backup.getAdlsGen2().getManagedIdentity(), backup.getStorageLocation(),
-                            "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
+                            DocumentationLinkProvider.azureCloudStorageSetupLink());
                 } else if (backup.getGcs() != null) {
                     errorMsg = String.format("Validating FreeIPA cloud storage permission for backup failed. " +
                                     "The managed profile %s did not have permission to write to %s. " +
@@ -87,7 +88,7 @@ public class FreeIpaCloudStorageValidationService {
                                     "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
                                     "Refer to Cloudera documentation at %s for the required rights.",
                             backup.getGcs().getServiceAccountEmail(), backup.getStorageLocation(),
-                            "https://docs.cloudera.com/management-console/cloud/environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
+                            DocumentationLinkProvider.googleCloudStorageSetupLink());
                 }
             }
             LOGGER.error(errorMsg, e);

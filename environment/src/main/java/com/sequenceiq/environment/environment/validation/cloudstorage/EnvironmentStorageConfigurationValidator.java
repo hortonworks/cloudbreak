@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.validation.cloudstorage;
 import org.apache.logging.log4j.util.Strings;
 
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 
@@ -50,14 +51,11 @@ public abstract class EnvironmentStorageConfigurationValidator {
     private String getDocLink(String cloudPlatform) {
         String docReferenceLink = " Refer to Cloudera documentation at %s for the required setup.";
         if (cloudPlatform.equals(CloudConstants.AWS)) {
-            return String.format(docReferenceLink, "https://docs.cloudera.com/management-console/cloud/" +
-                    "environments/topics/mc-idbroker-minimum-setup.html");
+            return String.format(docReferenceLink, DocumentationLinkProvider.awsCloudStorageSetupLink());
         } else if (cloudPlatform.equals(CloudConstants.AZURE)) {
-            return String.format(docReferenceLink, "https://docs.cloudera.com/management-console/cloud/" +
-                    "environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
+            return String.format(docReferenceLink, DocumentationLinkProvider.azureCloudStorageSetupLink());
         } else if (cloudPlatform.equals(CloudConstants.GCP)) {
-            return String.format(docReferenceLink, "https://docs.cloudera.com/management-console/cloud/" +
-                    "environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
+            return String.format(docReferenceLink, DocumentationLinkProvider.googleCloudStorageSetupLink());
         }
         return "";
     }
