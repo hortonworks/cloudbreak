@@ -70,7 +70,6 @@ public class CloudPlatformRequest<T> implements Selectable {
     public String toString() {
         return "CloudPlatformRequest{"
                 + "cloudContext=" + cloudContext
-                + ", cloudCredential=" + cloudCredential
                 + '}';
     }
 }
