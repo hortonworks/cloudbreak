@@ -4,6 +4,7 @@ import static com.sequenceiq.environment.TempConstants.TEMP_USER_ID;
 import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 
 import java.io.IOException;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -13,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyResult;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -64,6 +67,30 @@ public class CredentialPrerequisiteService {
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
             return res.getCredentialPrerequisitesResponse();
+        } catch (InterruptedException e) {
+            LOGGER.error(message, e);
+            throw new OperationException(e);
+        }
+    }
+
+    public Map<String, String> getExperiencePolicies(String cloudPlatform) {
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(cloudPlatform)
+                .withUserId(TEMP_USER_ID)
+                .withWorkspaceId(TEMP_WORKSPACE_ID)
+                .build();
+        CredentialExperiencePolicyRequest request = new CredentialExperiencePolicyRequest(cloudContext);
+        LOGGER.debug("Triggering event: {}", request);
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
+        String message = String.format("Failed to get experience cucc for platform '%s': ", cloudPlatform);
+        try {
+            CredentialExperiencePolicyResult res = request.await();
+            LOGGER.debug("Result: {}", res);
+            if (res.getStatus() != EventStatus.OK) {
+                LOGGER.info(message, res.getErrorDetails());
+                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
+            }
+            return res.getPolicies();
         } catch (InterruptedException e) {
             LOGGER.error(message, e);
             throw new OperationException(e);

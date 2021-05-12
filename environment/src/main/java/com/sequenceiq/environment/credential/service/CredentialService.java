@@ -236,6 +236,7 @@ public class CredentialService extends AbstractCredentialService implements Reso
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformUppercased = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformUppercased, userCrn);
+        credentialPrerequisiteService.getExperiencePolicies(cloudPlatformUppercased);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformUppercased, deploymentAddress, type);
     }
 
