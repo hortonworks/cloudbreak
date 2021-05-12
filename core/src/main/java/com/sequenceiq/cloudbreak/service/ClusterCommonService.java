@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -88,8 +89,12 @@ public class ClusterCommonService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private UpdateNodeCountValidator updateNodeCountValidator;
+
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByCrn(crn);
+        stack = stackService.getByIdWithLists(stack.getId());
         Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
@@ -130,6 +135,7 @@ public class ClusterCommonService {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
+        updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, updateJson.getHostGroupAdjustment());
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
             User creator = stack.getCreator();
             String userCrn = creator.getUserCrn();

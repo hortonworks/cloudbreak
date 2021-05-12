@@ -53,6 +53,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setScalabilityOption(source.getScalabilityOption());
         response.setSecurityGroup(createSecurityGroupFromEnvironment(source.getType(), environment));
         response.setRecipeNames(source.getRecipeNames());
+        response.setMinimumNodeCount(source.getMinimumNodeCount());
         response.setAws(getIfNotNull(source.getAws(), instanceGroupParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceGroupParameterConverter::convert));
         response.setGcp(getIfNotNull(source.getGcp(), instanceGroupParameterConverter::convert));

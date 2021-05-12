@@ -48,6 +48,9 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
     @ApiModelProperty(value = HostGroupModelDescription.RECOVERY_MODE, allowableValues = "MANUAL,AUTO")
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
+    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_MINIMUM_NODECOUNT)
+    private Integer minimumNodeCount = 0;
+
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_SCALABILITY_TYPE,
             allowableValues = "ALLOWED,FORBIDDEN,ONLY_UPSCALE,ONLY_DOWNSCALE")
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
@@ -74,6 +77,14 @@ public class InstanceGroupV1Base implements Serializable, CloudPlatformProvider 
 
     public void setType(InstanceGroupType type) {
         this.type = type;
+    }
+
+    public Integer getMinimumNodeCount() {
+        return minimumNodeCount;
+    }
+
+    public void setMinimumNodeCount(Integer minimumNodeCount) {
+        this.minimumNodeCount = minimumNodeCount;
     }
 
     public void setAzure(AzureInstanceGroupV1Parameters azure) {

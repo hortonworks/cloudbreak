@@ -75,6 +75,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     private int initialNodeCount;
 
+    private int minimumNodeCount;
+
     @Convert(converter = ScalabilityOptionConverter.class)
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
@@ -115,6 +117,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setStack(Stack stack) {
         this.stack = stack;
+    }
+
+    public int getMinimumNodeCount() {
+        return minimumNodeCount;
+    }
+
+    public void setMinimumNodeCount(int minimumNodeCount) {
+        this.minimumNodeCount = minimumNodeCount;
     }
 
     public InstanceGroup replaceInstanceMetadata(Set<InstanceMetaData> instanceMetaData) {

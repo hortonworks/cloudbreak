@@ -40,6 +40,9 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
             allowableValues = "ALLOWED,FORBIDDEN,ONLY_UPSCALE,ONLY_DOWNSCALE")
     private ScalabilityOption scalabilityOption = ScalabilityOption.ALLOWED;
 
+    @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_MINIMUM_NODECOUNT)
+    private Integer minimumNodeCount = 0;
+
     @ApiModelProperty(InstanceGroupModelDescription.AZURE_PARAMETERS)
     private AzureInstanceGroupV4Parameters azure;
 
@@ -84,6 +87,14 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public void setType(InstanceGroupType type) {
         this.type = type;
+    }
+
+    public Integer getMinimumNodeCount() {
+        return minimumNodeCount;
+    }
+
+    public void setMinimumNodeCount(Integer minimumNodeCount) {
+        this.minimumNodeCount = minimumNodeCount;
     }
 
     public AzureInstanceGroupV4Parameters createAzure() {

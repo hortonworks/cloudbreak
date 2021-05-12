@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -38,7 +39,7 @@ public class UpdateNodeCountValidator {
     private CmTemplateValidator cmTemplateValidator;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        if (upscaleEvent(instanceGroupAdjustmentJson)) {
+        if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
             List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
             List<InstanceMetaData> unhealthyInstanceMetadataList = instanceMetaDataAsList.stream()
                     .filter(instanceMetaData -> InstanceStatus.SERVICES_UNHEALTHY.equals(instanceMetaData.getInstanceStatus()))
@@ -102,36 +103,83 @@ public class UpdateNodeCountValidator {
         }
     }
 
+    public void validateScalabilityOfInstanceGroup(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustmentV4Request) {
+        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(hostGroupAdjustmentV4Request.getHostGroup());
+        validateGroupAdjustment(
+                stack,
+                hostGroupAdjustmentV4Request.getScalingAdjustment(),
+                instanceGroup);
+    }
+
     public void validateScalabilityOfInstanceGroup(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
-        if (upscaleEvent(instanceGroupAdjustmentJson)) {
+        validateGroupAdjustment(
+                stack,
+                instanceGroupAdjustmentJson.getScalingAdjustment(),
+                instanceGroup);
+    }
+
+    private void validateGroupAdjustment(Stack stack, Integer scalingAdjustment, InstanceGroup instanceGroup) {
+        if (upscaleEvent(scalingAdjustment)) {
+            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
+                throw new BadRequestException(format("Requested scaling up is forbidden on %s Data Hub %s group because the " +
+                        "the current node count is %s node the node count after the upscale action will be %s node and the minimal " +
+                        "node count in the %s group is %s node. You can not go under the minimal node count.",
+                        stack.getName(),
+                        instanceGroup.getGroupName(),
+                        instanceGroup.getNodeCount(),
+                        getNodeCountAfterScaling(instanceGroup, scalingAdjustment),
+                        instanceGroup.getGroupName(),
+                        instanceGroup.getMinimumNodeCount()));
+            }
             if (!instanceGroup.getScalabilityOption().upscalable()) {
-                throw new BadRequestException(format("Requested scaling up is forbidden on '%s' Data Hub '%s' group.",
+                throw new BadRequestException(format("Requested scaling up is forbidden on %s Data Hub %s group.",
                         stack.getName(),
                         instanceGroup.getGroupName()));
             }
-        } else if (downScaleEvent(instanceGroupAdjustmentJson)) {
+        } else if (downScaleEvent(scalingAdjustment)) {
+            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
+                throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub %s group because the " +
+                        "the current node count is %s node the node count after the downscale action will be %s node and the minimal " +
+                        "node count in the %s group is %s node. You can not go under the minimal node count.",
+                        stack.getName(),
+                        instanceGroup.getGroupName(),
+                        instanceGroup.getNodeCount(),
+                        getNodeCountAfterScaling(instanceGroup, scalingAdjustment),
+                        instanceGroup.getGroupName(),
+                        instanceGroup.getMinimumNodeCount()));
+            }
             if (!instanceGroup.getScalabilityOption().downscalable()) {
-                throw new BadRequestException(format("Requested scaling down is forbidden on '%s' Data Hub's '%s' group.",
+                throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub's %s group.",
                         stack.getName(),
                         instanceGroup.getGroupName()));
             }
         }
     }
 
-    private boolean downScaleEvent(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        return 0 > instanceGroupAdjustmentJson.getScalingAdjustment();
+    private int getNodeCountAfterScaling(InstanceGroup instanceGroup, Integer scalingAdjustment) {
+        return instanceGroup.getNodeCount() + scalingAdjustment.intValue();
     }
 
-    private boolean upscaleEvent(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        return 0 < instanceGroupAdjustmentJson.getScalingAdjustment();
+    private boolean nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(InstanceGroup instanceGroup,
+        Integer scalingAdjustment) {
+        int minimumNodeCount = instanceGroup.getMinimumNodeCount();
+        return getNodeCountAfterScaling(instanceGroup, scalingAdjustment) < minimumNodeCount;
+    }
+
+    private boolean downScaleEvent(Integer scalingAdjustment) {
+        return 0 > scalingAdjustment;
+    }
+
+    private boolean upscaleEvent(Integer scalingAdjustment) {
+        return 0 < scalingAdjustment;
     }
 
     public void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
         if (0 == instanceGroupAdjustmentJson.getScalingAdjustment()) {
             throw new BadRequestException(format("Requested scaling adjustment on Data Hub '%s' is 0. Nothing to do.", stack.getName()));
         }
-        if (upscaleEvent(instanceGroupAdjustmentJson)) {
+        if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
             InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupAdjustmentJson.getInstanceGroup());
             if (-1 * instanceGroupAdjustmentJson.getScalingAdjustment() > instanceGroup.getNodeCount()) {
                 throw new BadRequestException(format("There are %s instances in '%s' group. CDP Cannot remove %s instances.",
@@ -148,7 +196,7 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        if (upscaleEvent(instanceGroupAdjustmentJson)) {
+        if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
             List<InstanceMetaData> instanceMetaDataList =
                     stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
                             .collect(Collectors.toList());

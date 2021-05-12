@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @ExtendWith(MockitoExtension.class)
-class StackScalingServiceTest {
+public class StackScalingServiceTest {
 
     @InjectMocks
     private StackScalingService stackScalingService;

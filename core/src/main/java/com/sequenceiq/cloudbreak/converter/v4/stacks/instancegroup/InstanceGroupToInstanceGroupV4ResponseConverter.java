@@ -41,6 +41,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter extends AbstractCon
         }
         instanceGroupResponse.setNodeCount(source.getNodeCount());
         instanceGroupResponse.setName(source.getGroupName());
+        instanceGroupResponse.setMinimumNodeCount(source.getMinimumNodeCount());
         instanceGroupResponse.setType(source.getInstanceGroupType());
         instanceGroupResponse.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
         return instanceGroupResponse;
