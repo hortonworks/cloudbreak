@@ -18,9 +18,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -150,30 +148,6 @@ public interface ImageCatalogV4Endpoint {
             notes = IMAGE_CATALOG_NOTES, nickname = "getSingleImageByNameAndId")
     ImageV4Response getSingleImageByCatalogNameAndImageId(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("imageId") String imageId) throws Exception;
-
-    @POST
-    @Path("{name}/image")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.CREATE_IN_CATALOG, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "createImageInCatalog")
-    ImageV4Response createImageInCatalog(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @Valid ImageEntryV4Request request);
-
-    @PUT
-    @Path("{name}/image/{imageId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.UPDATE_IN_CATALOG, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "updateImageInCatalog")
-    ImageBasicInfoV4Response updateImageInCatalog(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @PathParam("imageId") String imageId, @Valid ImageEntryV4Request request);
-
-    @DELETE
-    @Path("{name}/image/{imageId}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ImageCatalogOpDescription.DELETE_FROM_CATALOG, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
-            nickname = "deleteImageFromCatalog")
-    ImageBasicInfoV4Response deleteImageFromCatalog(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @PathParam("imageId") String imageId);
 
     @GET
     @Path("image/{imageId}")
