@@ -56,7 +56,7 @@ public class SubnetListerService {
         if (credential.getAzure().isPresent()) {
             return credential.getAzure().get().getSubscriptionId();
         } else {
-            throw new RedbeamsException(String.format("Retrieved credential {} for Azure environment {} which lacks subscription ID",
+            throw new RedbeamsException(String.format("Retrieved credential %s for Azure environment %s which lacks subscription ID",
                     credential.getName(), environmentCrn));
         }
     }

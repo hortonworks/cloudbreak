@@ -211,7 +211,7 @@ public class RebootActions {
             protected void doExecute(RebootContext context, InstanceFailureEvent payload, Map<Object, Object> variables) {
                 addMdcOperationId(variables);
                 rebootService.handleInstanceRebootError(context);
-                String message = String.format("Rebooting failed for {}.", context.getInstanceIds());
+                String message = String.format("Rebooting failed for %s.", context.getInstanceIds());
                 LOGGER.error(message);
                 Stack stack = context.getStack();
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
