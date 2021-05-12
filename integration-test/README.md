@@ -10,7 +10,6 @@ This is a standalone [Spring Boot](https://spring.io/projects/spring-boot) appli
 2. After a successful build, you should find the `integration-test.jar` file at `integration-test/build/libs/`
 
 ## Quickstart setup of Integration tests with required parameters
-
 1. You need a config file under `~/.dp/config`
  *Note:*
  This can be achieved by installing the [DP CLI](https://github.com/hortonworks/cb-cli) on your machine then [configure](https://github.com/hortonworks/cb-cli#configure) it.
@@ -82,17 +81,17 @@ You should have a running [Cloudbreak](https://github.com/hortonworks/cloudbreak
 
 ## Code organization
 
-#### Test cases
+### Test cases
 Test cases are located under folder `https://github.com/hortonworks/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase`:
- - Integration Tests: `mock`
- - End To End Tests: `e2e`
- - Smoke Tests: `smoke`
- - Real UMS Tests: `authorization` (UMS host and cache timeout values needs to be changed before running these tests)
+- Integration Tests: `mock`
+- End To End Tests: `e2e`
+- Smoke Tests: `smoke`
+- Real UMS Tests: `authorization` ([UMS host and cache timeout values](#locally-running-authorization-tests) needs to be changed before running these tests)
 
 *Note:*
 [E2E tests](https://github.com/hortonworks/cloudbreak/tree/master/integration-test/src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e) are organized into domain-specific packages (distrox, sdx etc.).
 
-#### Cloud agnostic tests
+### Cloud agnostic tests
 Tests should be written in a cloud-vendor agnostic manner. Cloud-specific code should be hidden behind following interfaces:
 - CloudFunctionality: code directly manipulating cloud platforms (e.g. start / stop instances)
 - CloudProvider: DTOs containing cloud provider specific data 
@@ -101,7 +100,7 @@ Tests cases should thus reference cloud-vendor specific settings or make direct 
 
 If there are tests that contain DTOs with very specific cloud vendor dependent settings that cannot be generalized into an interface (like adls gen 2 settings of azure) then it might make sense to name the test as AzureAdlsGen2 test, but place it into a common package with other related tests (e.g. package name: storage, and aws s3 tests could also be placed there).
 
-#### Suites of tests in yaml files
+### Suites of tests in yaml files
 The previous organization of tests into cloud-vendor specific packages (e.g. aws tests) made it easy to see how many and what kind of tests are there for a given platform. Now, this information is not present any more and will be solely kept in the testsuites yaml files under `integration-test/src/main/resources/testsuites/e2e`.
 To help the reader to find out what tests are available for a certain platform the following guidelines are suggested:
 - keep a yaml file listing all implemented test for a given cloud vendor (e.g. `aws-e2e-tests.yaml`), and
@@ -110,3 +109,71 @@ To help the reader to find out what tests are available for a certain platform t
     - class move
     - accidental moving or renaming of classes will be guarded by TestNG (will throw a not found exception on moved classes)
     - however, testNG currently does not fail if an included method is not found, just ignores it - a quite dangeorous behavior in my mind 
+
+## Authorization tests
+Real UMS and Legacy AuthZ test cases are special kind of Mock tests:
+- use real life Manowar Dev UMS
+- use mocked cloud-vendor infrastructure (so any kind of AWS/Azure/GCP real resource will not be spin up)
+- internally use CBD just like a regular integration test
+
+Related test cases are present at [testcase/authorization](src/main/java/com/sequenceiq/it/cloudbreak/testcase/authorization) folder.
+
+### Legacy AuthZ tests
+Legacy tests require custom account parameter at `application.yml`:
+```
+integrationtest:
+   ums:
+     accountKey: legacy
+     deploymentKey: dev
+```
+
+### Locally running Authorization tests
+- UMS host and cache timeout values need to be changed:
+    - `altus.ums.host`
+    - `altus.ums.rights.cache.seconds.ttl`: Tests are using `Thread.sleep(7000)` to wait for UMS rights cache to expire. So locally the default cache need to be set to 5 seconds.
+    ```
+      export UMS_HOST="ums.thunderhead-dev.cloudera.com"
+      export CB_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
+      export REDBEAMS_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
+      export DATALAKE_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
+      export FREEIPA_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
+      export ENVIRONMENT_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
+    ```
+- `make fetch-secrets` is needed to initialize real UMS or Legacy users for authorization tests. *Fetching secrets accomplished via Azure CLI from Cloudbreak Team Azure Key Vault.*
+    - [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) on your local machine if it has not been installed yet. Read through the [Sign in with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli?view=azure-cli-latest) documentation.
+
+## L0 Promotion tests
+Cloudbreak related [promotion tests](src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e/l0promotion) from [Management Console/Control Plane test repository](https://github.infra.cloudera.com/CDH/cdpmc-qe).
+
+These tests are running on [Manowar-Dev](https://cloudera.dps.mow-dev.cloudera.com) in a separate test account (f8e2f110-fc7e-4e46-ae55-381aacc6718c) with machine users.
+
+Selected [promotion test cases](https://github.infra.cloudera.com/CDH/cdpmc-qe/tree/master/tests/regression) for transition (from Management Console/Control Plane Regression tests):
+- add user to environment
+- modify environment user role
+- add user to environment with multiple roles
+- remove user from environment
+- add user group to environment
+- remove user group from environment
+- add multiple groups to environments
+- access Cloudera Manager with new workload password
+- SSH access to Datalake
+
+***Note:***
+*In the future we can extend these test cases and the L0 package itself as well.*
+
+### Locally running L0 Promotion tests
+- `make fetch-secrets` is needed to initialize L0 users for tests. *Fetching secrets accomplished via Azure CLI from Cloudbreak Team Azure Key Vault.*
+    - [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) on your local machine if it has not been installed yet. Read through the [Sign in with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli?view=azure-cli-latest) documentation.
+    - Some L0 related UMS user store variable need to be set:
+    ```
+      export INTEGRATIONTEST_UMS_JSONSECRET_VERSION=9793d2c1afa84cbb9fdfeaee2f4327db
+      export INTEGRATIONTEST_UMS_JSONSECRET_DESTINATIONPATH=./src/main/resources/ums-users/api-credentials.json
+      export INTEGRATIONTEST_UMS_JSONSECRET_NAME=l0-ums-users-dev
+    ```
+    - Azure login applies [service principal authentication](https://docs.microsoft.com/en-us/cli/azure/create-an-azure-service-principal-azure-cli#sign-in-using-a-service-principal).
+        - Service principal is the local application instance, of a global application object in a single tenant. The service principal object defines what the app can actually do in the specific tenant, who can access the app, and what resources the app can access.
+        - Sign in with a service principal requires:
+            - `AZURE_CLIENT_ID`: application ID that has access to the `jenkins-secret` key vault
+            - `AZURE_CLIENT_SECRET`: application password
+            - `AZURE_TENANT_ID`: tenant ID which is associated with the selected application
+- Run the predefined test suites for L0 promotion. These suite files can be found at [src/main/resources/testsuites/e2e/l0promotion](src/main/resources/testsuites/e2e/l0promotion) directory. Tests can be [run in IDEA](#run-integration-tests-in-idea) or [in Terminal](#run-a-selected-e2e-test-in-terminal).
