@@ -16,7 +16,6 @@ import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
@@ -31,7 +30,6 @@ import com.sequenceiq.freeipa.converter.usersync.UserSyncStatusToUserSyncStatusR
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
@@ -63,6 +61,9 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
 
+    @Inject
+    private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
+
     public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, UserSyncStatus userSyncStatus) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
@@ -75,7 +76,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setNetwork(networkResponseConverter.convert(stack));
         describeFreeIpaResponse.setPlacement(convert(stack));
         describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups()));
-        describeFreeIpaResponse.setAvailabilityStatus(convertAvailabilityStatus(stack.getStackStatus()));
+        describeFreeIpaResponse.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack));
         describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
@@ -125,12 +126,5 @@ public class StackToDescribeFreeIpaResponseConverter {
         placementResponse.setAvailabilityZone(source.getAvailabilityZone());
         placementResponse.setRegion(source.getRegion());
         return placementResponse;
-    }
-
-    private AvailabilityStatus convertAvailabilityStatus(StackStatus status) {
-        if (status == null || status.getDetailedStackStatus() == null) {
-            return AvailabilityStatus.UNKNOWN;
-        }
-        return status.getDetailedStackStatus().getAvailabilityStatus();
     }
 }
