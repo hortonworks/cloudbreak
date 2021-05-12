@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsResponse;
@@ -105,6 +106,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private BalancedDnsAvailabilityChecker balancedDnsAvailabilityChecker;
 
+    @Mock
+    private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
+
     @BeforeAll
     static void initInstanceGroupResponse() {
         InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
@@ -126,6 +130,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(instanceGroupConverter.convert(stack.getInstanceGroups())).thenReturn(INSTANCE_GROUP_RESPONSES);
         when(userSyncStatusConverter.convert(userSyncStatus)).thenReturn(USERSYNC_STATUS_RESPONSE);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
+        when(stackToAvailabilityStatusConverter.convert(stack)).thenReturn(AvailabilityStatus.AVAILABLE);
 
         DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, userSyncStatus);
 

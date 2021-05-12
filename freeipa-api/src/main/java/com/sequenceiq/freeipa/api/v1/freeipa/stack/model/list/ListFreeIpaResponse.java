@@ -5,6 +5,7 @@ import javax.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
@@ -32,6 +33,8 @@ public class ListFreeIpaResponse {
     private Status status;
 
     private String statusString;
+
+    private AvailabilityStatus availabilityStatus;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -79,5 +82,13 @@ public class ListFreeIpaResponse {
 
     public void setStatusString(String statusString) {
         this.statusString = statusString;
+    }
+
+    public AvailabilityStatus getAvailabilityStatus() {
+        return availabilityStatus;
+    }
+
+    public void setAvailabilityStatus(AvailabilityStatus availabilityStatus) {
+        this.availabilityStatus = availabilityStatus;
     }
 }

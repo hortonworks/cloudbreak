@@ -1,14 +1,18 @@
 package com.sequenceiq.freeipa.converter.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -33,9 +37,14 @@ class FreeIpaToListFreeIpaResponseConverterTest {
     @InjectMocks
     private FreeIpaToListFreeIpaResponseConverter underTest;
 
+    @Mock
+    private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
+
     @Test
     void testConvertList() {
         List<FreeIpa> freeIpaList = createFreeIpaList();
+
+        when(stackToAvailabilityStatusConverter.convert(any())).thenReturn(AvailabilityStatus.AVAILABLE);
 
         List<ListFreeIpaResponse> actual = underTest.convertList(freeIpaList);
 
