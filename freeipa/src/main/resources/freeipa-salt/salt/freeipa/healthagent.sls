@@ -34,4 +34,5 @@ setup-healthagent-certs:
 start-freeipa-healthagent:
   service.running:
     - name: cdp-freeipa-healthagent
+    - failhard: True
     - enable: True

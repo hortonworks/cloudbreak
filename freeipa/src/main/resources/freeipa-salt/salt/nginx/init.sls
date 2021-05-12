@@ -36,5 +36,6 @@ restart_nginx_after_ssl_reconfig:
   service.running:
     - name: nginx
     - enable: True
+    - failhard: True
     - watch:
       - file: /etc/nginx/sites-enabled/ssl.conf

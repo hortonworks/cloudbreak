@@ -1,5 +1,6 @@
 freeipa-install:
   pkg.installed:
+    - failhard: True
     - pkgs:
         - ipa-server
         - ipa-server-dns
