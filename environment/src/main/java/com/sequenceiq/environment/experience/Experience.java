@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience;
 
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.constraints.NotNull;
@@ -27,6 +28,8 @@ public interface Experience {
      *            This object cannot be null since its content is can be crucial.
      */
     void deleteConnectedExperiences(@NotNull EnvironmentExperienceDto environment);
+
+    @NotNull Map<String, String> collectPolicy(@NotNull EnvironmentExperienceDto environment);
 
     ExperienceSource getSource();
 

@@ -2,11 +2,16 @@ package com.sequenceiq.environment.experience;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +68,24 @@ public class ExperienceConnectorService {
             LOGGER.info(XP_SCAN_DISABLED_BASE_MSG, "the experience deletion is disabled in the Spring config");
         }
         return Set.of();
+    }
+
+    public Map<String, String> collectExperiencePoliciesForCredentialCreation(@NotNull EnvironmentExperienceDto environmentExperienceDto) {
+        checkEnvironmentExperienceDto(environmentExperienceDto);
+        Map<String, String> policies = new LinkedHashMap<>();
+        LOGGER.info("About to collect policy JSONs from experiences");
+        if (experienceScanEnabled) {
+            if (isNotEmpty(experiences)) {
+                for (Experience experience : experiences) {
+                    experience.collectPolicy(environmentExperienceDto).forEach((k, v) -> policies.put(k, v));
+                }
+            } else {
+                LOGGER.info("No configured experiences has been provided for policy collecting!");
+            }
+        } else {
+            LOGGER.info(XP_SCAN_DISABLED_BASE_MSG, "the experience deletion is disabled in the Spring config");
+        }
+        return policies;
     }
 
     public void deleteConnectedExperiences(EnvironmentExperienceDto dto) {

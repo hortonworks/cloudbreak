@@ -102,6 +102,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                 policyJson = null;
         }
         AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, policyJson);
+        awsPrerequisites.setPolicies(Map.of("Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson()));
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
     }
 

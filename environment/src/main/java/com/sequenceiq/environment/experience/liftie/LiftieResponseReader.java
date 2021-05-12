@@ -29,7 +29,7 @@ public class LiftieResponseReader implements ResponseReader {
                 result = response.readEntity(expectedType);
                 LOGGER.debug("Liftie response has resolved.");
             } catch (IllegalStateException | ProcessingException e) {
-                String msg = "Failed to resolve response from Liftie on path: " + target;
+                String msg = "Failed to resolve response from Liftie on path \"" + target + "\" due to: " + e.getMessage();
                 LOGGER.warn(msg, e);
             }
         } else {

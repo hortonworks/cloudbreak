@@ -3,8 +3,10 @@ package com.sequenceiq.environment.experience.liftie;
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
 import static com.sequenceiq.environment.experience.liftie.LiftieIgnorableClusterStatuses.DELETED;
 
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.Experience;
 import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceSource;
@@ -22,6 +25,7 @@ import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.config.LiftieWorkloadsConfig;
 import com.sequenceiq.environment.experience.liftie.responses.LiftieClusterView;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
 
 @Component
 public class ExperiencesByLiftie implements Experience {
@@ -66,6 +70,25 @@ public class ExperiencesByLiftie implements Experience {
                 .filter(cluster -> LiftieIgnorableClusterStatuses.notContains(cluster.getClusterStatus().getStatus()))
                 .forEach(cluster -> liftieApi.deleteCluster(cluster.getClusterId()));
         LOGGER.debug("Liftie clusters delete requests submitted for environment '{}'", environment.getName());
+    }
+
+    @Override
+    @NotNull
+    public Map<String, String> collectPolicy(EnvironmentExperienceDto environment) {
+        String key = "Kubernetes cluster manager";
+        Map<String, String> result = new LinkedHashMap<>();
+        try {
+            ExperiencePolicyResponse fetchedPolicies = liftieApi.getPolicy(environment.getCloudPlatform());
+            if (fetchedPolicies.getAws() != null) {
+                result.put(key, fetchedPolicies.getAws().getPolicy());
+            } else {
+                result.put(key, "");
+            }
+        } catch (ExperienceOperationFailedException eofe) {
+            LOGGER.warn("Unable to fetch policy from Liftie  due to: " + eofe.getMessage(), eofe);
+            result.put(key, "");
+        }
+        return result;
     }
 
     @Override

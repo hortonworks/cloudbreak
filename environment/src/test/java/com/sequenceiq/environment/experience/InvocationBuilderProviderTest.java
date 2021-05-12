@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+
 class InvocationBuilderProviderTest {
 
     @Mock
@@ -58,11 +60,42 @@ class InvocationBuilderProviderTest {
         underTest.createInvocationBuilder(mockWebTarget);
 
         verify(mockBuilder, times(1)).header(eq(CRN_HEADER), any());
+        verify(mockBuilder, times(1)).header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
     void testCreateInvocationBuilderWebTargetShouldSetRequestIdHeader() {
         underTest.createInvocationBuilder(mockWebTarget);
+
+        verify(mockBuilder, times(1)).header(eq(REQUEST_ID_HEADER), anyString());
+    }
+
+    @Test
+    void testCreateInvocationBuilderForInternalActorShouldAcceptRequestCall() {
+        underTest.createInvocationBuilderForInternalActor(mockWebTarget);
+
+        verify(mockWebTarget, times(1)).request();
+    }
+
+    @Test
+    void testCreateInvocationBuilderForInternalActorShouldSetApplicationJsonAsAcceptedFormat() {
+        underTest.createInvocationBuilderForInternalActor(mockWebTarget);
+
+        verify(mockBuilder, times(1)).accept(anyString());
+        verify(mockBuilder, times(1)).accept(APPLICATION_JSON);
+    }
+
+    @Test
+    void testCreateInvocationBuilderForInternalActorShouldSetCrnHeader() {
+        underTest.createInvocationBuilderForInternalActor(mockWebTarget);
+
+        verify(mockBuilder, times(1)).header(eq(CRN_HEADER), any());
+        verify(mockBuilder, times(1)).header(CRN_HEADER, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+    }
+
+    @Test
+    void testCreateInvocationBuilderForInternalActorShouldSetRequestIdHeader() {
+        underTest.createInvocationBuilderForInternalActor(mockWebTarget);
 
         verify(mockBuilder, times(1)).header(eq(REQUEST_ID_HEADER), anyString());
     }

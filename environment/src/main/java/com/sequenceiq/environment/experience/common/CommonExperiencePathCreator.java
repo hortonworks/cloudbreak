@@ -6,7 +6,15 @@ import org.springframework.stereotype.Component;
 public class CommonExperiencePathCreator {
 
     public String createPathToExperience(CommonExperience xp) {
-        return xp.getAddress() + xp.getInternalEnvironmentEndpoint();
+        return createCombinedBasedAddress(xp) + xp.getInternalEnvironmentEndpoint();
+    }
+
+    public String createPathToExperiencePolicyProvider(CommonExperience xp) {
+        return createCombinedBasedAddress(xp) + xp.getPolicyEndpoint();
+    }
+
+    private String createCombinedBasedAddress(CommonExperience xp) {
+        return xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort();
     }
 
 }

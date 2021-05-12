@@ -9,6 +9,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 
@@ -16,6 +18,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
 
 class CommonExperienceWebTargetProviderTest {
 
@@ -37,31 +41,31 @@ class CommonExperienceWebTargetProviderTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        underTest = new CommonExperienceWebTargetProvider(TEST_COMPONENT_TO_REPLACE_IN_PATH, mockClient);
+        underTest = new CommonExperienceWebTargetProvider(new ExperiencePathConfig(Map.of("envCrn", TEST_COMPONENT_TO_REPLACE_IN_PATH)), mockClient);
     }
 
     @Test
-    void testInitializationWhenComponentToReplaceInPathIsNullThenIllegalArgumentExceptionShouldCome() {
+    void testCreateWebTargetForPolicyFetchWhenBasePathIsNullThenIllegalArgumentExceptionShouldCome() {
         IllegalArgumentException expectedException = assertThrows(
-                IllegalArgumentException.class, () -> new CommonExperienceWebTargetProvider(null, mockClient));
+                IllegalArgumentException.class, () -> underTest.createWebTargetForPolicyFetch(null, "someCloudProvider"));
 
         assertNotNull(expectedException);
-        assertEquals(MISSING_COMPONENT_TO_REPLACE_EXCEPTION_MSG, expectedException.getMessage());
+        assertEquals(INVALID_XP_BASE_PATH_GIVEN_MSG, expectedException.getMessage());
     }
 
     @Test
-    void testInitializationWhenComponentToReplaceInPathIsEmptyThenIllegalArgumentExceptionShouldCome() {
+    void testCreateWebTargetForClusterFetchWhenBasePathIsNullThenIllegalArgumentExceptionShouldCome() {
         IllegalArgumentException expectedException = assertThrows(
-                IllegalArgumentException.class, () -> new CommonExperienceWebTargetProvider("", mockClient));
+                IllegalArgumentException.class, () -> underTest.createWebTargetForClusterFetch(null, "someCloudProvider"));
 
         assertNotNull(expectedException);
-        assertEquals(MISSING_COMPONENT_TO_REPLACE_EXCEPTION_MSG, expectedException.getMessage());
+        assertEquals(INVALID_XP_BASE_PATH_GIVEN_MSG, expectedException.getMessage());
     }
 
     @Test
     void testCreateWebTargetBasedOnInputsWhenExperienceBasePathIsNullThenIllegalArgumentExceptionShouldCome() {
         IllegalArgumentException expectedException = assertThrows(
-                IllegalArgumentException.class, () -> underTest.createWebTargetBasedOnInputs(null, TEST_ENV_CRN));
+                IllegalArgumentException.class, () -> underTest.createWebTargetForClusterFetch(null, TEST_ENV_CRN));
 
         assertNotNull(expectedException);
         assertEquals(INVALID_XP_BASE_PATH_GIVEN_MSG, expectedException.getMessage());
@@ -77,7 +81,7 @@ class CommonExperienceWebTargetProviderTest {
 
         when(mockClient.target(expectedTargetCreationContent)).thenReturn(expectedWebTarget);
 
-        WebTarget resultWebTarget = underTest.createWebTargetBasedOnInputs(xpBasePathExtended, TEST_ENV_CRN);
+        WebTarget resultWebTarget = underTest.createWebTargetForClusterFetch(xpBasePathExtended, TEST_ENV_CRN);
 
         assertEquals(expectedWebTarget, resultWebTarget);
 

@@ -89,9 +89,11 @@ public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<Exp
 
     private EnvironmentExperienceDto buildDto(ExperiencePollerObject pollerObject) {
         return new EnvironmentExperienceDto.Builder()
-                .withName(pollerObject.getEnvironmentName())
                 .withCrn(pollerObject.getEnvironmentCrn())
-                .withAccountId(pollerObject.getAccountId()).build();
+                .withAccountId(pollerObject.getAccountId())
+                .withName(pollerObject.getEnvironmentName())
+                .withCloudPlatform(pollerObject.getCloudPlatform())
+                .build();
     }
 
 }
