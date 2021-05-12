@@ -24,6 +24,9 @@ public class AzureCredentialPrerequisites extends CredentialBasePrerequisites im
 
     public AzureCredentialPrerequisites(String appCreationCommand, String roleDefitionJson) {
         this.appCreationCommand = appCreationCommand;
+    }
+
+    public void setRoleDefinitionJson(String roleDefitionJson) {
         this.roleDefitionJson = roleDefitionJson;
     }
 
@@ -46,7 +49,7 @@ public class AzureCredentialPrerequisites extends CredentialBasePrerequisites im
         return appCreationCommand;
     }
 
-    public String getRoleDefitionJson() {
+    public String getRoleDefinitionJson() {
         return roleDefitionJson;
     }
 
