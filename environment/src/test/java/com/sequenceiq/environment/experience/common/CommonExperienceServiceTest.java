@@ -3,6 +3,7 @@ package com.sequenceiq.environment.experience.common;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
@@ -27,21 +29,27 @@ import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
+import com.sequenceiq.environment.experience.policy.response.ProviderPolicyResponse;
 
 @ExtendWith(MockitoExtension.class)
 class CommonExperienceServiceTest {
 
+    private static final int ONCE = 1;
+
     private static final String TENANT = "someTenantValue";
+
+    private static final String TEST_CLOUD_PLATFORM = "AWS";
 
     private static final String ENV_CRN = "someEnvCrnValue";
 
-    private static final String XP_API = "https://127.0.0.1:9999";
-
-    private static final String XP_INTERNAL_ENV_ENDPOINT = "/somexp/api/v3/cp-internal/environment/{crn}";
-
     private static final String TEST_XP_NAME = "AWESOME_XP";
 
-    private static final int ONCE = 1;
+    private static final String XP_API = "https://127.0.0.1:9999";
+
+    private static final String TEST_XP_BUSINESS_NAME = "SUPER_AWESOME_XP";
+
+    private static final String XP_INTERNAL_ENV_ENDPOINT = "/somexp/api/v3/cp-internal/environment/{crn}";
 
     @Mock
     private CommonExperienceConnectorService mockExperienceConnectorService;
@@ -68,9 +76,12 @@ class CommonExperienceServiceTest {
         lenient().when(mockEnvironment.getCrn()).thenReturn(ENV_CRN);
         lenient().when(mockEnvironment.getAccountId()).thenReturn(TENANT);
         lenient().when(mockEnvironment.getName()).thenReturn(TEST_XP_NAME);
+        lenient().when(mockEnvironment.getCloudPlatform()).thenReturn(TEST_CLOUD_PLATFORM);
         lenient().when(mockCommonExperience.getName()).thenReturn(TEST_XP_NAME);
+        lenient().when(mockCommonExperience.getBusinessName()).thenReturn(TEST_XP_BUSINESS_NAME);
         lenient().when(mockCommonExperience.getInternalEnvironmentEndpoint()).thenReturn(XP_INTERNAL_ENV_ENDPOINT);
         lenient().when(mockCommonExperience.getAddress()).thenReturn(XP_API);
+        lenient().when(mockCommonExperience.hasResourceDeleteAccess()).thenReturn(true);
     }
 
     @Test
@@ -271,6 +282,52 @@ class CommonExperienceServiceTest {
         ExperienceSource expectedSource = underTest.getSource();
 
         assertEquals(expectedSource, ExperienceSource.BASIC);
+    }
+
+    @Test
+    void testCollectPolicyWhenXpHasImplementedFineGradePolicyAndItReturnsValidResponseThenItShouldBeStoredWithTheKeyOfTheXp() {
+        String xpPath = "somePath";
+        String policyJson = "somePolicy";
+        ExperiencePolicyResponse epr = new ExperiencePolicyResponse();
+        epr.setAws(new ProviderPolicyResponse(policyJson));
+
+        when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
+        when(mockCommonExperience.hasFineGradePolicy()).thenReturn(true);
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
+        when(mockCommonExperiencePathCreator.createPathToExperiencePolicyProvider(mockCommonExperience)).thenReturn(xpPath);
+        when(mockExperienceConnectorService.collectPolicy(xpPath, TEST_CLOUD_PLATFORM)).thenReturn(epr);
+
+        underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
+                mockCommonExperiencePathCreator);
+
+        Map<String, String> result = underTest.collectPolicy(mockEnvironment);
+
+        assertNotNull(result);
+        assertTrue(result.containsKey(TEST_XP_BUSINESS_NAME));
+        assertEquals(policyJson, result.get(TEST_XP_BUSINESS_NAME));
+
+        verify(mockCommonExperiencePathCreator, times(ONCE)).createPathToExperiencePolicyProvider(any());
+        verify(mockCommonExperiencePathCreator, times(ONCE)).createPathToExperiencePolicyProvider(mockCommonExperience);
+        verify(mockExperienceConnectorService, times(ONCE)).collectPolicy(any(), any());
+        verify(mockExperienceConnectorService, times(ONCE)).collectPolicy(xpPath, TEST_CLOUD_PLATFORM);
+    }
+
+    @Test
+    void testCollectPolicyWhenXpHasNotImplementedFineGradePolicyThenNoRemoteCallShouldHappen() {
+        when(mockExperienceValidator.isExperienceFilled(mockCommonExperience)).thenReturn(true);
+        when(mockCommonExperience.hasFineGradePolicy()).thenReturn(false);
+        when(mockExperienceServicesConfig.getConfigs()).thenReturn(List.of(mockCommonExperience));
+
+        underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
+                mockCommonExperiencePathCreator);
+
+        Map<String, String> result = underTest.collectPolicy(mockEnvironment);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(mockCommonExperiencePathCreator, never()).createPathToExperiencePolicyProvider(any());
+        verify(mockExperienceConnectorService, never()).collectPolicy(any(), any());
     }
 
 }

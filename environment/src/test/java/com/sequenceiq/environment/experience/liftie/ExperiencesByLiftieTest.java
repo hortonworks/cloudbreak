@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -31,6 +32,8 @@ import com.sequenceiq.environment.experience.liftie.responses.LiftieClusterView;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
 import com.sequenceiq.environment.experience.liftie.responses.PageStats;
 import com.sequenceiq.environment.experience.liftie.responses.StatusMessage;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
+import com.sequenceiq.environment.experience.policy.response.ProviderPolicyResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ExperiencesByLiftieTest {
@@ -38,6 +41,8 @@ class ExperiencesByLiftieTest {
     private static final String DTO_ARG_NULL_EXCEPTION_MESSAGE = EnvironmentExperienceDto.class.getSimpleName() + " cannot be null!";
 
     private static final String AVAILABLE_STATUS = "AVAILABLE";
+
+    private static final String TEST_CLOUD_PLATFORM = "AWS";
 
     private static final LiftieWorkload TEST_WORKLOAD = new LiftieWorkload("mon-platform", "Monitoring Clusters");
 
@@ -314,6 +319,21 @@ class ExperiencesByLiftieTest {
         assertEquals(expectedSource, ExperienceSource.LIFTIE);
     }
 
+    @Test
+    void testCollectPolicy() {
+        String liftiePolicyKey = "Kubernetes cluster manager";
+        ExperiencePolicyResponse fetchedPolicy = new ExperiencePolicyResponse();
+        fetchedPolicy.setAws(new ProviderPolicyResponse("somePolicyForAws"));
+        EnvironmentExperienceDto environmentExperienceDto = createEnvironmentExperienceDto();
+        when(mockLiftieApi.getPolicy(environmentExperienceDto.getCloudPlatform())).thenReturn(fetchedPolicy);
+
+        Map<String, String> result = underTest.collectPolicy(environmentExperienceDto);
+
+        assertNotNull(result);
+        assertTrue(result.containsKey(liftiePolicyKey));
+        assertEquals(fetchedPolicy.getAws().getPolicy(), result.get(liftiePolicyKey));
+    }
+
     private ListClustersResponse createEmptyListClustersResponse() {
         ListClustersResponse empty = new ListClustersResponse();
         PageStats ps = new PageStats();
@@ -324,6 +344,7 @@ class ExperiencesByLiftieTest {
 
     private EnvironmentExperienceDto createEnvironmentExperienceDto() {
         return new EnvironmentExperienceDto.Builder()
+                .withCloudPlatform(TEST_CLOUD_PLATFORM)
                 .withAccountId(TEST_TENANT)
                 .withName(TEST_ENV_NAME)
                 .withCrn(TEST_ENV_CRN)

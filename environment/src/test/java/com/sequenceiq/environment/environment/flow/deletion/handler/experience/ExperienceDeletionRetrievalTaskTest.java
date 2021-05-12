@@ -23,6 +23,8 @@ class ExperienceDeletionRetrievalTaskTest {
 
     private static final String TEST_ENV_NAME = "someEnvName";
 
+    private static final String TEST_CLOUD_PLATFORM = "someCloudPlatform";
+
     private static final String TEST_ENV_CRN = "someEnvCrn";
 
     private static final String TEST_ACCOUNT_ID = "someAccountId";
@@ -38,7 +40,7 @@ class ExperienceDeletionRetrievalTaskTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         underTest = new ExperienceDeletionRetrievalTask(mockExperienceConnectorService);
-        testExperiencePollerObject = new ExperiencePollerObject(TEST_ENV_CRN, TEST_ENV_NAME, TEST_ACCOUNT_ID);
+        testExperiencePollerObject = new ExperiencePollerObject(TEST_ENV_CRN, TEST_ENV_NAME, TEST_CLOUD_PLATFORM, TEST_ACCOUNT_ID);
     }
 
     @Test

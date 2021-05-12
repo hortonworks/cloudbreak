@@ -2,7 +2,6 @@ package com.sequenceiq.environment.experience.liftie;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 import java.net.URI;
 
@@ -56,7 +55,7 @@ class LiftieConnectorServiceTestBase {
 
     @BeforeEach
     void setUp() {
-        when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        lenient().when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         lenient().when(mockWebTarget.queryParam(anyString(), anyString())).thenReturn(getMockWebTarget());
         lenient().when(mockWebTarget.getUri()).thenReturn(URI.create(LIFTIE_CLUSTER_ENDPOINT_PATH));
 

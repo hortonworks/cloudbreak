@@ -74,11 +74,14 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private String auditPoliciesJson;
 
+    private String environmentMinimalPoliciesJson;
+
     @PostConstruct
     public void init() {
         vmRecommendations = initVmRecommendations();
         credentialPoliciesJson = initCBPolicyJson();
         auditPoliciesJson = initAuditPolicyJson();
+        environmentMinimalPoliciesJson = initEnvironmentMinimalJson();
     }
 
     @Override
@@ -172,6 +175,10 @@ public class AwsPlatformParameters implements PlatformParameters {
         return credentialPoliciesJson;
     }
 
+    public String getEnvironmentMinimalPoliciesJson() {
+        return environmentMinimalPoliciesJson;
+    }
+
     public enum AwsDiskType {
         Standard("standard", "Magnetic"),
         Ephemeral("ephemeral", "Ephemeral"),
@@ -214,6 +221,11 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private String initAuditPolicyJson() {
         String resourceDefinition = resourceDefinition("audit-policy");
+        return getPolicyJson(resourceDefinition);
+    }
+
+    private String initEnvironmentMinimalJson() {
+        String resourceDefinition = resourceDefinition("environment-minimal-policy");
         return getPolicyJson(resourceDefinition);
     }
 

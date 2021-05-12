@@ -24,4 +24,12 @@ public class InvocationBuilderProvider {
                 .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
     }
 
+    public Invocation.Builder createInvocationBuilderForInternalActor(WebTarget webTarget) {
+        return webTarget
+                .request()
+                .accept(APPLICATION_JSON)
+                .header(CRN_HEADER, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN)
+                .header(REQUEST_ID_HEADER, UUID.randomUUID().toString());
+    }
+
 }

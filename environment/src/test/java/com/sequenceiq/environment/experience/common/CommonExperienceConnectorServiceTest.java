@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -34,6 +35,7 @@ import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
 import com.sequenceiq.environment.experience.common.responses.DeleteCommonExperienceWorkspaceResponse;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
 
 @ExtendWith(MockitoExtension.class)
 class CommonExperienceConnectorServiceTest {
@@ -45,6 +47,8 @@ class CommonExperienceConnectorServiceTest {
     private static final String TEST_ENV_CRN = "someEnvironmentCrn";
 
     private static final URI TEST_URI = URI.create("somePath");
+
+    private static final String TEST_CLOUD_PLATFORM = "AWS";
 
     private static final int ONCE = 1;
 
@@ -77,27 +81,27 @@ class CommonExperienceConnectorServiceTest {
                 mockInvocationBuilderProvider);
 
         when(mockWebTarget.getUri()).thenReturn(TEST_URI);
-        when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        lenient().when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
     }
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvShouldObtainWebTargetFromCreator() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
 
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
 
         underTest.getExperienceClustersConnectedToEnv(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
-        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(any(), any());
-        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForClusterFetch(any(), any());
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN);
     }
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvShouldReturnTheNameOfClustersFromTheCallResult() {
         CpInternalEnvironmentResponse response = createCpInternalEnvironmentResponse();
 
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(response));
 
@@ -109,7 +113,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvShouldObtainInvocationBuilderFromCreator() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
 
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
@@ -123,7 +127,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvShouldExecuteItsCallThroughRetryableWebTarget() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
 
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
@@ -137,7 +141,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvWhenCallResultIsEmptyThenIllegalStateExceptionShouldBeThrown() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(null);
 
@@ -149,7 +153,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvWhenCallResultIsNotEmptyThenResponseReaderShouldBeInvokeToResolveContent() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(createCpInternalEnvironmentResponse()));
@@ -162,7 +166,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvWhenResponseReaderUnableToResolveResponseThenEmptyOptionalReturnsAndResponseResultIterationDoesntHappen() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class)).thenReturn(Optional.empty());
@@ -176,7 +180,7 @@ class CommonExperienceConnectorServiceTest {
     @Test
     void testGetWorkspaceNamesConnectedToEnvWhenResponseReaderIsAbleToResolveResponseThenResponseResultIterationHappens() {
         CpInternalEnvironmentResponse mockCpInternalEnvironmentResponse = mock(CpInternalEnvironmentResponse.class);
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class))
@@ -189,7 +193,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testGetWorkspaceNamesConnectedToEnvWhenCallExecutionThrowsExceptionThenIllegalStateExceptionShouldBeThrown() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenThrow(new RuntimeException());
 
@@ -202,19 +206,19 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testDeleteWorkspaceForEnvironmentShouldObtainWebTargetFromCreator() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
 
         underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN);
 
-        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(any(), any());
-        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForClusterFetch(any(), any());
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN);
     }
 
     @Test
     void testDeleteWorkspaceForEnvironmentShouldObtainInvocationBuilderFromCreator() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
@@ -227,7 +231,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testDeleteWorkspaceForEnvironmentShouldExecuteItsCallThroughRetryableWebTarget() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
@@ -240,7 +244,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testDeleteWorkspaceForEnvironmentWhenCallResultIsEmptyThenIllegalStateExceptionShouldCome() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(null);
 
@@ -253,7 +257,7 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testDeleteWorkspaceForEnvironmentWhenCallResultIsNotEmptyThenResponseReaderShouldBeInvokeToResolveContent() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
@@ -267,7 +271,7 @@ class CommonExperienceConnectorServiceTest {
     @Test
     @MockitoSettings(strictness = Strictness.LENIENT)
     void testDeleteWorkspaceForEnvironmentWhenResponseReaderUnableToResolveResponseThenIllegalStateExceptionShouldCome() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class)).thenReturn(Optional.empty());
@@ -282,7 +286,7 @@ class CommonExperienceConnectorServiceTest {
     @Test
     void testDeleteWorkspaceForEnvironmentWhenResponseReaderIsAbleToResolveResponseThenResponseResultIterationHappens() {
         DeleteCommonExperienceWorkspaceResponse mockCpInternalEnvironmentResponse = mock(DeleteCommonExperienceWorkspaceResponse.class);
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
         when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, DeleteCommonExperienceWorkspaceResponse.class))
@@ -293,12 +297,118 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testDeleteWorkspaceForEnvironmentWhenCallExecutionThrowsExceptionThenIllegalStateExceptionShouldCome() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetBasedOnInputs(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenThrow(new RuntimeException());
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
+
+        assertNotNull(expectedException);
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
+
+        verify(mockCommonExperienceResponseReader, never()).read(any(), any(), any());
+    }
+
+    @Test
+    void testCollectPolicyShouldObtainWebTargetFromCreator() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockRetryableWebTarget.get(any())).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(ExperiencePolicyResponse.class)));
+
+        underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM);
+
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForPolicyFetch(any(), any());
+        verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM);
+    }
+
+    @Test
+    void testCollectPolicyShouldObtainInvocationBuilderFromCreator() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(any())).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(ExperiencePolicyResponse.class)));
+
+        underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM);
+
+        verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilderForInternalActor(any());
+        verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilderForInternalActor(mockWebTarget);
+    }
+
+    @Test
+    void testCollectPolicyShouldExecuteItsCallThroughRetryableWebTarget() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(any())).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(ExperiencePolicyResponse.class)));
+
+        underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM);
+
+        verify(mockRetryableWebTarget, times(ONCE)).get(any());
+        verify(mockRetryableWebTarget, times(ONCE)).get(mockInvocationBuilder);
+    }
+
+    @Test
+    void testCollectPolicyWhenCallResultIsEmptyThenIllegalStateExceptionShouldCome() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(null);
+
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM));
+
+        assertNotNull(expectedException);
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
+    }
+
+    @Test
+    void testCollectPolicyWhenCallResultIsNotEmptyThenResponseReaderShouldBeInvokeToResolveContent() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(any())).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(ExperiencePolicyResponse.class)));
+
+        underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM);
+
+        verify(mockCommonExperienceResponseReader, times(ONCE)).read(any(), any(), any());
+        verify(mockCommonExperienceResponseReader, times(ONCE)).read(TEST_URI.toString(), mockResponse, ExperiencePolicyResponse.class);
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testCollectPolicyWhenResponseReaderUnableToResolveResponseThenIllegalStateExceptionShouldCome() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, ExperiencePolicyResponse.class)).thenReturn(Optional.empty());
+
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM));
+
+        assertNotNull(expectedException);
+        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
+    }
+
+    @Test
+    void testCollectPolicyWhenResponseReaderIsAbleToResolveResponseThenResponseResultIterationHappens() {
+        ExperiencePolicyResponse mockCpInternalEnvironmentResponse = mock(ExperiencePolicyResponse.class);
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenReturn(mockResponse);
+        when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, ExperiencePolicyResponse.class))
+                .thenReturn(Optional.of(mockCpInternalEnvironmentResponse));
+
+        underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM);
+    }
+
+    @Test
+    void testCollectPolicyWhenCallExecutionThrowsExceptionThenIllegalStateExceptionShouldCome() {
+        when(mockCommonExperienceWebTargetProvider.createWebTargetForPolicyFetch(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM)).thenReturn(mockWebTarget);
+        when(mockInvocationBuilderProvider.createInvocationBuilderForInternalActor(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        when(mockRetryableWebTarget.get(mockInvocationBuilder)).thenThrow(new RuntimeException());
+
+        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
+                () -> underTest.collectPolicy(TEST_XP_BASE_PATH, TEST_CLOUD_PLATFORM));
 
         assertNotNull(expectedException);
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());

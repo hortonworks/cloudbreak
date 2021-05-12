@@ -79,7 +79,7 @@ public class EnvironmentExperienceDeletionAction {
     private void waitForResult(Environment environment, boolean forceDelete) {
         Pair<PollingResult, Exception> result = experiencePollingService.pollWithTimeout(
                 new ExperienceDeletionRetrievalTask(experienceConnectorService),
-                new ExperiencePollerObject(environment.getResourceCrn(), environment.getName(), environment.getAccountId()),
+                new ExperiencePollerObject(environment.getResourceCrn(), environment.getName(), environment.getCloudPlatform(), environment.getAccountId()),
                 EXPERIENCE_RETRYING_INTERVAL,
                 EXPERIENCE_RETRYING_COUNT,
                 SINGLE_FAILURE);
@@ -93,6 +93,7 @@ public class EnvironmentExperienceDeletionAction {
                 .withName(environment.getName())
                 .withCrn(environment.getResourceCrn())
                 .withAccountId(environment.getAccountId())
+                .withCloudPlatform(environment.getCloudPlatform())
                 .build();
         return environmentExperienceDto;
     }

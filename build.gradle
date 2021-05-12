@@ -150,6 +150,8 @@ subprojects {
   }
 
   test {
+    minHeapSize = "512m"
+    maxHeapSize = "1g"
     useJUnitPlatform()
     testlogger {
       showSummary true

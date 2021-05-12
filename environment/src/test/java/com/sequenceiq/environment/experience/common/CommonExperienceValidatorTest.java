@@ -31,7 +31,8 @@ class CommonExperienceValidatorTest {
 
     @Test
     void testIsExperienceFilledWhenAllTheFieldsAreValidThenTrueReturns() {
-        boolean result = underTest.isExperienceFilled(new CommonExperience("awesomeXP", "awesomeDescription", XP_ENV_ENDPOINT, XP_HOST_ADDRESS));
+        boolean result = underTest.isExperienceFilled(new CommonExperience("awesomeXP", "awesomeDescription", XP_ENV_ENDPOINT, XP_HOST_ADDRESS,
+                "somePolicyPath", "somePolicyPath", "envPort", "baseAddress", "policyPort"));
 
         assertTrue(result);
     }

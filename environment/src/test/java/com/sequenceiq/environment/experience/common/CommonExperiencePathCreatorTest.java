@@ -17,9 +17,19 @@ class CommonExperiencePathCreatorTest {
     @Test
     void testCreatePathToExperienceShouldCombineThePathCorretly() {
         CommonExperience xp = createCommonExperience();
-        String expected = xp.getAddress() + xp.getInternalEnvironmentEndpoint();
+        String expected = xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort() + xp.getInternalEnvironmentEndpoint();
 
         String result = underTest.createPathToExperience(xp);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testCreatePathToExperiencePolicyProviderShouldCombineThePathCorretly() {
+        CommonExperience xp = createCommonExperience();
+        String expected = xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort() + xp.getPolicyEndpoint();
+
+        String result = underTest.createPathToExperiencePolicyProvider(xp);
 
         assertEquals(expected, result);
     }
@@ -30,6 +40,10 @@ class CommonExperiencePathCreatorTest {
         cxp.setDescription("someDescription");
         cxp.setInternalEnvironmentEndpoint("someInternalEnvEndpoint");
         cxp.setAddress("https://someHostAddress:somePort");
+        cxp.setBaseAddress("https://someHostAddress");
+        cxp.setEnvironmentEndpointPort("somePort");
+        cxp.setPolicyEndpoint("somePolicyPath");
+        cxp.setBusinessName("someBusinessName");
         return cxp;
     }
 

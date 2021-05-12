@@ -6,6 +6,8 @@ import static java.util.stream.Collectors.toSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,11 +19,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.Experience;
 import com.sequenceiq.environment.experience.ExperienceCluster;
+import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.experience.ExperienceSource;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.config.ExperienceServicesConfig;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
 
 @Service
 public class CommonExperienceService implements Experience {
@@ -51,7 +56,10 @@ public class CommonExperienceService implements Experience {
         LOGGER.debug("About to find connected experiences for environment which is in the following tenant: " + environment.getAccountId());
         Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
         if (!activeExperiences.isEmpty()) {
-            String combinedNames = activeExperiences.stream().map(ExperienceCluster::getName).collect(Collectors.joining(","));
+            String combinedNames = activeExperiences
+                    .stream()
+                    .map(ExperienceCluster::getName)
+                    .collect(Collectors.joining(","));
             LOGGER.info("The following experiences has connected to this env: [env: {}, experience(s): {}]", environment.getName(), combinedNames);
         }
         return activeExperiences;
@@ -68,9 +76,31 @@ public class CommonExperienceService implements Experience {
         Set<ExperienceCluster> activeExperiences = getActiveExperiences(environment.getCrn());
         configuredExperiences
                 .stream()
-                .filter(commonExperience ->  activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
+                .filter(CommonExperience::hasResourceDeleteAccess)
+                .filter(commonExperience -> activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
                 .forEach(commonExperience -> experienceConnectorService
                         .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
+    }
+
+    @Override
+    @NotNull
+    public Map<String, String> collectPolicy(@NotNull EnvironmentExperienceDto environment) {
+        Map<String, String> policies = new LinkedHashMap<>();
+        configuredExperiences.stream()
+                .filter(CommonExperience::hasFineGradePolicy)
+                .forEachOrdered(configuredExperience -> {
+                    String xpPath = commonExperiencePathCreator.createPathToExperiencePolicyProvider(configuredExperience);
+                    try {
+                        LOGGER.info("Requesting {} to fetch granular policy for experience '{}' for cloud platform '{}'",
+                                ExperienceConnectorService.class.getSimpleName(), configuredExperience.getBusinessName(), environment.getCloudPlatform());
+                        ExperiencePolicyResponse res = experienceConnectorService.collectPolicy(xpPath, environment.getCloudPlatform());
+                        policies.put(configuredExperience.getBusinessName(), res.getAws().getPolicy());
+                    } catch (ExperienceOperationFailedException eofe) {
+                        LOGGER.warn("Unable to fetch policy from experience \"" + configuredExperience.getName() + "\" due to: " + eofe.getMessage(), eofe);
+                        policies.put(configuredExperience.getBusinessName(), "");
+                    }
+                });
+        return policies;
     }
 
     /**
@@ -86,6 +116,7 @@ public class CommonExperienceService implements Experience {
                 "given environment crn is null or empty!"));
         return configuredExperiences
                 .stream()
+                .filter(CommonExperience::hasResourceDeleteAccess)
                 .map(xp -> getExperiencesForEnvironment(xp.getName(), xp, environmentCrn))
                 .flatMap(Collection::stream)
                 .collect(toSet());

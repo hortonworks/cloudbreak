@@ -4,13 +4,14 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AZURE_ROLE_DEF_JSON;
 
 import java.io.Serializable;
+import java.util.Map;
 import java.util.Objects;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class AzureCredentialPrerequisites implements Serializable {
+public class AzureCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
     @ApiModelProperty(value = AZURE_APP_CREATION_COMMAND, required = true)
     private String appCreationCommand;
@@ -18,8 +19,26 @@ public class AzureCredentialPrerequisites implements Serializable {
     @ApiModelProperty(value = AZURE_ROLE_DEF_JSON, required = true)
     private String roleDefitionJson;
 
+    public AzureCredentialPrerequisites() {
+    }
+
     public AzureCredentialPrerequisites(String appCreationCommand, String roleDefitionJson) {
         this.appCreationCommand = appCreationCommand;
+        this.roleDefitionJson = roleDefitionJson;
+    }
+
+    public AzureCredentialPrerequisites(String appCreationCommand, String roleDefitionJson, Map<String, String> policies) {
+        this.appCreationCommand = appCreationCommand;
+        this.roleDefitionJson = roleDefitionJson;
+        setPolicies(policies);
+
+    }
+
+    public void setAppCreationCommand(String appCreationCommand) {
+        this.appCreationCommand = appCreationCommand;
+    }
+
+    public void setRoleDefitionJson(String roleDefitionJson) {
         this.roleDefitionJson = roleDefitionJson;
     }
 
@@ -56,4 +75,5 @@ public class AzureCredentialPrerequisites implements Serializable {
                 ", roleDefitionJson='" + roleDefitionJson + '\'' +
                 '}';
     }
+
 }

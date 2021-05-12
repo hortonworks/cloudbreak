@@ -1,8 +1,13 @@
 package com.sequenceiq.environment.experience.liftie;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
 
 class LiftiePathProviderTest {
 
@@ -10,11 +15,18 @@ class LiftiePathProviderTest {
 
     private static final String LIFTIE_API = "https://localhost:1234";
 
+    private static final String LIFTIE_PATH_INFIX = "/liftie/api/v1";
+
+    private static final String LIFTIE_POLICY_ENDPOINT = "/prerequisites?cloudPlatform={cloudProvider}";
+
     private LiftiePathProvider underTest;
+
+    private ExperiencePathConfig pathConfig;
 
     @BeforeEach
     void setUp() {
-        underTest = new LiftiePathProvider(LIFTIE_API);
+        pathConfig = new ExperiencePathConfig(Map.of("envCrn", "{environmentCrn}", "cloudProvider", "{cloudProvider}"));
+        underTest = new LiftiePathProvider(pathConfig, LIFTIE_API, LIFTIE_PATH_INFIX, LIFTIE_POLICY_ENDPOINT);
     }
 
     @Test
@@ -23,7 +35,17 @@ class LiftiePathProviderTest {
 
         String result = underTest.getPathToClustersEndpoint();
 
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testGetPathToPolicyEndpointWhenCallHappensTheExpectedOutputComes() {
+        String platform = "AWS";
+        String expected = LIFTIE_API + LIFTIE_PATH_INFIX + LIFTIE_POLICY_ENDPOINT.replace("{cloudProvider}", platform);
+
+        String result = underTest.getPathToPolicyEndpoint(platform);
+
+        assertEquals(expected, result);
     }
 
     @Test
@@ -33,7 +55,7 @@ class LiftiePathProviderTest {
 
         String result = underTest.getPathToClusterEndpoint(clusterId);
 
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     private String getExpectedClusterEndpointPathString() {

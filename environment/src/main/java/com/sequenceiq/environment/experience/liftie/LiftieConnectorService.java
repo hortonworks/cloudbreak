@@ -25,6 +25,7 @@ import com.sequenceiq.environment.experience.RetryableWebTarget;
 import com.sequenceiq.environment.experience.api.LiftieApi;
 import com.sequenceiq.environment.experience.liftie.responses.DeleteClusterResponse;
 import com.sequenceiq.environment.experience.liftie.responses.ListClustersResponse;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
 
 @Service
 public class LiftieConnectorService implements LiftieApi {
@@ -83,6 +84,19 @@ public class LiftieConnectorService implements LiftieApi {
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))) {
             return responseReader.read(webTarget.getUri().toString(), result, DeleteClusterResponse.class)
+                    .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
+        } catch (RuntimeException e) {
+            LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
+            throw new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG, e);
+        }
+    }
+
+    @Override
+    public ExperiencePolicyResponse getPolicy(String cloudPlatform) {
+        WebTarget webTarget = client.target(liftiePathProvider.getPathToPolicyEndpoint(cloudPlatform));
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
+        try (Response result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call))) {
+            return responseReader.read(webTarget.getUri().toString(), result, ExperiencePolicyResponse.class)
                     .orElseThrow(() -> new ExperienceOperationFailedException(LIFTIE_RESPONSE_RESOLVE_ERROR_MSG));
         } catch (RuntimeException e) {
             LOGGER.warn(LIFTIE_CALL_EXEC_FAILED_MSG, e);
