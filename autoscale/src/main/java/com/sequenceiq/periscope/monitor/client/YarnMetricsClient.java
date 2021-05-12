@@ -58,7 +58,7 @@ public class YarnMetricsClient {
             String hostGroup, Optional<Integer> mandatoryDownScaleCount) throws Exception {
         TlsConfiguration tlsConfig = tlsSecurityService.getTls(cluster.getId());
         String clusterProxyUrl = clusterProxyConfigurationService.getClusterProxyUrl()
-                .orElseThrow(() -> new RuntimeException(String.format("ClusterProxy Not Configured for Cluster {}, " +
+                .orElseThrow(() -> new RuntimeException(String.format("ClusterProxy Not Configured for Cluster %s, " +
                         " cannot query YARN Metrics.", cluster.getStackCrn())));
 
         Client restClient = RestClientUtil.createClient(tlsConfig.getServerCert(),

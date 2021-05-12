@@ -111,6 +111,6 @@ public class ChangePrimaryGatewayService {
         return instanceMetaDataSet.stream()
                 .filter(im -> instanceId.equals(im.getInstanceId()))
                 .findFirst()
-                .orElseThrow(() -> new NotFoundException(String.format("The instance id {} could not be found", instanceId)));
+                .orElseThrow(() -> new NotFoundException(String.format("The instance id %s could not be found", instanceId)));
     }
 }
