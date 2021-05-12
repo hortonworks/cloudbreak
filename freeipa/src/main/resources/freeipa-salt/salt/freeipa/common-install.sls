@@ -6,6 +6,7 @@ update_cnames:
         - DOMAIN: {{salt['pillar.get']('freeipa:domain')}}
         - REALM: {{salt['pillar.get']('freeipa:realm')}}
         - ADMIN_USER: {{salt['pillar.get']('freeipa:admin_user')}}
+    - failhard: True
     - require:
         - file: /opt/salt/scripts/update_cnames.sh
 
@@ -15,6 +16,7 @@ one_week_next_update_grace_period:
       - service pki-tomcatd@pki-tomcat stop
       - sed -i 's/^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=.*/ca.crl.MasterCRL.nextUpdateGracePeriod=10080/' /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
       - service pki-tomcatd@pki-tomcat start
+    - failhard: True
     - unless: grep "^ca[.]crl[.]MasterCRL[.]nextUpdateGracePeriod=10080$" /var/lib/pki/pki-tomcat/ca/conf/CS.cfg
 
 add-httpd-x-cdp-trace-id:
@@ -39,6 +41,7 @@ restart_freeipa_after_plugin_change:
   service.running:
     - name: ipa
     - onlyif: test -f /etc/ipa/default.conf
+    - failhard: True
     - watch:
       - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py
       - file: /usr/lib/python2.7/site-packages/ipaserver/rpcserver.py
@@ -53,6 +56,7 @@ set_number_of_krb5kdc_workers:
 restart_krb5kdc:
   service.running:
     - name: krb5kdc
+    - failhard: True
     - watch:
       - file: /etc/sysconfig/krb5kdc
 
@@ -87,6 +91,7 @@ disable_http_trace:
 restart_httpd:
   service.running:
     - name: httpd
+    - failhard: True
     - watch:
       - file: /etc/httpd/conf.d/ipa-rewrite.conf
       - file: /etc/httpd/conf/httpd.conf
@@ -101,5 +106,6 @@ restart_sssd_if_reconfigured:
   service.running:
     - enable: True
     - name: sssd
+    - failhard: True
     - watch:
       - file: /etc/sssd/sssd.conf

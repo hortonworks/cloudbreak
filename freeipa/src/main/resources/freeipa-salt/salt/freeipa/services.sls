@@ -72,5 +72,6 @@ dirSrvRestartSec:
 reload-systemd:
   cmd.run:
     - name: systemctl daemon-reload
+    - failhard: True
 
 {%- endif %}

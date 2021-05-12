@@ -7,6 +7,7 @@ freeipa_initial_full_backup:
   cmd.run:
     - name: /usr/local/bin/freeipa_backup -t FULL -f "{{salt['grains.get']('fqdn')}}/full" && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/freeipa_initial_backup-executed
     - unless: test -f /var/log/freeipa_initial_backup-executed
+    - failhard: True
     - require:
         - file: /usr/local/bin/freeipa_backup
         - file: /usr/local/bin/backup-log-filter.sh
@@ -18,6 +19,7 @@ freeipa_backoff_monthly_full:
   cmd.run:
     - name: /sbin/anacron -u cron.monthly
     - onlyif: test ! -s /var/spool/anacron/cron.monthly
+    - failhard: True
 
 /etc/cron.monthly/freeipa_backup_monthly:
   file.managed:
