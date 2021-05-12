@@ -14,6 +14,29 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class CredentialPrerequisitesResponse implements Serializable {
 
+    public CredentialPrerequisitesResponse() {
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
+    public void setAws(AwsCredentialPrerequisites aws) {
+        this.aws = aws;
+    }
+
+    public void setAzure(AzureCredentialPrerequisites azure) {
+        this.azure = azure;
+    }
+
+    public void setGcp(GcpCredentialPrerequisites gcp) {
+        this.gcp = gcp;
+    }
+
     @ApiModelProperty(value = CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 

@@ -18,6 +18,9 @@ public class AzureCredentialPrerequisites extends CredentialBasePrerequisites im
     @ApiModelProperty(value = AZURE_ROLE_DEF_JSON, required = true)
     private String roleDefitionJson;
 
+    public AzureCredentialPrerequisites() {
+    }
+
     public AzureCredentialPrerequisites(String appCreationCommand, String roleDefitionJson) {
         this.appCreationCommand = appCreationCommand;
         this.roleDefitionJson = roleDefitionJson;
@@ -27,6 +30,15 @@ public class AzureCredentialPrerequisites extends CredentialBasePrerequisites im
         this.appCreationCommand = appCreationCommand;
         this.roleDefitionJson = roleDefitionJson;
         this.setPolicies(policies);
+
+    }
+
+    public void setAppCreationCommand(String appCreationCommand) {
+        this.appCreationCommand = appCreationCommand;
+    }
+
+    public void setRoleDefitionJson(String roleDefitionJson) {
+        this.roleDefitionJson = roleDefitionJson;
     }
 
     public String getAppCreationCommand() {

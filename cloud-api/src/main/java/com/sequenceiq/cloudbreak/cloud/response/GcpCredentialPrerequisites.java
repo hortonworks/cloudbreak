@@ -14,6 +14,9 @@ public class GcpCredentialPrerequisites extends CredentialBasePrerequisites impl
     @ApiModelProperty(value = GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND, required = true)
     private String creationCommand;
 
+    public GcpCredentialPrerequisites() {
+    }
+
     public GcpCredentialPrerequisites(String creationCommand) {
         this.creationCommand = creationCommand;
     }
@@ -25,5 +28,9 @@ public class GcpCredentialPrerequisites extends CredentialBasePrerequisites impl
 
     public String getCreationCommand() {
         return creationCommand;
+    }
+
+    public void setCreationCommand(String creationCommand) {
+        this.creationCommand = creationCommand;
     }
 }

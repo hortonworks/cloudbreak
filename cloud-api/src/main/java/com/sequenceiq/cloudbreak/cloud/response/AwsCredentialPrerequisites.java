@@ -11,12 +11,14 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class AwsCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
-
     @ApiModelProperty(value = AWS_EXTERNAL_ID, required = true)
     private String externalId;
 
     @ApiModelProperty(value = AWS_POLICY_JSON, required = true)
     private String policyJson;
+
+    public AwsCredentialPrerequisites() {
+    }
 
     public AwsCredentialPrerequisites(String externalId, String policyJson) {
         this.externalId = externalId;
@@ -35,5 +37,13 @@ public class AwsCredentialPrerequisites extends CredentialBasePrerequisites impl
 
     public String getPolicyJson() {
         return policyJson;
+    }
+
+    public void setExternalId(String externalId) {
+        this.externalId = externalId;
+    }
+
+    public void setPolicyJson(String policyJson) {
+        this.policyJson = policyJson;
     }
 }
