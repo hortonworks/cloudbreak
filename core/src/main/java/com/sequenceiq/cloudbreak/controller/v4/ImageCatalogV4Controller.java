@@ -28,9 +28,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageEntryV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.UpdateImageCatalogV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageBasicInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -186,31 +184,6 @@ public class ImageCatalogV4Controller extends NotificationController implements 
         StatedImage statedImage = imageCatalogService.getImageByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), imageId, name);
         // FIXME: This conversion WILL fail unless properly implemented!
         return converterUtil.convert(statedImage.getImage(), ImageV4Response.class);
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public ImageV4Response createImageInCatalog(Long workspaceId, @ResourceName String name, @RequestObject ImageEntryV4Request request) {
-
-        // FIXME: Implement this!
-        return null;
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public ImageBasicInfoV4Response updateImageInCatalog(Long workspaceId, @ResourceName String name, String imageId,
-            @RequestObject ImageEntryV4Request request) {
-
-        // FIXME: Implement this!
-        return null;
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public ImageBasicInfoV4Response deleteImageFromCatalog(Long workspaceId, @ResourceName String name, String imageId) {
-
-        // FIXME: Implement this!
-        return null;
     }
 
     @Override
