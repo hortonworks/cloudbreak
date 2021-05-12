@@ -71,6 +71,10 @@ public class ExperienceConnectorService {
         deleteBasicExperiences(dto);
     }
 
+    public  boolean isPolicyFromExperiencesAllowed(EnvironmentExperienceDto environmentExperienceDto) {
+        return entitlementService.awsRestrictedPolicy(environmentExperienceDto.getAccountId());
+    }
+
     private void deleteLiftieBasedExperiences(EnvironmentExperienceDto dto) {
         experiences.stream().filter(experience -> experience.getSource().equals(ExperienceSource.LIFTIE)).forEach(experience -> {
             LOGGER.info("About to delete LIFTIE experiences for environment '{}'", dto.getName());

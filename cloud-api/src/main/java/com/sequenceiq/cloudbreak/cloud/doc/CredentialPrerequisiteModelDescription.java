@@ -16,6 +16,7 @@ public class CredentialPrerequisiteModelDescription {
             + "describes the necessary Azure role for cloud resource provisioning.";
     public static final String GCP_CREDENTIAL_PREREQUISITES_CREATION_COMMAND = "GCP specific 'gcloud' CLI based commands to "
             + "create prerequisites for Cloudbreak credential creation. The field is base64 encoded.";
+    public static final String POLICIES = "Policies for experiences.";
 
     private CredentialPrerequisiteModelDescription() {
     }

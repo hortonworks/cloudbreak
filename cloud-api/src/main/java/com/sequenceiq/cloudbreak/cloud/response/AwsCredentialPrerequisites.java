@@ -4,12 +4,13 @@ import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDes
 import static com.sequenceiq.cloudbreak.cloud.doc.CredentialPrerequisiteModelDescription.AWS_POLICY_JSON;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class AwsCredentialPrerequisites implements Serializable {
+public class AwsCredentialPrerequisites extends CredentialBasePrerequisites implements Serializable {
 
     @ApiModelProperty(value = AWS_EXTERNAL_ID, required = true)
     private String externalId;
@@ -20,6 +21,12 @@ public class AwsCredentialPrerequisites implements Serializable {
     public AwsCredentialPrerequisites(String externalId, String policyJson) {
         this.externalId = externalId;
         this.policyJson = policyJson;
+    }
+
+    public AwsCredentialPrerequisites(String externalId, String policyJson, Map<String, String> policies) {
+        this.externalId = externalId;
+        this.policyJson = policyJson;
+        this.setPolicies(policies);
     }
 
     public String getExternalId() {
