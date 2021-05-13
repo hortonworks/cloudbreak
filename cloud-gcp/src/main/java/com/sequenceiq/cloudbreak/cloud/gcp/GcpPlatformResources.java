@@ -484,11 +484,12 @@ public class GcpPlatformResources implements PlatformResources {
             ListServiceAccountsResponse response;
             do {
                 response = listServiceAccountEmailsRequest.execute();
-                collect = response
+                Set<CloudAccessConfig> accessConfigs = response
                         .getAccounts()
                         .stream()
                         .map(e -> new CloudAccessConfig(e.getName(), e.getEmail(), new HashMap<>()))
                         .collect(Collectors.toSet());
+                collect.addAll(accessConfigs);
                 listServiceAccountEmailsRequest.setPageToken(response.getNextPageToken());
             } while (response.getNextPageToken() != null);
             return new CloudAccessConfigs(collect);
