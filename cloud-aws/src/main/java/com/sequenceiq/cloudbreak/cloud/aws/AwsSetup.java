@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
 
@@ -215,7 +216,7 @@ public class AwsSetup implements Setup {
                                 "refer to Cloudera documentation at %s for the required setup",
                                 keyPairName,
                                 region,
-                                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-environment-aws-ssh-key.html"));
+                                DocumentationLinkProvider.awsSshKeySetupLink()));
             }
         }
     }

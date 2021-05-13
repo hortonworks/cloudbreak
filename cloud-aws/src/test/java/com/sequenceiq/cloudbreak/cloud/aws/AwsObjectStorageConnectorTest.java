@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsObjectStorageConnectorTest {
@@ -77,8 +78,8 @@ public class AwsObjectStorageConnectorTest {
         thrown.expect(CloudConnectorException.class);
         thrown.expectMessage("We were not able to query S3 object storage location for mybucket. " +
                 "Refer to Cloudera documentation at " +
-                "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html " +
-                "for the required setup. The message from Amazon S3 was: errormessage.");
+                DocumentationLinkProvider.awsCloudStorageSetupLink() +
+                " for the required setup. The message from Amazon S3 was: errormessage.");
         when(s3Client.getBucketLocation(BUCKET_NAME)).thenThrow(exception);
         ObjectStorageMetadataRequest request = ObjectStorageMetadataRequest.builder().withObjectStoragePath(BUCKET_NAME).build();
         underTest.getObjectStorageMetadata(request);

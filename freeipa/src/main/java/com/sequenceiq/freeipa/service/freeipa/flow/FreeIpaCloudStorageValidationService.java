@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticCloudStorageConverter;
 import com.sequenceiq.common.model.diagnostics.CloudStorageDiagnosticsParameters;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -99,8 +100,9 @@ public class FreeIpaCloudStorageValidationService {
                                 "Specifically verify the logStorage.instanceProfile and logStorage.storageLocationBase. " +
                                 "Refer to Cloudera documentation at %s for the required rights.",
                         function,
-                        backup.getS3().getInstanceProfile(), backup.getStorageLocation(),
-                        "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-idbroker-minimum-setup.html");
+                        backup.getS3().getInstanceProfile(),
+                        backup.getStorageLocation(),
+                        DocumentationLinkProvider.awsCloudStorageSetupLink());
             } else if (backup.getAdlsGen2() != null) {
                 return String.format("Validating FreeIPA cloud storage permission for %s failed. " +
                                 "The managed profile %s did not have permission to write to %s. " +
@@ -110,19 +112,21 @@ public class FreeIpaCloudStorageValidationService {
                                 "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
                                 "Refer to Cloudera documentation at %s for the required rights.",
                         function,
-                        backup.getAdlsGen2().getManagedIdentity(), backup.getStorageLocation(),
-                        "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-az-minimal-setup-for-cloud-storage.html");
+                        backup.getAdlsGen2().getManagedIdentity(),
+                        backup.getStorageLocation(),
+                        DocumentationLinkProvider.azureCloudStorageSetupLink());
             } else if (backup.getGcs() != null) {
                 return String.format("Validating FreeIPA cloud storage permission for %s failed. " +
                                 "The managed profile %s did not have permission to write to %s. " +
                                 "If provisioning was done using the UI, then verify the logger identity and logs location base when provisioning " +
                                 "in the UI. " +
                                 "If provisioning was done using the CLI, then verify the JSON which was provided when creating the environment. " +
-                                "Specifically, verify the logStorage.serviceAccountEmail and logStorage.storageLocationBase. " +
+                                "Specifically, verify the logStorage.managedIdentity and logStorage.storageLocationBase. " +
                                 "Refer to Cloudera documentation at %s for the required rights.",
                         function,
-                        backup.getGcs().getServiceAccountEmail(), backup.getStorageLocation(),
-                        "https://docs.cloudera.com/management-console/cloud/environments-gcp/topics/mc-gcp_minimum_setup_for_cloud_storage.html");
+                        backup.getGcs().getServiceAccountEmail(),
+                        backup.getStorageLocation(),
+                        DocumentationLinkProvider.googleCloudStorageSetupLink());
             }
         }
         return DEFAULT_ERROR_MESSAGE;
