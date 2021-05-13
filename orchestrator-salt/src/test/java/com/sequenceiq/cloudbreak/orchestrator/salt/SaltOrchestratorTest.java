@@ -591,4 +591,48 @@ public class SaltOrchestratorTest {
         assertTrue(target3.contains("new_replica1.example.com"));
         assertTrue(target3.contains("new_replica2.example.com"));
     }
+
+    @Test
+    public void testRemoveDeadSaltMinions() throws Exception {
+        PowerMockito.mockStatic(SaltStates.class);
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        List<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        minionStatus.setUp(upNodes);
+        List<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
+        minionStatus.setDown(downNodes);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
+        verify(saltConnector, times(1)).wheel("key.delete", downNodes, Object.class);
+    }
+
+    @Test
+    public void testDontRemoveDeadSaltMinions() throws Exception {
+        PowerMockito.mockStatic(SaltStates.class);
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        List<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        minionStatus.setUp(upNodes);
+        List<String> downNodes = new ArrayList<>();
+        minionStatus.setDown(downNodes);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
+        verify(saltConnector, never()).wheel("key.delete", downNodes, Object.class);
+    }
+
+    @Test(expected = CloudbreakOrchestratorFailedException.class)
+    public void testCannotRemoveDeadMinions() throws Exception {
+        PowerMockito.mockStatic(SaltStates.class);
+
+        when(SaltStates.collectNodeStatus(eq(saltConnector))).thenThrow(new RuntimeException("connection failed"));
+        saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
+    }
 }
