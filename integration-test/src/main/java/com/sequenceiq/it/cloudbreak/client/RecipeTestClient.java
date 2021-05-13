@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeGetAction;
+import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeGetInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.recipe.RecipeListAction;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 
@@ -24,6 +25,10 @@ public class RecipeTestClient {
 
     public Action<RecipeTestDto, CloudbreakClient> getV4() {
         return new RecipeGetAction();
+    }
+
+    public Action<RecipeTestDto, CloudbreakClient> getV4Internal() {
+        return new RecipeGetInternalAction();
     }
 
     public Action<RecipeTestDto, CloudbreakClient> deleteV4() {

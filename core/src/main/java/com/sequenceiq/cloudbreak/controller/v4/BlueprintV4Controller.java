@@ -70,6 +70,12 @@ public class BlueprintV4Controller extends NotificationController implements Blu
     }
 
     @Override
+    @InternalOnly
+    public BlueprintV4Response getByNameInternal(Long workspaceId, @AccountId String accountId, @NotNull String name) {
+        return getByName(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public BlueprintV4Response getByCrn(Long workspaceId, @NotNull @TenantAwareParam @ResourceCrn String crn) {
         Blueprint blueprint = blueprintService.getByWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());

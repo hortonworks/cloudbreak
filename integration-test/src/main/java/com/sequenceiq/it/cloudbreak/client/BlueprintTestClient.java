@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintCreateInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintGetAction;
+import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintGetInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v4.blueprint.BlueprintListAction;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 
@@ -24,6 +25,10 @@ public class BlueprintTestClient {
 
     public Action<BlueprintTestDto, CloudbreakClient> getV4() {
         return new BlueprintGetAction();
+    }
+
+    public Action<BlueprintTestDto, CloudbreakClient> getV4Internal() {
+        return new BlueprintGetInternalAction();
     }
 
     public Action<BlueprintTestDto, CloudbreakClient> listV4() {
