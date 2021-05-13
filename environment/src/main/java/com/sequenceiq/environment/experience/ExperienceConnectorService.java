@@ -95,7 +95,7 @@ public class ExperienceConnectorService {
         deleteBasicExperiences(dto);
     }
 
-    public  boolean isPolicyFromExperiencesAllowed(EnvironmentExperienceDto environmentExperienceDto) {
+    private boolean isPolicyFromExperiencesAllowed(EnvironmentExperienceDto environmentExperienceDto) {
         return entitlementService.awsRestrictedPolicy(environmentExperienceDto.getAccountId());
     }
 

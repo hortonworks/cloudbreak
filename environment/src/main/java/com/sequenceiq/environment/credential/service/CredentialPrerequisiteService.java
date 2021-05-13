@@ -6,13 +6,13 @@ import static com.sequenceiq.environment.TempConstants.TEMP_WORKSPACE_ID;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyResult;
@@ -21,10 +21,13 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesR
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.attributes.CredentialAttributes;
 import com.sequenceiq.environment.credential.domain.Credential;
+import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
+import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.user.UserPreferencesService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -35,18 +38,21 @@ public class CredentialPrerequisiteService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialPrerequisiteService.class);
 
-    private static final String ROLE_ARN_PARAMTER_KEY = "roleArn";
-
-    private static final String EXTERNAL_ID_PARAMETER_KEY = "externalId";
-
-    @Inject
     private EventBus eventBus;
 
-    @Inject
+    private UserPreferencesService userPreferencesService;
+
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    @Inject
-    private UserPreferencesService userPreferencesService;
+    private ExperienceConnectorService experienceConnectorService;
+
+    public CredentialPrerequisiteService(EventBus eventBus, UserPreferencesService userPreferencesService, ErrorHandlerAwareReactorEventFactory eventFactory,
+            ExperienceConnectorService experienceConnectorService) {
+        this.experienceConnectorService = experienceConnectorService;
+        this.userPreferencesService = userPreferencesService;
+        this.eventFactory = eventFactory;
+        this.eventBus = eventBus;
+    }
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, CredentialType type) {
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -66,7 +72,9 @@ public class CredentialPrerequisiteService {
                 LOGGER.info(message, res.getErrorDetails());
                 throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
             }
-            return res.getCredentialPrerequisitesResponse();
+            CredentialPrerequisitesResponse response = res.getCredentialPrerequisitesResponse();
+            collectAndFillCredentialPrerequisitesBasedOnProvider(cloudPlatform, response);
+            return response;
         } catch (InterruptedException e) {
             LOGGER.error(message, e);
             throw new OperationException(e);
@@ -106,6 +114,23 @@ public class CredentialPrerequisiteService {
             }
         }
         return credential;
+    }
+
+    private void collectAndFillCredentialPrerequisitesBasedOnProvider(String cloudProvider, CredentialPrerequisitesResponse response) {
+        EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder().withCloudPlatform(cloudProvider)
+                .withAccountId(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN).build();
+        Map<String, String> policies = experienceConnectorService.collectExperiencePoliciesForCredentialCreation(dto);
+        switch (CloudPlatform.valueOf(cloudProvider)) {
+            case AWS: {
+                response.getAws().setPolicies(policies);
+                break;
+            }
+            case AZURE: {
+                response.getAzure().setPolicies(policies);
+                break;
+            }
+            default: break;
+        }
     }
 
     private boolean isRoleArnSet(CredentialAttributes credentialAttributes) {
