@@ -5,6 +5,7 @@ public class OperationDescriptions {
         public static final String GET_BY_NAME = "retrieve validation request by blueprint name";
         public static final String LIST_BY_WORKSPACE = "list blueprints for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get blueprint by name in workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE_INTERNAL = "get blueprint by name in workspace internal";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get blueprint by crn";
         public static final String CREATE_IN_WORKSPACE = "create blueprint in workspace";
         public static final String CREATE_IN_WORKSPACE_INTERNAL = "create blueprint in workspace internal";
@@ -88,6 +89,7 @@ public class OperationDescriptions {
         public static final String GET_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
         public static final String LIST_BY_WORKSPACE = "list recipes for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get recipe by name in workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE_INTERNAL = "get recipe by name in workspace internal";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get recipe by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create recipe in workspace";
         public static final String CREATE_IN_WORKSPACE_INTERNAL = "create recipe in workspace internal";

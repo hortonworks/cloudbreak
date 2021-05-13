@@ -54,6 +54,14 @@ public interface BlueprintV4Endpoint {
     BlueprintV4Response getByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") @NotNull String name);
 
     @GET
+    @Path("name/{name}/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,
+            nickname = "getBlueprintInWorkspaceInternal")
+    BlueprintV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @AccountId @QueryParam("accountId") String accountId,
+            @PathParam("name") @NotNull String name);
+
+    @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = BlueprintOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = BLUEPRINT_NOTES,

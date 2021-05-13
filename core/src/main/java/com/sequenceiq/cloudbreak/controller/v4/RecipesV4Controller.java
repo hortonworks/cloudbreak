@@ -73,6 +73,12 @@ public class RecipesV4Controller extends NotificationController implements Recip
     }
 
     @Override
+    @InternalOnly
+    public RecipeV4Response getByNameInternal(Long workspaceId, @AccountId String accountId, @NotNull String name) {
+        return getByName(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
+    }
+
+    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
     public RecipeV4Response getByCrn(Long workspaceId, @TenantAwareParam @NotNull @ResourceCrn String crn) {
         Recipe recipe = recipeService.get(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());

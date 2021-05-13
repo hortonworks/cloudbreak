@@ -8,7 +8,9 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
+import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -41,6 +43,12 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
     private DistroXTestClient distroXTestClient;
 
     @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private BlueprintTestClient blueprintTestClient;
+
+    @Inject
     private UmsTestClient umsTestClient;
 
     @Override
@@ -63,6 +71,13 @@ public class DataHubCreateInternalApiTest extends AbstractIntegrationTest {
         RecipeTestDto recipe = resourceCreator.createDefaultRecipeInternal(testContext, accountId);
         BlueprintTestDto blueprint = resourceCreator.createDefaultBlueprintInternal(testContext, accountId,
                 commonClusterManagerProperties().getRuntimeVersion());
+
+        recipe.when(recipeTestClient.getV4Internal())
+                .validate();
+
+        blueprint.when(blueprintTestClient.getV4Internal())
+                .validate();
+
         resourceCreator.createDefaultCredential(testContext);
         resourceCreator.createDefaultEnvironment(testContext);
         resourceCreator.createDefaultFreeIpa(testContext);
