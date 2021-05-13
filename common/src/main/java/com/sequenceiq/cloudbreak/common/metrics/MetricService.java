@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.common.metrics;
 
+import java.time.Duration;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
@@ -14,4 +15,6 @@ public interface MetricService {
     void incrementMetricCounter(Metric metric, String... tags);
 
     <T, U> Map<T, U> gaugeMapSize(Metric metric, Map<T, U> map);
+
+    void recordTimerMetric(Metric metric, Duration duration, String... tags);
 }
