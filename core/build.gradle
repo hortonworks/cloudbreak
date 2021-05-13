@@ -142,10 +142,6 @@ dependencyManagement {
       }
     }
 
-    dependency (group: 'com.google.oauth-client',           name: 'google-oauth-client-jetty',   version: '1.22.0') {
-      exclude group: '*', name: 'servlet-api'
-    }
-
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
@@ -208,7 +204,6 @@ dependencies {
   compile group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart'
   compile group: 'org.mybatis',                        name: 'mybatis-migrations'
 
-  compile group: 'com.google.oauth-client',            name: 'google-oauth-client-jetty'
   compile group: 'net.jcip',                           name: 'jcip-annotations'
   compile group: 'com.github.spotbugs',                name: 'spotbugs-annotations'
   compile group: 'com.google.http-client',             name: 'google-http-client-jackson2'
