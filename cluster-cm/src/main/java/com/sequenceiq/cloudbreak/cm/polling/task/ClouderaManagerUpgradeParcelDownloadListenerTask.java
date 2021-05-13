@@ -42,7 +42,9 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
 
         if (!ParcelStatus.DOWNLOADED.name().equals(parcelStage)
                 && !ParcelStatus.DISTRIBUTED.name().equals(parcelStage)
-                && !ParcelStatus.ACTIVATED.name().equals(parcelStage)) {
+                && !ParcelStatus.DISTRIBUTING.name().equals(parcelStage)
+                && !ParcelStatus.ACTIVATED.name().equals(parcelStage)
+                && !ParcelStatus.ACTIVATING.name().equals(parcelStage)) {
             LOGGER.warn("Expected parcel status is {}, received status is: {}", ParcelStatus.DOWNLOADED.name(), parcelStage);
             return false;
         } else {
@@ -51,7 +53,7 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi)  {
+    public void handleTimeout(ClouderaManagerCommandPollerObject toolsResourceApi) {
 
         //when downloading, progress and totalProgress will show the current number of bytes downloaded
         // and the total number of bytes needed to be downloaded respectively.
