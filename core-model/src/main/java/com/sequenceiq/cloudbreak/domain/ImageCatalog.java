@@ -47,7 +47,7 @@ public class ImageCatalog implements ProvisionEntity, WorkspaceAwareResource {
     private String resourceCrn;
 
     //FIXME: lazy load
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "imageCatalog", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "imageCatalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CustomImage> customImages = new HashSet<>();
 
     private String creator;

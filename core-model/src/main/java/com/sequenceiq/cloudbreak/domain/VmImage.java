@@ -54,10 +54,6 @@ public class VmImage implements ProvisionEntity {
         return created;
     }
 
-    public void setCreated(Long created) {
-        this.created = created;
-    }
-
     public CustomImage getCustomImage() {
         return customImage;
     }
