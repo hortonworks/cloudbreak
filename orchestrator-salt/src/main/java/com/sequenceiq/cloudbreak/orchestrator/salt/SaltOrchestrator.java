@@ -769,15 +769,17 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void removeDeadSaltMinions(GatewayConfig gateway) throws CloudbreakOrchestratorFailedException {
+    @Override
+    public void removeDeadSaltMinions(GatewayConfig gateway) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             MinionStatusSaltResponse minionStatusSaltResponse = SaltStates.collectNodeStatus(saltConnector);
             List<String> downNodes = minionStatusSaltResponse.downMinions();
-            if (downNodes != null && !downNodes.isEmpty()) {
+            LOGGER.info("Deleting dead minions {} from {}", StringUtils.join(downNodes, ", "), gateway.getHostname());
+            if (!CollectionUtils.isEmpty(downNodes)) {
                 saltConnector.wheel("key.delete", downNodes, Object.class);
             }
         } catch (Exception e) {
-            LOGGER.info("Error occurred during dead salt minions removal", e);
+            LOGGER.info("Error occurred during dead salt minions removal on " + gateway.getHostname(), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }

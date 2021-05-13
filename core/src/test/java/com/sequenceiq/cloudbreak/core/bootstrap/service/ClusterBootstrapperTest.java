@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
@@ -33,7 +34,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
@@ -84,9 +84,6 @@ public class ClusterBootstrapperTest {
     private Stack stack;
 
     @Mock
-    private GatewayConfig gatewayConfig;
-
-    @Mock
     private Image image;
 
     @Mock
@@ -102,7 +99,7 @@ public class ClusterBootstrapperTest {
     private ResourceService resourceService;
 
     @Test
-    public void shouldUseReachableInstances() throws CloudbreakException, CloudbreakImageNotFoundException {
+    public void shouldUseReachableInstances() throws Exception {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
@@ -120,6 +117,7 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
+        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
 
@@ -129,5 +127,40 @@ public class ClusterBootstrapperTest {
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
         verify(componentConfigProviderService).getImage(1L);
         verify(instanceMetaDataService).saveAll(stack.getReachableInstanceMetaDataSet());
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(gatewayConfig);
+    }
+
+    @Test
+    public void testcleanupOldSaltState() throws Exception {
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setPrivateIp("1.1.1.1");
+        instanceMetaData.setPublicIp("2.2.2.2");
+        instanceMetaData.setDiscoveryFQDN("FQDN");
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        Template template = new Template();
+        template.setInstanceType("GATEWAY");
+        instanceGroup.setTemplate(template);
+        instanceMetaData.setInstanceGroup(instanceGroup);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getReachableInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
+        Cluster cluster = new Cluster();
+        cluster.setGateway(new Gateway());
+        when(stack.getCluster()).thenReturn(cluster);
+        GatewayConfig deadConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        GatewayConfig aliveConfig = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);
+        when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig, aliveConfig));
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+
+        underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"), List.of("host1"));
+
+        verify(stack).getReachableInstanceMetaDataSet();
+        verify(gatewayConfigService).getAllGatewayConfigs(stack);
+        verify(componentConfigProviderService).getImage(1L);
+        verify(instanceMetaDataService).saveAll(stack.getReachableInstanceMetaDataSet());
+        verify(hostOrchestrator, never()).removeDeadSaltMinions(deadConfig);
+        verify(hostOrchestrator, times(1)).removeDeadSaltMinions(aliveConfig);
     }
 }

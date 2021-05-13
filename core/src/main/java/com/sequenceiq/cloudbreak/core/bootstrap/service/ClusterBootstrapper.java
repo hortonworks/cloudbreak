@@ -355,11 +355,21 @@ public class ClusterBootstrapper {
         instanceMetaDataService.saveAll(metaDataSet);
         try {
             List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            cleanupOldSaltState(allGatewayConfigs, nodes);
             bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
+        }
+    }
+
+    private void cleanupOldSaltState(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {
+        List<GatewayConfig> saltMastersToCorrect = allGatewayConfigs.stream()
+                .filter(gc -> nodes.stream().anyMatch(n -> !gc.getPrivateAddress().equals(n.getPrivateIp())))
+                .collect(Collectors.toList());
+        for  (GatewayConfig masterToCorrect: saltMastersToCorrect) {
+            hostOrchestrator.removeDeadSaltMinions(masterToCorrect);
         }
     }
 
