@@ -43,14 +43,14 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
                 return;
             }
             if (networkDto.getSubnetMetas().size() != cloudmetadata.size()) {
-                message = String.format("Subnets of the environment (%s) are not found in the vpc (%s).",
+                message = String.format("Subnets of the environment (%s) are not found in the VPC (%s). All subnets are expected to belong to the same VPC",
                         environmentDto.getName(), String.join(", ", getSubnetDiff(networkDto.getSubnetIds(), cloudmetadata.keySet())));
                 LOGGER.info(message);
                 resultBuilder.error(message);
                 return;
             }
             if (cloudmetadata.size() < 2) {
-                message = "There should be at least two subnets in the network";
+                message = "There should be at least two Subnets in the environment network configuration";
                 LOGGER.info(message);
                 resultBuilder.error(message);
                 return;
@@ -58,7 +58,7 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
             Map<String, Long> zones = cloudmetadata.values().stream()
                     .collect(Collectors.groupingBy(CloudSubnet::getAvailabilityZone, Collectors.counting()));
             if (zones.size() < 2) {
-                message = "The subnets in the vpc should be present at least in two different availability zones";
+                message = "The Subnets in the VPC should be present at least in two different availability zones";
                 LOGGER.info(message);
                 resultBuilder.error(message);
             }

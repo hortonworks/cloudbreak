@@ -164,7 +164,7 @@ class AwsEnvironmentNetworkValidatorTest {
 
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
-        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two subnets in the network")
+        NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two Subnets in the environment network configuration")
         );
     }
 
@@ -196,7 +196,7 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "Subnets of the environment (" + ENV_NAME + ") are not found in the vpc (" + String.join(", ", networkDto.getSubnetIds()) + ")."
+                "Subnets of the environment (someenv) are not found in the VPC (key1, key0). All subnets are expected to belong to the same VPC"
         ));
     }
 
@@ -218,7 +218,7 @@ class AwsEnvironmentNetworkValidatorTest {
         underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
-                "The subnets in the vpc should be present at least in two different availability zones"
+                "The Subnets in the VPC should be present at least in two different availability zones"
         ));
     }
 
