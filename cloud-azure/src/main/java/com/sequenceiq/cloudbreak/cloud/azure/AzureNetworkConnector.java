@@ -194,12 +194,13 @@ public class AzureNetworkConnector implements NetworkConnector {
         String networkId = azureUtils.getCustomNetworkId(network);
         com.microsoft.azure.management.network.Network networkByResourceGroup = azureClient.getNetworkByResourceGroup(resourceGroupName, networkId);
         if (networkByResourceGroup == null || networkByResourceGroup.addressSpaces().isEmpty()) {
-            throw new BadRequestException(String.format("Network could not be fetch from Azure with resource group name: %s and network id: %s",
+            throw new BadRequestException(String.format("Network could not be fetched from Azure with Resource Group name: %s and VNET id: %s. " +
+                            "Please make sure that the name of the VNET is correct and is present in the Resource Group specified.",
                     resourceGroupName, networkId));
         }
         List<String> networkCidrs = networkByResourceGroup.addressSpaces();
         if (networkCidrs.size() > 1) {
-            LOGGER.info("More than one network cidrs for resource group name: {} and network id: {}. We will use the first one: {}",
+            LOGGER.info("More than one network CIDRs for Resource Group name: {} and network id: {}. We will use the first one: {}",
                     resourceGroupName, networkId, networkCidrs.get(0));
         }
         return new NetworkCidr(networkCidrs.get(0), networkCidrs);
