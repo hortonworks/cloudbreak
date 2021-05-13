@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Base;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
-import com.sequenceiq.cloudbreak.validation.ValidHttpContentSize;
+import com.sequenceiq.cloudbreak.validation.ValidDeprecated;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -28,7 +28,7 @@ public class BlueprintV4Request extends BlueprintV4Base {
     @Pattern(regexp = "^[^;\\/%]*$")
     private String name;
 
-    @ValidHttpContentSize
+    @ValidDeprecated(message = "Submitting Cluster Template by URL is not allowed anymore. Please use text based submission.")
     @ApiModelProperty(BlueprintModelDescription.URL)
     private String url;
 

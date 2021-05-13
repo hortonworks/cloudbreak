@@ -70,11 +70,6 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
         return this;
     }
 
-    public BlueprintTestDto withUrl(String url) {
-        getRequest().setUrl(url);
-        return this;
-    }
-
     public BlueprintTestDto withBlueprint(String blueprint) {
         getRequest().setBlueprint(blueprint);
         return this;
