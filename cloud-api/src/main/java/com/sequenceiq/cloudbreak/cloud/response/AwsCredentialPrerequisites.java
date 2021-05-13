@@ -28,7 +28,7 @@ public class AwsCredentialPrerequisites extends CredentialBasePrerequisites impl
     public AwsCredentialPrerequisites(String externalId, String policyJson, Map<String, String> policies) {
         this.externalId = externalId;
         this.policyJson = policyJson;
-        this.setPolicies(policies);
+        setPolicies(policies);
     }
 
     public String getExternalId() {

@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.experience.liftie.LiftieIgnorableCluste
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -66,6 +67,12 @@ public class ExperiencesByLiftie implements Experience {
                 .filter(cluster -> LiftieIgnorableClusterStatuses.notContains(cluster.getClusterStatus().getStatus()))
                 .forEach(cluster -> liftieApi.deleteCluster(cluster.getClusterId()));
         LOGGER.debug("Liftie clusters delete requests submitted for environment '{}'", environment.getName());
+    }
+
+    @Override
+    @NotNull
+    public Map<String, String> collectPolicy(EnvironmentExperienceDto environment) {
+        return Map.of("Liftie", liftieApi.getPolicy(environment.getCloudPlatform()));
     }
 
     @Override

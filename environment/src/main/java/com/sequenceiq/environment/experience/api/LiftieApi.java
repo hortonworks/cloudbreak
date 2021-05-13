@@ -12,4 +12,6 @@ public interface LiftieApi {
 
     @NotNull DeleteClusterResponse deleteCluster(@NotNull String clusterId);
 
+    @Nullable String getPolicy(String cloudPlatform);
+
 }

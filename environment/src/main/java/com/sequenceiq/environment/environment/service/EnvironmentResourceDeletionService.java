@@ -102,7 +102,9 @@ public class EnvironmentResourceDeletionService {
         EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder()
                 .withName(environment.getName())
                 .withCrn(environment.getResourceCrn())
-                .withAccountId(environment.getAccountId()).build();
+                .withAccountId(environment.getAccountId())
+                .withCloudPlatform(environment.getCloudPlatform())
+                .build();
         return experienceConnectorService.getConnectedExperienceCount(dto);
     }
 

@@ -8,11 +8,14 @@ public class ExperiencePollerObject {
 
     private final String environmentName;
 
+    private final String cloudPlatform;
+
     private final String accountId;
 
-    public ExperiencePollerObject(String environmentCrn, String environmentName, String accountId) {
-        this.environmentCrn = environmentCrn;
+    public ExperiencePollerObject(String environmentCrn, String environmentName, String cloudPlatform, String accountId) {
         this.environmentName = environmentName;
+        this.environmentCrn = environmentCrn;
+        this.cloudPlatform = cloudPlatform;
         this.accountId = accountId;
     }
 
@@ -24,6 +27,10 @@ public class ExperiencePollerObject {
         return environmentName;
     }
 
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
     public String getAccountId() {
         return accountId;
     }
@@ -33,6 +40,7 @@ public class ExperiencePollerObject {
         return new StringJoiner(", ", ExperiencePollerObject.class.getSimpleName() + "[", "]")
                 .add("environmentCrn='" + environmentCrn + "'")
                 .add("environmentName='" + environmentName + "'")
+                .add("cloudPlatform='" + cloudPlatform + "'")
                 .add("accountId='" + accountId + "'")
                 .toString();
     }

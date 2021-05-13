@@ -8,10 +8,13 @@ public class EnvironmentExperienceDto {
 
     private final String accountId;
 
-    private EnvironmentExperienceDto(String name, String crn, String accountId) {
-        this.name = name;
+    private final String cloudPlatform;
+
+    private EnvironmentExperienceDto(String name, String crn, String accountId, String cloudPlatform) {
         this.crn = crn;
+        this.name = name;
         this.accountId = accountId;
+        this.cloudPlatform = cloudPlatform;
     }
 
     public String getName() {
@@ -26,11 +29,16 @@ public class EnvironmentExperienceDto {
         return accountId;
     }
 
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentExperienceDto{" +
                 "name='" + name + '\'' +
                 ", crn='" + crn + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", accountId='" + accountId + '\'' +
                 '}';
     }
@@ -42,6 +50,8 @@ public class EnvironmentExperienceDto {
         private String crn;
 
         private String accountId;
+
+        private String cloudPlatform;
 
         public Builder() {
         }
@@ -61,8 +71,13 @@ public class EnvironmentExperienceDto {
             return this;
         }
 
+        public Builder withCloudPlatform(String cloudPlatform) {
+            this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
         public EnvironmentExperienceDto build() {
-            return new EnvironmentExperienceDto(name, crn, accountId);
+            return new EnvironmentExperienceDto(name, crn, accountId, cloudPlatform);
         }
 
     }

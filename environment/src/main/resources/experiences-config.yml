@@ -6,10 +6,12 @@ environment:
           description: Monitoring Clusters
       address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
     path:
-      componentToReplace: "{environmentCrn}"
+      componentToReplace:
+        envCrn: "{environmentCrn}"
+        cloudProvider: "cloudProvider"
     configs:
       - name: DWX
         description: Data Warehouse Clusters
         address: https://${MOCK_INFRASTRUCTURE_HOST:localhost}:${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
         internalEnvironmentEndpoint: /dwx/{environmentCrn}
-        policyPath: /prerequisites?cloudPlatform={provider}
+        policyPath: /prerequisites?cloudPlatform={cloudProvider}

@@ -3,6 +3,8 @@ package com.sequenceiq.environment.experience.common;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -24,6 +26,7 @@ import com.sequenceiq.environment.experience.api.CommonExperienceApi;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
 import com.sequenceiq.environment.experience.common.responses.DeleteCommonExperienceWorkspaceResponse;
+import com.sequenceiq.environment.experience.policy.response.ExperiencePolicyResponse;
 
 @Service
 public class CommonExperienceConnectorService implements CommonExperienceApi {
@@ -51,7 +54,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @NotNull
     @Override
     public Set<CpInternalCluster> getExperienceClustersConnectedToEnv(String experienceBasePath, String environmentCrn) {
-        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
+        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
         if (result.isPresent()) {
@@ -70,7 +73,7 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
     @NotNull
     @Override
     public DeleteCommonExperienceWorkspaceResponse deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn) {
-        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetBasedOnInputs(experienceBasePath, environmentCrn);
+        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
         Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call));
         if (response.isPresent()) {
@@ -78,6 +81,18 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
                     .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
         }
         throw new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG);
+    }
+
+    @Override
+    public Map<String, String> collectPolicy(String experienceBasePath, String cloudPlatform) {
+        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForPolicyFetch(experienceBasePath, cloudPlatform);
+        Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
+        Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
+        if (response.isPresent()) {
+            responseReader.read(webTarget.getUri().toString(), response.get(), ExperiencePolicyResponse.class)
+                    .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));
+        }
+        return new LinkedHashMap<>();
     }
 
     private Optional<Response> executeCall(URI path, Callable<Response> toCall) {

@@ -15,11 +15,14 @@ public class CommonExperience {
 
     private String internalEnvironmentEndpoint;
 
+    private String policyPath;
+
     private String address;
 
-    public CommonExperience(String name, String description, String internalEnvironmentEndpoint, String address) {
+    public CommonExperience(String name, String description, String internalEnvironmentEndpoint, String address, String policyPath) {
         this.name = name;
         this.address = address;
+        this.policyPath = policyPath;
         this.description = description;
         this.internalEnvironmentEndpoint = internalEnvironmentEndpoint;
         LOGGER.debug("CommonExperience has been created: {}", toString());
@@ -44,6 +47,14 @@ public class CommonExperience {
         this.description = description;
     }
 
+    public String getPolicyPath() {
+        return policyPath;
+    }
+
+    public void setPolicyPath(String policyPath) {
+        this.policyPath = policyPath;
+    }
+
     public String getInternalEnvironmentEndpoint() {
         return internalEnvironmentEndpoint;
     }
@@ -65,6 +76,7 @@ public class CommonExperience {
         return new StringJoiner(", ", CommonExperience.class.getSimpleName() + "[", "]")
                 .add("name='" + name + "'")
                 .add("description='" + description + "'")
+                .add("policyPath='" + policyPath + "'")
                 .add("internalEnvironmentEndpoint='" + internalEnvironmentEndpoint + "'")
                 .add("address='" + address + "'")
                 .toString();

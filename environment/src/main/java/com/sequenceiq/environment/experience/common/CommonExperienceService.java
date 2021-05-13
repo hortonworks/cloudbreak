@@ -6,6 +6,8 @@ import static java.util.stream.Collectors.toSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,6 +73,17 @@ public class CommonExperienceService implements Experience {
                 .filter(commonExperience ->  activeExperiences.stream().anyMatch(c -> c.getExperienceName().equals(commonExperience.getName())))
                 .forEach(commonExperience -> experienceConnectorService
                         .deleteWorkspaceForEnvironment(commonExperiencePathCreator.createPathToExperience(commonExperience), environment.getCrn()));
+    }
+
+    @Override
+    @NotNull
+    public Map<String, String> collectPolicy(@NotNull EnvironmentExperienceDto environment) {
+        Map<String, String> policies = new LinkedHashMap<>();
+        for (CommonExperience configuredExperience : configuredExperiences) {
+            String xpPath = commonExperiencePathCreator.createPathToExperience(configuredExperience);
+            policies.putAll(experienceConnectorService.collectPolicy(xpPath, environment.getCloudPlatform()));
+        }
+        return policies;
     }
 
     /**

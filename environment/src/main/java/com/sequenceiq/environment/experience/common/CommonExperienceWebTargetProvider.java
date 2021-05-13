@@ -2,7 +2,8 @@ package com.sequenceiq.environment.experience.common;
 
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.throwIfTrue;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
+
+import java.util.Map;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
@@ -19,25 +20,27 @@ class CommonExperienceWebTargetProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CommonExperienceWebTargetProvider.class);
 
-    private final String componentToReplaceInPath;
+    private final Map<String, String> componentsToReplace;
 
     private final Client client;
 
-    CommonExperienceWebTargetProvider(@Value("${environment.experience.path.componentToReplace}") String componentToReplaceInPath, Client client) {
-        throwIfTrue(isEmpty(componentToReplaceInPath),
+    CommonExperienceWebTargetProvider(@Value("${environment.experience.path.componentToReplace}") Map<String, String> componentsToReplace, Client client) {
+        throwIfTrue(componentsToReplace == null || componentsToReplace.isEmpty(),
                 () -> new IllegalArgumentException("Component what should be replaced in experience path must not be empty or null."));
-        this.componentToReplaceInPath = componentToReplaceInPath;
+        this.componentsToReplace = componentsToReplace;
         this.client = client;
     }
 
-    WebTarget createWebTargetBasedOnInputs(String experienceBasePath, String environmentCrn) {
-        LOGGER.debug("Creating WebTarget to connect experience");
-        return client.target(createPathToExperience(experienceBasePath, environmentCrn));
+    WebTarget createWebTargetForClusterFetch(String experienceBasePath, String environmentCrn) {
+        checkExperienceBasePath(experienceBasePath);
+        LOGGER.debug("Creating WebTarget to connect experience for cluster fetch");
+        return client.target(experienceBasePath.replace(componentsToReplace.get("envCrn"), environmentCrn));
     }
 
-    private String createPathToExperience(String experienceBasePath, String environmentCrn) {
+    WebTarget createWebTargetForPolicyFetch(String experienceBasePath, String cloudProvider) {
         checkExperienceBasePath(experienceBasePath);
-        return experienceBasePath.replace(componentToReplaceInPath, environmentCrn);
+        LOGGER.debug("Creating WebTarget to connect experience for cluster fetch");
+        return client.target(experienceBasePath.replace(componentsToReplace.get("cloudProvider"), cloudProvider));
     }
 
     private void checkExperienceBasePath(String experienceBasePath) {

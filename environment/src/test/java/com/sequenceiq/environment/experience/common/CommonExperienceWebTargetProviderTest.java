@@ -61,7 +61,7 @@ class CommonExperienceWebTargetProviderTest {
     @Test
     void testCreateWebTargetBasedOnInputsWhenExperienceBasePathIsNullThenIllegalArgumentExceptionShouldCome() {
         IllegalArgumentException expectedException = assertThrows(
-                IllegalArgumentException.class, () -> underTest.createWebTargetBasedOnInputs(null, TEST_ENV_CRN));
+                IllegalArgumentException.class, () -> underTest.createWebTargetForClusterFetch(null, TEST_ENV_CRN));
 
         assertNotNull(expectedException);
         assertEquals(INVALID_XP_BASE_PATH_GIVEN_MSG, expectedException.getMessage());
@@ -77,7 +77,7 @@ class CommonExperienceWebTargetProviderTest {
 
         when(mockClient.target(expectedTargetCreationContent)).thenReturn(expectedWebTarget);
 
-        WebTarget resultWebTarget = underTest.createWebTargetBasedOnInputs(xpBasePathExtended, TEST_ENV_CRN);
+        WebTarget resultWebTarget = underTest.createWebTargetForClusterFetch(xpBasePathExtended, TEST_ENV_CRN);
 
         assertEquals(expectedWebTarget, resultWebTarget);
 
