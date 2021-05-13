@@ -41,7 +41,8 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTask extends Abstract
         String parcelStage = apiParcel.getStage();
 
         if (!ParcelStatus.DISTRIBUTED.name().equals(parcelStage)
-                && !ParcelStatus.ACTIVATED.name().equals(parcelStage)) {
+                && !ParcelStatus.ACTIVATED.name().equals(parcelStage)
+                && !ParcelStatus.ACTIVATING.name().equals(parcelStage)) {
             LOGGER.warn("Expected parcel status is {}, received status is: {}", ParcelStatus.DISTRIBUTED.name(), parcelStage);
             return false;
         } else {
