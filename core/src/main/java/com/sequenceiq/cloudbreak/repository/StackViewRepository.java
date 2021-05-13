@@ -33,6 +33,9 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     @Query("SELECT s.resourceCrn FROM StackView s WHERE s.workspace.tenant.name = :tenantName AND s.terminated = null AND s.name IN (:names)")
     Set<String> findResourceCrnsByTenantNameAndNames(@Param("tenantName") String tenantName, @Param("names") List<String> names);
 
+    @Query("SELECT s FROM StackView s WHERE s.workspace.tenant.name = :tenantName AND s.terminated = null AND s.name IN (:names)")
+    Set<StackView> findByTenantNameAndNames(@Param("tenantName") String tenantName, @Param("names") List<String> names);
+
     @Query("SELECT s.resourceCrn FROM StackView s WHERE s.workspace.tenant.name = :tenantName AND s.terminated = null")
     Set<String> findResourceCrnsByTenant(@Param("tenantName") String tenantName);
 

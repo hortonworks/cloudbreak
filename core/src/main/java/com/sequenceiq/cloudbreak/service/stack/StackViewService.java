@@ -46,6 +46,10 @@ public class StackViewService {
         return stackViewRepository.findResourceCrnsByTenantNameAndNames(tenantName, names);
     }
 
+    public Set<StackView> findByNameListAndTenant(List<String> names, String tenantName) {
+        return stackViewRepository.findByTenantNameAndNames(tenantName, names);
+    }
+
     public Set<String> findResourceCrnsByTenant(String tenantName) {
         return stackViewRepository.findResourceCrnsByTenant(tenantName);
     }
