@@ -9,7 +9,7 @@ import java.sql.SQLException;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.hibernate.envers.AuditReader;
@@ -115,8 +115,8 @@ public class DatabaseConfig {
     }
 
     @Bean
-    public AuditReader auditReader(EntityManager entityManager) {
-        return AuditReaderFactory.get(entityManager);
+    public AuditReader auditReader(EntityManagerFactory entityManagerFactory) {
+        return AuditReaderFactory.get(entityManagerFactory.createEntityManager());
     }
 
     @Bean

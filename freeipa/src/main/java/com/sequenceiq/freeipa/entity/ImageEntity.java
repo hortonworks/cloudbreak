@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.entity;
 
+import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
+
+import java.util.Objects;
+
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -8,7 +12,12 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+
 @Entity(name = "image")
+@Audited
+@AuditTable("image_history")
 public class ImageEntity {
 
     @Id
@@ -17,6 +26,7 @@ public class ImageEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
+    @Audited(targetAuditMode = NOT_AUDITED)
     private Stack stack;
 
     private String imageName;
@@ -115,5 +125,33 @@ public class ImageEntity {
                 + ", imageId='" + imageId + '\''
                 + ", imageCatalogName='" + imageCatalogName + '\''
                 + ", userdata=" + userdata + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        } else if (o == null || getClass() != o.getClass()) {
+            return false;
+        } else {
+            ImageEntity that = (ImageEntity) o;
+            return isFieldEquals(that);
+        }
+    }
+
+    private boolean isFieldEquals(ImageEntity that) {
+        return Objects.equals(id, that.id)
+                && Objects.equals(imageName, that.imageName)
+                && Objects.equals(userdata, that.userdata)
+                && Objects.equals(os, that.os)
+                && Objects.equals(osType, that.osType)
+                && Objects.equals(imageCatalogUrl, that.imageCatalogUrl)
+                && Objects.equals(imageId, that.imageId)
+                && Objects.equals(imageCatalogName, that.imageCatalogName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, imageName, userdata, os, osType, imageCatalogUrl, imageId, imageCatalogName);
     }
 }

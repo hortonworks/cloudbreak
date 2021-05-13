@@ -11,12 +11,10 @@ public class ImageToImageEntityConverter extends AbstractConversionServiceAwareC
 
     @Override
     public ImageEntity convert(Image source) {
-
         ImageEntity imageEntity = new ImageEntity();
         imageEntity.setImageId(source.getUuid());
         imageEntity.setOs(source.getOs());
         imageEntity.setOsType(source.getOsType());
         return imageEntity;
     }
-
 }
