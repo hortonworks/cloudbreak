@@ -188,7 +188,7 @@ public class AmbariDecommissioner {
     @Inject
     private NifiDecommissionService nifiDecommissionService;
 
-    @Value("${hbase.decommission.enabled:false}")
+    @Value("${hbase.decommission.enabled:true}")
     private boolean hbaseDecommissionEnabled;
 
     @PostConstruct
@@ -354,16 +354,16 @@ public class AmbariDecommissioner {
                     Map<String, HostStatus> statuses = ambariClientRetryer.getHostComponentStatuses(ambariClient, hostList, List.of(DATANODE));
                     throw new DecommissionException("Datanode could not be decommissioned on hosts, current states " + statuses);
                 }
+                pollingResult = stopHadoopComponents(stack, ambariClient, hostList, hostStatusMap);
+                if (!isSuccess(pollingResult)) {
+                    LOGGER.warn("Polling failed, services could not be stopped on the cluster.");
+                    throw new DecommissionException("Hadoop components could not be stop on hosts");
+                }
                 pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, hostStatusMap);
                 if (!isSuccess(pollingResult)) {
                     LOGGER.warn("Polling failed, '{}' could not be decommissioned, polling result: '{}'", HBASE_REGIONSERVER, pollingResult);
                     Map<String, HostStatus> statuses = ambariClientRetryer.getHostComponentStatuses(ambariClient, hostList, List.of(HBASE_REGIONSERVER));
                     throw new DecommissionException("HBASE region server could not be decommissioned on hosts, current states " + statuses);
-                }
-                pollingResult = stopHadoopComponents(stack, ambariClient, hostList, hostStatusMap);
-                if (!isSuccess(pollingResult)) {
-                    LOGGER.warn("Polling failed, services could not be stopped on the cluster.");
-                    throw new DecommissionException("Hadoop components could not be stop on hosts");
                 }
                 ambariDeleteHostsService.deleteHostsButFirstQueryThemFromAmbari(ambariClient, hostList);
                 result.addAll(hostsToRemove.keySet());
@@ -635,7 +635,6 @@ public class AmbariDecommissioner {
                 || hosts.stream().noneMatch(hn -> hostStatusMap.get(hn).getHostComponentsStatuses().keySet().contains(HBASE_REGIONSERVER))) {
             return SUCCESS;
         }
-
         LOGGER.info("Waiting for RegionServers to move the regions to other servers");
         return rsPollerService.pollWithTimeoutSingleFailure(rsDecommissionStatusCheckerTask, new AmbariHostsWithNames(stack, ambariClient, hosts),
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_REGION_DECOM);
@@ -702,6 +701,8 @@ public class AmbariDecommissioner {
             Integer requestId = decommissionComponent(hostsRunService, component, hostStatusMap, action);
             if (requestId != null) {
                 decommissionRequests.put(component + "_DECOMMISSION", requestId);
+            } else {
+                LOGGER.info("{} decommission does not started on {}", component, hostStatusMap);
             }
         });
         LOGGER.info("Collected decommission requests: {}", decommissionRequests);
@@ -714,7 +715,7 @@ public class AmbariDecommissioner {
         List<String> hostsToDecommission = hosts.stream()
                 .filter(h -> "INSERVICE".equals(hostStatusMap.get(h).getHostComponentsStatuses().get(component).getDesired_admin_state()))
                 .collect(Collectors.toList());
-        LOGGER.info("Hosts to decommission for component: {}", hostsToDecommission);
+        LOGGER.info("Hosts to decommission for {} component: {}", component, hostsToDecommission);
         if (!hostsToDecommission.isEmpty()) {
             return action.apply(hostsToDecommission);
         }
