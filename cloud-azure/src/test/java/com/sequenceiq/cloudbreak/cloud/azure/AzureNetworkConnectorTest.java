@@ -326,8 +326,9 @@ public class AzureNetworkConnectorTest {
         when(azureNetwork.addressSpaces()).thenReturn(List.of());
 
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("Network could not be fetch from Azure with resource group name: %s and network id: %s",
-                resourceGroupName, networkId));
+        thrown.expectMessage("Network could not be fetched from Azure with Resource Group name: " +
+                "resourceGroupName and VNET id: vnet-1. Please make sure that the name of the VNET is " +
+                "correct and is present in the Resource Group specified.");
 
         underTest.getNetworkCidr(network, credential);
     }
@@ -367,8 +368,9 @@ public class AzureNetworkConnectorTest {
         when(azureClient.getNetworkByResourceGroup(resourceGroupName, networkId)).thenReturn(null);
 
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage(String.format("Network could not be fetch from Azure with resource group name: %s and network id: %s",
-                resourceGroupName, networkId));
+        thrown.expectMessage("Network could not be fetched from Azure with Resource Group name: resourceGroupName and" +
+                " VNET id: vnet-1. Please make sure that the name of the VNET is correct and is present in the" +
+                " Resource Group specified.");
         underTest.getNetworkCidr(network, credential);
     }
 
