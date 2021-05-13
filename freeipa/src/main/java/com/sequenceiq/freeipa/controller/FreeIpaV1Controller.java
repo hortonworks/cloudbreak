@@ -29,10 +29,12 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
@@ -50,6 +52,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.binduser.BindUserCreateService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
+import com.sequenceiq.freeipa.service.image.ImageChangeService;
 import com.sequenceiq.freeipa.service.stack.ChildEnvironmentService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
@@ -118,6 +121,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private BindUserCreateService bindUserCreateService;
+
+    @Inject
+    private ImageChangeService imageChangeService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -262,5 +268,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public OperationStatus createBindUser(@Valid @NotNull BindUserCreateRequest request, @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return bindUserCreateService.createBindUser(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public FlowIdentifier changeImage(@RequestObject @Valid @NotNull ImageChangeRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        return imageChangeService.changeImage(accountId, request);
     }
 }

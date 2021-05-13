@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootFlowConfig;
+import com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopFlowConfig;
@@ -26,6 +27,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationFlowConfig;
 public class FreeIpaFlowInformation implements ApplicationFlowInformation {
 
     private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = List.of(
+            ImageChangeFlowConfig.class,
             StackProvisionFlowConfig.class,
             StackTerminationFlowConfig.class,
             FreeIpaProvisionFlowConfig.class,

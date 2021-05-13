@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,8 +53,8 @@ public class FreeIpaImageProvider implements ImageProvider {
     @Override
     public Optional<ImageWrapper> getImage(ImageSettingsRequest imageSettings, String region, String platform) {
         String imageId = imageSettings.getId();
-        String catalogUrl = Objects.nonNull(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
-        String imageOs = Objects.nonNull(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
+        String catalogUrl = StringUtils.isNotBlank(imageSettings.getCatalog()) ? imageSettings.getCatalog() : defaultCatalogUrl;
+        String imageOs = StringUtils.isNotBlank(imageSettings.getOs()) ? imageSettings.getOs() : defaultOs;
 
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(catalogUrl);
         return findImageForAppVersion(region, platform, imageId, imageOs, cachedImageCatalog)

@@ -35,4 +35,12 @@ public class StackImageChangeV4Request implements JsonEntity {
     public void setImageCatalogName(String imageCatalogName) {
         this.imageCatalogName = imageCatalogName;
     }
+
+    @Override
+    public String toString() {
+        return "StackImageChangeV4Request{" +
+                "imageId='" + imageId + '\'' +
+                ", imageCatalogName='" + imageCatalogName + '\'' +
+                '}';
+    }
 }
