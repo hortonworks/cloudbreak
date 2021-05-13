@@ -69,10 +69,11 @@ public class AwsCredentialVerifier {
                 simulatePrincipalPolicyResult.getEvaluationResults().stream()
                         .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
                         .map(evaluationResult -> {
-                            if (evaluationResult.getOrganizationsDecisionDetail().getAllowedByOrganizations()) {
-                                return evaluationResult.getEvalActionName() + " : " + evaluationResult.getEvalResourceName();
-                            } else {
+                            if (evaluationResult.getOrganizationsDecisionDetail() != null && !evaluationResult.getOrganizationsDecisionDetail()
+                                    .getAllowedByOrganizations()) {
                                 return evaluationResult.getEvalActionName() + " : " + evaluationResult.getEvalResourceName() + " -> Denied by Organization Rule";
+                            } else {
+                                return evaluationResult.getEvalActionName() + " : " + evaluationResult.getEvalResourceName();
                             }
                         })
                         .forEach(failedActionList::add);

@@ -207,4 +207,63 @@ public class AwsCredentialVerifierTest {
                 assertEquals("arn", simulatePrincipalPolicyRequest.getPolicySourceArn()));
 
     }
+
+    @Test
+    public void verifyCredentialAndOrganizatioDecisionDetailIsNullTest() throws IOException {
+        URL url = Resources.getResource("definitions/aws-cb-policy.json");
+        String awsCbPolicy = Resources.toString(url, Charsets.UTF_8);
+        when(awsPlatformParameters.getCredentialPoliciesJson()).thenReturn(Base64.getEncoder().encodeToString(awsCbPolicy.getBytes()));
+        Map<String, Object> awsParameters = new HashMap<>();
+        awsParameters.put("accessKey", "a");
+        awsParameters.put("secretKey", "b");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, false);
+
+        AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
+        when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
+
+        AmazonSecurityTokenServiceClient awsSecurityTokenService = mock(AmazonSecurityTokenServiceClient.class);
+        GetCallerIdentityResult getCallerIdentityResult = new GetCallerIdentityResult();
+        getCallerIdentityResult.setArn("arn");
+        when(awsSecurityTokenService.getCallerIdentity(any(GetCallerIdentityRequest.class))).thenReturn(getCallerIdentityResult);
+        when(awsClient.createSecurityTokenService(any(AwsCredentialView.class))).thenReturn(awsSecurityTokenService);
+
+        ArgumentCaptor<SimulatePrincipalPolicyRequest> requestArgumentCaptor = ArgumentCaptor.forClass(SimulatePrincipalPolicyRequest.class);
+        AtomicInteger i = new AtomicInteger();
+        when(amazonIdentityManagement.simulatePrincipalPolicy(requestArgumentCaptor.capture())).thenAnswer(invocation -> {
+            SimulatePrincipalPolicyResult simulatePrincipalPolicyResult = new SimulatePrincipalPolicyResult();
+            ArrayList<EvaluationResult> evaluationResults = new ArrayList<>();
+            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
+                    .withOrganizationsDecisionDetail(null)
+                    .withEvalActionName("denied_action1_" + i).withEvalResourceName("aws:ec2"));
+            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
+                    .withOrganizationsDecisionDetail(null)
+                    .withEvalActionName("denied_action2_" + i).withEvalResourceName("aws:ec2"));
+            evaluationResults.add(new EvaluationResult().withEvalDecision("deny")
+                    .withOrganizationsDecisionDetail(null)
+                    .withEvalActionName("denied_action3_" + i).withEvalResourceName("aws:ec2"));
+            evaluationResults.add(new EvaluationResult().withEvalDecision("accept")
+                    .withOrganizationsDecisionDetail(null)
+                    .withEvalActionName("accepted_action_" + i).withEvalResourceName("*"));
+            simulatePrincipalPolicyResult.setEvaluationResults(evaluationResults);
+            i.getAndIncrement();
+            return simulatePrincipalPolicyResult;
+        });
+
+        try {
+            awsCredentialVerifier.validateAws(new AwsCredentialView(cloudCredential));
+            fail("It shoud throw verification exception");
+        } catch (AwsPermissionMissingException e) {
+            assertThat(e.getMessage(), CoreMatchers.containsString("denied_action1_0 : aws:ec2,"));
+            assertThat(e.getMessage(), CoreMatchers.containsString("denied_action2_0 : aws:ec2,"));
+            assertThat(e.getMessage(), CoreMatchers.containsString("denied_action3_0 : aws:ec2,"));
+            assertThat(e.getMessage(), not(CoreMatchers.containsString("accepted_action")));
+        }
+        List<SimulatePrincipalPolicyRequest> allSimulatePrincipalPolicyRequest = requestArgumentCaptor.getAllValues();
+        int simulateRequestNumber = 4;
+        assertEquals("expect if " + simulateRequestNumber + " simulate request has been sent",
+                simulateRequestNumber, allSimulatePrincipalPolicyRequest.size());
+        allSimulatePrincipalPolicyRequest.forEach(simulatePrincipalPolicyRequest ->
+                assertEquals("arn", simulatePrincipalPolicyRequest.getPolicySourceArn()));
+
+    }
 }
