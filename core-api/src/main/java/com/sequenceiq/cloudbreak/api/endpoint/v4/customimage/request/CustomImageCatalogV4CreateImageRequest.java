@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.validation.customimage.UniqueRegion;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -38,6 +39,7 @@ public class CustomImageCatalogV4CreateImageRequest {
 
     @NotNull
     @ApiModelProperty(value = VM_IMAGES, required = true)
+    @UniqueRegion
     private Set<CustomImageCatalogV4VmImageRequest> vmImages = new HashSet<>();
 
     public CustomImageCatalogV4CreateImageRequest() {

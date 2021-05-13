@@ -58,7 +58,7 @@ public class CustomImage implements ProvisionEntity {
 
     private String baseParcelUrl;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "customImage", cascade = CascadeType.REMOVE)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "customImage", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<VmImage> vmImage = new HashSet<>();
 
     public Long getId() {
@@ -150,7 +150,7 @@ public class CustomImage implements ProvisionEntity {
         final StringBuffer sb = new StringBuffer("ImageCatalog{");
         sb.append("id='").append(id).append('\'');
         sb.append("name='").append(name).append('\'');
-        sb.append("imageType='").append(imageType.name()).append('\'');
+        sb.append("imageType='").append(imageType != null ? imageType.name() : null).append('\'');
         sb.append("customizedImageId='").append(customizedImageId).append('\'');
         sb.append('}');
         return sb.toString();

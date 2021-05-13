@@ -134,10 +134,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNull(workspaceId, false);
         } else {
             imageCatalogs = imageCatalogRepository.findAllByWorkspaceIdAndArchivedAndImageCatalogUrlIsNotNull(workspaceId, false);
-        }
-        imageCatalogs.add(getCloudbreakDefaultImageCatalog());
-        if (legacyCatalogEnabled) {
-            imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+
+            imageCatalogs.add(getCloudbreakDefaultImageCatalog());
+            if (legacyCatalogEnabled) {
+                imageCatalogs.add(getCloudbreakLegacyDefaultImageCatalog());
+            }
         }
         return imageCatalogs;
     }

@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.validation.customimage.UniqueRegion;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
 import java.util.Set;
 
 import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.CustomImageDescription.BASE_PARCEL_URL;
@@ -34,7 +34,8 @@ public class CustomImageCatalogV4UpdateImageRequest {
     private String baseParcelUrl;
 
     @ApiModelProperty(value = VM_IMAGES)
-    private Set<CustomImageCatalogV4VmImageRequest> vmImages = new HashSet<>();
+    @UniqueRegion
+    private Set<CustomImageCatalogV4VmImageRequest> vmImages;
 
     public String getImageType() {
         return imageType;
