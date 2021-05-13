@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.common.metrics;
 
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -78,6 +79,12 @@ public abstract class AbstractMetricService implements MetricService {
 
     private String getMetricName(Metric metric) {
         return getMetricPrefix() + '.' + metric.getMetricName().toLowerCase();
+    }
+
+    @Override
+    public void recordTimerMetric(Metric metric, Duration duration, String... tags) {
+        Timer timer = Metrics.timer(getMetricName(metric), tags);
+        timer.record(duration);
     }
 
     protected abstract String getMetricPrefix();
