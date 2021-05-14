@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.ext.ExceptionMapper;
 
-import com.sequenceiq.cloudbreak.controller.v4.CustomImageCatalogV4Controller;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +24,7 @@ import com.sequenceiq.cloudbreak.controller.v4.BlueprintV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudProviderServicesV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.CloudbreakInfoV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.ClusterTemplateV4Controller;
+import com.sequenceiq.cloudbreak.controller.v4.CustomImageCatalogV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseConfigV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatabaseV4Controller;
 import com.sequenceiq.cloudbreak.controller.v4.DatalakeV4Controller;
@@ -42,8 +42,8 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilte
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXDatabaseServerV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
-import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
