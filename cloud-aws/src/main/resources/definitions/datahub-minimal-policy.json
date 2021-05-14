@@ -95,6 +95,7 @@
         "cloudformation:DescribeStackResource",
         "cloudformation:DescribeStacks",
         "elasticloadbalancing:DeregisterTargets",
+        "ec2:DescribePrefixLists",
         "kms:ListKeys",
         "kms:ListAliases",
         "sts:DecodeAuthorizationMessage",
