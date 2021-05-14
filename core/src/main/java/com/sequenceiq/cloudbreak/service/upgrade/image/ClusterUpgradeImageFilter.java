@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
@@ -123,8 +122,7 @@ public class ClusterUpgradeImageFilter {
     }
 
     private boolean isValidBlueprint(ImageFilterParams imageFilterParams) {
-        return imageFilterParams.getStackType().equals(StackType.DATALAKE)
-                || blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());
+        return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());
     }
 
     private boolean isOsVersionsMatch(Image currentImage, Image newImage) {
