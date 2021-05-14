@@ -77,6 +77,7 @@
         "ec2:DeleteInternetGateway",
         "ec2:AttachInternetGateway",
         "ec2:DetachInternetGateway",
+        "ec2:DescribePrefixLists",
         "ec2:AllocateAddress",
         "ec2:AssociateRouteTable",
         "ec2:CreateRoute",

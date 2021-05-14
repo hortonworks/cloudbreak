@@ -76,6 +76,7 @@
         "ec2:DescribeInstances",
         "ec2:DescribeRouteTables",
         "ec2:DescribeSubnets",
+        "ec2:DescribePrefixLists",
         "ec2:CreateSecurityGroup",
         "ec2:CreateLaunchTemplate",
         "ec2:AuthorizeSecurityGroupIngress",
