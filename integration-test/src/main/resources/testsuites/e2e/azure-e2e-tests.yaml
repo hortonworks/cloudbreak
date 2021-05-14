@@ -8,3 +8,4 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.AzureMarketplaceImageTest

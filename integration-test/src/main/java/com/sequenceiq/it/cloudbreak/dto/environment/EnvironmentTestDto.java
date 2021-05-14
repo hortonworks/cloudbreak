@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
+import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties.AZURE_MARKETPLACE_FREEIPA_CATALOG_URL;
+import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImageProperties.AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
@@ -14,6 +16,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+
+import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
@@ -48,7 +52,6 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
-import org.testng.util.Strings;
 
 @Prototype
 public class EnvironmentTestDto
@@ -117,6 +120,14 @@ public class EnvironmentTestDto
 
             getRequest().getFreeIpa().setImage(imageRequest);
         }
+        return this;
+    }
+
+    public EnvironmentTestDto withMarketplaceFreeIpaImage() {
+        FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
+        imageRequest.setCatalog(getMarketplaceFreeIpaCatalogUrl());
+        imageRequest.setId(getMarketplaceFreeIpaImageUuid());
+        getRequest().getFreeIpa().setImage(imageRequest);
         return this;
     }
 
@@ -394,6 +405,14 @@ public class EnvironmentTestDto
 
     private String getResourceGroupUsage() {
         return getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE);
+    }
+
+    private String getMarketplaceFreeIpaCatalogUrl() {
+        return getTestParameter().get(AZURE_MARKETPLACE_FREEIPA_CATALOG_URL);
+    }
+
+    private String getMarketplaceFreeIpaImageUuid() {
+        return getTestParameter().get(AZURE_MARKETPLACE_FREEIPA_IMAGE_UUID);
     }
 
     @Override
