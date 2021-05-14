@@ -63,7 +63,6 @@ public class AwsModelService {
             .withDefaultSubnet(subnet)
             .withOutboundInternetTraffic(network.getOutboundInternetTraffic())
             .withVpcCidrs(network.getNetworkCidrs())
-            .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()))
             .withPrefixListIds(getPrefixListIds(amazonEC2Client, regionName, network.getOutboundInternetTraffic()));
 
         AwsEfsFileSystem efsFileSystem = getAwsEfsFileSystem(stack);
