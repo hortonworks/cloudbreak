@@ -17,10 +17,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -32,7 +34,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
 
 @Controller
-@DisableCheckPermissions
 @Transactional(TxType.NEVER)
 @WorkspaceEntityType(StructuredEventEntity.class)
 public class EventV4Controller implements EventV4Endpoint {
@@ -50,12 +51,14 @@ public class EventV4Controller implements EventV4Endpoint {
     private WorkspaceService workspaceService;
 
     @Override
-    public CloudbreakEventV4Responses list(Long since) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public CloudbreakEventV4Responses list(Long since, @AccountId String accountId) {
         return new CloudbreakEventV4Responses(cloudbreakEventsFacade.retrieveEventsForWorkspace(workspaceService.getForCurrentUser().getId(), since));
     }
 
     @Override
-    public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size, @AccountId String accountId) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         StackView stackView = getStackViewIfAvailable(name);
         return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable);
@@ -67,12 +70,14 @@ public class EventV4Controller implements EventV4Endpoint {
     }
 
     @Override
-    public StructuredEventContainer structured(String name) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public StructuredEventContainer structured(String name, @AccountId String accountId) {
         return legacyStructuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
     }
 
     @Override
-    public Response download(String name) {
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public Response download(String name, @AccountId String accountId) {
         StructuredEventContainer events = legacyStructuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {

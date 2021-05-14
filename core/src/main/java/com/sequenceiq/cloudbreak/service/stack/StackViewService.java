@@ -22,6 +22,11 @@ public class StackViewService {
         return stackViewRepository.findById(id).orElseThrow(() -> new CloudbreakRuntimeException("Can not find stackview by stack id: " + id));
     }
 
+    public StackView getByCrn(Long workspaceId, String crn) {
+        return stackViewRepository.findByWorkspaceIdAndCrn(workspaceId, crn).orElseThrow(() ->
+                new CloudbreakRuntimeException("Can not find stackview by stack crn: " + crn));
+    }
+
     public Optional<StackView> findById(Long id) {
         return stackViewRepository.findById(id);
     }

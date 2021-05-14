@@ -14,6 +14,7 @@ import org.springframework.data.domain.Page;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EventOpDescription;
@@ -34,7 +35,7 @@ public interface EventV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_BY_TIMESTAMP, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEventsInWorkspace")
-    CloudbreakEventV4Responses list(@QueryParam("since") Long since);
+    CloudbreakEventV4Responses list(@QueryParam("since") Long since, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}")
@@ -44,19 +45,20 @@ public interface EventV4Endpoint {
     Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") Integer page,
-            @QueryParam("size") @DefaultValue("100") Integer size);
+            @QueryParam("size") @DefaultValue("100") Integer size,
+            @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}/structured")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_EVENTS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
             nickname = "getStructuredEventsInWorkspace")
-    StructuredEventContainer structured(@PathParam("name") String name);
+    StructuredEventContainer structured(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("{name}/zip")
     @Produces(MediaType.APPLICATION_OCTET_STREAM)
     @ApiOperation(value = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
             nickname = "getStructuredEventsZipInWorkspace")
-    Response download(@PathParam("name") String name);
+    Response download(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 }

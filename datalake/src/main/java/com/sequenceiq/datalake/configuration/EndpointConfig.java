@@ -21,6 +21,7 @@ import com.sequenceiq.datalake.controller.progress.ProgressController;
 import com.sequenceiq.datalake.controller.sdx.DatabaseConfigController;
 import com.sequenceiq.datalake.controller.sdx.DatabaseServerController;
 import com.sequenceiq.datalake.controller.sdx.SdxController;
+import com.sequenceiq.datalake.controller.sdx.SdxEventController;
 import com.sequenceiq.datalake.controller.sdx.SdxInternalController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
 import com.sequenceiq.datalake.controller.util.UtilController;
@@ -50,7 +51,8 @@ public class EndpointConfig extends ResourceConfig {
             DiagnosticsController.class,
             ProgressController.class,
             AuthorizationUtilEndpoint.class,
-            DatabaseServerController.class);
+            DatabaseServerController.class,
+            SdxEventController.class);
 
     @Value("${info.app.version:unspecified}")
     private String applicationVersion;

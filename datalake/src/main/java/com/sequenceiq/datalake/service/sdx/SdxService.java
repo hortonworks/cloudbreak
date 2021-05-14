@@ -164,6 +164,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
+    public List<SdxCluster> findByAccountIdAndDeletedIsNull() {
+        return sdxClusterRepository.findByAccountIdAndDeletedIsNull(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
     public List<ResourceWithId> findAsAuthorizationResorces(String accountId) {
         return sdxClusterRepository.findAuthorizationResourcesByAccountId(accountId);
     }
