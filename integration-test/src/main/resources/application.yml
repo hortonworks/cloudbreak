@@ -153,6 +153,12 @@ integrationtest:
     resourcegroup:
       usage: MULTIPLE
       name:
+    marketplace:
+      freeipa:
+        image:
+          uuid: 4c9de617-26b6-404c-990d-a8b6578f74e4
+        catalog:
+          url: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-marketplace-freeipa-image-catalog.json
 
   # gcp parameters
   gcp:
