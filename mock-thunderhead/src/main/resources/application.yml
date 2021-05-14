@@ -16,7 +16,6 @@ auth:
     freeipa:
       ha:
         repair.enable: true
-      backuplocationconfig.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true
