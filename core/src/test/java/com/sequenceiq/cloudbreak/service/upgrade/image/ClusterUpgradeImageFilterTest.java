@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -109,6 +108,7 @@ public class ClusterUpgradeImageFilterTest {
         when(entitlementDrivenPackageLocationFilter.filterImage(any(Image.class), any(ImageFilterParams.class))).thenReturn(predicate);
         when(imageCreationBasedFilter.filterPreviousImages(any(Image.class), any())).thenReturn(predicate);
         when(cmAndStackVersionFilter.filterCmAndStackVersion(any(ImageFilterParams.class), any())).thenReturn(predicate);
+        when(blueprintUpgradeOptionValidator.isValidBlueprint(any())).thenReturn(true);
     }
 
     @Test
@@ -122,7 +122,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(this.properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -147,10 +146,9 @@ public class ClusterUpgradeImageFilterTest {
 
         ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
-        assertEquals("The upgrade is not allowed for this blueprint.", actual.getReason());
+        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint);
-        verifyNoInteractions(imageCatalogServiceProxy);
     }
 
     @Test
@@ -167,7 +165,6 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -184,7 +181,6 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -200,7 +196,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -216,7 +211,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade for aws cloud platform.", actual.getReason());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -232,7 +226,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade with the same OS version.", actual.getReason());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -247,7 +240,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images with supported Cloudera Manager or CDP version.", actual.getReason());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -262,7 +254,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no eligible images to upgrade available with Cloudera Manager packages.", actual.getReason());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -278,7 +269,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getReason(), actual.getAvailableImages().getCdhImages().contains(imageWithSameStackAndCmVersion));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -294,7 +284,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().contains(properImage));
         assertEquals(1, actual.getAvailableImages().getCdhImages().size());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -309,7 +298,6 @@ public class ClusterUpgradeImageFilterTest {
 
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         assertEquals("There are no newer compatible images available.", actual.getReason());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -326,7 +314,6 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertEquals(actual.getReason(), 2, actual.getAvailableImages().getCdhImages().size());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     @Test
@@ -343,7 +330,6 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult actual = underTest.filter(cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
         assertEquals(actual.getReason(), 2, actual.getAvailableImages().getCdhImages().size());
-        verifyNoInteractions(blueprintUpgradeOptionValidator);
     }
 
     private Image createCurrentImage() {
