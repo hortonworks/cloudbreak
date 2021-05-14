@@ -2,10 +2,12 @@ package com.sequenceiq.cloudbreak.common.metrics;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.ToDoubleFunction;
 import java.util.stream.Collectors;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -85,6 +87,19 @@ public abstract class AbstractMetricService implements MetricService {
     public void recordTimerMetric(Metric metric, Duration duration, String... tags) {
         Timer timer = Metrics.timer(getMetricName(metric), tags);
         timer.record(duration);
+    }
+
+    @Override
+    public <T> void registerGaugeMetric(Metric metric, T object, ToDoubleFunction<T> valueFunction, Map<String, String> tags) {
+        List<Tag> tagList = getTagList(tags);
+        Metrics.gauge(getMetricName(metric), tagList, object, valueFunction);
+    }
+
+    private List<Tag> getTagList(Map<String, String> tags) {
+        if (tags == null) {
+            return Collections.emptyList();
+        }
+        return tags.entrySet().stream().map(e -> Tag.of(e.getKey(), e.getValue())).collect(Collectors.toList());
     }
 
     protected abstract String getMetricPrefix();
