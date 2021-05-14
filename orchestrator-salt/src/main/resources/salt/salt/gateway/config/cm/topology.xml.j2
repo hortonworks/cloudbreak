@@ -570,6 +570,14 @@
               <name>replayBufferSize</name>
               <value>128</value>
         </param>
+        <param>
+              <name>httpclient.connectionTimeout</name>
+              <value>5m</value>
+        </param>
+        <param>
+               <name>httpclient.socketTimeout</name>
+               <value>5m</value>
+        </param>
     </service>
     <service>
         <role>ATLAS-API</role>
@@ -579,6 +587,14 @@
         <param>
               <name>replayBufferSize</name>
               <value>128</value>
+        </param>
+        <param>
+              <name>httpclient.connectionTimeout</name>
+              <value>5m</value>
+        </param>
+        <param>
+               <name>httpclient.socketTimeout</name>
+               <value>5m</value>
         </param>
     </service>
     {%- endif %}
