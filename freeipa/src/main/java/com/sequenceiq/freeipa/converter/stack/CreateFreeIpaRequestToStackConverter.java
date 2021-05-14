@@ -122,7 +122,7 @@ public class CreateFreeIpaRequestToStackConverter {
             stack.setNetwork(networkConverter.convert(source.getNetwork()));
         }
         stack.setTelemetry(telemetryConverter.convert(source.getTelemetry()));
-        if (entitlementService.freeIpaBackupLocationEnabled(accountId) && source.getBackup() != null && isNotEmpty(source.getBackup().getStorageLocation())) {
+        if (source.getBackup() != null && isNotEmpty(source.getBackup().getStorageLocation())) {
             stack.setBackup(backupConverter.convert(source.getBackup()));
         } else {
             stack.setBackup(backupConverter.convert(source.getTelemetry()));
