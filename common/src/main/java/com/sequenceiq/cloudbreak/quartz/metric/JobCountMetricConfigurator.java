@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.metric;
 
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -9,8 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 
 @Component
 public class JobCountMetricConfigurator {
@@ -21,18 +22,17 @@ public class JobCountMetricConfigurator {
     private GroupNameToJobCountFunction groupNameToJobCountFunction;
 
     @Inject
-    private MeterRegistry meterRegistry;
+    private Scheduler scheduler;
 
     @Inject
-    private Scheduler scheduler;
+    private MetricService metricService;
 
     @PostConstruct
     public void init() {
         try {
             for (String groupName : scheduler.getJobGroupNames()) {
-                Gauge.builder(QuartzMetricType.JOB_COUNT.getMetricName(), groupName, groupNameToJobCountFunction)
-                        .tags("group", groupName)
-                        .register(meterRegistry);
+                metricService.registerGaugeMetric(QuartzMetricType.JOB_COUNT, groupName, groupNameToJobCountFunction,
+                        Map.of("group", groupName));
             }
         } catch (SchedulerException e) {
             LOGGER.error("Cannot create job count metrics", e);
