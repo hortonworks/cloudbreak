@@ -297,17 +297,15 @@
                                    </#if>
                                    <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
                                    ,"loadBalancerBackendAddressPools": [
-                                       {
                                            <#--
                                                This is adding the NIC to all load balancer backend address pools.
                                                When we add more load balancers, we'll have to associate the NIC with
                                                only a single LB pool
                                            -->
-                                           <#list loadBalancerMapping[instance.groupName] as loadBalancer>
-                                           "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', 'address-pool')]"
-                                           <#if (loadBalancer_index + 1) != loadBalancerMapping[instance.groupName]?size>,</#if>
-                                           </#list>
-                                       }
+                                       <#list loadBalancerMapping[instance.groupName] as loadBalancer>
+                                       { "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', 'address-pool')]" }
+                                       <#sep>, </#sep>
+                                       </#list>
                                    ]
                                    </#if>
                                }
