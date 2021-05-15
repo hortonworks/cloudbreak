@@ -32,6 +32,20 @@ public class AzureLoadBalancerModelBuilder {
     }
 
     /**
+     * Returns a map containing {@code loadBalancers} and {@code loadBalancerMapping} keys.
+     * The values in the returned map are based on the Cloud Stack and stack name provided at construction.
+     *
+     * @return A map containing load balancers and load balancer mappings
+     */
+    public Map<String, Object> buildModel() {
+        List<AzureLoadBalancer> azureLoadBalancers = buildAzureLoadBalancerModel(cloudStack, stackName);
+        Map<String, Collection<AzureLoadBalancer>> instanceGroupToLoadBalancers = createTargetInstanceGroupMapping(azureLoadBalancers);
+
+        return Map.of("loadBalancers", azureLoadBalancers,
+                "loadBalancerMapping", instanceGroupToLoadBalancers);
+    }
+
+    /**
      * Create a model of Azure load balancers from stack information.
      *
      * @param cloudStack containing CloudLoadBalancers to base the AzureLoadBalancers off of
@@ -50,14 +64,11 @@ public class AzureLoadBalancerModelBuilder {
         return buildAzureLb(cloudLoadBalancer.getType(), instanceGroupNames, rules, stackName);
     }
 
-    private AzureLoadBalancer buildAzureLb(LoadBalancerType type, Set<String> instanceGroupNames, List<AzureLoadBalancingRule> rules, String stackName) {
-        return new AzureLoadBalancer.Builder()
-                .setType(type)
-                .setInstanceGroupNames(instanceGroupNames)
-                .setRules(rules)
-                .setStackName(stackName)
-                .createAzureLoadBalancer();
-
+    private Set<String> collectInstanceGroupNames(CloudLoadBalancer cloudLoadBalancer) {
+        return cloudLoadBalancer.getPortToTargetGroupMapping().values().stream()
+                .flatMap(Collection::stream)
+                .map(Group::getName)
+                .collect(Collectors.toSet());
     }
 
     private List<AzureLoadBalancingRule> collectLoadBalancingRules(CloudLoadBalancer cloudLoadBalancer) {
@@ -68,19 +79,14 @@ public class AzureLoadBalancerModelBuilder {
                 .collect(toList());
     }
 
-    private Set<String> collectInstanceGroupNames(CloudLoadBalancer cloudLoadBalancer) {
-        return cloudLoadBalancer.getPortToTargetGroupMapping().values().stream()
-                .flatMap(Collection::stream)
-                .map(Group::getName)
-                .collect(Collectors.toSet());
-    }
+    private AzureLoadBalancer buildAzureLb(LoadBalancerType type, Set<String> instanceGroupNames, List<AzureLoadBalancingRule> rules, String stackName) {
+        return new AzureLoadBalancer.Builder()
+                .setType(type)
+                .setInstanceGroupNames(instanceGroupNames)
+                .setRules(rules)
+                .setStackName(stackName)
+                .createAzureLoadBalancer();
 
-    public Map<String, Object> buildModel() {
-        List<AzureLoadBalancer> azureLoadBalancers = buildAzureLoadBalancerModel(cloudStack, stackName);
-        Map<String, Collection<AzureLoadBalancer>> instanceGroupToLoadBalancers = createTargetInstanceGroupMapping(azureLoadBalancers);
-
-        return Map.of("loadBalancers", azureLoadBalancers,
-                "loadBalancerMapping", instanceGroupToLoadBalancers);
     }
 
     /**
