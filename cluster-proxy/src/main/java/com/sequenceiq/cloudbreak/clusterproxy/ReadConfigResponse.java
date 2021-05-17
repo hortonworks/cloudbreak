@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.clusterproxy;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class ReadConfigResponse {
     private String crn;
@@ -47,5 +48,10 @@ public class ReadConfigResponse {
     @Override
     public String toString() {
         return "ReadConfigResponse{crn='" + crn + '\'' + ", services=" + services + '}';
+    }
+
+    public String toHumanReadableString() {
+        return "ClusterProxy for crn: [" + crn + "], " +
+                "services: [" + services.stream().map(ReadConfigService::toHumanReadableString).collect(Collectors.joining(", ")) + "]]";
     }
 }
