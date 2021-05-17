@@ -230,7 +230,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNames, newHealtyHostNames);
         if (!failedInstances.isEmpty()) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AMBIGUOUS);
-        } else if (statesFromAvailabeAllowed().contains(stack.getCluster().getStatus())) {
+        } else if (statesFromAvailableAllowed().contains(stack.getCluster().getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         }
     }
@@ -242,7 +242,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         function.run();
     }
 
-    private EnumSet<Status> statesFromAvailabeAllowed() {
+    private EnumSet<Status> statesFromAvailableAllowed() {
         return EnumSet.of(
                 Status.AMBIGUOUS,
                 Status.STOPPED,
