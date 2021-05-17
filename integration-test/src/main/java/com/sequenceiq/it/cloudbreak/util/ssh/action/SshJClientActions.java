@@ -9,6 +9,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,18 +70,30 @@ public class SshJClientActions extends SshJClient {
             List<String> hostGroupNames, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         String fileListCommand = String.format("find %s -type f -name %s", filePath, fileName);
         AtomicLong quantity = new AtomicLong(0);
+        String appendMessage;
+
+        if (StringUtils.isBlank(user) && StringUtils.isBlank(password)) {
+            appendMessage = String.format("with 'cloudbreak' user and defaultPrivateKeyFile from 'application.yml'");
+        } else if (StringUtils.isNotBlank(user) && StringUtils.isNotBlank(password)) {
+            appendMessage = String.format("with user: '%s' and password: '%s' and defaultPrivateKeyFile from 'application.yml'", user, password);
+        } else {
+            LOGGER.error("Creating SSH client is not possible, because of one of the required parameter is missing: \nuser: '{}' \npassword: '{}'",
+                    user, password);
+            throw new TestFailException(String.format("Creating SSH client is not possible, because of one of the required parameter is missing: " +
+                            "%nuser: '%s' %npassword: '%s'",
+                    user, password));
+        }
 
         /**
          * Right now only the Private IP is available for an Instance.
          */
         getSdxInstanceGroupIps(instanceGroups, hostGroupNames, false).forEach(instanceIP -> {
-            LOGGER.info("Creating SSH client on '{}' host with user: '{}' and password: '{}'.", instanceIP, user, password);
+            LOGGER.info("Creating SSH client on '{}' host " + appendMessage, instanceIP);
             try (SSHClient client = createSshClient(instanceIP, user, password, null)) {
                 quantity.set(executefileListCommand(instanceIP, fileListCommand, client));
             } catch (Exception e) {
-                LOGGER.error("Create SSH client is failing on '{}' host with user: '{}' and password: '{}'!", instanceIP, user, password);
-                throw new TestFailException(String.format(" Create SSH client is failing on '%s' host with user: '%s' and password: '%s'! ",
-                        instanceIP, user, password), e);
+                LOGGER.error("Create SSH client is failing on '{}' host " + appendMessage + ", because of: {}", instanceIP, e.getMessage());
+                throw new TestFailException(String.format(" Create SSH client is failing on '%s' host " + appendMessage, instanceIP), e);
             }
         });
 
