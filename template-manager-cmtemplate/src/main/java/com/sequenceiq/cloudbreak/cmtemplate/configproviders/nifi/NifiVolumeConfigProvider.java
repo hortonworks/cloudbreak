@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_10;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -26,6 +29,10 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
+        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
+
         if (source.getProductDetailsView() != null) {
             if (source.getProductDetailsView().getProducts().stream()
                     .filter(product -> product.getName().equals("CFM"))
@@ -59,14 +66,18 @@ public class NifiVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
             logDirVolInd = THIRD_VOLUME;
             workingDirVolInd = THIRD_VOLUME;
         }
-        return List.of(
-                config("nifi.flowfile.repository.directory", buildSingleVolumePath(flowFileVolInd, volumeCount, "flowfile-repo")),
-                config("nifi.content.repository.directory.default", buildSingleVolumePath(contentVolInd, volumeCount, "content-repo")),
-                config("nifi.provenance.repository.directory.default", buildSingleVolumePath(provenanceVolInd, volumeCount, "provenance-repo")),
-                config("log_dir", buildSingleVolumePath(logDirVolInd, volumeCount, "nifi-log")),
-                config("nifi.database.directory", buildSingleVolumePath(databaseVolInd, volumeCount, "database-dir")),
-                config("nifi.working.directory", buildSingleVolumePath(workingDirVolInd, volumeCount, "working-dir"))
-        );
+
+        roleConfigs.add(config("nifi.flowfile.repository.directory", buildSingleVolumePath(flowFileVolInd, volumeCount, "flowfile-repo")));
+        roleConfigs.add(config("nifi.content.repository.directory.default", buildSingleVolumePath(contentVolInd, volumeCount, "content-repo")));
+        roleConfigs.add(config("nifi.provenance.repository.directory.default", buildSingleVolumePath(provenanceVolInd, volumeCount, "provenance-repo")));
+        roleConfigs.add(config("log_dir", buildSingleVolumePath(logDirVolInd, volumeCount, "nifi-log")));
+        roleConfigs.add(config("nifi.database.directory", buildSingleVolumePath(databaseVolInd, volumeCount, "database-dir")));
+
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)) {
+            roleConfigs.add(config("nifi.working.directory", buildSingleVolumePath(workingDirVolInd, volumeCount, "working-dir")));
+        }
+
+        return roleConfigs;
     }
 
     @Override
