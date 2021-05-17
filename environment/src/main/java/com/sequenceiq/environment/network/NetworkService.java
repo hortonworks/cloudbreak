@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -74,11 +75,12 @@ public class NetworkService {
     }
 
     public BaseNetwork validate(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         if (originalNetwork.getRegistrationType() == RegistrationType.CREATE_NEW) {
-            throw new BadRequestException("Subnet could not be attached to this environment, because it is newly created by Cloudbreak. " +
-                    "You need to re-install the the environment into an existing VPC");
+            throw new BadRequestException("Subnets of this environment could not be modified, because its network has been created by Cloudera. " +
+                    "You need to re-install the environment into an existing VPC/VNet." + getDocLink(cloudPlatform));
         }
-        EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(CloudPlatform.valueOf(environment.getCloudPlatform()));
+        EnvironmentNetworkConverter environmentNetworkConverter = environmentNetworkConverterMap.get(cloudPlatform);
         NetworkDto originalNetworkDto = environmentNetworkConverter.convertToDto(originalNetwork);
         NetworkDto cloneNetworkDto = NetworkDto.builder(originalNetworkDto)
                 .withSubnetMetas(editDto.getNetworkDto().getSubnetMetas())
@@ -133,6 +135,18 @@ public class NetworkService {
                 .setResource(UUID.randomUUID().toString())
                 .build()
                 .toString();
+    }
+
+    private String getDocLink(CloudPlatform cloudPlatform) {
+        String docReferenceLink = " Refer to Cloudera documentation at %s for more information.";
+        switch (cloudPlatform) {
+            case AWS:
+                return String.format(docReferenceLink, DocumentationLinkProvider.awsAddSubnetLink());
+            case AZURE:
+                return String.format(docReferenceLink, DocumentationLinkProvider.azureAddSubnetLink());
+            default:
+                return "";
+        }
     }
 
 }

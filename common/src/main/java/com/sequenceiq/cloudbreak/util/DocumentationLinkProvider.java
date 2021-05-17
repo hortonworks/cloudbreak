@@ -29,4 +29,12 @@ public class DocumentationLinkProvider {
     public static String ccmSetupLink() {
         return "https://docs.cloudera.com/management-console/cloud/connection-to-private-subnets/topics/mc-ccm-overview.html";
     }
+
+    public static String azureAddSubnetLink() {
+        return "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-subnet-adding-azure.html";
+    }
+
+    public static String awsAddSubnetLink() {
+        return "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-subnet-adding-azure.html";
+    }
 }

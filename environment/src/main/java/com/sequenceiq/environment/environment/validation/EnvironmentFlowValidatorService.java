@@ -2,7 +2,6 @@ package com.sequenceiq.environment.environment.validation;
 
 import java.util.Set;
 
-import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentBackupStorageLocationValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,8 +9,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentBackupStorageConfigurationValidator;
+import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentBackupStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageConfigurationValidator;
 import com.sequenceiq.environment.environment.validation.cloudstorage.EnvironmentLogStorageLocationValidator;
 import com.sequenceiq.environment.environment.validation.validators.EnvironmentAuthenticationValidator;
@@ -87,16 +87,16 @@ public class EnvironmentFlowValidatorService {
         return backupStorageConfigurationValidator.validateBackupStorageConfiguration(environment);
     }
 
-    public ValidationResult validateNetworkWithProvider(EnvironmentDto environmentDto) {
-        return environmentNetworkProviderValidator.validate(environmentDto);
+    public ValidationResult validateNetworkWithProvider(EnvironmentValidationDto environmentValidationDto) {
+        return environmentNetworkProviderValidator.validate(environmentValidationDto);
     }
 
-    public ValidationResult validateParameters(EnvironmentDto environmentDto, ParametersDto parametersDto) {
-        return environmentParameterValidator.validate(environmentDto, parametersDto);
+    public ValidationResult validateParameters(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto) {
+        return environmentParameterValidator.validate(environmentValidationDto, parametersDto);
     }
 
-    public ValidationResult validateAuthentication(EnvironmentDto environmentDto) {
-        return environmentAuthenticationValidator.validate(environmentDto);
+    public ValidationResult validateAuthentication(EnvironmentValidationDto environmentValidationDto) {
+        return environmentAuthenticationValidator.validate(environmentValidationDto);
     }
 
 }

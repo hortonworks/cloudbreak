@@ -25,8 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.parameter.dto.s3guard.S3GuardTableCreation;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -47,16 +49,19 @@ class AwsParameterValidatorTest {
     @InjectMocks
     private AwsParameterValidator underTest;
 
-    private EnvironmentDto environmentDto;
+    private EnvironmentValidationDto environmentValidationDto;
 
     @BeforeEach
     void setUp() {
         Credential credential = new Credential();
         credential.setCloudPlatform("platform");
-        environmentDto = new EnvironmentDto();
+        EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(ENV_ID);
         environmentDto.setLocation(new LocationDto("location", "location", 1.0, 1.0));
         environmentDto.setCredential(credential);
+        environmentValidationDto = new EnvironmentValidationDto();
+        environmentValidationDto.setValidationType(ValidationType.ENVIRONMENT_CREATION);
+        environmentValidationDto.setEnvironmentDto(environmentDto);
     }
 
     @Test
@@ -69,7 +74,7 @@ class AwsParameterValidatorTest {
                 .build();
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, parametersDto, ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals(1L, validationResult.getErrors().size());
@@ -92,7 +97,7 @@ class AwsParameterValidatorTest {
         when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(false);
         when(noSqlTableCreationModeDeterminerService.determineCreationMode(any(), any())).thenReturn(creation);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, parametersDto, ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
         verify(noSqlTableCreationModeDeterminerService).determineCreationMode(any(), any());
@@ -110,7 +115,7 @@ class AwsParameterValidatorTest {
                 .withAwsParameters(awsParameters)
                 .build();
 
-        ValidationResult validationResult = underTest.validate(environmentDto, parametersDto, ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
 
         assertEquals(hasError, validationResult.hasError());
         if (hasError) {

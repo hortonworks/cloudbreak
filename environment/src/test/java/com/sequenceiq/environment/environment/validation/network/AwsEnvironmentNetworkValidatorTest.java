@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.environment.validation.network.aws.AwsEnvironmentNetworkValidator;
@@ -54,7 +55,7 @@ class AwsEnvironmentNetworkValidatorTest {
     void testValidateDuringFlowWhenTheNetworkIsNull() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringFlow(mock(EnvironmentDto.class), null, validationResultBuilder);
+        underTest.validateDuringFlow(mock(EnvironmentValidationDto.class), null, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -125,8 +126,9 @@ class AwsEnvironmentNetworkValidatorTest {
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         assertFalse(validationResultBuilder.build().hasError());
     }
@@ -138,8 +140,9 @@ class AwsEnvironmentNetworkValidatorTest {
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("Either the AWS network id or cidr needs to be defined!"));
     }
@@ -154,6 +157,7 @@ class AwsEnvironmentNetworkValidatorTest {
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         Map<String, CloudSubnet> subnetMetas = new HashMap<>();
         for (int i = 0; i < amountOfSubnets; i++) {
@@ -162,7 +166,7 @@ class AwsEnvironmentNetworkValidatorTest {
 
         when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
 
-        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of("There should be at least two subnets in the network")
         );
@@ -190,10 +194,11 @@ class AwsEnvironmentNetworkValidatorTest {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setName(ENV_NAME);
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(new LinkedHashMap<>());
 
-        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "Subnets of the environment (" + ENV_NAME + ") are not found in the vpc (" + String.join(", ", networkDto.getSubnetIds()) + ")."
@@ -212,10 +217,11 @@ class AwsEnvironmentNetworkValidatorTest {
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         when(cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto)).thenReturn(subnetMetas);
 
-        underTest.validateDuringFlow(environmentDto, networkDto, validationResultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(validationResultBuilder, List.of(
                 "The subnets in the vpc should be present at least in two different availability zones"
@@ -226,7 +232,7 @@ class AwsEnvironmentNetworkValidatorTest {
     void testValidateDuringFlowWhenNetworkDtoIsNullThenNoCloudServiceRelatedCallHappens() {
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringFlow(new EnvironmentDto(), null, validationResultBuilder);
+        underTest.validateDuringFlow(new EnvironmentValidationDto(), null, validationResultBuilder);
 
         verify(cloudNetworkService, times(0)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verify(cloudNetworkService, times(0)).retrieveSubnetMetadata(any(Environment.class), any(NetworkDto.class));
@@ -240,7 +246,7 @@ class AwsEnvironmentNetworkValidatorTest {
         NetworkDto networkDto = NetworkTestUtils.getNetworkDto(null, null, null, null, null, 999, RegistrationType.CREATE_NEW);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
 
-        underTest.validateDuringFlow(new EnvironmentDto(), networkDto, validationResultBuilder);
+        underTest.validateDuringFlow(new EnvironmentValidationDto(), networkDto, validationResultBuilder);
 
         verify(cloudNetworkService, times(0)).retrieveSubnetMetadata(any(EnvironmentDto.class), any(NetworkDto.class));
         verify(cloudNetworkService, times(0)).retrieveSubnetMetadata(any(Environment.class), any(NetworkDto.class));
