@@ -27,7 +27,8 @@ public class NetworkMetadataValidationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NetworkMetadataValidationService.class);
 
-    private static final String UNMATCHED_AZ = "Please provide public subnets in each of the following availability zones: %s";
+    private static final String UNMATCHED_AZ = "Please provide public subnets in each of the following availability zones: %s." +
+            "You need to define subnets which are in different availability zones because CDP would like to provision highly available resources.";
 
     private final CloudNetworkService cloudNetworkService;
 
@@ -67,10 +68,12 @@ public class NetworkMetadataValidationService {
             Map<String, CloudSubnet> endpointGatewaySubnetMetas) {
         if (shouldValidateEndpointGatewaySubnets(environment, subnetMetas)) {
             if (endpointGatewaySubnetMetas != null && !endpointGatewaySubnetMetas.isEmpty()) {
-                LOGGER.debug("Running validation against provided endpoint gateway subnets.");
+                LOGGER.info("Validation of endpoint gateway subnets failed: gateway subnets should share availability " +
+                        "zones with the provided environment subnets.");
                 valildateProvidedEndpointGatewaySubnets(subnetMetas, endpointGatewaySubnetMetas);
             } else {
-                LOGGER.debug("Running validation against environment subnets.");
+                LOGGER.info("Validation of endpoint gateway subnets failed: Please make sure to provide a public " +
+                        "subnet for every availability zone where the environment has a private subnet.");
                 valildateEnvironmentSubnetsForEndpointGateway(subnetMetas);
             }
         }
