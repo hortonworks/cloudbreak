@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -20,11 +20,12 @@ public interface EnvironmentNetworkValidator {
 
     Logger LOGGER = LoggerFactory.getLogger(EnvironmentNetworkValidator.class);
 
-    void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder);
+    void validateDuringFlow(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder);
 
     void validateDuringRequest(NetworkDto networkDto, ValidationResultBuilder resultBuilder);
 
-    default void validateForNetworkEdit(EnvironmentDto environmentDto, NetworkDto networkDto, @NotNull ValidationResultBuilder resultBuilder) {
+    default void validateForNetworkEdit(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto,
+            @NotNull ValidationResultBuilder resultBuilder) {
         NullUtil.throwIfNull(resultBuilder, () -> new IllegalArgumentException("ValidationResultBuilder should not be null"));
         LOGGER.debug("About to validate request time network parameters");
         validateDuringRequest(networkDto, resultBuilder);
@@ -33,7 +34,7 @@ public interface EnvironmentNetworkValidator {
             return;
         }
         LOGGER.debug("About to validate network parameters which needs some provider side communication, thus execution can take a while");
-        validateDuringFlow(environmentDto, networkDto, resultBuilder);
+        validateDuringFlow(environmentValidationDto, networkDto, resultBuilder);
     }
 
     CloudPlatform getCloudPlatform();

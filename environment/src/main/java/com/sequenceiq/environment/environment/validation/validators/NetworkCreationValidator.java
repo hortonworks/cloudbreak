@@ -11,7 +11,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -59,7 +62,12 @@ public class NetworkCreationValidator {
             EnvironmentNetworkValidator environmentNetworkValidator =
                     environmentNetworkValidatorsByCloudPlatform.get(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase()));
             if (environmentNetworkValidator != null) {
-                environmentNetworkValidator.validateForNetworkEdit(environmentDtoConverter.environmentToDto(environment), network, resultBuilder);
+                EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
+                EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                        .withValidationType(ValidationType.ENVIRONMENT_EDIT)
+                        .withEnvironmentDto(environmentDto)
+                        .build();
+                environmentNetworkValidator.validateForNetworkEdit(environmentValidationDto, network, resultBuilder);
             }
         }
     }

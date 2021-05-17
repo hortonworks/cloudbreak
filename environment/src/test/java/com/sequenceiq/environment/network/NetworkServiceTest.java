@@ -16,13 +16,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -137,26 +139,41 @@ public class NetworkServiceTest {
         Assertions.assertEquals(0, actual.size());
     }*/
 
-    @Test
-    public void testMergeNetworkDtoWithNetworkIfNetworkCreateNew() {
+    @ParameterizedTest
+    @EnumSource(CloudPlatform.class)
+    public void testMergeNetworkDtoWithNetworkIfNetworkCreateNew(CloudPlatform cloudPlatform) {
         AwsNetwork baseNetwork = new AwsNetwork();
         baseNetwork.setSubnetMetas(Collections.emptyMap());
         baseNetwork.setRegistrationType(RegistrationType.CREATE_NEW);
         Environment environment = new Environment();
-        environment.setCloudPlatform("AWS");
+        environment.setCloudPlatform(cloudPlatform.name());
         environment.setNetwork(baseNetwork);
         NetworkDto networkDto = NetworkDto.builder().withRegistrationType(RegistrationType.CREATE_NEW).build();
         EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(networkDto).build();
 
-        when(environmentNetworkConverterMap.get(CloudPlatform.AWS)).thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverterMap.get(cloudPlatform)).thenReturn(environmentNetworkConverter);
         when(environmentNetworkConverter.convertToDto(baseNetwork)).thenReturn(networkDto);
         when(networkCreationValidator.validateNetworkEdit(eq(environment), any(NetworkDto.class)))
                 .thenReturn(new ValidationResult.ValidationResultBuilder());
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.validate(baseNetwork, environmentEditDto, environment));
-        Assertions.assertEquals("Subnet could not be attached to this environment, because it is newly created by Cloudbreak. " +
-                "You need to re-install the the environment into an existing VPC", exception.getMessage());
+        String baseMessage = "Subnets of this environment could not be modified, because its network has been created by Cloudera. " +
+                "You need to re-install the environment into an existing VPC/VNet.";
+        String providerSpecificLink = "";
+        switch (cloudPlatform) {
+            case AWS:
+                providerSpecificLink = " Refer to Cloudera documentation at "
+                        + "https://docs.cloudera.com/management-console/cloud/environments/topics/mc-subnet-adding-azure.html for more information.";
+                break;
+            case AZURE:
+                providerSpecificLink = " Refer to Cloudera documentation at "
+                        + "https://docs.cloudera.com/management-console/cloud/environments-azure/topics/mc-subnet-adding-azure.html for more information.";
+                break;
+            default:
+                break;
+        }
+        Assertions.assertEquals(String.format("%s%s", baseMessage, providerSpecificLink), exception.getMessage());
     }
 
     @Test

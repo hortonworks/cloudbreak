@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.securitygroup.azure.AzureEnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.dto.AzureParams;
@@ -66,9 +67,10 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
                 .withSecurityAccess(getSecurityAccessDto(SECURITY_GROUP_1, SECURITY_GROUP_2))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsValid(builder);
     }
 
@@ -85,9 +87,10 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
                 .withSecurityAccess(getSecurityAccessDto(sec1, SECURITY_GROUP_2))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsInvalid(builder);
     }
 
@@ -104,9 +107,10 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
                 .withSecurityAccess(getSecurityAccessDto(SECURITY_GROUP_1, SECURITY_GROUP_2))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsInvalid(builder);
     }
 
@@ -120,9 +124,10 @@ public class AzureEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNewNetworkDto(false))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsValid(builder);
     }
 

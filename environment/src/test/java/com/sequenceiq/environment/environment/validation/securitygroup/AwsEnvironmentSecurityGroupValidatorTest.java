@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.environment.validation.securitygroup.aws.AwsEnvironmentSecurityGroupValidator;
@@ -64,9 +65,10 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNetworkDto(vpcId))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsValid(builder);
     }
 
@@ -86,9 +88,10 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNetworkDto(vpcId))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsInvalid(builder);
     }
 
@@ -107,9 +110,10 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNetworkDto(requestVpcId))
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
         ValidationResultBuilder builder = ValidationResult.builder();
 
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
 
         requestIsInvalid(builder);
     }
@@ -130,9 +134,10 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNewNetworkDto())
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsInvalid(builder);
     }
 
@@ -144,9 +149,10 @@ public class AwsEnvironmentSecurityGroupValidatorTest {
                 .withNetwork(getNewNetworkDto())
                 .withCredential(getCredential())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
         ValidationResultBuilder builder = ValidationResult.builder();
-        underTest.validate(environmentDto, builder);
+        underTest.validate(environmentValidationDto, builder);
         requestIsValid(builder);
     }
 

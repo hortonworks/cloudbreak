@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.domain.LocationAwareCredential;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.service.NoSqlTableCreationModeDeterminerService;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -39,7 +40,9 @@ public class AwsParameterValidator implements ParameterValidator {
     }
 
     @Override
-    public ValidationResult validate(EnvironmentDto environmentDto, ParametersDto parametersDto, ValidationResultBuilder validationResultBuilder) {
+    public ValidationResult validate(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto,
+            ValidationResultBuilder validationResultBuilder) {
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         LOGGER.debug("ParametersDto: {}", parametersDto);
         AwsParametersDto awsParametersDto = parametersDto.getAwsParametersDto();
         if (Objects.isNull(awsParametersDto)) {
