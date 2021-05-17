@@ -48,7 +48,7 @@ public class ServiceEndpointHealthListenerTask implements StatusCheckerTask<Serv
         String errorMessage;
         try {
             ClusterProxyRegistrationClient client = clusterProxyHealthPollerObject.getClient();
-            errorMessage = client.readConfig(clusterIdentifer).toString();
+            errorMessage = client.readConfig(clusterIdentifer).toHumanReadableString();
         } catch (Exception e) {
             errorMessage = String.format("Failed to check cluster proxy endpoint health for %s, error: %s", clusterIdentifer, e.getMessage());
             LOGGER.error(errorMessage);

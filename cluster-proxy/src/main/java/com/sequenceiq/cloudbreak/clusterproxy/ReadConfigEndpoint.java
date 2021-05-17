@@ -73,4 +73,8 @@ public class ReadConfigEndpoint {
                 ", endpoint='" + endpoint + '\'' +
                 ", updatedTime='" + updatedTime + "\'}";
     }
+
+    public String toHumanReadableString() {
+        return "[endpointId = [" + endpointId + "], endpoint: [" + endpoint + "], status: [" + status + "]]";
+    }
 }
