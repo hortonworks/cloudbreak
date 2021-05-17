@@ -170,6 +170,10 @@
               {
                 "name": "hiveserver2_idle_session_timeout",
                 "value": 14400000
+              },
+              {
+                "name": "hiveserver2_vectorized_adaptor_usage_mode",
+                "value": "all"
               }
             ]
           }
