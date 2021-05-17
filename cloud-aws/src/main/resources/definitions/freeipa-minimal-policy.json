@@ -42,6 +42,7 @@
       "Action": [
         "cloudformation:DeleteStack",
         "autoscaling:SuspendProcesses",
+        "cloudformation:GetTemplate",
         "autoscaling:UpdateAutoScalingGroup",
         "autoscaling:ResumeProcesses"
       ],

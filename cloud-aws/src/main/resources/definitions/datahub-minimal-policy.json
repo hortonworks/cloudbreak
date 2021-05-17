@@ -28,7 +28,8 @@
       "Effect": "Allow",
       "Action": [
         "ec2:CreateTags",
-        "cloudformation:CreateStack"
+        "cloudformation:CreateStack",
+        "cloudformation:GetTemplate"
       ],
       "Resource": [
         "*"
