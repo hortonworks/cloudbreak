@@ -3,8 +3,9 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 
-{% set cdp_telemetry_version = '0.4.3' %}
-{% set cdp_telemetry_rpm_location = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-telemetry/'%}
+{% set cdp_telemetry_version = '0.4.4' %}
+{% set cldr_service_delivery_repo = 'https://cloudera-service-delivery-cache.s3.amazonaws.com'%}
+{% set cdp_telemetry_rpm_location = cldr_service_delivery_repo + '/telemetry/cdp-telemetry/'%}
 {% set cdp_telemetry_rpm_repo_url = cdp_telemetry_rpm_location + 'cdp_telemetry-' + cdp_telemetry_version + '.x86_64.rpm' %}
 {% set cdp_telemetry_package_name = 'cdp-telemetry' %}
 
@@ -12,8 +13,10 @@
 uninstall_telemetry_rpm_if_wrong_version:
   cmd.run:
     - name: rpm -e {{ cdp_telemetry_package_name }}
-    - onlyif: rpm -qa {{ cdp_telemetry_package_name }} | grep -v {{ cdp_telemetry_version }}
-    - failhard: True
+    - onlyif: cdp-telemetry utils check-connection --url {{ cldr_service_delivery_repo }} && rpm -qa {{ cdp_telemetry_package_name }} | grep -v {{ cdp_telemetry_version }}
+    - failhard: True{% if filecollector.proxyUrl %}
+    - env:
+       - https_proxy: {{ filecollector.proxyUrl }}{% endif %}
 install_telemetry_rpm_manually:
   cmd.run:
     - name: "rpm -i {{ cdp_telemetry_rpm_repo_url }}"
@@ -26,7 +29,7 @@ install_telemetry_rpm_manually:
 {% else %}
 fail_if_telemetry_rpm_is_not_installed:
   cmd.run:
-    - name: echo "Cdp telemetry is not installed, it is required for using filecollector"; exit 1
+    - name: echo "cdp-telemetry binary is not installed, it is required for using filecollector (diagnostics)"; exit 1
     - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
     - failhard: True
 {% endif %}
@@ -117,7 +120,9 @@ delete_test_cloud_storage_file:
 check_dbus_connection:
   cmd.run:
     - name: "cdp-telemetry utils check-connection --url {{ databus.endpoint }}"
-    - failhard: True
+    - failhard: True{% if filecollector.proxyUrl %}
+    - env:
+       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% endif %}
 check_logging_agent_running_systemctl:
   cmd.run:
     - name: "systemctl is-active --quiet td-agent || systemctl is-active --quiet cdp-logging-agent"
