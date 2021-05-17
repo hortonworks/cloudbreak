@@ -137,6 +137,7 @@ public class AwsClient {
 
     public AmazonCloudWatchClient createCloudWatchClient(AwsCredentialView awsCredential, String regionName) {
         AmazonCloudWatch client = proxy(com.amazonaws.services.cloudwatch.AmazonCloudWatchClient.builder()
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(getCredentialProvider(awsCredential))
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withRegion(regionName)
