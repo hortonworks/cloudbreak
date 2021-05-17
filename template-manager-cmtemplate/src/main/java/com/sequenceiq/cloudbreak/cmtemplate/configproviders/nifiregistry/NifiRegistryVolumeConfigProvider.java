@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifiregistry;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_10;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -19,11 +22,18 @@ public class NifiRegistryVolumeConfigProvider implements CmHostGroupRoleConfigPr
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
+        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
         Integer volumeCount = Objects.nonNull(hostGroupView) ? hostGroupView.getVolumeCount() : 0;
-        return List.of(
-                config("log_dir", buildSingleVolumePath(volumeCount, "nifi-registry-log")),
-                config("nifi.registry.working.directory", buildSingleVolumePath(volumeCount, "working-dir"))
-        );
+        roleConfigs.add(config("log_dir", buildSingleVolumePath(volumeCount, "nifi-registry-log")));
+
+
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)) {
+            roleConfigs.add(config("nifi.registry.working.directory", buildSingleVolumePath(volumeCount, "working-dir")));
+        }
+
+        return roleConfigs;
     }
 
     @Override
