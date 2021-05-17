@@ -6,7 +6,6 @@
       "Action": [
         "s3:CreateJob",
         "s3:GetAccountPublicAccessBlock",
-        "s3:ListBucket",
         "s3:ListJobs"
       ],
       "Resource": "*"
