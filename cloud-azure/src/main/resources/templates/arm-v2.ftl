@@ -238,30 +238,36 @@
                     },
                    "dependsOn": [
                        <#if !noFirewallRules>
-                       <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
-                       "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
+                           <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
+                               "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
+                           </#if>
                        </#if>
-                       </#if>
+
                        <#if !noPublicIp>
-                       <#if !noFirewallRules>
-                       <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
-                       ,
+                           <#if !noFirewallRules>
+                               <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
+                                   ,
+                               </#if>
+                           </#if>
+                           "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
                        </#if>
-                       </#if>
-                       "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
-                       </#if>
+
                        <#if !existingVPC>
-                       <#if !noFirewallRules || !noPublicIp>,</#if>
-                       "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
+                           <#if !noPublicIp || (!noFirewallRules && (!isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)))>
+                               ,
+                          </#if>
+                           "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
                        </#if>
+
                        <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
+                           <#if (!noFirewallRules && (!isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content))) || !noPublicIp || !existingVPC>,</#if>
                            <#list loadBalancerMapping[instance.groupName] as loadBalancer>
                                <#--
                                   we have to define a dependency between the NIC and the address pool it belongs to
                                   this makes every instance in the gateway group depend on every load balancer address pool
                                   when we add support for multiple load balancers, this will have to be updated.
                                -->
-                               ,"[resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}')]"
+                               "[resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}')]"<#sep>,</#sep>
                            </#list>
                        </#if>
                    ],
