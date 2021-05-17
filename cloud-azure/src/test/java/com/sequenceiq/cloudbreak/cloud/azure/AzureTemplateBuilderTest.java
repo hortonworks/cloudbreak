@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,9 +34,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -73,8 +78,8 @@ import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.model.CloudIdentityType;
 
 import freemarker.template.Configuration;
 
@@ -126,6 +131,8 @@ public class AzureTemplateBuilderTest {
     private static final String SUBNET_CIDR = "10.0.0.0/24";
 
     private static final String FIELD_ARM_TEMPLATE_PATH = "armTemplatePath";
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureTemplateBuilderTest.class);
 
     @Mock
     private AzureUtils azureUtils;
@@ -556,7 +563,7 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
         assertEquals(2, StringUtils.countMatches(templateString,
-            ",\"[resourceId('Microsoft.Network/loadBalancers'"));
+            "\"[resourceId('Microsoft.Network/loadBalancers'"));
         assertEquals(2, StringUtils.countMatches(templateString,
             "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPUBLIC', 'address-pool')]"));
         assertEquals(2, StringUtils.countMatches(templateString,
@@ -565,6 +572,120 @@ public class AzureTemplateBuilderTest {
             "\"type\": \"Microsoft.Network/loadBalancers\","));
         assertEquals(1, StringUtils.countMatches(templateString,
             "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void testNicDependenciesAreValidJson(String templatePath) {
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
+        publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(publicLb);
+        CloudLoadBalancer privateLb = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
+        privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(privateLb);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureUtils.getCustomResourceGroupName(any())).thenReturn("custom-resource-group-name");
+        when(azureUtils.getCustomNetworkId(any())).thenReturn("custom-vnet-id");
+        // This test is checking that valid json is created when using an existing network and no public IP.
+        when(azureUtils.isExistingNetwork(any())).thenReturn(true);
+        when(azureUtils.isPrivateIp(any())).thenReturn(true);
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.UPSCALE, null);
+        //THEN
+        validateJson(templateString);
+    }
+
+    @ParameterizedTest(name = "{displayName}_{0}")
+    @MethodSource("templatesPathDataProvider")
+    public void testNicDependenciesWhenNoSecurityGroupsNoFirewallRulesAndNoPublicIp(String templatePath) {
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+        //GIVEN
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer publicLb = new CloudLoadBalancer(LoadBalancerType.PUBLIC);
+        publicLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(publicLb);
+        CloudLoadBalancer privateLb = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
+        privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(privateLb);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        when(azureUtils.getCustomResourceGroupName(any())).thenReturn("custom-resource-group-name");
+        when(azureUtils.getCustomNetworkId(any())).thenReturn("custom-vnet-id");
+        when(azureUtils.isExistingNetwork(any())).thenReturn(false);
+        when(azureUtils.isPrivateIp(any())).thenReturn(true);
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.UPSCALE, null);
+        //THEN
+        validateJson(templateString);
+    }
+
+    /**
+     * Check that the template string is a valid JSON object.
+     * We're using the Jackson ObjectMapper because Gson has looser rules on what "valid" JSON is.
+     * For instance, a leading comma in an array is valid according to Gson.
+     * <pre>{@code [, "valid"]}</pre>
+     *
+     * @param templateString the string to validate
+     */
+    private void validateJson(String templateString) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.readTree(templateString);
+        } catch (JsonProcessingException jpe) {
+            int contextLines = 2;
+            int lineNumberOfIssue = jpe.getLocation().getLineNr();
+            List<String> lines = templateString.lines().collect(Collectors.toList());
+            int startingIndex = Math.max(lineNumberOfIssue - (contextLines + 1), 0);
+            int endingIndex = Math.min(lineNumberOfIssue + contextLines, lines.size() - 1);
+
+            List<String> context = lines.subList(startingIndex, endingIndex);
+
+            String message = String.join("\n", context);
+            LOGGER.warn("Error reading String as JSON at line {}:\n{}", lineNumberOfIssue, message);
+            fail("Generated ARM template is not valid JSON.\n" + jpe.getMessage());
+        }
     }
 
     @ParameterizedTest(name = "{0}")
