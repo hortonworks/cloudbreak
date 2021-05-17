@@ -849,8 +849,8 @@ public class AzureClient {
         for (AzurePrivateDnsZoneServiceEnum service : services) {
             String dnsZoneName = service.getDnsZoneName();
             Optional<PrivateZone> privateZoneWithNetworkLink = privateDnsZoneList.stream()
-                    .filter(privateZone -> !privateZone.resourceGroupName().equals(resourceGroupName))
-                    .filter(privateZone -> privateZone.name().equals(dnsZoneName))
+                    .filter(privateZone -> !privateZone.resourceGroupName().equalsIgnoreCase(resourceGroupName))
+                    .filter(privateZone -> privateZone.name().equalsIgnoreCase(dnsZoneName))
                     .filter(privateZone -> privateZone.provisioningState().equals(SUCCEEDED))
                     .filter(privateZone -> Objects.nonNull(getNetworkLinkByPrivateDnsZone(privateZone.resourceGroupName(), dnsZoneName, networkLinkId)))
                     .findFirst();
