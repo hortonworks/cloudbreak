@@ -54,6 +54,7 @@ public class InstanceTemplateV4RequestToTemplateConverter extends AbstractConver
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
         Map<String, Object> secretParameters = providerParameterCalculator.get(source).asSecretMap();
         Optional.ofNullable(secretParameters).map(toJson()).map(Json::getValue).ifPresent(template::setSecretAttributes);
+        template.setTemporaryStorage(source.getTemporaryStorage());
         return template;
     }
 
