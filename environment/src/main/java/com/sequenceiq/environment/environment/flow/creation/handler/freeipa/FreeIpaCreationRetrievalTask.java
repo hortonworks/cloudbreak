@@ -50,8 +50,7 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
                         freeIpa.getName(),
                         freeIpa.getCrn(),
                         freeIpa.getStatus());
-                throw new FreeIpaOperationFailedException(String.format("FreeIpa creation failed. Status: '%s' statusReason: '%s'",
-                        freeIpa.getStatus(), freeIpa.getStatusReason()));
+                throw new FreeIpaOperationFailedException(String.format("Reason: '%s'", freeIpa.getStatusReason()));
             }
             if (freeIpa.getAvailabilityStatus() != null && freeIpa.getAvailabilityStatus().isAvailable()) {
                 return true;
