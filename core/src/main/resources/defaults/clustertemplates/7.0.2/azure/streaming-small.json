@@ -12,7 +12,7 @@
       {
         "name": "master",
         "template": {
-          "instanceType": "Standard_D8_v3",
+          "instanceType": "Standard_E8s_v3",
           "attachedVolumes": [
             {
               "count": 1,
