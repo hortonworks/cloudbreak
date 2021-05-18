@@ -5,12 +5,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.conclusion.step.ConclusionStep;
+import com.sequenceiq.cloudbreak.conclusion.step.NetworkCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.NodeServicesCheckerConclusionStep;
 import com.sequenceiq.cloudbreak.conclusion.step.SaltCheckerConclusionStep;
 
 public enum ConclusionCheckerType {
 
-    DEFAULT(SaltCheckerConclusionStep.class, NodeServicesCheckerConclusionStep.class);
+    DEFAULT(SaltCheckerConclusionStep.class, NodeServicesCheckerConclusionStep.class, NetworkCheckerConclusionStep.class);
 
     private List<Class<? extends ConclusionStep>> steps;
 
