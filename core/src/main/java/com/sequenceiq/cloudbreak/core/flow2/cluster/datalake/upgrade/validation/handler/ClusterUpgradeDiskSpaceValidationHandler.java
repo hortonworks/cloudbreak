@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_CLUSTER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
 
 import javax.inject.Inject;
 
@@ -64,7 +64,7 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
 
     @Override
     public String selector() {
-        return VALIDATE_CLUSTER_EVENT.selector();
+        return VALIDATE_DISK_SPACE_EVENT.selector();
     }
 
     @Override

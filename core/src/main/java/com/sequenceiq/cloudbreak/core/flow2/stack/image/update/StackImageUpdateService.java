@@ -56,27 +56,29 @@ public class StackImageUpdateService {
     @Inject
     private PackageVersionChecker packageVersionChecker;
 
-    public void storeNewImageComponent(Stack stack, StatedImage image) {
+    public void storeNewImageComponent(Stack stack, StatedImage targetImage) {
         Component imageComponent;
         try {
-            Image newImage = getImageModelFromStatedImage(stack, image);
+            Image newImage = getImageModelFromStatedImage(stack, getCurrentImage(stack), targetImage);
             imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stack);
         } catch (IllegalArgumentException e) {
             LOGGER.info("Failed to create json", e);
             throw new CloudbreakServiceException("Failed to create json", e);
+        } catch (CloudbreakImageNotFoundException e) {
+            LOGGER.info("Could not find image", e);
+            throw new CloudbreakServiceException("Could not find image", e);
         }
 
         componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
 
-    private Image getImageModelFromStatedImage(Stack stack, StatedImage image) {
+    public Image getImageModelFromStatedImage(Stack stack, Image currentImage, StatedImage targetImage) {
         try {
-            Image currentImage = getCurrentImage(stack);
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-
-            String newImageName = imageService.determineImageName(platformString, stack.getRegion(), image.getImage());
-            return new Image(newImageName, currentImage.getUserdata(), image.getImage().getOs(), image.getImage().getOsType(),
-                    image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImage().getUuid(), image.getImage().getPackageVersions());
+            String newImageName = imageService.determineImageName(platformString, stack.getRegion(), targetImage.getImage());
+            return new Image(newImageName, currentImage.getUserdata(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
+                    targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
+                    targetImage.getImage().getPackageVersions());
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find image", e);
             throw new CloudbreakServiceException("Could not find image", e);

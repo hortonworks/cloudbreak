@@ -67,6 +67,11 @@ public class CloudStack {
         this.additionalFileSystem = Optional.ofNullable(additionalFileSystem);
     }
 
+    public CloudStack replaceImage(Image newImage) {
+        return new CloudStack(groups, network, newImage, parameters, tags, template, instanceAuthentication, loginUserName, publicKey,
+                fileSystem.orElse(null), loadBalancers, additionalFileSystem.orElse(null));
+    }
+
     public List<Group> getGroups() {
         return groups;
     }
