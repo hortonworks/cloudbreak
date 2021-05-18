@@ -21,13 +21,6 @@
               "type": "StandardSSD_LRS"
             }
           ],
-          "azure": {
-            "availabilitySet": {
-              "name": "",
-              "faultDomainCount": 2,
-              "updateDomainCount": 20
-            }
-          },
           "instanceType": "Standard_D8_v3",
           "cloudPlatform": "YARN"
         },
@@ -45,13 +38,6 @@
               "type": "StandardSSD_LRS"
             }
           ],
-          "azure": {
-            "availabilitySet": {
-              "name": "",
-              "faultDomainCount": 2,
-              "updateDomainCount": 20
-            }
-          },
           "instanceType": "Standard_D8_v3",
           "cloudPlatform": "YARN"
         },
@@ -69,13 +55,6 @@
               "type": "StandardSSD_LRS"
             }
           ],
-          "azure": {
-            "availabilitySet": {
-              "name": "",
-              "faultDomainCount": 2,
-              "updateDomainCount": 20
-            }
-          },
           "instanceType": "Standard_D8_v3",
           "cloudPlatform": "YARN"
         },
@@ -93,13 +72,6 @@
               "type": "StandardSSD_LRS"
             }
           ],
-          "azure": {
-            "availabilitySet": {
-              "name": "",
-              "faultDomainCount": 2,
-              "updateDomainCount": 20
-            }
-          },
           "instanceType": "Standard_D8_v3",
           "cloudPlatform": "YARN"
         },
