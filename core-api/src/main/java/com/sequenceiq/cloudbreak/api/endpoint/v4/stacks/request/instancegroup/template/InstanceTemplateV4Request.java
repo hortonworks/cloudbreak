@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4Base;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.RootVolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 
 import io.swagger.annotations.ApiModel;
 
@@ -22,6 +23,8 @@ public class InstanceTemplateV4Request extends InstanceTemplateV4Base {
     private VolumeV4Request ephemeralVolume;
 
     private Set<VolumeV4Request> attachedVolumes;
+
+    private TemporaryStorage temporaryStorage;
 
     public RootVolumeV4Request getRootVolume() {
         return rootVolume;
@@ -48,5 +51,13 @@ public class InstanceTemplateV4Request extends InstanceTemplateV4Base {
 
     public void setAttachedVolumes(Set<VolumeV4Request> attachedVolumes) {
         this.attachedVolumes = attachedVolumes;
+    }
+
+    public TemporaryStorage getTemporaryStorage() {
+        return temporaryStorage;
+    }
+
+    public void setTemporaryStorage(TemporaryStorage temporaryStorage) {
+        this.temporaryStorage = temporaryStorage;
     }
 }

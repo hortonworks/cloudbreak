@@ -19,6 +19,8 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.converter.TemporaryStorageConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -67,6 +69,9 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<VolumeTemplate> volumeTemplates;
+
+    @Convert(converter = TemporaryStorageConverter.class)
+    private TemporaryStorage temporaryStorage = TemporaryStorage.ATTACHED_VOLUMES;
 
     public Template() {
         deleted = false;
@@ -174,5 +179,13 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setWorkspace(Workspace workspace) {
         this.workspace = workspace;
+    }
+
+    public void setTemporaryStorage(TemporaryStorage temporaryStorage) {
+        this.temporaryStorage = temporaryStorage;
+    }
+
+    public TemporaryStorage getTemporaryStorage() {
+        return temporaryStorage;
     }
 }
