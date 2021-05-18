@@ -20,7 +20,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
-import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 
@@ -48,7 +47,7 @@ public class FreeIpaStackHealthDetailsService {
                 try {
                     NodeHealthDetails nodeHealthDetails = freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(stack, instance);
                     response.addNodeHealthDetailsFreeIpaResponses(nodeHealthDetails);
-                } catch (FreeIpaClientException e) {
+                } catch (Exception e) {
                     addUnreachableResponse(instance, response, e.getLocalizedMessage());
                     LOGGER.error(String.format("Unable to check the health of FreeIPA instance: %s", instance.getInstanceId()), e);
                 }

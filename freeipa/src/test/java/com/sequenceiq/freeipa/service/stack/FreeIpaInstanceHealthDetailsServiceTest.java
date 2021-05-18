@@ -335,4 +335,26 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Assert.assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
     }
 
+    @Test
+    public void testCheckFreeIpaHealthThrowsWhenFqdnIsMissing() throws Exception {
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+
+        InstanceMetaData instanceMetaData = getInstance();
+        instanceMetaData.setDiscoveryFQDN(null);
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        Assert.assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+    }
+
+    @Test
+    public void testCheckLegacyFreeIpaHealthThrowsWhenFqdnIsMissing() throws Exception {
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
+
+        InstanceMetaData instanceMetaData = getInstance();
+        instanceMetaData.setDiscoveryFQDN(null);
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        Assert.assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+    }
+
 }

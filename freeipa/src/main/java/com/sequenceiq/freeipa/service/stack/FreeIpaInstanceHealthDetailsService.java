@@ -80,6 +80,10 @@ public class FreeIpaInstanceHealthDetailsService {
     }
 
     private RPCResponse<CheckResult> freeIpaHealthCheck(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+        if (instance.getDiscoveryFQDN() == null) {
+            LOGGER.info("The health check cannot run on {} because the instance was not fully installed and it is missing the FQDN", instance);
+            throw new FreeIpaClientException("The legacy health check cannot run on because the instance was not fully installed and it is missing the FQDN");
+        }
         try (FreeIpaHealthCheckClient client = freeIpaHealthCheckClientFactory.getClient(stack, instance)) {
             return client.nodeHealth();
         } catch (FreeIpaClientException e) {
@@ -91,6 +95,10 @@ public class FreeIpaInstanceHealthDetailsService {
     }
 
     private RPCResponse<Boolean> legacyFreeIpaHealthCheck(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+        if (instance.getDiscoveryFQDN() == null) {
+            LOGGER.info("The legacy health check cannot run on {} because the instance was not fully installed and it is missing the FQDN", instance);
+            throw new FreeIpaClientException("The legacy health check cannot run on because the instance was not fully installed and it is missing the FQDN");
+        }
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(stack, instance.getDiscoveryFQDN());
         return freeIpaClient.serverConnCheck(freeIpaClient.getHostname(), instance.getDiscoveryFQDN());
     }

@@ -201,6 +201,21 @@ public class FreeIpaStackHealthDetailsServiceTest {
     }
 
     @Test
+    public void testUnresponsiveSingleNodeThatThrowsRuntimeException() throws Exception {
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStack());
+        Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenThrow(new RuntimeException("Expected"));
+        HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
+        Assert.assertEquals(Status.UNREACHABLE, response.getStatus());
+        Assert.assertTrue(response.getNodeHealthDetails().size() == 1);
+        for (NodeHealthDetails nodeHealth:response.getNodeHealthDetails()) {
+            Assert.assertTrue(!nodeHealth.getIssues().isEmpty());
+            Assert.assertEquals(InstanceStatus.UNREACHABLE, nodeHealth.getStatus());
+            Assert.assertTrue(nodeHealth.getIssues().size() == 1);
+            Assert.assertTrue(nodeHealth.getIssues().get(0).equals("Expected"));
+        }
+    }
+
+    @Test
     public void testUnresponsiveSecondaryNode() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
