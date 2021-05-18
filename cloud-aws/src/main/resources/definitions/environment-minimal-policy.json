@@ -96,7 +96,8 @@
         "dynamodb:DescribeTable",
         "iam:ListInstanceProfiles",
         "iam:SimulatePrincipalPolicy",
-        "iam:ListRoles"
+        "iam:ListRoles",
+        "dynamodb:ListTables"
       ],
       "Resource": "*"
     }
