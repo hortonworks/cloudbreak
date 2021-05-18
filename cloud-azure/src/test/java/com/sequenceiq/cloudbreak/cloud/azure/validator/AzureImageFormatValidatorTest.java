@@ -121,9 +121,10 @@ public class AzureImageFormatValidatorTest {
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.validate(authenticatedContext, cloudStack));
 
-        assertEquals(exception.getMessage(), "Your image cloudera:cdp-7_2:freeipa:1.0.2103081333 seems to be an Azure Marketplace image, however its " +
-                "Terms and Conditions are not accepted! On how to accept them please refer to azure documentation at " +
-                "https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.");
+        assertEquals("Your image cloudera:cdp-7_2:freeipa:1.0.2103081333 seems to be an Azure Marketplace image, however " +
+                "its Terms and Conditions are not accepted! Please accept them and retry upgrade. On how to accept the Terms and Conditions of the image " +
+                "please refer to azure documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.",
+                exception.getMessage());
         verify(entitlementService, times(1)).azureMarketplaceImagesEnabled(any());
         verify(azureImageTermsSignerService).isSigned(eq(AZURE_SUBSCRIPTION_ID), any(), any());
     }

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnAuthenticator;
@@ -62,7 +63,7 @@ public class YarnConnector implements CloudConnector<Object> {
     }
 
     @Override
-    public List<Validator> validators() {
+    public List<Validator> validators(ValidatorType validatorType) {
         return Collections.emptyList();
     }
 

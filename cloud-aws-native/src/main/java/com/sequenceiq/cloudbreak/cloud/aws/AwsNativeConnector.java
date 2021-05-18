@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialConnector;
@@ -89,7 +90,10 @@ public class AwsNativeConnector implements CloudConnector<List<CloudResource>> {
     }
 
     @Override
-    public List<Validator> validators() {
+    public List<Validator> validators(ValidatorType validatorType) {
+        if (ValidatorType.IMAGE.equals(validatorType)) {
+            return List.of();
+        }
         return Collections.singletonList(awsTagValidator);
     }
 

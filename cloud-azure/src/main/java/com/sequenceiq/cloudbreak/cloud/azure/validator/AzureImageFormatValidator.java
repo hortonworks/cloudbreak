@@ -67,7 +67,8 @@ public class AzureImageFormatValidator implements Validator {
             if (!enableAzureImageTermsAutomaticSigner
                     && !azureImageTermsSignerService.isSigned(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient)) {
                 String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
-                        + "however its Terms and Conditions are not accepted! On how to accept them please refer to azure documentation " +
+                        + "however its Terms and Conditions are not accepted! Please accept them and retry upgrade. " +
+                        "On how to accept the Terms and Conditions of the image please refer to azure documentation " +
                         "at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", imageUri);
                 LOGGER.warn(errorMessage);
                 throw new CloudConnectorException(errorMessage);

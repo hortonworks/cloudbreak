@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.gcp.setup.GcpProvisionSetup;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,7 +67,7 @@ public class GcpConnectorTest {
 
     @Test
     public void testValidators() {
-        Assert.assertEquals(Collections.singletonList(gcpTagValidator), underTest.validators());
+        Assert.assertEquals(Collections.singletonList(gcpTagValidator), underTest.validators(ValidatorType.ALL));
     }
 
     @Test

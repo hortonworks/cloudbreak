@@ -4,7 +4,8 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum ClusterUpgradeValidationHandlerSelectors implements FlowEvent {
 
-    VALIDATE_CLUSTER_EVENT;
+    VALIDATE_DISK_SPACE_EVENT,
+    VALIDATE_IMAGE_EVENT;
 
     @Override
     public String event() {

@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -32,7 +31,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgrad
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeSuccess;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.ComponentUpdaterService;
+import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -54,14 +54,14 @@ public class ClusterUpgradeActions {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeTriggerEvent.class) {
 
             @Inject
-            private ComponentUpdaterService componentUpdaterService;
+            private ImageComponentUpdaterService imageComponentUpdaterService;
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 try {
-                    Pair<StatedImage, StatedImage> images = componentUpdaterService.updateComponents(payload.getImageId(), payload.getResourceId());
-                    variables.put(CURRENT_IMAGE, images.getLeft());
-                    variables.put(TARGET_IMAGE, images.getRight());
+                    UpgradeImageInfo images = imageComponentUpdaterService.updateForUpgrade(payload.getImageId(), payload.getResourceId());
+                    variables.put(CURRENT_IMAGE, images.getCurrentStatedImage());
+                    variables.put(TARGET_IMAGE, images.getTargetStatedImage());
                     clusterUpgradeService.initUpgradeCluster(context.getStackId(), getTargetImage(variables));
                     Selectable event = new ClusterUpgradeInitRequest(context.getStackId());
                     sendEvent(context, event.selector(), event);
