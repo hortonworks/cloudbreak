@@ -13,8 +13,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
 
@@ -31,11 +29,8 @@ public class PrewarmImageValidatorE2ETest extends AbstractImageValidatorE2ETest 
             when = "a SDX internal create request is sent",
             then = "the SDX cluster and the corresponding DistroX cluster is created")
     public void testCreateInternalSdxAndDistrox(TestContext testContext) {
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-        sdxDatabaseRequest.setCreate(false);
         testContext.given(SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
+                .withoutDatabase()
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withTemplate(commonClusterManagerProperties().getInternalSdxBlueprintName())
                 .withRuntimeVersion(commonClusterManagerProperties().getRuntimeVersion())

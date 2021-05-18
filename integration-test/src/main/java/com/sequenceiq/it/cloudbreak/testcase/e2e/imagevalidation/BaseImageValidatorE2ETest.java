@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -34,10 +33,16 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
         put(HostGroupType.IDBROKER.getName(), InstanceStatus.SERVICES_HEALTHY);
     }};
 
-    private AtomicReference<String> selectedImageID;
+    private String sdxInternalKey;
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Override
+    protected void setupTest(TestContext testContext) {
+        super.setupTest(testContext);
+        sdxInternalKey = resourcePropertyProvider().getName();
+    }
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -46,7 +51,6 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
             when = "a valid SDX create request is sent (latest Base Image)",
             then = "SDX should be available AND deletable")
     public void testSDXWithBaseImage(TestContext testContext) {
-        String sdxInternal = resourcePropertyProvider().getName();
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
         String imageSettings = resourcePropertyProvider().getName();
@@ -54,14 +58,9 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
         String stack = resourcePropertyProvider().getName();
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
-        selectedImageID = new AtomicReference<>();
 
         testContext
                 .given(imageCatalog, ImageCatalogTestDto.class)
-                .when((tc, dto, client) -> {
-                    selectedImageID.set(testContext.getCloudProvider().getLatestBaseImageID(tc, dto, client));
-                    return dto;
-                })
                 .given(imageSettings, ImageSettingsTestDto.class)
                     .withImageCatalog(commonCloudProperties().getImageValidation().getSourceCatalogName())
                     .withImageId(commonCloudProperties().getImageValidation().getImageUuid())
@@ -75,10 +74,11 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
                 .given(stack, StackTestDto.class).withCluster(cluster).withImageSettings(imageSettings)
                 .withEmptyNetwork()
                 .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
-                .given(sdxInternal, SdxInternalTestDto.class)
-                .withCloudStorage(getCloudStorageRequest(testContext))
-                .withStackRequest(key(cluster), key(stack))
-                .when(sdxTestClient.createInternal(), key(sdxInternal))
+                .given(sdxInternalKey, SdxInternalTestDto.class)
+                    .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withStackRequest(key(cluster), key(stack))
+                    .withoutDatabase()
+                .when(sdxTestClient.createInternal(), key(sdxInternalKey))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForInstance(HEALTY_STATUSES)
                 .validate();
@@ -86,7 +86,7 @@ public class BaseImageValidatorE2ETest extends AbstractImageValidatorE2ETest {
 
     @Override
     protected String getImageId(TestContext testContext) {
-        return selectedImageID.get();
+        return ((SdxInternalTestDto) testContext.get(sdxInternalKey)).getResponse().getStackV4Response().getImage().getId();
     }
 
     @Override
