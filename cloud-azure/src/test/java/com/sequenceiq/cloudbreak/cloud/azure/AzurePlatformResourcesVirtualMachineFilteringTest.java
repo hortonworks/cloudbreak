@@ -10,7 +10,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -97,7 +96,6 @@ class AzurePlatformResourcesVirtualMachineFilteringTest {
         assertFalse(resultContainsVmTypesWithoutResourceDisk);
     }
 
-    @NotNull
     private VirtualMachineSize createVirtualMachineSize(String name, int resourceDiskSizeInMB) {
         return new VirtualMachineSize() {
             @Override

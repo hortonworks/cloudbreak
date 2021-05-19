@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
@@ -129,7 +128,6 @@ public class FreeipaChecker {
         }
     }
 
-    @NotNull
     private Boolean isSuccessfulRequest(RPCResponse<NodeStatusProto.NodeStatusReport> response) {
         return response.getMessages().stream()
                 .map(RPCMessage::getCode)

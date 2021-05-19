@@ -8,7 +8,6 @@ import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -103,7 +102,6 @@ public class AwsRdsTerminateService {
         }
     }
 
-    @NotNull
     public List<CloudResourceStatus> getAmazonServiceException(boolean force, String cFStackName, AmazonServiceException e) {
         if (!e.getErrorMessage().contains(cFStackName + " does not exist") && !force) {
             throw e;

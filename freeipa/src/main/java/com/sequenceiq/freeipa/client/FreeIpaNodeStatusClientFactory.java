@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javax.ws.rs.client.Client;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,20 +23,17 @@ public class FreeIpaNodeStatusClientFactory extends FreeIpaClientFactory<CdpNode
     @Value("${freeipa.nodestatus.readTimeoutMs}")
     private int readTimeoutMillis;
 
-    @NotNull
     @Override
     protected CdpNodeStatusMonitorClient instantiateClient(Map<String, String> headers, RpcListener listener, Client restClient, URL freeIpaUrl) {
         return new CdpNodeStatusMonitorClient(restClient, freeIpaUrl, headers, listener, Optional.empty(), Optional.empty());
     }
 
-    @NotNull
     @Override
     protected CdpNodeStatusMonitorClient instantiateClient(Map<String, String> headers, RpcListener listener, Client restClient, URL freeIpaUrl,
             Optional<String> username, Optional<String> password) {
         return new CdpNodeStatusMonitorClient(restClient, freeIpaUrl, headers, listener, username, password);
     }
 
-    @NotNull
     @Override
     protected String getDefaultBasePath() {
         return DEFAULT_BASE_PATH;

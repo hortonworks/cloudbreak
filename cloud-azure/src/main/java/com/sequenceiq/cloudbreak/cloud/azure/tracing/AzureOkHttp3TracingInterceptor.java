@@ -5,7 +5,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
@@ -28,9 +27,8 @@ public class AzureOkHttp3TracingInterceptor implements Interceptor {
     @Inject
     private Tracer tracer;
 
-    @NotNull
     @Override
-    public Response intercept(@NotNull Chain chain) throws IOException {
+    public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         String loggingContext = request.header(X_MS_LOGGING_CONTEXT).split(" ")[0];
         Span span = tracer.buildSpan("Azure - [" + request.method() + "] " + loggingContext)

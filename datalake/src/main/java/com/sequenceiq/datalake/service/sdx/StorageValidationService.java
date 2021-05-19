@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
@@ -103,7 +102,6 @@ public class StorageValidationService {
                 || (!StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountKey()) && !StringUtils.isEmpty(cloudStorage.getAdlsGen2().getAccountName())));
     }
 
-    @NotNull
     private Map<String, String> getUserMapping(String dataAccessRole, String rangerAuditRole) {
         Map<String, String> userMapping = new HashMap<>();
         if (dataAccessRole != null) {

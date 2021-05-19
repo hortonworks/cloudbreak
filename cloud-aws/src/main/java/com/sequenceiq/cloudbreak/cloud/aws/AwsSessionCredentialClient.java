@@ -5,7 +5,6 @@ import java.util.Date;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -97,7 +96,6 @@ public class AwsSessionCredentialClient {
                 .build();
     }
 
-    @NotNull
     private AwsClientBuilder.EndpointConfiguration getEndpointConfiguration(String defaultZone) {
         return new AwsClientBuilder
                 .EndpointConfiguration(String.format("https://sts.%s.amazonaws.com", defaultZone), defaultZone);
