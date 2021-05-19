@@ -287,7 +287,12 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
         Map<String, String> environmentUserTags = Objects.requireNonNullElse(environment.getTags().getUserDefined(), new HashMap<>());
-        environmentUserTags.forEach((k, v) -> resultTags.merge(k, v, (oldValue, newValue) -> newValue));
+        defaultTags.forEach((key, value) -> {
+            resultTags.put(key, value);
+        });
+        environmentUserTags.forEach((key, value) -> {
+            resultTags.putIfAbsent(key, value);
+        });
 
         return new Json(new StackTags(resultTags, new HashMap<>(), defaultTags));
     }
