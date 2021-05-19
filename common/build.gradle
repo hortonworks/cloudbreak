@@ -26,6 +26,7 @@ dependencies {
   compile group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
   compile group: 'commons-net',                           name: 'commons-net',                    version: '3.6'
   compile group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
+  compile group: 'com.google.code.gson',                  name: 'gson',                           version: gsonVersion
   compile group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
   compile group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
   compile group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
@@ -64,10 +65,13 @@ dependencies {
 
   compile group: 'io.opentracing.contrib',                name: 'opentracing-jaxrs2',                     version: opentracingJaxrs2Version
   compile group: 'io.opentracing.contrib',                name: 'opentracing-jdbc',                       version: opentracingJdbcVersion
-  compile group: 'io.opentracing.contrib',                name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
   compile group: 'io.opentracing.contrib',                name: 'opentracing-spring-web',                 version: opentracingSpringWebVersion
-
-
+  implementation group: 'io.opentracing.contrib',         name: 'opentracing-spring-jaeger-starter',      version: opentracingSpringJaegerStarterVersion
+  constraints {
+    implementation ('io.jaegertracing:jaeger-client:1.6.0') {
+      because 'default transitive dependency version (1.3.2) contains security vulnerabilities'
+    }
+  }
   compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
     force = true
   }

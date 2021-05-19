@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -163,7 +162,6 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    @NotNull
     private Set<InstanceMetaData> getUnusedInstances(Integer scalingAdjustment, Set<InstanceMetaData> instancesForHostGroup, ApiHostList hostRefList) {
         Set<InstanceMetaData> instancesWithoutFQDN = getInstancesWithoutFQDN(scalingAdjustment, instancesForHostGroup);
         LOGGER.warn("Instances without FQDN: {}", instancesWithoutFQDN);
@@ -176,7 +174,6 @@ public class ClouderaManagerDecomissioner {
         instancesToRemove.addAll(instancesNotKnownByCM.stream().limit(limit).collect(Collectors.toSet()));
     }
 
-    @NotNull
     private Set<InstanceMetaData> getInstancesNotKnownByCM(Set<InstanceMetaData> instancesForHostGroup, ApiHostList hostRefList) {
         Set<InstanceMetaData> instancesNotKnownByCM = instancesForHostGroup.stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
@@ -188,7 +185,6 @@ public class ClouderaManagerDecomissioner {
         return instancesNotKnownByCM;
     }
 
-    @NotNull
     private Set<InstanceMetaData> getInstancesWithoutFQDN(Integer scalingAdjustment, Set<InstanceMetaData> instancesForHostGroup) {
         return instancesForHostGroup.stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null)

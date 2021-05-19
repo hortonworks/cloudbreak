@@ -7,7 +7,6 @@ import java.util.Optional;
 import javax.ws.rs.NotSupportedException;
 import javax.ws.rs.client.Client;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -24,21 +23,18 @@ public class FreeIpaHealthCheckClientFactory extends FreeIpaClientFactory<FreeIp
     @Value("${freeipa.healthcheck.readTimeoutMs}")
     private int readTimeoutMillis;
 
-    @NotNull
     @Override
     protected FreeIpaHealthCheckClient instantiateClient(Map<String, String>  headers, RpcListener listener, Client restClient,
             URL freeIpaHealthCheckUrl) {
         return new FreeIpaHealthCheckClient(restClient, freeIpaHealthCheckUrl, headers, listener);
     }
 
-    @NotNull
     @Override
     protected FreeIpaHealthCheckClient instantiateClient(Map<String, String> headers, RpcListener listener, Client restClient, URL freeIpaUrl,
             Optional<String> username, Optional<String> password) {
         throw new NotSupportedException("Basic authentication is not supported for FreeIPA health check client");
     }
 
-    @NotNull
     @Override
     protected String getDefaultBasePath() {
         return DEFAULT_BASE_PATH;

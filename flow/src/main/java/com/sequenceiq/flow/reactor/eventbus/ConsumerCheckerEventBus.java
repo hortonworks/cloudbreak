@@ -1,6 +1,5 @@
 package com.sequenceiq.flow.reactor.eventbus;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,7 @@ public class ConsumerCheckerEventBus extends EventBus {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumerCheckerEventBus.class);
 
-    public ConsumerCheckerEventBus(@Nullable EventBus eventBus) {
+    public ConsumerCheckerEventBus(EventBus eventBus) {
         super(eventBus.getConsumerRegistry(), eventBus.getDispatcher(), eventBus.getRouter(), eventBus.getDispatchErrorHandler(),
                 eventBus.getUncaughtErrorHandler());
     }

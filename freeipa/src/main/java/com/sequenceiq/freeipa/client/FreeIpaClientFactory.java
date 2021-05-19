@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 
 import org.apache.commons.lang3.StringUtils;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -75,7 +74,6 @@ public abstract class FreeIpaClientFactory<T> {
         return buildFreeIpaClient(httpClientConfig, gatewayPort, getDefaultBasePath(), Map.of(), null, username, password);
     }
 
-    @NotNull
     protected abstract String getDefaultBasePath();
 
     private T buildFreeIpaClient(HttpClientConfig clientConfig, int port, String basePath,
@@ -101,10 +99,8 @@ public abstract class FreeIpaClientFactory<T> {
 
     protected abstract int getConnectionTimeoutMillis();
 
-    @NotNull
     protected abstract T instantiateClient(Map<String, String> headers, RpcListener listener, Client restClient, URL freeIpaUrl);
 
-    @NotNull
     protected abstract T instantiateClient(Map<String, String> headers, RpcListener listener, Client restClient, URL freeIpaUrl, Optional<String> username,
             Optional<String> password);
 

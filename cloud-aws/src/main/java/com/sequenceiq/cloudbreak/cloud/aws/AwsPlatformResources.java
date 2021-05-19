@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -761,7 +760,6 @@ public class AwsPlatformResources implements PlatformResources {
         return (float) instanceType.getMemoryInfo().getSizeInMiB() / ONE_THOUSAND;
     }
 
-    @NotNull
     private List<String> getInstanceTypes(List<String> instanceTypes, int i) {
         return instanceTypes.subList(i, (i + SEGMENT) < instanceTypes.size() ? (i + SEGMENT) : instanceTypes.size());
     }

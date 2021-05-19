@@ -10,7 +10,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -65,7 +64,6 @@ public class AzureCredentialAppCreationCommand {
         return getCommandString(deploymentAddress, appAuditCreationCommandTemplatePath);
     }
 
-    @NotNull
     public String getCommandString(String deploymentAddress, String appAuditCreationCommandTemplatePath) {
         try {
             if (StringUtils.isEmpty(deploymentAddress)) {
