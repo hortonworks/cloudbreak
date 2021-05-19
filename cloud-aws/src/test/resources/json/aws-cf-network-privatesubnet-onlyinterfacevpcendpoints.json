@@ -1,68 +1,54 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "Deploys a Cloudera Data Platform VPC on AWS.",
+  "Outputs": {
+    "CreatedVpc": {
+      "Value": {
+        "Ref": "VPC"
+      }
+    },
+    "id0": {
+      "Value": {
+        "Ref": "PubS0"
+      }
+    },
+    "id1": {
+      "Value": {
+        "Ref": "PubS1"
+      }
+    },
+    "id2": {
+      "Value": {
+        "Ref": "PrvS2"
+      }
+    },
+    "id3": {
+      "Value": {
+        "Ref": "PrvS3"
+      }
+    }
+  },
   "Resources": {
-    "VPC": {
-      "Type": "AWS::EC2::VPC",
-      "Properties": {
-        "CidrBlock": "0.0.0.0/16",
-        "EnableDnsSupport": "true",
-        "EnableDnsHostnames": "true",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": "VPC-1"
-          }
-        ]
-      }
-    },
-    "InternetGateway": {
-      "Type": "AWS::EC2::InternetGateway",
-      "Properties": {
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": "ig-1"
-          }
-        ]
-      }
-    },
     "AttachGateway": {
-      "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
         "InternetGatewayId": {
           "Ref": "InternetGateway"
+        },
+        "VpcId": {
+          "Ref": "VPC"
         }
-      }
+      },
+      "Type": "AWS::EC2::VPCGatewayAttachment"
     },
     "EndpointSecurityGroup": {
-      "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Security group for the private interface service endpoints",
         "SecurityGroupIngress": [
           {
-            "IpProtocol": "-1",
-            "CidrIp": "0.0.0.0/16"
+            "CidrIp": "0.0.0.0/16",
+            "IpProtocol": "-1"
           }
         ],
-        "VpcId": {
-          "Ref": "VPC"
-        },
         "Tags": [
           {
             "Key": "Application",
@@ -74,281 +60,14 @@
             "Key": "Name",
             "Value": "vpcep-sg-1"
           }
-        ]
-      }
-    },
-    "PubS0": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch": "true",
-        "CidrBlock": "2.2.2.2/24",
+        ],
         "VpcId": {
           "Ref": "VPC"
-        },
-        "AvailabilityZone": "az1",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "kubernetes.io/role/elb",
-            "Value": "1"
-          },
-          {
-            "Key": "Name",
-            "Value": "ps0-1"
-          }
-        ]
-      }
-    },
-    "PubSRTA0": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PubS0"
-        },
-        "RouteTableId": {
-          "Ref": "PublicRouteTable"
         }
-      }
-    },
-    "NG0EIP": {
-      "Type": "AWS::EC2::EIP",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "Domain": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "NG0": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": [
-            "NG0EIP",
-            "AllocationId"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "PubS0"
-        }
-      }
-    },
-    "PubS1": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch": "true",
-        "CidrBlock": "2.2.2.2/24",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "AvailabilityZone": "az2",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "kubernetes.io/role/elb",
-            "Value": "1"
-          },
-          {
-            "Key": "Name",
-            "Value": "ps1-1"
-          }
-        ]
-      }
-    },
-    "PubSRTA1": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PubS1"
-        },
-        "RouteTableId": {
-          "Ref": "PublicRouteTable"
-        }
-      }
-    },
-    "NG1EIP": {
-      "Type": "AWS::EC2::EIP",
-      "DependsOn": "AttachGateway",
-      "Properties": {
-        "Domain": {
-          "Ref": "VPC"
-        }
-      }
-    },
-    "NG1": {
-      "Type": "AWS::EC2::NatGateway",
-      "Properties": {
-        "AllocationId": {
-          "Fn::GetAtt": [
-            "NG1EIP",
-            "AllocationId"
-          ]
-        },
-        "SubnetId": {
-          "Ref": "PubS1"
-        }
-      }
-    },
-    "PrvS2": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch": "false",
-        "CidrBlock": "2.2.2.2/24",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "AvailabilityZone": "az1",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "kubernetes.io/role/elb",
-            "Value": "1"
-          },
-          {
-            "Key": "Name",
-            "Value": "ps2-1"
-          }
-        ]
-      }
-    },
-    "PRT2": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": "prt2-1"
-          }
-        ]
-      }
-    },
-    "PSRTA2": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PrvS2"
-        },
-        "RouteTableId": {
-          "Ref": "PRT2"
-        }
-      }
-    },
-    "PRt2": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": [
-        "PRT2",
-        "AttachGateway"
-      ],
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": {
-          "Ref": "PRT2"
-        },
-        "NatGatewayId": {
-          "Ref": "NG2"
-        }
-      }
-    },
-    "PrvS3": {
-      "Type": "AWS::EC2::Subnet",
-      "Properties": {
-        "MapPublicIpOnLaunch": "false",
-        "CidrBlock": "2.2.2.2/24",
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "AvailabilityZone": "az2",
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "kubernetes.io/role/elb",
-            "Value": "1"
-          },
-          {
-            "Key": "Name",
-            "Value": "ps3-1"
-          }
-        ]
-      }
-    },
-    "PRT3": {
-      "Type": "AWS::EC2::RouteTable",
-      "Properties": {
-        "VpcId": {
-          "Ref": "VPC"
-        },
-        "Tags": [
-          {
-            "Key": "Application",
-            "Value": {
-              "Ref": "AWS::StackId"
-            }
-          },
-          {
-            "Key": "Name",
-            "Value": "prt3-1"
-          }
-        ]
-      }
-    },
-    "PSRTA3": {
-      "Type": "AWS::EC2::SubnetRouteTableAssociation",
-      "Properties": {
-        "SubnetId": {
-          "Ref": "PrvS3"
-        },
-        "RouteTableId": {
-          "Ref": "PRT3"
-        }
-      }
-    },
-    "PRt3": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": [
-        "PRT3",
-        "AttachGateway"
-      ],
-      "Properties": {
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "RouteTableId": {
-          "Ref": "PRT3"
-        },
-        "NatGatewayId": {
-          "Ref": "NG3"
-        }
-      }
+      },
+      "Type": "AWS::EC2::SecurityGroup"
     },
     "interface1Endpoint": {
-      "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": "true",
         "SecurityGroupIds": [
@@ -371,10 +90,10 @@
         "VpcId": {
           "Ref": "VPC"
         }
-      }
+      },
+      "Type": "AWS::EC2::VPCEndpoint"
     },
     "interface2Endpoint": {
-      "Type": "AWS::EC2::VPCEndpoint",
       "Properties": {
         "PrivateDnsEnabled": "true",
         "SecurityGroupIds": [
@@ -397,14 +116,238 @@
         "VpcId": {
           "Ref": "VPC"
         }
-      }
+      },
+      "Type": "AWS::EC2::VPCEndpoint"
     },
-    "PublicRouteTable": {
-      "Type": "AWS::EC2::RouteTable",
+    "InternetGateway": {
       "Properties": {
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "ig-1"
+          }
+        ]
+      },
+      "Type": "AWS::EC2::InternetGateway"
+    },
+    "NG0": {
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NG0EIP",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PubS0"
+        }
+      },
+      "Type": "AWS::EC2::NatGateway"
+    },
+    "NG0EIP": {
+      "DependsOn": "AttachGateway",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::EIP"
+    },
+    "NG1": {
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "NG1EIP",
+            "AllocationId"
+          ]
+        },
+        "SubnetId": {
+          "Ref": "PubS1"
+        }
+      },
+      "Type": "AWS::EC2::NatGateway"
+    },
+    "NG1EIP": {
+      "DependsOn": "AttachGateway",
+      "Properties": {
+        "Domain": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::EIP"
+    },
+    "PRt2": {
+      "DependsOn": [
+        "PRT2",
+        "AttachGateway"
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NG2"
+        },
+        "RouteTableId": {
+          "Ref": "PRT2"
+        }
+      },
+      "Type": "AWS::EC2::Route"
+    },
+    "PRT2": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "prt2-1"
+          }
+        ],
         "VpcId": {
           "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable"
+    },
+    "PRt3": {
+      "DependsOn": [
+        "PRT3",
+        "AttachGateway"
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "NatGatewayId": {
+          "Ref": "NG3"
         },
+        "RouteTableId": {
+          "Ref": "PRT3"
+        }
+      },
+      "Type": "AWS::EC2::Route"
+    },
+    "PRT3": {
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "prt3-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable"
+    },
+    "PrvS2": {
+      "Properties": {
+        "AvailabilityZone": "az1",
+        "CidrBlock": "2.2.2.2/24",
+        "MapPublicIpOnLaunch": "false",
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "kubernetes.io/role/internal-elb",
+            "Value": "1"
+          },
+          {
+            "Key": "Name",
+            "Value": "ps2-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PrvS3": {
+      "Properties": {
+        "AvailabilityZone": "az2",
+        "CidrBlock": "2.2.2.2/24",
+        "MapPublicIpOnLaunch": "false",
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "kubernetes.io/role/internal-elb",
+            "Value": "1"
+          },
+          {
+            "Key": "Name",
+            "Value": "ps3-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PSRTA2": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PRT2"
+        },
+        "SubnetId": {
+          "Ref": "PrvS2"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "PSRTA3": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PRT3"
+        },
+        "SubnetId": {
+          "Ref": "PrvS3"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
+    },
+    "PublicRoute": {
+      "DependsOn": [
+        "PublicRouteTable",
+        "AttachGateway"
+      ],
+      "Properties": {
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        }
+      },
+      "Type": "AWS::EC2::Route"
+    },
+    "PublicRouteTable": {
+      "Properties": {
         "Tags": [
           {
             "Key": "Application",
@@ -416,51 +359,108 @@
             "Key": "Name",
             "Value": "prt-envName-1"
           }
-        ]
-      }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::RouteTable"
     },
-    "PublicRoute": {
-      "Type": "AWS::EC2::Route",
-      "DependsOn": [
-        "PublicRouteTable",
-        "AttachGateway"
-      ],
+    "PubS0": {
+      "Properties": {
+        "AvailabilityZone": "az1",
+        "CidrBlock": "2.2.2.2/24",
+        "MapPublicIpOnLaunch": "true",
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "kubernetes.io/role/elb",
+            "Value": "1"
+          },
+          {
+            "Key": "Name",
+            "Value": "ps0-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PubS1": {
+      "Properties": {
+        "AvailabilityZone": "az2",
+        "CidrBlock": "2.2.2.2/24",
+        "MapPublicIpOnLaunch": "true",
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "kubernetes.io/role/elb",
+            "Value": "1"
+          },
+          {
+            "Key": "Name",
+            "Value": "ps1-1"
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPC"
+        }
+      },
+      "Type": "AWS::EC2::Subnet"
+    },
+    "PubSRTA0": {
       "Properties": {
         "RouteTableId": {
           "Ref": "PublicRouteTable"
         },
-        "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": {
-          "Ref": "InternetGateway"
+        "SubnetId": {
+          "Ref": "PubS0"
         }
-      }
-    }
-  },
-  "Outputs": {
-    "id0": {
-      "Value": {
-        "Ref": "PubS0"
-      }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
     },
-    "id1": {
-      "Value": {
-        "Ref": "PubS1"
-      }
+    "PubSRTA1": {
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PubS1"
+        }
+      },
+      "Type": "AWS::EC2::SubnetRouteTableAssociation"
     },
-    "id2": {
-      "Value": {
-        "Ref": "PrvS2"
-      }
-    },
-    "id3": {
-      "Value": {
-        "Ref": "PrvS3"
-      }
-    },
-    "CreatedVpc": {
-      "Value": {
-        "Ref": "VPC"
-      }
+    "VPC": {
+      "Properties": {
+        "CidrBlock": "0.0.0.0/16",
+        "EnableDnsHostnames": "true",
+        "EnableDnsSupport": "true",
+        "Tags": [
+          {
+            "Key": "Application",
+            "Value": {
+              "Ref": "AWS::StackId"
+            }
+          },
+          {
+            "Key": "Name",
+            "Value": "VPC-1"
+          }
+        ]
+      },
+      "Type": "AWS::EC2::VPC"
     }
   }
 }
