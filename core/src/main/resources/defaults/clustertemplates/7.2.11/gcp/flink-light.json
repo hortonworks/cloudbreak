@@ -1,12 +1,12 @@
 {
-  "name": "7.2.11 - Streaming Analytics Heavy Duty for AWS",
+  "name": "7.2.11 - Streaming Analytics Light Duty for Google Cloud",
   "description": "",
   "type": "STREAMING",
   "featureState": "RELEASED",
-  "cloudPlatform": "AWS",
+  "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.11 - Streaming Analytics Heavy Duty with Apache Flink"
+      "blueprintName": "7.2.11 - Streaming Analytics Light Duty with Apache Flink"
     },
     "instanceGroups": [
       {
@@ -15,16 +15,11 @@
           "attachedVolumes": [
             {
               "count": 1,
-              "size": 1000,
-              "type": "gp2"
+              "size": 100,
+              "type": "pd-standard"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 3,
         "type": "CORE",
@@ -37,15 +32,10 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "pd-standard"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 1,
         "type": "GATEWAY",
@@ -58,15 +48,10 @@
             {
               "count": 1,
               "size": 100,
-              "type": "standard"
+              "type": "pd-standard"
             }
           ],
-          "aws": {
-            "encryption": {
-              "type": "NONE"
-            }
-          },
-          "instanceType": "m5.2xlarge"
+          "instanceType": "e2-standard-8"
         },
         "nodeCount": 2,
         "type": "CORE",
