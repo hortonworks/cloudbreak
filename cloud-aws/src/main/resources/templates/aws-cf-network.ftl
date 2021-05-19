@@ -101,7 +101,7 @@
             "AvailabilityZone" : "${subnet.availabilityZone}",
             "Tags" : [
               { "Key" : "Application", "Value" : { "Ref" : "AWS::StackId" } },
-              { "Key" : "kubernetes.io/role/elb", "Value" : "1" },
+              { "Key" : "kubernetes.io/role/internal-elb", "Value" : "1" },
               { "Key" : "Name", "Value" : "ps${subnet.index}-${environmentId}" }
             ]
         }

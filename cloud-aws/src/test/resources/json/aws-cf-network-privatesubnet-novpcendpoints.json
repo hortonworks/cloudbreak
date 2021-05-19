@@ -189,7 +189,7 @@
             }
           },
           {
-            "Key": "kubernetes.io/role/elb",
+            "Key": "kubernetes.io/role/internal-elb",
             "Value": "1"
           },
           {
@@ -263,7 +263,7 @@
             }
           },
           {
-            "Key": "kubernetes.io/role/elb",
+            "Key": "kubernetes.io/role/internal-elb",
             "Value": "1"
           },
           {
