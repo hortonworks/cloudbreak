@@ -18,7 +18,6 @@
     {
       "Effect": "Allow",
       "Action": [
-        "ec2:ImportKeyPair",
         "cloudformation:DeleteStack"
       ],
       "Resource": "*",
@@ -97,9 +96,31 @@
         "iam:ListInstanceProfiles",
         "iam:SimulatePrincipalPolicy",
         "iam:ListRoles",
-        "dynamodb:ListTables"
+        "dynamodb:ListTables",
+        "autoscaling:DescribeAutoScalingGroups",
+        "autoscaling:DescribeScalingActivities",
+        "autoscaling:CreateAutoScalingGroup",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:DescribeStackEvents",
+        "ec2:ImportKeyPair",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateLaunchTemplate",
+        "ec2:RunInstances",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DescribeAlarms"
       ],
       "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
+      ],
+      "Resource": [
+        "${ID_BROKER_ROLE}"
+      ]
     }
   ]
 }

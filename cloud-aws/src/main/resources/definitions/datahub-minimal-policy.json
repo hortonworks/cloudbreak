@@ -50,7 +50,9 @@
         "autoscaling:SuspendProcesses",
         "autoscaling:UpdateAutoScalingGroup",
         "autoscaling:ResumeProcesses",
-        "autoscaling:DetachInstances"
+        "autoscaling:DetachInstances",
+        "rds:StopDBInstance",
+        "rds:StartDBInstance"
       ],
       "Resource": [
         "*"
@@ -100,7 +102,27 @@
         "kms:ListKeys",
         "kms:ListAliases",
         "sts:DecodeAuthorizationMessage",
-        "s3:GetBucketLocation"
+        "s3:GetBucketLocation",
+        "rds:AddTagsToResource",
+        "rds:CreateDBInstance",
+        "rds:CreateDBSubnetGroup",
+        "rds:DeleteDBInstance",
+        "rds:DeleteDBSubnetGroup",
+        "rds:ListTagsForResource",
+        "rds:RemoveTagsFromResource",
+        "rds:CreateDBParameterGroup",
+        "rds:DeleteDBParameterGroup",
+        "rds:DescribeEngineDefaultParameters",
+        "rds:ModifyDBParameterGroup",
+        "rds:DescribeDBParameters",
+        "rds:DescribeDBParameterGroups",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DescribeDBInstances",
+        "rds:ModifyDBInstance",
+        "rds:DescribeCertificates",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:DescribeAccountAttributes"
       ],
       "Resource": "*"
     },
