@@ -115,12 +115,15 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     @Inject
     private HueWorkaroundValidatorService hueWorkaroundValidatorService;
 
+    @Inject
+    private BlueprintConfigValidator blueprintConfigValidator;
+
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
     }
 
     public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
-        validate(blueprint);
+        validate(blueprint, false);
         decorateWithCrn(blueprint, accountId, creator);
         try {
             return transactionService.required(() -> {
@@ -134,7 +137,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint createWithInternalUser(Blueprint blueprint, Long workspaceId, String accountId) {
-        validate(blueprint);
+        validate(blueprint, true);
         blueprint.setResourceCrn(createCRN(accountId));
         try {
             return transactionService.required(() -> {
@@ -148,13 +151,16 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         }
     }
 
-    private void validate(Blueprint blueprint) {
+    private void validate(Blueprint blueprint, boolean internalCreation) {
         MapBindingResult errors = new MapBindingResult(new HashMap(), "blueprint");
         blueprintValidator.validate(blueprint, errors);
         if (errors.hasErrors()) {
             throw new BadRequestException(errors.getAllErrors().stream()
                     .map(e -> (e instanceof FieldError ? ((FieldError) e).getField() + ": " : "") + e.getDefaultMessage())
                     .collect(Collectors.joining("; ")));
+        }
+        if (!internalCreation) {
+            blueprintConfigValidator.validate(blueprint);
         }
         hueWorkaroundValidatorService.validateForBlueprintRequest(getHueHostGroups(blueprint.getBlueprintText()));
     }
