@@ -51,7 +51,9 @@
         "autoscaling:SuspendProcesses",
         "autoscaling:UpdateAutoScalingGroup",
         "autoscaling:ResumeProcesses",
-        "autoscaling:DetachInstances"
+        "autoscaling:DetachInstances",
+        "rds:StopDBInstance",
+        "rds:StartDBInstance"
       ],
       "Resource": [
         "*"
@@ -85,7 +87,27 @@
         "ec2:CreateLaunchTemplate",
         "ec2:DescribeLaunchTemplates",
         "ec2:RunInstances",
-        "ec2:DescribePrefixLists"
+        "ec2:DescribePrefixLists",
+        "rds:AddTagsToResource",
+        "rds:CreateDBInstance",
+        "rds:CreateDBSubnetGroup",
+        "rds:DeleteDBInstance",
+        "rds:DeleteDBSubnetGroup",
+        "rds:ListTagsForResource",
+        "rds:RemoveTagsFromResource",
+        "rds:CreateDBParameterGroup",
+        "rds:DeleteDBParameterGroup",
+        "rds:DescribeEngineDefaultParameters",
+        "rds:ModifyDBParameterGroup",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:DescribeAccountAttributes",
+        "rds:DescribeDBParameters",
+        "rds:DescribeDBParameterGroups",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DescribeDBInstances",
+        "rds:ModifyDBInstance",
+        "rds:DescribeCertificates"
       ],
       "Resource": "*"
     },
