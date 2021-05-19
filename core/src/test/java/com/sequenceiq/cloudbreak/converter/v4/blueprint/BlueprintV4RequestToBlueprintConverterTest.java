@@ -94,60 +94,6 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
     }
 
     @Test
-    public void testIfInstatiatorPresentedShouldDropException() {
-        BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-instantiator.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Instantiator is present in your Cloudera Manager template which is probably incorrect.");
-        underTest.convert(request);
-    }
-
-    @Test
-    public void testIfPasswordPresentedWithStarsShouldDropException() {
-        BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-password-placeholder.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Password placeholder with **** is present in your Cloudera Manager template which is probably incorrect.");
-        underTest.convert(request);
-    }
-
-    @Test
-    public void testIfReposioriesPresentedShouldDropException() {
-        BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-repositories.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Repositories are present in your Cloudera Manager template, this must be removed.");
-        underTest.convert(request);
-    }
-
-    @Test
-    public void testIfVolumeConfigPresentedShouldDropException() {
-        BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-volume-config.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Volume configuration should not be part of your Cloudera Manager template.");
-        underTest.convert(request);
-    }
-
-    @Test
-    public void testIfRoleConfigGroupsRefNamesMisspelledShouldDropException() {
-        BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-wrong-role-group-name.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("RoleConfigGroupsRefNames is probably missing or misspelled in your Cloudera Manager template.");
-        underTest.convert(request);
-    }
-
-    @Test
-    public void testIfRoleConfigGroupsMisspelledShouldDropException() {
-        BlueprintV4Request request = new BlueprintV4Request();
-        request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-wrong-service-role-group-name.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("RoleConfigGroups is probably missing or misspelled in your Cloudera Manager template.");
-        underTest.convert(request);
-    }
-
-    @Test
     public void rejectsBuiltinWithoutContent() {
         BlueprintV4Request request = new BlueprintV4Request();
         request.setBlueprint("{ \"blueprint\": {}");

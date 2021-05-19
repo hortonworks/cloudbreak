@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -19,7 +17,6 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.converter.MissingResourceNameGenerator;
@@ -85,7 +82,6 @@ public class BlueprintV4RequestToBlueprintConverter
                 blueprint.setHostGroupCount(blueprintUtils.countHostTemplates(blueprintJson));
                 blueprint.setStackVersion(blueprintUtils.getCDHStackVersion(blueprintJson));
                 blueprint.setStackType("CDH");
-                validateBlueprintJson(blueprint);
             } else {
                 throw new BadRequestException("Failed to determine cluster template format");
             }
@@ -97,32 +93,6 @@ public class BlueprintV4RequestToBlueprintConverter
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
         blueprint.setTags(createJsonFromTagsMap(json.getTags()));
         return blueprint;
-    }
-
-    private void validateBlueprintJson(Blueprint blueprint) {
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintText());
-        if (cmTemplateProcessor.isInstantiatorPresent()) {
-            throw new BadRequestException("Instantiator is present in your Cloudera Manager template which is probably incorrect.");
-        }
-        if (cmTemplateProcessor.isRepositoriesPresent()) {
-            throw new BadRequestException("Repositories are present in your Cloudera Manager template, this must be removed.");
-        }
-        Pattern passwordPattern = Pattern.compile("\\*\\*\\*");
-        Matcher passwordMatch = passwordPattern.matcher(blueprint.getBlueprintText());
-        if (passwordMatch.find()) {
-            throw new BadRequestException("Password placeholder with **** is present in your Cloudera Manager template which is probably incorrect.");
-        }
-        Pattern volumePattern = Pattern.compile("/hadoopfs/fs(.*?)");
-        Matcher volumeMatch = volumePattern.matcher(blueprint.getBlueprintText());
-        if (volumeMatch.find()) {
-            throw new BadRequestException("Volume configuration should not be part of your Cloudera Manager template.");
-        }
-        if (!cmTemplateProcessor.everyHostTemplateHasRoleConfigGroupsRefNames()) {
-            throw new BadRequestException("RoleConfigGroupsRefNames is probably missing or misspelled in your Cloudera Manager template.");
-        }
-        if (!cmTemplateProcessor.everyServiceHasRoleConfigGroups()) {
-            throw new BadRequestException("RoleConfigGroups is probably missing or misspelled in your Cloudera Manager template.");
-        }
     }
 
     private String getNameByItsAvailability(@Nullable String name) {
