@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.api.service;
 
 import java.util.Optional;
 
@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 @Service
-public class ServiceEndpointCollectorVersionComparator {
+public class ExposedServiceVersionSupport {
 
-    private VersionComparator versionComparator = new VersionComparator();
+    private final VersionComparator versionComparator = new VersionComparator();
 
     public boolean minVersionSupported(Optional<String> blueprintVersionOptional, String minVersionString) {
         boolean shouldInclude = false;

@@ -2,18 +2,18 @@ package com.sequenceiq.cloudbreak.api.service;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +29,13 @@ public class ExposedServiceCollector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExposedServiceCollector.class);
 
-    private Map<String, ExposedService> exposedServices = new HashMap<>();
+    private final MultiValuedMap<String, ExposedService> exposedServices = new HashSetValuedHashMap<>();
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Inject
+    private ExposedServiceVersionSupport exposedServiceVersionSupportService;
 
     @PostConstruct
     public void init() {
@@ -40,67 +43,67 @@ public class ExposedServiceCollector {
     }
 
     public ExposedService getAtlasService() {
-        return exposedServices.get("ATLAS");
+        return getFirst("ATLAS");
     }
 
     public ExposedService getClouderaManagerService() {
-        return exposedServices.get("CLOUDERA_MANAGER");
+        return getFirst("CLOUDERA_MANAGER");
     }
 
     public ExposedService getClouderaManagerUIService() {
-        return exposedServices.get("CLOUDERA_MANAGER_UI");
+        return getFirst("CLOUDERA_MANAGER_UI");
     }
 
     public ExposedService getHBaseRestService() {
-        return exposedServices.get("HBASE_REST");
+        return getFirst("HBASE_REST");
     }
 
     public ExposedService getHBaseUIService() {
-        return exposedServices.get("HBASE_UI");
+        return getFirst("HBASE_UI");
     }
 
     public ExposedService getHBaseJarsService() {
-        return exposedServices.get("HBASEJARS");
+        return getFirst("HBASEJARS");
     }
 
     public ExposedService getHiveServerService() {
-        return exposedServices.get("HIVE_SERVER");
+        return getFirst("HIVE_SERVER");
     }
 
     public ExposedService getHueService() {
-        return exposedServices.get("HUE");
+        return getFirst("HUE");
     }
 
     public ExposedService getImpalaService() {
-        return exposedServices.get("IMPALA");
+        return getFirst("IMPALA");
     }
 
     public ExposedService getImpalaDebugUIService() {
-        return exposedServices.get("IMPALA_DEBUG_UI");
+        return getFirst("IMPALA_DEBUG_UI");
     }
 
     public ExposedService getKuduService() {
-        return exposedServices.get("KUDU");
+        return getFirst("KUDU");
     }
 
     public ExposedService getQueueService() {
-        return exposedServices.get("QUEUEMANAGER_WEBAPP");
+        return getFirst("QUEUEMANAGER_WEBAPP");
     }
 
     public ExposedService getNameNodeService() {
-        return exposedServices.get("NAMENODE");
+        return getFirst("NAMENODE");
     }
 
     public ExposedService getNiFiService() {
-        return exposedServices.get("NIFI");
+        return getFirst("NIFI");
     }
 
     public ExposedService getRangerService() {
-        return exposedServices.get("RANGER");
+        return getFirst("RANGER");
     }
 
     public ExposedService getResourceManagerWebService() {
-        return exposedServices.get("RESOURCEMANAGER_WEB");
+        return getFirst("RESOURCEMANAGER_WEB");
     }
 
     public String getKnoxServiceName() {
@@ -108,7 +111,7 @@ public class ExposedServiceCollector {
     }
 
     public ExposedService getByName(String name) {
-        return exposedServices.get(name);
+        return getFirst(name);
     }
 
     public Set<String> getFullServiceListBasedOnList(Collection<String> services) {
@@ -123,8 +126,10 @@ public class ExposedServiceCollector {
         return getAllKnoxExposed().contains(knoxService);
     }
 
-    public Collection<ExposedService> knoxServicesForComponents(Collection<String> components) {
-        return filterSupportedKnoxServices().stream()
+    public Collection<ExposedService> knoxServicesForComponents(Optional<String> bpVersion, Collection<String> components) {
+        return filterSupportedKnoxServices()
+                .stream()
+                .filter(exposedService -> isVersionSupported(bpVersion, exposedService))
                 .filter(exposedService ->
                         components.contains(exposedService.getServiceName())
                                 || exposedService.getServiceName().equalsIgnoreCase(getKnoxServiceName())
@@ -140,17 +145,19 @@ public class ExposedServiceCollector {
         return filterSupportedKnoxServices().stream().map(ExposedService::getKnoxService).collect(Collectors.toSet());
     }
 
-    public List<String> getAllServiceNames() {
-        List<String> allServiceName = exposedServices.values().stream()
-                .filter(x -> StringUtils.isNotEmpty(x.getServiceName()))
-                .map(ExposedService::getServiceName).collect(Collectors.toList());
-        return List.copyOf(allServiceName);
+    public Set<String> getAllServiceNames() {
+        return exposedServices.values()
+                .stream()
+                .map(ExposedService::getServiceName)
+                .filter(StringUtils::isNotEmpty)
+                .collect(Collectors.toSet());
     }
 
-    public Map<String, Integer> getAllServicePorts(boolean tls) {
-        return exposedServices.values().stream().filter(x -> StringUtils.isNotEmpty(x.getServiceName())
-                && StringUtils.isNotEmpty(x.getKnoxService())
-                && Objects.nonNull(tls ? x.getTlsPort() : x.getPort()))
+    public Map<String, Integer> getAllServicePorts(Optional<String> bpVersion, boolean tls) {
+        return exposedServices.values()
+                .stream()
+                .filter(x -> hasServicePort(tls, x))
+                .filter(x -> isVersionSupported(bpVersion, x))
                 .collect(Collectors.toMap(ExposedService::getKnoxService, v -> tls ? v.getTlsPort() : v.getPort()));
     }
 
@@ -158,9 +165,8 @@ public class ExposedServiceCollector {
         LOGGER.debug("Loading exposed-services.json");
         String exposedServiceDefinition = cloudbreakResourceReaderService.resourceDefinition("exposed-services");
         try {
-            exposedServices = JsonUtil.readValue(exposedServiceDefinition, ExposedServices.class).getServices()
-                    .stream()
-                    .collect(Collectors.toMap(ExposedService::getName, Function.identity()));
+            JsonUtil.readValue(exposedServiceDefinition, ExposedServices.class).getServices()
+                    .forEach(exposedService -> exposedServices.put(exposedService.getName(), exposedService));
             String exposedServiceNames = String.join(",", exposedServices.keySet());
             LOGGER.info("The following exposed service(s) has loaded (in total: {}): {}", exposedServices.size(), exposedServiceNames);
         } catch (IOException | IllegalArgumentException e) {
@@ -172,4 +178,21 @@ public class ExposedServiceCollector {
         return exposedServices.values().stream().filter(x -> StringUtils.isNotEmpty(x.getKnoxService())).collect(Collectors.toList());
     }
 
+    private boolean isVersionSupported(Optional<String> bpVersion, ExposedService exposedService) {
+        return exposedServiceVersionSupportService.maxVersionSupported(bpVersion, exposedService.getMaxVersion())
+                && exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinVersion());
+    }
+
+    private boolean hasServicePort(boolean tls, ExposedService exposedService) {
+        return StringUtils.isNotEmpty(exposedService.getServiceName())
+                && StringUtils.isNotEmpty(exposedService.getKnoxService())
+                && Objects.nonNull(tls ? exposedService.getTlsPort() : exposedService.getPort());
+    }
+
+    private ExposedService getFirst(String serviceName) {
+        return exposedServices.get(serviceName)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Given service \"" + serviceName + "\" not found"));
+    }
 }
