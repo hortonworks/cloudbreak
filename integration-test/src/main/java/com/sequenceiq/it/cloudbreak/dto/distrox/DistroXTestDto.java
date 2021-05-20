@@ -29,6 +29,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -40,6 +41,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
@@ -259,6 +261,14 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public DistroXTestDto addTags(Map<String, String> tags) {
         getRequest().initAndGetTags().getUserDefined().putAll(tags);
         return this;
+    }
+
+    public DistroXUpgradeV1Request getDistroXUpgradeRequest() {
+        DistroXUpgradeTestDto upgradeTestDto = given(DistroXUpgradeTestDto.class);
+        if (upgradeTestDto == null) {
+            throw new IllegalArgumentException("DistroX upgrade dto does not exist!");
+        }
+        return upgradeTestDto.getRequest();
     }
 
     @Override

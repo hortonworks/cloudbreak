@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -86,5 +87,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> repair(HostGroupType... hostGroupTypes) {
         return new DistroXRepairAction(List.of(hostGroupTypes));
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> upgrade() {
+        return new DistroXUpgradeAction();
     }
 }
