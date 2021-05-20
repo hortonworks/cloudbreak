@@ -298,9 +298,10 @@ class EnvironmentEncryptionServiceTest {
                 .filter(r -> r.getType() == ResourceType.AZURE_DISK_ENCRYPTION_SET)
                 .findFirst();
         assertThat(desCloudResourceOptional).isNotEmpty();
-        assertEquals(desCloudResourceOptional.get().getReference(), DISK_ENCRYPTION_SET_ID);
-        assertEquals(desCloudResourceOptional.get().getName(), "Des");
-        assertEquals(desCloudResourceOptional.get().getType(), ResourceType.AZURE_DISK_ENCRYPTION_SET);
+        CloudResource desCloudResource = desCloudResourceOptional.get();
+        assertEquals(desCloudResource.getReference(), DISK_ENCRYPTION_SET_ID);
+        assertEquals(desCloudResource.getName(), "Des");
+        assertEquals(desCloudResource.getType(), ResourceType.AZURE_DISK_ENCRYPTION_SET);
         assertEquals(cloudContext.getAccountId(), ACCOUNT_ID);
         assertEquals(cloudContext.getCrn(), ENVIRONMENT_CRN);
     }

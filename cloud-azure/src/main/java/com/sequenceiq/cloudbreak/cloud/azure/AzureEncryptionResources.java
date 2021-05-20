@@ -36,7 +36,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 public class AzureEncryptionResources implements EncryptionResources {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureEncryptionResources.class);
 
-    private static final Pattern ENCRYPTION_KEY_URL_PATTERN = Pattern.compile("https://([^.]+)\\.vault.*");
+    private static final Pattern ENCRYPTION_KEY_URL_VAULT_NAME = Pattern.compile("https://([^.]+)\\.vault.*");
 
     private static final Pattern DISK_ENCRYPTION_SET_NAME = Pattern.compile(".*diskEncryptionSets/([^.]+)");
 
@@ -81,7 +81,7 @@ public class AzureEncryptionResources implements EncryptionResources {
                     diskEncryptionSetCreationRequest.getCloudCredential());
             AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
 
-            Matcher matcher = ENCRYPTION_KEY_URL_PATTERN.matcher(diskEncryptionSetCreationRequest.getEncryptionKeyUrl());
+            Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(diskEncryptionSetCreationRequest.getEncryptionKeyUrl());
             if (matcher.matches()) {
                 vaultName = matcher.group(1);
             } else {
@@ -224,12 +224,38 @@ public class AzureEncryptionResources implements EncryptionResources {
                     LOGGER.info("Deleting {}.", description);
                     azureClient.deleteDiskEncryptionSet(desResourceGroupName, desName);
                     LOGGER.info("Deleted {}.", description);
+                    removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(azureClient, desResourceGroupName, desName,
+                            existingDiskEncryptionSet.activeKey().keyUrl(), existingDiskEncryptionSet.identity().principalId());
                 } else {
                     LOGGER.info("No {} found to delete.", description);
                 }
                 return true;
             } catch (Exception e) {
                 throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Deletion of " + description);
+            }
+        });
+    }
+
+    private void removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
+            String encryptionKeyUrl, String desPrincipalObjectId) {
+        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
+        String vaultName;
+        if (matcher.matches()) {
+            vaultName = matcher.group(1);
+        } else {
+            throw new IllegalArgumentException(String.format("Failed to deduce vault name from given encryption key url \"%s\"", encryptionKeyUrl));
+        }
+        String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
+                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, desResourceGroupName, desPrincipalObjectId,
+                desName, desResourceGroupName);
+        retryService.testWith2SecDelayMax15Times(() -> {
+            try {
+                LOGGER.info("Removing {}.", description);
+                azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(desResourceGroupName, vaultName, desPrincipalObjectId);
+                LOGGER.info("Removed {}.", description);
+                return true;
+            } catch (Exception e) {
+                throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
             }
         });
     }
