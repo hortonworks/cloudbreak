@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +23,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -34,6 +37,8 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -146,13 +151,18 @@ public class KnoxGatewayConfigProviderTest {
 
         IdBroker idBroker = new IdBroker();
         idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of())
                 .withIdBroker(idBroker)
                 .build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("7.2.11");
 
         assertEquals(
                 List.of(
@@ -175,7 +185,8 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_signing_keystore_name", "signing.jks"),
                         config("gateway_signing_keystore_type", "JKS"),
                         config("gateway_signing_key_alias", "signing-identity"),
-                        config("gateway_dispatch_whitelist", "^*.*$")
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
@@ -188,11 +199,16 @@ public class KnoxGatewayConfigProviderTest {
         gcc.setPassword("secret");
         IdBroker idBroker = new IdBroker();
         idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
                 .withGeneralClusterConfigs(gcc)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withIdBroker(idBroker)
+                .withBlueprintView(blueprintView)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of())
                 .build();
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("7.2.11");
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
@@ -209,7 +225,8 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_master_secret", gcc.getPassword()),
                         config("gateway_default_topology_name", "cdp-proxy"),
                         config("gateway_knox_admin_groups", ""),
-                        config("gateway_auto_discovery_enabled", "false")
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
                 underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );
@@ -223,16 +240,21 @@ public class KnoxGatewayConfigProviderTest {
         gateway.setPath("/a/b/c");
         IdBroker idBroker = new IdBroker();
         idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
 
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
 
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withLdapConfig(ldapConfig)
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of())
                 .withIdBroker(idBroker)
                 .build();
+        when(blueprintTextProcessor.getStackVersion()).thenReturn("7.2.11");
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
 
         assertEquals(
@@ -255,7 +277,8 @@ public class KnoxGatewayConfigProviderTest {
                 config("gateway_signing_keystore_name", "signing.jks"),
                 config("gateway_signing_keystore_type", "JKS"),
                 config("gateway_signing_key_alias", "signing-identity"),
-                config("gateway_dispatch_whitelist", "^*.*$")
+                config("gateway_dispatch_whitelist", "^*.*$"),
+                config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
             ),
             underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
         );

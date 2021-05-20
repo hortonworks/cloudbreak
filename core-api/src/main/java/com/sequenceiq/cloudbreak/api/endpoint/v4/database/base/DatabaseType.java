@@ -17,4 +17,5 @@ public enum DatabaseType {
     PROFILER_AGENT,
     PROFILER_METRIC,
     NIFIREGISTRY,
+    KNOX_GATEWAY,
 }

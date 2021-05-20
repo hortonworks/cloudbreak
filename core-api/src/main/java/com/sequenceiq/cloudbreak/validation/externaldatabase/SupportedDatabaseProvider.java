@@ -32,6 +32,7 @@ public final class SupportedDatabaseProvider {
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Streams Messaging Manager", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Hue", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager", POSTGRES));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Knox Gateway", POSTGRES));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager Management Service Activity Monitor", POSTGRES));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Cloudera Manager Management Service Reports Manager", POSTGRES));
     }

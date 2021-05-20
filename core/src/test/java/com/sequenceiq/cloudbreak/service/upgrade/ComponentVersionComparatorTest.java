@@ -44,7 +44,6 @@ public class ComponentVersionComparatorTest {
 
     @Test
     public void testInvalid() {
-        assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2", "2.2.0"));
         assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.a", "2.2.0"));
         assertFalse(underTest.permitCmAndStackUpgradeByComponentVersion("2.2", "u"));
 

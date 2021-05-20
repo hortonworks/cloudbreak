@@ -29,6 +29,7 @@ public class SupportedRuntimesTest {
         Assert.assertTrue(underTest.isSupported("7.1.0"));
         Assert.assertTrue(underTest.isSupported("7.1.0.0"));
         Assert.assertTrue(underTest.isSupported("7.0.99.0"));
+        Assert.assertTrue(underTest.isSupported("7"));
         Assert.assertTrue(underTest.isSupported("7.0.99"));
     }
 
@@ -44,7 +45,6 @@ public class SupportedRuntimesTest {
         Whitebox.setInternalState(underTest, "latestSupportedRuntime", "7.1.0");
         // Invalid versions shall not be supported, but at least they shall not throw exception
         Assert.assertFalse(underTest.isSupported("blah"));
-        Assert.assertFalse(underTest.isSupported("7"));
         Assert.assertFalse(underTest.isSupported("8"));
     }
 }
