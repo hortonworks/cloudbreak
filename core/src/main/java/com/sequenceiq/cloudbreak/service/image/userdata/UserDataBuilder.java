@@ -93,6 +93,7 @@ public class UserDataBuilder {
                 model.put("proxyUser", auth.getUserName());
                 model.put("proxyPassword", auth.getPassword());
             });
+            model.put("proxyNoProxyHosts", proxyConfig.getNoProxyHosts());
             LOGGER.info("Proxy config set up for gateway instances' userdata script: {}", anonymize(proxyConfig.toString()));
         } else {
             model.put("proxyEnabled", Boolean.FALSE);

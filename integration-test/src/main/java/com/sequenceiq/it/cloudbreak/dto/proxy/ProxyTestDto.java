@@ -37,7 +37,8 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
                 .withServerUser("mock")
                 .withPassword("akarmi")
                 .withServerPort(9)
-                .withProtocol("http");
+                .withProtocol("http")
+                .withNoProxyHosts("noproxy.com");
     }
 
     public ProxyTestDto withName(String name) {
@@ -78,6 +79,11 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
 
     public ProxyTestDto withServerUser(String serverUser) {
         getRequest().setUserName(serverUser);
+        return this;
+    }
+
+    public ProxyTestDto withNoProxyHosts(String noProxyHosts) {
+        getRequest().setNoProxyHosts(noProxyHosts);
         return this;
     }
 

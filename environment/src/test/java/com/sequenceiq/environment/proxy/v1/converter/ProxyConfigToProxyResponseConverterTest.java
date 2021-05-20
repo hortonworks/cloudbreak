@@ -2,6 +2,7 @@ package com.sequenceiq.environment.proxy.v1.converter;
 
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.DESCRIPTION;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.NAME;
+import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.NO_PROXY_HOSTS;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.PROTOCOL;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.SERVER_HOST;
 import static com.sequenceiq.environment.proxy.v1.ProxyTestSource.SERVER_PORT;
@@ -60,6 +61,11 @@ class ProxyConfigToProxyResponseConverterTest extends ProxyConfigToProxyResponse
     @Test
     void testConvertPort() {
         Assertions.assertEquals(SERVER_PORT, convertSourceProxyConfig().getPort());
+    }
+
+    @Test
+    void testConvertNoProxyHosts() {
+        Assertions.assertEquals(NO_PROXY_HOSTS, convertSourceProxyConfig().getNoProxyHosts());
     }
 
     @Test

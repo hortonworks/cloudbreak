@@ -36,6 +36,7 @@ public class ProxyConfigService {
                 proxy.put("user", auth.getUserName());
                 proxy.put("password", auth.getPassword());
             });
+            proxy.put("noProxyHosts", config.getNoProxyHosts());
             return Map.of(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
         } else {
             return Map.of();

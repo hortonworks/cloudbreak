@@ -22,6 +22,7 @@ public class ProxyRequestToProxyConfigConverter extends AbstractConversionServic
             proxyConfig.setUserName(source.getUserName());
             proxyConfig.setPassword(source.getPassword());
         }
+        proxyConfig.setNoProxyHosts(source.getNoProxyHosts());
         return proxyConfig;
     }
 }

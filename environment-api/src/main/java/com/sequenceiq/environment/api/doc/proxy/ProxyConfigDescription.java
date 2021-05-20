@@ -21,6 +21,7 @@ public class ProxyConfigDescription {
     public static final String SERVER_HOST = "host or IP address of proxy server";
     public static final String SERVER_PORT = "port of proxy server (typically: 3128 or 8080)";
     public static final String PROTOCOL = "determines the protocol (http or https)";
+    public static final String NO_PROXY_HOSTS = "comma-separated list of 'host[:port]' and 'IP[:port]' entries that should not be proxied";
     public static final String NAME = "Name of the proxy configuration resource";
     public static final String USERNAME = "Username to use for basic authentication";
     public static final String PASSWORD = "Password to use for basic authentication";

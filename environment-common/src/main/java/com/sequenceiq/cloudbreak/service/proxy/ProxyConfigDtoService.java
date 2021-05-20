@@ -62,7 +62,8 @@ public class ProxyConfigDtoService {
                 .withCrn(proxyResponse.getCrn())
                 .withProtocol(proxyResponse.getProtocol())
                 .withServerHost(proxyResponse.getHost())
-                .withServerPort(proxyResponse.getPort());
+                .withServerPort(proxyResponse.getPort())
+                .withNoProxyHosts(proxyResponse.getNoProxyHosts());
         if (proxyResponse.getUserName() != null && proxyResponse.getPassword() != null) {
             String user = getSecret(proxyResponse.getUserName());
             String password = getSecret(proxyResponse.getPassword());

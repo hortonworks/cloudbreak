@@ -18,13 +18,18 @@ public class ProxyConfig implements Serializable {
 
     private final ProxyAuthentication proxyAuthentication;
 
-    private ProxyConfig(String crn, String name, String serverHost, Integer serverPort, String protocol, ProxyAuthentication proxyAuthentication) {
+    private final String noProxyHosts;
+
+    private ProxyConfig(String crn, String name, String serverHost, Integer serverPort, String protocol, ProxyAuthentication proxyAuthentication,
+            String noProxyHosts) {
+
         this.crn = crn;
         this.name = name;
         this.serverHost = serverHost;
         this.serverPort = serverPort;
         this.protocol = protocol;
         this.proxyAuthentication = proxyAuthentication;
+        this.noProxyHosts = noProxyHosts;
     }
 
     public static ProxyConfigBuilder builder() {
@@ -55,6 +60,10 @@ public class ProxyConfig implements Serializable {
         return Optional.ofNullable(proxyAuthentication);
     }
 
+    public String getNoProxyHosts() {
+        return noProxyHosts;
+    }
+
     public String getFullProxyUrl() {
         if (getProxyAuthentication().isPresent()) {
             ProxyAuthentication auth = getProxyAuthentication().get();
@@ -72,6 +81,7 @@ public class ProxyConfig implements Serializable {
                 ", serverHost='" + serverHost + '\'' +
                 ", serverPort=" + serverPort +
                 ", protocol='" + protocol + '\'' +
+                ", noProxyHosts='" + noProxyHosts + '\'' +
                 ", proxyAuthentication=" + proxyAuthentication +
                 '}';
     }
@@ -107,6 +117,8 @@ public class ProxyConfig implements Serializable {
 
         private ProxyAuthentication proxyAuthentication;
 
+        private String noProxyHosts;
+
         private ProxyConfigBuilder() {
         }
 
@@ -140,8 +152,13 @@ public class ProxyConfig implements Serializable {
             return this;
         }
 
+        public ProxyConfigBuilder withNoProxyHosts(String noProxyHosts) {
+            this.noProxyHosts = noProxyHosts;
+            return this;
+        }
+
         public ProxyConfig build() {
-            return new ProxyConfig(crn, name, serverHost, serverPort, protocol, proxyAuthentication);
+            return new ProxyConfig(crn, name, serverHost, serverPort, protocol, proxyAuthentication, noProxyHosts);
         }
     }
 }

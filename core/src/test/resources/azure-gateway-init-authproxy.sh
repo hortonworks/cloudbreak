@@ -20,6 +20,7 @@ export PROXY_HOST=proxy.host
 export PROXY_PORT=1234
 export PROXY_USER="user"
 export PROXY_PASSWORD="pwd"
+export PROXY_NO_PROXY_HOSTS="noproxy.com"
 export IS_CCM_ENABLED=false
 export IS_CCM_V2_ENABLED=false
 

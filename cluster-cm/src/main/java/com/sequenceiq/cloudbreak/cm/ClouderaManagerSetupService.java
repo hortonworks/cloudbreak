@@ -369,6 +369,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user").value(auth.getUserName()));
             proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_password").value(auth.getPassword()));
         });
+        // TODO when CM implements the no_proxy parameter for parcel installation, that parameter has to be passed
         try {
             LOGGER.info("Update settings with: " + proxyConfigList);
             clouderaManagerResourceApi.updateConfig("Update proxy settings", proxyConfigList);

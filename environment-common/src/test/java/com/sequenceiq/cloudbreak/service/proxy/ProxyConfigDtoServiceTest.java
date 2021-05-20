@@ -59,6 +59,7 @@ class ProxyConfigDtoServiceTest {
         String host = "https://test.cloudera.com";
         Integer port = 8443;
         String decryptedSecretValue = "decrypted-secret-value";
+        String noProxyList = "noproxy.com";
         SecretResponse secretResponse = new SecretResponse();
 
         ProxyResponse proxyResponse = new ProxyResponse();
@@ -67,6 +68,7 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setPort(port);
         proxyResponse.setUserName(secretResponse);
         proxyResponse.setPassword(secretResponse);
+        proxyResponse.setNoProxyHosts(noProxyList);
 
         when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
@@ -81,6 +83,7 @@ class ProxyConfigDtoServiceTest {
         assertTrue(proxyConfig.getProxyAuthentication().isPresent());
         assertEquals(proxyConfig.getProxyAuthentication().get().getUserName(), decryptedSecretValue);
         assertEquals(proxyConfig.getProxyAuthentication().get().getPassword(), decryptedSecretValue);
+        assertEquals(proxyConfig.getNoProxyHosts(), noProxyList);
     }
 
     @Test

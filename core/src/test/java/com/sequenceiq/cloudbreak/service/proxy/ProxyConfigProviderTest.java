@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @RunWith(MockitoJUnitRunner.class)
 public class ProxyConfigProviderTest {
 
+    private static final String NO_PROXY_HOSTS = "noproxy.com";
+
     @Mock
     private ProxyConfigDtoService proxyConfigDtoService;
 
@@ -73,6 +75,7 @@ public class ProxyConfigProviderTest {
         assertNotNull(properties.get("port"));
         assertFalse(properties.containsKey("user"));
         assertFalse(properties.containsKey("password"));
+        assertEquals(NO_PROXY_HOSTS, properties.get("noProxyHosts"));
     }
 
     @Test
@@ -85,12 +88,14 @@ public class ProxyConfigProviderTest {
         Map<String, Object> properties = testProxyCore(proxyConfig);
         assertEquals("user", properties.get("user"));
         assertEquals("pass", properties.get("password"));
+        assertEquals(NO_PROXY_HOSTS, properties.get("noProxyHosts"));
     }
 
     private Map<String, Object> testProxyCore(ProxyConfigBuilder proxyConfigBuilder) {
         proxyConfigBuilder.withServerHost("test");
         proxyConfigBuilder.withServerPort(3128);
         proxyConfigBuilder.withProtocol("http");
+        proxyConfigBuilder.withNoProxyHosts(NO_PROXY_HOSTS);
         cluster.setProxyConfigCrn("ANY_CRN");
         cluster.setEnvironmentCrn("ANY_CRN");
         when(proxyConfigDtoService.getByCrnWithEnvironmentFallback(anyString(), anyString())).thenReturn(Optional.of(proxyConfigBuilder.build()));
