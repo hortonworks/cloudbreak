@@ -49,13 +49,17 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Service
@@ -102,6 +106,12 @@ public class ClusterRepairService {
     @Inject
     private RedbeamsClientService redbeamsClientService;
 
+    @Inject
+    private EnvironmentService environmentService;
+
+    @Inject
+    private FreeipaService freeipaService;
+
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
                 validateRepair(ManualClusterRepairMode.ALL, stackId, Set.of(), false);
@@ -144,7 +154,13 @@ public class ClusterRepairService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         boolean reattach = !deleteVolumes;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
-        if (hasStoppedNotSelectedInstance(stack, repairMode, selectedParts)) {
+        if (!freeipaService.freeipaStatusInDesiredState(stack, Set.of(Status.AVAILABLE))) {
+            repairStartResult = Result.error(RepairValidation
+                    .of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
+        } else if (!environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))) {
+            repairStartResult = Result.error(RepairValidation
+                    .of("Action cannot be performed because the Environment isn't available. Please check the Environment state."));
+        } else if (hasStoppedNotSelectedInstance(stack, repairMode, selectedParts)) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because there are stopped nodes in the cluster. " +
                             "Please select them for repair or start the stopped nodes."));
