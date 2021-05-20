@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -82,7 +83,7 @@ public class ParameterGenerator {
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
                 new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
-                new HashMap<>(), 0L, "default-id");
+                new HashMap<>(), 0L, "default-id", TemporaryStorage.ATTACHED_VOLUMES);
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);

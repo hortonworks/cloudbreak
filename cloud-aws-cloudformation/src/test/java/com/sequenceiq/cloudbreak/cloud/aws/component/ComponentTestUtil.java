@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguration;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.FileSystemType;
 
@@ -164,7 +165,7 @@ public class ComponentTestUtil {
                 new Volume("/hadoop/fs2", "HDD", SIZE_DISK_2, CloudVolumeUsageType.GENERAL)
         );
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", groupName, privateId, volumes, instanceStatus,
-                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
+                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
         Map<String, Object> params = new HashMap<>();
         return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, params);
     }

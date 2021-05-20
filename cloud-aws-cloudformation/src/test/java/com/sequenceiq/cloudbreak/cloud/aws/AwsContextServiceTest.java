@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -93,7 +94,8 @@ class AwsContextServiceTest {
     }
 
     private InstanceTemplate getInstanceTemplate(long privateId, String group) {
-        return new InstanceTemplate("large", group, privateId, new ArrayList<>(), InstanceStatus.CREATED, null, 1L, "image");
+        return new InstanceTemplate("large", group, privateId, new ArrayList<>(), InstanceStatus.CREATED, null, 1L,
+                "image", TemporaryStorage.ATTACHED_VOLUMES);
     }
 
 }

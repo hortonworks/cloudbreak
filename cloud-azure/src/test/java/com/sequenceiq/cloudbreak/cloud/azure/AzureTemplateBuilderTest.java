@@ -75,6 +75,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.cloudbreak.util.Version;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -215,7 +216,7 @@ public class AzureTemplateBuilderTest {
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
                 new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
-                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25");
+                new HashMap<>(), 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES);
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.SUBNET_ID, "existingSubnet");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
