@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.RetryService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -111,7 +112,8 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
 
     @Test
     void collectInstanceMetadataWhenTheSpecifiedInstanceInstanceIdsDoNotExist() {
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), InstanceStatus.UNKNOWN, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), InstanceStatus.UNKNOWN, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance1 = new CloudInstance("i-0000067a1cfd73843", instanceTemplate, null, Map.of());
         CloudInstance cloudInstance2 = new CloudInstance("i-0000057a1cfd73843", instanceTemplate, null, Map.of());
         List<CloudInstance> vms = List.of(cloudInstance1, cloudInstance2);

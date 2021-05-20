@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -74,11 +75,11 @@ public class TestApplicationContext {
 
     private final CloudInstance cloudInstance = new CloudInstance("instanceId",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L, "imageId"), instanceAuthentication);
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES), instanceAuthentication);
 
     private final CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(),
-                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L, "imageId"), instanceAuthentication);
+                    InstanceStatus.CREATE_REQUESTED, new HashMap<>(), 1L, "imageId", TemporaryStorage.ATTACHED_VOLUMES), instanceAuthentication);
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;

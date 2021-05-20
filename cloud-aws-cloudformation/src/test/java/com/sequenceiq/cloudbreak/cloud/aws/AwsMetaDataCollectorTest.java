@@ -40,10 +40,10 @@ import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,7 +133,8 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -218,13 +220,16 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 6L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 6L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 7L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -282,10 +287,12 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -348,13 +355,15 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstance1 = new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication);
         everyVms.add(cloudInstance1);
         newVms.add(cloudInstance1);
 
         everyVms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L,
+                        "imageId", TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -527,7 +536,8 @@ public class AwsMetaDataCollectorTest {
         List<CloudInstance> vms = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, new ArrayList<>(), InstanceStatus.CREATED, null, 0L, "imageId"),
+                new InstanceTemplate("fla", "cbgateway", 5L, new ArrayList<>(), InstanceStatus.CREATED, null, 0L, "imageId",
+                        TemporaryStorage.ATTACHED_VOLUMES),
                 instanceAuthentication));
 
         UnsupportedOperationException exception = new UnsupportedOperationException("Serious problem");

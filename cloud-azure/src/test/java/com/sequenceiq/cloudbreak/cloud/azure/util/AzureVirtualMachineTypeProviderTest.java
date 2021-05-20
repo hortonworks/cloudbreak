@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 
 public class AzureVirtualMachineTypeProviderTest {
 
@@ -88,7 +89,7 @@ public class AzureVirtualMachineTypeProviderTest {
 
     private AzureInstanceView createAzureInstanceView(String groupName, String flavour) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavour, groupName, null,
-                Collections.emptyList(), null, Collections.emptyMap(), null, null);
+                Collections.emptyList(), null, Collections.emptyMap(), null, null, TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null);
         return AzureInstanceView.builder(cloudInstance).build();
     }

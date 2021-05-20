@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 
 public class AzureInstanceTemplate extends InstanceTemplate {
 
@@ -49,7 +50,7 @@ public class AzureInstanceTemplate extends InstanceTemplate {
 
     public AzureInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
             Map<String, Object> parameters, Long templateId, String imageId) {
-        super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId);
+        super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, TemporaryStorage.ATTACHED_VOLUMES);
     }
 
 }
