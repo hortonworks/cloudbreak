@@ -142,6 +142,6 @@ public class ClusterUpgradeImageFilter {
     }
 
     private ImageFilterResult createEmptyResult() {
-        return new ImageFilterResult(new Images(null, Collections.emptyList(), null, null), "The upgrade is not allowed for this blueprint.");
+        return new ImageFilterResult(new Images(null, Collections.emptyList(), null, null), "The upgrade is not allowed for this template.");
     }
 }

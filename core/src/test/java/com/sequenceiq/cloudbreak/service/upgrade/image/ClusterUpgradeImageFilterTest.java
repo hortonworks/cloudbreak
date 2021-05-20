@@ -154,7 +154,7 @@ public class ClusterUpgradeImageFilterTest {
 
         ImageFilterResult actual = underTest.filter(accountId, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
-        assertEquals("The upgrade is not allowed for this blueprint.", actual.getReason());
+        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         verify(blueprintUpgradeOptionValidator).isValidBlueprint(blueprint);
         verifyNoInteractions(imageCatalogServiceProxy);
@@ -362,7 +362,7 @@ public class ClusterUpgradeImageFilterTest {
 
         ImageFilterResult actual = underTest.filter(accountId, cloudbreakImageCatalogV3, CLOUD_PLATFORM, imageFilterParams);
 
-        assertEquals("The upgrade is not allowed for this blueprint.", actual.getReason());
+        assertEquals("The upgrade is not allowed for this template.", actual.getReason());
         assertTrue(actual.getAvailableImages().getCdhImages().isEmpty());
         verifyNoInteractions(imageCatalogServiceProxy);
     }
