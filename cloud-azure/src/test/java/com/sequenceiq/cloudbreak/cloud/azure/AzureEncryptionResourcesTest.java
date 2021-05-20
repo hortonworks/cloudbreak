@@ -514,13 +514,15 @@ public class AzureEncryptionResourcesTest {
                 .withCloudResources(resources)
                 .build();
         initCloudResourceHelper(resources);
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
         DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
                 .withActiveKey(new KeyVaultAndKeyReference()
                         .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
                         .withSourceVault(new SourceVault()
                                 .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
-                .withIdentity(new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED))
+                .withIdentity(identity)
                 .withLocation("dummyRegion");
         when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
         when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
@@ -529,6 +531,7 @@ public class AzureEncryptionResourcesTest {
         underTest.deleteDiskEncryptionSet(deletionRequest);
 
         verify(azureClient).deleteDiskEncryptionSet("dummyResourceGroup", "dummyDesId");
+        verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().iterator().next(), deletionRequest.getCloudContext());
     }
 

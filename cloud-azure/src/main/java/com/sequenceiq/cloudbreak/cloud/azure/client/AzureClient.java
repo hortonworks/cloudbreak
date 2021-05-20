@@ -983,6 +983,18 @@ public class AzureClient {
         });
     }
 
+    public void removeKeyVaultAccessPolicyFromServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
+        handleAuthException(() -> {
+            azure.vaults()
+                    .getByResourceGroup(resourceGroupName, vaultName)
+                    .update()
+                    .updateAccessPolicy(principalObjectId)
+                    .disallowKeyPermissions(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))
+                    .parent()
+                    .apply();
+        });
+    }
+
     public void deleteDiskEncryptionSet(String resourceGroup, String diskEncryptionSetName) {
         handleAuthException(() -> {
             // The Disk encryption set operations are not exposed in public API, so have to rely on underlying DiskEncryptionSetsInner
