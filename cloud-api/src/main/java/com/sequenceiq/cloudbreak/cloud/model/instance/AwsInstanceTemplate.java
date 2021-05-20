@@ -6,6 +6,7 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 
 public class AwsInstanceTemplate extends InstanceTemplate {
 
@@ -80,8 +81,8 @@ public class AwsInstanceTemplate extends InstanceTemplate {
     public static final String PLACEMENT_GROUP_STRATEGY = "placementGroupStrategy";
 
     public AwsInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
-            Map<String, Object> parameters, Long templateId, String imageId) {
-        super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId);
+            Map<String, Object> parameters, Long templateId, String imageId, TemporaryStorage temporaryStorage) {
+        super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, temporaryStorage);
     }
 
 }
