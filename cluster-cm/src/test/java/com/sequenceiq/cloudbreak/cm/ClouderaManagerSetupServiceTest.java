@@ -843,6 +843,7 @@ public class ClouderaManagerSetupServiceTest {
                         .withUserName("user")
                         .withPassword("pw")
                         .build())
+                .withNoProxyHosts("noproxy.com")
                 .build();
     }
 

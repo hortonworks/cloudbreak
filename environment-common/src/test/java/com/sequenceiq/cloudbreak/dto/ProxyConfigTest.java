@@ -11,6 +11,8 @@ public class ProxyConfigTest {
 
     private static final String PROXY_AUTH = "squid";
 
+    private static final String NO_PROXY_HOSTS = "noProxy.com";
+
     @Test
     public void testGetFullProxyUrl() {
         ProxyConfig proxy = ProxyConfig.builder()
@@ -18,9 +20,11 @@ public class ProxyConfigTest {
                 .withProtocol("http")
                 .withServerHost(PROXY_HOST)
                 .withServerPort(PROXY_PORT)
+                .withNoProxyHosts(NO_PROXY_HOSTS)
                 .build();
 
         Assert.assertEquals("http://10.0.0.5:3128", proxy.getFullProxyUrl());
+        Assert.assertEquals(NO_PROXY_HOSTS, proxy.getNoProxyHosts());
     }
 
     @Test

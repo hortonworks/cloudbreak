@@ -24,6 +24,7 @@ public class ProxyConfigToProxyRequestConverter
         request.setHost(source.getServerHost());
         request.setPort(source.getServerPort());
         request.setProtocol(source.getProtocol());
+        request.setNoProxyHosts(source.getNoProxyHosts());
         return request;
     }
 

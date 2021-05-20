@@ -23,7 +23,7 @@ public class ProxyConfigToProxyResponseConverter extends AbstractConversionServi
         response.setCreator(source.getCreator());
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
-
+        response.setNoProxyHosts(source.getNoProxyHosts());
         return response;
     }
 
@@ -36,7 +36,7 @@ public class ProxyConfigToProxyResponseConverter extends AbstractConversionServi
         response.setCreator(source.getCreator());
         response.setHost(source.getServerHost());
         response.setPort(source.getServerPort());
-
+        response.setNoProxyHosts(source.getNoProxyHosts());
         return response;
     }
 }

@@ -38,6 +38,7 @@ public class ProxyConfigProvider {
                 proxy.put("user", auth.getUserName());
                 proxy.put("password", auth.getPassword());
             });
+            proxy.put("noProxyHosts", pc.getNoProxyHosts());
             servicePillar.put(PROXY_KEY, new SaltPillarProperties(PROXY_SLS_PATH, singletonMap(PROXY_KEY, proxy)));
             LOGGER.info("Salt pillar properties extend with proxy config: {}", pc);
         });

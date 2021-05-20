@@ -31,6 +31,8 @@ public class ProxyTestSource {
 
     public static final long ID = 1L;
 
+    public static final String NO_PROXY_HOSTS = "noproxy.com";
+
     static {
         USERNAME_SECRET = new SecretResponse();
         USERNAME_SECRET.setEnginePath("-");
@@ -57,7 +59,7 @@ public class ProxyTestSource {
         testSource.setServerHost(SERVER_HOST);
         testSource.setResourceCrn(RESCRN);
         testSource.setServerPort(SERVER_PORT);
-
+        testSource.setNoProxyHosts(NO_PROXY_HOSTS);
         return testSource;
     }
 
@@ -70,7 +72,7 @@ public class ProxyTestSource {
         result.setHost(SERVER_HOST);
         result.setPort(SERVER_PORT);
         result.setProtocol(PROTOCOL);
-
+        result.setNoProxyHosts(NO_PROXY_HOSTS);
         return result;
     }
 }

@@ -168,6 +168,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
                         .withUserName("proxyUser")
                         .withPassword("proxyPassword")
                         .build())
+                .withNoProxyHosts("noproxy.com")
                 .build();
         // WHEN
         ApiConfigList result = underTest.buildTelemetryConfigList(stack, wa, null, null, proxyConfig);
@@ -177,6 +178,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_enabled", "true"));
         assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_user", "proxyUser"));
         assertTrue(containsConfigWithValue(result, "telemetrypublisher_proxy_password", "proxyPassword"));
+        // TODO: check no_proxy configkey
     }
 
     @Test

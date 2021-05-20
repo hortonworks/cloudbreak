@@ -56,6 +56,11 @@ public class ProxyRequestToProxyConfigConverterTest extends ProxyRequestToProxyC
         Assertions.assertEquals(ProxyTestSource.PROTOCOL, getConvertProxyConfig().getProtocol());
     }
 
+    @Test
+    void testConvertNoProxyHosts() {
+        Assertions.assertEquals(ProxyTestSource.NO_PROXY_HOSTS, getConvertProxyConfig().getNoProxyHosts());
+    }
+
     @ParameterizedTest
     @MethodSource("invalidUserPasswords")
     void testConvertEmptyUser(String user) {

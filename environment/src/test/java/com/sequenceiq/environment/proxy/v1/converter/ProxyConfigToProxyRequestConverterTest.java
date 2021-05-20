@@ -10,37 +10,42 @@ class ProxyConfigToProxyRequestConverterTest extends ProxyConfigToProxyRequestCo
 
     @Test
     void testConvertCredentialAreMasked() {
-        ProxyRequest result = converProxyConfig();
+        ProxyRequest result = convertProxyConfig();
         Assertions.assertEquals(FAKE_USERNAME, result.getUserName());
         Assertions.assertEquals(FAKE_PASSWORD, result.getPassword());
     }
 
     @Test
     void testConvertName() {
-        Assertions.assertEquals(ProxyTestSource.NAME, converProxyConfig().getName());
+        Assertions.assertEquals(ProxyTestSource.NAME, convertProxyConfig().getName());
     }
 
     @Test
     void testConvertDescription() {
-        Assertions.assertEquals(ProxyTestSource.DESCRIPTION, converProxyConfig().getDescription());
+        Assertions.assertEquals(ProxyTestSource.DESCRIPTION, convertProxyConfig().getDescription());
     }
 
     @Test
     void testConvertHost() {
-        Assertions.assertEquals(ProxyTestSource.SERVER_HOST, converProxyConfig().getHost());
+        Assertions.assertEquals(ProxyTestSource.SERVER_HOST, convertProxyConfig().getHost());
     }
 
     @Test
     void testConvertProtocol() {
-        Assertions.assertEquals(ProxyTestSource.PROTOCOL, converProxyConfig().getProtocol());
+        Assertions.assertEquals(ProxyTestSource.PROTOCOL, convertProxyConfig().getProtocol());
     }
 
     @Test
     void testConvertPort() {
-        Assertions.assertEquals(ProxyTestSource.SERVER_PORT, converProxyConfig().getPort());
+        Assertions.assertEquals(ProxyTestSource.SERVER_PORT, convertProxyConfig().getPort());
     }
 
-    private ProxyRequest converProxyConfig() {
+    @Test
+    void testConvertNoProxyHosts() {
+        Assertions.assertEquals(ProxyTestSource.NO_PROXY_HOSTS, convertProxyConfig().getNoProxyHosts());
+    }
+
+    private ProxyRequest convertProxyConfig() {
         return convert(ProxyTestSource.getProxyConfig());
     }
 }

@@ -66,6 +66,8 @@ public class ProxyConfig implements Serializable, AuthResource, AccountIdAwareRe
 
     private Long deletionTimestamp = -1L;
 
+    private String noProxyHosts;
+
     @Override
     public String getAccountId() {
         return accountId;
@@ -148,23 +150,6 @@ public class ProxyConfig implements Serializable, AuthResource, AccountIdAwareRe
         this.description = description;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ProxyConfig that = (ProxyConfig) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
     public boolean isArchived() {
         return archived;
     }
@@ -189,5 +174,30 @@ public class ProxyConfig implements Serializable, AuthResource, AccountIdAwareRe
 
     public void setCreator(String creator) {
         this.creator = creator;
+    }
+
+    public String getNoProxyHosts() {
+        return noProxyHosts;
+    }
+
+    public void setNoProxyHosts(String noProxyHosts) {
+        this.noProxyHosts = noProxyHosts;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ProxyConfig that = (ProxyConfig) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

@@ -126,6 +126,7 @@ public class UserDataBuilderTest {
         ProxyConfig proxyConfig = ProxyConfig.builder()
                 .withServerHost("proxy.host")
                 .withServerPort(1234)
+                .withNoProxyHosts("noproxy.com")
                 .build();
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig);
@@ -145,6 +146,7 @@ public class UserDataBuilderTest {
                 .withServerHost("proxy.host")
                 .withServerPort(1234)
                 .withProxyAuthentication(proxyAuthentication)
+                .withNoProxyHosts("noproxy.com")
                 .build();
         Map<InstanceGroupType, String> userdata = underTest.buildUserData(Platform.platform("AZURE"), "priv-key".getBytes(),
                 "cloudbreak", getPlatformParameters(), "pass", "cert", new CcmConnectivityParameters(), proxyConfig);

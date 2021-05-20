@@ -11,6 +11,7 @@ import javax.validation.constraints.Size;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
 import com.sequenceiq.environment.api.doc.proxy.ProxyConfigDescription;
+import com.sequenceiq.environment.api.v1.proxy.validation.ValidNoProxyList;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -45,6 +46,10 @@ public abstract class ProxyBase implements Serializable {
     @Pattern(regexp = "^http(s)?$")
     @ApiModelProperty(value = ProxyConfigDescription.PROTOCOL, required = true)
     private String protocol;
+
+    @ValidNoProxyList
+    @ApiModelProperty(value = ProxyConfigDescription.NO_PROXY_HOSTS)
+    private String noProxyHosts;
 
     public String getName() {
         return name;
@@ -84,5 +89,13 @@ public abstract class ProxyBase implements Serializable {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getNoProxyHosts() {
+        return noProxyHosts;
+    }
+
+    public void setNoProxyHosts(String noProxyHosts) {
+        this.noProxyHosts = noProxyHosts;
     }
 }

@@ -160,6 +160,7 @@ public class ClouderaManagerMgmtTelemetryService {
                 configsToUpdate.put(TELEMETRY_PROXY_USER, auth.getUserName());
                 configsToUpdate.put(TELEMETRY_PROXY_PASSWORD, auth.getPassword());
             });
+            // TODO: no_proxy config should be added
         }
         return makeApiConfigList(configsToUpdate);
     }

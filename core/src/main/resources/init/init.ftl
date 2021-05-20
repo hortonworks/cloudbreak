@@ -25,6 +25,9 @@ export PROXY_USER="${proxyUser}"
 export PROXY_PASSWORD="${proxyPassword}"
 </#if>
 </#if>
+<#if proxyNoProxyHosts??>
+export PROXY_NO_PROXY_HOSTS="${proxyNoProxyHosts}"
+</#if>
 <#else>
 export IS_PROXY_ENABLED=false
 </#if>
