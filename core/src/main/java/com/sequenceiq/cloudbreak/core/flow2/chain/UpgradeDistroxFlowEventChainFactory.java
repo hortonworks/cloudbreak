@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
-
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
@@ -77,7 +76,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ManualClusterRepairMode.ALL,
-                event.getResourceId(), Set.of(), false);
+                event.getResourceId(), Set.of(), false, false);
         return toStringMap(validationResult.getSuccess());
     }
 
