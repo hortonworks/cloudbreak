@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -110,7 +111,8 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource("secondCrn", "secondInstanceName", secondInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
 
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null);
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, instanceTemplate, null);
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
@@ -139,7 +141,8 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource("secondCrn", "secondInstanceName", secondInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
 
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null);
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, instanceTemplate, null);
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
@@ -164,7 +167,8 @@ class AwsNativeMetadataCollectorTest {
         CloudResource secondCloudResource = getCloudResource("secondCrn", "secondInstanceName", secondInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource, secondCloudResource);
 
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null);
         CloudInstance secondCloudInstance = new CloudInstance(secondInstanceId, instanceTemplate, null);
         List<CloudInstance> cloudInstances = List.of(cloudInstance, secondCloudInstance);
@@ -188,7 +192,8 @@ class AwsNativeMetadataCollectorTest {
     @Test
     void collectInstanceMetadataWhenTheSpecifiedInstanceIdsExistAndMultipleBatchRequestsAreNecessary() {
         List<CloudInstance> allInstances = List.of();
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
 
         List<CloudResource> resources = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
@@ -222,7 +227,8 @@ class AwsNativeMetadataCollectorTest {
     @Test
     void collectInstanceMetadataWhenOneOrMoreOfSpecifiedInstanceIdsDoNotExistAndMultipleBatchRequestsAreNecessary() {
         List<CloudInstance> allInstances = List.of();
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
 
         List<CloudResource> resources = new ArrayList<>();
         List<CloudInstance> cloudInstances = new ArrayList<>();
@@ -266,7 +272,8 @@ class AwsNativeMetadataCollectorTest {
         CloudResource cloudResource = getCloudResource("aCrn", "instanceName", anInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource);
 
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null);
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);
@@ -286,7 +293,8 @@ class AwsNativeMetadataCollectorTest {
         CloudResource cloudResource = getCloudResource("aCrn", "instanceName", anInstanceId, AWS_INSTANCE);
         List<CloudResource> resources = List.of(cloudResource);
 
-        InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid");
+        InstanceTemplate instanceTemplate =
+                new InstanceTemplate("flavor", "alma", 1L, Set.of(), CREATED, Map.of(), 1L, "imageid", TemporaryStorage.ATTACHED_VOLUMES);
         CloudInstance cloudInstance = new CloudInstance(anInstanceId, instanceTemplate, null);
         List<CloudInstance> cloudInstances = List.of(cloudInstance);
         when(awsClient.createEc2Client(any(), anyString())).thenReturn(ec2Client);

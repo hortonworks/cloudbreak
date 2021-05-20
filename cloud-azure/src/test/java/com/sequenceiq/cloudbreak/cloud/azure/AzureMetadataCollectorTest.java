@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -171,7 +172,7 @@ public class AzureMetadataCollectorTest {
 
     private CloudInstance createCloudInstance(String instanceId, Long privateId) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(null, INSTANCE_GROUP_NAME, privateId, Collections.emptyList(), null, Collections.emptyMap(),
-                null, null);
+                null, null, TemporaryStorage.ATTACHED_VOLUMES);
         return new CloudInstance(instanceId, instanceTemplate, null);
     }
 
