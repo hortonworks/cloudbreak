@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceUtil.exposedService;
+import static java.util.Collections.emptyMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -107,10 +108,13 @@ public class ServiceEndpointCollectorTest {
         when(exposedServiceCollector.getClouderaManagerUIService()).thenReturn(getClouderaManagerUIService());
         when(exposedServiceCollector.getImpalaService()).thenReturn(exposedService("IMPALA"));
         when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(
-                List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI")));
+                List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI"), exposedService("NAMENODE"), exposedService("HBASEJARS")));
         when(exposedServiceCollector.getFullServiceListBasedOnList(anyList())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
         when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
         when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
+        when(exposedServiceCollector.getNameNodeService()).thenReturn(exposedService("NAMENODE"));
+        when(exposedServiceCollector.getHBaseJarsService()).thenReturn(exposedService("HBASEJARS"));
+//        when(exposedServiceCollector.getHBaseUIService()).thenReturn(exposedService("HBASE_UI"));
     }
 
     @Test
@@ -275,20 +279,53 @@ public class ServiceEndpointCollectorTest {
     }
 
     @Test
+    public void testPrepareClusterExposedServicesIfBlueprintNull() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        cluster.getGateway().setGatewayPort(443);
+        cluster.setExtendedBlueprintText("extended-blueprint");
+        cluster.setBlueprint(null);
+        mockBlueprintTextProcessor();
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
+    }
+
+
+    //If the private ip list is empty, cluster does not have any hostgroup.
+    @Test
+    public void testPrepareClusterExposedServicesIfPrivateIpsEmpty() {
+        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+                new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
+        cluster.getGateway().setGatewayPort(443);
+        cluster.setExtendedBlueprintText("extended-blueprint");
+        mockBlueprintTextProcessor();
+        when(componentLocatorService.getComponentLocation(any(), any(), any())).thenReturn(emptyMap());
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+
+        assertEquals(4L, clusterExposedServicesMap.keySet().size());
+    }
+
+    @Test
     public void testGetKnoxServices() {
         mockBlueprintTextProcessor();
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(2L, exposedServiceResponses.size());
+        assertEquals(4L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor();
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(2L, exposedServiceResponses.size());
+        assertEquals(4L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor();
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(2L, exposedServiceResponses.size());
+        assertEquals(4L, exposedServiceResponses.size());
     }
 
     @Test
@@ -296,12 +333,12 @@ public class ServiceEndpointCollectorTest {
         mockBlueprintTextProcessor();
 
         Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(2L, exposedServiceResponses.size());
+        assertEquals(4L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor();
 
         exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
-        assertEquals(2L, exposedServiceResponses.size());
+        assertEquals(4L, exposedServiceResponses.size());
     }
 
     private void mockBlueprintTextProcessor() {
