@@ -160,7 +160,7 @@ public class ClusterUpgradeAvailabilityService {
             CloudbreakImageCatalogV3 imageCatalog = getImagesFromCatalog(stack.getWorkspace(), currentImage);
             Image image = getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
             ImageFilterParams imageFilterParams = imageFilterParamsFactory.create(image, lockComponents, stack);
-            ImageFilterResult filteredImages = filterImages(imageCatalog, stack.cloudPlatform(), imageFilterParams);
+            ImageFilterResult filteredImages = filterImages(stack.getCreator().getTenant().getName(), imageCatalog, stack.cloudPlatform(), imageFilterParams);
             LOGGER.info(String.format("%d possible image found for stack upgrade.", filteredImages.getAvailableImages().getCdhImages().size()));
             upgradeOptions = createResponse(image, filteredImages, stack.getCloudPlatform(), stack.getRegion(), currentImage.getImageCatalogName());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException | NotFoundException e) {
@@ -192,8 +192,8 @@ public class ClusterUpgradeAvailabilityService {
         return imageCatalogProvider.getImageCatalogV3(imageCatalogUrl);
     }
 
-    private ImageFilterResult filterImages(CloudbreakImageCatalogV3 imageCatalog, String cloudPlatform, ImageFilterParams imageFilterParams) {
-        return clusterUpgradeImageFilter.filter(imageCatalog, cloudPlatform, imageFilterParams);
+    private ImageFilterResult filterImages(String accountId, CloudbreakImageCatalogV3 imageCatalog, String cloudPlatform, ImageFilterParams imageFilterParams) {
+        return clusterUpgradeImageFilter.filter(accountId, imageCatalog, cloudPlatform, imageFilterParams);
     }
 
     private UpgradeV4Response createResponse(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,

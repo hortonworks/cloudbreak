@@ -52,3 +52,5 @@ auth:
         SSEWithCMK.enable: true
     cm.ha.enable: false
     conclusion.checker.send.user.event.enable: false
+    mediumdutysdx.repair.enable: true
+    mediumdutysdx.upgrade.enable: true
