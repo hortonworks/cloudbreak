@@ -31,16 +31,16 @@ import io.opentracing.util.GlobalTracer;
 @Configuration
 public class TracingConfiguration {
 
-    private static final Set<String> ALLOWED_TRACING_HEADERS = Set.of("uber-trace-id", "cdp-destination-api", "cdp-caller-id",
-            "x-b3-parentspanid", "x-b3-traceid", "x-b3-spanid", "x-b3-sampled", "user-agent");
-
     private final Tracer tracer;
+
+    private final Set<String> allowedHeaderTags;
 
     @Value("${opentracing.jdbc.enabled:true}")
     private boolean jdbcEnabled;
 
-    public TracingConfiguration(Tracer tracer) {
+    public TracingConfiguration(Tracer tracer, @Value("#{'${opentracing.allowed-header-tags}'.split(',')}") Set<String> allowedHeaderTags) {
         this.tracer = tracer;
+        this.allowedHeaderTags = allowedHeaderTags;
         GlobalTracer.registerIfAbsent(tracer);
     }
 
@@ -67,7 +67,7 @@ public class TracingConfiguration {
         return clientTracingFeatureBuilder.build();
     }
 
-    public static class SpanDecorator implements ServerSpanDecorator, ClientSpanDecorator {
+    public class SpanDecorator implements ServerSpanDecorator, ClientSpanDecorator {
 
         @Override
         public void decorateRequest(ContainerRequestContext requestContext, Span span) {
@@ -93,7 +93,7 @@ public class TracingConfiguration {
             MDCBuilder.addTraceId(span.context().toTraceId());
             MDCBuilder.addSpanId(span.context().toSpanId());
             TracingUtil.setTagsFromMdc(span);
-            headers.keySet().retainAll(ALLOWED_TRACING_HEADERS);
+            headers.keySet().retainAll(allowedHeaderTags);
             span.setTag(TracingUtil.HEADERS, Json.silent(headers).getValue());
         }
 

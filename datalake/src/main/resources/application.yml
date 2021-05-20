@@ -10,6 +10,7 @@ spring:
     timeout-per-shutdown-phase: 60
 
 opentracing:
+  allowed-header-tags: "uber-trace-id,cdp-destination-api,cdp-caller-id,x-b3-parentspanid,x-b3-traceid,x-b3-spanid,x-b3-sampled,user-agent"
   jaeger:
     log-spans: false
 
