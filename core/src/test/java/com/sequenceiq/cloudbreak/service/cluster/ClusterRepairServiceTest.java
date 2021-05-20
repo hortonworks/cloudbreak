@@ -33,10 +33,13 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
@@ -68,12 +71,16 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterRepairServiceTest {
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
     private static final long STACK_ID = 1;
 
     private static final String STACK_CRN = "STACK_CRN";
@@ -119,6 +126,9 @@ public class ClusterRepairServiceTest {
     @Mock
     private RedbeamsClientService redbeamsClientService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private ClusterRepairService underTest;
 
@@ -157,9 +167,32 @@ public class ClusterRepairServiceTest {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
 
-        underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
 
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false));
+    }
+
+    @Test
+    public void repairValidationShouldFailWhenStackUsesCCMAndHasMultipleGatewayInstances() {
+        HostGroup hostGroup1 = new HostGroup();
+        hostGroup1.setName("hostGroup1");
+        hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
+        InstanceMetaData host1 = getHost("host1", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
+        InstanceMetaData host2 = getHost("host2", hostGroup1.getName(), InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
+        host2.setInstanceGroup(host1.getInstanceGroup());
+        host1.getInstanceGroup().getAllInstanceMetaData().add(host2);
+        hostGroup1.setInstanceGroup(host1.getInstanceGroup());
+
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
+        when(stack.getInstanceGroups()).thenReturn(Set.of(host1.getInstanceGroup()));
+        when(stack.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false)));
+
+        assertEquals("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. This will be fixed in future releases.",
+                exception.getMessage());
     }
 
     @Test
@@ -177,7 +210,7 @@ public class ClusterRepairServiceTest {
         databaseServerV4Response.setStatus(AVAILABLE);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertTrue(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);
@@ -199,7 +232,7 @@ public class ClusterRepairServiceTest {
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertTrue(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);
@@ -221,7 +254,7 @@ public class ClusterRepairServiceTest {
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertFalse(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);
@@ -243,7 +276,7 @@ public class ClusterRepairServiceTest {
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(false);
 
-        Result result = underTest.repairWithDryRun(stack.getId());
+        Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
         assertFalse(result.isSuccess());
         verifyNoInteractions(stackUpdater, flowManager, resourceService);
@@ -280,7 +313,7 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
 
-        underTest.repairNodes(1L, Set.of("instanceId1"), false, false, false);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairNodes(1L, Set.of("instanceId1"), false, false, false));
         verify(resourceService).findByStackIdAndType(stack.getId(), volumeSet.getResourceType());
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
@@ -302,7 +335,7 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
         });
 
         assertEquals("Could not trigger cluster repair for stack 1 because node list is incorrect", exception.getMessage());
@@ -320,7 +353,7 @@ public class ClusterRepairServiceTest {
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
         });
 
         assertEquals("Database dbCrn is not in AVAILABLE status, could not start repair.", exception.getMessage());
@@ -346,7 +379,7 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1, host2));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false);
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
         });
 
         String expectedErrorMessage =
@@ -375,7 +408,7 @@ public class ClusterRepairServiceTest {
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setInstanceId(hostName);
-        instanceGroup.setInstanceMetaData(Collections.singleton(instanceMetaData));
+        instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
 
         return instanceMetaData;
     }
