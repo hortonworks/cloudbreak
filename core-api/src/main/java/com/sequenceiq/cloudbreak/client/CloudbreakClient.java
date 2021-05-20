@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXDatabaseServerV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
@@ -50,6 +51,8 @@ public interface CloudbreakClient {
     StackV4Endpoint stackV4Endpoint();
 
     DistroXV1Endpoint distroXV1Endpoint();
+
+    DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint();
 
     DatalakeV4Endpoint datalakeV4Endpoint();
 
