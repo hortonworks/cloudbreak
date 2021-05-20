@@ -19,6 +19,8 @@ public class CustomJsonLayout extends JsonLayout {
 
     private static final String PARTIAL_CHUNK_ID_FIELD = "partial_id";
 
+    private static final String PARTIAL_CHUNK_ID_PREFIX = "p";
+
     private static final String PARTIAL_CHUNK_INDEX_FIELD = "partial_ordinal";
 
     private static final String PARTIAL_LAST_FIELD = "partial_last";
@@ -40,7 +42,7 @@ public class CustomJsonLayout extends JsonLayout {
     public String doLayout(ILoggingEvent event, String fullLogMessage) {
         if (StringUtils.length(fullLogMessage) > maxChunkLength) {
             StringBuilder stringBuilder = new StringBuilder();
-            String chunkId = Integer.toHexString(event.hashCode());
+            String chunkId = PARTIAL_CHUNK_ID_PREFIX + Integer.toHexString(event.hashCode());
             Iterable<String> messages = splitter.split(fullLogMessage);
             Iterator<String> messageIterator = messages.iterator();
             for (int currentIndex = 0; messageIterator.hasNext(); currentIndex++) {
