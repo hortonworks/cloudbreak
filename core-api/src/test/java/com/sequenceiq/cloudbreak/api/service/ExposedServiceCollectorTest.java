@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
@@ -25,11 +27,16 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 @ExtendWith(MockitoExtension.class)
 class ExposedServiceCollectorTest {
 
+    private static final Optional<String> BP_VERSION = Optional.of("7.2.11");
+
     @InjectMocks
     private ExposedServiceCollector underTest;
 
     @Mock
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Spy
+    private ExposedServiceVersionSupport exposedServiceVersionSupportService;
 
     @BeforeEach
     void setUp() throws IOException {
@@ -83,7 +90,6 @@ class ExposedServiceCollectorTest {
         assertThat(underTest.getAllServiceNames()).containsExactlyInAnyOrder(
                 "ALL",
                 "ATLAS_SERVER",
-                "ATLAS_SERVER",
                 "CM-API",
                 "CM-UI",
                 "DAS_WEBAPP",
@@ -96,17 +102,10 @@ class ExposedServiceCollectorTest {
                 "JOBHISTORY",
                 "KUDU_MASTER",
                 "LIVY_SERVER",
-                "LIVY_SERVER",
-                "LIVY_SERVER_FOR_SPARK3",
                 "LIVY_SERVER_FOR_SPARK3",
                 "MASTER",
-                "MASTER",
-                "NAMENODE",
-                "NAMENODE",
                 "NAMENODE",
                 "NIFI_NODE",
-                "NIFI_NODE",
-                "NIFI_REGISTRY_SERVER",
                 "NIFI_REGISTRY_SERVER",
                 "OOZIE_SERVER",
                 "PHOENIX_QUERY_SERVER",
@@ -116,9 +115,6 @@ class ExposedServiceCollectorTest {
                 "PROFILER_SCHEDULER_AGENT",
                 "RANGER_ADMIN",
                 "RESOURCEMANAGER",
-                "RESOURCEMANAGER",
-                "RESOURCEMANAGER",
-                "SCHEMA_REGISTRY_SERVER",
                 "SCHEMA_REGISTRY_SERVER",
                 "SOLR_SERVER",
                 "SPARK_YARN_HISTORY_SERVER",
@@ -185,14 +181,14 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(false)).containsOnly(
+        assertThat(underTest.getAllServicePorts(BP_VERSION, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
                 Map.entry("CM-API", 7180),
                 Map.entry("CM-UI", 7180),
                 Map.entry("DAS", 30800),
-                Map.entry("FLINK", 8082),
+                Map.entry("FLINK", 18211),
                 Map.entry("HBASEUI", 16010),
                 Map.entry("HBASEJARS", 16010),
                 Map.entry("HDFSUI", 9870),
@@ -236,14 +232,14 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(true)).containsOnly(
+        assertThat(underTest.getAllServicePorts(BP_VERSION, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
                 Map.entry("CM-API", 7183),
                 Map.entry("CM-UI", 7183),
                 Map.entry("DAS", 30800),
-                Map.entry("FLINK", 8082),
+                Map.entry("FLINK", 18211),
                 Map.entry("HBASEUI", 16010),
                 Map.entry("HBASEJARS", 16010),
                 Map.entry("HDFSUI", 9871),
@@ -304,7 +300,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getKnoxServicesForComponentsReturnsCMServicesAndForImpalaDebugUIAsWell() {
         underTest.init();
-        Collection<ExposedService> components = underTest.knoxServicesForComponents(Set.of("ATLAS_SERVER", "IMPALAD"));
+        Collection<ExposedService> components = underTest.knoxServicesForComponents(BP_VERSION, Set.of("ATLAS_SERVER", "IMPALAD"));
         assertThat(components).hasSize(7);
         assertThat(components.stream().map(ExposedService::getName)).containsExactlyInAnyOrder(
                 "ATLAS",

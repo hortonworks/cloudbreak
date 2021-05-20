@@ -638,7 +638,23 @@
       "apiOnly": false,
       "apiIncluded": false,
       "visibleForDatalake": false,
-      "visibleForDatahub": true
+      "visibleForDatahub": true,
+      "maxVersion": "7.2.10"
+    },
+    {
+      "name": "FLINK",
+      "displayName": "Flink Dashboard",
+      "serviceName": "FLINK_HISTORY_SERVER",
+      "knoxService": "FLINK",
+      "knoxUrl": "/flink/",
+      "ssoSupported": true,
+      "port": 18211,
+      "tlsPort": 18211,
+      "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.11"
     },
     {
       "name": "KNOX_TOKEN_INTEGRATOR",

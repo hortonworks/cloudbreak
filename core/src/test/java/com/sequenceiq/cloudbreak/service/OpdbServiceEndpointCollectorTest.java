@@ -10,9 +10,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,17 +23,17 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.MultiValuedMap;
+import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.mockito.stubbing.Answer;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
@@ -74,7 +74,7 @@ public class OpdbServiceEndpointCollectorTest {
 
     private static final String GATEWAY_PATH = "gateway-path";
 
-    private static final Map<String, ExposedService> EXPOSED_SERVICES = parseExposedServices();
+    private static final MultiValuedMap<String, ExposedService> EXPOSED_SERVICES = parseExposedServices();
 
     @Mock
     private BlueprintService blueprintService;
@@ -101,9 +101,6 @@ public class OpdbServiceEndpointCollectorTest {
     private ExposedServiceCollector exposedServiceCollector;
 
     @Mock
-    private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
-
-    @Mock
     private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
     @InjectMocks
@@ -113,22 +110,16 @@ public class OpdbServiceEndpointCollectorTest {
     @Mock
     private Workspace workspace;
 
-    private static Map<String, ExposedService> parseExposedServices() {
-        String rawJson;
-        try (BufferedReader bs = new BufferedReader(
-                new InputStreamReader(Thread.currentThread().getContextClassLoader().getResourceAsStream(
-                    "definitions/exposed-services.json")))) {
-            StringBuilder out = new StringBuilder();
-            String line;
-            while ((line = bs.readLine()) != null) {
-                out.append(line);
-            }
-            rawJson = out.toString();
+    private static MultiValuedMap<String, ExposedService> parseExposedServices() {
+        MultiValuedMap<String, ExposedService> services = new ArrayListValuedHashMap<>();
 
-            return JsonUtil.readValue(rawJson, com.sequenceiq.cloudbreak.api.service.ExposedServices.class)
-                .getServices()
-                .stream()
-                .collect(Collectors.toMap(ExposedService::getName, Function.identity()));
+        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream("definitions/exposed-services.json")) {
+            String rawJson = IOUtils.toString(is, StandardCharsets.UTF_8);
+            JsonUtil.readValue(rawJson, com.sequenceiq.cloudbreak.api.service.ExposedServices.class)
+                    .getServices()
+                    .forEach(exposedService -> services.put(exposedService.getName(), exposedService));
+
+            return services;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -139,11 +130,10 @@ public class OpdbServiceEndpointCollectorTest {
      * element exists with the same name.
      */
     ExposedService getExposedServiceOrFail(String name) {
-        ExposedService svc = EXPOSED_SERVICES.get(name);
-        if (svc == null) {
-            throw new NoSuchElementException("No such exposed service with name: " + name);
-        }
-        return svc;
+        return EXPOSED_SERVICES.get(name)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new NoSuchElementException("No such exposed service with name: " + name));
     }
 
     @Before
@@ -163,8 +153,6 @@ public class OpdbServiceEndpointCollectorTest {
         services.add("CM-UI");
         services.add("CM-API");
         when(exposedServiceCollector.getFullServiceListBasedOnList(any())).thenReturn(services);
-        when(serviceEndpointCollectorVersionComparator.maxVersionSupported(any(), any())).thenReturn(true);
-        when(serviceEndpointCollectorVersionComparator.minVersionSupported(any(), any())).thenReturn(true);
         when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
         when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         // Skip exposed service validation
@@ -173,15 +161,11 @@ public class OpdbServiceEndpointCollectorTest {
         // version of what ExposedServiceCollector#knoxServicesForComponents actually does. The improvement
         // over what ServiceEndpointCollectorTest does is that this actually reads the real exposed-service.json
         // file to populate the data that the test uses.
-        when(exposedServiceCollector.knoxServicesForComponents(any())).thenAnswer(new Answer<>() {
-            @Override
-            public Collection<ExposedService> answer(InvocationOnMock invocation) throws Throwable {
-                @SuppressWarnings("unchecked")
-                Collection<String> components = (Collection<String>) invocation.getArgument(0);
-                Collection<ExposedService> services = filterSupportedKnoxServices();
-                return services.stream().filter(exposedService -> components.contains(exposedService.getServiceName()))
+        when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), any())).thenAnswer(invocation -> {
+            Collection<String> components = invocation.getArgument(1);
+            Collection<ExposedService> services1 = filterSupportedKnoxServices();
+            return services1.stream().filter(exposedService -> components.contains(exposedService.getServiceName()))
                     .collect(Collectors.toList());
-            }
         });
     }
 

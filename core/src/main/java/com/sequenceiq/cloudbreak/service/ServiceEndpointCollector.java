@@ -74,9 +74,6 @@ public class ServiceEndpointCollector {
     private EntitlementService entitlementService;
 
     @Inject
-    private ServiceEndpointCollectorVersionComparator serviceEndpointCollectorVersionComparator;
-
-    @Inject
     private ServiceEndpointCollectorEntitlementComparator serviceEndpointCollectorEntitlementComparator;
 
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
@@ -272,15 +269,10 @@ public class ServiceEndpointCollector {
         String blueprintText = blueprint.getBlueprintText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
         List<String> components = processor.getAllComponents().stream().map(ServiceComponent::getComponent).collect(Collectors.toList());
-        return exposedServiceCollector.knoxServicesForComponents(components)
+        return exposedServiceCollector.knoxServicesForComponents(processor.getVersion(), components)
                 .stream()
                 .filter(ExposedService::isVisible)
-                .filter(e -> serviceEndpointCollectorVersionComparator
-                        .maxVersionSupported(processor.getVersion(), e.getMaxVersion()))
-                .filter(e -> serviceEndpointCollectorVersionComparator
-                        .minVersionSupported(processor.getVersion(), e.getMinVersion()))
-                .filter(e -> serviceEndpointCollectorEntitlementComparator
-                        .entitlementSupported(entitlements, e.getEntitlement()))
+                .filter(e -> serviceEndpointCollectorEntitlementComparator.entitlementSupported(entitlements, e.getEntitlement()))
                 .collect(Collectors.toList());
     }
 

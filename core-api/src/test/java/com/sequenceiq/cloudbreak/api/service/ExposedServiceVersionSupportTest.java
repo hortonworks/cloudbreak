@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service;
+package com.sequenceiq.cloudbreak.api.service;
 
 import java.util.Optional;
 
@@ -9,11 +9,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class ServiceEndpointCollectorVersionComparatorTest {
+public class ExposedServiceVersionSupportTest {
 
     private static final Optional<String> BLUEPRINT_VERSION = Optional.of("7.2.6");
 
-    private ServiceEndpointCollectorVersionComparator underTest = new ServiceEndpointCollectorVersionComparator();
+    private ExposedServiceVersionSupport underTest = new ExposedServiceVersionSupport();
 
     static Object[][] maxVersionSupportedParameters() {
         return new Object[][]{

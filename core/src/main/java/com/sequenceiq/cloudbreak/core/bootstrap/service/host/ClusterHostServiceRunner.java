@@ -669,7 +669,7 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, List<String>> getServiceLocations(Cluster cluster) {
-        List<String> serviceNames = exposedServiceCollector.getAllServiceNames();
+        Set<String> serviceNames = exposedServiceCollector.getAllServiceNames();
         Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(cluster, serviceNames);
         ExposedService impalaService = exposedServiceCollector.getImpalaService();
         if (componentLocation.containsKey(impalaService.getServiceName())) {
