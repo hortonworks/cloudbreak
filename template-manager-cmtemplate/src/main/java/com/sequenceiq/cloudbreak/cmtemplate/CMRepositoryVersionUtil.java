@@ -40,7 +40,11 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERAMANAGER_VERSION_7_4_1 = () -> "7.4.1";
 
+    public static final Versioned CLOUDERAMANAGER_VERSION_7_4_2 = () -> "7.4.2";
+
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_10 = () -> "7.2.10";
+
+    public static final Versioned CLOUDERA_STACK_VERSION_7_2_9_1 = () -> "7.2.9.1";
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
@@ -82,6 +86,21 @@ public class CMRepositoryVersionUtil {
     public static boolean isRangerTearDownSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
         LOGGER.info("ClouderaManagerRepo is compared for ranger tear down support");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1);
+    }
+
+    public static boolean isKnoxDatabaseSupported(ClouderaManagerRepo clouderaManagerRepoDetails, String cdhVersion) {
+        LOGGER.info("ClouderaManagerRepo is compared for knox database support");
+        boolean supported = false;
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)) {
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_2)) {
+                supported = true;
+            }
+        } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9_1)) {
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
+                supported = true;
+            }
+        }
+        return supported;
     }
 
     public static boolean isRazConfigurationSupportedInDatalake(ClouderaManagerRepo clouderaManagerRepoDetails, CloudPlatform cloudPlatform) {

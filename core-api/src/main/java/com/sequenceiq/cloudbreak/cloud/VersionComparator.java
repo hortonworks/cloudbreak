@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 
@@ -13,8 +14,9 @@ public class VersionComparator implements Comparator<Versioned>, Serializable {
 
     @Override
     public int compare(Versioned o1, Versioned o2) {
-        String[] vals1 = o1.getVersion().split(VERSION_SPLITTER_REGEX);
-        String[] vals2 = o2.getVersion().split(VERSION_SPLITTER_REGEX);
+        ImmutablePair<Versioned, Versioned> versionedVersionedPair = transformByLength(new ImmutablePair<>(o1, o2));
+        String[] vals1 = versionedVersionedPair.getLeft().getVersion().split(VERSION_SPLITTER_REGEX);
+        String[] vals2 = versionedVersionedPair.getRight().getVersion().split(VERSION_SPLITTER_REGEX);
 
         int i = 0;
         // set index to first non-equal ordinal or length of shortest version string
@@ -30,6 +32,71 @@ public class VersionComparator implements Comparator<Versioned>, Serializable {
         // the strings are equal or one string is a substring of the other, then shorter wins
         // e.g. "2.4.2.0" is newer than "2.4.2.0-9999"
         return Integer.signum(vals2.length - vals1.length);
+    }
+
+    private ImmutablePair<Versioned, Versioned> transformByLength(ImmutablePair<Versioned, Versioned> input) {
+        String first = input.getLeft().getVersion();
+        String last = input.getRight().getVersion();
+
+        // splitting with '-'
+        String[] firstSplit = splitWithHyphens(first);
+        String[] lastSplit = splitWithHyphens(last);
+
+        if (!lastSplit[0].equals(firstSplit[0])) {
+            if (lastSplit.length < firstSplit.length) {
+                last = getLastSegmentWithZeros(last, firstSplit[1]);
+            } else if (firstSplit.length < lastSplit.length) {
+                first = getLastSegmentWithZeros(first, lastSplit[1]);
+            }
+        }
+
+        firstSplit = splitWithHyphens(first);
+        lastSplit = splitWithHyphens(last);
+        String[] firstSplitFirstSegment = splitWithPoint(first);
+        String[] lastSplitFirstSegment = splitWithPoint(last);
+
+        if (!lastSplit[0].equals(firstSplit[0])) {
+            if (lastSplitFirstSegment.length < firstSplitFirstSegment.length) {
+                last = getFirstSegmentWithZeros(lastSplit,
+                        firstSplitFirstSegment.length - lastSplitFirstSegment.length);
+            } else if (firstSplitFirstSegment.length < lastSplitFirstSegment.length) {
+                first = getFirstSegmentWithZeros(firstSplit,
+                        lastSplitFirstSegment.length - firstSplitFirstSegment.length);
+            }
+        }
+        String finalFirst = first;
+        String finalLast = last;
+
+        return new ImmutablePair<>(() -> finalFirst, () -> finalLast);
+    }
+
+    private String getFirstSegmentWithZeros(String[] lastSplit, int difference1) {
+        String last;
+        int difference = difference1;
+        String firstSegment = lastSplit[0];
+        for (int i = 0; i < difference; i++) {
+            firstSegment += ".0";
+        }
+        if (lastSplit.length > 1) {
+            last = firstSegment + "-" + lastSplit[1];
+        } else {
+            last = firstSegment;
+        }
+        return last;
+    }
+
+    private String[] splitWithPoint(String first) {
+        return first.trim().split("-")[0].trim().split("\\.");
+    }
+
+    private String[] splitWithHyphens(String input) {
+        return input.trim().split("-");
+    }
+
+    private String getLastSegmentWithZeros(String last, String end1) {
+        String end = end1;
+        last = last + "-" + end.replaceAll("[0-9]", "0");
+        return last;
     }
 
     private int getDiffByPreReleaseIdPrecedence(String left, String right) {

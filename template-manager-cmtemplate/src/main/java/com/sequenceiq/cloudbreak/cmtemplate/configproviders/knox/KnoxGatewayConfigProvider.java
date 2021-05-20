@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxDatabaseSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.ArrayList;
@@ -72,6 +73,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String GATEWAY_CM_AUTO_DISCOVERY_ENABLED = "gateway_auto_discovery_enabled";
 
+    private static final String GATEWAY_SERVICE_TOKENSTATE_IMPL = "gateway_service_tokenstate_impl";
+
     @Inject
     private VirtualGroupService virtualGroupService;
 
@@ -81,7 +84,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
         String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
-
+        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
         VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
         String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.KNOX_ADMIN.getRight());
 
@@ -98,6 +102,9 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                     config.add(config(GATEWAY_SIGNING_KEYSTORE_TYPE, JKS));
                     config.add(config(GATEWAY_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
                     config.add(getGatewayWhitelistConfig(source));
+                }
+                if (source.getProductDetailsView() != null && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), cdhVersion)) {
+                    config.add(config(GATEWAY_SERVICE_TOKENSTATE_IMPL, "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"));
                 }
                 return config;
             case KnoxRoles.IDBROKER:

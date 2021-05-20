@@ -32,6 +32,7 @@ public class VersionComparatorTest {
     public void testGreaterNonEqualLength() {
         Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.4.0.0-770")));
         Assert.assertEquals(1L, underTest.compare(new VersionString("2.5.0.0"), new VersionString("2.5.0.0-770")));
+        Assert.assertEquals(1L, underTest.compare(new VersionString("7.2.9.1"), new VersionString("7.2.9-1000")));
     }
 
     @Test
@@ -40,6 +41,10 @@ public class VersionComparatorTest {
         Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-1000")));
         Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.5.0.0-1000")));
         Assert.assertEquals(-1L, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.15.0.0-1000")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9"), new VersionString("7.2.9.1")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9-1000"), new VersionString("7.2.9.1")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9-1"), new VersionString("7.2.9.1-200")));
+        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9"), new VersionString("7.2.9.1-1000")));
     }
 
     @Test
