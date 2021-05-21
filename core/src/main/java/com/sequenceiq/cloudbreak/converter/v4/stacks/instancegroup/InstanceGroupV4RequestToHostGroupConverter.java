@@ -35,14 +35,14 @@ public class InstanceGroupV4RequestToHostGroupConverter extends AbstractConversi
 
     @Override
     public HostGroup convert(InstanceGroupV4Request source) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(source.getName());
+        hostGroup.setName(source.getName().toLowerCase());
         hostGroup.setRecoveryMode(source.getRecoveryMode());
         Set<String> recipeNames = source.getRecipeNames();
         if (!CollectionUtils.isEmpty(recipeNames)) {
+            CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
+            User user = userService.getOrCreate(cloudbreakUser);
+            Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
             hostGroup.setRecipes(recipeService.getRecipesByNamesForWorkspace(workspace, recipeNames));
         }
         return hostGroup;

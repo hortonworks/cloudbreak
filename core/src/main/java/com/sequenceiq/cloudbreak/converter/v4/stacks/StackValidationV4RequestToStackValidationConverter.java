@@ -168,7 +168,7 @@ public class StackValidationV4RequestToStackValidationConverter extends Abstract
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupV4Request json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();
-            hostGroup.setName(json.getName());
+            hostGroup.setName(json.getName().toLowerCase());
             String instanceGroupName = json.getInstanceGroupName();
             if (instanceGroupName != null) {
                 Optional<InstanceGroup> instanceGroup =
