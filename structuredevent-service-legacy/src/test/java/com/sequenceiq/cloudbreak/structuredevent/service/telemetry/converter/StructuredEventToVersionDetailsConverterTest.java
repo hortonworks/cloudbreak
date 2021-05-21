@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
-class StructuredFlowEventToVersionDetailsConverterTest {
+class StructuredEventToVersionDetailsConverterTest {
 
     private StructuredEventToVersionDetailsConverter underTest;
 

@@ -24,39 +24,39 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
     private EnvironmentRequestProcessingStepMapper environmentRequestProcessingStepMapper;
 
     public UsageProto.CDPOperationDetails convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
-        if (cdpStructuredFlowEvent == null) {
-            return null;
-        }
         UsageProto.CDPOperationDetails.Builder cdpOperationDetails = UsageProto.CDPOperationDetails.newBuilder();
-        CDPOperationDetails structuredOperationDetails = cdpStructuredFlowEvent.getOperation();
-        if (structuredOperationDetails != null) {
-            cdpOperationDetails.setAccountId(defaultIfEmpty(structuredOperationDetails.getAccountId(), ""));
-            cdpOperationDetails.setResourceCrn(defaultIfEmpty(structuredOperationDetails.getResourceCrn(), ""));
-            cdpOperationDetails.setResourceName(defaultIfEmpty(structuredOperationDetails.getResourceName(), ""));
-            cdpOperationDetails.setInitiatorCrn(defaultIfEmpty(structuredOperationDetails.getUserCrn(), ""));
-            cdpOperationDetails.setCorrelationId(defaultIfEmpty(structuredOperationDetails.getUuid(), ""));
-        }
 
-        EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();
-        if (environmentDetails != null && environmentDetails.getCloudPlatform() != null) {
-            cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
-                    .Value.valueOf(environmentDetails.getCloudPlatform()));
-        }
+        if (cdpStructuredFlowEvent != null) {
+            CDPOperationDetails structuredOperationDetails = cdpStructuredFlowEvent.getOperation();
+            if (structuredOperationDetails != null) {
+                cdpOperationDetails.setAccountId(defaultIfEmpty(structuredOperationDetails.getAccountId(), ""));
+                cdpOperationDetails.setResourceCrn(defaultIfEmpty(structuredOperationDetails.getResourceCrn(), ""));
+                cdpOperationDetails.setResourceName(defaultIfEmpty(structuredOperationDetails.getResourceName(), ""));
+                cdpOperationDetails.setInitiatorCrn(defaultIfEmpty(structuredOperationDetails.getUserCrn(), ""));
+                cdpOperationDetails.setCorrelationId(defaultIfEmpty(structuredOperationDetails.getUuid(), ""));
+            }
 
-        FlowDetails flowDetails = cdpStructuredFlowEvent.getFlow();
-        if (flowDetails != null) {
-            String flowId = defaultIfEmpty(flowDetails.getFlowId(), "");
-            cdpOperationDetails.setFlowId(flowId);
-            // We will use flow id if there is no flowchain id, this helps to correlate requests
-            cdpOperationDetails.setFlowChainId(defaultIfEmpty(flowDetails.getFlowChainId(), flowId));
-            cdpOperationDetails.setFlowState(flowDetails.getFlowState() != null
-                    && !"unknown".equals(flowDetails.getFlowState())
-                    && flowDetails.getNextFlowState() != null
-                    && flowDetails.getNextFlowState().endsWith("_FAILED_STATE")
-                    ? flowDetails.getFlowState() : "");
-        }
+            EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();
+            if (environmentDetails != null && environmentDetails.getCloudPlatform() != null) {
+                cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
+                        .Value.valueOf(environmentDetails.getCloudPlatform()));
+            }
 
-        cdpOperationDetails.setCdpRequestProcessingStep(environmentRequestProcessingStepMapper.mapIt(cdpStructuredFlowEvent.getFlow()));
+            FlowDetails flowDetails = cdpStructuredFlowEvent.getFlow();
+            if (flowDetails != null) {
+                String flowId = defaultIfEmpty(flowDetails.getFlowId(), "");
+                cdpOperationDetails.setFlowId(flowId);
+                // We will use flow id if there is no flowchain id, this helps to correlate requests
+                cdpOperationDetails.setFlowChainId(defaultIfEmpty(flowDetails.getFlowChainId(), flowId));
+                cdpOperationDetails.setFlowState(flowDetails.getFlowState() != null
+                        && !"unknown".equals(flowDetails.getFlowState())
+                        && flowDetails.getNextFlowState() != null
+                        && flowDetails.getNextFlowState().endsWith("_FAILED_STATE")
+                        ? flowDetails.getFlowState() : "");
+            }
+
+            cdpOperationDetails.setCdpRequestProcessingStep(environmentRequestProcessingStepMapper.mapIt(cdpStructuredFlowEvent.getFlow()));
+        }
         cdpOperationDetails.setApplicationVersion(appVersion);
 
         return cdpOperationDetails.build();

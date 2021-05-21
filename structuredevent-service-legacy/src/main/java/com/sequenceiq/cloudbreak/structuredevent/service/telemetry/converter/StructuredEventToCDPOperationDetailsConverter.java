@@ -25,24 +25,30 @@ public class StructuredEventToCDPOperationDetailsConverter {
     private ClusterRequestProcessingStepMapper clusterRequestProcessingStepMapper;
 
     public UsageProto.CDPOperationDetails convert(StructuredFlowEvent structuredFlowEvent) {
-        if (structuredFlowEvent == null) {
-            return null;
-        }
-        UsageProto.CDPOperationDetails.Builder cdpOperationDetails = convert(structuredFlowEvent.getOperation(), structuredFlowEvent.getStack(),
-                structuredFlowEvent.getFlow());
+        UsageProto.CDPOperationDetails.Builder cdpOperationDetails = UsageProto.CDPOperationDetails.newBuilder();
 
-        cdpOperationDetails.setCdpRequestProcessingStep(clusterRequestProcessingStepMapper.mapIt(structuredFlowEvent.getFlow()));
+        if (structuredFlowEvent != null) {
+            cdpOperationDetails = convert(structuredFlowEvent.getOperation(), structuredFlowEvent.getStack(),
+                    structuredFlowEvent.getFlow());
+
+            cdpOperationDetails.setCdpRequestProcessingStep(clusterRequestProcessingStepMapper.mapIt(structuredFlowEvent.getFlow()));
+        }
+
+        cdpOperationDetails.setApplicationVersion(appVersion);
 
         return cdpOperationDetails.build();
     }
 
     public UsageProto.CDPOperationDetails convert(StructuredSyncEvent structuredSyncEvent) {
-        if (structuredSyncEvent == null) {
-            return null;
+        UsageProto.CDPOperationDetails.Builder cdpOperationDetails = UsageProto.CDPOperationDetails.newBuilder();
+
+        if (structuredSyncEvent != null) {
+            cdpOperationDetails = convert(structuredSyncEvent.getOperation(), structuredSyncEvent.getStack(), null);
         }
-        UsageProto.CDPOperationDetails.Builder cdpOperationDetails = convert(structuredSyncEvent.getOperation(), structuredSyncEvent.getStack(), null);
 
         cdpOperationDetails.setCdpRequestProcessingStep(UsageProto.CDPRequestProcessingStep.Value.SYNC);
+
+        cdpOperationDetails.setApplicationVersion(appVersion);
 
         return cdpOperationDetails.build();
     }
@@ -75,8 +81,6 @@ public class StructuredEventToCDPOperationDetailsConverter {
                     && flowDetails.getNextFlowState().endsWith("_FAILED_STATE")
                     ? flowDetails.getFlowState() : "");
         }
-
-        cdpOperationDetails.setApplicationVersion(appVersion);
 
         return cdpOperationDetails;
     }

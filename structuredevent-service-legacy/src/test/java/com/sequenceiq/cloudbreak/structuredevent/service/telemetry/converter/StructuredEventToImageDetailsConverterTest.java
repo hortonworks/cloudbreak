@@ -8,7 +8,7 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
-class StructuredFlowEventToImageDetailsConverterTest {
+class StructuredEventToImageDetailsConverterTest {
 
     private StructuredEventToImageDetailsConverter underTest;
 

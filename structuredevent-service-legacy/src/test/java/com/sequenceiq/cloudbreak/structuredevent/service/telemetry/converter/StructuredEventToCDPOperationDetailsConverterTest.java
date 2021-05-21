@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.reflect.Whitebox;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
@@ -15,6 +17,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
 
+@ExtendWith(MockitoExtension.class)
 public class StructuredEventToCDPOperationDetailsConverterTest {
 
     private StructuredEventToCDPOperationDetailsConverter underTest;
@@ -28,8 +31,35 @@ public class StructuredEventToCDPOperationDetailsConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNull("We should return with null if the input is null", underTest.convert((StructuredFlowEvent) null));
-        Assert.assertNull("We should return with null if the input is null", underTest.convert((StructuredSyncEvent) null));
+        UsageProto.CDPOperationDetails flowOperationDetails = underTest.convert((StructuredFlowEvent) null);
+
+        Assert.assertEquals("", flowOperationDetails.getAccountId());
+        Assert.assertEquals("", flowOperationDetails.getResourceCrn());
+        Assert.assertEquals("", flowOperationDetails.getResourceName());
+        Assert.assertEquals("", flowOperationDetails.getInitiatorCrn());
+        Assert.assertEquals("", flowOperationDetails.getCorrelationId());
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, flowOperationDetails.getCdpRequestProcessingStep());
+        Assert.assertEquals("", flowOperationDetails.getFlowId());
+        Assert.assertEquals("", flowOperationDetails.getFlowChainId());
+        Assert.assertEquals("", flowOperationDetails.getFlowState());
+        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, flowOperationDetails.getEnvironmentType());
+
+        Assert.assertEquals("version-1234", flowOperationDetails.getApplicationVersion());
+
+        UsageProto.CDPOperationDetails syncOperationDetails = underTest.convert((StructuredSyncEvent) null);
+
+        Assert.assertEquals("", syncOperationDetails.getAccountId());
+        Assert.assertEquals("", syncOperationDetails.getResourceCrn());
+        Assert.assertEquals("", syncOperationDetails.getResourceName());
+        Assert.assertEquals("", syncOperationDetails.getInitiatorCrn());
+        Assert.assertEquals("", syncOperationDetails.getCorrelationId());
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.SYNC, syncOperationDetails.getCdpRequestProcessingStep());
+        Assert.assertEquals("", syncOperationDetails.getFlowId());
+        Assert.assertEquals("", syncOperationDetails.getFlowChainId());
+        Assert.assertEquals("", syncOperationDetails.getFlowState());
+        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, syncOperationDetails.getEnvironmentType());
+
+        Assert.assertEquals("version-1234", syncOperationDetails.getApplicationVersion());
     }
 
     @Test

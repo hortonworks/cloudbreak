@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -21,13 +23,13 @@ public class StructuredFlowEventToCDPDatahubRequestedConverter {
     private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
 
     public UsageProto.CDPDatahubRequested convert(StructuredFlowEvent structuredFlowEvent) {
-        if (structuredFlowEvent == null) {
-            return null;
-        }
         UsageProto.CDPDatahubRequested.Builder cdpDatahubRequested = UsageProto.CDPDatahubRequested.newBuilder();
+
         cdpDatahubRequested.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
 
-        cdpDatahubRequested.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
+        if (structuredFlowEvent != null && structuredFlowEvent.getOperation() != null) {
+            cdpDatahubRequested.setEnvironmentCrn(defaultIfEmpty(structuredFlowEvent.getOperation().getEnvironmentCrn(), ""));
+        }
 
         cdpDatahubRequested.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
 

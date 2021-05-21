@@ -49722,6 +49722,81 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+     */
+    boolean hasEnvironmentDetails();
+    /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getEnvironmentDetails();
+    /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder getEnvironmentDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+     */
+    boolean hasTelemetryFeatureDetails();
+    /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails getTelemetryFeatureDetails();
+    /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * FreeIPA metadata
+     * </pre>
+     *
+     * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+     */
+    boolean hasFreeIPA();
+    /**
+     * <pre>
+     * FreeIPA metadata
+     * </pre>
+     *
+     * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails getFreeIPA();
+    /**
+     * <pre>
+     * FreeIPA metadata
+     * </pre>
+     *
+     * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetailsOrBuilder getFreeIPAOrBuilder();
   }
   /**
    * <pre>
@@ -49798,6 +49873,45 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 42: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder subBuilder = null;
+              if (environmentDetails_ != null) {
+                subBuilder = environmentDetails_.toBuilder();
+              }
+              environmentDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(environmentDetails_);
+                environmentDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 50: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder subBuilder = null;
+              if (telemetryFeatureDetails_ != null) {
+                subBuilder = telemetryFeatureDetails_.toBuilder();
+              }
+              telemetryFeatureDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(telemetryFeatureDetails_);
+                telemetryFeatureDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 58: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.Builder subBuilder = null;
+              if (freeIPA_ != null) {
+                subBuilder = freeIPA_.toBuilder();
+              }
+              freeIPA_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(freeIPA_);
+                freeIPA_ = subBuilder.buildPartial();
+              }
+
               break;
             }
             default: {
@@ -49957,6 +50071,105 @@ public final class UsageProto {
       }
     }
 
+    public static final int ENVIRONMENTDETAILS_FIELD_NUMBER = 5;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails environmentDetails_;
+    /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+     */
+    public boolean hasEnvironmentDetails() {
+      return environmentDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getEnvironmentDetails() {
+      return environmentDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.getDefaultInstance() : environmentDetails_;
+    }
+    /**
+     * <pre>
+     * Environment metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder getEnvironmentDetailsOrBuilder() {
+      return getEnvironmentDetails();
+    }
+
+    public static final int TELEMETRYFEATUREDETAILS_FIELD_NUMBER = 6;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails_;
+    /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+     */
+    public boolean hasTelemetryFeatureDetails() {
+      return telemetryFeatureDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails getTelemetryFeatureDetails() {
+      return telemetryFeatureDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.getDefaultInstance() : telemetryFeatureDetails_;
+    }
+    /**
+     * <pre>
+     * Data collection metadata
+     * </pre>
+     *
+     * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder() {
+      return getTelemetryFeatureDetails();
+    }
+
+    public static final int FREEIPA_FIELD_NUMBER = 7;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails freeIPA_;
+    /**
+     * <pre>
+     * FreeIPA metadata
+     * </pre>
+     *
+     * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+     */
+    public boolean hasFreeIPA() {
+      return freeIPA_ != null;
+    }
+    /**
+     * <pre>
+     * FreeIPA metadata
+     * </pre>
+     *
+     * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails getFreeIPA() {
+      return freeIPA_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.getDefaultInstance() : freeIPA_;
+    }
+    /**
+     * <pre>
+     * FreeIPA metadata
+     * </pre>
+     *
+     * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetailsOrBuilder getFreeIPAOrBuilder() {
+      return getFreeIPA();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -49983,6 +50196,15 @@ public final class UsageProto {
       if (!getFailureReasonBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, failureReason_);
       }
+      if (environmentDetails_ != null) {
+        output.writeMessage(5, getEnvironmentDetails());
+      }
+      if (telemetryFeatureDetails_ != null) {
+        output.writeMessage(6, getTelemetryFeatureDetails());
+      }
+      if (freeIPA_ != null) {
+        output.writeMessage(7, getFreeIPA());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -50006,6 +50228,18 @@ public final class UsageProto {
       }
       if (!getFailureReasonBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, failureReason_);
+      }
+      if (environmentDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getEnvironmentDetails());
+      }
+      if (telemetryFeatureDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getTelemetryFeatureDetails());
+      }
+      if (freeIPA_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, getFreeIPA());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -50032,6 +50266,21 @@ public final class UsageProto {
       result = result && newStatus_ == other.newStatus_;
       result = result && getFailureReason()
           .equals(other.getFailureReason());
+      result = result && (hasEnvironmentDetails() == other.hasEnvironmentDetails());
+      if (hasEnvironmentDetails()) {
+        result = result && getEnvironmentDetails()
+            .equals(other.getEnvironmentDetails());
+      }
+      result = result && (hasTelemetryFeatureDetails() == other.hasTelemetryFeatureDetails());
+      if (hasTelemetryFeatureDetails()) {
+        result = result && getTelemetryFeatureDetails()
+            .equals(other.getTelemetryFeatureDetails());
+      }
+      result = result && (hasFreeIPA() == other.hasFreeIPA());
+      if (hasFreeIPA()) {
+        result = result && getFreeIPA()
+            .equals(other.getFreeIPA());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -50053,6 +50302,18 @@ public final class UsageProto {
       hash = (53 * hash) + newStatus_;
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasEnvironmentDetails()) {
+        hash = (37 * hash) + ENVIRONMENTDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getEnvironmentDetails().hashCode();
+      }
+      if (hasTelemetryFeatureDetails()) {
+        hash = (37 * hash) + TELEMETRYFEATUREDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getTelemetryFeatureDetails().hashCode();
+      }
+      if (hasFreeIPA()) {
+        hash = (37 * hash) + FREEIPA_FIELD_NUMBER;
+        hash = (53 * hash) + getFreeIPA().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -50202,6 +50463,24 @@ public final class UsageProto {
 
         failureReason_ = "";
 
+        if (environmentDetailsBuilder_ == null) {
+          environmentDetails_ = null;
+        } else {
+          environmentDetails_ = null;
+          environmentDetailsBuilder_ = null;
+        }
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          telemetryFeatureDetails_ = null;
+        } else {
+          telemetryFeatureDetails_ = null;
+          telemetryFeatureDetailsBuilder_ = null;
+        }
+        if (freeIPABuilder_ == null) {
+          freeIPA_ = null;
+        } else {
+          freeIPA_ = null;
+          freeIPABuilder_ = null;
+        }
         return this;
       }
 
@@ -50236,6 +50515,21 @@ public final class UsageProto {
         result.oldStatus_ = oldStatus_;
         result.newStatus_ = newStatus_;
         result.failureReason_ = failureReason_;
+        if (environmentDetailsBuilder_ == null) {
+          result.environmentDetails_ = environmentDetails_;
+        } else {
+          result.environmentDetails_ = environmentDetailsBuilder_.build();
+        }
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          result.telemetryFeatureDetails_ = telemetryFeatureDetails_;
+        } else {
+          result.telemetryFeatureDetails_ = telemetryFeatureDetailsBuilder_.build();
+        }
+        if (freeIPABuilder_ == null) {
+          result.freeIPA_ = freeIPA_;
+        } else {
+          result.freeIPA_ = freeIPABuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -50296,6 +50590,15 @@ public final class UsageProto {
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
           onChanged();
+        }
+        if (other.hasEnvironmentDetails()) {
+          mergeEnvironmentDetails(other.getEnvironmentDetails());
+        }
+        if (other.hasTelemetryFeatureDetails()) {
+          mergeTelemetryFeatureDetails(other.getTelemetryFeatureDetails());
+        }
+        if (other.hasFreeIPA()) {
+          mergeFreeIPA(other.getFreeIPA());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -50696,6 +50999,465 @@ public final class UsageProto {
         failureReason_ = value;
         onChanged();
         return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails environmentDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder> environmentDetailsBuilder_;
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public boolean hasEnvironmentDetails() {
+        return environmentDetailsBuilder_ != null || environmentDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails getEnvironmentDetails() {
+        if (environmentDetailsBuilder_ == null) {
+          return environmentDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.getDefaultInstance() : environmentDetails_;
+        } else {
+          return environmentDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public Builder setEnvironmentDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails value) {
+        if (environmentDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          environmentDetails_ = value;
+          onChanged();
+        } else {
+          environmentDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public Builder setEnvironmentDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder builderForValue) {
+        if (environmentDetailsBuilder_ == null) {
+          environmentDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          environmentDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public Builder mergeEnvironmentDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails value) {
+        if (environmentDetailsBuilder_ == null) {
+          if (environmentDetails_ != null) {
+            environmentDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.newBuilder(environmentDetails_).mergeFrom(value).buildPartial();
+          } else {
+            environmentDetails_ = value;
+          }
+          onChanged();
+        } else {
+          environmentDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public Builder clearEnvironmentDetails() {
+        if (environmentDetailsBuilder_ == null) {
+          environmentDetails_ = null;
+          onChanged();
+        } else {
+          environmentDetails_ = null;
+          environmentDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder getEnvironmentDetailsBuilder() {
+        
+        onChanged();
+        return getEnvironmentDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder getEnvironmentDetailsOrBuilder() {
+        if (environmentDetailsBuilder_ != null) {
+          return environmentDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return environmentDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.getDefaultInstance() : environmentDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Environment metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentDetails environmentDetails = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder> 
+          getEnvironmentDetailsFieldBuilder() {
+        if (environmentDetailsBuilder_ == null) {
+          environmentDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentDetailsOrBuilder>(
+                  getEnvironmentDetails(),
+                  getParentForChildren(),
+                  isClean());
+          environmentDetails_ = null;
+        }
+        return environmentDetailsBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder> telemetryFeatureDetailsBuilder_;
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public boolean hasTelemetryFeatureDetails() {
+        return telemetryFeatureDetailsBuilder_ != null || telemetryFeatureDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails getTelemetryFeatureDetails() {
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          return telemetryFeatureDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.getDefaultInstance() : telemetryFeatureDetails_;
+        } else {
+          return telemetryFeatureDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public Builder setTelemetryFeatureDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails value) {
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          telemetryFeatureDetails_ = value;
+          onChanged();
+        } else {
+          telemetryFeatureDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public Builder setTelemetryFeatureDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder builderForValue) {
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          telemetryFeatureDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          telemetryFeatureDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public Builder mergeTelemetryFeatureDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails value) {
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          if (telemetryFeatureDetails_ != null) {
+            telemetryFeatureDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.newBuilder(telemetryFeatureDetails_).mergeFrom(value).buildPartial();
+          } else {
+            telemetryFeatureDetails_ = value;
+          }
+          onChanged();
+        } else {
+          telemetryFeatureDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public Builder clearTelemetryFeatureDetails() {
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          telemetryFeatureDetails_ = null;
+          onChanged();
+        } else {
+          telemetryFeatureDetails_ = null;
+          telemetryFeatureDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder getTelemetryFeatureDetailsBuilder() {
+        
+        onChanged();
+        return getTelemetryFeatureDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder getTelemetryFeatureDetailsOrBuilder() {
+        if (telemetryFeatureDetailsBuilder_ != null) {
+          return telemetryFeatureDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return telemetryFeatureDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.getDefaultInstance() : telemetryFeatureDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Data collection metadata
+       * </pre>
+       *
+       * <code>.usage.CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder> 
+          getTelemetryFeatureDetailsFieldBuilder() {
+        if (telemetryFeatureDetailsBuilder_ == null) {
+          telemetryFeatureDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentTelemetryFeatureDetailsOrBuilder>(
+                  getTelemetryFeatureDetails(),
+                  getParentForChildren(),
+                  isClean());
+          telemetryFeatureDetails_ = null;
+        }
+        return telemetryFeatureDetailsBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails freeIPA_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetailsOrBuilder> freeIPABuilder_;
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public boolean hasFreeIPA() {
+        return freeIPABuilder_ != null || freeIPA_ != null;
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails getFreeIPA() {
+        if (freeIPABuilder_ == null) {
+          return freeIPA_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.getDefaultInstance() : freeIPA_;
+        } else {
+          return freeIPABuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public Builder setFreeIPA(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails value) {
+        if (freeIPABuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          freeIPA_ = value;
+          onChanged();
+        } else {
+          freeIPABuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public Builder setFreeIPA(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.Builder builderForValue) {
+        if (freeIPABuilder_ == null) {
+          freeIPA_ = builderForValue.build();
+          onChanged();
+        } else {
+          freeIPABuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public Builder mergeFreeIPA(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails value) {
+        if (freeIPABuilder_ == null) {
+          if (freeIPA_ != null) {
+            freeIPA_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.newBuilder(freeIPA_).mergeFrom(value).buildPartial();
+          } else {
+            freeIPA_ = value;
+          }
+          onChanged();
+        } else {
+          freeIPABuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public Builder clearFreeIPA() {
+        if (freeIPABuilder_ == null) {
+          freeIPA_ = null;
+          onChanged();
+        } else {
+          freeIPA_ = null;
+          freeIPABuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.Builder getFreeIPABuilder() {
+        
+        onChanged();
+        return getFreeIPAFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetailsOrBuilder getFreeIPAOrBuilder() {
+        if (freeIPABuilder_ != null) {
+          return freeIPABuilder_.getMessageOrBuilder();
+        } else {
+          return freeIPA_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.getDefaultInstance() : freeIPA_;
+        }
+      }
+      /**
+       * <pre>
+       * FreeIPA metadata
+       * </pre>
+       *
+       * <code>.usage.CDPFreeIPADetails freeIPA = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetailsOrBuilder> 
+          getFreeIPAFieldBuilder() {
+        if (freeIPABuilder_ == null) {
+          freeIPABuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPADetailsOrBuilder>(
+                  getFreeIPA(),
+                  getParentForChildren(),
+                  isClean());
+          freeIPA_ = null;
+        }
+        return freeIPABuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -59315,6 +60077,74 @@ public final class UsageProto {
      * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * Cluster details for Datalake
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    boolean hasClusterDetails();
+    /**
+     * <pre>
+     * Cluster details for Datalake
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails();
+    /**
+     * <pre>
+     * Cluster details for Datalake
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+     */
+    boolean hasFeatures();
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getFeatures();
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder getFeaturesOrBuilder();
   }
   /**
    * <pre>
@@ -59335,6 +60165,7 @@ public final class UsageProto {
     private CDPDatalakeStatusChanged() {
       oldStatus_ = 0;
       newStatus_ = 0;
+      environmentCrn_ = "";
     }
 
     @java.lang.Override
@@ -59395,6 +60226,38 @@ public final class UsageProto {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(statusDetails_);
                 statusDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              environmentCrn_ = s;
+              break;
+            }
+            case 50: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder subBuilder = null;
+              if (clusterDetails_ != null) {
+                subBuilder = clusterDetails_.toBuilder();
+              }
+              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(clusterDetails_);
+                clusterDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 58: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder subBuilder = null;
+              if (features_ != null) {
+                subBuilder = features_.toBuilder();
+              }
+              features_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(features_);
+                features_ = subBuilder.buildPartial();
               }
 
               break;
@@ -59547,6 +60410,114 @@ public final class UsageProto {
       return getStatusDetails();
     }
 
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 5;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 6;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails clusterDetails_;
+    /**
+     * <pre>
+     * Cluster details for Datalake
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    public boolean hasClusterDetails() {
+      return clusterDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Cluster details for Datalake
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails() {
+      return clusterDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.getDefaultInstance() : clusterDetails_;
+    }
+    /**
+     * <pre>
+     * Cluster details for Datalake
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+      return getClusterDetails();
+    }
+
+    public static final int FEATURES_FIELD_NUMBER = 7;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures features_;
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+     */
+    public boolean hasFeatures() {
+      return features_ != null;
+    }
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getFeatures() {
+      return features_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance() : features_;
+    }
+    /**
+     * <pre>
+     * Feature tracking for DL
+     * </pre>
+     *
+     * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder getFeaturesOrBuilder() {
+      return getFeatures();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -59573,6 +60544,15 @@ public final class UsageProto {
       if (statusDetails_ != null) {
         output.writeMessage(4, getStatusDetails());
       }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, environmentCrn_);
+      }
+      if (clusterDetails_ != null) {
+        output.writeMessage(6, getClusterDetails());
+      }
+      if (features_ != null) {
+        output.writeMessage(7, getFeatures());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -59597,6 +60577,17 @@ public final class UsageProto {
       if (statusDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getStatusDetails());
+      }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, environmentCrn_);
+      }
+      if (clusterDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getClusterDetails());
+      }
+      if (features_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, getFeatures());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -59626,6 +60617,18 @@ public final class UsageProto {
         result = result && getStatusDetails()
             .equals(other.getStatusDetails());
       }
+      result = result && getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn());
+      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (hasClusterDetails()) {
+        result = result && getClusterDetails()
+            .equals(other.getClusterDetails());
+      }
+      result = result && (hasFeatures() == other.hasFeatures());
+      if (hasFeatures()) {
+        result = result && getFeatures()
+            .equals(other.getFeatures());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -59648,6 +60651,16 @@ public final class UsageProto {
       if (hasStatusDetails()) {
         hash = (37 * hash) + STATUSDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getStatusDetails().hashCode();
+      }
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      if (hasClusterDetails()) {
+        hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getClusterDetails().hashCode();
+      }
+      if (hasFeatures()) {
+        hash = (37 * hash) + FEATURES_FIELD_NUMBER;
+        hash = (53 * hash) + getFeatures().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -59802,6 +60815,20 @@ public final class UsageProto {
           statusDetails_ = null;
           statusDetailsBuilder_ = null;
         }
+        environmentCrn_ = "";
+
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+        if (featuresBuilder_ == null) {
+          features_ = null;
+        } else {
+          features_ = null;
+          featuresBuilder_ = null;
+        }
         return this;
       }
 
@@ -59839,6 +60866,17 @@ public final class UsageProto {
           result.statusDetails_ = statusDetails_;
         } else {
           result.statusDetails_ = statusDetailsBuilder_.build();
+        }
+        result.environmentCrn_ = environmentCrn_;
+        if (clusterDetailsBuilder_ == null) {
+          result.clusterDetails_ = clusterDetails_;
+        } else {
+          result.clusterDetails_ = clusterDetailsBuilder_.build();
+        }
+        if (featuresBuilder_ == null) {
+          result.features_ = features_;
+        } else {
+          result.features_ = featuresBuilder_.build();
         }
         onBuilt();
         return result;
@@ -59899,6 +60937,16 @@ public final class UsageProto {
         }
         if (other.hasStatusDetails()) {
           mergeStatusDetails(other.getStatusDetails());
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        if (other.hasClusterDetails()) {
+          mergeClusterDetails(other.getClusterDetails());
+        }
+        if (other.hasFeatures()) {
+          mergeFeatures(other.getFeatures());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -60363,6 +61411,401 @@ public final class UsageProto {
           statusDetails_ = null;
         }
         return statusDetailsBuilder_;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails clusterDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder> clusterDetailsBuilder_;
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public boolean hasClusterDetails() {
+        return clusterDetailsBuilder_ != null || clusterDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          return clusterDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.getDefaultInstance() : clusterDetails_;
+        } else {
+          return clusterDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder setClusterDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          clusterDetails_ = value;
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder setClusterDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder builderForValue) {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder mergeClusterDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (clusterDetails_ != null) {
+            clusterDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.newBuilder(clusterDetails_).mergeFrom(value).buildPartial();
+          } else {
+            clusterDetails_ = value;
+          }
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder clearClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+          onChanged();
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder getClusterDetailsBuilder() {
+        
+        onChanged();
+        return getClusterDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+        if (clusterDetailsBuilder_ != null) {
+          return clusterDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return clusterDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.getDefaultInstance() : clusterDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Cluster details for Datalake
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder> 
+          getClusterDetailsFieldBuilder() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder>(
+                  getClusterDetails(),
+                  getParentForChildren(),
+                  isClean());
+          clusterDetails_ = null;
+        }
+        return clusterDetailsBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures features_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder> featuresBuilder_;
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public boolean hasFeatures() {
+        return featuresBuilder_ != null || features_ != null;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures getFeatures() {
+        if (featuresBuilder_ == null) {
+          return features_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance() : features_;
+        } else {
+          return featuresBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public Builder setFeatures(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures value) {
+        if (featuresBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          features_ = value;
+          onChanged();
+        } else {
+          featuresBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public Builder setFeatures(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder builderForValue) {
+        if (featuresBuilder_ == null) {
+          features_ = builderForValue.build();
+          onChanged();
+        } else {
+          featuresBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public Builder mergeFeatures(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures value) {
+        if (featuresBuilder_ == null) {
+          if (features_ != null) {
+            features_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.newBuilder(features_).mergeFrom(value).buildPartial();
+          } else {
+            features_ = value;
+          }
+          onChanged();
+        } else {
+          featuresBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public Builder clearFeatures() {
+        if (featuresBuilder_ == null) {
+          features_ = null;
+          onChanged();
+        } else {
+          features_ = null;
+          featuresBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder getFeaturesBuilder() {
+        
+        onChanged();
+        return getFeaturesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder getFeaturesOrBuilder() {
+        if (featuresBuilder_ != null) {
+          return featuresBuilder_.getMessageOrBuilder();
+        } else {
+          return features_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.getDefaultInstance() : features_;
+        }
+      }
+      /**
+       * <pre>
+       * Feature tracking for DL
+       * </pre>
+       *
+       * <code>.usage.CDPDatalakeFeatures features = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder> 
+          getFeaturesFieldBuilder() {
+        if (featuresBuilder_ == null) {
+          featuresBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeatures.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPDatalakeFeaturesOrBuilder>(
+                  getFeatures(),
+                  getParentForChildren(),
+                  isClean());
+          features_ = null;
+        }
+        return featuresBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -61606,6 +63049,49 @@ public final class UsageProto {
      * <code>.usage.CDPStatusDetails statusDetails = 4;</code>
      */
     com.cloudera.thunderhead.service.common.usage.UsageProto.CDPStatusDetailsOrBuilder getStatusDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    java.lang.String getEnvironmentCrn();
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    com.google.protobuf.ByteString
+        getEnvironmentCrnBytes();
+
+    /**
+     * <pre>
+     * Cluster details for Datahub
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    boolean hasClusterDetails();
+    /**
+     * <pre>
+     * Cluster details for Datahub
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails();
+    /**
+     * <pre>
+     * Cluster details for Datahub
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder();
   }
   /**
    * <pre>
@@ -61626,6 +63112,7 @@ public final class UsageProto {
     private CDPDatahubStatusChanged() {
       oldStatus_ = 0;
       newStatus_ = 0;
+      environmentCrn_ = "";
     }
 
     @java.lang.Override
@@ -61686,6 +63173,25 @@ public final class UsageProto {
               if (subBuilder != null) {
                 subBuilder.mergeFrom(statusDetails_);
                 statusDetails_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              environmentCrn_ = s;
+              break;
+            }
+            case 50: {
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder subBuilder = null;
+              if (clusterDetails_ != null) {
+                subBuilder = clusterDetails_.toBuilder();
+              }
+              clusterDetails_ = input.readMessage(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(clusterDetails_);
+                clusterDetails_ = subBuilder.buildPartial();
               }
 
               break;
@@ -61838,6 +63344,81 @@ public final class UsageProto {
       return getStatusDetails();
     }
 
+    public static final int ENVIRONMENTCRN_FIELD_NUMBER = 5;
+    private volatile java.lang.Object environmentCrn_;
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    public java.lang.String getEnvironmentCrn() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        environmentCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Environment Crn
+     * </pre>
+     *
+     * <code>string environmentCrn = 5;</code>
+     */
+    public com.google.protobuf.ByteString
+        getEnvironmentCrnBytes() {
+      java.lang.Object ref = environmentCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        environmentCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLUSTERDETAILS_FIELD_NUMBER = 6;
+    private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails clusterDetails_;
+    /**
+     * <pre>
+     * Cluster details for Datahub
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    public boolean hasClusterDetails() {
+      return clusterDetails_ != null;
+    }
+    /**
+     * <pre>
+     * Cluster details for Datahub
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails() {
+      return clusterDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.getDefaultInstance() : clusterDetails_;
+    }
+    /**
+     * <pre>
+     * Cluster details for Datahub
+     * </pre>
+     *
+     * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+     */
+    public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+      return getClusterDetails();
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -61864,6 +63445,12 @@ public final class UsageProto {
       if (statusDetails_ != null) {
         output.writeMessage(4, getStatusDetails());
       }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, environmentCrn_);
+      }
+      if (clusterDetails_ != null) {
+        output.writeMessage(6, getClusterDetails());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -61888,6 +63475,13 @@ public final class UsageProto {
       if (statusDetails_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getStatusDetails());
+      }
+      if (!getEnvironmentCrnBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, environmentCrn_);
+      }
+      if (clusterDetails_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getClusterDetails());
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -61917,6 +63511,13 @@ public final class UsageProto {
         result = result && getStatusDetails()
             .equals(other.getStatusDetails());
       }
+      result = result && getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn());
+      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (hasClusterDetails()) {
+        result = result && getClusterDetails()
+            .equals(other.getClusterDetails());
+      }
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -61939,6 +63540,12 @@ public final class UsageProto {
       if (hasStatusDetails()) {
         hash = (37 * hash) + STATUSDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getStatusDetails().hashCode();
+      }
+      hash = (37 * hash) + ENVIRONMENTCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getEnvironmentCrn().hashCode();
+      if (hasClusterDetails()) {
+        hash = (37 * hash) + CLUSTERDETAILS_FIELD_NUMBER;
+        hash = (53 * hash) + getClusterDetails().hashCode();
       }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
@@ -62093,6 +63700,14 @@ public final class UsageProto {
           statusDetails_ = null;
           statusDetailsBuilder_ = null;
         }
+        environmentCrn_ = "";
+
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
         return this;
       }
 
@@ -62130,6 +63745,12 @@ public final class UsageProto {
           result.statusDetails_ = statusDetails_;
         } else {
           result.statusDetails_ = statusDetailsBuilder_.build();
+        }
+        result.environmentCrn_ = environmentCrn_;
+        if (clusterDetailsBuilder_ == null) {
+          result.clusterDetails_ = clusterDetails_;
+        } else {
+          result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
         onBuilt();
         return result;
@@ -62190,6 +63811,13 @@ public final class UsageProto {
         }
         if (other.hasStatusDetails()) {
           mergeStatusDetails(other.getStatusDetails());
+        }
+        if (!other.getEnvironmentCrn().isEmpty()) {
+          environmentCrn_ = other.environmentCrn_;
+          onChanged();
+        }
+        if (other.hasClusterDetails()) {
+          mergeClusterDetails(other.getClusterDetails());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -62654,6 +64282,248 @@ public final class UsageProto {
           statusDetails_ = null;
         }
         return statusDetailsBuilder_;
+      }
+
+      private java.lang.Object environmentCrn_ = "";
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public java.lang.String getEnvironmentCrn() {
+        java.lang.Object ref = environmentCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          environmentCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public com.google.protobuf.ByteString
+          getEnvironmentCrnBytes() {
+        java.lang.Object ref = environmentCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          environmentCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public Builder setEnvironmentCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public Builder clearEnvironmentCrn() {
+        
+        environmentCrn_ = getDefaultInstance().getEnvironmentCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Environment Crn
+       * </pre>
+       *
+       * <code>string environmentCrn = 5;</code>
+       */
+      public Builder setEnvironmentCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        environmentCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails clusterDetails_ = null;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder> clusterDetailsBuilder_;
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public boolean hasClusterDetails() {
+        return clusterDetailsBuilder_ != null || clusterDetails_ != null;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails getClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          return clusterDetails_ == null ? com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.getDefaultInstance() : clusterDetails_;
+        } else {
+          return clusterDetailsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder setClusterDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          clusterDetails_ = value;
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder setClusterDetails(
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder builderForValue) {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = builderForValue.build();
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder mergeClusterDetails(com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails value) {
+        if (clusterDetailsBuilder_ == null) {
+          if (clusterDetails_ != null) {
+            clusterDetails_ =
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.newBuilder(clusterDetails_).mergeFrom(value).buildPartial();
+          } else {
+            clusterDetails_ = value;
+          }
+          onChanged();
+        } else {
+          clusterDetailsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public Builder clearClusterDetails() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetails_ = null;
+          onChanged();
+        } else {
+          clusterDetails_ = null;
+          clusterDetailsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder getClusterDetailsBuilder() {
+        
+        onChanged();
+        return getClusterDetailsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
+        if (clusterDetailsBuilder_ != null) {
+          return clusterDetailsBuilder_.getMessageOrBuilder();
+        } else {
+          return clusterDetails_ == null ?
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.getDefaultInstance() : clusterDetails_;
+        }
+      }
+      /**
+       * <pre>
+       * Cluster details for Datahub
+       * </pre>
+       *
+       * <code>.usage.CDPClusterDetails clusterDetails = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder> 
+          getClusterDetailsFieldBuilder() {
+        if (clusterDetailsBuilder_ == null) {
+          clusterDetailsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetails.Builder, com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterDetailsOrBuilder>(
+                  getClusterDetails(),
+                  getParentForChildren(),
+                  isClean());
+          clusterDetails_ = null;
+        }
+        return clusterDetailsBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -80386,114 +82256,123 @@ public final class UsageProto {
       "s\022M\n\027telemetryFeatureDetails\030\003 \001(\0132,.usa" +
       "ge.CDPEnvironmentTelemetryFeatureDetails" +
       "\022)\n\007freeIPA\030\004 \001(\0132\030.usage.CDPFreeIPADeta" +
-      "ils\"\326\001\n\033CDPEnvironmentStatusChanged\0224\n\020o" +
+      "ils\"\212\003\n\033CDPEnvironmentStatusChanged\0224\n\020o" +
       "perationDetails\030\001 \001(\0132\032.usage.CDPOperati" +
       "onDetails\0224\n\toldStatus\030\002 \001(\0162!.usage.CDP" +
       "EnvironmentStatus.Value\0224\n\tnewStatus\030\003 \001" +
       "(\0162!.usage.CDPEnvironmentStatus.Value\022\025\n" +
-      "\rfailureReason\030\004 \001(\t\"8\n\017CDPImageDetails\022" +
-      "\017\n\007imageId\030\001 \001(\t\022\024\n\014imageCatalog\030\002 \001(\t\"t" +
-      "\n\017CDPClusterShape\022\033\n\023clusterTemplateName" +
-      "\030\001 \001(\t\022\r\n\005nodes\030\002 \001(\005\022\032\n\022hostGroupNodeCo" +
-      "unt\030\003 \001(\t\022\031\n\021definitionDetails\030\004 \001(\t\"\206\001\n" +
-      "\021CDPVersionDetails\022\021\n\tcrVersion\030\001 \001(\t\022\021\n" +
-      "\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersion\030\003 \001(\t\022\023\n" +
-      "\013saltVersion\030\004 \001(\t\022\024\n\014osPatchLevel\030\005 \001(\t" +
-      "\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterDetails\022,\n\014c" +
-      "lusterShape\030\001 \001(\0132\026.usage.CDPClusterShap" +
-      "e\0220\n\016versionDetails\030\002 \001(\0132\030.usage.CDPVer" +
-      "sionDetails\022,\n\014imageDetails\030\003 \001(\0132\026.usag" +
-      "e.CDPImageDetails\022\020\n\010userTags\030\004 \001(\t\"\223\001\n\020" +
-      "CDPStatusDetails\022\023\n\013stackStatus\030\001 \001(\t\022\033\n" +
-      "\023stackDetailedStatus\030\002 \001(\t\022\031\n\021stackStatu" +
-      "sReason\030\003 \001(\t\022\025\n\rclusterStatus\030\004 \001(\t\022\033\n\023" +
-      "clusterStatusReason\030\005 \001(\t\"1\n\023CDPDatalake" +
-      "Features\022\032\n\003raz\030\001 \001(\0132\r.usage.CDPRaz\"\030\n\006" +
-      "CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CDPDatalakeRe" +
-      "quested\0224\n\020operationDetails\030\001 \001(\0132\032.usag" +
-      "e.CDPOperationDetails\022\026\n\016environmentCrn\030" +
-      "\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CD" +
-      "PClusterDetails\022,\n\010features\030\004 \001(\0132\032.usag" +
-      "e.CDPDatalakeFeatures\"\344\001\n\030CDPDatalakeSta" +
-      "tusChanged\0224\n\020operationDetails\030\001 \001(\0132\032.u" +
-      "sage.CDPOperationDetails\0220\n\toldStatus\030\002 " +
-      "\001(\0162\035.usage.CDPClusterStatus.Value\0220\n\tne" +
-      "wStatus\030\003 \001(\0162\035.usage.CDPClusterStatus.V" +
-      "alue\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDPS" +
-      "tatusDetails\"\225\001\n\023CDPDatahubRequested\0224\n\020" +
-      "operationDetails\030\001 \001(\0132\032.usage.CDPOperat" +
-      "ionDetails\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016cl" +
-      "usterDetails\030\003 \001(\0132\030.usage.CDPClusterDet" +
-      "ails\"\343\001\n\027CDPDatahubStatusChanged\0224\n\020oper" +
-      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
-      "etails\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClu" +
-      "sterStatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.us" +
-      "age.CDPClusterStatus.Value\022.\n\rstatusDeta" +
-      "ils\030\004 \001(\0132\027.usage.CDPStatusDetails\"y\n\016CD" +
-      "PSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016detailed" +
-      "Status\030\002 \001(\t\022\036\n\026clusterCreationStarted\030\003" +
-      " \001(\004\022\037\n\027clusterCreationFinished\030\004 \001(\004\"\325\001" +
-      "\n\017CDPDatalakeSync\0224\n\020operationDetails\030\001 " +
-      "\001(\0132\032.usage.CDPOperationDetails\022*\n\013syncD" +
-      "etails\030\002 \001(\0132\025.usage.CDPSyncDetails\0220\n\016c" +
-      "lusterDetails\030\003 \001(\0132\030.usage.CDPClusterDe" +
-      "tails\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CDP" +
-      "StatusDetails\"\324\001\n\016CDPDatahubSync\0224\n\020oper" +
-      "ationDetails\030\001 \001(\0132\032.usage.CDPOperationD" +
-      "etails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPS" +
-      "yncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usa" +
-      "ge.CDPClusterDetails\022.\n\rstatusDetails\030\004 " +
-      "\001(\0132\027.usage.CDPStatusDetails\"8\n\030CDPDFCat" +
-      "alogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020\000\022\010\n\004" +
-      "FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCreated\022\022" +
-      "\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n" +
-      "\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFCa" +
-      "talogArtifactType.Value\"\206\001\n\033CDPDFCatalog" +
-      "ArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\ta" +
-      "ccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(" +
-      "\0162%.usage.CDPDFCatalogArtifactType.Value" +
-      "\"k\n\"CDPDFCatalogArtifactVersionCreated\022\021" +
-      "\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n" +
-      "\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CDPDFCa" +
-      "talogArtifactVersionDeleted\022\021\n\tversionId" +
-      "\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022" +
-      "\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFServiceStatu" +
-      "s\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_REQUEST" +
-      "ED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENABLE_C" +
-      "OMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DISABLE" +
-      "_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS\020\006\022\025\n" +
-      "\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAILED\020\010" +
-      "\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN_PROG" +
-      "RESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE_COMP" +
-      "LETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n\002id\030\001" +
-      " \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(\t\022\022\n\n" +
-      "workflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n\025CDPD" +
-      "FServiceRequested\0226\n\020operationDetails\030\001 " +
-      "\001(\0132\034.usage.CDPDFOperationDetails\022\026\n\016env" +
-      "ironmentCrn\030\002 \001(\t\022D\n\017environmentType\030\003 \001" +
-      "(\0162+.usage.CDPEnvironmentsEnvironmentTyp" +
-      "e.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010minNode" +
-      "s\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sServerVe" +
-      "rsion\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016publicEn" +
-      "dpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n \001(\010\022/" +
-      "\n\006status\030\013 \001(\0162\037.usage.CDPDFServiceStatu" +
-      "s.Value\"\322\001\n\031CDPDFServiceStatusChanged\0226\n" +
-      "\020operationDetails\030\001 \001(\0132\034.usage.CDPDFOpe" +
-      "rationDetails\0222\n\toldStatus\030\002 \001(\0162\037.usage" +
-      ".CDPDFServiceStatus.Value\0222\n\tnewStatus\030\003" +
-      " \001(\0162\037.usage.CDPDFServiceStatus.Value\022\025\n" +
-      "\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundleInit" +
-      "iated\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDP" +
-      "UDXBundleDetails\022\024\n\014initiatorCrn\030\002 \001(\t\022\022" +
-      "\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleReceiv" +
-      "ed\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.CDPUDX" +
-      "BundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006status\030\003 " +
-      "\001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccountId\030" +
-      "\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentCrn\030\003 " +
-      "\001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 \001(\tBV" +
-      "\n-com.cloudera.thunderhead.service.commo" +
-      "n.usageB\nUsageProtoZ\031com/cloudera/cdp/pr" +
-      "otobufb\006proto3"
+      "\rfailureReason\030\004 \001(\t\0228\n\022environmentDetai" +
+      "ls\030\005 \001(\0132\034.usage.CDPEnvironmentDetails\022M" +
+      "\n\027telemetryFeatureDetails\030\006 \001(\0132,.usage." +
+      "CDPEnvironmentTelemetryFeatureDetails\022)\n" +
+      "\007freeIPA\030\007 \001(\0132\030.usage.CDPFreeIPADetails" +
+      "\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014" +
+      "imageCatalog\030\002 \001(\t\"t\n\017CDPClusterShape\022\033\n" +
+      "\023clusterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(" +
+      "\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021definit" +
+      "ionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDetails\022\021" +
+      "\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013" +
+      "cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024" +
+      "\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CD" +
+      "PClusterDetails\022,\n\014clusterShape\030\001 \001(\0132\026." +
+      "usage.CDPClusterShape\0220\n\016versionDetails\030" +
+      "\002 \001(\0132\030.usage.CDPVersionDetails\022,\n\014image" +
+      "Details\030\003 \001(\0132\026.usage.CDPImageDetails\022\020\n" +
+      "\010userTags\030\004 \001(\t\"\223\001\n\020CDPStatusDetails\022\023\n\013" +
+      "stackStatus\030\001 \001(\t\022\033\n\023stackDetailedStatus" +
+      "\030\002 \001(\t\022\031\n\021stackStatusReason\030\003 \001(\t\022\025\n\rclu" +
+      "sterStatus\030\004 \001(\t\022\033\n\023clusterStatusReason\030" +
+      "\005 \001(\t\"1\n\023CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(" +
+      "\0132\r.usage.CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001" +
+      "(\t\"\304\001\n\024CDPDatalakeRequested\0224\n\020operation" +
+      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
+      "s\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDeta" +
+      "ils\030\003 \001(\0132\030.usage.CDPClusterDetails\022,\n\010f" +
+      "eatures\030\004 \001(\0132\032.usage.CDPDatalakeFeature" +
+      "s\"\334\002\n\030CDPDatalakeStatusChanged\0224\n\020operat" +
+      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
+      "ails\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClust" +
+      "erStatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usag" +
+      "e.CDPClusterStatus.Value\022.\n\rstatusDetail" +
+      "s\030\004 \001(\0132\027.usage.CDPStatusDetails\022\026\n\016envi" +
+      "ronmentCrn\030\005 \001(\t\0220\n\016clusterDetails\030\006 \001(\013" +
+      "2\030.usage.CDPClusterDetails\022,\n\010features\030\007" +
+      " \001(\0132\032.usage.CDPDatalakeFeatures\"\225\001\n\023CDP" +
+      "DatahubRequested\0224\n\020operationDetails\030\001 \001" +
+      "(\0132\032.usage.CDPOperationDetails\022\026\n\016enviro" +
+      "nmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030" +
+      ".usage.CDPClusterDetails\"\255\002\n\027CDPDatahubS" +
+      "tatusChanged\0224\n\020operationDetails\030\001 \001(\0132\032" +
+      ".usage.CDPOperationDetails\0220\n\toldStatus\030" +
+      "\002 \001(\0162\035.usage.CDPClusterStatus.Value\0220\n\t" +
+      "newStatus\030\003 \001(\0162\035.usage.CDPClusterStatus" +
+      ".Value\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CD" +
+      "PStatusDetails\022\026\n\016environmentCrn\030\005 \001(\t\0220" +
+      "\n\016clusterDetails\030\006 \001(\0132\030.usage.CDPCluste" +
+      "rDetails\"y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001" +
+      "(\t\022\026\n\016detailedStatus\030\002 \001(\t\022\036\n\026clusterCre" +
+      "ationStarted\030\003 \001(\004\022\037\n\027clusterCreationFin" +
+      "ished\030\004 \001(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020opera" +
+      "tionDetails\030\001 \001(\0132\032.usage.CDPOperationDe" +
+      "tails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSy" +
+      "ncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usag" +
+      "e.CDPClusterDetails\022.\n\rstatusDetails\030\004 \001" +
+      "(\0132\027.usage.CDPStatusDetails\"\324\001\n\016CDPDatah" +
+      "ubSync\0224\n\020operationDetails\030\001 \001(\0132\032.usage" +
+      ".CDPOperationDetails\022*\n\013syncDetails\030\002 \001(" +
+      "\0132\025.usage.CDPSyncDetails\0220\n\016clusterDetai" +
+      "ls\030\003 \001(\0132\030.usage.CDPClusterDetails\022.\n\rst" +
+      "atusDetails\030\004 \001(\0132\027.usage.CDPStatusDetai" +
+      "ls\"8\n\030CDPDFCatalogArtifactType\"\034\n\005Value\022" +
+      "\t\n\005UNSET\020\000\022\010\n\004FLOW\020\001\"\206\001\n\033CDPDFCatalogArt" +
+      "ifactCreated\022\022\n\nartifactId\030\001 \001(\t\022\021\n\tacco" +
+      "untId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%" +
+      ".usage.CDPDFCatalogArtifactType.Value\"\206\001" +
+      "\n\033CDPDFCatalogArtifactDeleted\022\022\n\nartifac" +
+      "tId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(" +
+      "\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFCatalogArti" +
+      "factType.Value\"k\n\"CDPDFCatalogArtifactVe" +
+      "rsionCreated\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartif" +
+      "actId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 " +
+      "\001(\t\"k\n\"CDPDFCatalogArtifactVersionDelete" +
+      "d\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t" +
+      "\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDP" +
+      "DFServiceStatus\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020" +
+      "ENABLE_REQUESTED\020\001\022\026\n\022ENABLE_IN_PROGRESS" +
+      "\020\002\022\024\n\020ENABLE_COMPLETED\020\003\022\021\n\rENABLE_FAILE" +
+      "D\020\004\022\025\n\021DISABLE_REQUESTED\020\005\022\027\n\023DISABLE_IN" +
+      "_PROGRESS\020\006\022\025\n\021DISABLE_COMPLETED\020\007\022\022\n\016DI" +
+      "SABLE_FAILED\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022" +
+      "UPDATE_IN_PROGRESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022" +
+      "\024\n\020UPDATE_COMPLETED\020\014\"f\n\025CDPDFOperationD" +
+      "etails\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccou" +
+      "ntId\030\003 \001(\t\022\022\n\nworkflowId\030\004 \001(\t\022\r\n\005runId\030" +
+      "\005 \001(\t\"\365\002\n\025CDPDFServiceRequested\0226\n\020opera" +
+      "tionDetails\030\001 \001(\0132\034.usage.CDPDFOperation" +
+      "Details\022\026\n\016environmentCrn\030\002 \001(\t\022D\n\017envir" +
+      "onmentType\030\003 \001(\0162+.usage.CDPEnvironments" +
+      "EnvironmentType.Value\022\024\n\014instanceType\030\004 " +
+      "\001(\t\022\020\n\010minNodes\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022" +
+      "\030\n\020k8sServerVersion\030\007 \001(\t\022\017\n\007version\030\010 \001" +
+      "(\t\022\026\n\016publicEndpoint\030\t \001(\010\022\030\n\020accessRest" +
+      "ricted\030\n \001(\010\022/\n\006status\030\013 \001(\0162\037.usage.CDP" +
+      "DFServiceStatus.Value\"\322\001\n\031CDPDFServiceSt" +
+      "atusChanged\0226\n\020operationDetails\030\001 \001(\0132\034." +
+      "usage.CDPDFOperationDetails\0222\n\toldStatus" +
+      "\030\002 \001(\0162\037.usage.CDPDFServiceStatus.Value\022" +
+      "2\n\tnewStatus\030\003 \001(\0162\037.usage.CDPDFServiceS" +
+      "tatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"t\n\025CD" +
+      "PUDXBundleInitiated\0221\n\rbundleDetails\030\001 \001" +
+      "(\0132\032.usage.CDPUDXBundleDetails\022\024\n\014initia" +
+      "torCrn\030\002 \001(\t\022\022\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPU" +
+      "DXBundleReceived\0221\n\rbundleDetails\030\001 \001(\0132" +
+      "\032.usage.CDPUDXBundleDetails\022\014\n\004host\030\002 \001(" +
+      "\t\022\016\n\006status\030\003 \001(\t\"q\n\023CDPUDXBundleDetails" +
+      "\022\021\n\taccountId\030\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016env" +
+      "ironmentCrn\030\003 \001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014" +
+      "\n\004type\030\005 \001(\tBV\n-com.cloudera.thunderhead" +
+      ".service.common.usageB\nUsageProtoZ\031com/c" +
+      "loudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -80734,7 +82613,7 @@ public final class UsageProto {
     internal_static_usage_CDPEnvironmentStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPEnvironmentStatusChanged_descriptor,
-        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "FailureReason", });
+        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "FailureReason", "EnvironmentDetails", "TelemetryFeatureDetails", "FreeIPA", });
     internal_static_usage_CDPImageDetails_descriptor =
       getDescriptor().getMessageTypes().get(38);
     internal_static_usage_CDPImageDetails_fieldAccessorTable = new
@@ -80788,7 +82667,7 @@ public final class UsageProto {
     internal_static_usage_CDPDatalakeStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatalakeStatusChanged_descriptor,
-        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
+        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", "EnvironmentCrn", "ClusterDetails", "Features", });
     internal_static_usage_CDPDatahubRequested_descriptor =
       getDescriptor().getMessageTypes().get(47);
     internal_static_usage_CDPDatahubRequested_fieldAccessorTable = new
@@ -80800,7 +82679,7 @@ public final class UsageProto {
     internal_static_usage_CDPDatahubStatusChanged_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPDatahubStatusChanged_descriptor,
-        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", });
+        new java.lang.String[] { "OperationDetails", "OldStatus", "NewStatus", "StatusDetails", "EnvironmentCrn", "ClusterDetails", });
     internal_static_usage_CDPSyncDetails_descriptor =
       getDescriptor().getMessageTypes().get(49);
     internal_static_usage_CDPSyncDetails_fieldAccessorTable = new

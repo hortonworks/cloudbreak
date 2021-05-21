@@ -25,8 +25,20 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNull("We should return with null if the input is null", underTest.convert(null));
-    }
+        UsageProto.CDPOperationDetails details = underTest.convert(null);
+
+        Assert.assertEquals("", details.getAccountId());
+        Assert.assertEquals("", details.getResourceCrn());
+        Assert.assertEquals("", details.getResourceName());
+        Assert.assertEquals("", details.getInitiatorCrn());
+        Assert.assertEquals("", details.getCorrelationId());
+        Assert.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
+        Assert.assertEquals("", details.getFlowId());
+        Assert.assertEquals("", details.getFlowChainId());
+        Assert.assertEquals("", details.getFlowState());
+        Assert.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
+
+        Assert.assertEquals("version-1234", details.getApplicationVersion());    }
 
     @Test
     public void testConversionWithNullOperation() {

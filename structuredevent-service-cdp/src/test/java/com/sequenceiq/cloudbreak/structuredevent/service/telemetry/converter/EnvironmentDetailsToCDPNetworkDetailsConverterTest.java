@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.Environme
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
@@ -68,6 +69,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         when(environmentDetails.getNetwork()).thenReturn(networkDto);
         when(environmentDetails.getSecurityAccessType()).thenReturn("CIDR_WIDE_OPEN");
+        when(environmentDetails.getTunnel()).thenReturn(Tunnel.CCM);
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
@@ -85,6 +87,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 networkDetails.getPublicEndpointAccessGateway());
         Assert.assertEquals("CIDR_WIDE_OPEN",
                 networkDetails.getSecurityAccessType());
+        Assert.assertEquals("CCM",
+                networkDetails.getConnectivity());
     }
 
     @Test
@@ -161,7 +165,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         Assertions.assertEquals("", networkDetails.getNetworkType());
         Assertions.assertEquals("", networkDetails.getServiceEndpointCreation());
-        Assertions.assertEquals("", networkDetails.getNetworkType());
+        Assertions.assertEquals("", networkDetails.getConnectivity());
         Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
         Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
         Assertions.assertEquals("", networkDetails.getPublicEndpointAccessGateway());

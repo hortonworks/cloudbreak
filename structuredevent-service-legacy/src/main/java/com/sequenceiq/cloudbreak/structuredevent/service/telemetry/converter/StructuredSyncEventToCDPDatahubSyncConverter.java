@@ -27,11 +27,8 @@ public class StructuredSyncEventToCDPDatahubSyncConverter {
     private StructuredEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatahubSync convert(StructuredSyncEvent structuredSyncEvent) {
-        if (structuredSyncEvent == null) {
-            return null;
-        }
-
         UsageProto.CDPDatahubSync.Builder cdpDatahubSyncBuilder = UsageProto.CDPDatahubSync.newBuilder();
+
         cdpDatahubSyncBuilder.setOperationDetails(operationDetailsConverter.convert(structuredSyncEvent));
         cdpDatahubSyncBuilder.setSyncDetails(syncDetailsConverter.convert(structuredSyncEvent));
         cdpDatahubSyncBuilder.setClusterDetails(clusterDetailsConverter.convert(structuredSyncEvent));
