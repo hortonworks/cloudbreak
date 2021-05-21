@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.VmImage;
@@ -146,6 +149,20 @@ public class CustomImageCatalogServiceTest {
         when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
 
         assertThrows(NotFoundException.class, () -> victim.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME));
+    }
+
+    @Test
+    public void testGetSourceImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        CustomImage customImage = new CustomImage();
+        customImage.setCustomizedImageId(CUSTOMIZED_IMAGE_ID);
+        Image expected = createTestImage();
+        StatedImage statedImage = StatedImage.statedImage(expected, null, IMAGE_CATALOG_NAME);
+
+        when(imageCatalogService.getSourceImageByImageType(customImage, IMAGE_CATALOG_NAME)).thenReturn(statedImage);
+
+        Image actual = victim.getSourceImage(customImage, IMAGE_CATALOG_NAME);
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -311,5 +328,9 @@ public class CustomImageCatalogServiceTest {
         customImage.setVmImage(Collections.singleton(vmImage));
 
         return customImage;
+    }
+
+    private Image createTestImage() {
+        return new Image(null, null, null, null, CUSTOMIZED_IMAGE_ID, null, null, null, null, null, null, null, null, null, true, null, null);
     }
 }

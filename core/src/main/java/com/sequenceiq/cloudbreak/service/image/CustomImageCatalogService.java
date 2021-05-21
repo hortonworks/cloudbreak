@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.VmImage;
@@ -59,6 +62,18 @@ public class CustomImageCatalogService {
         LOGGER.debug(String.format("Get custom image '%s' from catalog '%s' in workspace '%d'", imageId, imageCatalogName, workspaceId));
         ImageCatalog imageCatalog = getImageCatalog(workspaceId, imageCatalogName);
         return getCustomImageFromCatalog(imageCatalog, imageId);
+    }
+
+    public Image getSourceImage(CustomImage image, String catalogName) {
+        String imageId = image.getCustomizedImageId();
+        LOGGER.debug(String.format("Get source image '%s' from default catalog", imageId));
+        try {
+            StatedImage sourceStatedImage = imageCatalogService.getSourceImageByImageType(image, catalogName);
+            return sourceStatedImage.getImage();
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            LOGGER.error(String.format("Failed to get source image: %s", e.getMessage()));
+            throw new NotFoundException(String.format("Could not find source image with id: '%s'", imageId));
+        }
     }
 
     public CustomImage createCustomImage(Long workspaceId, String accountId, String creator, String imageCatalogName, CustomImage customImage) {

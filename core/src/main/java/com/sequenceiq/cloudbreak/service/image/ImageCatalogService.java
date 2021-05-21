@@ -717,7 +717,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalog.getCustomImages().stream().filter(i -> i.getName().equalsIgnoreCase(imageId)).findFirst();
     }
 
-    private StatedImage getSourceImageByImageType(CustomImage customImage, String catalogName)
+    public StatedImage getSourceImageByImageType(CustomImage customImage, String catalogName)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage sourceImage;
         switch (customImage.getImageType()) {

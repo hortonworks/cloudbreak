@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
@@ -55,6 +57,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     }
 
     @Override
+    @AccountIdNotNeeded
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public CustomImageCatalogV4GetResponse get(@ResourceName String name) {
         ImageCatalog imageCatalog = customImageCatalogService.getImageCatalog(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
@@ -63,6 +66,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     }
 
     @Override
+    @AccountIdNotNeeded
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateResponse create(CustomImageCatalogV4CreateRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -83,11 +87,15 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     }
 
     @Override
+    @AccountIdNotNeeded
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public CustomImageCatalogV4GetImageResponse getCustomImage(@ResourceName String name, String imageId) {
         CustomImage customImage = customImageCatalogService.getCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, imageId);
+        Image sourceImage = customImageCatalogService.getSourceImage(customImage, name);
+        CustomImageCatalogV4GetImageResponse response = converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class);
+        response.setSourceImageDate(sourceImage.getCreated());
 
-        return converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class);
+        return response;
     }
 
     @Override
