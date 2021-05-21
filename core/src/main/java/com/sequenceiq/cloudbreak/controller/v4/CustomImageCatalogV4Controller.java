@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Controller;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.Set;
 
 @Controller
@@ -48,7 +50,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
-    public CustomImageCatalogV4ListResponse list() {
+    public CustomImageCatalogV4ListResponse list(@AccountId String accountId) {
         Set<ImageCatalog> imageCatalogs = customImageCatalogService.getImageCatalogs(restRequestThreadLocalService.getRequestedWorkspaceId());
 
         return new CustomImageCatalogV4ListResponse(converterUtil.convertAllAsSet(imageCatalogs, CustomImageCatalogV4ListItemResponse.class));
@@ -56,7 +58,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
-    public CustomImageCatalogV4GetResponse get(@ResourceName String name) {
+    public CustomImageCatalogV4GetResponse get(@ResourceName String name, @AccountId String accountId) {
         ImageCatalog imageCatalog = customImageCatalogService.getImageCatalog(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
 
         return converterUtil.convert(imageCatalog, CustomImageCatalogV4GetResponse.class);
@@ -64,8 +66,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_IMAGE_CATALOG)
-    public CustomImageCatalogV4CreateResponse create(CustomImageCatalogV4CreateRequest request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+    public CustomImageCatalogV4CreateResponse create(@Valid CustomImageCatalogV4CreateRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         ImageCatalog imageCatalog = converterUtil.convert(request, ImageCatalog.class);
         ImageCatalog savedImageCatalog = customImageCatalogService
@@ -76,7 +77,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_IMAGE_CATALOG)
-    public CustomImageCatalogV4DeleteResponse delete(@ResourceName String name) {
+    public CustomImageCatalogV4DeleteResponse delete(@ResourceName String name, @AccountId String accountId) {
         ImageCatalog imageCatalog = customImageCatalogService.delete(restRequestThreadLocalService.getRequestedWorkspaceId(), name);
 
         return converterUtil.convert(imageCatalog, CustomImageCatalogV4DeleteResponse.class);
@@ -84,7 +85,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
-    public CustomImageCatalogV4GetImageResponse getCustomImage(@ResourceName String name, String imageId) {
+    public CustomImageCatalogV4GetImageResponse getCustomImage(@ResourceName String name, String imageId, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogService.getCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, imageId);
 
         return converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class);
@@ -93,8 +94,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4CreateImageResponse createCustomImage(@ResourceName String name,
-            CustomImageCatalogV4CreateImageRequest request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            @Valid CustomImageCatalogV4CreateImageRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         CustomImage customImage = converterUtil.convert(request, CustomImage.class);
         CustomImage savedCustomImage = customImageCatalogService
@@ -106,7 +106,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4UpdateImageResponse updateCustomImage(@ResourceName String name, String imageId,
-            CustomImageCatalogV4UpdateImageRequest request) {
+            CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         CustomImage customImage = converterUtil.convert(request, CustomImage.class);
         customImage.setName(imageId);
@@ -118,7 +118,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
-    public CustomImageCatalogV4DeleteImageResponse deleteCustomImage(@ResourceName String name, String imageId) {
+    public CustomImageCatalogV4DeleteImageResponse deleteCustomImage(@ResourceName String name, String imageId, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogService.deleteCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, imageId);
 
         return converterUtil.convert(customImage, CustomImageCatalogV4DeleteImageResponse.class);
