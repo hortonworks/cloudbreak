@@ -178,8 +178,8 @@ public class ClusterRepairService {
 
     private boolean isHAClusterAndRepairNotAllowed(boolean removeOnly, Stack stack) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return !entitlementService.mediumDutyRepairEnabled(accountId)
-                && !entitlementService.mediumDutyUpgradeEnabled(accountId)
+        return !entitlementService.haRepairEnabled(accountId)
+                && !entitlementService.haUpgradeEnabled(accountId)
                 && !removeOnly
                 && stack.getTunnel().useClusterProxy()
                 && hasMultipleGatewayInstances(stack);
