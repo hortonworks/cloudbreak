@@ -202,6 +202,9 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
         when(stack.getInstanceGroups()).thenReturn(Set.of(host1.getInstanceGroup()));
         when(stack.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
+        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+                .thenReturn(true);
+        when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false)));
@@ -437,7 +440,7 @@ public class ClusterRepairServiceTest {
                 .thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false);
+                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false, false);
 
         assertEquals(1, actual.getError().getValidationErrors().size());
         assertEquals("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state.",
@@ -452,7 +455,7 @@ public class ClusterRepairServiceTest {
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false);
+                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false, false);
 
         assertEquals(1, actual.getError().getValidationErrors().size());
         assertEquals("Action cannot be performed because the Environment isn't available. Please check the Environment state.",
