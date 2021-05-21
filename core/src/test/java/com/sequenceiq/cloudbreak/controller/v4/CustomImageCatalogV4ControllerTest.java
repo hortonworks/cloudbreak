@@ -46,6 +46,8 @@ public class CustomImageCatalogV4ControllerTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + UUID + ":user:" + UUID;
 
+    private static final String ACCOUNT_ID = "123";
+
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
@@ -74,7 +76,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(customImageCatalogService.getImageCatalogs(WORKSPACE_ID)).thenReturn(imageCatalogs);
         when(converterUtil.convertAllAsSet(imageCatalogs, CustomImageCatalogV4ListItemResponse.class)).thenReturn(customImageCatalogV4ListItemResponses);
 
-        CustomImageCatalogV4ListResponse actual = victim.list();
+        CustomImageCatalogV4ListResponse actual = victim.list(ACCOUNT_ID);
 
         assertEquals(customImageCatalogV4ListItemResponses, actual.getResponses());
     }
@@ -88,7 +90,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(customImageCatalogService.getImageCatalog(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(converterUtil.convert(imageCatalog, CustomImageCatalogV4GetResponse.class)).thenReturn(expected);
 
-        CustomImageCatalogV4GetResponse actual = victim.get(IMAGE_CATALOG_NAME);
+        CustomImageCatalogV4GetResponse actual = victim.get(IMAGE_CATALOG_NAME, ACCOUNT_ID);
 
         assertEquals(expected, actual);
     }
@@ -106,7 +108,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(converterUtil.convert(savedImageCatalog, CustomImageCatalogV4CreateResponse.class)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            CustomImageCatalogV4CreateResponse actual = victim.create(request);
+            CustomImageCatalogV4CreateResponse actual = victim.create(request, ACCOUNT_ID);
 
             assertEquals(expected, actual);
         });
@@ -121,7 +123,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(customImageCatalogService.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
         when(converterUtil.convert(imageCatalog, CustomImageCatalogV4DeleteResponse.class)).thenReturn(expected);
 
-        CustomImageCatalogV4DeleteResponse actual = victim.delete(IMAGE_CATALOG_NAME);
+        CustomImageCatalogV4DeleteResponse actual = victim.delete(IMAGE_CATALOG_NAME, ACCOUNT_ID);
 
         assertEquals(expected, actual);
     }
@@ -135,7 +137,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(customImageCatalogService.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(customImage);
         when(converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class)).thenReturn(expected);
 
-        CustomImageCatalogV4GetImageResponse actual = victim.getCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID);
+        CustomImageCatalogV4GetImageResponse actual = victim.getCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 
         assertEquals(expected, actual);
     }
@@ -154,7 +156,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(converterUtil.convert(savedCustomImage, CustomImageCatalogV4CreateImageResponse.class)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request);
+            CustomImageCatalogV4CreateImageResponse actual = victim.createCustomImage(IMAGE_CATALOG_NAME, request, ACCOUNT_ID);
 
             assertEquals(expected, actual);
         });
@@ -174,7 +176,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(converterUtil.convert(savedCustomImage, CustomImageCatalogV4UpdateImageResponse.class)).thenReturn(expected);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            CustomImageCatalogV4UpdateImageResponse actual = victim.updateCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, request);
+            CustomImageCatalogV4UpdateImageResponse actual = victim.updateCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, request, ACCOUNT_ID);
 
             assertEquals(expected, actual);
         });
@@ -189,7 +191,7 @@ public class CustomImageCatalogV4ControllerTest {
         when(customImageCatalogService.deleteCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(customImage);
         when(converterUtil.convert(customImage, CustomImageCatalogV4DeleteImageResponse.class)).thenReturn(expected);
 
-        CustomImageCatalogV4DeleteImageResponse actual = victim.deleteCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID);
+        CustomImageCatalogV4DeleteImageResponse actual = victim.deleteCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 
         assertEquals(expected, actual);
     }
