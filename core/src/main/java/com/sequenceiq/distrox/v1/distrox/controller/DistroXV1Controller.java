@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DELETE_DATAHUB;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB;
@@ -145,7 +146,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     private DataHubFiltering dataHubFiltering;
 
     @Override
-    @FilterListBasedOnPermissions(action = DESCRIBE_DATAHUB, filter = DataHubFiltering.class)
+    @FilterListBasedOnPermissions
     public StackViewV4Responses list(@FilterParam(DataHubFiltering.ENV_NAME) String environmentName,
             @FilterParam(DataHubFiltering.ENV_CRN) String environmentCrn) {
         return dataHubFiltering.filterDataHubs(DESCRIBE_DATAHUB, environmentName, environmentCrn);
@@ -195,7 +196,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DELETE_DATAHUB)
-    public void deleteByCrn(@ResourceCrn String crn, Boolean forced) {
+    public void deleteByCrn(@TenantAwareParam @ResourceCrn String crn, Boolean forced) {
         stackOperations.delete(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), forced);
     }
 
@@ -242,7 +243,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_DATAHUB)
-    public void syncByCrn(@ResourceCrn String crn) {
+    public void syncByCrn(@TenantAwareParam @ResourceCrn String crn) {
         stackOperations.sync(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
@@ -265,7 +266,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RETRY_DATAHUB_OPERATION)
-    public void retryByCrn(@ResourceCrn String crn) {
+    public void retryByCrn(@TenantAwareParam @ResourceCrn String crn) {
         stackOperations.retry(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
@@ -277,7 +278,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATAHUB)
-    public FlowIdentifier putStopByCrn(@ResourceCrn String crn) {
+    public FlowIdentifier putStopByCrn(@TenantAwareParam @ResourceCrn String crn) {
         return stackOperations.putStop(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
@@ -301,7 +302,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATAHUB)
-    public FlowIdentifier putStartByCrn(@ResourceCrn String crn) {
+    public FlowIdentifier putStartByCrn(@TenantAwareParam @ResourceCrn String crn) {
         return stackOperations.putStart(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
@@ -327,7 +328,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putScalingByCrn(@ResourceCrn String crn, @Valid DistroXScaleV1Request updateRequest) {
+    public void putScalingByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
         stackOperations.putScaling(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId(), stackScaleV4Request);
@@ -344,7 +345,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public FlowIdentifier repairClusterByCrn(@ResourceCrn String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
+    public FlowIdentifier repairClusterByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid DistroXRepairV1Request clusterRepairRequest) {
         return stackOperations.repairCluster(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
@@ -352,8 +353,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public GeneratedBlueprintV4Response postStackForBlueprint(@Valid DistroXV1Request stackRequest) {
+    @CheckPermissionByRequestProperty(type = NAME, path = "environmentName", action = DESCRIBE_ENVIRONMENT)
+    public GeneratedBlueprintV4Response postStackForBlueprint(@RequestObject @Valid DistroXV1Request stackRequest) {
         return stackOperations.postStackForBlueprint(stackRequestConverter.convert(stackRequest));
     }
 
@@ -366,7 +367,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public Object getRequestfromCrn(@ResourceCrn String crn) {
+    public Object getRequestfromCrn(@TenantAwareParam @ResourceCrn String crn) {
         StackV4Request stackV4Request = getStackV4Request(NameOrCrn.ofCrn(crn));
         return getCreateAWSClusterRequest(stackV4Request);
     }
@@ -381,7 +382,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public StackStatusV4Response getStatusByCrn(@ResourceCrn String crn) {
+    public StackStatusV4Response getStatusByCrn(@TenantAwareParam @ResourceCrn String crn) {
         return stackOperations.getStatusByCrn(NameOrCrn.ofCrn(crn), workspaceService.getForCurrentUser().getId());
     }
 
@@ -397,7 +398,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstanceByCrn(@ResourceCrn String crn, Boolean forced, String instanceId) {
+    public void deleteInstanceByCrn(@TenantAwareParam @ResourceCrn String crn, Boolean forced, String instanceId) {
         stackOperations.deleteInstance(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
@@ -418,7 +419,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstancesByCrn(@ResourceCrn String crn, List<String> instances,
+    public void deleteInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, List<String> instances,
             MultipleInstanceDeleteRequest request, boolean forced) {
         stackOperations.deleteInstances(
                 NameOrCrn.ofCrn(crn),
@@ -450,7 +451,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SET_DATAHUB_MAINTENANCE_MODE)
-    public void setClusterMaintenanceModeByCrn(@ResourceCrn String crn, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
+    public void setClusterMaintenanceModeByCrn(@TenantAwareParam @ResourceCrn String crn, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
@@ -469,7 +470,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DELETE_DATAHUB)
-    public void deleteWithKerberosByCrn(@ResourceCrn String crn, boolean forced) {
+    public void deleteWithKerberosByCrn(@TenantAwareParam @ResourceCrn String crn, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofCrn(crn),
                 workspaceService.getForCurrentUser().getId(),
@@ -503,13 +504,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public ListDiagnosticsCollectionResponse listCollections(@ResourceCrn String crn) {
+    public ListDiagnosticsCollectionResponse listCollections(@TenantAwareParam @ResourceCrn String crn) {
         return diagnosticsService.getDiagnosticsCollections(crn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public void cancelCollections(@ResourceCrn String crn) {
+    public void cancelCollections(@TenantAwareParam @ResourceCrn String crn) {
         diagnosticsService.cancelDiagnosticsCollections(crn);
     }
 
@@ -522,26 +523,26 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public List<String> getCmRoles(String stackCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
+    public List<String> getCmRoles(@TenantAwareParam @ResourceCrn String stackCrn) {
         return clusterDiagnosticsService.getClusterComponents(stackCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ResourceCrn String resourceCrn) {
+    public FlowProgressResponse getLastFlowLogProgressByResourceCrn(@TenantAwareParam @ResourceCrn String resourceCrn) {
         return flowService.getLastFlowProgressByResourceCrn(resourceCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@ResourceCrn String resourceCrn) {
+    public List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@TenantAwareParam @ResourceCrn String resourceCrn) {
         return flowService.getFlowProgressListByResourceCrn(resourceCrn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public FlowIdentifier renewCertificate(@ResourceCrn String crn) {
+    public FlowIdentifier renewCertificate(@TenantAwareParam @ResourceCrn String crn) {
         Stack stack = stackOperations.getStackByCrn(crn);
         return stackOperationService.renewCertificate(stack);
     }
@@ -559,7 +560,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_AUTOTLS_CERT_DATAHUB)
-    public CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@ResourceCrn String crn,
+    public CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@TenantAwareParam @ResourceCrn String crn,
             @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         return stackOperations.rotateAutoTlsCertificates(
                 NameOrCrn.ofCrn(crn),

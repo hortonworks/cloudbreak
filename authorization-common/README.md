@@ -71,8 +71,8 @@ MethodAnnotation
     | [@CheckPermissionByAccount], [ResourceBasedAuthorization];
 
 ResourceBasedAuthorization 
-    = @FilterListBasedOnPermissions
-    | [@CheckPermissionByResourceCrn], [@CheckPermissionByResourceName], [@CheckPermissionByResourceCrnList], [@CheckPermissionByResourceNameList], {@CheckPermissionByRequestProperty};
+    = [@FilterListBasedOnPermissions]
+    | [@CheckPermissionByResourceCrn], [@CheckPermissionByResourceName], [@CheckPermissionByResourceCrnList], [@CheckPermissionByResourceNameList], [@CheckPermissionByRequestProperty];
 
 MethodArgAnnotation
     = [@ResourceCrn], [@ResourceName], [@ResourceCrnList], [@ResourceNameList], [@RequestObject], [@TenantAwareParam], [@AccountId], [@InitiatorUserCrn];
@@ -184,7 +184,7 @@ public class MyResourceController {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.GET_RESOURCE)
     public MyResource getByName(@ResourceName String name) {}
 
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.GET_RESOURCE, filter = MyResourceFiltering.class)
+    @FilterListBasedOnPermissions
     public List<MyResource> list(@FilterParam(MyResourceFiltering.QUERY_PARAM) String queryParam) {
       return myResourceFiltering.filterResources(Crn.safeFromString(ThreadBasedUserCrnProvider.getUserCrn()),
         AuthorizationResourceAction.GET_RESOURCE, Map.of(MyResourceFiltering.QUERY_PARAM, queryParam));

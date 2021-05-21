@@ -18,10 +18,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -161,26 +159,10 @@ public class PermissionCheckServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
-        InOrder inOrder = Mockito.inOrder(resourceAuthorizationService, commonPermissionCheckingUtils);
-
-        inOrder.verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
-        inOrder.verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
+        verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verifyNoInteractions(
                 internalUserModifier,
                 accountAuthorizationService);
-    }
-
-    @Test
-    public void testListAndAccoundBasedAuthorization() throws NoSuchMethodException {
-        when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("listAndAcccountBasedMethod"));
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
-
-        InOrder inOrder = Mockito.inOrder(accountAuthorizationService, resourceAuthorizationService, commonPermissionCheckingUtils);
-        inOrder.verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
-        inOrder.verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
-        inOrder.verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
-        verifyNoInteractions(internalUserModifier);
     }
 
     @Test
@@ -300,16 +282,8 @@ public class PermissionCheckServiceTest {
 
         }
 
-        @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT,
-                filter = ExampleFiltering.class)
+        @FilterListBasedOnPermissions
         public List<String> listMethod() {
-            return List.of();
-        }
-
-        @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
-        @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT,
-                filter = ExampleFiltering.class)
-        public List<String> listAndAcccountBasedMethod() {
             return List.of();
         }
 

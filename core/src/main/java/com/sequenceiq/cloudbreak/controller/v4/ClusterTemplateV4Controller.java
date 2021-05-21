@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -109,8 +110,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     }
 
     @Override
-    @DisableCheckPermissions
-    public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, @TenantAwareParam @ResourceCrn String environmentCrn) {
         measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Blueprints fetched in {}ms");
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
@@ -151,7 +152,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
-    public ClusterTemplateV4Response getByCrn(Long workspaceId, @ResourceCrn String crn) {
+    public ClusterTemplateV4Response getByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() ->
                     clusterTemplateService.getByCrn(crn, threadLocalService.getRequestedWorkspaceId()));
@@ -170,7 +171,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
-    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @ResourceCrn String crn) {
+    public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
         ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, threadLocalService.getRequestedWorkspaceId());
         return converterUtil.convert(clusterTemplate, ClusterTemplateV4Response.class);
     }

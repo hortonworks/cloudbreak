@@ -175,7 +175,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATALAKE, filter = DataLakeFiltering.class)
+    @FilterListBasedOnPermissions
     public List<SdxClusterResponse> list(@FilterParam(DataLakeFiltering.ENV_NAME) String envName) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvNameOrAll(AuthorizationResourceAction.DESCRIBE_DATALAKE, envName);
         return sdxClusters.stream()
@@ -184,7 +184,7 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_DATALAKE, filter = DataLakeFiltering.class)
+    @FilterListBasedOnPermissions
     public List<SdxClusterResponse> getByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @FilterParam(DataLakeFiltering.ENV_CRN)
             @TenantAwareParam String envCrn) {
         List<SdxCluster> sdxClusters = dataLakeFiltering.filterDataLakesByEnvCrn(AuthorizationResourceAction.DESCRIBE_DATALAKE, envCrn);

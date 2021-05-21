@@ -166,7 +166,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, filter = FreeIpaFiltering.class)
+    @FilterListBasedOnPermissions
     public List<ListFreeIpaResponse> list() {
         return freeIpaFiltering.filterFreeIpas(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }

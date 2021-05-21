@@ -67,7 +67,7 @@ public class CredentialV1Controller extends NotificationController implements Cr
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_CREDENTIAL, filter = EnvironmentCredentialFiltering.class)
+    @FilterListBasedOnPermissions
     public CredentialResponses list() {
         Set<Credential> credentials = environmentCredentialFiltering.filterCredntials(AuthorizationResourceAction.DESCRIBE_CREDENTIAL);
         return new CredentialResponses(

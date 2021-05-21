@@ -11,9 +11,9 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -21,6 +21,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -64,7 +65,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
+    @FilterListBasedOnPermissions
     public ImageCatalogV4Responses list(Long workspaceId, boolean customCatalogsOnly) {
         Set<ImageCatalog> allByWorkspaceId = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, customCatalogsOnly);
         return new ImageCatalogV4Responses(converterUtil.convertAllAsSet(allByWorkspaceId, ImageCatalogV4Response.class));
@@ -188,7 +189,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @AccountIdNotNeeded
-    @DisableCheckPermissions
+    @InternalOnly
     public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
 
         // FIXME: Implement this!
@@ -197,7 +198,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Override
     @AccountIdNotNeeded
-    @DisableCheckPermissions
+    @InternalOnly
     public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime) throws Exception {
 
         // FIXME: Implement this!

@@ -6,7 +6,9 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.ResourceName;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.FileSystemV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Responses;
@@ -19,7 +21,6 @@ import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 
 @Controller
 @WorkspaceEntityType(FileSystem.class)
-@DisableCheckPermissions
 public class FileSystemV4Controller implements FileSystemV4Endpoint {
 
     @Inject
@@ -32,9 +33,10 @@ public class FileSystemV4Controller implements FileSystemV4Endpoint {
     private CloudbreakRestRequestThreadLocalService threadLocalService;
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public FileSystemParameterV4Responses getFileSystemParameters(
             Long workspaceId,
-            String blueprintName,
+            @ResourceName String blueprintName,
             String clusterName,
             String accountName,
             String storageName,

@@ -1,5 +1,21 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4CreateImageRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4CreateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4UpdateImageRequest;
@@ -14,24 +30,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.HashSet;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CustomImageCatalogV4ControllerTest {
@@ -57,6 +60,9 @@ public class CustomImageCatalogV4ControllerTest {
     @Mock
     private ConverterUtil converterUtil;
 
+    @Mock
+    private ImageCatalogFiltering imageCatalogFiltering;
+
     @InjectMocks
     private CustomImageCatalogV4Controller victim;
 
@@ -72,8 +78,7 @@ public class CustomImageCatalogV4ControllerTest {
         Set<ImageCatalog> imageCatalogs = new HashSet<>();
         Set<CustomImageCatalogV4ListItemResponse> customImageCatalogV4ListItemResponses = new HashSet<>();
 
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
-        when(customImageCatalogService.getImageCatalogs(WORKSPACE_ID)).thenReturn(imageCatalogs);
+        when(imageCatalogFiltering.filterImageCatalogs(eq(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG), eq(true))).thenReturn(imageCatalogs);
         when(converterUtil.convertAllAsSet(imageCatalogs, CustomImageCatalogV4ListItemResponse.class)).thenReturn(customImageCatalogV4ListItemResponses);
 
         CustomImageCatalogV4ListResponse actual = victim.list(ACCOUNT_ID);
