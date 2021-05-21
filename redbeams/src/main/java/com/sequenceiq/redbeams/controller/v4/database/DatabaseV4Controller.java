@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.controller.v4.database;
 
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -9,10 +11,11 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -39,8 +42,8 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     private DatabaseConfigService databaseConfigService;
 
     @Override
-    @DisableCheckPermissions
-    public DatabaseV4Responses list(@TenantAwareParam String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public DatabaseV4Responses list(@ResourceCrn @TenantAwareParam String environmentCrn) {
         return new DatabaseV4Responses(converterUtil.convertAllAsSet(databaseConfigService.findAll(environmentCrn),
                 DatabaseV4Response.class));
     }
@@ -85,8 +88,8 @@ public class DatabaseV4Controller implements DatabaseV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public DatabaseTestV4Response test(@Valid DatabaseTestV4Request databaseTestV4Request) {
+    @CheckPermissionByRequestProperty(path = "existingDatabase.name", type = NAME, action = AuthorizationResourceAction.DESCRIBE_DATABASE)
+    public DatabaseTestV4Response test(@RequestObject @Valid DatabaseTestV4Request databaseTestV4Request) {
         throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
         // String result = "";
         // if (databaseTestV4Request.getExistingDatabase() != null) {

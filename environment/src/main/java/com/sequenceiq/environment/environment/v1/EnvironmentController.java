@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
@@ -24,7 +25,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
@@ -250,7 +250,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, filter = EnvironmentFiltering.class)
+    @FilterListBasedOnPermissions
     public SimpleEnvironmentResponses list() {
         List<EnvironmentDto> environmentDtos = environmentFiltering.filterEnvironments(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
         return toSimpleEnvironmentResponses(environmentDtos);
@@ -365,8 +365,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public Object getCreateEnvironmentForCli(EnvironmentRequest environmentRequest) {
+    @CheckPermissionByRequestProperty(type = NAME, action = DESCRIBE_ENVIRONMENT, path = "name")
+    public Object getCreateEnvironmentForCli(@RequestObject EnvironmentRequest environmentRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         Credential credential = credentialService.getByNameForAccountId(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
         return environmentService.getCreateEnvironmentForCli(environmentRequest, credential.getCloudPlatform());

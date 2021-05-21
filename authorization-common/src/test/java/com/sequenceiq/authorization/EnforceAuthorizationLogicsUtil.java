@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 import javax.ws.rs.Path;
 
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
@@ -52,6 +54,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
+import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 
 import uk.co.jemos.podam.api.PodamFactoryImpl;
@@ -79,7 +82,7 @@ public class EnforceAuthorizationLogicsUtil {
                     .put(CheckPermissionByAccount.class, noRestriction())
                     .put(InternalOnly.class, noRestriction())
                     .put(CustomPermissionCheck.class, noRestriction())
-                    .put(FilterListBasedOnPermissions.class, noRestriction())
+                    .put(FilterListBasedOnPermissions.class, hasListFilteringInController())
                     .put(CheckPermissionByRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
                     .put(CheckPermissionByCompositeRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
                     .build();
@@ -147,6 +150,18 @@ public class EnforceAuthorizationLogicsUtil {
         return method -> Optional.of(invalid(method, "No validation rule specified for " + annotation));
     }
 
+    private static Function<Method, Optional<String>> hasListFilteringInController() {
+        return method -> {
+            Field[] fields = FieldUtils.getAllFields(method.getDeclaringClass());
+            if (Arrays.stream(fields).anyMatch(field -> AbstractAuthorizationFiltering.class.isAssignableFrom(field.getType()))) {
+                return Optional.empty();
+            } else {
+                return Optional.of(String.format("The method %s#%s should have an AbstractAuthorizationFiltering bean for resource filtering.",
+                        method.getDeclaringClass().getSimpleName(), method.getName()));
+            }
+        };
+    }
+
     private static String methodToString(Method method) {
         return method.getDeclaringClass().getSimpleName() + '#' + method.getName();
     }
@@ -160,7 +175,7 @@ public class EnforceAuthorizationLogicsUtil {
                     .collect(toList());
             String errorMessageCommon = " method parameter with @" + annotation.getSimpleName() + " annotation";
             if (validations.isEmpty()) {
-                return Optional.of(invalid(method, "Misssing" + errorMessageCommon));
+                return Optional.of(invalid(method, "Missing" + errorMessageCommon));
             } else if (validations.size() > 1) {
                 return Optional.of(invalid(method, "Multiple" + errorMessageCommon));
             } else {

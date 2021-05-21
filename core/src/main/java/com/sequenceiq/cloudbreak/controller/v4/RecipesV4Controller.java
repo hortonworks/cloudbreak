@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
+
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,12 +14,13 @@ import org.springframework.stereotype.Controller;
 
 import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -59,7 +62,7 @@ public class RecipesV4Controller extends NotificationController implements Recip
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_RECIPE, filter = RecipeFiltering.class)
+    @FilterListBasedOnPermissions
     public RecipeViewV4Responses list(Long workspaceId) {
         Set<RecipeView> allViewByWorkspaceId = recipeFiltering.filterRecipes(AuthorizationResourceAction.DESCRIBE_RECIPE);
         return new RecipeViewV4Responses(converterUtil.convertAllAsSet(allViewByWorkspaceId, RecipeViewV4Response.class));
@@ -138,8 +141,8 @@ public class RecipesV4Controller extends NotificationController implements Recip
     }
 
     @Override
-    @DisableCheckPermissions
-    public CreateRecipeRequest getCreateRecipeRequestForCli(Long workspaceId, RecipeV4Request recipeV4Request) {
+    @CheckPermissionByRequestProperty(path = "name", type = NAME, action = AuthorizationResourceAction.DESCRIBE_RECIPE)
+    public CreateRecipeRequest getCreateRecipeRequestForCli(Long workspaceId, @RequestObject RecipeV4Request recipeV4Request) {
         return converterUtil.convert(recipeV4Request, CreateRecipeRequest.class);
     }
 }

@@ -120,7 +120,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     }
 
     @Override
-    @DisableCheckPermissions
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ResourceEventResponse postNotificationTest() {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         notificationSender.sendTestNotification(cloudbreakUser.getUserId());

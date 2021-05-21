@@ -109,7 +109,7 @@ public class DiagnosticsService {
     }
 
     public List<String> getCmRoles(String stackCrn) {
-        return diagnosticsV4Endpoint.getCmRoles(stackCrn);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> diagnosticsV4Endpoint.getCmRoles(stackCrn));
     }
 
     public ListDiagnosticsCollectionResponse getDiagnosticsCollections(String crn) {

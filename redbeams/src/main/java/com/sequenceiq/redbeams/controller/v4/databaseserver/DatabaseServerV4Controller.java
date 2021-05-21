@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.controller.v4.databaseserver;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.CREATE_DATABASE;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import java.util.Optional;
@@ -18,7 +19,6 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
-import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
@@ -79,8 +79,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     private ConverterUtil converterUtil;
 
     @Override
-    @DisableCheckPermissions
-    public DatabaseServerV4Responses list(@TenantAwareParam String environmentCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public DatabaseServerV4Responses list(@ResourceCrn @TenantAwareParam String environmentCrn) {
         Set<DatabaseServerConfig> all = databaseServerConfigService.findAll(DEFAULT_WORKSPACE, environmentCrn);
         return new DatabaseServerV4Responses(converterUtil.convertAllAsSet(all, DatabaseServerV4Response.class));
     }
@@ -100,8 +100,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public DatabaseServerV4Response getByClusterCrn(@TenantAwareParam String environmentCrn, String clusterCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public DatabaseServerV4Response getByClusterCrn(@ResourceCrn @TenantAwareParam String environmentCrn, String clusterCrn) {
         DatabaseServerConfig server = databaseServerConfigService.getByClusterCrn(environmentCrn, clusterCrn);
         return converterUtil.convert(server, DatabaseServerV4Response.class);
     }
@@ -164,8 +164,8 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public DatabaseServerTestV4Response test(DatabaseServerTestV4Request request) {
+    @CheckPermissionByRequestProperty(path = "existingDatabaseServerCrn", type = CRN, action = AuthorizationResourceAction.DESCRIBE_DATABASE_SERVER)
+    public DatabaseServerTestV4Response test(@RequestObject DatabaseServerTestV4Request request) {
         throw new UnsupportedOperationException("Connection testing is disabled for security reasons until further notice");
         // String connectionResult;
         // if (request.getExistingDatabaseServerCrn() != null) {

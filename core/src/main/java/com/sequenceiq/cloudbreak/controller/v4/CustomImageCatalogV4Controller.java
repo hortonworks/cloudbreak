@@ -1,5 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Set;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.springframework.stereotype.Controller;
+
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
@@ -27,12 +34,8 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
-import org.springframework.stereotype.Controller;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.Set;
 
 @Controller
 @Transactional(Transactional.TxType.NEVER)
@@ -48,11 +51,13 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Inject
     private ConverterUtil converterUtil;
 
-    @Override
-    @FilterListBasedOnPermissions(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, filter = ImageCatalogFiltering.class)
-    public CustomImageCatalogV4ListResponse list(@AccountId String accountId) {
-        Set<ImageCatalog> imageCatalogs = customImageCatalogService.getImageCatalogs(restRequestThreadLocalService.getRequestedWorkspaceId());
+    @Inject
+    private ImageCatalogFiltering imageCatalogFiltering;
 
+    @Override
+    @FilterListBasedOnPermissions
+    public CustomImageCatalogV4ListResponse list(@AccountId String accountId) {
+        Set<ImageCatalog> imageCatalogs = imageCatalogFiltering.filterImageCatalogs(AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG, true);
         return new CustomImageCatalogV4ListResponse(converterUtil.convertAllAsSet(imageCatalogs, CustomImageCatalogV4ListItemResponse.class));
     }
 

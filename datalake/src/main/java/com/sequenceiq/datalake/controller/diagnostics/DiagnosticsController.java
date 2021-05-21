@@ -17,6 +17,7 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.datalake.service.sdx.diagnostics.DiagnosticsService;
@@ -43,13 +44,13 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public ListDiagnosticsCollectionResponse listCollections(@ResourceCrn String crn) {
+    public ListDiagnosticsCollectionResponse listCollections(@TenantAwareParam @ResourceCrn String crn) {
         return diagnosticsService.getDiagnosticsCollections(crn);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
-    public void cancelCollections(@ResourceCrn String crn) {
+    public void cancelCollections(@TenantAwareParam @ResourceCrn String crn) {
         diagnosticsService.cancelDiagnosticsCollection(crn);
     }
 
@@ -60,8 +61,8 @@ public class DiagnosticsController implements DiagnosticsEndpoint {
     }
 
     @Override
-    @DisableCheckPermissions
-    public List<String> getCmRoles(String stackCrn) {
+    @CheckPermissionByResourceCrn(action = DESCRIBE_DATALAKE)
+    public List<String> getCmRoles(@TenantAwareParam @ResourceCrn String stackCrn) {
         return diagnosticsService.getCmRoles(stackCrn);
     }
 }
