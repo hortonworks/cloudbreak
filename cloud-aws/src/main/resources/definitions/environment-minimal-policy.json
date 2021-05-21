@@ -132,6 +132,7 @@
         "autoscaling:TerminateInstanceInAutoScalingGroup",
         "cloudformation:DescribeStackResource",
         "cloudformation:DescribeStackEvents",
+        "cloudformation:GetTemplate",
         "cloudwatch:DeleteAlarms",
         "cloudwatch:PutMetricAlarm",
         "cloudwatch:DescribeAlarms",
