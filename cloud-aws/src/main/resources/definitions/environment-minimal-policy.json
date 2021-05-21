@@ -4,7 +4,15 @@
     {
       "Effect": "Allow",
       "Action": [
-        "ec2:DeleteTags"
+        "ec2:DeleteTags",
+        "ec2:AssociateAddress",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:AttachVolume",
+        "ec2:ReleaseAddress",
+        "ec2:DescribeAddresses",
+        "ec2:TerminateInstances",
+        "ec2:DeleteSecurityGroup"
       ],
       "Resource": "*",
       "Condition": {
@@ -18,7 +26,14 @@
     {
       "Effect": "Allow",
       "Action": [
-        "cloudformation:DeleteStack"
+        "cloudformation:DeleteStack",
+        "autoscaling:SuspendProcesses",
+        "autoscaling:UpdateAutoScalingGroup",
+        "autoscaling:ResumeProcesses",
+        "autoscaling:DetachInstances",
+        "autoscaling:DeleteAutoScalingGroup",
+        "rds:StopDBInstance",
+        "rds:StartDBInstance"
       ],
       "Resource": "*",
       "Condition": {
@@ -50,11 +65,17 @@
     {
       "Effect": "Allow",
       "Action": [
+        "ec2:DeleteKeyPair",
         "ec2:DescribeKeyPairs",
         "ec2:DescribeAvailabilityZones",
         "ec2:DescribeImages",
+        "ec2:DeleteLaunchTemplate",
+        "ec2:DescribeVolumes",
+        "ec2:CreateVolume",
         "ec2:DescribeInstances",
         "ec2:DescribeRegions",
+        "ec2:DescribeInstanceTypeOfferings",
+        "ec2:DescribeInstanceTypes",
         "ec2:DescribeRouteTables",
         "ec2:DescribeSecurityGroups",
         "ec2:DescribeSubnets",
@@ -88,7 +109,15 @@
         "ec2:DeleteRoute",
         "ec2:DeleteNatGateway",
         "ec2:DeleteVpc",
+        "ec2:ImportKeyPair",
+        "ec2:DescribeLaunchTemplates",
+        "ec2:CreateSecurityGroup",
+        "ec2:CreateLaunchTemplate",
+        "ec2:RunInstances",
         "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:DescribeAccountAttributes",
         "sts:DecodeAuthorizationMessage",
         "cloudformation:DescribeStacks",
         "dynamodb:DeleteTable",
@@ -100,26 +129,65 @@
         "autoscaling:DescribeAutoScalingGroups",
         "autoscaling:DescribeScalingActivities",
         "autoscaling:CreateAutoScalingGroup",
+        "autoscaling:TerminateInstanceInAutoScalingGroup",
         "cloudformation:DescribeStackResource",
         "cloudformation:DescribeStackEvents",
-        "ec2:ImportKeyPair",
-        "ec2:DescribeLaunchTemplates",
-        "ec2:CreateSecurityGroup",
-        "ec2:CreateLaunchTemplate",
-        "ec2:RunInstances",
         "cloudwatch:DeleteAlarms",
         "cloudwatch:PutMetricAlarm",
-        "cloudwatch:DescribeAlarms"
+        "cloudwatch:DescribeAlarms",
+        "elasticloadbalancing:CreateLoadBalancer",
+        "elasticloadbalancing:CreateTargetGroup",
+        "elasticloadbalancing:DescribeLoadBalancers",
+        "elasticloadbalancing:DescribeTargetGroups",
+        "elasticloadbalancing:AddTags",
+        "elasticloadbalancing:RegisterTargets",
+        "elasticloadbalancing:DescribeTargetHealth",
+        "elasticloadbalancing:DescribeListeners",
+        "elasticloadbalancing:CreateListener",
+        "elasticloadbalancing:DeleteListener",
+        "elasticloadbalancing:DeleteTargetGroup",
+        "elasticloadbalancing:DeleteLoadBalancer",
+        "s3:GetBucketLocation",
+        "cloudformation:DescribeStackEvents",
+        "cloudformation:DescribeStackResources",
+        "cloudformation:DescribeStackResource",
+        "cloudformation:ListStackResources",
+        "cloudformation:UpdateStack",
+        "cloudwatch:DescribeAlarms",
+        "iam:GetInstanceProfile",
+        "iam:SimulatePrincipalPolicy",
+        "iam:GetRole",
+        "iam:PassRole",
+        "rds:AddTagsToResource",
+        "rds:CreateDBInstance",
+        "rds:CreateDBSubnetGroup",
+        "rds:DeleteDBInstance",
+        "rds:DeleteDBSubnetGroup",
+        "rds:ListTagsForResource",
+        "rds:RemoveTagsFromResource",
+        "rds:CreateDBParameterGroup",
+        "rds:DeleteDBParameterGroup",
+        "rds:DescribeEngineDefaultParameters",
+        "rds:ModifyDBParameterGroup",
+        "rds:DescribeDBParameters",
+        "rds:DescribeDBParameterGroups",
+        "rds:DescribeDBSubnetGroups",
+        "rds:DescribeDBInstances",
+        "rds:ModifyDBInstance",
+        "rds:DescribeCertificates",
+        "kms:ListKeys",
+        "kms:ListAliases"
       ],
       "Resource": "*"
     },
     {
-      "Effect": "Allow",
+      "Sid": "IdentityAccessManagementLimited",
       "Action": [
-        "iam:PassRole"
+        "iam:CreateServiceLinkedRole"
       ],
+      "Effect": "Allow",
       "Resource": [
-        "${ID_BROKER_ROLE}"
+        "arn:aws:iam::*:role/aws-service-role/*"
       ]
     }
   ]
