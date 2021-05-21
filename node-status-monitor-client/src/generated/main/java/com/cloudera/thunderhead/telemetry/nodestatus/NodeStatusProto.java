@@ -9270,18 +9270,18 @@ public final class NodeStatusProto {
      * Additional helper message for the status (optional).
      * </pre>
      *
-     * <code>string statusReson = 3;</code>
+     * <code>string statusReason = 3;</code>
      */
-    java.lang.String getStatusReson();
+    java.lang.String getStatusReason();
     /**
      * <pre>
      * Additional helper message for the status (optional).
      * </pre>
      *
-     * <code>string statusReson = 3;</code>
+     * <code>string statusReason = 3;</code>
      */
     com.google.protobuf.ByteString
-        getStatusResonBytes();
+        getStatusReasonBytes();
 
     /**
      * <pre>
@@ -9311,7 +9311,7 @@ public final class NodeStatusProto {
     private StatusDetails() {
       host_ = "";
       status_ = 0;
-      statusReson_ = "";
+      statusReason_ = "";
       timestamp_ = 0L;
     }
 
@@ -9354,7 +9354,7 @@ public final class NodeStatusProto {
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
 
-              statusReson_ = s;
+              statusReason_ = s;
               break;
             }
             case 32: {
@@ -9461,24 +9461,24 @@ public final class NodeStatusProto {
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
     }
 
-    public static final int STATUSRESON_FIELD_NUMBER = 3;
-    private volatile java.lang.Object statusReson_;
+    public static final int STATUSREASON_FIELD_NUMBER = 3;
+    private volatile java.lang.Object statusReason_;
     /**
      * <pre>
      * Additional helper message for the status (optional).
      * </pre>
      *
-     * <code>string statusReson = 3;</code>
+     * <code>string statusReason = 3;</code>
      */
-    public java.lang.String getStatusReson() {
-      java.lang.Object ref = statusReson_;
+    public java.lang.String getStatusReason() {
+      java.lang.Object ref = statusReason_;
       if (ref instanceof java.lang.String) {
         return (java.lang.String) ref;
       } else {
         com.google.protobuf.ByteString bs = 
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        statusReson_ = s;
+        statusReason_ = s;
         return s;
       }
     }
@@ -9487,16 +9487,16 @@ public final class NodeStatusProto {
      * Additional helper message for the status (optional).
      * </pre>
      *
-     * <code>string statusReson = 3;</code>
+     * <code>string statusReason = 3;</code>
      */
     public com.google.protobuf.ByteString
-        getStatusResonBytes() {
-      java.lang.Object ref = statusReson_;
+        getStatusReasonBytes() {
+      java.lang.Object ref = statusReason_;
       if (ref instanceof java.lang.String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        statusReson_ = b;
+        statusReason_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -9536,8 +9536,8 @@ public final class NodeStatusProto {
       if (status_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(2, status_);
       }
-      if (!getStatusResonBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, statusReson_);
+      if (!getStatusReasonBytes().isEmpty()) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, statusReason_);
       }
       if (timestamp_ != 0L) {
         output.writeInt64(4, timestamp_);
@@ -9558,8 +9558,8 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, status_);
       }
-      if (!getStatusResonBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, statusReson_);
+      if (!getStatusReasonBytes().isEmpty()) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, statusReason_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
@@ -9584,8 +9584,8 @@ public final class NodeStatusProto {
       result = result && getHost()
           .equals(other.getHost());
       result = result && status_ == other.status_;
-      result = result && getStatusReson()
-          .equals(other.getStatusReson());
+      result = result && getStatusReason()
+          .equals(other.getStatusReason());
       result = result && (getTimestamp()
           == other.getTimestamp());
       result = result && unknownFields.equals(other.unknownFields);
@@ -9603,8 +9603,8 @@ public final class NodeStatusProto {
       hash = (53 * hash) + getHost().hashCode();
       hash = (37 * hash) + STATUS_FIELD_NUMBER;
       hash = (53 * hash) + status_;
-      hash = (37 * hash) + STATUSRESON_FIELD_NUMBER;
-      hash = (53 * hash) + getStatusReson().hashCode();
+      hash = (37 * hash) + STATUSREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getStatusReason().hashCode();
       hash = (37 * hash) + TIMESTAMP_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
           getTimestamp());
@@ -9749,7 +9749,7 @@ public final class NodeStatusProto {
 
         status_ = 0;
 
-        statusReson_ = "";
+        statusReason_ = "";
 
         timestamp_ = 0L;
 
@@ -9781,7 +9781,7 @@ public final class NodeStatusProto {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails(this);
         result.host_ = host_;
         result.status_ = status_;
-        result.statusReson_ = statusReson_;
+        result.statusReason_ = statusReason_;
         result.timestamp_ = timestamp_;
         onBuilt();
         return result;
@@ -9838,8 +9838,8 @@ public final class NodeStatusProto {
         if (other.status_ != 0) {
           setStatusValue(other.getStatusValue());
         }
-        if (!other.getStatusReson().isEmpty()) {
-          statusReson_ = other.statusReson_;
+        if (!other.getStatusReason().isEmpty()) {
+          statusReason_ = other.statusReason_;
           onChanged();
         }
         if (other.getTimestamp() != 0L) {
@@ -10028,21 +10028,21 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private java.lang.Object statusReson_ = "";
+      private java.lang.Object statusReason_ = "";
       /**
        * <pre>
        * Additional helper message for the status (optional).
        * </pre>
        *
-       * <code>string statusReson = 3;</code>
+       * <code>string statusReason = 3;</code>
        */
-      public java.lang.String getStatusReson() {
-        java.lang.Object ref = statusReson_;
+      public java.lang.String getStatusReason() {
+        java.lang.Object ref = statusReason_;
         if (!(ref instanceof java.lang.String)) {
           com.google.protobuf.ByteString bs =
               (com.google.protobuf.ByteString) ref;
           java.lang.String s = bs.toStringUtf8();
-          statusReson_ = s;
+          statusReason_ = s;
           return s;
         } else {
           return (java.lang.String) ref;
@@ -10053,16 +10053,16 @@ public final class NodeStatusProto {
        * Additional helper message for the status (optional).
        * </pre>
        *
-       * <code>string statusReson = 3;</code>
+       * <code>string statusReason = 3;</code>
        */
       public com.google.protobuf.ByteString
-          getStatusResonBytes() {
-        java.lang.Object ref = statusReson_;
+          getStatusReasonBytes() {
+        java.lang.Object ref = statusReason_;
         if (ref instanceof String) {
           com.google.protobuf.ByteString b = 
               com.google.protobuf.ByteString.copyFromUtf8(
                   (java.lang.String) ref);
-          statusReson_ = b;
+          statusReason_ = b;
           return b;
         } else {
           return (com.google.protobuf.ByteString) ref;
@@ -10073,15 +10073,15 @@ public final class NodeStatusProto {
        * Additional helper message for the status (optional).
        * </pre>
        *
-       * <code>string statusReson = 3;</code>
+       * <code>string statusReason = 3;</code>
        */
-      public Builder setStatusReson(
+      public Builder setStatusReason(
           java.lang.String value) {
         if (value == null) {
     throw new NullPointerException();
   }
   
-        statusReson_ = value;
+        statusReason_ = value;
         onChanged();
         return this;
       }
@@ -10090,11 +10090,11 @@ public final class NodeStatusProto {
        * Additional helper message for the status (optional).
        * </pre>
        *
-       * <code>string statusReson = 3;</code>
+       * <code>string statusReason = 3;</code>
        */
-      public Builder clearStatusReson() {
+      public Builder clearStatusReason() {
         
-        statusReson_ = getDefaultInstance().getStatusReson();
+        statusReason_ = getDefaultInstance().getStatusReason();
         onChanged();
         return this;
       }
@@ -10103,16 +10103,16 @@ public final class NodeStatusProto {
        * Additional helper message for the status (optional).
        * </pre>
        *
-       * <code>string statusReson = 3;</code>
+       * <code>string statusReason = 3;</code>
        */
-      public Builder setStatusResonBytes(
+      public Builder setStatusReasonBytes(
           com.google.protobuf.ByteString value) {
         if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
         
-        statusReson_ = value;
+        statusReason_ = value;
         onChanged();
         return this;
       }
@@ -39856,127 +39856,127 @@ public final class NodeStatusProto {
       "\003\"\211\001\n\020SaltHealthReport\022/\n\006master\030\001 \001(\0132\037" +
       ".cdp.telemetry.SaltMasterHealth\0221\n\007minio" +
       "ns\030\002 \001(\0132 .cdp.telemetry.SaltMinionsHeal" +
-      "th\022\021\n\ttimestamp\030\003 \001(\003\"r\n\rStatusDetails\022\014" +
+      "th\022\021\n\ttimestamp\030\003 \001(\003\"s\n\rStatusDetails\022\014" +
       "\n\004host\030\001 \001(\t\022+\n\006status\030\002 \001(\0162\033.cdp.telem" +
-      "etry.HealthStatus\022\023\n\013statusReson\030\003 \001(\t\022\021" +
-      "\n\ttimestamp\030\004 \001(\003\"\334\005\n\017MeteringDetails\022J\n" +
-      "\016databusDetails\030\001 \003(\01322.cdp.telemetry.Me" +
-      "teringDetails.DatabusDetailsEntry\022F\n\014eve" +
-      "ntDetails\030\002 \003(\01320.cdp.telemetry.Metering" +
-      "Details.EventDetailsEntry\022$\n\034firstHeartb" +
-      "eatEventTimestamp\030\003 \001(\003\022\033\n\023systemBootTim" +
-      "estamp\030\004 \001(\003\022\033\n\023heartbeatEventCount\030\005 \001(" +
-      "\005\022:\n\025heartbeatAgentRunning\030\006 \001(\0162\033.cdp.t" +
-      "elemetry.HealthStatus\0224\n\017heartbeatConfig" +
-      "\030\007 \001(\0162\033.cdp.telemetry.HealthStatus\0225\n\020d" +
-      "atabusReachable\030\010 \001(\0162\033.cdp.telemetry.He" +
-      "althStatus\0228\n\023databusTestResponse\030\t \001(\0162" +
-      "\033.cdp.telemetry.HealthStatus\0227\n\022loggingA" +
-      "gentConfig\030\n \001(\0162\033.cdp.telemetry.HealthS" +
-      "tatus\022:\n\025loggingServiceRunning\030\013 \001(\0162\033.c" +
-      "dp.telemetry.HealthStatus\022\021\n\ttimestamp\030\014" +
-      " \001(\003\0325\n\023DatabusDetailsEntry\022\013\n\003key\030\001 \001(\t" +
-      "\022\r\n\005value\030\002 \001(\t:\0028\001\0323\n\021EventDetailsEntry" +
-      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\324\005\n\016Net" +
-      "workDetails\022\014\n\004host\030\001 \001(\t\022\022\n\nccmEnabled\030" +
-      "\002 \001(\010\022\024\n\014dnsResolvers\030\003 \003(\t\022\025\n\rneighbour" +
-      "Scan\030\004 \001(\010\022\022\n\nneighbours\030\005 \003(\t\022<\n\027anyNei" +
-      "ghboursAccessible\030\006 \001(\0162\033.cdp.telemetry." +
-      "HealthStatus\022\032\n\022numberOfNeighbours\030\007 \001(\005" +
-      "\022\021\n\ttimestamp\030\010 \001(\003\0222\n\rccmAccessible\030\t \001" +
-      "(\0162\033.cdp.telemetry.HealthStatus\022:\n\025cloud" +
-      "eraComAccessible\030\n \001(\0162\033.cdp.telemetry.H" +
-      "ealthStatus\0226\n\021databusAccessible\030\013 \001(\0162\033" +
-      ".cdp.telemetry.HealthStatus\0228\n\023databusS3" +
-      "Accessible\030\014 \001(\0162\033.cdp.telemetry.HealthS" +
-      "tatus\0221\n\014s3Accessible\030\r \001(\0162\033.cdp.teleme" +
-      "try.HealthStatus\0225\n\020adlsV2Accessible\030\016 \001" +
-      "(\0162\033.cdp.telemetry.HealthStatus\0222\n\rgcsAc" +
-      "cessible\030\017 \001(\0162\033.cdp.telemetry.HealthSta" +
-      "tus\0222\n\rstsAccessible\030\020 \001(\0162\033.cdp.telemet" +
-      "ry.HealthStatus\022>\n\031azureManagementAccess" +
-      "ible\030\021 \001(\0162\033.cdp.telemetry.HealthStatus\"" +
-      "\211\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001(\0132\031.cdp.tel" +
-      "emetry.CpuMetrics\022(\n\004disk\030\002 \001(\0132\032.cdp.te" +
-      "lemetry.DiskMetrics\022,\n\006memory\030\003 \001(\0132\034.cd" +
-      "p.telemetry.MemoryMetrics\022.\n\007network\030\004 \001" +
-      "(\0132\035.cdp.telemetry.NetworkMetrics\022\021\n\ttim" +
-      "estamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035.c" +
-      "dp.telemetry.ClusterDetails\"~\n\017CmMetrics" +
-      "Report\0224\n\007metrics\030\001 \003(\0132#.cdp.telemetry." +
-      "CmServiceMetricEvent\0225\n\016clusterDetails\030\002" +
-      " \001(\0132\035.cdp.telemetry.ClusterDetails\"\215\001\n\024" +
-      "CmHealthChecksReport\022>\n\014healthChecks\030\001 \003" +
-      "(\0132(.cdp.telemetry.CmServiceHealthCheckE" +
-      "vent\0225\n\016clusterDetails\030\002 \001(\0132\035.cdp.telem" +
-      "etry.ClusterDetails\"\277\001\n\nCpuMetrics\022\r\n\005co" +
-      "unt\030\001 \001(\005\022\025\n\rlogical_count\030\002 \001(\005\022\020\n\010load" +
-      "_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp.telemetr" +
-      "y.CpuTimes\022&\n\005stats\030\005 \001(\0132\027.cdp.telemetr" +
-      "y.CpuStats\022)\n\004freq\030\006 \001(\0132\033.cdp.telemetry" +
-      ".CpuFrequency\"_\n\010CpuStats\022\024\n\014ctx_switche" +
-      "s\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017soft_inte" +
-      "rrupts\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D\n\010CpuTim" +
-      "es\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016\n\006system" +
-      "\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequency\022\017\n\007" +
-      "current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003max\030\003 \001(\003\"" +
-      "\214\001\n\013DiskMetrics\0220\n\npartitions\030\001 \003(\0132\034.cd" +
-      "p.telemetry.DiskPartition\022(\n\ntop_varlog\030" +
-      "\002 \003(\0132\024.cdp.telemetry.VmLog\022!\n\002io\030\003 \001(\0132" +
-      "\025.cdp.telemetry.DiskIO\"#\n\005VmLog\022\014\n\004path\030" +
-      "\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPartition\022\'\n" +
-      "\005usage\030\001 \001(\0132\030.cdp.telemetry.DiskUsage\022\016" +
-      "\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017\n\007maxfil" +
-      "e\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmountpoint\030\006" +
-      " \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022\014\n\004free\030" +
-      "\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001(\003\022\017\n\007pe" +
-      "rcent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_bytes\030\001 \001" +
-      "(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\tread_time\030\003 \001(" +
-      "\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013write_count\030\005 " +
-      "\001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n\016NetworkMetric" +
-      "s\0226\n\013connections\030\001 \001(\0132!.cdp.telemetry.N" +
-      "etworkConnections\022$\n\002io\030\002 \001(\0132\030.cdp.tele" +
-      "metry.NetworkIO\"\237\001\n\tNetworkIO\022\022\n\nbytes_r" +
-      "ecv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n\006dropin\030" +
-      "\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030\005 \001(\003\022\016\n" +
-      "\006errout\030\006 \001(\003\022\024\n\014packets_recv\030\007 \001(\003\022\024\n\014p" +
-      "ackets_sent\030\010 \001(\003\"\322\001\n\022NetworkConnections" +
-      "\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030\002 \001(\005\022\021\n" +
-      "\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004 \001(\005\022\016\n\006" +
-      "CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024\n\014SYN_RE" +
-      "CEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005\022\022\n\nFIN_" +
-      "WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u\n\rMemory" +
-      "Metrics\0224\n\016virtual_memory\030\001 \001(\0132\034.cdp.te" +
-      "lemetry.VirtualMemory\022.\n\013swap_memory\030\002 \001" +
-      "(\0132\031.cdp.telemetry.SwapMemory\"\277\001\n\rVirtua" +
-      "lMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002 \001(\003\022\014\n\004" +
-      "free\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\tavailable" +
-      "\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010inactive\030\007 \001(\003" +
-      "\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cached\030\t \001(\003\022\016\n\006sha" +
-      "red\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapMemory\022\014\n" +
-      "\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003sin\030\003 \001(" +
-      "\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014\n\004used\030\006" +
-      " \001(\003\"\301\001\n\031CmServiceHealthCheckEvent\022\023\n\013se" +
-      "rviceName\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004" +
-      "name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022\023\n\013explanation" +
-      "\030\005 \001(\t\022\021\n\ttimestamp\030\006 \001(\003\0225\n\016clusterDeta" +
-      "ils\030\007 \001(\0132\035.cdp.telemetry.ClusterDetails" +
-      "\"\247\001\n\024CmServiceMetricEvent\022\023\n\013serviceName" +
-      "\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004name\030\003 \001(" +
-      "\t\022\r\n\005value\030\004 \001(\001\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016c" +
-      "lusterDetails\030\006 \001(\0132\035.cdp.telemetry.Clus" +
-      "terDetails\"\262\002\n\016ClusterDetails\022\013\n\003crn\030\001 \001" +
-      "(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227\n\004typ" +
-      "e\030\004 \001(\0162).cdp.telemetry.ClusterDetails.C" +
-      "lusterType\022=\n\010platform\030\005 \001(\0162+.cdp.telem" +
-      "etry.ClusterDetails.CloudPlatform\"5\n\013Clu" +
-      "sterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001\022\013\n\007F" +
-      "REEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOWN\020\000\022\007" +
-      "\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLOUD\020\004*" +
-      ",\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020\001\022\007\n\003" +
-      "NOK\020\002B[\n-com.cloudera.thunderhead.teleme" +
-      "try.nodestatusB\017NodeStatusProtoZ\031com/clo" +
-      "udera/cdp/protobufb\006proto3"
+      "etry.HealthStatus\022\024\n\014statusReason\030\003 \001(\t\022" +
+      "\021\n\ttimestamp\030\004 \001(\003\"\334\005\n\017MeteringDetails\022J" +
+      "\n\016databusDetails\030\001 \003(\01322.cdp.telemetry.M" +
+      "eteringDetails.DatabusDetailsEntry\022F\n\014ev" +
+      "entDetails\030\002 \003(\01320.cdp.telemetry.Meterin" +
+      "gDetails.EventDetailsEntry\022$\n\034firstHeart" +
+      "beatEventTimestamp\030\003 \001(\003\022\033\n\023systemBootTi" +
+      "mestamp\030\004 \001(\003\022\033\n\023heartbeatEventCount\030\005 \001" +
+      "(\005\022:\n\025heartbeatAgentRunning\030\006 \001(\0162\033.cdp." +
+      "telemetry.HealthStatus\0224\n\017heartbeatConfi" +
+      "g\030\007 \001(\0162\033.cdp.telemetry.HealthStatus\0225\n\020" +
+      "databusReachable\030\010 \001(\0162\033.cdp.telemetry.H" +
+      "ealthStatus\0228\n\023databusTestResponse\030\t \001(\016" +
+      "2\033.cdp.telemetry.HealthStatus\0227\n\022logging" +
+      "AgentConfig\030\n \001(\0162\033.cdp.telemetry.Health" +
+      "Status\022:\n\025loggingServiceRunning\030\013 \001(\0162\033." +
+      "cdp.telemetry.HealthStatus\022\021\n\ttimestamp\030" +
+      "\014 \001(\003\0325\n\023DatabusDetailsEntry\022\013\n\003key\030\001 \001(" +
+      "\t\022\r\n\005value\030\002 \001(\t:\0028\001\0323\n\021EventDetailsEntr" +
+      "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\324\005\n\016Ne" +
+      "tworkDetails\022\014\n\004host\030\001 \001(\t\022\022\n\nccmEnabled" +
+      "\030\002 \001(\010\022\024\n\014dnsResolvers\030\003 \003(\t\022\025\n\rneighbou" +
+      "rScan\030\004 \001(\010\022\022\n\nneighbours\030\005 \003(\t\022<\n\027anyNe" +
+      "ighboursAccessible\030\006 \001(\0162\033.cdp.telemetry" +
+      ".HealthStatus\022\032\n\022numberOfNeighbours\030\007 \001(" +
+      "\005\022\021\n\ttimestamp\030\010 \001(\003\0222\n\rccmAccessible\030\t " +
+      "\001(\0162\033.cdp.telemetry.HealthStatus\022:\n\025clou" +
+      "deraComAccessible\030\n \001(\0162\033.cdp.telemetry." +
+      "HealthStatus\0226\n\021databusAccessible\030\013 \001(\0162" +
+      "\033.cdp.telemetry.HealthStatus\0228\n\023databusS" +
+      "3Accessible\030\014 \001(\0162\033.cdp.telemetry.Health" +
+      "Status\0221\n\014s3Accessible\030\r \001(\0162\033.cdp.telem" +
+      "etry.HealthStatus\0225\n\020adlsV2Accessible\030\016 " +
+      "\001(\0162\033.cdp.telemetry.HealthStatus\0222\n\rgcsA" +
+      "ccessible\030\017 \001(\0162\033.cdp.telemetry.HealthSt" +
+      "atus\0222\n\rstsAccessible\030\020 \001(\0162\033.cdp.teleme" +
+      "try.HealthStatus\022>\n\031azureManagementAcces" +
+      "sible\030\021 \001(\0162\033.cdp.telemetry.HealthStatus" +
+      "\"\211\002\n\rSystemMetrics\022&\n\003cpu\030\001 \001(\0132\031.cdp.te" +
+      "lemetry.CpuMetrics\022(\n\004disk\030\002 \001(\0132\032.cdp.t" +
+      "elemetry.DiskMetrics\022,\n\006memory\030\003 \001(\0132\034.c" +
+      "dp.telemetry.MemoryMetrics\022.\n\007network\030\004 " +
+      "\001(\0132\035.cdp.telemetry.NetworkMetrics\022\021\n\tti" +
+      "mestamp\030\005 \001(\003\0225\n\016clusterDetails\030\006 \001(\0132\035." +
+      "cdp.telemetry.ClusterDetails\"~\n\017CmMetric" +
+      "sReport\0224\n\007metrics\030\001 \003(\0132#.cdp.telemetry" +
+      ".CmServiceMetricEvent\0225\n\016clusterDetails\030" +
+      "\002 \001(\0132\035.cdp.telemetry.ClusterDetails\"\215\001\n" +
+      "\024CmHealthChecksReport\022>\n\014healthChecks\030\001 " +
+      "\003(\0132(.cdp.telemetry.CmServiceHealthCheck" +
+      "Event\0225\n\016clusterDetails\030\002 \001(\0132\035.cdp.tele" +
+      "metry.ClusterDetails\"\277\001\n\nCpuMetrics\022\r\n\005c" +
+      "ount\030\001 \001(\005\022\025\n\rlogical_count\030\002 \001(\005\022\020\n\010loa" +
+      "d_avg\030\003 \003(\002\022&\n\005times\030\004 \001(\0132\027.cdp.telemet" +
+      "ry.CpuTimes\022&\n\005stats\030\005 \001(\0132\027.cdp.telemet" +
+      "ry.CpuStats\022)\n\004freq\030\006 \001(\0132\033.cdp.telemetr" +
+      "y.CpuFrequency\"_\n\010CpuStats\022\024\n\014ctx_switch" +
+      "es\030\001 \001(\003\022\022\n\ninterrupts\030\002 \001(\003\022\027\n\017soft_int" +
+      "errupts\030\003 \001(\003\022\020\n\010syscalls\030\004 \001(\003\"D\n\010CpuTi" +
+      "mes\022\014\n\004idle\030\001 \001(\001\022\014\n\004nice\030\002 \001(\001\022\016\n\006syste" +
+      "m\030\003 \001(\001\022\014\n\004user\030\004 \001(\001\"9\n\014CpuFrequency\022\017\n" +
+      "\007current\030\001 \001(\003\022\013\n\003min\030\002 \001(\003\022\013\n\003max\030\003 \001(\003" +
+      "\"\214\001\n\013DiskMetrics\0220\n\npartitions\030\001 \003(\0132\034.c" +
+      "dp.telemetry.DiskPartition\022(\n\ntop_varlog" +
+      "\030\002 \003(\0132\024.cdp.telemetry.VmLog\022!\n\002io\030\003 \001(\013" +
+      "2\025.cdp.telemetry.DiskIO\"#\n\005VmLog\022\014\n\004path" +
+      "\030\001 \001(\t\022\014\n\004size\030\002 \001(\t\"\234\001\n\rDiskPartition\022\'" +
+      "\n\005usage\030\001 \001(\0132\030.cdp.telemetry.DiskUsage\022" +
+      "\016\n\006device\030\002 \001(\t\022\016\n\006fstype\030\003 \001(\t\022\017\n\007maxfi" +
+      "le\030\004 \001(\005\022\017\n\007maxpath\030\005 \001(\005\022\022\n\nmountpoint\030" +
+      "\006 \001(\t\022\014\n\004opts\030\007 \001(\t\"G\n\tDiskUsage\022\014\n\004free" +
+      "\030\001 \001(\003\022\r\n\005total\030\002 \001(\003\022\014\n\004used\030\003 \001(\003\022\017\n\007p" +
+      "ercent\030\004 \001(\001\"\201\001\n\006DiskIO\022\022\n\nread_bytes\030\001 " +
+      "\001(\003\022\022\n\nread_count\030\002 \001(\003\022\021\n\tread_time\030\003 \001" +
+      "(\003\022\023\n\013write_bytes\030\004 \001(\003\022\023\n\013write_count\030\005" +
+      " \001(\003\022\022\n\nwrite_time\030\006 \001(\003\"n\n\016NetworkMetri" +
+      "cs\0226\n\013connections\030\001 \001(\0132!.cdp.telemetry." +
+      "NetworkConnections\022$\n\002io\030\002 \001(\0132\030.cdp.tel" +
+      "emetry.NetworkIO\"\237\001\n\tNetworkIO\022\022\n\nbytes_" +
+      "recv\030\001 \001(\003\022\022\n\nbytes_sent\030\002 \001(\003\022\016\n\006dropin" +
+      "\030\003 \001(\003\022\017\n\007dropout\030\004 \001(\003\022\r\n\005errin\030\005 \001(\003\022\016" +
+      "\n\006errout\030\006 \001(\003\022\024\n\014packets_recv\030\007 \001(\003\022\024\n\014" +
+      "packets_sent\030\010 \001(\003\"\322\001\n\022NetworkConnection" +
+      "s\022\016\n\006LISTEN\030\001 \001(\005\022\023\n\013ESTABLISHED\030\002 \001(\005\022\021" +
+      "\n\tTIME_WAIT\030\003 \001(\005\022\022\n\nCLOSE_WAIT\030\004 \001(\005\022\016\n" +
+      "\006CLOSED\030\005 \001(\005\022\020\n\010SYN_SEND\030\006 \001(\005\022\024\n\014SYN_R" +
+      "ECEIVED\030\007 \001(\005\022\022\n\nFIN_WAIT_1\030\010 \001(\005\022\022\n\nFIN" +
+      "_WAIT_2\030\t \001(\005\022\020\n\010LAST_ACK\030\n \001(\005\"u\n\rMemor" +
+      "yMetrics\0224\n\016virtual_memory\030\001 \001(\0132\034.cdp.t" +
+      "elemetry.VirtualMemory\022.\n\013swap_memory\030\002 " +
+      "\001(\0132\031.cdp.telemetry.SwapMemory\"\277\001\n\rVirtu" +
+      "alMemory\022\r\n\005total\030\001 \001(\003\022\014\n\004used\030\002 \001(\003\022\014\n" +
+      "\004free\030\003 \001(\003\022\017\n\007percent\030\004 \001(\001\022\021\n\tavailabl" +
+      "e\030\005 \001(\003\022\016\n\006active\030\006 \001(\003\022\020\n\010inactive\030\007 \001(" +
+      "\003\022\017\n\007buffers\030\010 \001(\003\022\016\n\006cached\030\t \001(\003\022\016\n\006sh" +
+      "ared\030\n \001(\003\022\014\n\004slab\030\013 \001(\003\"c\n\nSwapMemory\022\014" +
+      "\n\004free\030\001 \001(\003\022\017\n\007percent\030\002 \001(\001\022\013\n\003sin\030\003 \001" +
+      "(\003\022\014\n\004sout\030\004 \001(\003\022\r\n\005total\030\005 \001(\003\022\014\n\004used\030" +
+      "\006 \001(\003\"\301\001\n\031CmServiceHealthCheckEvent\022\023\n\013s" +
+      "erviceName\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n" +
+      "\004name\030\003 \001(\t\022\r\n\005value\030\004 \001(\t\022\023\n\013explanatio" +
+      "n\030\005 \001(\t\022\021\n\ttimestamp\030\006 \001(\003\0225\n\016clusterDet" +
+      "ails\030\007 \001(\0132\035.cdp.telemetry.ClusterDetail" +
+      "s\"\247\001\n\024CmServiceMetricEvent\022\023\n\013serviceNam" +
+      "e\030\001 \001(\t\022\023\n\013serviceType\030\002 \001(\t\022\014\n\004name\030\003 \001" +
+      "(\t\022\r\n\005value\030\004 \001(\001\022\021\n\ttimestamp\030\005 \001(\003\0225\n\016" +
+      "clusterDetails\030\006 \001(\0132\035.cdp.telemetry.Clu" +
+      "sterDetails\"\262\002\n\016ClusterDetails\022\013\n\003crn\030\001 " +
+      "\001(\t\022\014\n\004name\030\002 \001(\t\022\017\n\007version\030\003 \001(\t\0227\n\004ty" +
+      "pe\030\004 \001(\0162).cdp.telemetry.ClusterDetails." +
+      "ClusterType\022=\n\010platform\030\005 \001(\0162+.cdp.tele" +
+      "metry.ClusterDetails.CloudPlatform\"5\n\013Cl" +
+      "usterType\022\013\n\007DATAHUB\020\000\022\014\n\010DATALAKE\020\001\022\013\n\007" +
+      "FREEIPA\020\002\"E\n\rCloudPlatform\022\013\n\007UNKNOWN\020\000\022" +
+      "\007\n\003AWS\020\001\022\t\n\005AZURE\020\002\022\007\n\003GCP\020\003\022\n\n\006YCLOUD\020\004" +
+      "*,\n\014HealthStatus\022\013\n\007UNKNOWN\020\000\022\006\n\002OK\020\001\022\007\n" +
+      "\003NOK\020\002B[\n-com.cloudera.thunderhead.telem" +
+      "etry.nodestatusB\017NodeStatusProtoZ\031com/cl" +
+      "oudera/cdp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -40037,7 +40037,7 @@ public final class NodeStatusProto {
     internal_static_cdp_telemetry_StatusDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_cdp_telemetry_StatusDetails_descriptor,
-        new java.lang.String[] { "Host", "Status", "StatusReson", "Timestamp", });
+        new java.lang.String[] { "Host", "Status", "StatusReason", "Timestamp", });
     internal_static_cdp_telemetry_MeteringDetails_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_cdp_telemetry_MeteringDetails_fieldAccessorTable = new

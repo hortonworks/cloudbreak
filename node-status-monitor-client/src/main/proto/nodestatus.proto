@@ -96,7 +96,7 @@ message StatusDetails {
     // Response status.
     HealthStatus status = 2;
     // Additional helper message for the status (optional).
-    string statusReson = 3;
+    string statusReason = 3;
     // Timestaamp of the service statuses for the specific node.
     int64 timestamp = 4;
 }
