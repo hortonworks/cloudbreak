@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
@@ -32,8 +33,10 @@ public class AwsEnvironmentNetworkValidator implements EnvironmentNetworkValidat
     }
 
     @Override
-    public void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+    public void validateDuringFlow(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
         String message;
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
+
         if (networkDto != null && networkDto.getRegistrationType() == RegistrationType.EXISTING) {
             Map<String, CloudSubnet> cloudmetadata = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
             if (StringUtils.isEmpty(networkDto.getNetworkCidr()) && StringUtils.isEmpty(networkDto.getNetworkId())) {

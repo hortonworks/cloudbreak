@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceGroupDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -62,8 +63,9 @@ public class AzureParameterValidatorTest {
     @Test
     public void testWhenNoAzureParametersThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder().build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -73,8 +75,9 @@ public class AzureParameterValidatorTest {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder().build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -88,8 +91,9 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -105,12 +109,14 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(true);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -126,12 +132,14 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(true);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -147,12 +155,14 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals("You specified to use multiple resource groups for your resources, " +
@@ -171,11 +181,13 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals("If you use a single resource group for your resources then please provide the name of that resource group.",
@@ -192,11 +204,13 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals("If you have provided the resource group name for your resources then please provide the resource group usage pattern too.",
@@ -214,12 +228,14 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals("Resource group 'myResourceGroup' does not exist or insufficient permission to access it.", validationResult.getFormattedErrors());
@@ -234,13 +250,15 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
         verify(credentialToCloudCredentialConverter, never()).convert(any());
@@ -259,13 +277,15 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
         when(azureClient.resourceGroupExists("myResourceGroup")).thenReturn(false);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(false);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals("You specified to use a single resource group for all of your resources, but that feature is currently disabled",
@@ -283,6 +303,8 @@ public class AzureParameterValidatorTest {
                         .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder().build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(new CloudCredential());
         AzureClient azureClient = mock(AzureClient.class);
         when(azureClientService.getClient(any())).thenReturn(azureClient);
@@ -290,7 +312,7 @@ public class AzureParameterValidatorTest {
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
         when(entitlementService.azureSingleResourceGroupDedicatedStorageAccountEnabled(anyString())).thenReturn(false);
 
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
         assertEquals("You specified to use a single resource group with dedicated storage account for the images, but that feature is currently disabled",
@@ -307,8 +329,10 @@ public class AzureParameterValidatorTest {
                                 .withEncryptionKeyUrl("DummyKeyUrl").build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
     }
@@ -323,8 +347,10 @@ public class AzureParameterValidatorTest {
                                 .withEncryptionKeyUrl("DummyKeyUrl").build())
                         .build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -334,8 +360,10 @@ public class AzureParameterValidatorTest {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder().build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -345,8 +373,10 @@ public class AzureParameterValidatorTest {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder().build())
                 .build();
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
         when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
@@ -360,7 +390,9 @@ public class AzureParameterValidatorTest {
                                 .withDiskEncryptionSetId("DummyDesId").build())
                         .build())
                 .build();
-        ValidationResult validationResult = underTest.validate(environmentDto, environmentDto.getParameters(), ValidationResult.builder());
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
+
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());
     }

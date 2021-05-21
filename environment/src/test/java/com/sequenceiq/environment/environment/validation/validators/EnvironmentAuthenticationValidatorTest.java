@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 
 class EnvironmentAuthenticationValidatorTest {
 
@@ -25,39 +26,41 @@ class EnvironmentAuthenticationValidatorTest {
 
     @Test
     void testValidateShouldReturnValidationError() {
-        EnvironmentDto environmentDto = createEnvironmentDto(PUBLIC_KEY, null);
+        EnvironmentValidationDto environmentValidationDto = createEnvironmentDto(PUBLIC_KEY, null);
         String expected = "Failed to parse public key. Detailed message: Corrupt or unknown public key file format";
 
-        ValidationResult actual = underTest.validate(environmentDto);
+        ValidationResult actual = underTest.validate(environmentValidationDto);
 
         Assertions.assertEquals(expected, actual.getFormattedErrors());
     }
 
     @Test
     void testValidateShouldReturnWithoutError() {
-        EnvironmentDto environmentDto = createEnvironmentDto(VALID_PUBLIC_KEY, null);
+        EnvironmentValidationDto environmentValidationDto = createEnvironmentDto(VALID_PUBLIC_KEY, null);
 
-        ValidationResult actual = underTest.validate(environmentDto);
+        ValidationResult actual = underTest.validate(environmentValidationDto);
 
         Assertions.assertFalse(actual.hasError());
     }
 
     @Test
     void testValidateShouldReturnWithoutErrorWhenPublicKeyIdIsPresent() {
-        EnvironmentDto environmentDto = createEnvironmentDto(null, "public-key-id");
+        EnvironmentValidationDto environmentValidationDto = createEnvironmentDto(null, "public-key-id");
 
-        ValidationResult actual = underTest.validate(environmentDto);
+        ValidationResult actual = underTest.validate(environmentValidationDto);
 
         Assertions.assertFalse(actual.hasError());
     }
 
-    private EnvironmentDto createEnvironmentDto(String publicKey, String publicKeyId) {
-        return EnvironmentDto.builder()
-                .withAuthentication(AuthenticationDto.builder()
-                        .withPublicKey(publicKey)
-                        .withPublicKeyId(publicKeyId)
-                        .build())
+    private EnvironmentValidationDto createEnvironmentDto(String publicKey, String publicKeyId) {
+        return EnvironmentValidationDto.builder().withEnvironmentDto(EnvironmentDto.builder()
+                    .withAuthentication(AuthenticationDto.builder()
+                            .withPublicKey(publicKey)
+                            .withPublicKeyId(publicKeyId)
+                            .build())
+                    .build())
                 .build();
+
     }
 
 }

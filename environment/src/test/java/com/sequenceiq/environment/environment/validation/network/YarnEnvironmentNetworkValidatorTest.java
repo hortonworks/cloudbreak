@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.network.yarn.YarnEnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.dto.YarnParams;
@@ -39,8 +40,9 @@ public class YarnEnvironmentNetworkValidatorTest {
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        underTest.validateDuringFlow(environmentDto, networkDto, resultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "The 'Queue(queue)' parameter should be specified for the 'YARN' environment specific network!"
@@ -59,8 +61,9 @@ public class YarnEnvironmentNetworkValidatorTest {
 
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setNetwork(networkDto);
+        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        underTest.validateDuringFlow(environmentDto, networkDto, resultBuilder);
+        underTest.validateDuringFlow(environmentValidationDto, networkDto, resultBuilder);
 
         NetworkTestUtils.checkErrorsPresent(resultBuilder, List.of(
                 "The 'lifetime' parameter should be non negative for 'YARN' environment specific network!"

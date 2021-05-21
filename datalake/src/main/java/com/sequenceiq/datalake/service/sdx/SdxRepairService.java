@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -42,6 +44,7 @@ import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 @Service
@@ -73,15 +76,26 @@ public class SdxRepairService {
     @Inject
     private AvailabilityChecker availabilityChecker;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public FlowIdentifier triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
+        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape()) && !entitlementService.mediumDutyRepairEnabled(cluster.getAccountId())) {
+            LOGGER.error("Cluster {} is Medium Duty and is not allowed to be repaired", cluster.getClusterName());
+            throw new BadRequestException("Cannot repair Medium Duty cluster " + cluster.getClusterName() + " at this time");
+        }
         return sdxReactorFlowManager.triggerSdxRepairFlow(cluster, clusterRepairRequest);
     }
 
     public FlowIdentifier triggerRepairByName(String userCrn, String clusterName, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
         MDCBuilder.buildMdcContext(cluster);
+        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(cluster.getClusterShape()) && !entitlementService.mediumDutyRepairEnabled(cluster.getAccountId())) {
+            LOGGER.error("Cluster {} is Medium Duty and is not allowed to be repaired", cluster.getClusterName());
+            throw new BadRequestException("Cannot repair Medium Duty cluster " + cluster.getClusterName() + " at this time");
+        }
         return sdxReactorFlowManager.triggerSdxRepairFlow(cluster, clusterRepairRequest);
     }
 

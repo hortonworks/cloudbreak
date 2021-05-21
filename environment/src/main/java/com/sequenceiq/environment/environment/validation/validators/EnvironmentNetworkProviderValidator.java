@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
@@ -43,13 +44,14 @@ public class EnvironmentNetworkProviderValidator {
         this.environmentSecurityGroupValidatorsByCloudPlatform = environmentSecurityGroupValidatorsByCloudPlatform;
     }
 
-    public ValidationResult validate(EnvironmentDto environmentDto) {
+    public ValidationResult validate(EnvironmentValidationDto environmentValidationDto) {
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         NetworkDto network = environmentDto.getNetwork();
         String cloudPlatform = environmentDto.getCloudPlatform();
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
         validateNetworkHasTheSamePropertyFilledAsTheDesiredCloudPlatform(network, cloudPlatform, resultBuilder);
-        validateNetwork(network, cloudPlatform, resultBuilder, environmentDto);
-        validateSecurityGroup(environmentDto, cloudPlatform, resultBuilder);
+        validateNetwork(network, cloudPlatform, resultBuilder, environmentValidationDto);
+        validateSecurityGroup(environmentValidationDto, cloudPlatform, resultBuilder);
         return resultBuilder.build();
     }
 
@@ -86,23 +88,25 @@ public class EnvironmentNetworkProviderValidator {
         return Optional.ofNullable(o);
     }
 
-    private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto) {
+    private void validateNetwork(NetworkDto networkDto, String cloudPlatform, ValidationResultBuilder resultBuilder,
+            EnvironmentValidationDto environmentValidationDto) {
         EnvironmentNetworkValidator environmentNetworkValidator = environmentNetworkValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
         if (environmentNetworkValidator != null) {
-            environmentNetworkValidator.validateDuringFlow(environmentDto, networkDto, resultBuilder);
+            environmentNetworkValidator.validateDuringFlow(environmentValidationDto, networkDto, resultBuilder);
         } else {
             resultBuilder.error(String.format("Environment specific network is not supported for cloud platform: '%s'!", cloudPlatform));
         }
     }
 
-    private void validateSecurityGroup(EnvironmentDto request, String cloudPlatform, ValidationResultBuilder resultBuilder) {
-        SecurityAccessDto securityAccess = request.getSecurityAccess();
-        NetworkDto networkDto = request.getNetwork();
+    private void validateSecurityGroup(EnvironmentValidationDto environmentValidationDto, String cloudPlatform, ValidationResultBuilder resultBuilder) {
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
+        SecurityAccessDto securityAccess = environmentDto.getSecurityAccess();
+        NetworkDto networkDto = environmentDto.getNetwork();
         if (securityAccess != null && networkDto != null) {
             EnvironmentSecurityGroupValidator environmentSecurityGroupValidator =
                     environmentSecurityGroupValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (environmentSecurityGroupValidator != null) {
-                environmentSecurityGroupValidator.validate(request, resultBuilder);
+                environmentSecurityGroupValidator.validate(environmentValidationDto, resultBuilder);
             } else if (!MOCK.equalsIgnoreCase(cloudPlatform) && !YARN.equalsIgnoreCase(cloudPlatform) && !GCP.equalsIgnoreCase(cloudPlatform)) {
                 resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }

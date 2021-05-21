@@ -13,9 +13,11 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
+import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
@@ -31,7 +33,8 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
     }
 
     @Override
-    public void validate(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public void validate(EnvironmentValidationDto environmentValidationDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
@@ -39,20 +42,21 @@ public class AwsEnvironmentSecurityGroupValidator implements EnvironmentSecurity
                 resultBuilder.error(securityGroupIdsMustBePresent());
             } else if (isSecurityGroupIdDefined(securityAccessDto)) {
                 LOGGER.info("Both existing security group defined: {}", securityAccessDto);
-                if (RegistrationType.CREATE_NEW == environmentDto.getNetwork().getRegistrationType()) {
+                NetworkDto networkDto = environmentDto.getNetwork();
+                if (RegistrationType.CREATE_NEW == networkDto.getRegistrationType()) {
                     LOGGER.error("Both existing security group defined and user wants to create a new network with cidr: {}",
-                            environmentDto.getNetwork().getNetworkCidr());
+                            networkDto.getNetworkCidr());
                     resultBuilder.error(networkIdMustBePresent(getCloudPlatform().name()));
                     return;
                 }
                 if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {
                     LOGGER.info("Validate Security group {} that is related to {} network",
-                            securityAccessDto.getDefaultSecurityGroupId(), environmentDto.getNetwork().getAws());
+                            securityAccessDto.getDefaultSecurityGroupId(), networkDto.getAws());
                     checkSecurityGroupVpc(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getDefaultSecurityGroupId());
                 }
                 if (!Strings.isNullOrEmpty(securityAccessDto.getSecurityGroupIdForKnox())) {
                     LOGGER.info("Validate Security group {} that is related to {} network",
-                            securityAccessDto.getSecurityGroupIdForKnox(), environmentDto.getNetwork().getAws());
+                            securityAccessDto.getSecurityGroupIdForKnox(), networkDto.getAws());
                     checkSecurityGroupVpc(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
                 }
             }

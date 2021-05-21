@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
@@ -45,8 +47,12 @@ public class ClusterUpgradeImageFilter {
     @Inject
     private BlueprintUpgradeOptionValidator blueprintUpgradeOptionValidator;
 
-    public ImageFilterResult filter(CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform, ImageFilterParams imageFilterParams) {
-        return isValidBlueprint(imageFilterParams) ? getImageFilterResult(imageCatalogV3, cloudPlatform, imageFilterParams)
+    @Inject
+    private EntitlementService entitlementService;
+
+    public ImageFilterResult filter(String accountId, CloudbreakImageCatalogV3 imageCatalogV3, String cloudPlatform,
+            ImageFilterParams imageFilterParams) {
+        return isValidBlueprint(imageFilterParams, accountId) ? getImageFilterResult(imageCatalogV3, cloudPlatform, imageFilterParams)
                 : createEmptyResult();
     }
 
@@ -121,8 +127,14 @@ public class ClusterUpgradeImageFilter {
         return packageLocationFilter.filterImage(currentImage, imageFilterParams);
     }
 
-    private boolean isValidBlueprint(ImageFilterParams imageFilterParams) {
-        return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());
+    private boolean isValidBlueprint(ImageFilterParams imageFilterParams, String accountId) {
+        if (imageFilterParams.getStackType().equals(StackType.DATALAKE)) {
+            boolean mediumDuty = imageFilterParams.getBlueprint().getName().contains("SDX Medium Duty");
+            boolean canUpgradeMediumDuty = mediumDuty && entitlementService.mediumDutyUpgradeEnabled(accountId);
+            return !mediumDuty || canUpgradeMediumDuty;
+        } else {
+            return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());
+        }
     }
 
     private boolean isOsVersionsMatch(Image currentImage, Image newImage) {

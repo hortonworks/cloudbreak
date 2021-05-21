@@ -27,7 +27,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOIN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
@@ -291,6 +293,12 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.mediumdutysdx.enable}")
     private boolean mediumDutySdxEnabled;
+
+    @Value("${auth.mock.mediumdutysdx.repair.enable}")
+    private boolean mediumDutySdxRepairEnabled;
+
+    @Value("${auth.mock.mediumdutysdx.upgrade.enable}")
+    private boolean mediumDutySdxUpgradeEnabled;
 
     @Value("${auth.mock.azure.single.resourcegroup.enable}")
     private boolean enableAzureSingleResourceGroupDeployment;
@@ -643,6 +651,12 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (mediumDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));
+        }
+        if (mediumDutySdxUpgradeEnabled) {
+            builder.addEntitlements(createEntitlement(MEDIUM_DUTY_UPGRADE));
+        }
+        if (mediumDutySdxRepairEnabled) {
+            builder.addEntitlements(createEntitlement(MEDIUM_DUTY_REPAIR));
         }
         if (enableAzureSingleResourceGroupDeployment) {
             builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP));

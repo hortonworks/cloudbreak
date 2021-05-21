@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
@@ -28,17 +29,18 @@ public class AzureEnvironmentSecurityGroupValidator implements EnvironmentSecuri
     }
 
     @Override
-    public void validate(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public void validate(EnvironmentValidationDto environmentValidationDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
                 resultBuilder.error(securityGroupIdsMustBePresent());
             } else if (isSecurityGroupIdDefined(securityAccessDto)) {
                 if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {
-                    validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getDefaultSecurityGroupId());
+                    validateSecurityGroup(environmentDto, resultBuilder, securityAccessDto.getDefaultSecurityGroupId());
                 }
                 if (!Strings.isNullOrEmpty(securityAccessDto.getSecurityGroupIdForKnox())) {
-                    validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
+                    validateSecurityGroup(environmentDto, resultBuilder, securityAccessDto.getSecurityGroupIdForKnox());
                 }
             }
         }

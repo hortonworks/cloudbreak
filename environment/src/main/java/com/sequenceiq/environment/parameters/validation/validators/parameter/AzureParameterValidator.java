@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
@@ -46,8 +47,10 @@ public class AzureParameterValidator implements ParameterValidator {
     private EntitlementService entitlementService;
 
     @Override
-    public ValidationResult validate(EnvironmentDto environmentDto, ParametersDto parametersDto, ValidationResultBuilder validationResultBuilder) {
+    public ValidationResult validate(EnvironmentValidationDto environmentValidationDto, ParametersDto parametersDto,
+            ValidationResultBuilder validationResultBuilder) {
 
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         LOGGER.debug("ParametersDto: {}", parametersDto);
         AzureParametersDto azureParametersDto = parametersDto.azureParametersDto();
         if (Objects.isNull(azureParametersDto)) {

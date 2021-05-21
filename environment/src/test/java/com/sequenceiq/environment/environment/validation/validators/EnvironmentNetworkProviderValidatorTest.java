@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -74,8 +75,10 @@ class EnvironmentNetworkProviderValidatorTest {
     }
 
     @Test
-    void testIfNetworkParamsHasNotSpecifiedThenNoErrorComes() {
-        ValidationResult result = underTest.validate(EnvironmentDto.builder().withCloudPlatform("AWS").build());
+    void testIfNetworkParamsHaveNotBeenSpecifiedThenNoErrorComes() {
+        ValidationResult result = underTest.validate(EnvironmentValidationDto.builder().
+                withEnvironmentDto(EnvironmentDto.builder()
+                        .withCloudPlatform("AWS").build()).build());
 
         assertFalse(result.hasError());
     }
@@ -88,8 +91,13 @@ class EnvironmentNetworkProviderValidatorTest {
         assertFalse(result.hasError());
     }
 
-    private EnvironmentDto getEnvDto(NetworkDto network) {
-        return EnvironmentDto.builder().withCloudPlatform("AWS").withNetwork(network).build();
+    private EnvironmentValidationDto getEnvDto(NetworkDto network) {
+        return EnvironmentValidationDto.builder()
+                .withEnvironmentDto(EnvironmentDto.builder()
+                        .withCloudPlatform("AWS")
+                        .withNetwork(network)
+                        .build())
+                .build();
     }
 
 }
