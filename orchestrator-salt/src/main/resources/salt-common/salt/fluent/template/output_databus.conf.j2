@@ -15,14 +15,11 @@
     extra_headers_field              bundleContext
     event_message_field              message
     stream_name                      {{ fluent.dbusClusterLogsCollectionStreamName }}
-    partition_key                    "#{Socket.gethostname}"
-    {%- if fluent.proxyUrl %}
-    proxy_url                        "{{ fluent.proxyUrl }}"
-    {%- if fluent.proxyAuth %}
+    partition_key                    "#{Socket.gethostname}"{%- if fluent.proxyUrl %}
+    proxy_url                        "{{ fluent.proxyUrl }}"{%- if fluent.proxyAuth %}
     proxy_username                   "{{ fluent.proxyUser }}"
-    proxy_password                   "{{ fluent.proxyPassword }}"
-    {% endif %}
-    {% endif %}
+    proxy_password                   "{{ fluent.proxyPassword }}"{% endif %}{% if fluent.noProxyHosts and fluent.fluentVersion > 3 %}
+    no_proxy                         "{{ fluent.noProxyHosts }}"{% endif %}{% endif %}
     <buffer tag,time>
       @type file
       path /var/log/{{ fluent.binary }}/databus_service_logs
