@@ -553,6 +553,13 @@ public class CmTemplateProcessorTest {
         assertEquals(YarnConstants.ATTRIBUTE_NODE_INSTANCE_TYPE_COMPUTE, serviceAttributesMap.get(YarnRoles.YARN).getAttributes().values().iterator().next());
     }
 
+    @Test
+    public void testHostWithUpperCase() {
+        underTest = new CmTemplateProcessor(getBlueprintText("input/clouderamanager-host-with-uppercase.bp"));
+        Set<String> hosts = Set.of("master", "executor", "coordinator");
+        assertTrue(underTest.getTemplate().getHostTemplates().stream().allMatch(ht -> hosts.contains(ht.getRefName())));
+    }
+
     private static void assertSortedEquals(Set<?> expected, Set<?> actual) {
         assertEquals(new TreeSet<>(expected), new TreeSet<>(actual));
     }

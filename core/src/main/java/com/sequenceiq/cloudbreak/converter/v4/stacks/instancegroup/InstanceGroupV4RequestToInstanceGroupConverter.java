@@ -31,7 +31,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverter extends AbstractConv
         source.getTemplate().setCloudPlatform(source.getCloudPlatform());
         instanceGroup.setTemplate(getConversionService().convert(source.getTemplate(), Template.class));
         instanceGroup.setSecurityGroup(getConversionService().convert(source.getSecurityGroup(), SecurityGroup.class));
-        instanceGroup.setGroupName(source.getName());
+        instanceGroup.setGroupName(source.getName().toLowerCase());
         instanceGroup.setMinimumNodeCount(source.getMinimumNodeCount() == null ? 0 : source.getMinimumNodeCount());
         setAttributes(source, instanceGroup);
         instanceGroup.setInstanceGroupType(source.getType());

@@ -32,6 +32,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateClusterSpec;
@@ -77,8 +78,15 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     public CmTemplateProcessor(@Nonnull String cmTemplateText) {
         try {
             cmTemplate = JsonUtil.readValue(cmTemplateText, ApiClusterTemplate.class);
+            transformHostGroupNameToLowerCase();
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to parse blueprint text.", e);
+        }
+    }
+
+    private void transformHostGroupNameToLowerCase() {
+        if (!CollectionUtils.isEmpty(cmTemplate.getHostTemplates())) {
+            cmTemplate.getHostTemplates().forEach(ht -> ht.setRefName(ht.getRefName().toLowerCase()));
         }
     }
 

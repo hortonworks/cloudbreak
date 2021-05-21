@@ -12,7 +12,7 @@ public class HostGroupV4RequestToHostGroupConverter extends AbstractConversionSe
     @Override
     public HostGroup convert(HostGroupV4Request source) {
         HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(source.getName());
+        hostGroup.setName(source.getName().toLowerCase());
         hostGroup.setRecoveryMode(source.getRecoveryMode());
         return hostGroup;
     }
