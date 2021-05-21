@@ -22,7 +22,7 @@
   {% set collect_available = False %}
 {% endif %}
 
-{% if telemetry.cdpTelemetryVersion > 4 %}
+{% if telemetry.cdpTelemetryVersion > 9 %}
   {% set salt_ping_available = True %}
 {% else %}
   {% set salt_ping_available = False %}
