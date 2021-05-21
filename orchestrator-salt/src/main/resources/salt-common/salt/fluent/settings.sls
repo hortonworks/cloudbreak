@@ -4,7 +4,7 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
-{% set cdp_logging_agent_version = '0.2.6' %}
+{% set cdp_logging_agent_version = '0.2.10' %}
 {% set cdp_logging_agent_rpm = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-logging-agent/' + cdp_logging_agent_version + '/cdp_logging_agent-'+ cdp_logging_agent_version + '.x86_64.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
@@ -146,6 +146,7 @@
   {% set proxy_auth = False %}
   {% set proxy_full_url = None %}
 {% endif %}
+{% set no_proxy_hosts = salt['pillar.get']('proxy:noProxyHosts') %}
 
 {% if dbus_metering_enabled %}
   {% if "metering_prewarmed_v2" in grains.get('roles', []) and salt['pillar.get']('fluent:dbusMeteringAppName') and salt['pillar.get']('fluent:dbusMeteringStreamName') %}
@@ -272,6 +273,7 @@
     "proxyUser": proxy_user,
     "proxyPassword": proxy_password,
     "proxyFullUrl": proxy_full_url,
+    "noProxyHosts": no_proxy_hosts,
     "binary": binary,
     "fluentVersion": fluent_version,
     "cdpLoggingAgentInstalled": cdp_logging_agent_installed,
