@@ -79,9 +79,7 @@ public class StructuredSynchronizerJob extends TracedQuartzJob {
 
     Set<Status> unshedulableStates() {
         return EnumSet.of(
-                Status.CREATE_FAILED,
-                Status.DELETE_COMPLETED,
-                Status.DELETED_ON_PROVIDER_SIDE
+                Status.DELETE_COMPLETED
         );
     }
 
