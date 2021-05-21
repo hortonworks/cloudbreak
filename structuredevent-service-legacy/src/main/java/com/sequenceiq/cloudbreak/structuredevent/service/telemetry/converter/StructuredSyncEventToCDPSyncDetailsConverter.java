@@ -10,14 +10,14 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 public class StructuredSyncEventToCDPSyncDetailsConverter {
 
     public UsageProto.CDPSyncDetails convert(StructuredSyncEvent structuredSyncEvent) {
-        if (structuredSyncEvent == null) {
-            return null;
-        }
         UsageProto.CDPSyncDetails.Builder cdpSyncDetails = UsageProto.CDPSyncDetails.newBuilder();
-        ClusterDetails clusterDetails = structuredSyncEvent.getCluster();
-        if (clusterDetails != null) {
-            cdpSyncDetails.setClusterCreationStarted(clusterDetails.getCreationStarted() != null ? clusterDetails.getCreationStarted() : 0L);
-            cdpSyncDetails.setClusterCreationFinished(clusterDetails.getCreationFinished() != null ? clusterDetails.getCreationFinished() : 0L);
+
+        if (structuredSyncEvent != null) {
+            ClusterDetails clusterDetails = structuredSyncEvent.getCluster();
+            if (clusterDetails != null) {
+                cdpSyncDetails.setClusterCreationStarted(clusterDetails.getCreationStarted() != null ? clusterDetails.getCreationStarted() : 0L);
+                cdpSyncDetails.setClusterCreationFinished(clusterDetails.getCreationFinished() != null ? clusterDetails.getCreationFinished() : 0L);
+            }
         }
 
         return cdpSyncDetails.build();

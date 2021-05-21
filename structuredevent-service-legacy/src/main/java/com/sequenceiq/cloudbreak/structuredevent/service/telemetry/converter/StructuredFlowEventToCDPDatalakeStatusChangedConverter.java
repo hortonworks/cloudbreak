@@ -20,16 +20,29 @@ public class StructuredFlowEventToCDPDatalakeStatusChangedConverter {
     @Inject
     private StructuredEventToStatusDetailsConverter statusDetailsConverter;
 
+    @Inject
+    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+
+    @Inject
+    private StructuredFlowEventToCDPDatalakeFeaturesConverter featuresConverter;
+
     public UsageProto.CDPDatalakeStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
-        if (structuredFlowEvent == null) {
-            return null;
-        }
         UsageProto.CDPDatalakeStatusChanged.Builder cdpDatalakeStatusChanged = UsageProto.CDPDatalakeStatusChanged.newBuilder();
+
         cdpDatalakeStatusChanged.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
 
         cdpDatalakeStatusChanged.setNewStatus(status);
 
         cdpDatalakeStatusChanged.setStatusDetails(statusDetailsConverter.convert(structuredFlowEvent));
+
+        if (structuredFlowEvent != null) {
+            cdpDatalakeStatusChanged.setFeatures(featuresConverter.convert(structuredFlowEvent.getCluster()));
+            if (structuredFlowEvent.getOperation() != null) {
+                cdpDatalakeStatusChanged.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
+            }
+        }
+
+        cdpDatalakeStatusChanged.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
 
         UsageProto.CDPDatalakeStatusChanged ret = cdpDatalakeStatusChanged.build();
         LOGGER.debug("Converted CDPDatalakeStatusChanged telemetry event: {}", ret);

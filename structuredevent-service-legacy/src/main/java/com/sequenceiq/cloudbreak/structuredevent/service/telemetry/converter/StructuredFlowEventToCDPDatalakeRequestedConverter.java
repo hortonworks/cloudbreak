@@ -24,17 +24,18 @@ public class StructuredFlowEventToCDPDatalakeRequestedConverter {
     private StructuredFlowEventToCDPDatalakeFeaturesConverter featuresConverter;
 
     public UsageProto.CDPDatalakeRequested convert(StructuredFlowEvent structuredFlowEvent) {
-        if (structuredFlowEvent == null) {
-            return null;
-        }
         UsageProto.CDPDatalakeRequested.Builder cdpDatalakeRequested = UsageProto.CDPDatalakeRequested.newBuilder();
+
         cdpDatalakeRequested.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
 
-        cdpDatalakeRequested.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
+        if (structuredFlowEvent != null) {
+            cdpDatalakeRequested.setFeatures(featuresConverter.convert(structuredFlowEvent.getCluster()));
+            if (structuredFlowEvent.getOperation() != null) {
+                cdpDatalakeRequested.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
+            }
+        }
 
         cdpDatalakeRequested.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
-
-        cdpDatalakeRequested.setFeatures(featuresConverter.convert(structuredFlowEvent.getCluster()));
 
         UsageProto.CDPDatalakeRequested ret = cdpDatalakeRequested.build();
         LOGGER.debug("Converted CDPDatalakeRequested telemetry event: {}", ret);

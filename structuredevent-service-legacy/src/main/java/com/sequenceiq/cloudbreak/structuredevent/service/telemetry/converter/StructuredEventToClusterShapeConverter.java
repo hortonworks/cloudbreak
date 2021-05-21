@@ -22,8 +22,9 @@ public class StructuredEventToClusterShapeConverter {
     private static final int DEFAULT_INTEGER_VALUE = -1;
 
     public UsageProto.CDPClusterShape convert(StructuredFlowEvent structuredFlowEvent) {
-
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
+
+        cdpClusterShape.setNodes(DEFAULT_INTEGER_VALUE);
 
         if (structuredFlowEvent != null) {
             cdpClusterShape = convert(structuredFlowEvent.getBlueprintDetails(), structuredFlowEvent.getStack());
@@ -33,8 +34,8 @@ public class StructuredEventToClusterShapeConverter {
     }
 
     public UsageProto.CDPClusterShape convert(StructuredSyncEvent structuredSyncEvent) {
-
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
+        cdpClusterShape.setNodes(DEFAULT_INTEGER_VALUE);
 
         if (structuredSyncEvent != null) {
             cdpClusterShape = convert(structuredSyncEvent.getBlueprintDetails(), structuredSyncEvent.getStack());
@@ -44,7 +45,6 @@ public class StructuredEventToClusterShapeConverter {
     }
 
     private UsageProto.CDPClusterShape.Builder convert(BlueprintDetails blueprintDetails, StackDetails stackDetails) {
-
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
         cdpClusterShape.setNodes(DEFAULT_INTEGER_VALUE);
 

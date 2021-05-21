@@ -19,7 +19,10 @@ public class StructuredSyncEventToCDPSyncDetailsConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNull("We should return with null if the input is null", underTest.convert(null));
+        UsageProto.CDPSyncDetails details = underTest.convert(null);
+
+        Assert.assertEquals(0, details.getClusterCreationStarted());
+        Assert.assertEquals(0, details.getClusterCreationFinished());
     }
 
     @Test

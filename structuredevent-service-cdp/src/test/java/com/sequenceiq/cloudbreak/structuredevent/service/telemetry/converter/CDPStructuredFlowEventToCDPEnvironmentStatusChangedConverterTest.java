@@ -12,13 +12,13 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnviro
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
 
 @ExtendWith(MockitoExtension.class)
-class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
+public class CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverterTest {
 
-    private CDPStructuredFlowEventToCDPEnvironmentRequestedConverter underTest;
+    private CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter underTest;
 
     @BeforeEach()
     public void setUp() {
-        underTest = new CDPStructuredFlowEventToCDPEnvironmentRequestedConverter();
+        underTest = new CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter();
         CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
         Whitebox.setInternalState(operationDetailsConverter, "environmentRequestProcessingStepMapper", new EnvironmentRequestProcessingStepMapper());
@@ -30,22 +30,28 @@ class CDPStructuredFlowEventToCDPEnvironmentRequestedConverterTest {
 
     @Test
     public void testNullStructuredFlowEvent() {
-        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(null);
+        UsageProto.CDPEnvironmentStatusChanged environmentStatusChanged = underTest.convert(null,
+                UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED);
 
-        Assertions.assertNotNull(environmentRequested.getOperationDetails());
-        Assertions.assertNotNull(environmentRequested.getEnvironmentDetails());
-        Assertions.assertNotNull(environmentRequested.getFreeIPA());
-        Assertions.assertNotNull(environmentRequested.getTelemetryFeatureDetails());
+        Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED, environmentStatusChanged.getNewStatus());
+        Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET, environmentStatusChanged.getOldStatus());
+        Assertions.assertNotNull(environmentStatusChanged.getOperationDetails());
+        Assertions.assertNotNull(environmentStatusChanged.getEnvironmentDetails());
+        Assertions.assertNotNull(environmentStatusChanged.getFreeIPA());
+        Assertions.assertNotNull(environmentStatusChanged.getTelemetryFeatureDetails());
     }
 
     @Test
     public void testConvertingEmptyStructuredFlowEvent() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
-        UsageProto.CDPEnvironmentRequested environmentRequested = underTest.convert(cdpStructuredFlowEvent);
+        UsageProto.CDPEnvironmentStatusChanged environmentStatusChanged = underTest.convert(cdpStructuredFlowEvent,
+                UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED);
 
-        Assertions.assertNotNull(environmentRequested.getOperationDetails());
-        Assertions.assertNotNull(environmentRequested.getEnvironmentDetails());
-        Assertions.assertNotNull(environmentRequested.getFreeIPA());
-        Assertions.assertNotNull(environmentRequested.getTelemetryFeatureDetails());
+        Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED, environmentStatusChanged.getNewStatus());
+        Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET, environmentStatusChanged.getOldStatus());
+        Assertions.assertNotNull(environmentStatusChanged.getOperationDetails());
+        Assertions.assertNotNull(environmentStatusChanged.getEnvironmentDetails());
+        Assertions.assertNotNull(environmentStatusChanged.getFreeIPA());
+        Assertions.assertNotNull(environmentStatusChanged.getTelemetryFeatureDetails());
     }
 }

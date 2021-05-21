@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,16 +22,23 @@ public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
     @Inject
     private StructuredEventToStatusDetailsConverter statusDetailsConverter;
 
+    @Inject
+    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+
     public UsageProto.CDPDatahubStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
-        if (structuredFlowEvent == null) {
-            return null;
-        }
         UsageProto.CDPDatahubStatusChanged.Builder cdpDatahubStatusChanged = UsageProto.CDPDatahubStatusChanged.newBuilder();
+
         cdpDatahubStatusChanged.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
 
         cdpDatahubStatusChanged.setNewStatus(status);
 
         cdpDatahubStatusChanged.setStatusDetails(statusDetailsConverter.convert(structuredFlowEvent));
+
+        if (structuredFlowEvent != null && structuredFlowEvent.getOperation() != null) {
+            cdpDatahubStatusChanged.setEnvironmentCrn(defaultIfEmpty(structuredFlowEvent.getOperation().getEnvironmentCrn(), ""));
+        }
+
+        cdpDatahubStatusChanged.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
 
         UsageProto.CDPDatahubStatusChanged ret = cdpDatahubStatusChanged.build();
         LOGGER.debug("Converted CDPDatahubStatusChanged telemetry event: {}", ret);

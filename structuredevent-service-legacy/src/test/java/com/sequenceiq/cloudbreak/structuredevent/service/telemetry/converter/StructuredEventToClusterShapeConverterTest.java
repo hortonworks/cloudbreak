@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
-class StructuredFlowEventToClusterShapeConverterTest {
+class StructuredEventToClusterShapeConverterTest {
 
     private StructuredEventToClusterShapeConverter underTest;
 
@@ -24,8 +24,17 @@ class StructuredFlowEventToClusterShapeConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNotNull("We should return empty object for not null", underTest.convert((StructuredFlowEvent) null));
-        Assert.assertNotNull("We should return empty object for not null", underTest.convert((StructuredSyncEvent) null));
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert((StructuredFlowEvent) null);
+
+        Assert.assertEquals("", flowClusterShape.getClusterTemplateName());
+        Assert.assertEquals(-1, flowClusterShape.getNodes());
+        Assert.assertEquals("", flowClusterShape.getDefinitionDetails());
+
+        UsageProto.CDPClusterShape syncClusterShape = underTest.convert((StructuredSyncEvent) null);
+
+        Assert.assertEquals("", syncClusterShape.getClusterTemplateName());
+        Assert.assertEquals(-1, syncClusterShape.getNodes());
+        Assert.assertEquals("", syncClusterShape.getDefinitionDetails());
     }
 
     @Test

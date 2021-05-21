@@ -27,11 +27,8 @@ public class StructuredSyncEventToCDPDatalakeSyncConverter {
     private StructuredEventToStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatalakeSync convert(StructuredSyncEvent structuredSyncEvent) {
-        if (structuredSyncEvent == null) {
-            return null;
-        }
-
         UsageProto.CDPDatalakeSync.Builder cdpDatalakeSyncBuilder = UsageProto.CDPDatalakeSync.newBuilder();
+
         cdpDatalakeSyncBuilder.setOperationDetails(operationDetailsConverter.convert(structuredSyncEvent));
         cdpDatalakeSyncBuilder.setSyncDetails(syncDetailsConverter.convert(structuredSyncEvent));
         cdpDatalakeSyncBuilder.setClusterDetails(clusterDetailsConverter.convert(structuredSyncEvent));

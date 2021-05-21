@@ -823,6 +823,12 @@ message CDPEnvironmentStatusChanged {
   CDPEnvironmentStatus.Value newStatus = 3;
   // Describe the reason of the failure if any
   string failureReason = 4;
+  // Environment metadata
+  CDPEnvironmentDetails environmentDetails = 5;
+  // Data collection metadata
+  CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;
+  // FreeIPA metadata
+  CDPFreeIPADetails freeIPA = 7;
 }
 
 message CDPImageDetails {
@@ -916,6 +922,12 @@ message CDPDatalakeStatusChanged {
   CDPClusterStatus.Value newStatus = 3;
   // Describes the detailed status of the stack and the cluster of the datalake
   CDPStatusDetails statusDetails = 4;
+  // Environment Crn
+  string environmentCrn = 5;
+  // Cluster details for Datalake
+  CDPClusterDetails clusterDetails = 6;
+  // Feature tracking for DL
+  CDPDatalakeFeatures features = 7;
 }
 
 // Generated when Datahub creation has been requested or finished
@@ -938,6 +950,10 @@ message CDPDatahubStatusChanged {
   CDPClusterStatus.Value newStatus = 3;
   // Describes the detailed status of the stack and the cluster of the datahub
   CDPStatusDetails statusDetails = 4;
+  // Environment Crn
+  string environmentCrn = 5;
+  // Cluster details for Datahub
+  CDPClusterDetails clusterDetails = 6;
 }
 
 message CDPSyncDetails {
