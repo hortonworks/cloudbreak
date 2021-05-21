@@ -73,7 +73,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     public void testChainQueueForReplaceVms() {
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult = Result.success(new HashMap<>());
-        when(clusterRepairService.validateRepair(any(), any(), any(), eq(false))).thenReturn(repairStartResult);
+        when(clusterRepairService.validateRepair(any(), any(), any(), eq(false), eq(false))).thenReturn(repairStartResult);
 
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, true);

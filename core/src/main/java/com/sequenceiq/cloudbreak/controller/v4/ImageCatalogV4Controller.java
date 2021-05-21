@@ -11,6 +11,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
@@ -186,18 +187,20 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     }
 
     @Override
+    @AccountIdNotNeeded
     @DisableCheckPermissions
     public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
 
         // FIXME: Implement this!
-        return null;
+        return new ImageV4Response();
     }
 
     @Override
+    @AccountIdNotNeeded
     @DisableCheckPermissions
     public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime) throws Exception {
 
         // FIXME: Implement this!
-        return null;
+        return new ImageV4Response();
     }
 }

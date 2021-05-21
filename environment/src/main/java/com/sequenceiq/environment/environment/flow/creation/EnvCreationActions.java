@@ -38,11 +38,13 @@ import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
@@ -109,7 +111,11 @@ public class EnvCreationActions {
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_VALIDATION_STARTED);
-                    sendEvent(context, VALIDATE_ENVIRONMENT_EVENT.selector(), environmentDto);
+                    EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                            .withEnvironmentDto(environmentDto)
+                            .withValidationType(ValidationType.ENVIRONMENT_CREATION)
+                            .build();
+                    sendEvent(context, VALIDATE_ENVIRONMENT_EVENT.selector(), environmentValidationDto);
                 }, () -> {
                     EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
                             payload.getResourceId(),

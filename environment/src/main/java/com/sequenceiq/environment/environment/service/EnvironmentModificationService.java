@@ -27,11 +27,13 @@ import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.validation.EnvironmentFlowValidatorService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
@@ -316,8 +318,12 @@ public class EnvironmentModificationService {
     private void validateAwsParameters(Environment environment, ParametersDto parametersDto) {
         if (parametersDto.getAwsParametersDto() != null) {
             EnvironmentDto environmentDto = environmentDtoConverter.environmentToDto(environment);
+            EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder()
+                    .withEnvironmentDto(environmentDto)
+                    .withValidationType(ValidationType.ENVIRONMENT_EDIT)
+                    .build();
             ValidationResult validationResult = environmentFlowValidatorService
-                    .validateParameters(environmentDto, parametersDto);
+                    .validateParameters(environmentValidationDto, parametersDto);
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
             }

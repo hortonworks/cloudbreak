@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.validation.securitygroup.EnvironmentSecurityGroupValidator;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
@@ -32,17 +33,18 @@ public class GcpEnvironmentSecurityGroupValidator implements EnvironmentSecurity
     }
 
     @Override
-    public void validate(EnvironmentDto environmentDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+    public void validate(EnvironmentValidationDto environmentValidationDto, ValidationResult.ValidationResultBuilder resultBuilder) {
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         SecurityAccessDto securityAccessDto = environmentDto.getSecurityAccess();
         if (securityAccessDto != null) {
             if (onlyOneSecurityGroupIdDefined(securityAccessDto)) {
                 resultBuilder.error(securityGroupIdsMustBePresent());
             } else if (isSecurityGroupIdDefined(securityAccessDto)) {
                 if (!Strings.isNullOrEmpty(securityAccessDto.getDefaultSecurityGroupId())) {
-                    validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getDefaultSecurityGroupId());
+                    validateSecurityGroup(environmentDto, resultBuilder, securityAccessDto.getDefaultSecurityGroupId());
                 }
                 if (!Strings.isNullOrEmpty(securityAccessDto.getSecurityGroupIdForKnox())) {
-                    validateSecurityGroup(environmentDto, resultBuilder, environmentDto.getSecurityAccess().getSecurityGroupIdForKnox());
+                    validateSecurityGroup(environmentDto, resultBuilder, securityAccessDto.getSecurityGroupIdForKnox());
                 }
             }
         }

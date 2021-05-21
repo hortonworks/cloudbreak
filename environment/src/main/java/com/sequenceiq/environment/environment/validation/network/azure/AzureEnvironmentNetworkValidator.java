@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
+import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.environment.validation.network.EnvironmentNetworkValidator;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -63,17 +65,22 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
     }
 
     @Override
-    public void validateDuringFlow(EnvironmentDto environmentDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
-        if (environmentDto == null || networkDto == null) {
-            LOGGER.warn("EnvironmentDto or NetworkDto. Neither them can be null!");
+    public void validateDuringFlow(EnvironmentValidationDto environmentValidationDto, NetworkDto networkDto, ValidationResultBuilder resultBuilder) {
+        if (environmentValidationDto == null || environmentValidationDto.getEnvironmentDto() == null || networkDto == null) {
+            LOGGER.warn("Neither EnvironmentDto nor NetworkDto could be null!");
             resultBuilder.error("Internal validation error");
             return;
         }
+        EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         Map<String, CloudSubnet> cloudNetworks = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks);
-        checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
-        checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
-        checkPrivateEndpointForExistingNetworkLink(resultBuilder, environmentDto, networkDto);
+        if (environmentValidationDto.getValidationType() == ValidationType.ENVIRONMENT_CREATION) {
+            checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
+            checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
+            checkPrivateEndpointForExistingNetworkLink(resultBuilder, environmentDto, networkDto);
+        } else {
+            LOGGER.debug("Skipping Private Endpoint related validations as they have been validated before during env creation");
+        }
     }
 
     @Override

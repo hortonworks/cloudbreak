@@ -113,7 +113,6 @@
             {
                  "apiVersion": "2015-05-01-preview",
                  "type": "Microsoft.Network/virtualNetworks",
-                 <#if !noFirewallRules>
                  "dependsOn": [
                     <#list igs as group>
                         <#if !isUpscale && (! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content)>
@@ -121,7 +120,6 @@
                         </#if>
                     </#list>
                  ],
-                 </#if>
                  "tags": {
                 <#if userDefinedTags?? && userDefinedTags?has_content>
                     <#list userDefinedTags?keys as key>
@@ -148,7 +146,6 @@
                  }
              },
              </#if>
-             <#if !noFirewallRules>
              <#list igs as group>
              <#if !isUpscale && (! securityGroups[group.name]?? || ! securityGroups[group.name]?has_content)>
              {
@@ -199,9 +196,9 @@
              },
              </#if>
              </#list>
-             </#if>
              <#list groups?keys as instanceGroup>
              <#list groups[instanceGroup] as instance>
+                 <#assign createAndNoSecGroup = !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
                  <#if !noPublicIp>
                  {
                    "apiVersion": "2015-05-01-preview",
@@ -237,31 +234,34 @@
                      </#if>
                     },
                    "dependsOn": [
-                       <#if !noFirewallRules>
-                       <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
-                       "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
+                       <#if createAndNoSecGroup>
+                           "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
                        </#if>
-                       </#if>
+
                        <#if !noPublicIp>
-                       <#if !noFirewallRules>
-                       <#if !isUpscale && (! securityGroups[instance.groupName]?? || ! securityGroups[instance.groupName]?has_content)>
-                       ,
+                           <#if createAndNoSecGroup>
+                               ,
+                           </#if>
+
+                           "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
                        </#if>
-                       </#if>
-                       "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
-                       </#if>
+
                        <#if !existingVPC>
-                       <#if !noFirewallRules || !noPublicIp>,</#if>
-                       "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
+                           <#if !noPublicIp || createAndNoSecGroup>
+                               ,
+                          </#if>
+                           "[concat('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkNamePrefix'))]"
                        </#if>
+
                        <#if loadBalancerMapping[instance.groupName]?? && (loadBalancerMapping[instance.groupName]?size > 0)>
+                           <#if createAndNoSecGroup || !noPublicIp || !existingVPC>,</#if>
                            <#list loadBalancerMapping[instance.groupName] as loadBalancer>
                                <#--
                                   we have to define a dependency between the NIC and the address pool it belongs to
                                   this makes every instance in the gateway group depend on every load balancer address pool
                                   when we add support for multiple load balancers, this will have to be updated.
                                -->
-                               ,"[resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}')]"
+                               "[resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}')]"<#sep>,</#sep>
                            </#list>
                        </#if>
                    ],
@@ -271,7 +271,7 @@
                            "networkSecurityGroup":{
                                "id": "${securityGroups[instance.groupName]}"
                             },
-                        <#elseif !noFirewallRules>
+                        <#else>
                             "networkSecurityGroup":{
                                 "id": "[resourceId('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
                            },

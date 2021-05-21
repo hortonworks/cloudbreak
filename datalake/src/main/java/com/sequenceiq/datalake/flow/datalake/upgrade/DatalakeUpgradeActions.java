@@ -122,6 +122,7 @@ public class DatalakeUpgradeActions {
             @Override
             protected void doExecute(SdxContext context, DatalakeImageChangeEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Start Datalake upgrade image change for {} ", payload.getResourceId());
+                sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 String catalogName = sdxUpgradeService.getCurrentImageCatalogName(payload.getResourceId());
                 UpgradeOptionV4Response upgrade = new UpgradeOptionV4Response().upgrade(
                         new ImageInfoV4Response().imageId(payload.getImageId()).imageCatalogName(catalogName)
@@ -171,7 +172,6 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeVmReplaceEvent payload, Map<Object, Object> variables) {
-                sdxUpgradeService.updateRuntimeVersionFromCloudbreak(payload.getResourceId());
                 if ((boolean) variables.get(REPLACE_VMS_AFTER_UPGRADE)) {
                     LOGGER.info("Start Datalake upgrade vm replacement for {} ", payload.getResourceId());
                     sdxUpgradeService.upgradeOs(payload.getResourceId());
