@@ -23,6 +23,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
@@ -342,6 +343,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.nodestatus.check.enable}")
     private boolean datahubNodestatusCheck;
+
+    @Value("${auth.mock.enable.distrox.instance.types}")
+    private boolean enableDistroxInstanceTypes;
 
     private String cbLicense;
 
@@ -706,6 +710,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (cmHAEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CM_HA));
+        }
+        if (enableDistroxInstanceTypes) {
+            builder.addEntitlements(createEntitlement(CDP_ENABLE_DISTROX_INSTANCE_TYPES));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
