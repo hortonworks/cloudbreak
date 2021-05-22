@@ -107,13 +107,13 @@
               {
                 "name": "hdfs_client_env_safety_valve",
                 "value": "HADOOP_OPTS=\"-Dorg.wildfly.openssl.path=/usr/lib64 ${HADOOP_OPTS}\""
-              },
-              {
-                "refName": "hdfs-HTTPFS-BASE",
-                "roleType": "HTTPFS",
-                "base": true
               }
             ]
+          },
+          {
+            "refName": "hdfs-HTTPFS-BASE",
+            "roleType": "HTTPFS",
+            "base": true
           }
         ]
       },
