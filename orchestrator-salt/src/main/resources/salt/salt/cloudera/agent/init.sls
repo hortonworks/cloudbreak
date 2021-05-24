@@ -1,6 +1,7 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- set manager_server_fqdn = salt['pillar.get']('hosts')[metadata.server_address]['fqdn'] %}
+{%- set internal_loadbalancer_san = salt['pillar.get']('cloudera-manager:communication:internal_loadbalancer_san') %}
 
 install-cloudera-manager-agent:
   pkg.installed:
@@ -46,6 +47,19 @@ setup_autotls_token:
     - content: "cert_request_token_file=/etc/cloudera-scm-agent/cmagent.token"
     - after: "use_tls=.*"
     - backup: False
+
+{% if internal_loadbalancer_san|length > 0 %}
+
+setup_autotls_san:
+  file.line:
+    - name: /etc/cloudera-scm-agent/config.ini
+    - mode: ensure
+    - content: "subject_alt_names={{ internal_loadbalancer_san }}"
+    - after: "# subject_alt_names.*"
+    - backup: False
+    - quiet: True
+
+{% endif %}
 
 {% endif %}
 

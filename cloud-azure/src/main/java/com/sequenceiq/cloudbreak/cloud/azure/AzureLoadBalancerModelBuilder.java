@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancingRule
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,10 +74,13 @@ public class AzureLoadBalancerModelBuilder {
 
     private List<AzureLoadBalancingRule> collectLoadBalancingRules(CloudLoadBalancer cloudLoadBalancer) {
         return cloudLoadBalancer.getPortToTargetGroupMapping()
-                .keySet()
-                .stream()
-                .map(AzureLoadBalancingRule::new)
-                .collect(toList());
+            .entrySet().stream()
+            .map(entry -> {
+                TargetGroupPortPair pair = entry.getKey();
+                Group firstGroup = entry.getValue().stream().findFirst().orElse(null);
+                return new AzureLoadBalancingRule(pair, firstGroup);
+            })
+            .collect(toList());
     }
 
     private AzureLoadBalancer buildAzureLb(LoadBalancerType type, Set<String> instanceGroupNames, List<AzureLoadBalancingRule> rules, String stackName) {
