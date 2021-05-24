@@ -237,13 +237,19 @@ public class SaltConnector implements Closeable {
 
     private Response upload(String endpoint, Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
-        return endpointInvocation(endpoint, content).post(Entity.entity(getBodyPart(targets, path, fileName, content), contentType));
+        try (FormDataMultiPart parts = new FormDataMultiPart(); ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
+            MultiPart bodyParts = addBodyPart(parts, targets, path, fileName, inputStream);
+            return endpointInvocation(endpoint, content).post(Entity.entity(bodyParts, contentType));
+        }
     }
 
     private Response upload(String endpoint, Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
         MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
-        return endpointInvocation(endpoint, content)
-                .post(Entity.entity(getBodyPart(targets, path, fileName, permission, content), contentType));
+        try (FormDataMultiPart parts = new FormDataMultiPart(); ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
+            MultiPart bodyParts = addBodyPart(parts, targets, path, fileName, permission, inputStream);
+            return endpointInvocation(endpoint, content)
+                    .post(Entity.entity(bodyParts, contentType));
+        }
     }
 
     private Invocation.Builder endpointInvocation(String endpoint, byte[] content) throws IOException {
@@ -251,44 +257,36 @@ public class SaltConnector implements Closeable {
         return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature);
     }
 
-    private MultiPart getBodyPart(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
-        FormDataMultiPart pathPart = path(new FormDataMultiPart(), path);
-        FormDataMultiPart targetsPart = targets(pathPart, targets);
-        return content(targetsPart, fileName, content);
+    private MultiPart addBodyPart(FormDataMultiPart parts, Iterable<String> targets, String path, String fileName, ByteArrayInputStream inputStream)
+            throws IOException {
+        FormDataMultiPart partsPath = addPath(parts, path);
+        FormDataMultiPart targetsPart = addTargets(partsPath, targets);
+        return addContent(targetsPart, fileName, inputStream);
     }
 
-    private MultiPart getBodyPart(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
-        FormDataMultiPart pathPart = path(new FormDataMultiPart(), path);
-        FormDataMultiPart permissionPart = permissions(pathPart, permission);
-        FormDataMultiPart targetsPart = targets(permissionPart, targets);
-        return content(targetsPart, fileName, content);
+    private MultiPart addBodyPart(FormDataMultiPart parts, Iterable<String> targets, String path, String fileName, String permission,
+            ByteArrayInputStream inputStream) throws IOException {
+        FormDataMultiPart partPath = addPath(parts, path);
+        FormDataMultiPart permissionsPart = addPermissions(partPath, permission);
+        FormDataMultiPart targetsPart = addTargets(permissionsPart, targets);
+        return addContent(targetsPart, fileName, inputStream);
     }
 
-    private FormDataMultiPart path(FormDataMultiPart formDataMultiPart, String path) throws IOException {
-        try (FormDataMultiPart result = formDataMultiPart.field("path", path)) {
-            return result;
-        }
+    private FormDataMultiPart addPath(FormDataMultiPart formDataMultiPart, String path) throws IOException {
+        return formDataMultiPart.field("path", path);
     }
 
-    private FormDataMultiPart permissions(FormDataMultiPart formDataMultiPart, String permissions) throws IOException {
-        try (FormDataMultiPart result = formDataMultiPart.field("permissions", permissions)) {
-            return result;
-        }
+    private FormDataMultiPart addPermissions(FormDataMultiPart formDataMultiPart, String permissions) throws IOException {
+        return formDataMultiPart.field("permissions", permissions);
     }
 
-    private FormDataMultiPart targets(FormDataMultiPart formDataMultiPart, Iterable<String> targets) throws IOException {
-        try (FormDataMultiPart result = formDataMultiPart.field("targets", String.join(",", targets))) {
-            return result;
-        }
+    private FormDataMultiPart addTargets(FormDataMultiPart formDataMultiPart, Iterable<String> targets) throws IOException {
+        return formDataMultiPart.field("targets", String.join(",", targets));
     }
 
-    private MultiPart content(FormDataMultiPart formDataMultiPart, String fileName, byte[] content) throws IOException {
-        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
-            StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
-            try (MultiPart bodyPart = formDataMultiPart.bodyPart(streamDataBodyPart)) {
-                return bodyPart;
-            }
-        }
+    private MultiPart addContent(FormDataMultiPart formDataMultiPart, String fileName, ByteArrayInputStream inputStream) throws IOException {
+        StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
+        return formDataMultiPart.bodyPart(streamDataBodyPart);
     }
 
     @Measure(SaltConnector.class)
@@ -358,5 +356,14 @@ public class SaltConnector implements Closeable {
         } catch (JsonProcessingException e) {
             throw new IllegalArgumentException(e);
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("SaltConnector{");
+        sb.append("saltTarget=").append(saltTarget);
+        sb.append(", hostname='").append(hostname).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
