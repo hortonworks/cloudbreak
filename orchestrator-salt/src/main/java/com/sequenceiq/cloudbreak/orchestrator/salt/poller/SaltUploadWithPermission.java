@@ -26,7 +26,7 @@ public class SaltUploadWithPermission extends SaltFileUpload {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("SaltUpload{");
+        StringBuilder sb = new StringBuilder("SaltUploadWithPermission{");
         sb.append("sc=").append(getSaltConnector());
         sb.append(", originalTargets=").append(getOriginalTargets());
         sb.append(", path='").append(path).append('\'');
