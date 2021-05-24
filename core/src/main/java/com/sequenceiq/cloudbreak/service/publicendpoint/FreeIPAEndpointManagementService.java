@@ -77,6 +77,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         request.setHostname(endpoint);
         request.setIp(ip);
         request.setEnvironmentCrn(stack.getEnvironmentCrn());
+        request.setCreateReverse(true);
         LOGGER.debug("Registering load balancer with target IP {} in FreeIPA with A record {}", ip, endpoint);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         ThreadBasedUserCrnProvider.doAsInternalActor(() -> dnsV1Endpoint.addDnsARecordInternal(accountId, request));
