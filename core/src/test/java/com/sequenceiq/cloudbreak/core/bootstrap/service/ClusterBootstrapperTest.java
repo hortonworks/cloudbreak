@@ -12,21 +12,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -42,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperTest {
@@ -98,17 +92,13 @@ public class ClusterBootstrapperTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
-    @Spy
-    private ResourceAttributeUtil resourceAttributeUtil;
-
     @Test
     public void shouldUseReachableInstances() throws CloudbreakException, CloudbreakImageNotFoundException {
-        when(stackService.getByIdWithResourcesInTransaction(1L)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
         instanceMetaData.setPublicIp("2.2.2.2");
         instanceMetaData.setDiscoveryFQDN("FQDN");
-        instanceMetaData.setInstanceId("instanceId");
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
         Template template = new Template();
@@ -118,12 +108,6 @@ public class ClusterBootstrapperTest {
         when(stack.getId()).thenReturn(1L);
         when(stack.getReachableInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
         when(stack.getCustomDomain()).thenReturn("CUSTOM_DOMAIN");
-        Resource volumeset = new Resource(ResourceType.AWS_VOLUMESET, "aws-volumeset", stack);
-        volumeset.setInstanceId("instanceId");
-        VolumeSetAttributes attribute = new VolumeSetAttributes("eu", true, "", List.of(), 100, "SSD");
-        attribute.setDiscoveryFQDN("host.example.com");
-        volumeset.setAttributes(new Json(attribute));
-        when(stack.getDiskResources()).thenReturn(List.of(volumeset));
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);

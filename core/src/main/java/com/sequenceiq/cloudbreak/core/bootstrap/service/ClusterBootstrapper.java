@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,10 +31,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -128,9 +126,6 @@ public class ClusterBootstrapper {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter cloudInstanceConverter;
-
-    @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
 
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -319,7 +314,7 @@ public class ClusterBootstrapper {
     }
 
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Collection<String> recoveryHostNames) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithResourcesInTransaction(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
@@ -333,15 +328,14 @@ public class ClusterBootstrapper {
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
-        Map<String, Optional<String>> instanceIdToFQDN = createInstanceIdToFQDNMappingFromDiskResources(stack);
+        Iterator<String> iterator = recoveryHostNames.iterator();
         for (InstanceMetaData im : metaDataSet) {
             Node node = createNodeAndInitFqdnInInstanceMetadata(stack, im, clusterDomain, hostGroupNodeIndexes, clusterNodeNames);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
                 // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
-                Optional<String> fqdnOptional = instanceIdToFQDN.getOrDefault(im.getInstanceId(), Optional.empty());
-                if (recoveredNodes && isNoneBlank(node.getHostname()) && fqdnOptional.isPresent()) {
-                    node.setHostname(fqdnOptional.get().split("\\.")[0]);
+                if (recoveredNodes && isNoneBlank(node.getHostname())) {
+                    node.setHostname(iterator.next().split("\\.")[0]);
                     LOGGER.debug("Set the hostname to {} for address: {}", node.getHostname(), im.getPrivateIp());
                 }
                 nodes.add(node);
@@ -357,16 +351,6 @@ public class ClusterBootstrapper {
         } catch (CloudbreakOrchestratorException e) {
             throw new CloudbreakException(e);
         }
-    }
-
-    private Map<String, Optional<String>> createInstanceIdToFQDNMappingFromDiskResources(Stack stack) {
-        List<Resource> diskResources = stack.getDiskResources();
-        Map<String, Optional<String>> imIdToFQDN = diskResources.stream()
-                .collect(Collectors.toMap(Resource::getInstanceId, volumeSet -> {
-                    Optional<VolumeSetAttributes> volumeSetAttributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
-                    return volumeSetAttributes.map(VolumeSetAttributes::getDiscoveryFQDN);
-                }));
-        return imIdToFQDN;
     }
 
     private String getClusterDomain(Set<InstanceMetaData> metaDataSet, String customDomain) {

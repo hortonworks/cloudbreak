@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -18,8 +16,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class AwsContextService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsContextService.class);
 
     public void addInstancesToContext(List<CloudResource> instances, ResourceBuilderContext context, List<Group> groups) {
         groups.forEach(group -> {
@@ -50,15 +46,10 @@ public class AwsContextService {
             List<CloudResource> groupVolumeSets = getResourcesOfTypeInGroup(resources, group, ResourceType.AWS_VOLUMESET);
             for (int i = 0; i < ids.size(); i++) {
                 if (i < groupInstances.size()) {
-                    Long privateId = ids.get(i);
-                    CloudResource instanceResource = groupInstances.get(i);
                     if (i > groupVolumeSets.size() - 1) {
-                        context.addComputeResources(privateId, List.of(instanceResource));
+                        context.addComputeResources(ids.get(i), List.of(groupInstances.get(i)));
                     } else {
-                        CloudResource volumesetResource = groupVolumeSets.get(i);
-                        LOGGER.debug("Adding instance and volume set to context under private id: {}. "
-                                + "Instance: {}, Volume Set: {}", privateId, instanceResource, volumesetResource);
-                        context.addComputeResources(privateId, List.of(instanceResource, volumesetResource));
+                        context.addComputeResources(ids.get(i), List.of(groupInstances.get(i), groupVolumeSets.get(i)));
                     }
                 }
             }

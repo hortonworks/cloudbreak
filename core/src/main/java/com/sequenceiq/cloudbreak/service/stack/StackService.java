@@ -345,19 +345,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stack;
     }
 
-    public Stack getByIdWithResourcesInTransaction(Long id) {
-        Stack stack;
-        try {
-            stack = transactionService.required(() -> stackRepository.findOneWithResources(id).orElse(null));
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
-        if (stack == null) {
-            throw new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id));
-        }
-        return stack;
-    }
-
     public Stack getByIdWithGatewayInTransaction(Long id) {
         Stack stack;
         try {
