@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazTokenConfigurationSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazRoles.RANGER_RAZ;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz.RangerRazRoles.RANGER_RAZ_SERVER;
@@ -33,7 +34,7 @@ public abstract class RangerRazBaseConfigProvider extends AbstractRoleConfigProv
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        if () {
+        if (source.getProductDetailsView() != null && isRazTokenConfigurationSupported(source.getProductDetailsView().getCm())) {
             if (CloudPlatform.AZURE == source.getCloudPlatform()) {
                 return List.of(
                         config("ranger.raz.processor.adls", "org.apache.ranger.raz.processor.adls.AdlsGen2RazProcessor"),

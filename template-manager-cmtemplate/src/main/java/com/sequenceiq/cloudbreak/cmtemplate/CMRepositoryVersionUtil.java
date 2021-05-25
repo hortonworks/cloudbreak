@@ -115,7 +115,7 @@ public class CMRepositoryVersionUtil {
     }
 
     public static boolean isRazTokenConfigurationSupported(ClouderaManagerRepo clouderaManagerRepoDetails) {
-        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger support in Datahub");
+        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger token support in Data Hub and Data Lake");
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_2);
     }
 

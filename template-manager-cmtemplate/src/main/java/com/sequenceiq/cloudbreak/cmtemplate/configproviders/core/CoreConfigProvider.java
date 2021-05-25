@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isRazTokenConfigurationSupported;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_REF_NAME;
@@ -93,7 +94,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     }
 
     private void addCoreConfigSettings(TemplatePreparationObject source, ApiClusterTemplateRoleConfigGroup coreSettingsRole) {
-        if (isWorkloadConfigForRazIsRequired(source) || isDatalakeConfigForRazIsRequired(source)) {
+        boolean versionIsSupported = source.getProductDetailsView() != null && isRazTokenConfigurationSupported(source.getProductDetailsView().getCm());
+        if (versionIsSupported && (isWorkloadConfigForRazIsRequired(source) || isDatalakeConfigForRazIsRequired(source))) {
             if (source.getCloudPlatform().equals(CloudPlatform.AWS)) {
                 coreSettingsRole.addConfigsItem(
                         config("fs.s3a.ext.raz.delegation-token.token-kind", "S3 delegation"));
