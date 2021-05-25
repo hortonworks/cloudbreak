@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
@@ -87,8 +88,11 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public CustomImageCatalogV4GetImageResponse getCustomImage(@ResourceName String name, String imageId, @AccountId String accountId) {
         CustomImage customImage = customImageCatalogService.getCustomImage(restRequestThreadLocalService.getRequestedWorkspaceId(), name, imageId);
+        Image sourceImage = customImageCatalogService.getSourceImage(customImage);
+        CustomImageCatalogV4GetImageResponse response = converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class);
+        response.setSourceImageDate(sourceImage.getCreated());
 
-        return converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class);
+        return response;
     }
 
     @Override
@@ -106,7 +110,7 @@ public class CustomImageCatalogV4Controller implements CustomImageCatalogV4Endpo
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_IMAGE_CATALOG)
     public CustomImageCatalogV4UpdateImageResponse updateCustomImage(@ResourceName String name, String imageId,
-            CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
+            @Valid CustomImageCatalogV4UpdateImageRequest request, @AccountId String accountId) {
         String creator = ThreadBasedUserCrnProvider.getUserCrn();
         CustomImage customImage = converterUtil.convert(request, CustomImage.class);
         customImage.setName(imageId);
