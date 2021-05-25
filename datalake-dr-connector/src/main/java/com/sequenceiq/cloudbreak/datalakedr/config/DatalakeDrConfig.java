@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class DatalakeDrConfig {
 
-    private static final int DEFAULT_DATALAKE_DR_PORT = 80;
+    static final int DEFAULT_DATALAKE_DR_PORT = 80;
 
     @Value("${altus.datalakedr.endpoint}")
     private String endpoint;

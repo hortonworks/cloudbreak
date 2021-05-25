@@ -32,6 +32,7 @@ import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
@@ -116,7 +117,7 @@ public class SdxBackupRestoreService {
         String selector = DATALAKE_TRIGGER_BACKUP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         DatalakeTriggerBackupEvent startEvent = new DatalakeTriggerBackupEvent(selector, clusterId, userId,
-            backupLocation, backupName);
+            backupLocation, backupName, DatalakeBackupFailureReason.USER_TRIGGERED);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeBackupFlow(startEvent);
         return new SdxBackupResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }

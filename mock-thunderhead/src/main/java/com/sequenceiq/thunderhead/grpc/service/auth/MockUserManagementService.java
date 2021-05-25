@@ -32,6 +32,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
@@ -338,6 +339,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.endpointgateway.enable}")
     private boolean publicEndpointAccessGatewayEnabled;
+
+    @Value("${auth.mock.datalake.backup.on.upgrade.enable}")
+    private boolean datalakeBackupOnUpgrade;
 
     @Value("${auth.mock.cm.sync.command.poller.enable}")
     private boolean cmSyncCommandPollerEnabled;
@@ -696,6 +700,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (publicEndpointAccessGatewayEnabled) {
             builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY));
+        }
+        if (datalakeBackupOnUpgrade) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_UPGRADE));
         }
         if (cmSyncCommandPollerEnabled) {
             builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));

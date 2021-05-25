@@ -25,7 +25,7 @@ public class DatalakeDrConfigTest {
             { "null endpoint",   null,                     false, true,   false,       null,        null, IllegalStateException.class },
             { "blank endpoint",  "   ",                    false, true,   false,       null,        null, IllegalStateException.class },
             { "blank endpoint",  "   ",                    true,  false,  false,       null,        null, null },
-            { "host only",       "hostname",               true,  true,   true,        "hostname",  80,   null },
+            { "host only",       "hostname",               true,  true,   true,        "hostname",  DatalakeDrConfig.DEFAULT_DATALAKE_DR_PORT,   null },
             { "host:port",       "hostname:1234",          true,  true,   true,        "hostname",  1234, null },
             { "host:port:extra", "hostname:1234:whatelse", false, true,   false,       null,        null, IllegalArgumentException.class },
         };

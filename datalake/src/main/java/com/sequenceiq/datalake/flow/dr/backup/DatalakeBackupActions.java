@@ -27,6 +27,7 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -55,6 +56,8 @@ public class DatalakeBackupActions {
 
     private static final String BACKUP_ID = "BACKUP-ID";
 
+    private static final String REASON = "REASON";
+
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
 
@@ -79,6 +82,7 @@ public class DatalakeBackupActions {
             @Override
             protected void prepareExecution(DatalakeTriggerBackupEvent payload, Map<Object, Object> variables) {
                 variables.put(OPERATION_ID, payload.getDrStatus().getOperationId());
+                variables.put(REASON, payload.getReason().name());
                 super.prepareExecution(payload, variables);
             }
 
@@ -294,8 +298,10 @@ public class DatalakeBackupActions {
                 LOGGER.error("Datalake backup failed for datalake with id: {}", payload.getResourceId(), exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FAILED,
-                        "Datalake backup failed, Datalake is running", payload.getResourceId());
+                        getFailureReason(variables), payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
+                Flow flow = getFlow(context.getFlowParameters().getFlowId());
+                flow.setFlowFailed(payload.getException());
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -304,5 +310,16 @@ public class DatalakeBackupActions {
                 return DatalakeDatabaseBackupFailedEvent.from(payload, ex);
             }
         };
+    }
+
+    private String getFailureReason(Map<Object, Object> variables) {
+        if (!variables.containsKey(REASON)) {
+            return "Datalake backup failed, Datalake is running.";
+        }
+        if (variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
+            return  "Upgrade not stared, Datalake backup failed.";
+        } else {
+            return  "Datalake backup failed, Datalake is running.";
+        }
     }
 }
