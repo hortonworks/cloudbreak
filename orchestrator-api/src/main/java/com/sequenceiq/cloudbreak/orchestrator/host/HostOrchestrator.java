@@ -81,7 +81,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void installFreeIpa(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    Optional<String> getFreeIpaMasterHostname(GatewayConfig primaryGateway) throws CloudbreakOrchestratorException;
+    Optional<String> getFreeIpaMasterHostname(GatewayConfig primaryGateway, Set<Node> allNodes) throws CloudbreakOrchestratorException;
 
     void leaveDomain(GatewayConfig gatewayConfig, Set<Node> allNodes, String roleToRemove, String roleToAdd, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException;

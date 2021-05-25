@@ -18,10 +18,12 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 
 @Service
 public class ChangePrimaryGatewayService {
@@ -35,6 +37,9 @@ public class ChangePrimaryGatewayService {
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Inject
+    private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
     public Optional<String> getPrimaryGatewayInstanceId(Stack stack) {
         Optional<String> primaryGatewayInstanceId = Optional.empty();
@@ -70,7 +75,9 @@ public class ChangePrimaryGatewayService {
     }
 
     private Optional<String> findFreeIpaMasterInstanceId(Stack stack, GatewayConfig currentPrimaryGatewayConfig) throws CloudbreakOrchestratorException {
-        return hostOrchestrator.getFreeIpaMasterHostname(currentPrimaryGatewayConfig).stream()
+        Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
+        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
+        return hostOrchestrator.getFreeIpaMasterHostname(currentPrimaryGatewayConfig, allNodes).stream()
                 .flatMap(hostname ->
                         stack.getNotDeletedInstanceMetaDataList().stream()
                                 .filter(im -> hostname.equals(im.getDiscoveryFQDN()))

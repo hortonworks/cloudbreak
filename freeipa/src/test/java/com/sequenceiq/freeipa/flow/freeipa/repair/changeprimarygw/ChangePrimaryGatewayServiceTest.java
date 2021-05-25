@@ -24,11 +24,13 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 
 @ExtendWith(MockitoExtension.class)
 class ChangePrimaryGatewayServiceTest {
@@ -55,6 +57,9 @@ class ChangePrimaryGatewayServiceTest {
 
     @Mock
     private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Mock
+    private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
     @InjectMocks
     private ChangePrimaryGatewayService underTest;
@@ -91,7 +96,7 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im2 = mock(InstanceMetaData.class);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(hostOrchestrator.getFreeIpaMasterHostname(any())).thenReturn(Optional.of(HOSTNAME_1));
+        when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
         when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
         lenient().when(im2.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
@@ -101,7 +106,7 @@ class ChangePrimaryGatewayServiceTest {
         assertEquals(INSTANCE_ID_1, underTest.selectNewPrimaryGatewayInstanceId(stack, List.of()));
 
         verify(gatewayConfigService).getPrimaryGatewayConfig(eq(stack));
-        verify(hostOrchestrator).getFreeIpaMasterHostname(eq(gatewayConfig));
+        verify(hostOrchestrator).getFreeIpaMasterHostname(eq(gatewayConfig), any());
     }
 
     @Test
@@ -126,7 +131,7 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im1 = mock(InstanceMetaData.class);
         InstanceMetaData im2 = mock(InstanceMetaData.class);
 
-        when(hostOrchestrator.getFreeIpaMasterHostname(any())).thenThrow(CloudbreakOrchestratorFailedException.class);
+        when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenThrow(CloudbreakOrchestratorFailedException.class);
         when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
         when(im1.getInstanceId()).thenReturn(INSTANCE_ID_1);
         lenient().when(im2.getInstanceId()).thenReturn(INSTANCE_ID_2);
@@ -142,10 +147,13 @@ class ChangePrimaryGatewayServiceTest {
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         InstanceMetaData im1 = mock(InstanceMetaData.class);
         InstanceMetaData im2 = mock(InstanceMetaData.class);
+        Node node = mock(Node.class);
+        Set<Node> allNodes = Set.of(node);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(gatewayConfig.getInstanceId()).thenReturn(INSTANCE_ID_1);
-        when(hostOrchestrator.getFreeIpaMasterHostname(any())).thenReturn(Optional.of(HOSTNAME_1));
+        when(freeIpaNodeUtilService.mapInstancesToNodes(any())).thenReturn(allNodes);
+        when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
         when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
         lenient().when(im2.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
@@ -155,7 +163,7 @@ class ChangePrimaryGatewayServiceTest {
         assertEquals(INSTANCE_ID_2, underTest.selectNewPrimaryGatewayInstanceId(stack, List.of(INSTANCE_ID_1)));
 
         verify(gatewayConfigService).getPrimaryGatewayConfig(eq(stack));
-        verify(hostOrchestrator).getFreeIpaMasterHostname(eq(gatewayConfig));
+        verify(hostOrchestrator).getFreeIpaMasterHostname(eq(gatewayConfig), eq(allNodes));
     }
 
     @Test
@@ -165,10 +173,13 @@ class ChangePrimaryGatewayServiceTest {
         InstanceMetaData im1 = mock(InstanceMetaData.class);
         InstanceMetaData im2 = mock(InstanceMetaData.class);
         InstanceMetaData im3 = mock(InstanceMetaData.class);
+        Node node = mock(Node.class);
+        Set<Node> allNodes = Set.of(node);
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(gatewayConfig.getInstanceId()).thenReturn(INSTANCE_ID_2);
-        when(hostOrchestrator.getFreeIpaMasterHostname(any())).thenReturn(Optional.of(HOSTNAME_1));
+        when(freeIpaNodeUtilService.mapInstancesToNodes(any())).thenReturn(allNodes);
+        when(hostOrchestrator.getFreeIpaMasterHostname(any(), any())).thenReturn(Optional.of(HOSTNAME_1));
         when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(List.of(im1, im2, im3));
         when(im1.getDiscoveryFQDN()).thenReturn(HOSTNAME_1);
         lenient().when(im2.getDiscoveryFQDN()).thenReturn(HOSTNAME_2);
@@ -180,7 +191,7 @@ class ChangePrimaryGatewayServiceTest {
         assertEquals(INSTANCE_ID_3, underTest.selectNewPrimaryGatewayInstanceId(stack, List.of(INSTANCE_ID_1, INSTANCE_ID_2)));
 
         verify(gatewayConfigService).getPrimaryGatewayConfig(eq(stack));
-        verify(hostOrchestrator).getFreeIpaMasterHostname(eq(gatewayConfig));
+        verify(hostOrchestrator).getFreeIpaMasterHostname(eq(gatewayConfig), eq(allNodes));
     }
 
     @Test
