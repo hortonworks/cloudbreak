@@ -32,12 +32,14 @@ auth:
     mediumdutysdx.enable: true
     upgrade.internalrepo.enable: true
     hbase.cloudstorage.enable: false
-    datalake.efs.enable: false
-    datalake.customimage.enable: true
+    datalake:
+      efs.enable: false
+      customimage.enable: true
+      loadbalancer.enable: false
+      backup.on.upgrade.enable: false
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub.runtime.upgrade.enable: true
-    datalake.loadbalancer.enable: false
     ccmv2.enable: false
     environment.experience.deletion.enable: true
     endpointgateway.enable: false
