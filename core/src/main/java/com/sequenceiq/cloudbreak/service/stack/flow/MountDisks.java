@@ -112,7 +112,7 @@ public class MountDisks {
                     String uuids = value.getOrDefault("uuids", "");
                     String fstab = value.getOrDefault("fstab", "");
                     if (!StringUtils.isEmpty(uuids) && !StringUtils.isEmpty(fstab)) {
-                        persistUuidAndFstab(stack, instanceIdOptional.get(), hostname, uuids, fstab);
+                        persistUuidAndFstab(stack, instanceIdOptional.get(), uuids, fstab);
                     }
                 }
             });
@@ -122,13 +122,12 @@ public class MountDisks {
         }
     }
 
-    private void persistUuidAndFstab(Stack stack, String instanceId, String discoveryFQDN, String uuids, String fstab) {
+    private void persistUuidAndFstab(Stack stack, String instanceId, String uuids, String fstab) {
         resourceService.saveAll(stack.getDiskResources().stream()
                 .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
                 .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
                     volumeSetAttributes.setUuids(uuids);
                     volumeSetAttributes.setFstab(fstab);
-                    volumeSetAttributes.setDiscoveryFQDN(discoveryFQDN);
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))
                 .collect(Collectors.toList()));

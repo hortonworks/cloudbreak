@@ -28,8 +28,6 @@ public class VolumeSetAttributes {
 
     private String volumeType;
 
-    private String discoveryFQDN;
-
     @JsonCreator
     public VolumeSetAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
             @JsonProperty("fstab") String fstab, @JsonProperty("volumes") List<Volume> volumes, @JsonProperty("volumeSize") Integer volumeSize,
@@ -96,14 +94,6 @@ public class VolumeSetAttributes {
 
     public void setVolumeType(String volumeType) {
         this.volumeType = volumeType;
-    }
-
-    public void setDiscoveryFQDN(String discoveryFQDN) {
-        this.discoveryFQDN = discoveryFQDN;
-    }
-
-    public String getDiscoveryFQDN() {
-        return discoveryFQDN;
     }
 
     @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)

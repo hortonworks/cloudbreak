@@ -81,10 +81,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "LEFT JOIN FETCH ig.securityGroup WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "LEFT JOIN FETCH ig.template LEFT JOIN FETCH ig.securityGroup WHERE s.id= :id AND (s.type is not 'TEMPLATE' OR s.type is null)")
-    Optional<Stack> findOneWithResources(@Param("id") Long id);
-
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData im LEFT JOIN FETCH ig.template " +
             "WHERE s.id= :id AND ig.instanceGroupType = 'GATEWAY' AND im.instanceMetadataType = 'GATEWAY_PRIMARY' " +
             "AND (s.type is not 'TEMPLATE' OR s.type is null)")
