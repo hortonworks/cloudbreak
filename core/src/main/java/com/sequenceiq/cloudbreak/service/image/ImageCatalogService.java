@@ -78,6 +78,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     public static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
 
+    public static final String FREEIPA_DEFAULT_CATALOG_NAME = "freeipa-default";
+
     static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
@@ -702,7 +704,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         if (optionalCustomImage.isPresent()) {
             CustomImage customImage = optionalCustomImage.get();
             LOGGER.info("Custom image is available with id '{}'. Searching for source image '{}',", imageId);
-            StatedImage sourceImage = getSourceImageByImageType(customImage, catalogName);
+            StatedImage sourceImage = getSourceImageByImageType(customImage);
             LOGGER.info("Custom image '{}' is a {} image '{}' customization.", imageId, customImage.getImageType(), customImage.getCustomizedImageId());
             image = customImageProvider.mergeSourceImageAndCustomImageProperties(
                     sourceImage, customImage, imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
@@ -717,12 +719,12 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return imageCatalog.getCustomImages().stream().filter(i -> i.getName().equalsIgnoreCase(imageId)).findFirst();
     }
 
-    private StatedImage getSourceImageByImageType(CustomImage customImage, String catalogName)
+    public StatedImage getSourceImageByImageType(CustomImage customImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage sourceImage;
         switch (customImage.getImageType()) {
             case FREEIPA:
-                sourceImage = getImage(defaultFreeIpaCatalogUrl, catalogName, customImage.getCustomizedImageId());
+                sourceImage = getImage(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, customImage.getCustomizedImageId());
                 break;
             case DATAHUB:
             case DATALAKE:

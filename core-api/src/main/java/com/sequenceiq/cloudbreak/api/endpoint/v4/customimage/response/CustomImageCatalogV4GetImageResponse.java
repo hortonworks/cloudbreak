@@ -24,6 +24,9 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
     private String sourceImageId;
 
     @JsonProperty
+    private Long sourceImageDate;
+
+    @JsonProperty
     private String baseParcelUrl;
 
     @JsonProperty
@@ -51,6 +54,14 @@ public class CustomImageCatalogV4GetImageResponse implements JsonEntity {
 
     public void setSourceImageId(String sourceImageId) {
         this.sourceImageId = sourceImageId;
+    }
+
+    public Long getSourceImageDate() {
+        return sourceImageDate;
+    }
+
+    public void setSourceImageDate(Long sourceImageDate) {
+        this.sourceImageDate = sourceImageDate;
     }
 
     public String getBaseParcelUrl() {

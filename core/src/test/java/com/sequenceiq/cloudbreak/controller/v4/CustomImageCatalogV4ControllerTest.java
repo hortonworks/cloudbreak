@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImag
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response.CustomImageCatalogV4UpdateImageResponse;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.CustomImageCatalogService;
@@ -131,11 +132,15 @@ public class CustomImageCatalogV4ControllerTest {
     @Test
     public void testGetCustomImage() {
         CustomImage customImage = new CustomImage();
+        Image sourceImage = createTestImage();
+
         CustomImageCatalogV4GetImageResponse expected = new CustomImageCatalogV4GetImageResponse();
+        expected.setSourceImageDate(12345L);
 
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(customImageCatalogService.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(customImage);
         when(converterUtil.convert(customImage, CustomImageCatalogV4GetImageResponse.class)).thenReturn(expected);
+        when(customImageCatalogService.getSourceImage(customImage)).thenReturn(sourceImage);
 
         CustomImageCatalogV4GetImageResponse actual = victim.getCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 
@@ -194,5 +199,9 @@ public class CustomImageCatalogV4ControllerTest {
         CustomImageCatalogV4DeleteImageResponse actual = victim.deleteCustomImage(IMAGE_CATALOG_NAME, IMAGE_ID, ACCOUNT_ID);
 
         assertEquals(expected, actual);
+    }
+
+    private static Image createTestImage() {
+        return new Image(null, 12345L, null, null, null, null, null, null, null, null, null, null, null, null, true, null, null);
     }
 }
