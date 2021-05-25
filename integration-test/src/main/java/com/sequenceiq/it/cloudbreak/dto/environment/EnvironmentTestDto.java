@@ -21,6 +21,7 @@ import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.base.CloudStorageValidation;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -104,7 +105,8 @@ public class EnvironmentTestDto
                 .withCloudplatform(getCloudPlatform().toString())
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withResourceGroup(getResourceGroupUsage(), getResourceGroupName())
-                .withCloudStorageValidation(CloudStorageValidation.ENABLED);
+                .withCloudStorageValidation(CloudStorageValidation.ENABLED)
+                .withClusterProxy();
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
@@ -138,6 +140,11 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withMockIDBMS() {
         getRequest().setIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
+        return this;
+    }
+
+    public EnvironmentTestDto withClusterProxy() {
+        getRequest().setTunnel(Tunnel.CLUSTER_PROXY);
         return this;
     }
 
