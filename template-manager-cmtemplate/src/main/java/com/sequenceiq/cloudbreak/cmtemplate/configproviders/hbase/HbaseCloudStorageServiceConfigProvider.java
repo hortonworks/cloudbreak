@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 
@@ -57,12 +56,11 @@ public class HbaseCloudStorageServiceConfigProvider implements CmTemplateCompone
         String cdhVersion = getCdhVersion(source);
         boolean is727OrNewer = isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_7);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        boolean sdxHbaseCloudStorageEnabled = entitlementService.sdxHbaseCloudStorageEnabled(accountId);
-        boolean razEnabled =  source.getGeneralClusterConfigs().isEnableRangerRaz();
-        boolean awsWithRazDisabled = CloudPlatform.AWS.equals(source.getCloudPlatform()) && !razEnabled;
+        boolean sdxHbaseCloudStorageEnabled =
+                entitlementService.sdxHbaseCloudStorageEnabled(accountId);
         return source.getFileSystemConfigurationView().isPresent()
                 && cmTemplateProcessor.isRoleTypePresentInService(getServiceType(), getRoleTypes())
-                && (!datalakeCluster || (is727OrNewer && (awsWithRazDisabled || sdxHbaseCloudStorageEnabled)));
+                && (!datalakeCluster || (is727OrNewer && sdxHbaseCloudStorageEnabled));
     }
 
     private String getCdhVersion(TemplatePreparationObject source) {
