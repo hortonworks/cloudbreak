@@ -247,9 +247,10 @@ public class SaltOrchestratorTest {
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
         privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
         privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
+        Set<String> privateIps = privateIpsByFQDN.values().stream().collect(Collectors.toSet());
 
         mockStatic(SaltStates.class);
-        SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIps));
         MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
         List<MinionStatus> minionStatusList = new ArrayList<>();
         MinionStatus minionStatus = new MinionStatus();
@@ -267,7 +268,43 @@ public class SaltOrchestratorTest {
         verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic(SaltStates.class);
 
-        SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIps));
+    }
+
+    @Test
+    public void tearDownReusedIpAddressTest() throws Exception {
+        Map<String, String> privateIpsByFQDN = new HashMap<>();
+        privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
+        privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
+        privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
+        Set<String> privateIps = privateIpsByFQDN.values().stream().collect(Collectors.toSet());
+
+        mockStatic(SaltStates.class);
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIps));
+        MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
+        List<MinionStatus> minionStatusList = new ArrayList<>();
+        MinionStatus minionStatus = new MinionStatus();
+        List<String> upNodes = Lists.newArrayList("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com");
+        minionStatus.setUp(upNodes);
+        List<String> downNodes = Lists.newArrayList("10-0-0-4.example.com", "10-0-0-5.example.com");
+        minionStatus.setDown(downNodes);
+        minionStatusList.add(minionStatus);
+        minionStatusSaltResponse.setResult(minionStatusList);
+
+        when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
+        Callable<Boolean> callable = mock(Callable.class);
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+
+        Node remainingNode = mock(Node.class);
+        when(remainingNode.getPrivateIp()).thenReturn("10.0.0.1");
+        ExitCriteriaModel exitCriteriaModel = mock(ExitCriteriaModel.class);
+
+        saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
+
+        verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
+        verifyStatic(SaltStates.class);
+
+        SaltStates.stopMinions(eq(saltConnector), eq(Set.of("10.0.0.2", "10.0.0.3")));
     }
 
     @Test
@@ -276,10 +313,11 @@ public class SaltOrchestratorTest {
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
         privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
         privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
+        Set<String> privateIps = privateIpsByFQDN.values().stream().collect(Collectors.toSet());
 
         mockStatic(SaltStates.class);
         PowerMockito.doThrow(new NullPointerException()).when(SaltStates.class);
-        SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIps));
 
         try {
             saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
