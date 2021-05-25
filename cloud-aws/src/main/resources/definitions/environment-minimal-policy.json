@@ -148,6 +148,7 @@
         "elasticloadbalancing:DeleteListener",
         "elasticloadbalancing:DeleteTargetGroup",
         "elasticloadbalancing:DeleteLoadBalancer",
+        "elasticloadbalancing:DeregisterTargets",
         "s3:GetBucketLocation",
         "cloudformation:DescribeStackEvents",
         "cloudformation:DescribeStackResources",
