@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -220,11 +221,11 @@ public class SaltStates {
         return measure(() -> sc.run(Glob.ALL, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
 
-    public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
+    public static void stopMinions(SaltConnector sc, Set<String> privateIPs) {
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
-        for (Entry<String, String> entry : privateIPsByFQDN.entrySet()) {
+        for (String entry : privateIPs) {
             Minion minion = new Minion();
-            minion.setAddress(entry.getValue());
+            minion.setAddress(entry);
             saltAction.addMinion(minion);
         }
         sc.action(saltAction);

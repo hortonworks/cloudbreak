@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
+import static java.util.function.Predicate.not;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -702,10 +703,18 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         LOGGER.debug("Tear down hosts: {},", removeNodePrivateIPsByFQDN);
         LOGGER.debug("Gateway config for tear down: {}", allGatewayConfigs);
+        Set<String> remainingIps = remainingNodes.stream()
+                .map(Node::getPrivateIp)
+                .collect(Collectors.toSet());
+        LOGGER.debug("Remaining IPs: {}", remainingIps);
+        Set<String> minionsToStop = removeNodePrivateIPsByFQDN.values().stream()
+                .filter(not(remainingIps::contains))
+                .collect(Collectors.toSet());
+        LOGGER.debug("Minions to stop: {}", minionsToStop);
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
-            SaltStates.stopMinions(saltConnector, removeNodePrivateIPsByFQDN);
+            SaltStates.stopMinions(saltConnector, minionsToStop);
             if (!CollectionUtils.isEmpty(remainingNodes)) {
                 OrchestratorBootstrap hostSave = new PillarSave(saltConnector, gatewayTargetIpAddresses, remainingNodes);
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);

@@ -296,11 +296,11 @@ public class SaltStatesTest {
 
     @Test
     public void stopMinionsTest() {
-        Map<String, String> privateIpsByFQDN = new HashMap<>();
-        privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
-        privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
-        privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
-        SaltStates.stopMinions(saltConnector, privateIpsByFQDN);
+        Set<String> privateIps = new HashSet<>();
+        privateIps.add("10.0.0.1");
+        privateIps.add("10.0.0.2");
+        privateIps.add("10.0.0.3");
+        SaltStates.stopMinions(saltConnector, privateIps);
 
         ArgumentCaptor<SaltAction> saltActionArgumentCaptor = ArgumentCaptor.forClass(SaltAction.class);
         verify(saltConnector, times(1)).action(saltActionArgumentCaptor.capture());
