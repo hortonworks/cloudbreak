@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ambari.AmbariSecurityConfigProvider;
+import com.sequenceiq.cloudbreak.service.credential.PaywallCredentialService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -58,6 +59,9 @@ public class AmbariClusterUpgradeService {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private PaywallCredentialService paywallCredentialService;
+
     public void upgradeCluster(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
@@ -77,7 +81,7 @@ public class AmbariClusterUpgradeService {
                 servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
                 if (ambariRepo != null) {
                     Json blueprint = new Json(cluster.getBlueprint().getBlueprintText());
-                    servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap(
+                    servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", Map.of("ambari", singletonMap(
                             "repo", Map.of(
                                     "baseUrl", ambariRepo.getBaseUrl(),
                                     "gpgKeyUrl", ambariRepo.getGpgKeyUrl(),
@@ -85,8 +89,10 @@ public class AmbariClusterUpgradeService {
                                     "version", ambariRepo.getVersion(),
                                     "stack_version", blueprint.getValue("Blueprints.stack_version"),
                                     "stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase()
-                            )))));
+                            )),
+                            "paywall", paywallCredentialService.getCredential())));
                 }
+                paywallCredentialService.setPaywallCredentialMoved(servicePillar);
                 SaltConfig pillar = new SaltConfig(servicePillar);
                 hostOrchestrator.upgradeAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);
             } else {
