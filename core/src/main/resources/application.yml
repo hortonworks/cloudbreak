@@ -711,6 +711,14 @@ cb:
       sdx:
         enabled: false
 
+cluster:
+  monitoring:
+    enabled: true
+    databus:
+      processing:
+        workers: 1
+        queueSizeLimit: 2000
+
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
   enabled: true

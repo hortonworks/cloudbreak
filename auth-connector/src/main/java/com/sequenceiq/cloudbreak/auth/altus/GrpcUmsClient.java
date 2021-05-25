@@ -720,6 +720,17 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Delete one specific access key (by access key id)
+     * @param actorCrn    actor crn (not used yet)
+     * @param accountId   acccount where access key located
+     * @param accessKeyId access key id
+     */
+    public void deleteOneMachineUserAccessKey(String actorCrn, String accountId, String accessKeyId) {
+        UmsClient client = makeClient(channelWrapper.getChannel());
+        client.deleteAccessKeys(RequestIdUtil.newRequestId(), List.of(accessKeyId), accountId);
+    }
+
+    /**
      * Check that machine user has a specific access key in UMS
      *
      * @param actorCrn       actor for the machine user request
@@ -733,6 +744,19 @@ public class GrpcUmsClient {
         UmsClient client = makeClient(channelWrapper.getChannel());
         List<String> accessKeys = client.listMachineUserAccessKeys(RequestIdUtil.newRequestId(), actorCrn, accountId, machineUserCrn, true);
         return accessKeys.contains(accessKeyId);
+    }
+
+    /**
+     * Get a map of access keys (with id and last usage pairs)
+     * @param actorCrn       actor for the machine user request
+     * @param accountId      the account ID
+     * @param machineUserCrn machine user crn that own the access key
+     * @return access key id and last usage pairs
+     */
+    public Map<String, Long> getAccessKeyUsageMapForMachineUser(String actorCrn, String accountId,
+            String machineUserCrn) {
+        UmsClient client = makeClient(channelWrapper.getChannel());
+        return client.listMachineUserAccessKeyLastUsages(RequestIdUtil.newRequestId(), actorCrn, accountId, machineUserCrn);
     }
 
     /**

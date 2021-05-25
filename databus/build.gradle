@@ -1,0 +1,35 @@
+apply plugin: "java"
+
+jar {
+  baseName = 'databus'
+  archiveName = 'databus.jar'
+}
+
+repositories {
+  maven { url = "$repoUrl" }
+  maven { url = "$springRepoUrl" }
+  mavenCentral()
+  jcenter()
+}
+
+dependencies {
+  compile project(':common')
+  compile project(':auth-connector')
+  compile project(':secret-engine')
+  implementation     group: 'com.google.protobuf',   name: 'protobuf-java-util',   version: '3.6.1'
+  implementation     group: 'com.cloudera.cdp',      name: 'cdp-sdk-java',         version: cdpSdkVersion
+}
+
+task testJar(type: Jar, dependsOn: testClasses) {
+  baseName = "test-${project.archivesBaseName}"
+  from sourceSets.test.output
+  from sourceSets.main.output
+}
+
+configurations {
+  tests
+}
+
+artifacts {
+  tests testJar
+}

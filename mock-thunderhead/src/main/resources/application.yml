@@ -47,6 +47,7 @@ auth:
     cm.sync.command.poller.enable: true
     network.preflight.notifications.enable: true
     datahub.nodestatus.check.enable: true
+    metrics.databus.processing.enable: false
     user.sync.credentials.update.optimization.enable: true
     azure:
       disk:

@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -105,5 +108,23 @@ public class AltusIAMService {
 
     public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String accountId) {
         return umsClient.listAllMachineUsers(accountId, true, true, Optional.empty());
+    }
+
+    public Map<String, Long> getAccessKeyUsageMapForMachineUser(String actorCrn, String accountId, String machineUserName, boolean useSharedCredential) {
+        Optional<AltusCredential> sharedCredential = sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential);
+        if (sharedCredential.isPresent()) {
+            Map<String, Long> accessKeyLastUsageMap = new HashMap<>();
+            accessKeyLastUsageMap.put(sharedCredential.get().getAccessKey(), new Date().getTime());
+            return accessKeyLastUsageMap;
+        }
+        LOGGER.debug("Gather access key usage data for machine user '{}'", machineUserName);
+        return umsClient.getAccessKeyUsageMapForMachineUser(actorCrn, accountId, machineUserName);
+    }
+
+    public void deleteAccessKey(String actorCrn, String accountId, String accessKeyId, boolean useSharedCredential) {
+        Optional<AltusCredential> sharedCredential = sharedAltusCredentialProvider.getSharedCredentialIfConfigured(useSharedCredential);
+        if (sharedCredential.isEmpty()) {
+            umsClient.deleteOneMachineUserAccessKey(actorCrn, accountId, accessKeyId);
+        }
     }
 }

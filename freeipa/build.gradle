@@ -111,6 +111,7 @@ dependencies {
   implementation project(':cloud-reactor-api')
   implementation project(':cloud-reactor')
   implementation project(':orchestrator-api')
+  implementation project(':databus')
   implementation project(':flow')
   implementation project(':freeipa-api')
   implementation project(':freeipa-client')

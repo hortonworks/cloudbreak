@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.job.nodestatus;
 
+import static com.sequenceiq.cdp.databus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_ENV_CRN;
+import static com.sequenceiq.cdp.databus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_METRICS_TYPE;
+import static com.sequenceiq.cdp.databus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_RESOURCE_CRN;
+import static com.sequenceiq.cdp.databus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_RESOURCE_NAME;
+import static com.sequenceiq.cdp.databus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_RESOURCE_VERSION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.EnumSet;
@@ -19,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
+import com.sequenceiq.cdp.databus.model.DatabusRequestContext;
+import com.sequenceiq.cdp.databus.processor.MetricsDatabusRecordProcessor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
@@ -31,6 +38,7 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
+import com.sequenceiq.node.health.client.model.CdpNodeStatusType;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
 import io.opentracing.Tracer;
@@ -55,6 +63,9 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private NodeStatusCheckerJobService jobService;
+
+    @Inject
+    private MetricsDatabusRecordProcessor metricsDataBusRecordProcessor;
 
     public NodeStatusCheckerJob(Tracer tracer) {
         super(tracer, "NodeStatus Checker Job");
@@ -87,8 +98,8 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     private void executeNodeStatusCheck(Stack stack) {
         boolean nodeStatusCheckEnabled = true;
         CdpNodeStatusRequest.Builder requestBuilder = CdpNodeStatusRequest.Builder.builder();
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         if (StackType.WORKLOAD.equals(stack.getType())) {
-            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             nodeStatusCheckEnabled = entitlementService.datahubNodestatusCheckEnabled(accountId);
         }
         if (nodeStatusCheckEnabled) {
@@ -97,22 +108,29 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
             }
             CdpNodeStatusRequest request = requestBuilder.withCmMonitoring(true).build();
             CdpNodeStatuses statuses = nodeStatusService.getNodeStatuses(stack, request);
-            processNodeStatusReport(statuses.getNetworkReport(), NodeStatusProto.NodeStatus::getNetworkDetails, stack, "Network");
-            processNodeStatusReport(statuses.getServicesReport(), NodeStatusProto.NodeStatus::getServicesDetails, stack, "Services");
-            processNodeStatusReport(statuses.getSystemMetricsReport(), NodeStatusProto.NodeStatus::getSystemMetrics, stack, "System metrics");
-            processCmMetricsReport(statuses.getCmMetricsReport(), stack);
+            processNodeStatusReport(statuses.getNetworkReport(), NodeStatusProto.NodeStatus::getNetworkDetails, stack, "Network", accountId);
+            processNodeStatusReport(statuses.getServicesReport(), NodeStatusProto.NodeStatus::getServicesDetails, stack, "Services", accountId);
+            boolean processMetrics;
             if (StackType.WORKLOAD.equals(stack.getType())) {
-                processNodeStatusReport(statuses.getMeteringReport(), NodeStatusProto.NodeStatus::getSystemMetrics, stack, "Metering");
+                processMetrics = entitlementService.datahubMetricsDatabusProcessing(accountId);
+                processNodeStatusReport(statuses.getMeteringReport(), NodeStatusProto.NodeStatus::getSystemMetrics, stack, "Metering", accountId);
+            } else {
+                processMetrics = entitlementService.datalakeMetricsDatabusProcessing(accountId);
             }
+            processNodeStatusReport(statuses.getSystemMetricsReport(), NodeStatusProto.NodeStatus::getSystemMetrics,
+                    stack, "System metrics", accountId, processMetrics);
+            processCmMetricsReport(statuses.getCmMetricsReport(), stack, accountId, processMetrics);
         }
     }
 
-    private void processCmMetricsReport(Optional<RPCResponse<NodeStatusProto.CmMetricsReport>> cmMetricsReport, Stack stack) {
+    private void processCmMetricsReport(Optional<RPCResponse<NodeStatusProto.CmMetricsReport>> cmMetricsReport, Stack stack,
+            String accountId, boolean process) {
         if (cmMetricsReport.isPresent()) {
             LOGGER.debug("CM metrics report: {}", cmMetricsReport.get().getFirstTextMessage());
             if (isCmMetricsReportNotEmpty(cmMetricsReport.get())) {
-                for (NodeStatusProto.CmServiceMetricEvent metricEvent : cmMetricsReport.get().getResult().getMetricsList()) {
-                    LOGGER.debug("CM metric event details: \n{}", metricEvent);
+                if (process) {
+                    DatabusRequestContext context = createDatabusRequestContext(accountId, stack, CdpNodeStatusType.CM_METRICS_REPORT);
+                    metricsDataBusRecordProcessor.processRecord(cmMetricsReport.get().getResult(), context);
                 }
             }
         } else {
@@ -121,17 +139,39 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     }
 
     private <T> void processNodeStatusReport(Optional<RPCResponse<NodeStatusProto.NodeStatusReport>> nodeStatusReport,
-            Function<NodeStatusProto.NodeStatus, T> nodeStatusDetails, Stack stack, String type) {
+            Function<NodeStatusProto.NodeStatus, T> nodeStatusDetails, Stack stack, String type, String accountId, boolean processAsMetrics) {
         if (nodeStatusReport.isPresent()) {
             LOGGER.debug("{} report: {}", type, nodeStatusReport.get().getFirstTextMessage());
             if (isStatusReportNotEmpty(nodeStatusReport.get())) {
+                DatabusRequestContext context = createDatabusRequestContext(accountId, stack, CdpNodeStatusType.SYSTEM_METRICS);
                 for (NodeStatusProto.NodeStatus nodeStatus : nodeStatusReport.get().getResult().getNodesList()) {
                     LOGGER.debug("{} details report: \n{}{}", type, nodeStatusDetails.apply(nodeStatus), getStatusDetailsStr(nodeStatus.getStatusDetails()));
+                    if (processAsMetrics) {
+                        metricsDataBusRecordProcessor.processRecord(nodeStatus, context);
+                    }
                 }
             }
         } else {
             LOGGER.debug("Node status report does not contain {} report for {}", type, stack.getName());
         }
+    }
+
+    private <T> void processNodeStatusReport(Optional<RPCResponse<NodeStatusProto.NodeStatusReport>> nodeStatusReport,
+            Function<NodeStatusProto.NodeStatus, T> nodeStatusDetails, Stack stack, String type, String accountId) {
+        processNodeStatusReport(nodeStatusReport, nodeStatusDetails, stack, type, accountId, false);
+    }
+
+    private DatabusRequestContext createDatabusRequestContext(String accountId, Stack stack, CdpNodeStatusType type) {
+        String envCrn = stack.getEnvironmentCrn();
+        String resourceCrn = stack.getResourceCrn();
+        String resourceName = stack.getResourceName();
+        DatabusRequestContext context = new DatabusRequestContext(accountId, envCrn, resourceCrn, resourceName);
+        context.addAdditionalDatabusHeader(DBUS_METRICS_HEADER_ENV_CRN, envCrn)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_RESOURCE_CRN, resourceCrn)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_RESOURCE_NAME, resourceName)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_RESOURCE_VERSION, stack.getStackVersion())
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_METRICS_TYPE, type.value());
+        return context;
     }
 
     private boolean isStatusReportNotEmpty(RPCResponse<NodeStatusProto.NodeStatusReport> statusReport) {

@@ -25,7 +25,7 @@ public class ClouderaManagerSetupTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
-                .mockCm().users().get().times(1).verify()
+                .mockCm().users().get().times(2).verify()
                 .mockCm().users().put().pathVariable("users", "admin").times(1).verify()
                 .validate();
     }

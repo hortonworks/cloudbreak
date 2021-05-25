@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.service.CrnChecker.warnIfAcco
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -862,11 +863,38 @@ public class UmsClient {
      */
     public List<String> listMachineUserAccessKeys(String requestId, String userCrn, String accountId,
             String machineUserName, boolean userAccessKeyId) {
+        return listAccessKeys(requestId, userCrn, accountId, machineUserName).stream()
+                .map(accessKeyObject -> {
+                    if (userAccessKeyId) {
+                        return accessKeyObject.getAccessKeyId();
+                    } else {
+                        return accessKeyObject.getCrn();
+                    }
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get a map of access keys  (id and last usage pairs)
+     *
+     * @param requestId       id of the request
+     * @param userCrn         actor that query the keys for the machine user
+     * @param machineUserName machine user that owns the access keys
+     * @return access key CRNs (or access key ids)
+     */
+    public Map<String, Long> listMachineUserAccessKeyLastUsages(String requestId, String userCrn, String accountId,
+            String machineUserName) {
+        return listAccessKeys(requestId, userCrn, accountId, machineUserName).stream()
+                .collect(Collectors.toMap(UserManagementProto.AccessKey::getAccessKeyId, accessKey -> accessKey.getLastUsage().getTimestampMs()));
+    }
+
+    public List<UserManagementProto.AccessKey> listAccessKeys(String requestId, String userCrn, String accountId,
+            String machineUserName) {
         checkNotNull(requestId);
         checkNotNull(userCrn);
         checkNotNull(machineUserName);
         warnIfAccountIdIsInternal(accountId);
-        List<String> accessKeys = new ArrayList<>();
+        List<UserManagementProto.AccessKey> accessKeys = new ArrayList<>();
         UserManagementProto.ListAccessKeysRequest.Builder listAccessKeysRequestBuilder =
                 UserManagementProto.ListAccessKeysRequest.newBuilder()
                         .setAccountId(accountId)
@@ -878,16 +906,7 @@ public class UmsClient {
             try {
                 UserManagementProto.ListAccessKeysResponse listAccessKeysResponse =
                         newStub(requestId).listAccessKeys(listAccessKeysRequestBuilder.build());
-                accessKeys.addAll(
-                        listAccessKeysResponse.getAccessKeyList().stream()
-                                .map(accessKeyObject -> {
-                                    if (userAccessKeyId) {
-                                        return accessKeyObject.getAccessKeyId();
-                                    } else {
-                                        return accessKeyObject.getCrn();
-                                    }
-                                })
-                                .collect(Collectors.toList()));
+                accessKeys.addAll(listAccessKeysResponse.getAccessKeyList());
                 if (!listAccessKeysResponse.hasNextPageToken()) {
                     break;
                 }

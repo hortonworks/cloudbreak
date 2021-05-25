@@ -12,7 +12,7 @@ public class NodeStatusCheckerConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeStatusCheckerConfig.class);
 
-    @Value("${nodestatuschecker.intervalsec:1200}")
+    @Value("${nodestatuschecker.intervalsec:1800}")
     private int intervalInSeconds;
 
     @Value("${nodestatuschecker.enabled:true}")
