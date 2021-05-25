@@ -142,6 +142,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     protected void createDefaultEnvironment(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(Boolean.FALSE)
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
@@ -154,6 +155,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .withCreateFreeIpa(Boolean.FALSE)
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
@@ -226,6 +228,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
@@ -241,6 +244,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .withNetwork()
                 .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.FALSE)
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())

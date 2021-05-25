@@ -41,7 +41,7 @@ unset HTTPS_PROXY
 env
 
 TRACE=1 ./cbd regenerate
-./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake haveged mock-infrastructure
+./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak distrox-api environment environments2-api periscope freeipa redbeams datalake datalake-api haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker
 
 docker ps --format ‘{{.Image}}’
 

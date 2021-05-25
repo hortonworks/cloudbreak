@@ -46,6 +46,7 @@ public class BasicEnvironmentTests extends AbstractE2ETest {
                 .withNetwork()
                 .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.TRUE)
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))

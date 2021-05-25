@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -83,7 +84,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
-                .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl());
+                .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
+                .withClusterProxy();
     }
 
     public FreeIpaTestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
@@ -253,6 +255,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         authReq.setPublicKey(request.getPublicKey());
         authReq.setPublicKeyId(request.getPublicKeyId());
         getRequest().setAuthentication(authReq);
+        return this;
+    }
+
+    public FreeIpaTestDto withClusterProxy() {
+        getRequest().setTunnel(Tunnel.CLUSTER_PROXY);
         return this;
     }
 

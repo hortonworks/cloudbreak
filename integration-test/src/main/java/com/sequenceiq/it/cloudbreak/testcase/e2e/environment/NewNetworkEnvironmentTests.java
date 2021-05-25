@@ -55,6 +55,7 @@ public class NewNetworkEnvironmentTests extends AbstractE2ETest {
                 .withNetwork(networkKey)
                 .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.FALSE)
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))

@@ -144,6 +144,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
                 .withParentEnvironment()
                 .withNetwork(CHILD_ENVIRONMENT_NETWORK_KEY)
                 .withTelemetry("childtelemetry")
+                .withClusterProxy()
                 .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT_KEY))
                 .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT_KEY))

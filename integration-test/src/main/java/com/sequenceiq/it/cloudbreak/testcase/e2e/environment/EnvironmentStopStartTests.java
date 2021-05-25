@@ -73,6 +73,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withTelemetry("telemetry")
                     .withCreateFreeIpa(Boolean.TRUE)
                     .addTags(ENV_TAGS)
+                    .withClusterProxy()
                 .when(environmentTestClient.create())
                 .given(SdxInternalTestDto.class)
                     .addTags(SDX_TAGS)

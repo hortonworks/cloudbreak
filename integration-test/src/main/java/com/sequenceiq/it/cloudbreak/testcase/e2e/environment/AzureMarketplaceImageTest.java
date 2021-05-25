@@ -58,6 +58,7 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
 
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withMarketplaceFreeIpaImage()
+                .withClusterProxy()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
