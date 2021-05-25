@@ -22,6 +22,10 @@ public class RangerRazDatalakeConfigProvider extends RangerRazBaseConfigProvider
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return isDatalakeConfigForRazIsRequired(source);
+    }
+
+    public static boolean isDatalakeConfigForRazIsRequired(TemplatePreparationObject source) {
         return StackType.DATALAKE == source.getStackType()
                 && (CloudPlatform.AWS == source.getCloudPlatform() || CloudPlatform.AZURE == source.getCloudPlatform())
                 && CMRepositoryVersionUtil.isRazConfigurationSupportedInDatalake(source.getProductDetailsView().getCm(), source.getCloudPlatform())

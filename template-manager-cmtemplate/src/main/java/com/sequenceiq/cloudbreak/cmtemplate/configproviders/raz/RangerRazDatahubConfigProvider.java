@@ -26,6 +26,10 @@ public class RangerRazDatahubConfigProvider extends RangerRazBaseConfigProvider 
 
     @Override
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
+        return isWorkloadConfigForRazIsRequired(source);
+    }
+
+    public static boolean isWorkloadConfigForRazIsRequired(TemplatePreparationObject source) {
         return StackType.WORKLOAD == source.getStackType()
                 && (CloudPlatform.AWS == source.getCloudPlatform() || CloudPlatform.AZURE == source.getCloudPlatform())
                 && source.getProductDetailsView() != null
