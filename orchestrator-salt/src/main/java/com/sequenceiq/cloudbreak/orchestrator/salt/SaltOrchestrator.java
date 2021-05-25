@@ -57,8 +57,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostAndRoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.RoleTarget;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
@@ -512,8 +512,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Override
     public void installFreeIpa(GatewayConfig primaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
-        Set<String> freeIpaMasterHostname = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE)));
-        Set<String> existingFreeIpaReplaceHostnames = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_REPLICA_ROLE)));
+        Set<String> freeIpaMasterHostname = new HashSet<>(
+                getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE), allNodes));
+        Set<String> existingFreeIpaReplaceHostnames = new HashSet<>(getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_REPLICA_ROLE), allNodes));
 
         Set<String> unassignedHostnames = allGatewayConfigs.stream()
                 .map(GatewayConfig::getHostname)
@@ -589,26 +590,36 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Optional<String> getFreeIpaMasterHostname(GatewayConfig primaryGateway) throws CloudbreakOrchestratorException {
-        return getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE)).stream().findFirst();
+    public Optional<String> getFreeIpaMasterHostname(GatewayConfig primaryGateway, Set<Node> allNodes) throws CloudbreakOrchestratorException {
+        return getHostnamesForRoles(primaryGateway, Set.of(FREEIPA_MASTER_ROLE, FREEIPA_MASTER_REPLACEMENT_ROLE), allNodes).stream().findFirst();
     }
 
-    private Set<String> getHostnamesForRoles(GatewayConfig primaryGateway, Set<String> rolesToSearch) throws CloudbreakOrchestratorFailedException {
+    private Set<String> getHostnamesForRoles(GatewayConfig primaryGateway, Set<String> rolesToSearch, Set<Node> allNodes)
+            throws CloudbreakOrchestratorFailedException {
         Set<String> hostnames = new HashSet<>();
         for (String roleToSearch : rolesToSearch) {
-            hostnames.addAll(getHostnamesForRole(primaryGateway, roleToSearch));
+            hostnames.addAll(getHostnamesForRole(primaryGateway, roleToSearch, allNodes));
         }
         return hostnames;
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
-    private Set<String> getHostnamesForRole(GatewayConfig primaryGateway, String roleToSearch) throws CloudbreakOrchestratorFailedException {
+    private Set<String> getHostnamesForRole(GatewayConfig primaryGateway, String roleToSearch, Set<Node> allNodes)
+            throws CloudbreakOrchestratorFailedException {
         Map<String, JsonNode> roles;
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            roles = SaltStates.getGrains(sc, new RoleTarget(roleToSearch), "roles");
-        } catch (Exception e) {
-            LOGGER.warn("Error occurred when getting roles", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        Collection<String> targetHosts = allNodes.stream()
+                .map(Node::getHostname)
+                .collect(Collectors.toSet());
+        if (targetHosts.isEmpty()) {
+            LOGGER.warn("No hosts to get role for");
+            roles = Map.of();
+        } else {
+            try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+                roles = SaltStates.getGrains(sc, new HostAndRoleTarget(roleToSearch, targetHosts), "roles");
+            } catch (Exception e) {
+                LOGGER.warn("Error occurred when getting roles", e);
+                throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+            }
         }
         return roles.keySet();
     }

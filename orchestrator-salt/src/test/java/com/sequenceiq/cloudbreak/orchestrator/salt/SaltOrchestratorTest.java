@@ -53,6 +53,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 import org.springframework.util.ReflectionUtils;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionStatusSaltResponse;
@@ -178,7 +180,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
         verify(saltRunner, times(2)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
-        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector),  eq(saltConnectors),
+        verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(saltConnectors),
                 eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
 
@@ -404,5 +406,150 @@ public class SaltOrchestratorTest {
         assertTrue(hosts.keySet().contains("10.0.0.1"));
         assertTrue(hosts.keySet().contains("10.0.0.2"));
         assertTrue(hosts.keySet().contains("10.0.0.3"));
+    }
+
+    @Test
+    public void testInstallFreeIpa() throws Exception {
+        GatewayConfig primaryGateway = mock(GatewayConfig.class);
+        Node primaryNode = mock(Node.class);
+        Callable<Boolean> callable = mock(Callable.class);
+
+        when(primaryNode.getHostname()).thenReturn("primary.example.com");
+        when(primaryGateway.getHostname()).thenReturn("primary.example.com");
+        PowerMockito.mockStatic(SaltStates.class);
+        PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
+                .thenReturn(Map.of())
+                .thenReturn(Map.of())
+                .thenReturn(Map.of());
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+
+
+        saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway),
+                Set.of(primaryNode), exitCriteriaModel);
+
+        verify(saltRunner, times(1)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
+        assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
+    }
+
+    @Test
+    public void testInstallFreeIpaHa() throws Exception {
+        GatewayConfig primaryGateway = mock(GatewayConfig.class);
+        GatewayConfig replica1Config = mock(GatewayConfig.class);
+        GatewayConfig replica2Config = mock(GatewayConfig.class);
+        Node primaryNode = mock(Node.class);
+        Node replica1Node = mock(Node.class);
+        Node replica2Node = mock(Node.class);
+        Callable<Boolean> callable = mock(Callable.class);
+
+        when(primaryNode.getHostname()).thenReturn("primary.example.com");
+        when(replica1Node.getHostname()).thenReturn("replica1.example.com");
+        when(replica2Node.getHostname()).thenReturn("replica2.example.com");
+        when(primaryGateway.getHostname()).thenReturn("primary.example.com");
+        when(replica1Config.getHostname()).thenReturn("replica1.example.com");
+        when(replica2Config.getHostname()).thenReturn("replica2.example.com");
+        PowerMockito.mockStatic(SaltStates.class);
+        PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
+                .thenReturn(Map.of())
+                .thenReturn(Map.of())
+                .thenReturn(Map.of());
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+
+
+        saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, replica1Config, replica2Config),
+                Set.of(primaryNode, replica1Node, replica2Node), exitCriteriaModel);
+
+        verify(saltRunner, times(2)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
+        assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("replica1.example.com", "replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+    }
+
+    @Test
+    public void testInstallFreeIpaHaRepairOneInstance() throws Exception {
+        GatewayConfig primaryGateway = mock(GatewayConfig.class);
+        GatewayConfig replicaConfig = mock(GatewayConfig.class);
+        GatewayConfig newReplicaConfig = mock(GatewayConfig.class);
+        Node primaryNode = mock(Node.class);
+        Node replicaNode = mock(Node.class);
+        Node newReplicaNode = mock(Node.class);
+        Callable<Boolean> callable = mock(Callable.class);
+
+        when(primaryNode.getHostname()).thenReturn("primary.example.com");
+        when(replicaNode.getHostname()).thenReturn("replica.example.com");
+        when(newReplicaNode.getHostname()).thenReturn("new_replica.example.com");
+        when(primaryGateway.getHostname()).thenReturn("primary.example.com");
+        when(replicaConfig.getHostname()).thenReturn("replica.example.com");
+        when(newReplicaConfig.getHostname()).thenReturn("new_replica.example.com");
+        PowerMockito.mockStatic(SaltStates.class);
+        PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
+                .thenReturn(Map.of("primary.example.com", mock(JsonNode.class)))
+                .thenReturn(Map.of())
+                .thenReturn(Map.of("replica.example.com", mock(JsonNode.class)));
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+
+
+        saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, replicaConfig, newReplicaConfig),
+                Set.of(primaryNode, replicaNode, newReplicaNode), exitCriteriaModel);
+
+        verify(saltRunner, times(3)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
+        assertEquals(Set.of("replica.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("new_replica.example.com"), jobIdTrackers.get(2).getSaltJobRunner().getTargetHostnames());
+    }
+
+    @Test
+    public void testInstallFreeIpaHaRepairTwoInstance() throws Exception {
+        GatewayConfig primaryGateway = mock(GatewayConfig.class);
+        GatewayConfig newReplica1Config = mock(GatewayConfig.class);
+        GatewayConfig newReplica2Config = mock(GatewayConfig.class);
+        Node primaryNode = mock(Node.class);
+        Node newReplica1Node = mock(Node.class);
+        Node newReplica2Node = mock(Node.class);
+        Callable<Boolean> callable = mock(Callable.class);
+
+        when(primaryNode.getHostname()).thenReturn("primary.example.com");
+        when(newReplica1Node.getHostname()).thenReturn("new_replica1.example.com");
+        when(newReplica2Node.getHostname()).thenReturn("new_replica2.example.com");
+        when(primaryGateway.getHostname()).thenReturn("primary.example.com");
+        when(newReplica1Config.getHostname()).thenReturn("new_replica1.example.com");
+        when(newReplica2Config.getHostname()).thenReturn("new_replica2.example.com");
+        PowerMockito.mockStatic(SaltStates.class);
+        PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
+                .thenReturn(Map.of("primary.example.com", mock(JsonNode.class)))
+                .thenReturn(Map.of())
+                .thenReturn(Map.of());
+        when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
+        ArgumentCaptor<SaltJobIdTracker> saltJobIdTrackerArgumentCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);
+
+
+        saltOrchestrator.installFreeIpa(primaryGateway, List.of(primaryGateway, newReplica1Config, newReplica2Config),
+                Set.of(primaryNode, newReplica1Node, newReplica2Node), exitCriteriaModel);
+
+        verify(saltRunner, times(2)).runner(saltJobIdTrackerArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+        List<SaltJobIdTracker> jobIdTrackers = saltJobIdTrackerArgumentCaptor.getAllValues();
+        assertEquals(Set.of("primary.example.com"), jobIdTrackers.get(0).getSaltJobRunner().getTargetHostnames());
+        assertEquals(Set.of("new_replica1.example.com", "new_replica2.example.com"), jobIdTrackers.get(1).getSaltJobRunner().getTargetHostnames());
+        PowerMockito.verifyStatic(SaltStates.class, times(3));
+        ArgumentCaptor<Target<String>> targetArgumentCaptor = ArgumentCaptor.forClass(Target.class);
+        SaltStates.getGrains(any(), targetArgumentCaptor.capture(), any());
+        List<Target<String>> targets = targetArgumentCaptor.getAllValues();
+        String target1 = targets.get(0).getTarget();
+        assertTrue(target1.contains("primary.example.com"));
+        assertTrue(target1.contains("new_replica1.example.com"));
+        assertTrue(target1.contains("new_replica2.example.com"));
+        String target2 = targets.get(1).getTarget();
+        assertTrue(target2.contains("primary.example.com"));
+        assertTrue(target2.contains("new_replica1.example.com"));
+        assertTrue(target2.contains("new_replica2.example.com"));
+        String target3 = targets.get(2).getTarget();
+        assertTrue(target3.startsWith("G@roles:freeipa_replica and L@"));
+        assertTrue(target3.contains("primary.example.com"));
+        assertTrue(target3.contains("new_replica1.example.com"));
+        assertTrue(target3.contains("new_replica2.example.com"));
     }
 }
