@@ -44,15 +44,16 @@ public class PaywallCredentialService {
         return result;
     }
 
-    public void getPaywallCredential(Map<String, SaltPillarProperties> servicePillar) {
-        servicePillar.put("paywall", new SaltPillarProperties("/hdp/paywall.sls", singletonMap("paywall", createCredential())));
+    public void setPaywallCredentialMoved(Map<String, SaltPillarProperties> servicePillar) {
+        servicePillar.put("paywall-moved-to-ambari-repo",
+                new SaltPillarProperties("/hdp/paywall.sls", singletonMap("paywall-moved-to-ambari-repo", getCredential())));
     }
 
     public String getBasicAuthorizationEncoded() {
         return Base64.getEncoder().encodeToString(String.format("%s:%s", paywallUserName, paywallPassword).getBytes());
     }
 
-    private Map<String, String> createCredential() {
+    public Map<String, String> getCredential() {
         return Map.of(
                 "paywallUser", paywallUserName,
                 "paywallPassword", paywallPassword);

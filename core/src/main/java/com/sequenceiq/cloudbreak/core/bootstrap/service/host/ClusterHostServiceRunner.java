@@ -225,7 +225,10 @@ public class ClusterHostServiceRunner {
             Json blueprint = new Json(cluster.getBlueprint().getBlueprintText());
             ambariRepoMap.put("stack_version", blueprint.getValue("Blueprints.stack_version"));
             ambariRepoMap.put("stack_type", blueprint.getValue("Blueprints.stack_name").toString().toLowerCase());
-            servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepoMap))));
+            servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls",
+                    Map.of(
+                            "ambari", singletonMap("repo", ambariRepoMap),
+                            "paywall", paywallCredentialService.getCredential())));
             boolean setupLdapAndSsoOnApi = ambariRepositoryVersionService.isVersionNewerOrEqualThanLimited(ambariRepo::getVersion, AMBARI_VERSION_2_7_0_0);
             servicePillar.put("setup-ldap-and-sso-on-api", new SaltPillarProperties("/ambari/config.sls",
                     singletonMap("ambari", singletonMap("setup_ldap_and_sso_on_api", setupLdapAndSsoOnApi))));
@@ -242,7 +245,7 @@ public class ClusterHostServiceRunner {
         }
         saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
-        paywallCredentialService.getPaywallCredential(servicePillar);
+        paywallCredentialService.setPaywallCredentialMoved(servicePillar);
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("username", ambariSecurityConfigProvider.getAmbariUserName(stack.getCluster()));
         credentials.put("password", ambariSecurityConfigProvider.getAmbariPassword(stack.getCluster()));
