@@ -852,7 +852,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider 
                 throw ex;
             }
         }
-        if (attachedDistroXClusters != null && !attachedDistroXClusters.isEmpty()) {
+        DetailedEnvironmentResponse environment = getEnvironment(sdxCluster.getEnvName());
+        if (!entitlementService.isDatalakeLightToMediumMigrationEnabled(Crn.safeFromString(environment.getCreator()).getAccountId()) &&
+                attachedDistroXClusters != null && !attachedDistroXClusters.isEmpty()) {
             throw new BadRequestException(String.format("The following Data Hub cluster(s) must be terminated before SDX deletion [%s]",
                     String.join(", ", attachedDistroXClusters.stream().map(StackViewV4Response::getName).collect(Collectors.toList()))));
         }

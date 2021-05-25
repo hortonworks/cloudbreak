@@ -505,9 +505,33 @@ class SdxServiceTest {
     @Test
     void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlow() {
         SdxCluster sdxCluster = getSdxCluster();
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(false);
         mockCBCallForDistroXClusters(Sets.newHashSet());
+        underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
+        verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
+        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(sdxStatusService, times(1))
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
+    }
+
+    @Test
+    void testDeleteSdxWhenNameIsProvidedShouldInitiateSdxDeletionFlowBecuseMigrationIsEnabled() {
+        SdxCluster sdxCluster = getSdxCluster();
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        StackViewV4Response stackViewV4Response = new StackViewV4Response();
+        stackViewV4Response.setName("existingDistroXCluster");
+        mockCBCallForDistroXClusters(Sets.newHashSet(stackViewV4Response));
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
         final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -519,7 +543,11 @@ class SdxServiceTest {
     @Test
     void testDeleteSdxWhenSdxHasAttachedDataHubsShouldThrowBadRequestBecauseSdxCanNotDeletedIfAttachedClustersAreAvailable() {
         SdxCluster sdxCluster = getSdxCluster();
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(false);
 
         StackViewV4Response stackViewV4Response = new StackViewV4Response();
         stackViewV4Response.setName("existingDistroXCluster");
@@ -533,8 +561,12 @@ class SdxServiceTest {
     @Test
     void testDeleteSdxWhenSdxHasAttachedDataHubsAndExceptionHappensWhenGettingDatahubsAndForceDeleteShouldInitiateSdxDeletionFlow() {
         SdxCluster sdxCluster = getSdxCluster();
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.1.0", LIGHT_DUTY);
+        withCloudStorage(sdxClusterRequest);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxReactorFlowManager.triggerSdxDeletion(any(SdxCluster.class), anyBoolean())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(false);
         doThrow(new NotFoundException("nope")).when(distroxService).getAttachedDistroXClusters(anyString());
 
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
