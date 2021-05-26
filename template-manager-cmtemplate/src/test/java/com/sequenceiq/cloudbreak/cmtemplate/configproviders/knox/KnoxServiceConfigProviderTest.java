@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.KNOX;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +39,7 @@ public class KnoxServiceConfigProviderTest {
 
     @Test
     public void testGetRoleConfigsShouldReturnEmptyList() {
-        Assert.assertTrue(underTest.getRoleConfigs(anyString(), any(TemplatePreparationObject.class)).isEmpty());
+        Assert.assertTrue(underTest.getRoleConfigs("", null).isEmpty());
     }
 
     @Test
