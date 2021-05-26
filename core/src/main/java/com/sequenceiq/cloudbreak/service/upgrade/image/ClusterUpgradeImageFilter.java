@@ -130,7 +130,7 @@ public class ClusterUpgradeImageFilter {
     private boolean isValidBlueprint(ImageFilterParams imageFilterParams, String accountId) {
         if (imageFilterParams.getStackType().equals(StackType.DATALAKE)) {
             boolean mediumDuty = imageFilterParams.getBlueprint().getName().contains("SDX Medium Duty");
-            boolean canUpgradeMediumDuty = mediumDuty && entitlementService.mediumDutyUpgradeEnabled(accountId);
+            boolean canUpgradeMediumDuty = mediumDuty && entitlementService.haUpgradeEnabled(accountId);
             return !mediumDuty || canUpgradeMediumDuty;
         } else {
             return blueprintUpgradeOptionValidator.isValidBlueprint(imageFilterParams.getBlueprint());

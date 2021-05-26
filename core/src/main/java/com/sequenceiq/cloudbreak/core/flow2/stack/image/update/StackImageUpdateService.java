@@ -193,20 +193,24 @@ public class StackImageUpdateService {
                 boolean cloudPlatformMatches = isCloudPlatformMatches(stack, newImage);
                 boolean osVersionsMatch = isOsVersionsMatch(currentImage, newImage);
                 boolean stackMatchIfPrewarmed = isStackMatchIfPrewarmed(newImage);
-                CheckResult status = checkPackageVersions(stack, newImage);
-                boolean aggregatedValidationResult = cloudPlatformMatches && osVersionsMatch && stackMatchIfPrewarmed
-                        && status.getStatus() == EventStatus.OK;
+                CheckResult checkPackageVersionsStatus = checkPackageVersions(stack, newImage);
+
+                boolean aggregatedValidationResult = cloudPlatformMatches && osVersionsMatch && stackMatchIfPrewarmed;
                 if (!aggregatedValidationResult) {
                     LOGGER.info("Image validation for {}:\n "
                                     + "Valid platform? {}\n "
                                     + "Valid os? {}\n "
-                                    + "Valid stack (prewarmed only)? {}\n "
-                                    + "Valid package versions? {}",
+                                    + "Valid stack (prewarmed only)? {}",
                             newImageId,
                             cloudPlatformMatches,
                             osVersionsMatch,
-                            stackMatchIfPrewarmed,
-                            status);
+                            stackMatchIfPrewarmed);
+                }
+                if (checkPackageVersionsStatus.getStatus() != EventStatus.OK) {
+                    LOGGER.info("Image validation for {}:\n "
+                                    + "Valid package versions? {}",
+                            newImageId,
+                            checkPackageVersionsStatus);
                 }
                 return aggregatedValidationResult;
             } catch (CloudbreakImageNotFoundException e) {

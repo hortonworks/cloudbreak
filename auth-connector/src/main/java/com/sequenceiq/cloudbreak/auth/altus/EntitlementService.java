@@ -30,9 +30,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
@@ -264,12 +264,12 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CM_HA);
     }
 
-    public boolean mediumDutyRepairEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, MEDIUM_DUTY_REPAIR);
+    public boolean haRepairEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ALLOW_HA_REPAIR);
     }
 
-    public boolean mediumDutyUpgradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, MEDIUM_DUTY_UPGRADE);
+    public boolean haUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ALLOW_HA_UPGRADE);
     }
 
     public boolean conclusionCheckerSendUserEventEnabled(String accountId) {
