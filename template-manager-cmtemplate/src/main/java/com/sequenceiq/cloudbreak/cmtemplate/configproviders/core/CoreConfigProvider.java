@@ -49,7 +49,18 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        return List.of();
+        List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
+        boolean versionIsSupported = source.getProductDetailsView() != null && isRazTokenConfigurationSupported(source.getProductDetailsView().getCm());
+        if (versionIsSupported && (isWorkloadConfigForRazIsRequired(source) || isDatalakeConfigForRazIsRequired(source))) {
+            if (source.getCloudPlatform().equals(CloudPlatform.AWS)) {
+                apiClusterTemplateConfigs.add(
+                        config("fs.s3a.ext.raz.delegation-token.token-kind", "S3 delegation"));
+            } else if (source.getCloudPlatform().equals(CloudPlatform.AZURE)) {
+                apiClusterTemplateConfigs.add(
+                        config("fs.s3a.ext.raz.delegation-token.token-kind", "ABFS delegation"));
+            }
+        }
+        return apiClusterTemplateConfigs;
     }
 
     @Override
@@ -88,22 +99,8 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
                 .roleType(STORAGEOPERATIONS)
                 .base(true)
                 .refName(CORE_SETTINGS_REF_NAME);
-        addCoreConfigSettings(source, coreSettingsRole);
         coreSettings.roleConfigGroups(List.of(coreSettingsRole));
         return coreSettings;
-    }
-
-    private void addCoreConfigSettings(TemplatePreparationObject source, ApiClusterTemplateRoleConfigGroup coreSettingsRole) {
-        boolean versionIsSupported = source.getProductDetailsView() != null && isRazTokenConfigurationSupported(source.getProductDetailsView().getCm());
-        if (versionIsSupported && (isWorkloadConfigForRazIsRequired(source) || isDatalakeConfigForRazIsRequired(source))) {
-            if (source.getCloudPlatform().equals(CloudPlatform.AWS)) {
-                coreSettingsRole.addConfigsItem(
-                        config("fs.s3a.ext.raz.delegation-token.token-kind", "S3 delegation"));
-            } else if (source.getCloudPlatform().equals(CloudPlatform.AZURE)) {
-                coreSettingsRole.addConfigsItem(
-                        config("fs.s3a.ext.raz.delegation-token.token-kind", "ABFS delegation"));
-            }
-        }
     }
 
     @Override
