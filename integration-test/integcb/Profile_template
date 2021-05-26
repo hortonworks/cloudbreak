@@ -15,12 +15,11 @@ export ENVIRONMENT_ENABLEDPLATFORMS=AZURE,AWS,YARN,MOCK
 export CB_DEFAULT_SUBSCRIPTION_ADDRESS=""
 export CB_CLIENT_SECRET=cloudbreak
 export INGRESS_URLS=dev-gateway,localhost
-export CLUSTERPROXY_ENABLED=false
+export CLUSTERPROXY_ENABLED=true
 export ENVIRONMENT_AUTOSYNC_ENABLED=false
 export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false
 export ENVIRONMENT_EXPERIENCE_SCAN_ENABLED=true
 
-export CLUSTERPROXY_ENABLED=false
 export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
 export MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
 
@@ -35,4 +34,4 @@ export PERISCOPE_JAVA_OPTS="-Dperiscope.hibernate.circuitbreaker=BREAK -Dhiberna
 export FREEIPA_JAVA_OPTS="-Dfreeipa.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=50"
 export REDBEAMS_JAVA_OPTS="-Dredbeams.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
 export DATALAKE_JAVA_OPTS="-Ddatalake.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
-export ENVIRONMENT_JAVA_OPTS="-Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
+export ENVIRONMENT_JAVA_OPTS="-Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25 -Denvironment.tunnel.default=CLUSTER_PROXY"
