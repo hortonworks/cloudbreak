@@ -251,8 +251,10 @@ public class TelemetryDecorator {
         if (StringUtils.isNotBlank(stack.getCluster().getCdpNodeStatusMonitorPassword())) {
             passwordInput = stack.getCluster().getCdpNodeStatusMonitorPassword().toCharArray();
         }
+        Crn userCrn = Crn.fromString(stack.getCreator().getUserCrn());
+        boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(userCrn.getAccountId());
         NodeStatusConfigView nodeStatusConfigView = nodeStatusConfigService
-                .createNodeStatusConfig(stack.getCluster().getCdpNodeStatusMonitorUser(), passwordInput);
+                .createNodeStatusConfig(stack.getCluster().getCdpNodeStatusMonitorUser(), passwordInput, saltPingEnabled);
         Map<String, Object> nodeStatusConfig = nodeStatusConfigView.toMap();
         servicePillar.put("nodestatus",
                 new SaltPillarProperties("/nodestatus/init.sls", singletonMap("nodestatus", nodeStatusConfig)));

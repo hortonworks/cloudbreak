@@ -698,8 +698,8 @@ cb:
         prewarmed: true
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
   nodestatus:
-    connectionTimeoutMs: 5000
-    readTimeoutMs: 5000
+    connectionTimeoutMs: 15000
+    readTimeoutMs: 30000
 
   loadBalancer:
     supportedPlatforms: AWS,YARN,AZURE

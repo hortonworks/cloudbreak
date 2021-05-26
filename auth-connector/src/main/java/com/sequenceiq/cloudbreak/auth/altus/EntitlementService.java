@@ -34,6 +34,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
@@ -110,6 +111,10 @@ public class EntitlementService {
 
     public boolean datahubNodestatusCheckEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATAHUB_NODESTATUS_CHECK);
+    }
+
+    public boolean nodestatusSaltPingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_NODESTATUS_ENABLE_SALT_PING);
     }
 
     public boolean automaticUsersyncPollerEnabled(String accountId) {

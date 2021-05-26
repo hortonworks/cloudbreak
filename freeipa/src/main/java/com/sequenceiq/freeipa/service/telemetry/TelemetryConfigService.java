@@ -136,7 +136,9 @@ public class TelemetryConfigService {
         if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
             passwordInput = stack.getCdpNodeStatusMonitorPassword().toCharArray();
         }
-        NodeStatusConfigView nodeStatusConfigs = nodeStatusConfigService.createNodeStatusConfig(stack.getCdpNodeStatusMonitorUser(), passwordInput);
+        boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(stack.getAccountId());
+        NodeStatusConfigView nodeStatusConfigs = nodeStatusConfigService.createNodeStatusConfig(
+                stack.getCdpNodeStatusMonitorUser(), passwordInput, saltPingEnabled);
         return Map.of("nodestatus",
                 new SaltPillarProperties("/nodestatus/init.sls", Collections.singletonMap("nodestatus", nodeStatusConfigs.toMap())));
     }

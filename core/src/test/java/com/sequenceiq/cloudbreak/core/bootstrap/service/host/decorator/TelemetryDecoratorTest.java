@@ -305,7 +305,7 @@ public class TelemetryDecoratorTest {
                 anyString(), anyString())).willReturn(meteringConfigView);
         given(monitoringConfigService.createMonitoringConfig(any(), any()))
                 .willReturn(monitoringConfigView);
-        given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull())).willReturn(nodeStatusConfigView);
+        given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(nodeStatusConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), anyString(), anyString(),
                 anyString(), anyString(), anyString(), anyString()))
                 .willReturn(telemetryCommonConfigView);
