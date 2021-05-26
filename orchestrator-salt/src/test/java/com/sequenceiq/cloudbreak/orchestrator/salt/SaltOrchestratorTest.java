@@ -19,6 +19,7 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -131,7 +132,7 @@ public class SaltOrchestratorTest {
 
     @Before
     public void setUp() throws Exception {
-        gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
+        gatewayConfig = new GatewayConfig("172.16.252.43", "1.1.1.1", "10.0.0.1", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, "privatekey", "publickey", null, null);
         targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", "1.1.1.1", "instanceid1", "hg", "10-0-0-1.example.com", "hg"));
@@ -179,7 +180,7 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, null, bootstrapParams, exitCriteriaModel);
 
-        verify(saltRunner, times(2)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
+        verify(saltRunner, times(4)).runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class));
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(saltConnectors),
                 eq(Collections.singletonList(gatewayConfig)), eq(targets), eq(bootstrapParams));
     }
@@ -265,7 +266,7 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
 
-        verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
+        verify(saltConnector, never()).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic(SaltStates.class);
 
         SaltStates.stopMinions(eq(saltConnector), eq(privateIps));
@@ -437,7 +438,7 @@ public class SaltOrchestratorTest {
         assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
 
         Set<String> targets = Whitebox.getInternalState(capturedPillarSave, "targets");
-        assertTrue(targets.contains("172.16.252.43"));
+        assertTrue(targets.contains("10.0.0.1"));
 
         Pillar pillar = Whitebox.getInternalState(capturedPillarSave, "pillar");
         Map<String, Map> hosts = (Map) ((Map) pillar.getJson()).get("hosts");
