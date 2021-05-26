@@ -34,6 +34,6 @@ public class EnvironmentLogStorageLocationValidator {
     }
 
     private boolean isCloudStorageEnabled(EnvironmentLogging logging) {
-        return logging.getS3() != null || logging.getAdlsGen2() != null;
+        return logging.getS3() != null || logging.getAdlsGen2() != null || logging.getGcs() != null;
     }
 }
