@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarCon
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
@@ -17,7 +18,7 @@ public enum ClusterStartEvent implements FlowEvent {
     CLUSTER_START_POLLING_EVENT(EventSelectorUtil.selector(ClusterStartResult.class)),
     CLUSTER_START_POLLING_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterStartPollingResult.class)),
     CLUSTER_START_POLLING_FINISHED_EVENT(EventSelectorUtil.selector(ClusterStartPollingResult.class)),
-
+    CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT(EventSelectorUtil.selector(ConfigureClusterManagerManagementServicesSuccess.class)),
     FINALIZED_EVENT("CLUSTERSTARTFINALIZEDEVENT"),
     FAILURE_EVENT("CLUSTERSTARTFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERSTARTFAILHANDLEDEVENT");

@@ -13,6 +13,7 @@ public enum ClusterStartState implements FlowState {
     UPDATING_DNS_IN_PEM_STATE,
     CLUSTER_STARTING_STATE,
     CLUSTER_START_POLLING_STATE(FillInMemoryStateStoreRestartAction.class),
+    CONFIGURE_MANAGEMENT_SERVICES_ON_START_STATE,
     CLUSTER_START_FINISHED_STATE,
 
     FINAL_STATE;

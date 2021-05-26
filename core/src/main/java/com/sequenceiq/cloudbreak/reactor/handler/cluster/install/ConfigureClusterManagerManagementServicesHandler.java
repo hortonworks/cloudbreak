@@ -2,6 +2,11 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.install;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -25,6 +30,12 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
     @Inject
     private ClusterBuilderService clusterBuilderService;
 
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private ClusterApiConnectors clusterApiConnectors;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ConfigureClusterManagerManagementServicesRequest.class);
@@ -39,10 +50,18 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
     @Override
     protected Selectable doAccept(HandlerEvent<ConfigureClusterManagerManagementServicesRequest> event) {
         Long stackId = event.getData().getResourceId();
+        Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         Selectable response;
         try {
             clusterBuilderService.configureManagementServices(stackId);
+            ClusterApi connector = clusterApiConnectors.getConnector(stack);
             response = new ConfigureClusterManagerManagementServicesSuccess(stackId);
+            try {
+                LOGGER.info("Trying to restart services");
+                connector.restartAll(false);
+            } catch (CloudbreakException e) {
+                LOGGER.info("Restart services failed", e);
+            }
         } catch (RuntimeException e) {
             LOGGER.error("ConfigureClusterManagerManagementServicesHandler step failed with the following message: {}", e.getMessage());
             response = new ConfigureClusterManagerManagementServicesFailed(stackId, e);

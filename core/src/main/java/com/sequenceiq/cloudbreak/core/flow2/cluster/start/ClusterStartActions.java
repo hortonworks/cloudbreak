@@ -4,6 +4,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -92,11 +95,26 @@ public class ClusterStartActions {
         };
     }
 
-    @Bean(name = "CLUSTER_START_FINISHED_STATE")
-    public Action<?, ?> clusterStartFinished() {
+    @Bean(name = "CONFIGURE_MANAGEMENT_SERVICES_ON_START_STATE")
+    public Action<?, ?> configureManagementServicesAction() {
         return new AbstractClusterAction<>(ClusterStartPollingResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new ConfigureClusterManagerManagementServicesRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_START_FINISHED_STATE")
+    public Action<?, ?> clusterStartFinished() {
+        return new AbstractClusterAction<>(ConfigureClusterManagerManagementServicesSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, ConfigureClusterManagerManagementServicesSuccess payload, Map<Object, Object> variables) {
                 clusterStartService.clusterStartFinished(context.getStack());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);

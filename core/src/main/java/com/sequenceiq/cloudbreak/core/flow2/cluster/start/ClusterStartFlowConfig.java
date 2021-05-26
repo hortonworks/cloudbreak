@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEve
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.DNS_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_STARTING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CLUSTER_START_FINISHED_STATE;
@@ -18,6 +19,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartSta
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.UPDATING_DNS_IN_PEM_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState.CONFIGURE_MANAGEMENT_SERVICES_ON_START_STATE;
+
 
 import java.util.List;
 
@@ -50,9 +53,14 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
                     .event(CLUSTER_START_POLLING_EVENT)
                     .failureEvent(CLUSTER_START_FAILURE_EVENT)
 
-                    .from(CLUSTER_START_POLLING_STATE).to(CLUSTER_START_FINISHED_STATE)
+                    .from(CLUSTER_START_POLLING_STATE).to(CONFIGURE_MANAGEMENT_SERVICES_ON_START_STATE)
                     .event(CLUSTER_START_POLLING_FINISHED_EVENT)
                     .failureEvent(CLUSTER_START_POLLING_FAILURE_EVENT)
+
+                    .from(CONFIGURE_MANAGEMENT_SERVICES_ON_START_STATE)
+                    .to(CLUSTER_START_FINISHED_STATE)
+                    .event(CONFIGURE_MANAGEMENT_SERVICES_SUCCESS_EVENT)
+                    .failureEvent(CLUSTER_START_FAILURE_EVENT)
 
                     .from(CLUSTER_START_FINISHED_STATE).to(FINAL_STATE)
                     .event(FINALIZED_EVENT)
