@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -89,8 +90,8 @@ public class AwsDownscaleService {
                     auth.getCloudContext().getLocation().getRegion().value());
 
             Long stackId = auth.getCloudContext().getId();
-            terminateInstances(stackId, instanceIds, amazonEC2Client);
-            waitForTerminateInstances(stackId, instanceIds, amazonEC2Client);
+            List<String> terminatedInstances = terminateInstances(stackId, instanceIds, amazonEC2Client);
+            waitForTerminateInstances(stackId, terminatedInstances, amazonEC2Client);
 
             try {
                 int maxSize = getInstanceCount(stack, vms.get(0).getTemplate().getGroupName());
@@ -150,22 +151,26 @@ public class AwsDownscaleService {
         return result;
     }
 
-    private void terminateInstances(Long stackId, List<String> instanceIds, AmazonEc2Client amazonEC2Client) {
+    private List<String> terminateInstances(Long stackId, List<String> instanceIds, AmazonEc2Client amazonEC2Client) {
         LOGGER.debug("Terminated instances. [stack: {}, instances: {}]", stackId, instanceIds);
         try {
             amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
+            return instanceIds;
         } catch (AmazonServiceException e) {
+            LOGGER.info("Termination failed, lets check if it is because instance was not found", e);
             if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(e.getErrorCode())) {
                 throw e;
             } else {
+                LOGGER.info("Instance was not found, lets terminate others");
                 List<String> runningInstances = instanceIds.stream()
                         .filter(instanceId -> !e.getMessage().contains(instanceId))
                         .collect(Collectors.toList());
+                LOGGER.info("Running instances on AWS to terminate: {}", runningInstances);
                 if (!runningInstances.isEmpty()) {
                     amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(runningInstances));
                 }
+                return runningInstances;
             }
-            LOGGER.debug(e.getErrorMessage());
         }
     }
 
@@ -173,8 +178,31 @@ public class AwsDownscaleService {
         LOGGER.debug("Polling instance until terminated. [stack: {}, instances: {}]", stackId,
                 instanceIds);
         Waiter<DescribeInstancesRequest> instanceTerminatedWaiter = amazonEC2Client.waiters().instanceTerminated();
-        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(stackId);
+        try {
+            waitTermination(instanceIds, instanceTerminatedWaiter, stackCancellationCheck);
+        } catch (CloudConnectorException e) {
+            LOGGER.info("Wait termination failed, lets check if it is because instance was not found", e);
+            if (e.getCause() instanceof AmazonServiceException) {
+                if (!INSTANCE_NOT_FOUND_ERROR_CODE.equals(((AmazonServiceException) e.getCause()).getErrorCode())) {
+                    throw e;
+                } else {
+                    LOGGER.info("Instance was not found, lets wait for others");
+                    List<String> runningInstanceIds = instanceIds.stream()
+                            .filter(instanceId -> !e.getCause().getMessage().contains(instanceId))
+                            .collect(Collectors.toList());
+                    LOGGER.info("Running instances on AWS to check: {}", runningInstanceIds);
+                    if (!runningInstanceIds.isEmpty()) {
+                        waitTermination(runningInstanceIds, instanceTerminatedWaiter, stackCancellationCheck);
+                    }
+                }
+            }
+        }
+    }
+
+    private void waitTermination(List<String> instanceIds, Waiter<DescribeInstancesRequest> instanceTerminatedWaiter,
+            StackCancellationCheck stackCancellationCheck) {
+        DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest().withInstanceIds(instanceIds);
         run(instanceTerminatedWaiter, describeInstancesRequest, stackCancellationCheck,
                 String.format("There was an error when application are deleting instances %s", String.join(",", instanceIds)));
     }
