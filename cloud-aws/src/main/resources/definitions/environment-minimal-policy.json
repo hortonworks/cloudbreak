@@ -175,7 +175,9 @@
         "rds:ModifyDBInstance",
         "rds:DescribeCertificates",
         "kms:ListKeys",
-        "kms:ListAliases"
+        "kms:ListAliases",
+        "ec2:ModifyInstanceAttribute",
+        "ec2:CreateLaunchTemplateVersion"
       ],
       "Resource": "*"
     },
