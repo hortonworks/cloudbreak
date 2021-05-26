@@ -69,7 +69,7 @@ public class StackImageUpdateServiceTest {
 
     private Image image;
 
-    private Map<String, String> packageVersions = Collections.singletonMap("package", "version");
+    private final Map<String, String> packageVersions = Collections.singletonMap("package", "version");
 
     @Before
     public void setUp() {
@@ -180,5 +180,44 @@ public class StackImageUpdateServiceTest {
         when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
         boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
         assertFalse(validImage);
+    }
+
+    @Test
+    public void testPackageVersionCheckerFailedThenResultShouldBeSkipped() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
+                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
+
+        CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
+        cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
+
+        when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
+        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.failed(
+                "Instance ID: instance-id Packages without version: salt"));
+
+        boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
+        assertTrue(validImage);
+
+    }
+
+    @Test
+    public void testOsCheckFailedThenResultShouldNotBeSkipped() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
+                new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "redhat7", "redhat",
+                        statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
+
+        CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
+        cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
+
+        when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
+        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.ok());
+
+        boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
+        assertFalse(validImage);
+
     }
 }

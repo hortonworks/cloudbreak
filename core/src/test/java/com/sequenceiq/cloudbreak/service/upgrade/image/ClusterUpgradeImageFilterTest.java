@@ -355,7 +355,7 @@ public class ClusterUpgradeImageFilterTest {
 
     @Test
     public void testNotAllowedUpgradeMediumDuty() {
-        when(entitlementService.mediumDutyUpgradeEnabled(accountId)).thenReturn(false);
+        when(entitlementService.haUpgradeEnabled(accountId)).thenReturn(false);
         blueprint = new Blueprint();
         blueprint.setName("SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas");
         ImageFilterParams imageFilterParams = new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, blueprint);
@@ -369,7 +369,7 @@ public class ClusterUpgradeImageFilterTest {
 
     @Test
     public void testAllowedUpgradeMediumDuty() {
-        when(entitlementService.mediumDutyUpgradeEnabled(accountId)).thenReturn(true);
+        when(entitlementService.haUpgradeEnabled(accountId)).thenReturn(true);
         blueprint = new Blueprint();
         blueprint.setName("SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas.");
         List<Image> properImages = List.of(properImage);
