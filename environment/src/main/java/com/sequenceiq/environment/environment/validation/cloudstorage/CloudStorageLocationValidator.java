@@ -18,6 +18,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCrede
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentBackup;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
+import com.sequenceiq.environment.exception.EnvironmentServiceException;
 
 @Component
 public class CloudStorageLocationValidator {
@@ -34,6 +35,10 @@ public class CloudStorageLocationValidator {
 
     public void validate(String storageLocation, Environment environment, ValidationResultBuilder resultBuilder) {
         Optional<FileSystemType> fileSystemType = getFileSystemType(environment);
+        if (fileSystemType.isPresent() && FileSystemType.GCS.equals(fileSystemType.get()) && !storageLocation.startsWith("gs://")) {
+            throw new EnvironmentServiceException(String.format("The Google storage location [%s] should be a gs:// URL. %s",
+                    storageLocation, getDocLink(environment.getCloudPlatform())));
+        }
         String bucketName = getBucketName(fileSystemType, storageLocation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(environment.getCredential());
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
