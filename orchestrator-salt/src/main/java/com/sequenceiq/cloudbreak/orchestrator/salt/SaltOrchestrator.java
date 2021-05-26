@@ -725,7 +725,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
         List<GatewayConfig> liveGateways = allGatewayConfigs.stream()
-                .filter(gw -> !removeNodePrivateIPsByFQDN.containsValue(gw.getPrivateAddress())).collect(Collectors.toList());
+                .filter(gw -> remainingIps.contains(gw.getPrivateAddress())).collect(Collectors.toList());
         for (GatewayConfig gatewayConfig : liveGateways) {
             try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
                 sc.wheel("key.delete", removeNodePrivateIPsByFQDN.keySet(), Object.class);
