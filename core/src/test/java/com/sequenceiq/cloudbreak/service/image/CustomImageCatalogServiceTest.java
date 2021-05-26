@@ -54,6 +54,8 @@ public class CustomImageCatalogServiceTest {
 
     private static final String REGION = "region";
 
+    private static final String IMAGE_CATALOG_URL = "image catalog url";
+
     @Mock
     private ImageCatalogService imageCatalogService;
 
@@ -89,6 +91,16 @@ public class CustomImageCatalogServiceTest {
     }
 
     @Test
+    public void testGetImageCatalogShouldFailInCaseOfNonCustomImageCatalog() {
+        ImageCatalog expected = new ImageCatalog();
+        expected.setImageCatalogUrl(IMAGE_CATALOG_URL);
+
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
+
+        assertThrows(BadRequestException.class, () -> victim.getImageCatalog(WORKSPACE_ID, IMAGE_CATALOG_NAME));
+    }
+
+    @Test
     public void testCreate() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(IMAGE_CATALOG_NAME);
@@ -119,11 +131,22 @@ public class CustomImageCatalogServiceTest {
     public void testDelete() {
         ImageCatalog expected = new ImageCatalog();
 
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
         when(imageCatalogService.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
 
         ImageCatalog actual = victim.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDeleteShouldFailInCaseOfNonCustomImageCatalog() {
+        ImageCatalog expected = new ImageCatalog();
+        expected.setImageCatalogUrl(IMAGE_CATALOG_URL);
+
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(expected);
+
+        assertThrows(BadRequestException.class, () -> victim.delete(WORKSPACE_ID, IMAGE_CATALOG_NAME));
     }
 
     @Test
@@ -138,6 +161,16 @@ public class CustomImageCatalogServiceTest {
         CustomImage actual = victim.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME);
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testGetCustomImageShouldFailInCaseOfNonCustomImageCatalog() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(IMAGE_CATALOG_URL);
+
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+
+        assertThrows(BadRequestException.class, () -> victim.getCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME));
     }
 
     @Test
@@ -193,6 +226,34 @@ public class CustomImageCatalogServiceTest {
     }
 
     @Test
+    public void testCreateCustomImageShouldFailInCaseOfNonCustomImageCatalog() throws TransactionService.TransactionExecutionException,
+            CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        CustomImage customImage = aCustomImage();
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getSourceImageByImageType(customImage)).thenThrow(new CloudbreakImageCatalogException(""));
+
+
+
+        assertThrows(NotFoundException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, customImage));
+    }
+
+    @Test
+    public void testCreateCustomImageShouldFailInCaseOfMissingSourceImage() throws TransactionService.TransactionExecutionException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(IMAGE_CATALOG_URL);
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+
+        assertThrows(BadRequestException.class, () -> victim.createCustomImage(WORKSPACE_ID, ACCOUNT_ID, CREATOR, IMAGE_CATALOG_NAME, null));
+    }
+
+    @Test
     public void testDeleteCustomImage() throws TransactionService.TransactionExecutionException {
         CustomImage expected = aCustomImage();
         ImageCatalog imageCatalog = new ImageCatalog();
@@ -207,6 +268,19 @@ public class CustomImageCatalogServiceTest {
 
         assertTrue(imageCatalog.getCustomImages().isEmpty());
         assertEquals(expected, actual);
+    }
+
+    @Test
+    public void testDeleteCustomImageShouldFailInCaseOfNonCustomImageCatalog() throws TransactionService.TransactionExecutionException {
+        CustomImage expected = aCustomImage();
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(IMAGE_CATALOG_URL);
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+
+        assertThrows(BadRequestException.class, () -> victim.deleteCustomImage(WORKSPACE_ID, IMAGE_CATALOG_NAME, IMAGE_NAME));
     }
 
     @Test
@@ -314,6 +388,38 @@ public class CustomImageCatalogServiceTest {
         VmImage actualVmImage = actual.getVmImage().stream().findFirst().get();
         assertEquals(REGION, actualVmImage.getRegion());
         assertEquals(IMAGE_REFERENCE, actualVmImage.getImageReference());
+    }
+
+    @Test
+    public void testUpdateCustomImageShouldFailInCaseOfNonCustomImageCatalog() throws TransactionService.TransactionExecutionException {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogUrl(IMAGE_CATALOG_URL);
+        CustomImage customImage = new CustomImage();
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+
+        assertThrows(BadRequestException.class, () -> victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, customImage));
+    }
+
+    @Test
+    public void testUpdateCustomImageShouldFailInCaseMissingSourceImage() throws TransactionService.TransactionExecutionException,
+            CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        CustomImage updatedCustomImage = new CustomImage();
+        updatedCustomImage.setVmImage(null);
+        updatedCustomImage.setName(IMAGE_NAME);
+        updatedCustomImage.setCustomizedImageId("fakeid");
+        CustomImage savedCustomImage = aCustomImage();
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.getCustomImages().add(savedCustomImage);
+
+        doAnswer(invocation -> ((Supplier<CustomImage>) invocation.getArgument(0)).get())
+                .when(transactionService).required(any(Supplier.class));
+        when(imageCatalogService.get(WORKSPACE_ID, IMAGE_CATALOG_NAME)).thenReturn(imageCatalog);
+        when(imageCatalogService.getSourceImageByImageType(savedCustomImage)).thenThrow(new CloudbreakImageCatalogException(""));
+
+        assertThrows(NotFoundException.class, () -> victim.updateCustomImage(WORKSPACE_ID, CREATOR, IMAGE_CATALOG_NAME, updatedCustomImage));
     }
 
     private CustomImage aCustomImage() {
