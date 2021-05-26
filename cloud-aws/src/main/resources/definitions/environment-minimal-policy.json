@@ -156,7 +156,6 @@
         "iam:GetInstanceProfile",
         "iam:SimulatePrincipalPolicy",
         "iam:GetRole",
-        "iam:PassRole",
         "rds:AddTagsToResource",
         "rds:CreateDBInstance",
         "rds:CreateDBSubnetGroup",
@@ -178,6 +177,13 @@
         "kms:ListAliases",
         "ec2:ModifyInstanceAttribute",
         "ec2:CreateLaunchTemplateVersion"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "iam:PassRole"
       ],
       "Resource": "*"
     },
