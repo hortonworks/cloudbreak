@@ -58,7 +58,7 @@ public abstract class AbstractRdsConfigProvider {
      * @return         salt pillar configuration information for this provider's database
      */
     public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
-        if (isRdsConfigNeeded(cluster.getBlueprint())) {
+        if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())) {
             Set<RDSConfig> rdsConfigs = createPostgresRdsConfigIfNeeded(stack, cluster);
             RDSConfig rdsConfig = rdsConfigs.stream().filter(rdsConfig1 -> rdsConfig1.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
@@ -98,7 +98,7 @@ public abstract class AbstractRdsConfigProvider {
     public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
         Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
         rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
-        if (isRdsConfigNeeded(cluster.getBlueprint())
+        if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())
                 && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
             RDSConfig newRdsConfig;
             if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
@@ -167,6 +167,6 @@ public abstract class AbstractRdsConfigProvider {
 
     protected abstract DatabaseType getRdsType();
 
-    protected abstract boolean isRdsConfigNeeded(Blueprint blueprint);
+    protected abstract boolean isRdsConfigNeeded(Blueprint blueprint, boolean knoxGateway);
 
 }
