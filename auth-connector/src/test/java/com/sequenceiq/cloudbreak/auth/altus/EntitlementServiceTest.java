@@ -143,7 +143,10 @@ class EntitlementServiceTest {
                 {"CDP_AWS_RESTRICTED_POLICY", (EntitlementCheckFunction) EntitlementService::awsRestrictedPolicy, true},
 
                 {"CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", (EntitlementCheckFunction) EntitlementService::conclusionCheckerSendUserEventEnabled, false},
-                {"CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", (EntitlementCheckFunction) EntitlementService::conclusionCheckerSendUserEventEnabled, true}
+                {"CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", (EntitlementCheckFunction) EntitlementService::conclusionCheckerSendUserEventEnabled, true},
+
+                {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, false},
+                {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, true}
         };
     }
 

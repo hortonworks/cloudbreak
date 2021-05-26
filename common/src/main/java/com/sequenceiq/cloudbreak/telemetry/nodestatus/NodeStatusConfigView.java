@@ -17,9 +17,12 @@ public class NodeStatusConfigView implements TelemetryConfigView {
 
     private final char[] serverPassword;
 
+    private final boolean saltPingEnabled;
+
     private NodeStatusConfigView(Builder builder) {
         this.serverUsername = builder.serverUsername;
         this.serverPassword = builder.serverPassword;
+        this.saltPingEnabled = builder.saltPingEnabled;
     }
 
     @Override
@@ -31,6 +34,7 @@ public class NodeStatusConfigView implements TelemetryConfigView {
             serverSha256Password = new String(this.serverPassword);
         }
         map.put("serverPassword", serverSha256Password);
+        map.put("saltPingEnabled", saltPingEnabled);
         return map;
     }
 
@@ -39,6 +43,8 @@ public class NodeStatusConfigView implements TelemetryConfigView {
         private String serverUsername;
 
         private char[] serverPassword;
+
+        private boolean saltPingEnabled;
 
         public NodeStatusConfigView build() {
             return new NodeStatusConfigView(this);
@@ -51,6 +57,11 @@ public class NodeStatusConfigView implements TelemetryConfigView {
 
         public Builder withServerPassword(char[] serverPassword) {
             this.serverPassword = serverPassword;
+            return this;
+        }
+
+        public Builder withSaltPingEnabled(boolean saltPingEnabled) {
+            this.saltPingEnabled = saltPingEnabled;
             return this;
         }
     }

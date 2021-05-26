@@ -10,7 +10,7 @@ public class NodeStatusConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NodeStatusConfigService.class);
 
-    public NodeStatusConfigView createNodeStatusConfig(String cdpNodeStatusUser, char[] cdpNodeStatusPassword) {
+    public NodeStatusConfigView createNodeStatusConfig(String cdpNodeStatusUser, char[] cdpNodeStatusPassword, boolean saltPingEnabled) {
         NodeStatusConfigView.Builder builder = new NodeStatusConfigView.Builder();
         if (cdpNodeStatusPassword != null && StringUtils.isNoneBlank(cdpNodeStatusUser, new String(cdpNodeStatusPassword))) {
             LOGGER.debug("Filling authentication settings for nodestatus monitor.");
@@ -19,6 +19,7 @@ public class NodeStatusConfigService {
         } else {
             LOGGER.debug("Authentication settings are missing from nodestatus monitor.");
         }
+        builder.withSaltPingEnabled(saltPingEnabled);
         return builder.build();
     }
 

@@ -31,6 +31,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_H
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
@@ -354,6 +355,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.nodestatus.check.enable}")
     private boolean datahubNodestatusCheck;
+
+    @Value("${auth.mock.nodestatus.salt.ping.enable}")
+    private boolean nodestatusSaltPingEnabled;
 
     private String cbLicense;
 
@@ -715,6 +719,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubNodestatusCheck) {
             builder.addEntitlements(createEntitlement(CDP_DATAHUB_NODESTATUS_CHECK));
+        }
+        if (nodestatusSaltPingEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_NODESTATUS_ENABLE_SALT_PING));
         }
         if (enableAzureDiskSSEWithCMK) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));

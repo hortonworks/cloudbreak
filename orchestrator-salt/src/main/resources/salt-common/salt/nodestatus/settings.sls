@@ -2,6 +2,7 @@
 {% set nodestatus = {} %}
 {% set server_username = salt['pillar.get']('nodestatus:serverUsername') %}
 {% set server_password = salt['pillar.get']('nodestatus:serverPassword') %}
+{% set salt_ping_enabled = salt['pillar.get']('nodestatus:saltPingEnabled') %}
 
 {% if telemetry.databusEndpoint %}
     {% set databus_params = "--databus-url " + telemetry.databusEndpoint %}
@@ -33,5 +34,6 @@
     "serverPassword": server_password,
     "collectParams": collect_params,
     "collectAvailable": collect_available,
-    "saltPingAvailable": salt_ping_available
+    "saltPingAvailable": salt_ping_available,
+    "saltPingEnabled": salt_ping_enabled
 }) %}

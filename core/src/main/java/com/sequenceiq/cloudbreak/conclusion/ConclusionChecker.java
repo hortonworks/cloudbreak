@@ -41,7 +41,7 @@ public class ConclusionChecker {
                     LOGGER.debug("Conclusion step succeeded");
                 }
                 conclusions.add(conclusion);
-                doNext = conclusion.isFailureFound();
+                doNext = !conclusion.isFailureFound();
             }
             ConclusionResult result = new ConclusionResult(conclusions);
             LOGGER.info("Conclusion checker finished: {}", result.isFailureFound() ? "failure not found" : conclusions);
