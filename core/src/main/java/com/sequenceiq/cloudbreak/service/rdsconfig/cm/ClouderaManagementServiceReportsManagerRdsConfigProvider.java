@@ -47,7 +47,7 @@ public class ClouderaManagementServiceReportsManagerRdsConfigProvider extends Ab
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
         return true;
     }
 

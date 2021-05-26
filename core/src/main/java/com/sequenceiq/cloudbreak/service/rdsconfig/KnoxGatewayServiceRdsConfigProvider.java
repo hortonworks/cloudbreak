@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import javax.inject.Inject;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
@@ -23,9 +19,6 @@ public class KnoxGatewayServiceRdsConfigProvider extends AbstractRdsConfigProvid
 
     @Value("${cb.knox_gateway.database.db:knox_gateway}")
     private String db;
-
-    @Inject
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
     protected String getDbUser() {
@@ -53,8 +46,7 @@ public class KnoxGatewayServiceRdsConfigProvider extends AbstractRdsConfigProvid
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintText());
-        return blueprintProcessor.getServiceByType("KNOX").isPresent();
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
+        return hasGateway;
     }
 }

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 
 public class KnoxIdBrokerConfigProviderTest {
@@ -316,7 +317,7 @@ public class KnoxIdBrokerConfigProviderTest {
 
     @Test
     public void getRoleConfigWhenIdBrokerAndWasbFileSystem() {
-        BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
+        WasbFileSystemConfigurationsView fileSystemConfigurationsView = mock(WasbFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("WASB");
 
         TemplatePreparationObject tpo = new Builder()

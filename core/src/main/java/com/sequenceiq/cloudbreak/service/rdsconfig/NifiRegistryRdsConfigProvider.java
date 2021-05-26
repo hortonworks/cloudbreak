@@ -58,7 +58,7 @@ public class NifiRegistryRdsConfigProvider extends AbstractRdsConfigProvider {
     }
 
     @Override
-    protected boolean isRdsConfigNeeded(Blueprint blueprint) {
+    protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
         return isRdsConfigNeedForNifiRegistry(blueprint);
     }
 }
