@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration scan="true" scanPeriod="30 seconds">
+
+    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
+    <logger name="org.springframework.statemachine.support" level="ERROR"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+
+    <appender name="CLUSTER_PROXY_FILE_BASED" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>cluster-proxy-log/cluster-proxy.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${INTEGRATION_TEST_LOG_LEVEL:-OFF}</level>
+        </filter>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <layout class="com.sequenceiq.cloudbreak.logger.MaskingPatternLayout">
+                <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [crn:%X{resourceCrn:-}] [name:%X{resourceName:-}] [flow:%X{flowId:-}] [requestid:%X{requestId:-}] [tenant:%X{tenant:-}] [userCrn:%X{userCrn:-}] [environment:%X{environmentCrn:-}] [traceId:%X{traceId:-}] [spanId:%X{spanId:-}] %msg%n</pattern>
+            </layout>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>cluster-proxy-log/cluster-proxy-%d{yyyy-MM-dd}.log</FileNamePattern>
+        </rollingPolicy>
+        <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+            <MaxFileSize>1024MB</MaxFileSize>
+        </triggeringPolicy>
+    </appender>
+
+    <root level="${CP_ROOT_LOG_LEVEL:-INFO}">
+        <appender-ref ref="CLUSTER_PROXY_FILE_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.sequenceiq" level="${CP_LOG_LEVEL:-DEBUG}" additivity="false">
+        <appender-ref ref="CLUSTER_PROXY_FILE_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+    <logger name="com.zaxxer" level="${CP_LOG_LEVEL:-INFO}" additivity="false">
+        <appender-ref ref="CLUSTER_PROXY_FILE_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
+
+</configuration>
