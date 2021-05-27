@@ -847,6 +847,8 @@ message CDPClusterShape {
   string hostGroupNodeCount = 3;
   // Definition details in a json format
   string definitionDetails = 4;
+  // Indicating whether Temporary Storage is used in the cluster
+  bool temporaryStorageUsed = 5;
 }
 
 message CDPVersionDetails {
