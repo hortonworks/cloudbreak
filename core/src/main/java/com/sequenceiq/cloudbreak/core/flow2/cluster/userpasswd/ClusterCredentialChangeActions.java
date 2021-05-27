@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest.Type;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeResult;
 
 @Configuration
@@ -44,10 +45,10 @@ public class ClusterCredentialChangeActions {
                 ClusterCredentialChangeRequest request;
                 switch (payload.getType()) {
                     case REPLACE:
-                        request = ClusterCredentialChangeRequest.replaceUserRequest(ctx.getStackId(), payload.getUser(), payload.getPassword());
+                        request = new ClusterCredentialChangeRequest(ctx.getStackId(), payload.getUser(), payload.getPassword(), Type.REPLACE);
                         break;
                     case UPDATE:
-                        request = ClusterCredentialChangeRequest.changePasswordRequest(ctx.getStackId(), payload.getPassword());
+                        request = new ClusterCredentialChangeRequest(ctx.getStackId(), null, payload.getPassword(), Type.UPDATE);
                         break;
                     default:
                         throw new UnsupportedOperationException("Ambari credential update request not supported: " + payload.getType());

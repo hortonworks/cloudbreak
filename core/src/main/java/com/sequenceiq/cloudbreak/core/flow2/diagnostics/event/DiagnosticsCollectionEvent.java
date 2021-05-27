@@ -18,7 +18,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
 
     private final Set<String> excludeHosts;
 
-    DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, DiagnosticParameters parameters,
+    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, DiagnosticParameters parameters,
             Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
         super(selector, resourceId, resourceCrn);
         this.parameters = parameters;
@@ -27,7 +27,7 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         this.excludeHosts = excludeHosts;
     }
 
-    DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
+    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
             DiagnosticParameters parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
