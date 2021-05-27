@@ -1,25 +1,27 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.microsoft.azure.Page;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.rest.RestException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AzureVirtualMachineServiceTest {
 
     private static final String INSTANCE_1 = "instance-1";
@@ -63,6 +65,19 @@ public class AzureVirtualMachineServiceTest {
         assertEquals(1, actual.size());
     }
 
+    @Test
+    public void testGetVirtualMachinesByResourceGroupShouldThrowExceptionWhenListIsEmpty() {
+        Set<String> privateInstanceIds = createPrivateInstanceIds();
+        PagedList<VirtualMachine> virtualMachinesEmpty = createEmptyPagedList();
+
+        when(azureClient.getVirtualMachines(RESOURCE_GROUP)).thenReturn(virtualMachinesEmpty);
+
+        CloudConnectorException exception = assertThrows(
+                CloudConnectorException.class,
+                () -> underTest.getVirtualMachinesByName(azureClient, RESOURCE_GROUP, privateInstanceIds));
+        assertEquals("Operation failed, azure returned an empty list while trying to list vms in resource group.", exception.getMessage());
+    }
+
     private PagedList<VirtualMachine> createPagedList() {
         PagedList<VirtualMachine> pagedList = new PagedList<>() {
             @Override
@@ -73,6 +88,16 @@ public class AzureVirtualMachineServiceTest {
         pagedList.add(createVirtualMachine(INSTANCE_1));
         pagedList.add(createVirtualMachine(INSTANCE_2));
         pagedList.add(createVirtualMachine(INSTANCE_3));
+        return pagedList;
+    }
+
+    private PagedList<VirtualMachine> createEmptyPagedList() {
+        PagedList<VirtualMachine> pagedList = new PagedList<>() {
+            @Override
+            public Page<VirtualMachine> nextPage(String nextPageLink) throws RestException {
+                return null;
+            }
+        };
         return pagedList;
     }
 
