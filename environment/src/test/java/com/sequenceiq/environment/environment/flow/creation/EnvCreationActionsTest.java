@@ -33,7 +33,6 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -56,7 +55,6 @@ import io.opentracing.SpanContext;
 import io.opentracing.Tracer;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
-import reactor.rx.Promise;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @ExtendWith(MockitoExtension.class)
@@ -76,8 +74,6 @@ class EnvCreationActionsTest {
     private static final String MESSAGE = "Houston, we have a problem.";
 
     private static final String FAILURE_EVENT = "failureEvent";
-
-    private static final Promise<AcceptResult> ACCEPTED = new Promise<>();
 
     @Mock
     private EnvironmentService environmentService;
@@ -151,13 +147,7 @@ class EnvCreationActionsTest {
     void setUp() {
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
-        actionPayload = EnvCreationEvent.builder()
-                .withSelector(ACTION_PAYLOAD_SELECTOR)
-                .withResourceId(ENVIRONMENT_ID)
-                .withAccepted(ACCEPTED)
-                .withResourceName(ENVIRONMENT_NAME)
-                .withResourceCrn(ENVIRONMENT_CRN)
-                .build();
+        actionPayload = new EnvCreationEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
