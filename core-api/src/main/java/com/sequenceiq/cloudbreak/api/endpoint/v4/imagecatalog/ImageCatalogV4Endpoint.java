@@ -166,4 +166,13 @@ public interface ImageCatalogV4Endpoint {
             @PathParam("type") String type,
             @PathParam("provider") String provider,
             @PathParam("runtime") String runtime) throws Exception;
+
+    @GET
+    @Path("image/type/{type}/provider/{provider}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_IMAGE_FROM_DEFAULT, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefault")
+    ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
+            @PathParam("type") String type,
+            @PathParam("provider") String provider) throws Exception;
 }
