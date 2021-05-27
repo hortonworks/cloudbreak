@@ -38,7 +38,7 @@ public class JaxRSUtil {
 
     public static <T> T response(Response response, Class<T> clazz) {
         if (Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
-            if (!response.getMediaType().isCompatible(MediaType.APPLICATION_JSON_TYPE)) {
+            if (!MediaType.APPLICATION_JSON_TYPE.isCompatible(response.getMediaType())) {
                 throw handleUnexpectedError(response);
             }
         }
