@@ -31,6 +31,7 @@ public class FlowPayloadToDiagnosticDetailsConverter {
                 if (!parametersNode.isEmpty()) {
                     fillStrFieldIfExists(parametersNode, "accountId", "accountId", properties);
                     fillStrFieldIfExists(parametersNode, "issue", "case", properties);
+                    fillStrFieldIfExists(parametersNode, "uuid", "uuid", properties);
                     fillStrFieldIfExists(parametersNode, "description", "description", properties);
                     fillStrFieldIfExists(parametersNode, "clusterType", "clusterType", properties);
                     fillStrFieldIfExists(parametersNode, "clusterVersion", "clusterVersion", properties);
