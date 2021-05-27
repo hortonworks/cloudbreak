@@ -28,6 +28,7 @@ import com.microsoft.azure.management.resources.fluentcore.arm.models.HasName;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -94,6 +95,10 @@ public class AzureVirtualMachineService {
         return hasMissingVm;
     }
 
+    private boolean hasNoVmInResourceGroup(PagedList<VirtualMachine> virtualMachines) {
+        return virtualMachines.isEmpty();
+    }
+
     private Map<String, VirtualMachine> collectVirtualMachinesByName(Collection<String> privateInstanceIds, PagedList<VirtualMachine> virtualMachines) {
         return virtualMachines.stream()
                 .filter(virtualMachine -> privateInstanceIds.contains(virtualMachine.name()))
@@ -101,6 +106,10 @@ public class AzureVirtualMachineService {
     }
 
     private void validateResponse(PagedList<VirtualMachine> virtualMachines, Collection<String> privateInstanceIds) {
+        if (hasNoVmInResourceGroup(virtualMachines)) {
+            LOGGER.warn("Azure returned 0 vms when listing by resource group. This should not be possible, retrying");
+            throw new CloudConnectorException("Operation failed, azure returned an empty list while trying to list vms in resource group.");
+        }
         if (hasMissingVm(virtualMachines, privateInstanceIds)) {
             LOGGER.warn("Failed to retrieve all host from Azure. Only {} found from the {}.", virtualMachines.size(), privateInstanceIds.size());
         }
