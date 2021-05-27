@@ -8,15 +8,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class V4ImageCatalogGetFromDefaultByFilterUrlParser extends LegacyRestUrlParser {
+public class V4ImageCatalogGetFromDefaultByFilterWithoutRuntimeUrlParser extends LegacyRestUrlParser {
 
     private static final int WORKSPACE_ID_GROUP_NUMBER = 1;
 
     private static final int RESOURCE_TYPE_GROUP_NUMBER = 2;
 
-    // v4/{workspaceId}/image_catalogs/image/type/{type}/provider/{provider}/runtime/{runtime}/
+    // v4/{workspaceId}/image_catalogs/image/type/{type}/provider/{provider}/
     private static final Pattern PATTERN = Pattern.compile(
-            "v4/(\\d+)/(image_catalogs)/image/type/(DATAHUB|DATALAKE|FREEIPA)/provider/(AWS|AZURE|GCP)/runtime/([\\.0-9]+)?");
+            "v4/(\\d+)/(image_catalogs)/image/type/(FREEIPA|DATAHUB|DATALAKE)/provider/(AWS|AZURE|GCP)");
 
     @Override
     protected List<String> parsedMethods() {
@@ -57,5 +57,4 @@ public class V4ImageCatalogGetFromDefaultByFilterUrlParser extends LegacyRestUrl
     protected String getResourceEvent(Matcher matcher) {
         return matcher.group(RESOURCE_TYPE_GROUP_NUMBER);
     }
-
 }
