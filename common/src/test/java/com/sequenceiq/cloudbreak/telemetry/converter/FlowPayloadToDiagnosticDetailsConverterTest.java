@@ -44,6 +44,7 @@ public class FlowPayloadToDiagnosticDetailsConverterTest {
         assertEquals("FREEIPA", result.get("clusterType"));
         assertEquals("crn:cdp:freeipa:us-west-1:cloudera:freeipa:4428e540-a878-42b1-a1d4-91747322d8b6", result.get("resourceCrn"));
         assertEquals("mycase", result.get("case"));
+        assertEquals("eecb0472-e39b-4383-b383-d487d60955df", result.get("uuid"));
         assertNull(result.get("description"));
     }
 
