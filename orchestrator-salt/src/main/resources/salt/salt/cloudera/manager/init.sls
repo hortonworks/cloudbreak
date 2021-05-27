@@ -129,12 +129,15 @@ copy_autotls_setup_to_cm_settings:
       - cmd: run_autotls_setup
     - unless: grep "# Auto-tls related configurations" /etc/cloudera-scm-server/cm.settings
 
-disable_phone_home:
+setup_support_settings:
   file.blockreplace:
     - name: /etc/cloudera-scm-server/cm.settings
     - marker_start: "# BLOCK TOP : salt managed zone : please do not edit"
     - marker_end: "# BLOCK BOTTOM : end of salt managed zone --"
-    - content: "setsettings PHONE_HOME false"
+    - content: |
+        setsettings PHONE_HOME true
+        setsettings CLUSTER_STATS_COUNT 2{% if salt['pillar.get']('cloudera-manager:settings:disable_auto_bundle_collection') == True %}
+        setsettings CLUSTER_STATS_SCHEDULE NEVER{% endif %}
     - show_changes: True
     - append_if_not_found: True
 

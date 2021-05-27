@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
@@ -102,6 +103,10 @@ public class EntitlementService {
 
     public boolean useCmSyncCommandPoller(String accountId) {
         return isEntitlementRegistered(accountId, CDP_USE_CM_SYNC_COMMAND_POLLER);
+    }
+
+    public boolean cmAutoBundleCollectionDisabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION);
     }
 
     public boolean networkPreflightNotificationsEnabled(String accountId) {
