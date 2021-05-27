@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -227,6 +228,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private CsdParcelDecorator csdParcelDecorator;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public void runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
@@ -514,11 +518,13 @@ public class ClusterHostServiceRunner {
             Stack stack) {
         ServiceLocationMap serviceLocations = clusterApiConnectors.getConnector(stack.getCluster()).getServiceLocations();
         String cmVersion = clouderaManagerRepo.getVersion();
+        boolean disableAutoBundleCollection = entitlementService.cmAutoBundleCollectionDisabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", Map.of(
                         "settings", Map.of(
                                 "heartbeat_interval", cmHeartbeatInterval,
                                 "missed_heartbeat_interval", cmMissedHeartbeatInterval,
+                                "disable_auto_bundle_collection", disableAutoBundleCollection,
                                 "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
                                 "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
                                 "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo)),

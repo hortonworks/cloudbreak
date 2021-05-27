@@ -25,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -146,6 +147,9 @@ public class ClusterHostServiceRunnerTest {
 
     @Mock
     private CMLicenseParser cmLicenseParser;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private ClusterHostServiceRunner underTest;
