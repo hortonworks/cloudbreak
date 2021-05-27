@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
@@ -29,12 +30,14 @@ class StructuredEventToClusterShapeConverterTest {
         Assert.assertEquals("", flowClusterShape.getClusterTemplateName());
         Assert.assertEquals(-1, flowClusterShape.getNodes());
         Assert.assertEquals("", flowClusterShape.getDefinitionDetails());
+        Assert.assertFalse(flowClusterShape.getTemporaryStorageUsed());
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert((StructuredSyncEvent) null);
 
         Assert.assertEquals("", syncClusterShape.getClusterTemplateName());
         Assert.assertEquals(-1, syncClusterShape.getNodes());
         Assert.assertEquals("", syncClusterShape.getDefinitionDetails());
+        Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
     }
 
     @Test
@@ -46,6 +49,7 @@ class StructuredEventToClusterShapeConverterTest {
         Assert.assertEquals("", flowClusterShape.getClusterTemplateName());
         Assert.assertEquals(-1, flowClusterShape.getNodes());
         Assert.assertEquals("", flowClusterShape.getDefinitionDetails());
+        Assert.assertFalse(flowClusterShape.getTemporaryStorageUsed());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
 
@@ -54,6 +58,7 @@ class StructuredEventToClusterShapeConverterTest {
         Assert.assertEquals("", syncClusterShape.getClusterTemplateName());
         Assert.assertEquals(-1, syncClusterShape.getNodes());
         Assert.assertEquals("", syncClusterShape.getDefinitionDetails());
+        Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
     }
 
     @Test
@@ -64,11 +69,12 @@ class StructuredEventToClusterShapeConverterTest {
         flowBlueprintDetails.setName("My Blueprint");
         structuredFlowEvent.setBlueprintDetails(flowBlueprintDetails);
 
-        UsageProto.CDPClusterShape flowSlusterShape = underTest.convert(structuredFlowEvent);
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("My Blueprint", flowSlusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, flowSlusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowSlusterShape.getHostGroupNodeCount());
+        Assert.assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
+        Assert.assertEquals(10, flowClusterShape.getNodes());
+        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
+        Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
@@ -81,23 +87,25 @@ class StructuredEventToClusterShapeConverterTest {
         Assert.assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
         Assert.assertEquals(10, syncClusterShape.getNodes());
         Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
+        Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
     }
 
     private StackDetails createStackDetails() {
         StackDetails stackDetails = new StackDetails();
-        InstanceGroupDetails master = createInstanceGroupDetails("master", 1);
-        InstanceGroupDetails worker = createInstanceGroupDetails("worker", 2);
-        InstanceGroupDetails compute = createInstanceGroupDetails("compute", 3);
-        InstanceGroupDetails gw = createInstanceGroupDetails("gw", 4);
+        InstanceGroupDetails master = createInstanceGroupDetails("master", 1, TemporaryStorage.ATTACHED_VOLUMES.name());
+        InstanceGroupDetails worker = createInstanceGroupDetails("worker", 2, TemporaryStorage.ATTACHED_VOLUMES.name());
+        InstanceGroupDetails compute = createInstanceGroupDetails("compute", 3, TemporaryStorage.EPHEMERAL_VOLUMES.name());
+        InstanceGroupDetails gw = createInstanceGroupDetails("gw", 4, TemporaryStorage.ATTACHED_VOLUMES.name());
 
         stackDetails.setInstanceGroups(List.of(master, worker, compute, gw));
         return stackDetails;
     }
 
-    private InstanceGroupDetails createInstanceGroupDetails(String groupName, int nodeCount) {
+    private InstanceGroupDetails createInstanceGroupDetails(String groupName, int nodeCount, String storage) {
         InstanceGroupDetails ig = new InstanceGroupDetails();
         ig.setGroupName(groupName);
         ig.setNodeCount(nodeCount);
+        ig.setTemporaryStorage(storage);
         return ig;
     }
 }

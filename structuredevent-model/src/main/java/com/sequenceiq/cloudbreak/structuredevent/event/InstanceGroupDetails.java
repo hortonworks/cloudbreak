@@ -21,6 +21,8 @@ public class InstanceGroupDetails implements Serializable {
 
     private SecurityGroupDetails securityGroup;
 
+    private String temporaryStorage;
+
     public String getGroupName() {
         return groupName;
     }
@@ -67,5 +69,13 @@ public class InstanceGroupDetails implements Serializable {
 
     public void setSecurityGroup(SecurityGroupDetails securityGroup) {
         this.securityGroup = securityGroup;
+    }
+
+    public String getTemporaryStorage() {
+        return temporaryStorage;
+    }
+
+    public void setTemporaryStorage(String temporaryStorage) {
+        this.temporaryStorage = temporaryStorage;
     }
 }

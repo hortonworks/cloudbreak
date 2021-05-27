@@ -52337,6 +52337,15 @@ public final class UsageProto {
      */
     com.google.protobuf.ByteString
         getDefinitionDetailsBytes();
+
+    /**
+     * <pre>
+     * Indicating whether Temporary Storage is used in the cluster
+     * </pre>
+     *
+     * <code>bool temporaryStorageUsed = 5;</code>
+     */
+    boolean getTemporaryStorageUsed();
   }
   /**
    * Protobuf type {@code usage.CDPClusterShape}
@@ -52355,6 +52364,7 @@ public final class UsageProto {
       nodes_ = 0;
       hostGroupNodeCount_ = "";
       definitionDetails_ = "";
+      temporaryStorageUsed_ = false;
     }
 
     @java.lang.Override
@@ -52402,6 +52412,11 @@ public final class UsageProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               definitionDetails_ = s;
+              break;
+            }
+            case 40: {
+
+              temporaryStorageUsed_ = input.readBool();
               break;
             }
             default: {
@@ -52575,6 +52590,19 @@ public final class UsageProto {
       }
     }
 
+    public static final int TEMPORARYSTORAGEUSED_FIELD_NUMBER = 5;
+    private boolean temporaryStorageUsed_;
+    /**
+     * <pre>
+     * Indicating whether Temporary Storage is used in the cluster
+     * </pre>
+     *
+     * <code>bool temporaryStorageUsed = 5;</code>
+     */
+    public boolean getTemporaryStorageUsed() {
+      return temporaryStorageUsed_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -52601,6 +52629,9 @@ public final class UsageProto {
       if (!getDefinitionDetailsBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, definitionDetails_);
       }
+      if (temporaryStorageUsed_ != false) {
+        output.writeBool(5, temporaryStorageUsed_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -52622,6 +52653,10 @@ public final class UsageProto {
       }
       if (!getDefinitionDetailsBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, definitionDetails_);
+      }
+      if (temporaryStorageUsed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(5, temporaryStorageUsed_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -52647,6 +52682,8 @@ public final class UsageProto {
           .equals(other.getHostGroupNodeCount());
       result = result && getDefinitionDetails()
           .equals(other.getDefinitionDetails());
+      result = result && (getTemporaryStorageUsed()
+          == other.getTemporaryStorageUsed());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -52666,6 +52703,9 @@ public final class UsageProto {
       hash = (53 * hash) + getHostGroupNodeCount().hashCode();
       hash = (37 * hash) + DEFINITIONDETAILS_FIELD_NUMBER;
       hash = (53 * hash) + getDefinitionDetails().hashCode();
+      hash = (37 * hash) + TEMPORARYSTORAGEUSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getTemporaryStorageUsed());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -52807,6 +52847,8 @@ public final class UsageProto {
 
         definitionDetails_ = "";
 
+        temporaryStorageUsed_ = false;
+
         return this;
       }
 
@@ -52837,6 +52879,7 @@ public final class UsageProto {
         result.nodes_ = nodes_;
         result.hostGroupNodeCount_ = hostGroupNodeCount_;
         result.definitionDetails_ = definitionDetails_;
+        result.temporaryStorageUsed_ = temporaryStorageUsed_;
         onBuilt();
         return result;
       }
@@ -52899,6 +52942,9 @@ public final class UsageProto {
         if (!other.getDefinitionDetails().isEmpty()) {
           definitionDetails_ = other.definitionDetails_;
           onChanged();
+        }
+        if (other.getTemporaryStorageUsed() != false) {
+          setTemporaryStorageUsed(other.getTemporaryStorageUsed());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -53230,6 +53276,44 @@ public final class UsageProto {
   checkByteStringIsUtf8(value);
         
         definitionDetails_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean temporaryStorageUsed_ ;
+      /**
+       * <pre>
+       * Indicating whether Temporary Storage is used in the cluster
+       * </pre>
+       *
+       * <code>bool temporaryStorageUsed = 5;</code>
+       */
+      public boolean getTemporaryStorageUsed() {
+        return temporaryStorageUsed_;
+      }
+      /**
+       * <pre>
+       * Indicating whether Temporary Storage is used in the cluster
+       * </pre>
+       *
+       * <code>bool temporaryStorageUsed = 5;</code>
+       */
+      public Builder setTemporaryStorageUsed(boolean value) {
+        
+        temporaryStorageUsed_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicating whether Temporary Storage is used in the cluster
+       * </pre>
+       *
+       * <code>bool temporaryStorageUsed = 5;</code>
+       */
+      public Builder clearTemporaryStorageUsed() {
+        
+        temporaryStorageUsed_ = false;
         onChanged();
         return this;
       }
@@ -82267,112 +82351,113 @@ public final class UsageProto {
       "CDPEnvironmentTelemetryFeatureDetails\022)\n" +
       "\007freeIPA\030\007 \001(\0132\030.usage.CDPFreeIPADetails" +
       "\"8\n\017CDPImageDetails\022\017\n\007imageId\030\001 \001(\t\022\024\n\014" +
-      "imageCatalog\030\002 \001(\t\"t\n\017CDPClusterShape\022\033\n" +
-      "\023clusterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001(" +
-      "\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021definit" +
-      "ionDetails\030\004 \001(\t\"\206\001\n\021CDPVersionDetails\022\021" +
-      "\n\tcrVersion\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013" +
-      "cdpdVersion\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024" +
-      "\n\014osPatchLevel\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CD" +
-      "PClusterDetails\022,\n\014clusterShape\030\001 \001(\0132\026." +
-      "usage.CDPClusterShape\0220\n\016versionDetails\030" +
-      "\002 \001(\0132\030.usage.CDPVersionDetails\022,\n\014image" +
-      "Details\030\003 \001(\0132\026.usage.CDPImageDetails\022\020\n" +
-      "\010userTags\030\004 \001(\t\"\223\001\n\020CDPStatusDetails\022\023\n\013" +
-      "stackStatus\030\001 \001(\t\022\033\n\023stackDetailedStatus" +
-      "\030\002 \001(\t\022\031\n\021stackStatusReason\030\003 \001(\t\022\025\n\rclu" +
-      "sterStatus\030\004 \001(\t\022\033\n\023clusterStatusReason\030" +
-      "\005 \001(\t\"1\n\023CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(" +
-      "\0132\r.usage.CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001" +
-      "(\t\"\304\001\n\024CDPDatalakeRequested\0224\n\020operation" +
-      "Details\030\001 \001(\0132\032.usage.CDPOperationDetail" +
-      "s\022\026\n\016environmentCrn\030\002 \001(\t\0220\n\016clusterDeta" +
-      "ils\030\003 \001(\0132\030.usage.CDPClusterDetails\022,\n\010f" +
-      "eatures\030\004 \001(\0132\032.usage.CDPDatalakeFeature" +
-      "s\"\334\002\n\030CDPDatalakeStatusChanged\0224\n\020operat" +
-      "ionDetails\030\001 \001(\0132\032.usage.CDPOperationDet" +
-      "ails\0220\n\toldStatus\030\002 \001(\0162\035.usage.CDPClust" +
-      "erStatus.Value\0220\n\tnewStatus\030\003 \001(\0162\035.usag" +
-      "e.CDPClusterStatus.Value\022.\n\rstatusDetail" +
-      "s\030\004 \001(\0132\027.usage.CDPStatusDetails\022\026\n\016envi" +
-      "ronmentCrn\030\005 \001(\t\0220\n\016clusterDetails\030\006 \001(\013" +
-      "2\030.usage.CDPClusterDetails\022,\n\010features\030\007" +
-      " \001(\0132\032.usage.CDPDatalakeFeatures\"\225\001\n\023CDP" +
-      "DatahubRequested\0224\n\020operationDetails\030\001 \001" +
-      "(\0132\032.usage.CDPOperationDetails\022\026\n\016enviro" +
-      "nmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030" +
-      ".usage.CDPClusterDetails\"\255\002\n\027CDPDatahubS" +
-      "tatusChanged\0224\n\020operationDetails\030\001 \001(\0132\032" +
-      ".usage.CDPOperationDetails\0220\n\toldStatus\030" +
-      "\002 \001(\0162\035.usage.CDPClusterStatus.Value\0220\n\t" +
-      "newStatus\030\003 \001(\0162\035.usage.CDPClusterStatus" +
-      ".Value\022.\n\rstatusDetails\030\004 \001(\0132\027.usage.CD" +
-      "PStatusDetails\022\026\n\016environmentCrn\030\005 \001(\t\0220" +
-      "\n\016clusterDetails\030\006 \001(\0132\030.usage.CDPCluste" +
-      "rDetails\"y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001" +
-      "(\t\022\026\n\016detailedStatus\030\002 \001(\t\022\036\n\026clusterCre" +
-      "ationStarted\030\003 \001(\004\022\037\n\027clusterCreationFin" +
-      "ished\030\004 \001(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020opera" +
-      "tionDetails\030\001 \001(\0132\032.usage.CDPOperationDe" +
-      "tails\022*\n\013syncDetails\030\002 \001(\0132\025.usage.CDPSy" +
-      "ncDetails\0220\n\016clusterDetails\030\003 \001(\0132\030.usag" +
-      "e.CDPClusterDetails\022.\n\rstatusDetails\030\004 \001" +
-      "(\0132\027.usage.CDPStatusDetails\"\324\001\n\016CDPDatah" +
-      "ubSync\0224\n\020operationDetails\030\001 \001(\0132\032.usage" +
-      ".CDPOperationDetails\022*\n\013syncDetails\030\002 \001(" +
-      "\0132\025.usage.CDPSyncDetails\0220\n\016clusterDetai" +
-      "ls\030\003 \001(\0132\030.usage.CDPClusterDetails\022.\n\rst" +
-      "atusDetails\030\004 \001(\0132\027.usage.CDPStatusDetai" +
-      "ls\"8\n\030CDPDFCatalogArtifactType\"\034\n\005Value\022" +
-      "\t\n\005UNSET\020\000\022\010\n\004FLOW\020\001\"\206\001\n\033CDPDFCatalogArt" +
-      "ifactCreated\022\022\n\nartifactId\030\001 \001(\t\022\021\n\tacco" +
-      "untId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%" +
-      ".usage.CDPDFCatalogArtifactType.Value\"\206\001" +
-      "\n\033CDPDFCatalogArtifactDeleted\022\022\n\nartifac" +
-      "tId\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(" +
-      "\t\0223\n\004type\030\004 \001(\0162%.usage.CDPDFCatalogArti" +
-      "factType.Value\"k\n\"CDPDFCatalogArtifactVe" +
-      "rsionCreated\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartif" +
-      "actId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 " +
-      "\001(\t\"k\n\"CDPDFCatalogArtifactVersionDelete" +
-      "d\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t" +
-      "\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDP" +
-      "DFServiceStatus\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020" +
-      "ENABLE_REQUESTED\020\001\022\026\n\022ENABLE_IN_PROGRESS" +
-      "\020\002\022\024\n\020ENABLE_COMPLETED\020\003\022\021\n\rENABLE_FAILE" +
-      "D\020\004\022\025\n\021DISABLE_REQUESTED\020\005\022\027\n\023DISABLE_IN" +
-      "_PROGRESS\020\006\022\025\n\021DISABLE_COMPLETED\020\007\022\022\n\016DI" +
-      "SABLE_FAILED\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022" +
-      "UPDATE_IN_PROGRESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022" +
-      "\024\n\020UPDATE_COMPLETED\020\014\"f\n\025CDPDFOperationD" +
-      "etails\022\n\n\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccou" +
-      "ntId\030\003 \001(\t\022\022\n\nworkflowId\030\004 \001(\t\022\r\n\005runId\030" +
-      "\005 \001(\t\"\365\002\n\025CDPDFServiceRequested\0226\n\020opera" +
-      "tionDetails\030\001 \001(\0132\034.usage.CDPDFOperation" +
-      "Details\022\026\n\016environmentCrn\030\002 \001(\t\022D\n\017envir" +
-      "onmentType\030\003 \001(\0162+.usage.CDPEnvironments" +
-      "EnvironmentType.Value\022\024\n\014instanceType\030\004 " +
-      "\001(\t\022\020\n\010minNodes\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022" +
-      "\030\n\020k8sServerVersion\030\007 \001(\t\022\017\n\007version\030\010 \001" +
-      "(\t\022\026\n\016publicEndpoint\030\t \001(\010\022\030\n\020accessRest" +
-      "ricted\030\n \001(\010\022/\n\006status\030\013 \001(\0162\037.usage.CDP" +
-      "DFServiceStatus.Value\"\322\001\n\031CDPDFServiceSt" +
-      "atusChanged\0226\n\020operationDetails\030\001 \001(\0132\034." +
-      "usage.CDPDFOperationDetails\0222\n\toldStatus" +
-      "\030\002 \001(\0162\037.usage.CDPDFServiceStatus.Value\022" +
-      "2\n\tnewStatus\030\003 \001(\0162\037.usage.CDPDFServiceS" +
-      "tatus.Value\022\025\n\rfailureReason\030\004 \001(\t\"t\n\025CD" +
-      "PUDXBundleInitiated\0221\n\rbundleDetails\030\001 \001" +
-      "(\0132\032.usage.CDPUDXBundleDetails\022\024\n\014initia" +
-      "torCrn\030\002 \001(\t\022\022\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPU" +
-      "DXBundleReceived\0221\n\rbundleDetails\030\001 \001(\0132" +
-      "\032.usage.CDPUDXBundleDetails\022\014\n\004host\030\002 \001(" +
-      "\t\022\016\n\006status\030\003 \001(\t\"q\n\023CDPUDXBundleDetails" +
-      "\022\021\n\taccountId\030\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016env" +
-      "ironmentCrn\030\003 \001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014" +
-      "\n\004type\030\005 \001(\tBV\n-com.cloudera.thunderhead" +
-      ".service.common.usageB\nUsageProtoZ\031com/c" +
-      "loudera/cdp/protobufb\006proto3"
+      "imageCatalog\030\002 \001(\t\"\222\001\n\017CDPClusterShape\022\033" +
+      "\n\023clusterTemplateName\030\001 \001(\t\022\r\n\005nodes\030\002 \001" +
+      "(\005\022\032\n\022hostGroupNodeCount\030\003 \001(\t\022\031\n\021defini" +
+      "tionDetails\030\004 \001(\t\022\034\n\024temporaryStorageUse" +
+      "d\030\005 \001(\010\"\206\001\n\021CDPVersionDetails\022\021\n\tcrVersi" +
+      "on\030\001 \001(\t\022\021\n\tcmVersion\030\002 \001(\t\022\023\n\013cdpdVersi" +
+      "on\030\003 \001(\t\022\023\n\013saltVersion\030\004 \001(\t\022\024\n\014osPatch" +
+      "Level\030\005 \001(\t\022\013\n\003all\030\006 \001(\t\"\263\001\n\021CDPClusterD" +
+      "etails\022,\n\014clusterShape\030\001 \001(\0132\026.usage.CDP" +
+      "ClusterShape\0220\n\016versionDetails\030\002 \001(\0132\030.u" +
+      "sage.CDPVersionDetails\022,\n\014imageDetails\030\003" +
+      " \001(\0132\026.usage.CDPImageDetails\022\020\n\010userTags" +
+      "\030\004 \001(\t\"\223\001\n\020CDPStatusDetails\022\023\n\013stackStat" +
+      "us\030\001 \001(\t\022\033\n\023stackDetailedStatus\030\002 \001(\t\022\031\n" +
+      "\021stackStatusReason\030\003 \001(\t\022\025\n\rclusterStatu" +
+      "s\030\004 \001(\t\022\033\n\023clusterStatusReason\030\005 \001(\t\"1\n\023" +
+      "CDPDatalakeFeatures\022\032\n\003raz\030\001 \001(\0132\r.usage" +
+      ".CDPRaz\"\030\n\006CDPRaz\022\016\n\006status\030\001 \001(\t\"\304\001\n\024CD" +
+      "PDatalakeRequested\0224\n\020operationDetails\030\001" +
+      " \001(\0132\032.usage.CDPOperationDetails\022\026\n\016envi" +
+      "ronmentCrn\030\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\013" +
+      "2\030.usage.CDPClusterDetails\022,\n\010features\030\004" +
+      " \001(\0132\032.usage.CDPDatalakeFeatures\"\334\002\n\030CDP" +
+      "DatalakeStatusChanged\0224\n\020operationDetail" +
+      "s\030\001 \001(\0132\032.usage.CDPOperationDetails\0220\n\to" +
+      "ldStatus\030\002 \001(\0162\035.usage.CDPClusterStatus." +
+      "Value\0220\n\tnewStatus\030\003 \001(\0162\035.usage.CDPClus" +
+      "terStatus.Value\022.\n\rstatusDetails\030\004 \001(\0132\027" +
+      ".usage.CDPStatusDetails\022\026\n\016environmentCr" +
+      "n\030\005 \001(\t\0220\n\016clusterDetails\030\006 \001(\0132\030.usage." +
+      "CDPClusterDetails\022,\n\010features\030\007 \001(\0132\032.us" +
+      "age.CDPDatalakeFeatures\"\225\001\n\023CDPDatahubRe" +
+      "quested\0224\n\020operationDetails\030\001 \001(\0132\032.usag" +
+      "e.CDPOperationDetails\022\026\n\016environmentCrn\030" +
+      "\002 \001(\t\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CD" +
+      "PClusterDetails\"\255\002\n\027CDPDatahubStatusChan" +
+      "ged\0224\n\020operationDetails\030\001 \001(\0132\032.usage.CD" +
+      "POperationDetails\0220\n\toldStatus\030\002 \001(\0162\035.u" +
+      "sage.CDPClusterStatus.Value\0220\n\tnewStatus" +
+      "\030\003 \001(\0162\035.usage.CDPClusterStatus.Value\022.\n" +
+      "\rstatusDetails\030\004 \001(\0132\027.usage.CDPStatusDe" +
+      "tails\022\026\n\016environmentCrn\030\005 \001(\t\0220\n\016cluster" +
+      "Details\030\006 \001(\0132\030.usage.CDPClusterDetails\"" +
+      "y\n\016CDPSyncDetails\022\016\n\006status\030\001 \001(\t\022\026\n\016det" +
+      "ailedStatus\030\002 \001(\t\022\036\n\026clusterCreationStar" +
+      "ted\030\003 \001(\004\022\037\n\027clusterCreationFinished\030\004 \001" +
+      "(\004\"\325\001\n\017CDPDatalakeSync\0224\n\020operationDetai" +
+      "ls\030\001 \001(\0132\032.usage.CDPOperationDetails\022*\n\013" +
+      "syncDetails\030\002 \001(\0132\025.usage.CDPSyncDetails" +
+      "\0220\n\016clusterDetails\030\003 \001(\0132\030.usage.CDPClus" +
+      "terDetails\022.\n\rstatusDetails\030\004 \001(\0132\027.usag" +
+      "e.CDPStatusDetails\"\324\001\n\016CDPDatahubSync\0224\n" +
+      "\020operationDetails\030\001 \001(\0132\032.usage.CDPOpera" +
+      "tionDetails\022*\n\013syncDetails\030\002 \001(\0132\025.usage" +
+      ".CDPSyncDetails\0220\n\016clusterDetails\030\003 \001(\0132" +
+      "\030.usage.CDPClusterDetails\022.\n\rstatusDetai" +
+      "ls\030\004 \001(\0132\027.usage.CDPStatusDetails\"8\n\030CDP" +
+      "DFCatalogArtifactType\"\034\n\005Value\022\t\n\005UNSET\020" +
+      "\000\022\010\n\004FLOW\020\001\"\206\001\n\033CDPDFCatalogArtifactCrea" +
+      "ted\022\022\n\nartifactId\030\001 \001(\t\022\021\n\taccountId\030\002 \001" +
+      "(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type\030\004 \001(\0162%.usage.CD" +
+      "PDFCatalogArtifactType.Value\"\206\001\n\033CDPDFCa" +
+      "talogArtifactDeleted\022\022\n\nartifactId\030\001 \001(\t" +
+      "\022\021\n\taccountId\030\002 \001(\t\022\013\n\003crn\030\003 \001(\t\0223\n\004type" +
+      "\030\004 \001(\0162%.usage.CDPDFCatalogArtifactType." +
+      "Value\"k\n\"CDPDFCatalogArtifactVersionCrea" +
+      "ted\022\021\n\tversionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001" +
+      "(\t\022\013\n\003crn\030\003 \001(\t\022\021\n\taccountId\030\004 \001(\t\"k\n\"CD" +
+      "PDFCatalogArtifactVersionDeleted\022\021\n\tvers" +
+      "ionId\030\001 \001(\t\022\022\n\nartifactId\030\002 \001(\t\022\013\n\003crn\030\003" +
+      " \001(\t\022\021\n\taccountId\030\004 \001(\t\"\262\002\n\022CDPDFService" +
+      "Status\"\233\002\n\005Value\022\t\n\005UNSET\020\000\022\024\n\020ENABLE_RE" +
+      "QUESTED\020\001\022\026\n\022ENABLE_IN_PROGRESS\020\002\022\024\n\020ENA" +
+      "BLE_COMPLETED\020\003\022\021\n\rENABLE_FAILED\020\004\022\025\n\021DI" +
+      "SABLE_REQUESTED\020\005\022\027\n\023DISABLE_IN_PROGRESS" +
+      "\020\006\022\025\n\021DISABLE_COMPLETED\020\007\022\022\n\016DISABLE_FAI" +
+      "LED\020\010\022\024\n\020UPDATE_REQUESTED\020\t\022\026\n\022UPDATE_IN" +
+      "_PROGRESS\020\n\022\021\n\rUPDATE_FAILED\020\013\022\024\n\020UPDATE" +
+      "_COMPLETED\020\014\"f\n\025CDPDFOperationDetails\022\n\n" +
+      "\002id\030\001 \001(\t\022\013\n\003crn\030\002 \001(\t\022\021\n\taccountId\030\003 \001(" +
+      "\t\022\022\n\nworkflowId\030\004 \001(\t\022\r\n\005runId\030\005 \001(\t\"\365\002\n" +
+      "\025CDPDFServiceRequested\0226\n\020operationDetai" +
+      "ls\030\001 \001(\0132\034.usage.CDPDFOperationDetails\022\026" +
+      "\n\016environmentCrn\030\002 \001(\t\022D\n\017environmentTyp" +
+      "e\030\003 \001(\0162+.usage.CDPEnvironmentsEnvironme" +
+      "ntType.Value\022\024\n\014instanceType\030\004 \001(\t\022\020\n\010mi" +
+      "nNodes\030\005 \001(\005\022\020\n\010maxNodes\030\006 \001(\005\022\030\n\020k8sSer" +
+      "verVersion\030\007 \001(\t\022\017\n\007version\030\010 \001(\t\022\026\n\016pub" +
+      "licEndpoint\030\t \001(\010\022\030\n\020accessRestricted\030\n " +
+      "\001(\010\022/\n\006status\030\013 \001(\0162\037.usage.CDPDFService" +
+      "Status.Value\"\322\001\n\031CDPDFServiceStatusChang" +
+      "ed\0226\n\020operationDetails\030\001 \001(\0132\034.usage.CDP" +
+      "DFOperationDetails\0222\n\toldStatus\030\002 \001(\0162\037." +
+      "usage.CDPDFServiceStatus.Value\0222\n\tnewSta" +
+      "tus\030\003 \001(\0162\037.usage.CDPDFServiceStatus.Val" +
+      "ue\022\025\n\rfailureReason\030\004 \001(\t\"t\n\025CDPUDXBundl" +
+      "eInitiated\0221\n\rbundleDetails\030\001 \001(\0132\032.usag" +
+      "e.CDPUDXBundleDetails\022\024\n\014initiatorCrn\030\002 " +
+      "\001(\t\022\022\n\ncaseNumber\030\003 \001(\t\"g\n\024CDPUDXBundleR" +
+      "eceived\0221\n\rbundleDetails\030\001 \001(\0132\032.usage.C" +
+      "DPUDXBundleDetails\022\014\n\004host\030\002 \001(\t\022\016\n\006stat" +
+      "us\030\003 \001(\t\"q\n\023CDPUDXBundleDetails\022\021\n\taccou" +
+      "ntId\030\001 \001(\t\022\014\n\004uuid\030\002 \001(\t\022\026\n\016environmentC" +
+      "rn\030\003 \001(\t\022\023\n\013resourceCrn\030\004 \001(\t\022\014\n\004type\030\005 " +
+      "\001(\tBV\n-com.cloudera.thunderhead.service." +
+      "common.usageB\nUsageProtoZ\031com/cloudera/c" +
+      "dp/protobufb\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -82625,7 +82710,7 @@ public final class UsageProto {
     internal_static_usage_CDPClusterShape_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_usage_CDPClusterShape_descriptor,
-        new java.lang.String[] { "ClusterTemplateName", "Nodes", "HostGroupNodeCount", "DefinitionDetails", });
+        new java.lang.String[] { "ClusterTemplateName", "Nodes", "HostGroupNodeCount", "DefinitionDetails", "TemporaryStorageUsed", });
     internal_static_usage_CDPVersionDetails_descriptor =
       getDescriptor().getMessageTypes().get(40);
     internal_static_usage_CDPVersionDetails_fieldAccessorTable = new
