@@ -10,12 +10,12 @@ public class CmDiagnosticsCollectionEvent extends BaseFlowEvent {
 
     private final CmDiagnosticsParameters parameters;
 
-    CmDiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, CmDiagnosticsParameters parameters) {
+    public CmDiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, CmDiagnosticsParameters parameters) {
         super(selector, resourceId, resourceCrn);
         this.parameters = parameters;
     }
 
-    CmDiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
+    public CmDiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
             CmDiagnosticsParameters parameters) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;

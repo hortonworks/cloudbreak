@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEve
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent.Type;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
@@ -175,13 +176,13 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerClusterCredentialReplace(Long stackId, String userName, String password) {
         String selector = CLUSTER_CREDENTIALCHANGE_EVENT.event();
-        ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.replaceUserEvent(selector, stackId, userName, password);
+        ClusterCredentialChangeTriggerEvent event = new ClusterCredentialChangeTriggerEvent(selector, stackId, userName, password, Type.REPLACE);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
     public FlowIdentifier triggerClusterCredentialUpdate(Long stackId, String password) {
         String selector = CLUSTER_CREDENTIALCHANGE_EVENT.event();
-        ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.changePasswordEvent(selector, stackId, password);
+        ClusterCredentialChangeTriggerEvent event = new ClusterCredentialChangeTriggerEvent(selector, stackId, null, password, Type.UPDATE);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
