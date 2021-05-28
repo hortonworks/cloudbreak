@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
-import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -648,20 +647,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 || STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
-    }
-
-    public StopRestrictionReason isInfrastructureStoppable() {
-        StopRestrictionReason reason = StopRestrictionReason.NONE;
-        if ("AWS".equals(cloudPlatform())) {
-            for (InstanceGroup instanceGroup : instanceGroups) {
-                if (instanceGroup.getTemplate().getVolumeTemplates().stream()
-                        .filter(volume -> "ephemeral".equals(volume.getVolumeType())).findAny().isPresent()) {
-                    reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
-                    break;
-                }
-            }
-        }
-        return reason;
     }
 
     public boolean isMultipleGateway() {

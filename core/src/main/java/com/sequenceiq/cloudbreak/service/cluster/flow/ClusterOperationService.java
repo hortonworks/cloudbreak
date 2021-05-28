@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
@@ -131,6 +132,9 @@ public class ClusterOperationService {
 
     @Inject
     private BlueprintValidatorFactory blueprintValidatorFactory;
+
+    @Inject
+    private StackStopRestrictionService stackStopRestrictionService;
 
     @Measure(ClusterOperationService.class)
     public Cluster create(Stack stack, Cluster cluster, List<ClusterComponent> components, User user) throws TransactionService.TransactionExecutionException {
@@ -404,7 +408,7 @@ public class ClusterOperationService {
     }
 
     private FlowIdentifier stop(Stack stack, Cluster cluster) {
-        StopRestrictionReason reason = stack.isInfrastructureStoppable();
+        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack.getCloudPlatform(), stack.getInstanceGroups());
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (cluster.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_STOP_IGNORED);

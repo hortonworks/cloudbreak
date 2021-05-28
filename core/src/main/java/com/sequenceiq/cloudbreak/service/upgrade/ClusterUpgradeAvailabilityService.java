@@ -15,10 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
@@ -97,19 +94,6 @@ public class ClusterUpgradeAvailabilityService {
 
     private boolean shouldValidateForRepair(boolean lockComponents, Boolean replaceVms) {
         return lockComponents || replaceVms == null || replaceVms;
-    }
-
-    public UpgradeV4Response checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeV4Response upgradeOptions) {
-        String notStoppedAttachedClusters = stackViewV4Responses.getResponses().stream()
-                .filter(stackViewV4Response -> !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getStatus())
-                        || (stackViewV4Response.getCluster() != null
-                        && !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackViewV4Response.getCluster().getStatus())))
-                .map(StackViewV4Response::getName).collect(Collectors.joining(","));
-        if (!notStoppedAttachedClusters.isEmpty()) {
-            upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
-                    + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters));
-        }
-        return upgradeOptions;
     }
 
     public void filterUpgradeOptions(String accountId, UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {

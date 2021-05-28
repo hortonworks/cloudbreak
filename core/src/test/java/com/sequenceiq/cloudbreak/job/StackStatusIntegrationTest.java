@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
@@ -397,6 +398,9 @@ class StackStatusIntegrationTest {
 
         @MockBean
         private BlueprintValidatorFactory blueprintValidatorFactory;
+
+        @MockBean
+        private StackStopRestrictionService stackStopRestrictionService;
 
     }
 }
