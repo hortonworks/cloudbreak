@@ -24,8 +24,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -82,6 +84,12 @@ class StackStatusTest {
 
     @MockBean
     private FreeipaStatusInfoLogger freeipaStatusInfoLogger;
+
+    @MockBean
+    private MetricsDatabusRecordProcessor metricsDatabusRecordProcessor;
+
+    @MockBean
+    private EntitlementService entitlementService;
 
     @MockBean
     private Tracer tracer;

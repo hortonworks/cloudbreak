@@ -69,6 +69,9 @@
         <Package name="~com\.cloudera\.thunderhead\.telemetry\.nodestatus.*"/>
     </Match>
     <Match>
+        <Package name="~com\.cloudera\.sigma\.service\.dbus.*"/>
+    </Match>
+    <Match>
         <Bug pattern="REC_CATCH_EXCEPTION" />
     </Match>
     <Match>

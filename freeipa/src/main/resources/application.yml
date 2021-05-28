@@ -272,6 +272,14 @@ cb:
       enabled: true
       contentlogging: true
 
+cluster:
+  monitoring:
+    enabled: false
+    databus:
+      processing:
+        workers: 1
+        queueSizeLimit: 2000
+
 clusterProxy:
   url: http://localhost:10180/cluster-proxy
   enabled: true

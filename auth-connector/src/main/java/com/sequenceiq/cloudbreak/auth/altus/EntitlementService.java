@@ -21,7 +21,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -116,6 +118,14 @@ public class EntitlementService {
 
     public boolean datahubNodestatusCheckEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATAHUB_NODESTATUS_CHECK);
+    }
+
+    public boolean datahubMetricsDatabusProcessing(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATAHUB_METRICS_DATABUS_PROCESSING);
+    }
+
+    public boolean datalakeMetricsDatabusProcessing(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_METRICS_DATABUS_PROCESSING);
     }
 
     public boolean nodestatusSaltPingEnabled(String accountId) {

@@ -19,4 +19,9 @@ public class ClusterLogsCollectionConfiguration extends AbstractDatabusStreamCon
     public String getDbusServiceName() {
         return "ClusterLogsCollection";
     }
+
+    @Override
+    public String getDbusAppNameKey() {
+        return "@logging-app";
+    }
 }

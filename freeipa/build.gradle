@@ -117,6 +117,7 @@ dependencies {
   implementation project(':node-status-monitor-client')
   implementation project(':common')
   implementation project(':core-api')
+  implementation project(':databus-connector')
   implementation project(':secret-engine')
   implementation project(':notification-sender')
   implementation project(':environment-api')

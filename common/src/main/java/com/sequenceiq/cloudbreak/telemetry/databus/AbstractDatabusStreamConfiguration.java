@@ -29,7 +29,9 @@ public abstract class AbstractDatabusStreamConfiguration {
         return dbusStreamName;
     }
 
-    protected abstract String getDbusServiceName();
+    public abstract String getDbusServiceName();
+
+    public abstract String getDbusAppNameKey();
 
     public Map<String, String> getDbusConfigs() {
         Map<String, String> map = new HashMap<>();

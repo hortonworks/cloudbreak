@@ -162,6 +162,7 @@ public class AltusMachineUserService {
     }
 
     // for datalake metering is not supported/required right now
+    // TODO: monitoring do not need databus machine user - until fluent based metrics pushing is not supported
     public boolean isMeteringOrAnyDataBusBasedFeatureSupported(Stack stack, Telemetry telemetry) {
         return telemetry != null && (telemetry.isAnyDataBusBasedFeatureEnablred() || (telemetry.isMeteringFeatureEnabled()
                 && !StackType.DATALAKE.equals(stack.getType())));

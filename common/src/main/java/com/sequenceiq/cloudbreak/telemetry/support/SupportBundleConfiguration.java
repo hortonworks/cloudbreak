@@ -16,7 +16,12 @@ public class SupportBundleConfiguration extends AbstractDatabusStreamConfigurati
     }
 
     @Override
-    protected String getDbusServiceName() {
+    public String getDbusServiceName() {
         return "UnifiedDiagnostics";
+    }
+
+    @Override
+    public String getDbusAppNameKey() {
+        return "unifieddiagnostics-app";
     }
 }
