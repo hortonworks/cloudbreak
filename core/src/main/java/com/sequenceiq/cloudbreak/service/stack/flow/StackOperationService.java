@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
+
 import static java.lang.String.format;
 
 import java.util.Collection;
@@ -24,26 +25,24 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
-import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
@@ -90,6 +89,12 @@ public class StackOperationService {
     @Inject
     private DataLakeStatusCheckerService dataLakeStatusCheckerService;
 
+    @Inject
+    private SpotInstanceUsageCondition spotInstanceUsageCondition;
+
+    @Inject
+    private StackStopRestrictionService stackStopRestrictionService;
+
     public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
         return flowManager.triggerStackRemoveInstance(stack.getId(), metaData.getInstanceGroupName(), metaData.getPrivateId(), forced);
@@ -131,11 +136,11 @@ public class StackOperationService {
     }
 
     @VisibleForTesting
-    FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+    FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster) {
         if (!isStopNeeded(stack)) {
             return FlowIdentifier.notTriggered();
         }
-        if (isStackRunsOnSpotInstances(stack)) {
+        if (spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)) {
             throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         }
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
@@ -158,16 +163,6 @@ public class StackOperationService {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
             return flowManager.triggerStackStop(stack.getId());
         }
-    }
-
-    private boolean isStackRunsOnSpotInstances(Stack stack) {
-        return stack.getInstanceGroups().stream()
-                .map(InstanceGroup::getTemplate)
-                .map(Template::getAttributes)
-                .map(Json::getMap)
-                .map(attributes -> attributes.getOrDefault(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, 0))
-                .map(spotPercentage -> Integer.parseInt(spotPercentage.toString()))
-                .anyMatch(spotPercentage -> spotPercentage != 0);
     }
 
     private FlowIdentifier repairFailedNodes(Stack stack, User user) {
@@ -194,7 +189,7 @@ public class StackOperationService {
             setStackStatusToStopRequested(stack);
             return FlowIdentifier.notTriggered();
         } else {
-            return triggerStackStopIfNeeded(stack, cluster, updateCluster, user);
+            return triggerStackStopIfNeeded(stack, cluster, updateCluster);
         }
     }
 
@@ -270,7 +265,7 @@ public class StackOperationService {
 
     private boolean isStopNeeded(Stack stack) {
         boolean result = true;
-        StopRestrictionReason reason = stack.isInfrastructureStoppable();
+        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack.getCloudPlatform(), stack.getInstanceGroups());
         if (stack.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_STOP_IGNORED);
             result = false;

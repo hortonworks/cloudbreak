@@ -3,14 +3,13 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.assertj.core.api.Assertions;
@@ -27,21 +26,20 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
-import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
-import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -82,6 +80,12 @@ public class StackOperationServiceTest {
     @Mock
     private DataLakeStatusCheckerService statusCheckerService;
 
+    @Mock
+    private SpotInstanceUsageCondition spotInstanceUsageCondition;
+
+    @Mock
+    private StackStopRestrictionService stackStopRestrictionService;
+
     @Test
     public void testStartWhenStackAvailable() {
         Stack stack = new Stack();
@@ -102,7 +106,7 @@ public class StackOperationServiceTest {
         underTest.start(stack, null, false);
 
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
+        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -114,7 +118,7 @@ public class StackOperationServiceTest {
         underTest.start(stack, null, false);
 
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
+        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -127,7 +131,7 @@ public class StackOperationServiceTest {
         expectedException.expectMessage("");
         underTest.start(stack, null, false);
 
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
+        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -140,7 +144,7 @@ public class StackOperationServiceTest {
         stack.setCluster(cluster);
         underTest.start(stack, cluster, false);
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(),  DetailedStackStatus.START_REQUESTED);
+        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -148,8 +152,9 @@ public class StackOperationServiceTest {
         Stack stack = new Stack();
         stack.setId(9876L);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
-        stack.setInstanceGroups(Set.of(createInstanceGroup(100)));
 
+        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
         Assertions.assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true, new User()))
@@ -163,21 +168,14 @@ public class StackOperationServiceTest {
         Stack stack = new Stack();
         stack.setId(9876L);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
-        stack.setInstanceGroups(Set.of(createInstanceGroup(0), createInstanceGroup(null)));
 
+        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
         underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true, new User());
 
         verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED);
-    }
-
-    private InstanceGroup createInstanceGroup(Integer spotPercentage) {
-        Template template = new Template();
-        template.setAttributes(new Json(spotPercentage != null ? Map.of(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotPercentage) : Map.of()));
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setTemplate(template);
-        return instanceGroup;
     }
 
     @Test
@@ -200,7 +198,9 @@ public class StackOperationServiceTest {
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         cluster.setStatus(Status.STOPPED);
-        underTest.triggerStackStopIfNeeded(stack, cluster, false, new User());
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any(), any())).thenReturn(StopRestrictionReason.NONE);
+        underTest.triggerStackStopIfNeeded(stack, cluster, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
     }
 

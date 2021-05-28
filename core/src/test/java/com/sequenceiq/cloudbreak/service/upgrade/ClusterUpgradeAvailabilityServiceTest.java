@@ -27,12 +27,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -328,64 +325,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
         assertNull(actual.getCurrent());
         assertEquals(1, actual.getUpgradeCandidates().size());
         assertEquals(validationError, actual.getReason());
-    }
-
-    @Test
-    public void testRunningDataHubsAttached() {
-        StackViewV4Response datahubStack1 = new StackViewV4Response();
-        datahubStack1.setStatus(Status.AVAILABLE);
-        datahubStack1.setName("stack-1");
-        ClusterViewV4Response datahubCluster1 = new ClusterViewV4Response();
-        datahubCluster1.setStatus(Status.AVAILABLE);
-        datahubStack1.setCluster(datahubCluster1);
-        StackViewV4Response datahubStack2 = new StackViewV4Response();
-        datahubStack2.setStatus(Status.DELETE_COMPLETED);
-        datahubStack2.setName("stack-2");
-        ClusterViewV4Response datahubCluster2 = new ClusterViewV4Response();
-        datahubCluster2.setStatus(Status.DELETE_COMPLETED);
-        datahubStack2.setCluster(datahubCluster2);
-        StackViewV4Response datahubStack3 = new StackViewV4Response();
-        datahubStack3.setStatus(Status.STOPPED);
-        datahubStack3.setName("stack-3");
-        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3));
-        UpgradeV4Response response = new UpgradeV4Response();
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, response);
-
-        assertNull(actual.getUpgradeCandidates());
-        assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
-                actual.getReason());
-
-    }
-
-    @Test
-    public void testNotRunningDataHubsAttached() {
-        StackViewV4Response datahubStack1 = new StackViewV4Response();
-        datahubStack1.setStatus(Status.STOPPED);
-        ClusterViewV4Response datahubCluster1 = new ClusterViewV4Response();
-        datahubCluster1.setStatus(Status.STOPPED);
-        datahubStack1.setCluster(datahubCluster1);
-        StackViewV4Response datahubStack2 = new StackViewV4Response();
-        datahubStack2.setStatus(Status.DELETE_COMPLETED);
-        ClusterViewV4Response datahubCluster2 = new ClusterViewV4Response();
-        datahubCluster2.setStatus(Status.DELETE_COMPLETED);
-        datahubStack2.setCluster(datahubCluster2);
-        StackViewV4Response datahubStack3 = new StackViewV4Response();
-        datahubStack3.setStatus(Status.STOPPED);
-        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3));
-        UpgradeV4Response response = new UpgradeV4Response();
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, response);
-
-        assertNull(actual.getReason());
-    }
-
-    @Test
-    public void tesDataHubsNotAttached() {
-        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of());
-        UpgradeV4Response response = new UpgradeV4Response();
-
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, response);
-
-        assertNull(actual.getReason());
     }
 
     @Test

@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -122,6 +123,9 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private UpgradePreconditionService upgradePreconditionService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -283,7 +287,7 @@ public class StackOperations implements ResourcePropertyProvider {
             LOGGER.info("Checking that the attached DataHubs of the Datalake are in stopped state only in case if Datalake runtime upgarda is enabled" +
                             " in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
-            clusterUpgradeAvailabilityService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
+            upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
         }
     }
 
