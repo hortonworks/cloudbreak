@@ -1,5 +1,10 @@
 package com.sequenceiq.freeipa.sync;
 
+import static com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_ENV_CRN;
+import static com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_METRICS_TYPE;
+import static com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_RESOURCE_CRN;
+import static com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_RESOURCE_NAME;
+import static com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor.DBUS_METRICS_HEADER_RESOURCE_VERSION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
 import java.util.ArrayList;
@@ -15,19 +20,26 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
+import com.google.protobuf.GeneratedMessageV3;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
+import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
+import com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
+import com.sequenceiq.node.health.client.model.CdpNodeStatusType;
 
 @Component
 public class FreeipaChecker {
@@ -39,6 +51,12 @@ public class FreeipaChecker {
 
     @Inject
     private FreeIpaNodeStatusService freeIpaNodeStatusService;
+
+    @Inject
+    private MetricsDatabusRecordProcessor metricsDatabusRecordProcessor;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     private Pair<Map<InstanceMetaData, DetailedStackStatus>, String> checkStatus(Stack stack, Set<InstanceMetaData> checkableInstances) throws Exception {
         return checkedMeasure(() -> {
@@ -112,6 +130,7 @@ public class FreeipaChecker {
                         () -> freeIpaNodeStatusService.nodeSystemMetricsReport(stack, instanceMetaData), LOGGER,
                         ":::Auto sync::: FreeIPA system metrics report ran in {}ms");
                 logReportResult(instanceMetaData, systemMetricsReportRPCResponse, "system metrics");
+                processSystemMetrics(systemMetricsReportRPCResponse, stack);
             } catch (Exception e) {
                 LOGGER.info("FreeIpaClientException occurred during status fetch: " + e.getMessage(), e);
             }
@@ -125,6 +144,21 @@ public class FreeipaChecker {
         } else {
             LOGGER.info("Failed to get " + reportType + " reports for instance: [{}], reason: [{}]", instanceMetaData.getInstanceId(),
                     nodeStatusRpcResponse.getSummary());
+        }
+    }
+
+    private void processSystemMetrics(RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsResponse, Stack stack) {
+        if (entitlementService.datalakeMetricsDatabusProcessing(stack.getAccountId())) {
+            DatabusRequestContext context = createDatabusRequestContext(stack);
+            if (isSuccessfulRequest(systemMetricsResponse) && systemMetricsResponse.getResult() != null
+                    && CollectionUtils.isNotEmpty(systemMetricsResponse.getResult().getNodesList())) {
+                for (NodeStatusProto.NodeStatus nodeStatus : systemMetricsResponse.getResult().getNodesList()) {
+                    DatabusRequest recordRequest = createDatabusRecordRequest(nodeStatus.getSystemMetrics(), context);
+                    metricsDatabusRecordProcessor.processRecord(recordRequest);
+                }
+            }
+        } else {
+            LOGGER.debug("Skip databus metrics processing as databus record processing is disabled for {}", stack.getAccountId());
         }
     }
 
@@ -153,5 +187,30 @@ public class FreeipaChecker {
                 .flatMap(List::stream)
                 .map(m -> m.getName() + ": " + m.getMessage())
                 .collect(Collectors.joining(", "));
+    }
+
+    private DatabusRequest createDatabusRecordRequest(GeneratedMessageV3 grpcMessage, DatabusRequestContext context) {
+        return DatabusRequest.Builder.newBuilder()
+                .withMessageBody(grpcMessage)
+                .withContext(context)
+                .build();
+    }
+
+    private DatabusRequestContext createDatabusRequestContext(Stack stack) {
+        String envCrn = stack.getEnvironmentCrn();
+        String resourceCrn = stack.getResourceCrn();
+        String resourceName = stack.getResourceName();
+        return DatabusRequestContext.Builder.newBuilder()
+                .withAccountId(stack.getAccountId())
+                .withEnvironmentCrn(envCrn)
+                .withRecourceCrn(resourceCrn)
+                .withResourceName(resourceName)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_ENV_CRN, envCrn)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_RESOURCE_CRN, resourceCrn)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_RESOURCE_NAME, resourceName)
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_RESOURCE_VERSION, stack.getAppVersion())
+                .addAdditionalDatabusHeader(DBUS_METRICS_HEADER_METRICS_TYPE, CdpNodeStatusType.SYSTEM_METRICS.value())
+                .build();
+
     }
 }

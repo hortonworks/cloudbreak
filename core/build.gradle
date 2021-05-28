@@ -241,6 +241,7 @@ dependencies {
   compile project(':template-manager-cmtemplate')
   compile project(':template-manager-tag')
   compile project(':cluster-api')
+  compile project(':databus-connector')
   compile project(':flow')
   compile project(':common')
   compile project(':common-model')

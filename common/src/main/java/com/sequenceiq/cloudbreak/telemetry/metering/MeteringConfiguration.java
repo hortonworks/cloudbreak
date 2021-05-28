@@ -18,4 +18,9 @@ public class MeteringConfiguration extends AbstractDatabusStreamConfiguration {
     public String getDbusServiceName() {
         return "Metering";
     }
+
+    @Override
+    public String getDbusAppNameKey() {
+        return "@metering-app";
+    }
 }

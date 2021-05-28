@@ -17,9 +17,11 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -355,6 +357,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.nodestatus.check.enable}")
     private boolean datahubNodestatusCheck;
+
+    @Value("${auth.mock.metrics.databus.processing.enable}")
+    private boolean metricsDatabusProcessing;
 
     @Value("${auth.mock.nodestatus.salt.ping.enable}")
     private boolean nodestatusSaltPingEnabled;
@@ -734,6 +739,10 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (cmHAEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CM_HA));
+        }
+        if (metricsDatabusProcessing) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_METRICS_DATABUS_PROCESSING));
+            builder.addEntitlements(createEntitlement(CDP_DATAHUB_METRICS_DATABUS_PROCESSING));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

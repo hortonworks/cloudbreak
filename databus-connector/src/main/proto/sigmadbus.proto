@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package sigmadbus;
+
+option java_package = "com.cloudera.sigma.service.dbus";
+option java_outer_classname = "DbusProto";
+
+import "options.proto";
+import "version.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service SigmaDbus {
+    // Put a new record.
+    rpc PutRecord (PutRecordRequest)
+    returns (PutRecordResponse) {}
+
+    // Get the service version
+    rpc GetVersion (version.VersionRequest)
+    returns (version.VersionResponse) {}
+
+    rpc ValidateUuid (ValidateUuidRequest)
+    returns (ValidateUuidResponse) {}
+
+    // notify about the file arrival (on prem)
+    rpc NotifyFileUpload (NotifyFileUploadRequest)
+    returns (NotifyFileUploadResponse) {}
+}
+
+message Record {
+    message Header {
+        string name = 1;
+        string value = 2;
+    }
+
+    message Body {
+        int64 payloadSize = 1;
+        bytes payload = 2;
+        repeated Header header = 3;
+    }
+
+    string streamName = 1;
+    string partitionKey = 2;
+    Body body = 3;
+    string accountId = 4;
+    bool strictSizeCheck = 5;
+
+    message Reply {
+        enum Status {
+            UNSET = 0;
+            SENT = 1;
+            PENDING = 2;
+        }
+        string recordId = 1;
+        Status status = 2;
+        string uploadUrl = 3;
+    }
+}
+
+message PutRecordRequest {
+    Record record = 1 [(options.FieldExtension.skipLogging) = true];
+    string urlPrefix = 2; // optional prefix to be used for on-prem only
+}
+
+message PutRecordResponse {
+    Record.Reply record = 1 [(options.FieldExtension.skipLogging) = true];
+}
+
+message S3Link {
+    string bucketName = 1;
+    string key = 2;
+}
+
+message DbusKinesisRecord {
+    string recordId = 1;
+    string accountId = 2;
+    Record.Body body = 3;
+    S3Link s3Link = 4;
+}
+
+message ValidateUuidRequest {
+    string uuid = 1;
+}
+
+message ValidateUuidResponse {
+    bool valid = 1; // true means valid and false means invalid
+    string bucket = 2;
+    string stream = 3;
+}
+
+message NotifyFileUploadRequest {
+    string uuid = 1;
+    int64 uploadedFileSize = 2;
+}
+
+message NotifyFileUploadResponse {
+    bool valid = 1; // true means success and false means failure
+}

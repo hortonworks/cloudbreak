@@ -100,7 +100,7 @@ public class Telemetry implements Serializable {
 
     @JsonIgnore
     public boolean isAnyDataBusBasedFeatureEnablred() {
-        return  isMonitoringFeatureEnabled() || isClusterLogsCollectionEnabled() || isMeteringFeatureEnabled();
+        return  isClusterLogsCollectionEnabled() || isMeteringFeatureEnabled();
     }
 
     @JsonIgnore

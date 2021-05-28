@@ -48,6 +48,7 @@ auth:
     network.preflight.notifications.enable: true
     datahub.nodestatus.check.enable: true
     nodestatus.salt.ping.enable: true
+    metrics.databus.processing.enable: false
     user.sync.credentials.update.optimization.enable: true
     azure:
       disk:
