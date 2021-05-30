@@ -6,5 +6,14 @@ check_databus_network_connectivity:
     - failhard: True{% if telemetry.proxyUrl %}
     - env: {% if telemetry.proxyProtocol == "https" %}
        - HTTPS_PROXY: {{ telemetry.proxyUrl }}{% else %}
-       - HTTP_PROXY: {{ telemetry.proxyUrl }}{% endif %}{% endif %}
-{% endif %}
+       - HTTP_PROXY: {{ telemetry.proxyUrl }}{% endif %}{% if telemetry.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - NO_PROXY: {{ telemetry.noProxyHosts }}{% endif %}{% endif %}{% endif %}{% if telemetry.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+/etc/cdp-telemetry/conf:
+  file.directory:
+    - makedirs: True
+
+/etc/cdp-telemetry/conf/proxy-whitelist.txt:
+    file.managed:
+        - source: salt://telemetry/template/proxy-whitelist.txt.j2
+        - template: jinja
+        - mode: '0640'{% endif %}

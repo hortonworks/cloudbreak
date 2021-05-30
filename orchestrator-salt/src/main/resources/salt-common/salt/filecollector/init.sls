@@ -16,16 +16,17 @@ uninstall_telemetry_rpm_if_wrong_version:
     - onlyif: cdp-telemetry utils check-connection --url {{ cldr_service_delivery_repo }} && rpm -qa {{ cdp_telemetry_package_name }} | grep -v {{ cdp_telemetry_version }}
     - failhard: True{% if filecollector.proxyUrl %}
     - env:
-       - https_proxy: {{ filecollector.proxyUrl }}{% endif %}
+       - https_proxy: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 install_telemetry_rpm_manually:
   cmd.run:
     - name: "rpm -i {{ cdp_telemetry_rpm_repo_url }}"
     - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
-    - failhard: True
-{% if filecollector.proxyUrl %}
+    - failhard: True{% if filecollector.proxyUrl %}
     - env:{% if filecollector.proxyProtocol == "https" %}
       - https_proxy: {{ filecollector.proxyUrl }}{% else %}
-      - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+      - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+      - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% else %}
 fail_if_telemetry_rpm_is_not_installed:
   cmd.run:
@@ -122,7 +123,8 @@ check_dbus_connection:
     - name: "cdp-telemetry utils check-connection --url {{ databus.endpoint }}"
     - failhard: True{% if filecollector.proxyUrl %}
     - env:
-       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% endif %}
+       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 check_logging_agent_running_systemctl:
   cmd.run:
     - name: "systemctl is-active --quiet td-agent || systemctl is-active --quiet cdp-logging-agent"
@@ -134,7 +136,8 @@ check_support_dbus_connection:
     - failhard: True{% if filecollector.proxyUrl %}
     - env: {% if filecollector.proxyProtocol == "https" %}
        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
-       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% if filecollector.dbusS3Url %}
 check_support_dbus_s3_connection:
   cmd.run:
@@ -142,7 +145,8 @@ check_support_dbus_s3_connection:
     - failhard: True{% if filecollector.proxyUrl %}
     - env: {% if filecollector.proxyProtocol == "https" %}
        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
-       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% endif %}
 {% endif %}
 

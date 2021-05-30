@@ -1,0 +1,1 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}{% set no_proxy_lines = '\n'.join(telemetry.noProxyHosts.split(',')) %}{{ no_proxy_lines }}

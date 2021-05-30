@@ -81,6 +81,7 @@
     {% set proxy_full_url = proxy_url %}
   {% endif %}
 {% endif %}
+{% set no_proxy_hosts = salt['pillar.get']('proxy:noProxyHosts') %}
 
 {% if salt['pillar.get']('tags:Cloudera-Resource-Name') %}
    {% set resource_crn = salt['pillar.get']('tags:Cloudera-Resource-Name') %}
@@ -131,6 +132,7 @@
     "skipWorkspaceCleanupOnStartup": skip_workspace_cleanup_on_startup,
     "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
+    "noProxyHosts": no_proxy_hosts,
     "mode": mode,
     "resourceCrn": resource_crn,
     "creatorCrn": creator_crn,
