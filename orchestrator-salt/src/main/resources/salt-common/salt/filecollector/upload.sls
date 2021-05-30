@@ -39,5 +39,6 @@ filecollector_upload_to_support:
     - env:
         - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"{% if filecollector.proxyUrl %}{% if filecollector.proxyProtocol == "https" %}
         - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
-        - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% endif %}
+        - HTTP_PROXY: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+        - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}{% endif %}
 {% endif %}

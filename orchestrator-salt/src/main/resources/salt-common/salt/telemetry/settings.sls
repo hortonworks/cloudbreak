@@ -40,6 +40,7 @@
     {% set proxy_full_url = proxy_url %}
   {% endif %}
 {% endif %}
+{% set no_proxy_hosts = salt['pillar.get']('proxy:noProxyHosts') %}
 
 {% set version_data = namespace(entities=[]) %}
 {% for role in grains.get('roles', []) %}
@@ -93,6 +94,7 @@
     "cdpTelemetryVersion": cdp_telemetry_version,
     "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
+    "noProxyHosts": no_proxy_hosts,
     "logs": logs,
     "skipValidation": skip_validation,
     "cloudStorageUploadParams": cloud_storage_upload_params,
