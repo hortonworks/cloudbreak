@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+
 public class Node {
     private final String privateIp;
 
@@ -17,13 +19,17 @@ public class Node {
 
     private NodeVolumes nodeVolumes;
 
+    private TemporaryStorage temporaryStorage;
+
     public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String hostGroup) {
         this(privateIp, publicIp, instanceId, instanceType, fqdn, null, hostGroup);
     }
 
-    public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String hostGroup, NodeVolumes nodeVolumes) {
+    public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String hostGroup, NodeVolumes nodeVolumes,
+            TemporaryStorage temporaryStorage) {
         this(privateIp, publicIp, instanceId, instanceType, fqdn, null, hostGroup);
         this.nodeVolumes = nodeVolumes;
+        this.temporaryStorage = temporaryStorage;
     }
 
     public Node(String privateIp, String publicIp, String instanceId, String instanceType, String fqdn, String domain, String hostGroup) {
@@ -76,6 +82,10 @@ public class Node {
         return nodeVolumes;
     }
 
+    public TemporaryStorage getTemporaryStorage() {
+        return temporaryStorage;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Node{");
@@ -86,7 +96,8 @@ public class Node {
         sb.append(", hostname='").append(hostname).append('\'');
         sb.append(", domain='").append(domain).append('\'');
         sb.append(", hostGroup='").append(hostGroup).append('\'');
-        sb.append(", nodeVolumes=").append(nodeVolumes);
+        sb.append(", nodeVolumes=").append(nodeVolumes).append('\'');
+        sb.append(", temporaryStorage=").append(temporaryStorage);
         sb.append('}');
         return sb.toString();
     }

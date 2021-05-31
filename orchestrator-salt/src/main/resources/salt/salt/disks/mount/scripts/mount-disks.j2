@@ -3,6 +3,7 @@
 DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['database_volume_index'] }}"
 ATTACHED_VOLUME_NAME_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_name_list'] }}"
 ATTACHED_VOLUME_SERIAL_LIST="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['attached_volume_serial_list'] }}"
+TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM={{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}
 PREVIOUS_FSTAB="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['previous_fstab'] }}"
 
@@ -14,6 +15,7 @@ VERSION="V1.0"
 # INPUT
 #   ATTACHED_VOLUME_UUID_LIST - contains a list of uuids of volumes attached to the instance, format: space separated list
 #   PREVIOUS_FSTAB - contains the fstab if any from a previous instance, format: the file contents as is
+#   TEMPORARY_STORAGE - tells if volumes should be mounted in a mixed fashion (/hadoopfs/fsX vs /hadoopfs/ephfsX) or not
 #
 # OUTPUT
 #   happy path:
@@ -25,6 +27,7 @@ VERSION="V1.0"
 
 mount_remaining() {
       local hadoop_fs_dir_counter=$1
+      local hadoop_ephfs_dir_counter=1
       local return_value=0
       if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
         not_mounted_volume_names=$(lsblk_command --noheadings --raw -o NAME,MOUNTPOINT | awk '$1~/[[:digit:]]/ && $2 == ""')
@@ -36,10 +39,17 @@ mount_remaining() {
       for volume in $not_mounted_volume_names; do
           uuid=$(get_disk_uuid "/dev/$volume")
           if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
+            if [[ "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
+                mount_one "UUID=$uuid /hadoopfs/ephfs${hadoop_ephfs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+                return_value=$(($? || return_value ))
+                log $LOG_FILE result of all mounting: $return_value
+                ((hadoop_ephfs_dir_counter++))
+            else
                 mount_one "UUID=$uuid /hadoopfs/fs${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
                 return_value=$(($? || return_value ))
                 log $LOG_FILE result of all mounting: $return_value
                 ((hadoop_fs_dir_counter++))
+            fi
            elif [[ "$root_disk" == "/dev/$volume" ]]; then
                 log $LOG_FILE volume $volume is the root volume, skipping it
            elif ! not_elastic_block_store "/dev/$volume" $LOG_FILE ; then

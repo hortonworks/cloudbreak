@@ -41,6 +41,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -203,6 +204,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Map<String, String> dataVolumeMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDataVolumes()));
             Map<String, String> serialIdMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getSerialIds()));
             Map<String, String> fstabMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getFstab()));
+            Map<String, String> temporaryStorageMap = nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getTemporaryStorage().name()));
             Map<String, Integer> dataBaseVolumeIndexMap =
                     nodes.stream().collect(Collectors.toMap(Node::getHostname, node -> node.getNodeVolumes().getDatabaseVolumeIndex()));
 
@@ -211,7 +213,8 @@ public class SaltOrchestrator implements HostOrchestrator {
                     "attached_volume_serial_list", serialIdMap.getOrDefault(hn, ""),
                     "cloud_platform", platformVariant,
                     "previous_fstab", fstabMap.getOrDefault(hn, ""),
-                    "database_volume_index", dataBaseVolumeIndexMap.getOrDefault(hn, -1)
+                    "database_volume_index", dataBaseVolumeIndexMap.getOrDefault(hn, -1),
+                    "temporary_storage", temporaryStorageMap.getOrDefault(hn, TemporaryStorage.ATTACHED_VOLUMES.name())
             )));
 
             SaltPillarProperties mounDiskProperties = new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
