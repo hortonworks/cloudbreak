@@ -114,7 +114,7 @@ public class ClouderaManagerStorageErrorMapper {
                         "permissions must, at a minimum, allow to assume Data Access Role and Ranger Audit Role." +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessRole, rangerAuditRole, auditLocation, serviceAccountEmail, serviceAccountEmail,
-                DocumentationLinkProvider.awsCloudStorageSetupLink());
+                DocumentationLinkProvider.googleCloudStorageSetupLink());
     }
 
     private String azureError(CloudStorage cloudStorage) {
@@ -143,7 +143,7 @@ public class ClouderaManagerStorageErrorMapper {
                         "permissions must, at a minimum, allow to attach the Data Access Identity and Ranger Access Identity. " +
                         "Refer to Cloudera documentation at %s for the required rights.",
                 auditLocation, dataAccessIdentity, rangerAuditIdentity, auditLocation, assumerIdentity, assumerIdentity,
-                DocumentationLinkProvider.googleCloudStorageSetupLink());
+                DocumentationLinkProvider.azureCloudStorageSetupLink());
     }
 
     private String getRangerAuditDir(CloudStorage cloudStorage) {
