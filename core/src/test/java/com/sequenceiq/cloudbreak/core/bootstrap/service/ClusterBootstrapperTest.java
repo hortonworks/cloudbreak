@@ -12,10 +12,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -91,6 +94,12 @@ public class ClusterBootstrapperTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Spy
+    private ResourceAttributeUtil resourceAttributeUtil;
+
+    @Mock
+    private ResourceService resourceService;
 
     @Test
     public void shouldUseReachableInstances() throws CloudbreakException, CloudbreakImageNotFoundException {
