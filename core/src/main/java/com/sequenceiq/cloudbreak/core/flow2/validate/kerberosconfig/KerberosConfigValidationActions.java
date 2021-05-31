@@ -16,6 +16,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
@@ -99,7 +100,8 @@ public class KerberosConfigValidationActions {
 
             @Override
             protected void doExecute(StackContext context, PollBindUserCreationEvent payload, Map<Object, Object> variables) {
-                PollBindUserCreationEvent event = new PollBindUserCreationEvent(payload.getResourceId(), payload.getOperationId());
+                PollBindUserCreationEvent event = new PollBindUserCreationEvent(payload.getResourceId(), payload.getOperationId(),
+                        Crn.safeFromString(context.getStack().getResourceCrn()).getAccountId());
                 sendEvent(context, event);
             }
 
