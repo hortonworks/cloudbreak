@@ -37,7 +37,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 @ExtendWith(MockitoExtension.class)
 class StartBindUserCreationServiceTest {
 
-    private static final String ENV_CRN = "envCrn";
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:accountId:environment:4c5ba74b-c35e-45e9-9f47-123456789876";
 
     private static final String STACK_NAME = "clusterName";
 
@@ -57,6 +57,7 @@ class StartBindUserCreationServiceTest {
 
     @BeforeEach
     public void init() {
+        when(stackView.getResourceCrn()).thenReturn(ENV_CRN);
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
         when(stackView.getName()).thenReturn(STACK_NAME);
         when(stackView.getId()).thenReturn(STACK_ID);

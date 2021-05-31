@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.controller;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
@@ -24,8 +27,8 @@ public class OperationV1Controller implements OperationV1Endpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.GET_OPERATION_STATUS)
-    public OperationStatus getOperationStatus(@NotNull String operationId) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return operationToOperationStatusConverter.convert(operationService.getOperationForAccountIdAndOperationId(accountId, operationId));
+    public OperationStatus getOperationStatus(@NotNull String operationId, @AccountId String accountId) {
+        String currentAccountId = Optional.of(accountId).orElse(ThreadBasedUserCrnProvider.getAccountId());
+        return operationToOperationStatusConverter.convert(operationService.getOperationForAccountIdAndOperationId(currentAccountId, operationId));
     }
 }
