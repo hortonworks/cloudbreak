@@ -1,0 +1,22 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+  maven { url = "$repoUrl" }
+  maven { url = "$springRepoUrl" }
+  mavenCentral()
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}

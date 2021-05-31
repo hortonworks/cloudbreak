@@ -69,4 +69,6 @@ include 'auth-internal-api'
 include 'datalake-dr-connector'
 include 'mock-infrastructure'
 include 'node-status-monitor-client'
+include 'cloud-aws-common'
+include 'cloud-aws-native'
 
