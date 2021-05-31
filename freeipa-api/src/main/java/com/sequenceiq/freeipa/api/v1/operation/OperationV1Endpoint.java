@@ -8,6 +8,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.operation.doc.OperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -26,5 +27,6 @@ public interface OperationV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.OPERATION_STATUS, notes = OperationDescriptions.NOTES, produces = MediaType.APPLICATION_JSON,
             nickname = "getOperationStatusV1")
-    OperationStatus getOperationStatus(@NotNull @QueryParam("operationId") String operationId);
+    OperationStatus getOperationStatus(@NotNull @QueryParam("operationId") String operationId,
+            @AccountId @QueryParam("accountId") String accountId);
 }

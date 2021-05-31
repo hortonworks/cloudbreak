@@ -6,17 +6,25 @@ public class PollBindUserCreationEvent extends StackEvent {
 
     private final String operationId;
 
-    public PollBindUserCreationEvent(Long stackId, String operationId) {
+    private final String accountId;
+
+    public PollBindUserCreationEvent(Long stackId, String operationId, String accountId) {
         super(stackId);
         this.operationId = operationId;
+        this.accountId = accountId;
     }
 
-    public PollBindUserCreationEvent(String selector, Long stackId, String operationId) {
+    public PollBindUserCreationEvent(String selector, Long stackId, String operationId, String accountId) {
         super(selector, stackId);
         this.operationId = operationId;
+        this.accountId = accountId;
     }
 
     public String getOperationId() {
         return operationId;
+    }
+
+    public String getAccountId() {
+        return accountId;
     }
 }

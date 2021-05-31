@@ -50,7 +50,7 @@ class PollBindUserCreationHandlerTest {
 
     @Test
     public void testDefaultFailureEvent() {
-        Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId"));
+        Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId", "acc"));
         Exception e = new Exception();
 
         StackFailureEvent result = (StackFailureEvent) underTest.defaultFailureEvent(1L, e, event);
@@ -62,7 +62,7 @@ class PollBindUserCreationHandlerTest {
 
     @Test
     public void testPollingSuccessful() {
-        Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId"));
+        Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId", "acc"));
         ArgumentCaptor<FreeIpaOperationPollerObject> captor = ArgumentCaptor.forClass(FreeIpaOperationPollerObject.class);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(FreeIpaOperationCheckerTask.class), captor.capture(), anyLong(), anyLong(), anyInt()))
         .thenReturn(Pair.of(PollingResult.SUCCESS, null));
@@ -80,7 +80,7 @@ class PollBindUserCreationHandlerTest {
 
     @Test
     public void testPollingFailed() {
-        Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId"));
+        Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId", "acc"));
         ArgumentCaptor<FreeIpaOperationPollerObject> captor = ArgumentCaptor.forClass(FreeIpaOperationPollerObject.class);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(FreeIpaOperationCheckerTask.class), captor.capture(), anyLong(), anyLong(), anyInt()))
         .thenReturn(Pair.of(PollingResult.FAILURE, new Exception("error")));

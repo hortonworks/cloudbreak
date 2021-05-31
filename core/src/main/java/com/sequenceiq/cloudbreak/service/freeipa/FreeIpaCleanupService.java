@@ -117,13 +117,13 @@ public class FreeIpaCleanupService {
 
         if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfig)) {
             OperationStatus operationStatus = sendCleanupRequest(stack, stepsToSkip, hostNames, ips);
-            pollCleanupOperation(operationStatus);
+            pollCleanupOperation(operationStatus, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         }
     }
 
-    private void pollCleanupOperation(OperationStatus operationStatus) {
+    private void pollCleanupOperation(OperationStatus operationStatus, String accountId) {
         FreeIpaOperationPollerObject opretaionPollerObject = new FreeIpaOperationPollerObject(operationStatus.getOperationId(),
-                operationStatus.getOperationType().name(), operationV1Endpoint);
+                operationStatus.getOperationType().name(), operationV1Endpoint, accountId);
         Pair<PollingResult, Exception> pollingResult = freeIpaOperationChecker
                 .pollWithAbsoluteTimeout(new FreeIpaOperationCheckerTask<>(), opretaionPollerObject, POLL_INTERVAL, WAIT_SEC, 1);
         if (!PollingResult.isSuccess(pollingResult.getLeft())) {
