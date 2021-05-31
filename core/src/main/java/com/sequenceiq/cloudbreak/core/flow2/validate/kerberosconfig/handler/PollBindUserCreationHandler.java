@@ -62,7 +62,7 @@ public class PollBindUserCreationHandler extends ExceptionCatcherEventHandler<Po
     protected Selectable doAccept(HandlerEvent<PollBindUserCreationEvent> event) {
         PollBindUserCreationEvent data = event.getData();
         FreeIpaOperationPollerObject operationPollerObject = new FreeIpaOperationPollerObject(data.getOperationId(),
-                OperationType.BIND_USER_CREATE.name(), operationV1Endpoint);
+                OperationType.BIND_USER_CREATE.name(), operationV1Endpoint, data.getAccountId());
         Pair<PollingResult, Exception> result = freeIpaOperationChecker.pollWithAbsoluteTimeout(new FreeIpaOperationCheckerTask<>(), operationPollerObject,
                 pollIntervalMilliSec, pollWaitTimeSec, pollMaxError);
         PollingResult pollingResult = result.getLeft();
