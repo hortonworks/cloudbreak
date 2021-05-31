@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -16,7 +17,8 @@ public class FreeIpaOperationCheckerTask<T extends FreeIpaOperationPollerObject>
 
     @Override
     public boolean checkStatus(T operationPollerObject) {
-        OperationStatus operationStatus = operationPollerObject.getOperationV1Endpoint().getOperationStatus(operationPollerObject.getOperationId());
+        OperationStatus operationStatus = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                operationPollerObject.getOperationV1Endpoint().getOperationStatus(operationPollerObject.getOperationId(), operationPollerObject.getAccountId()));
         LOGGER.debug("OperationStatus for operationId[{}]: {}", operationPollerObject.getOperationId(), operationStatus);
         if (OperationState.COMPLETED.equals(operationStatus.getStatus())) {
             return true;
@@ -49,7 +51,8 @@ public class FreeIpaOperationCheckerTask<T extends FreeIpaOperationPollerObject>
 
     @Override
     public void handleTimeout(T operationPollerObject) {
-        OperationStatus operationStatus = operationPollerObject.getOperationV1Endpoint().getOperationStatus(operationPollerObject.getOperationId());
+        OperationStatus operationStatus = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                operationPollerObject.getOperationV1Endpoint().getOperationStatus(operationPollerObject.getOperationId(), operationPollerObject.getAccountId()));
         throw new FreeIpaOperationFailedException(String.format("FreeIPA [%s] operation [%s] timed out. Current state is [%s]",
                 operationStatus.getOperationType(), operationPollerObject.getOperationId(), operationStatus.getStatus()));
     }
