@@ -122,6 +122,12 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_2);
     }
 
+    public static boolean isRazTokenConfigurationSupported(String cdhVersion, CloudPlatform cloudPlatform) {
+        LOGGER.info("ClouderaManagerRepo is compared for Raz Ranger token support in Data Hub and Data Lake");
+        return isVersionNewerOrEqualThanLimited(() -> cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)
+                && (cloudPlatform.equals(CloudPlatform.AWS) || cloudPlatform.equals(CloudPlatform.AZURE));
+    }
+
     public static boolean isSudoAccessNeededForHostCertRotation(ClouderaManagerRepo clouderaManagerRepoDetails) {
         LOGGER.info("ClouderaManagerRepo is compared for Host certs rotation Sudo access");
         return isVersionOlderThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_2_6);
