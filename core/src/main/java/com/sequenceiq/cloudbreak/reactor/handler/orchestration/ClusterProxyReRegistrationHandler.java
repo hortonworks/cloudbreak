@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy.ClusterProxyService;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.BootstrapNewNodesEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;

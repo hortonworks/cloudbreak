@@ -71,13 +71,10 @@
 {% set cloud_storage_upload_params = None %}
 {% set test_cloud_storage_upload_params = None %}
 {% if s3_location %}
-  {% set cloud_storage_upload_params = "s3 upload -e -p '" + compressed_file_pattern + "' --location " + s3_location + " --bucket " + s3_bucket +  " --region " + s3_region %}
   {% set test_cloud_storage_upload_params = "s3 upload -e -p /tmp/.test_cloud_storage_upload.txt --location " + s3_location + " --bucket " + s3_bucket +  " --region " + s3_region %}
 {% elif adlsv2_storage_location %}
-  {% set cloud_storage_upload_params = "abfs upload -p '" + compressed_file_pattern + "' --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
   {% set test_cloud_storage_upload_params = "abfs upload -p /tmp/.test_cloud_storage_upload.txt --location " + adlsv2_storage_location + " --account " + adlsv2_storage_account + " --container " + adlsv2_storage_container%}
 {% elif gcs_location %}
-  {% set cloud_storage_upload_params = "gcs upload -p '" + compressed_file_pattern + "' --location " + gcs_location + " --bucket " + gcs_bucket %}
   {% set test_cloud_storage_upload_params = "gcs upload -p /tmp/.test_cloud_storage_upload.txt --location " + gcs_location + " --bucket " + gcs_bucket %}
 {% endif %}
 
@@ -97,6 +94,5 @@
     "noProxyHosts": no_proxy_hosts,
     "logs": logs,
     "skipValidation": skip_validation,
-    "cloudStorageUploadParams": cloud_storage_upload_params,
     "testCloudStorageUploadParams": test_cloud_storage_upload_params
 }) %}

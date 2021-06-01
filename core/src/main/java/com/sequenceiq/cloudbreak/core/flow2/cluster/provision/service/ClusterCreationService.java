@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
@@ -62,6 +62,10 @@ public class ClusterCreationService {
 
     public void collectingHostMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.COLLECTING_HOST_METADATA);
+    }
+
+    public void validatingCloudStorageOnVm(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.VALIDATING_CLOUD_STORAGE_ON_VM);
     }
 
     public void bootstrapPublicEndpoints(Stack stack) {

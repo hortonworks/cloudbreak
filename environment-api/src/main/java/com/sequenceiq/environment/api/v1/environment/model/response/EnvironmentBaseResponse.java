@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
@@ -111,6 +112,12 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_SERVICE_VERSION)
     private String environmentServiceVersion;
+
+    @JsonIgnore
+    public boolean isCloudStorageLoggingEnabled() {
+        return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
+                && telemetry.getFeatures().getCloudStorageLogging().isEnabled();
+    }
 
     public String getCrn() {
         return crn;
