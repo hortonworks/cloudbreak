@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -31,11 +32,19 @@ public class AssignResourceRoleUserAction implements Action<UmsTestDto, UmsClien
         String resourceCrn = testDto.getRequest().getResourceCrn();
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for user '%s' ", resourceRole, resourceCrn, user.getCrn()));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
-        client.getDefaultClient().assignResourceRole(user.getCrn(), resourceCrn, resourceRole, Optional.of(""));
-        // wait for UmsRightsCache to expire
-        Thread.sleep(7000);
-        LOGGER.info(format(" Resource role '%s' has been assigned at resource '%s' for user '%s' ", resourceRole, resourceCrn, user.getCrn()));
-        Log.when(LOGGER, format(" Resource role '%s' has been assigned at resource '%s' for user '%s' ", resourceRole, resourceCrn, user.getCrn()));
+
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(user.getCrn(), Optional.of(""));
+        LOGGER.info(format(" Assigned resource roles ['%s'] are present to user '%s' ", assignedResourceRoles, user.getCrn()));
+        if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
+            LOGGER.info(format(" Resource role '%s' has already been assigned to user '%s' for resource '%s' ", resourceRole, user.getCrn(), resourceCrn));
+            Log.when(LOGGER, format(" Resource role '%s' has already been assigned to user '%s' for resource '%s' ", resourceRole, user.getCrn(), resourceCrn));
+        } else {
+            client.getDefaultClient().assignResourceRole(user.getCrn(), resourceCrn, resourceRole, Optional.of(""));
+            // wait for UmsRightsCache to expire
+            Thread.sleep(7000);
+            LOGGER.info(format(" Resource role '%s' has been assigned at resource '%s' for user '%s' ", resourceRole, resourceCrn, user.getCrn()));
+            Log.when(LOGGER, format(" Resource role '%s' has been assigned at resource '%s' for user '%s' ", resourceRole, resourceCrn, user.getCrn()));
+        }
         return testDto;
     }
 }

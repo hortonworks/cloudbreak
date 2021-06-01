@@ -174,32 +174,27 @@ public class UmsClient {
         checkNotNull(memberCrn);
         validateAccountIdWithWarning(accountId);
 
-        Actor member;
         Crn crn = Crn.safeFromString(memberCrn);
         Actor.Builder actor = Actor.newBuilder().setAccountId(accountId);
         switch (crn.getResourceType()) {
             case USER:
                 actor.setUserIdOrCrn(memberCrn);
-                member = actor.build();
-                LOGGER.info("Found user '{}' for member Crn: '{}'.", member.getUserIdOrCrn(), memberCrn);
+                LOGGER.info("Found user for member Crn: '{}'.", memberCrn);
                 break;
             case MACHINE_USER:
                 actor.setMachineUserNameOrCrn(memberCrn);
-                member = actor.build();
-                LOGGER.info("Found machine user '{}' for member Crn: '{}'.", member.getMachineUserNameOrCrn(), memberCrn);
+                LOGGER.info("Found machine user for member Crn: '{}'.", memberCrn);
                 break;
             default:
                 throw new IllegalArgumentException(String.format("memberCrn %s is not a USER or MACHINE_USER", memberCrn));
         }
 
         try {
-            AddMemberToGroupResponse addMemberToGroupResponse = newStub(requestId).addMemberToGroup(
-                    AddMemberToGroupRequest.newBuilder()
-                            .setGroupNameOrCrn(groupName)
-                            .setMember(member)
-                            .build()
-            );
-            LOGGER.info("User '{}' has been added to the '{}' group successfully.", addMemberToGroupResponse.getMemberCrn(), groupName);
+            AddMemberToGroupRequest.Builder addMemberToGroupRequest = AddMemberToGroupRequest.newBuilder()
+                    .setMember(actor.build())
+                    .setGroupNameOrCrn(groupName);
+            AddMemberToGroupResponse addMemberToGroupResponse = newStub(requestId).addMemberToGroup(addMemberToGroupRequest.build());
+            LOGGER.info("User '{}' has been assigned to the '{}' group successfully.", addMemberToGroupResponse.getMemberCrn(), groupName);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
                 LOGGER.info("User group '{}' not found or has already been deleted.", groupName);
@@ -225,35 +220,30 @@ public class UmsClient {
         checkNotNull(memberCrn);
         validateAccountIdWithWarning(accountId);
 
-        Actor member;
         Crn crn = Crn.safeFromString(memberCrn);
         Actor.Builder actor = Actor.newBuilder().setAccountId(accountId);
         switch (crn.getResourceType()) {
             case USER:
                 actor.setUserIdOrCrn(memberCrn);
-                member = actor.build();
-                LOGGER.info("Found user '{}' for member Crn: '{}'.", member.getUserIdOrCrn(), memberCrn);
+                LOGGER.info("Found user for member Crn: '{}'.", memberCrn);
                 break;
             case MACHINE_USER:
                 actor.setMachineUserNameOrCrn(memberCrn);
-                member = actor.build();
-                LOGGER.info("Found machine user '{}' for member Crn: '{}'.", member.getMachineUserNameOrCrn(), memberCrn);
+                LOGGER.info("Found machine user for member Crn: '{}'.", memberCrn);
                 break;
             default:
                 throw new IllegalArgumentException(String.format("memberCrn %s is not a USER or MACHINE_USER", memberCrn));
         }
 
         try {
-            RemoveMemberFromGroupResponse removeMemberFromGroupResponse = newStub(requestId).removeMemberFromGroup(
-                    RemoveMemberFromGroupRequest.newBuilder()
-                            .setGroupNameOrCrn(groupName)
-                            .setMember(member)
-                            .build()
-            );
+            RemoveMemberFromGroupRequest.Builder removeMemberFromGroupRequest = RemoveMemberFromGroupRequest.newBuilder()
+                    .setMember(actor.build())
+                    .setGroupNameOrCrn(groupName);
+            RemoveMemberFromGroupResponse removeMemberFromGroupResponse = newStub(requestId).removeMemberFromGroup(removeMemberFromGroupRequest.build());
             LOGGER.info("User '{}' has been removed from the '{}' group successfully.", removeMemberFromGroupResponse.getMemberCrn(), groupName);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
-                LOGGER.info("User group '{}' or user '{}' membership not found or has already been deleted.", groupName, memberCrn);
+                LOGGER.info("User group '{}' or user '{}' not found or has already been deleted.", groupName, memberCrn);
             } else {
                 throw e;
             }
@@ -274,15 +264,21 @@ public class UmsClient {
         validateAccountIdWithWarning(accountId);
 
         try {
-            ListGroupMembersResponse listGroupMembersResponse = newStub(requestId).listGroupMembers(
-                    ListGroupMembersRequest.newBuilder()
-                            .setGroupNameOrCrn(groupName)
-                            .setAccountId(accountId)
-                            .setIncludeDeleted(false)
-                            .build()
-            );
-            List<String> members = listGroupMembersResponse.getMemberCrnList();
-            LOGGER.info("User group '{}' contains: [{}] members.", groupName, members);
+            ListGroupMembersRequest.Builder listGroupMembersRequest = ListGroupMembersRequest.newBuilder()
+                    .setGroupNameOrCrn(groupName)
+                    .setAccountId(accountId)
+                    .setIncludeDeleted(false);
+            ListGroupMembersResponse listGroupMembersResponse;
+            List<String> members = new ArrayList<>();
+            do {
+                listGroupMembersResponse = newStub(requestId).listGroupMembers(listGroupMembersRequest.build());
+                for (int i = 0; i < listGroupMembersResponse.getMemberCrnCount(); i++) {
+                    String memberCrn = listGroupMembersResponse.getMemberCrn(i);
+                    members.add(memberCrn);
+                }
+                listGroupMembersRequest.setPageToken(listGroupMembersResponse.getNextPageToken());
+            } while (listGroupMembersResponse.hasNextPageToken());
+            LOGGER.info("User group '{}' contains members: [{}]", groupName, members);
             return members;
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
@@ -590,6 +586,12 @@ public class UmsClient {
         } else if (users.size() > 1) {
             throw new UmsAuthenticationException(String.format("Multiple users found in UMS system: %s", crnResource));
         }
+    }
+
+    public UserManagementProto.ListAssignedResourceRolesResponse listAssignedResourceRoles(String requestId, String assigneeCrn) {
+        return newStub(requestId).listAssignedResourceRoles(UserManagementProto.ListAssignedResourceRolesRequest.newBuilder()
+                .setAssignee(getAssignee(assigneeCrn))
+                .build());
     }
 
     public void assignResourceRole(String requestId, String assigneeCrn, String resourceCrn, String resourceRoleCrn) {

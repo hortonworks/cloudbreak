@@ -40,7 +40,10 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Workl
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
@@ -769,6 +772,21 @@ public class GrpcUmsClient {
         String requestId = RequestIdUtil.newRequestId();
         LOGGER.debug("Getting IdP metadata through account ID: {}, request id: {}", accountId, requestId);
         return client.getIdentityProviderMetadataXml(requestId, accountId);
+    }
+
+    public Multimap<String, String> listAssignedResourceRoles(String assigneeCrn, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel());
+        LOGGER.info("List the assigned resource roles for {} assignee", assigneeCrn);
+        UserManagementProto.ListAssignedResourceRolesResponse response =
+                client.listAssignedResourceRoles(RequestIdUtil.getOrGenerate(requestId), assigneeCrn);
+        Multimap<String, String> resourceRoleAssignments = response.getResourceAssignmentList().stream()
+                .collect(Multimaps
+                        .toMultimap(
+                                UserManagementProto.ResourceAssignment::getResourceCrn,
+                                UserManagementProto.ResourceAssignment::getResourceRoleCrn,
+                                ArrayListMultimap::create));
+        LOGGER.info("Assigned resource roles [{}] for assignee {}", resourceRoleAssignments, assigneeCrn);
+        return resourceRoleAssignments;
     }
 
     public void assignResourceRole(
