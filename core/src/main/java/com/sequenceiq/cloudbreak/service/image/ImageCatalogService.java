@@ -28,6 +28,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import com.google.common.base.Strings;
+import com.sequenceiq.common.api.type.ImageType;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -317,10 +319,47 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public StatedImages getImages(Long workspaceId, String name, Set<String> providers) throws CloudbreakImageCatalogException {
         try {
             ImageCatalog imageCatalog = get(workspaceId, name);
-            return getImages(new ImageFilter(imageCatalog, providers, cbVersion, baseImageEnabled(), null, null));
+            if (isCustomImageCatalog(imageCatalog)) {
+                return getStatedImagesFromCustomImageCatalog(imageCatalog, providers);
+            } else {
+                return getImages(new ImageFilter(imageCatalog, providers, cbVersion, baseImageEnabled(), null, null));
+            }
         } catch (NotFoundException ignore) {
             throw new CloudbreakImageCatalogException(String.format("The %s catalog does not exist or does not belongs to your account.", name));
         }
+    }
+
+    private boolean isCustomImageCatalog(ImageCatalog imageCatalog) {
+        return Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl()) && imageCatalog.getCustomImages() != null;
+    }
+
+    private StatedImages getStatedImagesFromCustomImageCatalog(ImageCatalog imageCatalog, Set<String> providers) throws CloudbreakImageCatalogException {
+        try {
+            List<Image> cbImages = getImages(Set.of(ImageType.DATALAKE, ImageType.DATAHUB), imageCatalog, providers);
+            List<Image> freeIpaImages = getImages(Set.of(ImageType.FREEIPA), imageCatalog, providers);
+            return statedImages(new Images(null, cbImages, freeIpaImages,
+                    Set.of(cbVersion)), imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
+        } catch (CloudbreakImageNotFoundException ex) {
+            throw new CloudbreakImageCatalogException(ex.getMessage());
+        }
+    }
+
+    private List<Image> getImages(Set<ImageType> imageTypes, ImageCatalog imageCatalog, Set<String> providers)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        List<Image> images = new ArrayList<>();
+        for (CustomImage customImage : imageCatalog.getCustomImages()) {
+            if (imageTypes.contains(customImage.getImageType())) {
+                StatedImage sourceImage = getSourceImageByImageType(customImage);
+                Optional<String> provider = sourceImage.getImage().getImageSetsByProvider().keySet().stream().findFirst();
+                provider.ifPresent(p -> {
+                    if (providers.stream().anyMatch(p::equalsIgnoreCase)) {
+                        images.add(customImageProvider.mergeSourceImageAndCustomImageProperties(
+                                sourceImage, customImage, imageCatalog.getImageCatalogUrl(), imageCatalog.getName()).getImage());
+                    }
+                });
+            }
+        }
+        return images;
     }
 
     public StatedImage getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
