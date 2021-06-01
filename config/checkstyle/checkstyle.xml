@@ -121,7 +121,7 @@
         <module name="AvoidStarImport" />
         <module name="ImportControl">
             <property name="file" value="${config_loc}/import-control.xml"/>
-            <property name="path" value="cloud-aws/src/main/java.*$"/>
+            <property name="path" value="cloud-aws-cloudformation/src/main/java.*$"/>
         </module>
         <module name="PackageAnnotation" />
         <module name="ExecutableStatementCount">

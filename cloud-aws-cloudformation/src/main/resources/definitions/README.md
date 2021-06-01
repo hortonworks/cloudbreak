@@ -1,6 +1,6 @@
 ## Creating the aws-zone-vm.json files
 
-from the cloud-aws directory run the following make command:
+from the cloud-aws-cloudformation directory run the following make command:
 
 ```
 make generate-zone-vms

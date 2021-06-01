@@ -59,7 +59,7 @@ dependencies {
     implementation     project(":cloud-reactor-api")
     implementation     project(":datalake-api")
     implementation     project(":core-api")
-    implementation     project(":cloud-aws")
+    implementation     project(":cloud-aws-cloudformation")
     implementation     project(":cloud-azure")
     implementation     project(":cloud-mock")
     implementation     project(":cloud-yarn")
