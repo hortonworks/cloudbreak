@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_FLOW_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DEACTIVATE_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
@@ -388,6 +389,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.user.sync.credentials.update.optimization.enable}")
     private boolean userSyncCredentialsUpdateOptimizationEnabled;
+
+    @Value("${auth.mock.user.sync.deactivateuser.enable}")
+    private boolean userSyncDeactivateUserEnabled;
 
     @Value("${auth.mock.endpointgateway.skip.validation}")
     private boolean endpointGatewaySkipValidation;
@@ -743,6 +747,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (metricsDatabusProcessing) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_METRICS_DATABUS_PROCESSING));
             builder.addEntitlements(createEntitlement(CDP_DATAHUB_METRICS_DATABUS_PROCESSING));
+        }
+        if (userSyncDeactivateUserEnabled) {
+            builder.addEntitlements(createEntitlement(DEACTIVATE_USER));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

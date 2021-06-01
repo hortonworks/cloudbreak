@@ -49,7 +49,9 @@ auth:
     datahub.nodestatus.check.enable: true
     nodestatus.salt.ping.enable: true
     metrics.databus.processing.enable: false
-    user.sync.credentials.update.optimization.enable: true
+    user.sync:
+      credentials.update.optimization.enable: true
+      deactivateuser.enable: true
     azure:
       disk:
         SSEWithCMK.enable: true
