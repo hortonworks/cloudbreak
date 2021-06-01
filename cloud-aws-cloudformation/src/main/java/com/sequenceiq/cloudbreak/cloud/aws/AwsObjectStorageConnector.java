@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsIDBrokerObjectStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -125,6 +126,6 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
 
     @Override
     public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 }

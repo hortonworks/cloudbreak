@@ -12,6 +12,7 @@ import com.amazonaws.services.dynamodbv2.model.TableDescription;
 import com.sequenceiq.cloudbreak.cloud.NoSqlConnector;
 import com.sequenceiq.cloudbreak.cloud.RegionAware;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonDynamoDBClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -90,7 +91,7 @@ public class AwsNoSqlConnector implements NoSqlConnector {
 
     @Override
     public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 
     private AmazonDynamoDBClient getAmazonDynamoDB(RegionAndCredentialAwareRequestBase request) {

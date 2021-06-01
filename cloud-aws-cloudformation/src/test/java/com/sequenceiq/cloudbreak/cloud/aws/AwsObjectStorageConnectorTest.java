@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonS3Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -92,6 +93,6 @@ public class AwsObjectStorageConnectorTest {
 
     @Test
     public void variant() {
-        assertEquals(AwsConstants.AWS_VARIANT, underTest.variant());
+        assertEquals(AwsConstants.AWS_DEFAULT_VARIANT, underTest.variant());
     }
 }

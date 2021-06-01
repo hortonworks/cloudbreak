@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.aws.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -32,6 +32,6 @@ public class AwsContextBuilder implements ResourceContextBuilder<AwsContext> {
 
     @Override
     public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 }

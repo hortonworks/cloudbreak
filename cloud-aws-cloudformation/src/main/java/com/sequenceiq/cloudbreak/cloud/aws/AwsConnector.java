@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -86,7 +87,7 @@ public class AwsConnector implements CloudConnector<Object> {
 
     @Override
     public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 
     @Override

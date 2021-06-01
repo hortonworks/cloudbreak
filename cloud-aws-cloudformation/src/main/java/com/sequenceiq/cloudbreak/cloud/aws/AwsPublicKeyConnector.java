@@ -11,6 +11,7 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.PublicKeyConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -85,7 +86,7 @@ public class AwsPublicKeyConnector implements PublicKeyConnector {
 
     @Override
     public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 
     private boolean exists(AmazonEc2Client client, String publicKeyId) {

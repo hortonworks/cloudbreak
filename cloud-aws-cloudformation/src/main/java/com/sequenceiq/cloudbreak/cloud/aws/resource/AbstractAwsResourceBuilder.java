@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.service.AwsResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -32,7 +32,7 @@ public abstract class AbstractAwsResourceBuilder implements CloudPlatformAware {
 
     @Override
     public Variant variant() {
-        return AwsConstants.AWS_VARIANT;
+        return AwsConstants.AWS_DEFAULT_VARIANT;
     }
 
     public AwsResourceNameService getResourceNameService() {
