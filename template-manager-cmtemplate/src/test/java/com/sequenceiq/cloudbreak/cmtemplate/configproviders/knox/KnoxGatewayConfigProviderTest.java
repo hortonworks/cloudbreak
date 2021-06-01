@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +21,9 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -35,14 +36,13 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.LdapView.LdapViewBuilder;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
-import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KnoxGatewayConfigProviderTest {
@@ -158,11 +158,12 @@ public class KnoxGatewayConfigProviderTest {
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
-                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of())
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.10")
+                        .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("7.2.11");
 
         assertEquals(
                 List.of(
@@ -206,9 +207,10 @@ public class KnoxGatewayConfigProviderTest {
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withIdBroker(idBroker)
                 .withBlueprintView(blueprintView)
-                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of())
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.10")
+                        .withName("CDH")))
                 .build();
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("7.2.11");
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
@@ -251,10 +253,11 @@ public class KnoxGatewayConfigProviderTest {
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
-                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of())
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.10")
+                        .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(blueprintTextProcessor.getStackVersion()).thenReturn("7.2.11");
         Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
 
         assertEquals(

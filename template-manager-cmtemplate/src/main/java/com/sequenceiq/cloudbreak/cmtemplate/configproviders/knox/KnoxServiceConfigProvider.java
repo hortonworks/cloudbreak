@@ -48,9 +48,8 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> configList = new ArrayList<>();
-        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
-                "" : source.getBlueprintView().getProcessor().getStackVersion();
-        if (isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), cdhVersion)) {
+        if (source.getProductDetailsView() != null
+                && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
             RdsView knoxGatewayRdsView = getRdsView(source);
             configList.add(config(DATABASE_TYPE, knoxGatewayRdsView.getSubprotocol()));
             configList.add(config(DATABASE_NAME, knoxGatewayRdsView.getDatabaseName()));
@@ -78,4 +77,5 @@ public class KnoxServiceConfigProvider extends AbstractRdsRoleConfigProvider {
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         return emptyList();
     }
+
 }
