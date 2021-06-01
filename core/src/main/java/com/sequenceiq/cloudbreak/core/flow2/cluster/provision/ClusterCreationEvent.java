@@ -53,6 +53,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSet
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.PreFlightCheckSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ValidateCloudStorageSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -69,6 +71,8 @@ public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_PROXY_GATEWAY_REGISTRATION_FAILED_EVENT(EventSelectorUtil.selector(ClusterProxyGatewayRegistrationFailed.class)),
     HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
     HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
+    VALIDATE_CLOUD_STORAGE_FINISHED_EVENT(EventSelectorUtil.selector(ValidateCloudStorageSuccess.class)),
+    VALIDATE_CLOUD_STORAGE_FAILED_EVENT(EventSelectorUtil.selector(ValidateCloudStorageFailed.class)),
     CLEANUP_FREEIPA_FINISHED_EVENT("CLEANUP_FREEIPA_FINISHED"),
     CLEANUP_FREEIPA_FAILED_EVENT("CLEANUP_FREEIPA_FAILED_EVENT"),
     BOOTSTRAP_PUBLIC_ENDPOINT_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapPublicEndpointSuccess.class)),

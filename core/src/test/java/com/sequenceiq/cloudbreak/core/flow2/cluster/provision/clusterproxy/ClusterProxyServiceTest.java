@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ConfigUpdateRequest;
 import com.sequenceiq.cloudbreak.clusterproxy.TunnelEntry;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;

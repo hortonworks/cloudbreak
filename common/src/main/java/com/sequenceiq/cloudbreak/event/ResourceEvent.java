@@ -284,6 +284,7 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_VALIDATION_FINISHED("cluster.upgrade.validation.finished"),
     CLUSTER_UPGRADE_VALIDATION_SKIPPED("cluster.upgrade.validation.skipped"),
     CLUSTER_UPGRADE_VALIDATION_FAILED("cluster.upgrade.validation.failed"),
+    CLUSTER_PROVISION_CLOUD_STORAGE_VALIDATION_ON_IDBROKER_FAILED("cluster.provision.idbrokerhost.cloudstorage.vmvalidation.failed"),
 
     CLUSTER_SALT_UPDATE_STARTED("cluster.salt.update.started"),
     CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),

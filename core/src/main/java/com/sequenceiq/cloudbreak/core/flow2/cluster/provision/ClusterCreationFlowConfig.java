@@ -37,6 +37,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.INSTALL_CLUSTER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.LDAP_SSO_CONFIGURATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.LDAP_SSO_CONFIGURATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREFLIGHT_CHECK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_DATALAKE_RESOURCE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_DATALAKE_RESOURCE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_EXTENDED_TEMPLATE_FAILED_EVENT;
@@ -47,7 +48,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REFRESH_PARCEL_REPOS_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREFLIGHT_CHECK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
@@ -58,6 +58,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SUPPRESS_WARNINGS_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_CLOUD_STORAGE_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_CLOUD_STORAGE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_LICENCE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.VALIDATE_LICENCE_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.WAIT_FOR_CLUSTER_MANAGER_FAILED_EVENT;
@@ -78,8 +80,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CONFIGURE_SUPPORT_TAGS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.EXECUTE_POST_CLUSTER_MANAGER_START_RECIPES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.EXECUTE_POST_INSTALL_RECIPES_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINALIZE_CLUSTER_INSTALL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.INSTALLING_CLUSTER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.PREFLIGHT_CHECK_STATE;
@@ -94,6 +96,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.SUPPRESS_WARNINGS_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPDATE_CONFIG_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.VALIDATE_CLOUD_STORAGE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.VALIDATE_LICENCE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.WAIT_FOR_CLUSTER_MANAGER_STATE;
 
@@ -127,9 +130,13 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
                     .event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
             .from(COLLECTING_HOST_METADATA_STATE)
-                    .to(CLEANUP_FREEIPA_STATE)
+                    .to(VALIDATE_CLOUD_STORAGE_STATE)
                     .event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
+            .from(VALIDATE_CLOUD_STORAGE_STATE)
+                    .to(CLEANUP_FREEIPA_STATE)
+                    .event(VALIDATE_CLOUD_STORAGE_FINISHED_EVENT)
+                    .failureEvent(VALIDATE_CLOUD_STORAGE_FAILED_EVENT)
             .from(CLEANUP_FREEIPA_STATE)
                     .to(BOOTSTRAPPING_PUBLIC_ENDPOINT_STATE)
                     .event(CLEANUP_FREEIPA_FINISHED_EVENT)

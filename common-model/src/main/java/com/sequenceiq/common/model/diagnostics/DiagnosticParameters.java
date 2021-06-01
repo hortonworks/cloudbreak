@@ -17,6 +17,8 @@ public class DiagnosticParameters {
 
     public static final String DEFAULT_ROOT = "filecollector";
 
+    public static final String TELEMETRY_ROOT = "telemetry";
+
     private String root;
 
     private String issue;

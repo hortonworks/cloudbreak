@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CB_AUTHZ_POWER_USERS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
@@ -18,11 +20,13 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_S
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_GCP;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_ON_VM;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISABLE_AUTO_BUNDLE_COLLECTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_CUSTOM_IMAGE;
@@ -33,9 +37,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
@@ -51,7 +53,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 
@@ -154,6 +155,10 @@ public class EntitlementService {
 
     public boolean fmsClusterProxyEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_FMS_CLUSTER_PROXY);
+    }
+
+    public boolean cloudStorageValidationOnVmEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION_ON_VM);
     }
 
     public boolean cloudStorageValidationEnabled(String accountId) {

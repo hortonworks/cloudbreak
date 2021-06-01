@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.Crn;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -33,8 +35,6 @@ public class FreeIpaCloudStorageValidationService {
 
     private static final String DEFAULT_ERROR_MESSAGE = "Validating FreeIPA cloud storage permission for backup failed.";
 
-    private static final String PARAMETERS_ROOT = "telemetry";
-
     @Inject
     private HostOrchestrator hostOrchestrator;
 
@@ -50,7 +50,16 @@ public class FreeIpaCloudStorageValidationService {
     @Inject
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public void validate(Stack stack) throws CloudbreakOrchestratorException {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        if (!entitlementService.cloudStorageValidationOnVmEnabled(accountId)) {
+            LOGGER.info("Cloud storage validation on VM entitlement is missing, not validating cloud storage on VM.");
+            return;
+        }
+
         Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
         List<GatewayConfig> allGateways = gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet);
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet);
@@ -77,7 +86,7 @@ public class FreeIpaCloudStorageValidationService {
                 CloudStorageDiagnosticsParameters cloudStorageParameters = diagnosticCloudStorageConverter
                         .loggingToCloudStorageDiagnosticsParameters(stack.getTelemetry().getLogging(), stack.getRegion());
                 DiagnosticParameters parameters = new DiagnosticParameters();
-                parameters.setRoot(PARAMETERS_ROOT);
+                parameters.setRoot(DiagnosticParameters.TELEMETRY_ROOT);
                 parameters.setCloudStorageDiagnosticsParameters(cloudStorageParameters);
                 telemetryOrchestrator.validateCloudStorage(allGateways, allNodes, targetHostNames, parameters.toMap(), exitCriteriaModel);
             }

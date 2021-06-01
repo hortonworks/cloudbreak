@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.clusterproxy;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service;
 
 import static com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterConstants.CCMV2_BACKEND_ID_FORMAT;
 import static java.util.Arrays.asList;
