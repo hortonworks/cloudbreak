@@ -532,6 +532,17 @@ public class ClusterUpgradeAvailabilityServiceTest {
         assertEquals(2, response.getUpgradeCandidates().stream().map(ImageInfoV4Response::getImageId).collect(Collectors.toSet()).size());
     }
 
+    @Test
+    public void testFilterUpgradeNotSupportedForCustomImages() throws CloudbreakImageNotFoundException {
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImageWithoutImageCatalogUrl();
+
+        when(imageService.getImage(stack.getId())).thenReturn(currentImage);
+
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, Boolean.TRUE);
+        assertNull(actual.getUpgradeCandidates());
+    }
+
     private StackStatus createStackStatus(Status status) {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(status);
@@ -566,6 +577,10 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImage() {
         return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, FALLBACK_CATALOG_URL, CATALOG_NAME, CURRENT_IMAGE_ID, null);
+    }
+
+    private com.sequenceiq.cloudbreak.cloud.model.Image createCurrentImageWithoutImageCatalogUrl() {
+        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, null, CATALOG_NAME, CURRENT_IMAGE_ID, null);
     }
 
     private CloudbreakImageCatalogV3 createImageCatalog(List<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> images) {
