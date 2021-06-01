@@ -2,11 +2,14 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Objects;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -25,7 +28,8 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertTo));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
         response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
-        response.setAzure(getIfNotNull(source.getAzure(), environment, instanceTemplateParameterConverter::convert));
+        AzureInstanceTemplateV1Parameters azureParametersEffective = Objects.requireNonNullElse(source.getAzure(), new AzureInstanceTemplateV1Parameters());
+        response.setAzure(instanceTemplateParameterConverter.convert(azureParametersEffective, environment));
         response.setGcp(getIfNotNull(source.getGcp(), instanceTemplateParameterConverter::convert));
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));
         response.setCloudPlatform(source.getCloudPlatform());
