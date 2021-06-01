@@ -13,16 +13,20 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyBase;
+import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.controller.AutoScaleClusterCommonService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
 
@@ -43,6 +47,12 @@ public class AlertValidator {
 
     @Inject
     private AutoScaleClusterCommonService asClusterCommonService;
+
+    @Inject
+    private AutoscaleRestRequestThreadLocalService autoscaleRestRequestThreadLocalService;
+
+    @Inject
+    private ScalingHardLimitsService scalingHardLimitsService;
 
     public void validateEntitlementAndDisableIfNotEntitled(Cluster cluster) {
         if (!entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
@@ -80,6 +90,7 @@ public class AlertValidator {
             Set<String> timeAlertHostGroups = distroXAutoscaleClusterRequest.getTimeAlertRequests().stream()
                     .map(timeAlertRequest -> {
                         validateSchedule(timeAlertRequest);
+                        validateScalingAdjustment(timeAlertRequest.getScalingPolicy());
                         return timeAlertRequest;
                     })
                     .map(TimeAlertRequest::getScalingPolicy)
@@ -90,6 +101,10 @@ public class AlertValidator {
 
         if (!distroXAutoscaleClusterRequest.getLoadAlertRequests().isEmpty()) {
             Set<String> loadAlertHostGroups = distroXAutoscaleClusterRequest.getLoadAlertRequests().stream()
+                    .map(loadAlertRequest -> {
+                        validateScalingAdjustment(loadAlertRequest.getScalingPolicy());
+                        return loadAlertRequest;
+                    })
                     .map(LoadAlertRequest::getScalingPolicy)
                     .map(ScalingPolicyBase::getHostGroup)
                     .collect(Collectors.toSet());
@@ -103,6 +118,19 @@ public class AlertValidator {
             dateService.getCronExpression(json.getCron());
         } catch (ParseException parseException) {
             throw new BadRequestException(parseException.getMessage(), parseException);
+        }
+    }
+
+    public void validateScalingAdjustment(ScalingPolicyRequest scalingPolicyRequest) {
+        if (AdjustmentType.NODE_COUNT.equals(scalingPolicyRequest.getAdjustmentType())) {
+            int maxScaleUpStepAllowed = entitlementValidationService
+                    .scalingStepEntitlementEnabled(autoscaleRestRequestThreadLocalService.getCloudbreakTenant()) ?
+                    scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled() :
+                    scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+            if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(maxScaleUpStepAllowed, scalingPolicyRequest.getScalingAdjustment())) {
+                String message = String.format("Maximum upscale step is %d node(s)", maxScaleUpStepAllowed);
+                throw new BadRequestException(message);
+            }
         }
     }
 

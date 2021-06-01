@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,9 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -29,6 +34,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -42,6 +48,8 @@ class StackCommonServiceTest {
 
     private static final NameOrCrn STACK_NAME = NameOrCrn.ofName("stackName");
 
+    private static final NameOrCrn STACK_CRN = NameOrCrn.ofCrn("stackCrn");
+
     @Mock
     private ImageCatalogService imageCatalogService;
 
@@ -49,7 +57,13 @@ class StackCommonServiceTest {
     private StackService stackService;
 
     @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
     private StackOperationService stackOperationService;
+
+    @Mock
+    private ScalingHardLimitsService scalingHardLimitsService;
 
     @Mock
     private UserService userService;
@@ -163,5 +177,109 @@ class StackCommonServiceTest {
         underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
 
         verify(stackOperationService).removeInstances(stack, WORKSPACE_ID, nodes, true, user);
+    }
+
+    @Test
+    public void testPutInDefaultWorkspaceWhenScalingStepEntitledAndScalingBeyond200() {
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentV4Request.setScalingAdjustment(250);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
+
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        User user = new User();
+        Tenant tenant = new Tenant();
+        tenant.setName("accountId");
+        user.setTenant(tenant);
+
+        when(userService.getOrCreate(any())).thenReturn(user);
+        when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
+        when(entitlementService.dataHubScalingStepSizeEnabled("accountId")).thenReturn(true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled()).thenReturn(200);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.putInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request));
+
+        assertEquals("Upscaling by more than 200 nodes is not supported", exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
+    public void testPutInDefaultWorkspaceWhenScalingStepEntitledAndValidScaling() {
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentV4Request.setScalingAdjustment(150);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
+
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        User user = new User();
+        Tenant tenant = new Tenant();
+        tenant.setName("accountId");
+        user.setTenant(tenant);
+
+        when(userService.getOrCreate(any())).thenReturn(user);
+        when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
+        when(entitlementService.dataHubScalingStepSizeEnabled("accountId")).thenReturn(true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled()).thenReturn(200);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        underTest.putInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request);
+        verify(stackOperationService).updateNodeCount(stack, instanceGroupAdjustmentV4Request, false);
+    }
+
+    @Test
+    public void testPutInDefaultWorkspaceWhenScalingStepNotEntitledAndScalingBeyond100() {
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentV4Request.setScalingAdjustment(101);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
+
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        User user = new User();
+        Tenant tenant = new Tenant();
+        tenant.setName("accountId");
+        user.setTenant(tenant);
+
+        when(userService.getOrCreate(any())).thenReturn(user);
+        when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
+        when(entitlementService.dataHubScalingStepSizeEnabled("accountId")).thenReturn(false);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.putInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request));
+        assertEquals("Upscaling by more than 100 nodes is not supported", exception.getMessage());
+    }
+
+    @Test
+    public void testPutInDefaultWorkspaceWhenScalingStepNotEntitledAndValidScaling() {
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentV4Request.setScalingAdjustment(95);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
+
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        User user = new User();
+        Tenant tenant = new Tenant();
+        tenant.setName("accountId");
+        user.setTenant(tenant);
+
+        when(userService.getOrCreate(any())).thenReturn(user);
+        when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
+        when(entitlementService.dataHubScalingStepSizeEnabled("accountId")).thenReturn(false);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        underTest.putInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request);
+        verify(stackOperationService).updateNodeCount(stack, instanceGroupAdjustmentV4Request, false);
     }
 }

@@ -53,6 +53,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DEACTIVATE_USER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_SCALING_STEP_SIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
@@ -240,6 +241,10 @@ public class EntitlementService {
 
     public boolean gcpAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_GCP_AUTOSCALING);
+    }
+
+    public boolean dataHubScalingStepSizeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATAHUB_SCALING_STEP_SIZE);
     }
 
     public boolean ccmV2Enabled(String accountId) {

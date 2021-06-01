@@ -31,4 +31,8 @@ public class EntitlementValidationService {
         }
         return entitled;
     }
+
+    public boolean scalingStepEntitlementEnabled(String accountId) {
+        return entitlementService.dataHubScalingStepSizeEnabled(accountId);
+    }
 }

@@ -31,6 +31,7 @@ import com.sequenceiq.periscope.domain.MetricType;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AuditService;
+import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
@@ -77,6 +78,9 @@ public class ScalingRequest implements Runnable {
     @Inject
     private AuditService auditService;
 
+    @Inject
+    private EntitlementValidationService entitlementValidationService;
+
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int totalNodes, int desiredNodeCount, List<String> decommissionNodeIds) {
         this.cluster = cluster;
         this.policy = policy;
@@ -104,10 +108,11 @@ public class ScalingRequest implements Runnable {
 
     private void scaleUp(int scalingAdjustment, int totalNodes) {
         metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_TRIGGERED);
-        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
-            LOGGER.debug("Upscale requested for '{}' nodes. Upscaling with the maximum allowed of '{}' node(s)",
-                    scalingAdjustment, scalingHardLimitsService.getMaxUpscaleStepInNodeCount());
-            scalingAdjustment = scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+        int maxScaleUpStepAllowed = entitlementValidationService.scalingStepEntitlementEnabled(cluster.getClusterPertain().getTenant()) ?
+                scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled() : scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(maxScaleUpStepAllowed, scalingAdjustment)) {
+            LOGGER.debug("Upscale requested for '{}' nodes. Upscaling with the maximum allowed of '{}' node(s)", scalingAdjustment, maxScaleUpStepAllowed);
+            scalingAdjustment = maxScaleUpStepAllowed;
         }
         String hostGroup = policy.getHostGroup();
         String statusReason = null;

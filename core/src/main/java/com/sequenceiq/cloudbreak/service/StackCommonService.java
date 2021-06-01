@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.util.ConverterUtil;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -111,6 +112,9 @@ public class StackCommonService {
 
     @Inject
     private UserService userService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Inject
     private BlueprintUpdaterConnectors blueprintUpdaterConnectors;
@@ -318,15 +322,17 @@ public class StackCommonService {
             return stackOperationService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-            validateHardLimits(scalingAdjustment);
+            validateHardLimits(scalingAdjustment, user);
             return stackOperationService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
         }
     }
 
-    private void validateHardLimits(Integer scalingAdjustment) {
-        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment)) {
-            throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported",
-                    scalingHardLimitsService.getMaxUpscaleStepInNodeCount()));
+    private void validateHardLimits(Integer scalingAdjustment, User user) {
+        int maxScaleUpStepAllowed = entitlementService.dataHubScalingStepSizeEnabled(user.getTenant().getName()) ?
+                scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled() : scalingHardLimitsService.getMaxUpscaleStepInNodeCount();
+
+        if (scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(maxScaleUpStepAllowed, scalingAdjustment)) {
+            throw new BadRequestException(String.format("Upscaling by more than %d nodes is not supported", maxScaleUpStepAllowed));
         }
     }
 

@@ -2,6 +2,9 @@ package com.sequenceiq.periscope.controller.validation;
 
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,8 +29,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -36,6 +41,7 @@ import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.controller.AutoScaleClusterCommonService;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
+import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
 
@@ -64,6 +70,12 @@ public class AlertValidatorTest {
     @Mock
     private AutoScaleClusterCommonService asClusterCommonService;
 
+    @Mock
+    private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Mock
+    private AutoscaleRestRequestThreadLocalService autoscaleRestRequestThreadLocalService;
+
     private DateService dateService = new DateService();
 
     private Cluster aCluster;
@@ -78,6 +90,9 @@ public class AlertValidatorTest {
         underTest.setDateService(dateService);
         aCluster = getACluster();
         when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString())).thenReturn(true);
+        when(autoscaleRestRequestThreadLocalService.getCloudbreakTenant()).thenReturn("tenant");
+        when(entitlementValidationService.scalingStepEntitlementEnabled(anyString())).thenReturn(true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled()).thenCallRealMethod();
     }
 
     @Test
@@ -338,6 +353,64 @@ public class AlertValidatorTest {
         expectedException.expectMessage("unsupported.hostgroup");
 
         underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
+    }
+
+    @Test
+    public void testValidateScalingAdjustmentWhenScalingStepEntitledAndScalingBeyond200() {
+        ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
+        scalingPolicyRequest.setAdjustmentType(AdjustmentType.NODE_COUNT);
+        scalingPolicyRequest.setScalingAdjustment(250);
+
+        when(entitlementValidationService.scalingStepEntitlementEnabled("tenant")).thenReturn(true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled()).thenReturn(200);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateScalingAdjustment(scalingPolicyRequest));
+
+        assertEquals("Maximum upscale step is 200 node(s)", exception.getMessage());
+    }
+
+    @Test
+    public void testValidateScalingAdjustmentWhenScalingStepEntitledAndValidScaling() {
+        ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
+        scalingPolicyRequest.setAdjustmentType(AdjustmentType.NODE_COUNT);
+        scalingPolicyRequest.setScalingAdjustment(100);
+
+        when(entitlementValidationService.scalingStepEntitlementEnabled("tenant")).thenReturn(true);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCountWhenScalingStepEntitled()).thenReturn(200);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        underTest.validateScalingAdjustment(scalingPolicyRequest);
+    }
+
+    @Test
+    public void testValidateScalingAdjustmentWhenScalingStepNotEntitledAndScalingBeyond200() {
+        ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
+        scalingPolicyRequest.setAdjustmentType(AdjustmentType.NODE_COUNT);
+        scalingPolicyRequest.setScalingAdjustment(150);
+
+        when(entitlementValidationService.scalingStepEntitlementEnabled("tenant")).thenReturn(false);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateScalingAdjustment(scalingPolicyRequest));
+
+        assertEquals("Maximum upscale step is 100 node(s)", exception.getMessage());
+    }
+
+    @Test
+    public void testValidateScalingAdjustmentWhenScalingStepNotEntitledAndValidScaling() {
+        ScalingPolicyRequest scalingPolicyRequest = new ScalingPolicyRequest();
+        scalingPolicyRequest.setAdjustmentType(AdjustmentType.NODE_COUNT);
+        scalingPolicyRequest.setScalingAdjustment(50);
+
+        when(entitlementValidationService.scalingStepEntitlementEnabled("tenant")).thenReturn(false);
+        when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
+        when(scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(anyInt(), anyInt())).thenCallRealMethod();
+
+        underTest.validateScalingAdjustment(scalingPolicyRequest);
     }
 
     private Cluster getACluster() {
