@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -154,9 +156,10 @@ public class AzureResourceConnectorTest {
     }
 
     @Test
-    public void testWhenTemplateDeploymentExistsThenComputeResourceServiceBuildsTheResources() {
+    public void testWhenTemplateDeploymentExistsAndInProgressThenComputeResourceServiceBuildsTheResources() {
         when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
         when(client.getTemplateDeployment(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(deployment);
+        when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
         when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
 
         underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
@@ -165,6 +168,26 @@ public class AzureResourceConnectorTest {
                 any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
+        verify(client, never()).createTemplateDeployment(any(), any(), any(), any());
+        verify(client, times(2)).getTemplateDeployment(any(), any());
+        verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
+    }
+
+    @Test
+    public void testWhenTemplateDeploymentExistsAndFinishedThenComputeResourceServiceBuildsTheResources() {
+        when(client.templateDeploymentExists(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(true);
+        when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
+        when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.CREATED);
+        when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
+
+        underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
+
+        verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
+                any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
+        verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
+        verify(azureUtils, times(1)).getCustomNetworkId(network);
+        verify(client, times(1)).createTemplateDeployment(any(), any(), any(), any());
+        verify(client, times(1)).getTemplateDeployment(any(), any());
         verify(azureMarketplaceImageProviderService, times(0)).get(imageModel);
     }
 

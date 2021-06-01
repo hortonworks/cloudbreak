@@ -133,7 +133,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         boolean resourcesPersisted = false;
         try {
             List<CloudResource> instances;
-            if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
+            if (shouldCreateTemplateDeployment(stackName, resourceGroupName, client)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
                 LOGGER.debug("Created template deployment for launch: {}", templateDeployment.exportTemplate().template());
                 instances = persistCloudResources(ac, stack, notifier, cloudContext, stackName, resourceGroupName, templateDeployment);
@@ -177,6 +177,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             throws Exception {
         // todo: we're implementing this method as part of the work to add LBs to an existing environment. See CB-11647
         return ImmutableList.of();
+    }
+
+    private boolean shouldCreateTemplateDeployment(String stackName, String resourceGroupName, AzureClient client) {
+        return !client.templateDeploymentExists(resourceGroupName, stackName) ||
+                client.getTemplateDeploymentStatus(resourceGroupName, stackName) != ResourceStatus.IN_PROGRESS;
     }
 
     private List<CloudResource> persistCloudResources(
