@@ -33,8 +33,8 @@ public class SpiStoreService {
 
     public List<CloudVmMetaDataStatus> store(String mockUuid, CloudStack cloudStack) {
         LOGGER.info("New CloudStack will be created for {}, {}", mockUuid, cloudStack);
-        List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, cloudStack.getGroups());
         SpiDto spiDto = new SpiDto(mockUuid, cloudStack);
+        List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, spiDto, cloudStack.getGroups());
         spiDto.setVmMetaDataStatuses(instances);
         spiDtoMap.put(mockUuid, spiDto);
         return instances;
@@ -74,9 +74,10 @@ public class SpiStoreService {
 
     public List<CloudVmMetaDataStatus> resize(String mockUuid, List<Group> groups) {
         LOGGER.info("Resize {}", mockUuid);
-        List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, groups);
+        SpiDto spiDto = read(mockUuid);
+        List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, spiDto, groups);
         LOGGER.info("{} will be resized with {}", mockUuid, instances);
-        read(mockUuid).getVmMetaDataStatuses().addAll(instances);
+        spiDto.getVmMetaDataStatuses().addAll(instances);
         return instances;
     }
 

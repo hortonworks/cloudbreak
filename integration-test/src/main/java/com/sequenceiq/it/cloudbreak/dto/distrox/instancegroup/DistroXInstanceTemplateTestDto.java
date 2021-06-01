@@ -1,5 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -8,6 +11,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsIns
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.volume.VolumeV1Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -61,6 +65,24 @@ public class DistroXInstanceTemplateTestDto
             DistroXVolumeTestDto value = getTestContext().get(key);
             return value.getRequest();
         }).collect(Collectors.toSet()));
+        return this;
+    }
+
+    public DistroXInstanceTemplateTestDto withAttachedVolumeCount(int count) {
+        Set<VolumeV1Request> volumes = new HashSet<>();
+        for (int i = 0; i < count; i++) {
+            volumes.add(getTestContext().given("attachedVolume" + i, DistroXVolumeTestDto.class).getRequest());
+        }
+        getRequest().setAttachedVolumes(volumes);
+        return this;
+    }
+
+    public DistroXInstanceTemplateTestDto withAttachedVolumes(int count) {
+        Optional<VolumeV1Request> first = getRequest().getAttachedVolumes().stream().findFirst();
+        if (first.isEmpty()) {
+            withAttachedVolumeCount(1);
+        }
+        first.get().setCount(count);
         return this;
     }
 

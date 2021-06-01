@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,6 +25,10 @@ import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 
 public class AlertServiceTest {
+
+    private static final String TEST_ACCOUNT_ID = "accid";
+
+    private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
     @InjectMocks
     AlertService underTest;
@@ -59,7 +64,7 @@ public class AlertServiceTest {
         when(clusterService.save(mockCluster)).thenReturn(mockCluster);
         when(loadAlertRepository.save(testAlert)).thenReturn(mockLoadAlert);
 
-        LoadAlert response = underTest.createLoadAlert(clusterId, testAlert);
+        LoadAlert response = doAs(TEST_USER_CRN, () -> underTest.createLoadAlert(clusterId, testAlert));
 
         assertNotNull("LoadAlert should not be null", response);
         assertNotNull("LoadAlert' cluster should not be null", testAlert.getCluster());
@@ -78,7 +83,7 @@ public class AlertServiceTest {
         when(mockLoadAlert.getScalingPolicy()).thenReturn(new ScalingPolicy());
         when(loadAlertRepository.save(mockLoadAlert)).thenReturn(mockLoadAlert);
 
-        LoadAlert response = underTest.updateLoadAlert(clusterId, alertId, testAlert);
+        LoadAlert response = doAs(TEST_USER_CRN, () -> underTest.updateLoadAlert(clusterId, alertId, testAlert));
         assertNotNull("LoadAlert should not be null", response);
 
         verify(mockLoadAlert).setName(anyString());
@@ -110,7 +115,7 @@ public class AlertServiceTest {
         when(clusterService.save(mockCluster)).thenReturn(mockCluster);
         when(timeAlertRepository.save(testAlert)).thenReturn(mockTimeAlert);
 
-        TimeAlert response = underTest.createTimeAlert(clusterId, testAlert);
+        TimeAlert response = doAs(TEST_USER_CRN, () -> underTest.createTimeAlert(clusterId, testAlert));
 
         assertNotNull("TestAlert should not be null", response);
         assertNotNull("TestAlert' cluster should not be null", testAlert.getCluster());
@@ -130,7 +135,7 @@ public class AlertServiceTest {
         when(mockTimeAlert.getScalingPolicy()).thenReturn(new ScalingPolicy());
         when(timeAlertRepository.save(mockTimeAlert)).thenReturn(mockTimeAlert);
 
-        TimeAlert response = underTest.updateTimeAlert(clusterId, alertId, testAlert);
+        TimeAlert response = doAs(TEST_USER_CRN, () -> underTest.updateTimeAlert(clusterId, alertId, testAlert));
         assertNotNull("TimeAlert should not be null", response);
 
         verify(mockTimeAlert).setName(anyString());
