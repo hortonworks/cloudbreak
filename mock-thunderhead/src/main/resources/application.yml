@@ -42,7 +42,7 @@ auth:
     datahub.runtime.upgrade.enable: true
     ccmv2.enable: false
     environment.experience.deletion.enable: true
-    endpointgateway.enable: false
+    endpointgateway.enable.azure: false
     endpointgateway.skip.validation: false
     cm.sync.command.poller.enable: true
     network.preflight.notifications.enable: true

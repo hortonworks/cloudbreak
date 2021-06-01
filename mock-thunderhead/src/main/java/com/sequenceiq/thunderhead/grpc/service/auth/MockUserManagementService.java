@@ -34,7 +34,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NETWORK_PREFLIGHT_NOTIFICATIONS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
@@ -342,8 +342,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.environment.experience.deletion.enable}")
     private boolean enableExperienceDeletionByEnvironment;
 
-    @Value("${auth.mock.endpointgateway.enable}")
-    private boolean publicEndpointAccessGatewayEnabled;
+    @Value("${auth.mock.endpointgateway.enable.azure}")
+    private boolean azureEndpointGatewayEnabled;
 
     @Value("${auth.mock.datalake.backup.on.upgrade.enable}")
     private boolean datalakeBackupOnUpgrade;
@@ -715,8 +715,8 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableExperienceDeletionByEnvironment) {
             builder.addEntitlements(createEntitlement(CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT));
         }
-        if (publicEndpointAccessGatewayEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY));
+        if (azureEndpointGatewayEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE));
         }
         if (datalakeBackupOnUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_UPGRADE));

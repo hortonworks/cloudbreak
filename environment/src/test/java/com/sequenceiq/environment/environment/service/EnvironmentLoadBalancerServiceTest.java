@@ -26,6 +26,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
 
 @ExtendWith(SpringExtension.class)
 public class EnvironmentLoadBalancerServiceTest {
@@ -45,6 +46,9 @@ public class EnvironmentLoadBalancerServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private LoadBalancerEntitlementService loadBalancerEntitlementService;
+
     @InjectMocks
     private EnvironmentLoadBalancerService underTest;
 
@@ -61,6 +65,7 @@ public class EnvironmentLoadBalancerServiceTest {
 
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(anyString(), anyString()))
             .thenReturn(Optional.empty());
+        doNothing().when(loadBalancerEntitlementService).validateNetworkForEndpointGateway(any(), any(), any());
 
         final NotFoundException[] exception = new NotFoundException[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
@@ -83,6 +88,7 @@ public class EnvironmentLoadBalancerServiceTest {
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(anyString(), anyString()))
             .thenReturn(Optional.of(new Environment()));
         doNothing().when(reactorFlowManager).triggerLoadBalancerUpdateFlow(any(), any(), any(), any(), any(), any(), anyString());
+        doNothing().when(loadBalancerEntitlementService).validateNetworkForEndpointGateway(any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             underTest.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLbDto);
@@ -105,6 +111,7 @@ public class EnvironmentLoadBalancerServiceTest {
         when(environmentService.findByResourceCrnAndAccountIdAndArchivedIsFalse(anyString(), anyString()))
             .thenReturn(Optional.of(new Environment()));
         doNothing().when(reactorFlowManager).triggerLoadBalancerUpdateFlow(any(), any(), any(), any(), any(), any(), anyString());
+        doNothing().when(loadBalancerEntitlementService).validateNetworkForEndpointGateway(any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             underTest.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLbDto);
@@ -125,6 +132,7 @@ public class EnvironmentLoadBalancerServiceTest {
         String expectedError = "Neither Endpoint Gateway nor Data Lake load balancer is enabled. Nothing to do.";
 
         when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(false);
+        doNothing().when(loadBalancerEntitlementService).validateNetworkForEndpointGateway(any(), any(), any());
 
         final BadRequestException[] exception = new BadRequestException[1];
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
