@@ -7,8 +7,8 @@ repositories {
 }
 
 jar {
-  baseName = 'cloud-aws'
-  archiveName = 'cloud-aws.jar'
+  baseName = 'cloud-aws-cloudformation'
+  archiveName = 'cloud-aws-cloudformation.jar'
 }
 
 dependencies {

@@ -4,7 +4,7 @@
 
 # By default, unless overridden later,
 # Wolf should review every policy change:
-cloud-aws/src/main/resources/definitions/   @hortonworks/cloudbreak-wolf
+cloud-aws-cloudformation/src/main/resources/definitions/   @hortonworks/cloudbreak-wolf
 
 # Raven team should review authorization framework related changes
 auth-internal/   @hortonworks/cloudbreak-raven

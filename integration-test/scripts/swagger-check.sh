@@ -88,7 +88,7 @@ declare -a nonApiModules=("cloud-reactor-api"
   "scripts"
   "template-manager-blueprint"
   "auth-internal"
-  "cloud-aws"
+  "cloud-aws-cloudformation"
   "cloudbreak-log"
   "docker-environment"
   "notification-sender"
@@ -133,6 +133,8 @@ declare -a nonApiModules=("cloud-reactor-api"
   "grpc-common"
   "structuredevent-service-cdp"
   "workspace"
+  "cloud-aws-common"
+  "cloud-aws-native"
 )
 
 # list of the changed files

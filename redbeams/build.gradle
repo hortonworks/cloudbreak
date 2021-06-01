@@ -122,7 +122,7 @@ dependencies {
   implementation project(':template-manager-tag')
   runtime project(':cloud-openstack')
   runtime project(':cloud-gcp')
-  runtime project(':cloud-aws')
+  runtime project(':cloud-aws-cloudformation')
   runtime project(':cloud-mock')
   runtime project(':cloud-azure')
 }
