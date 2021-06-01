@@ -6,6 +6,7 @@ import static java.util.Collections.emptyList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -151,19 +153,28 @@ public class MockResourceConnector implements ResourceConnector<Object> {
         List<CloudResourceStatus> ret = new ArrayList<>();
         for (CloudVmInstanceStatus cloudVmInstanceStatus : resize) {
             CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
-            CloudResource instanceResource = generateResource("cloudinstance" + ret.size(), cloudContext, cloudInstance, ResourceType.MOCK_INSTANCE);
+            CloudResource instanceResource = generateResource("cloudinstance" + ret.size(), cloudContext, cloudInstance, cloudInstance.getInstanceId(),
+                    ResourceType.MOCK_INSTANCE);
+            List<Volume> volumes = cloudInstance.getTemplate().getVolumes();
+            for (int i = 0; i < volumes.size(); i++) {
+                UUID uuid = UUID.randomUUID();
+                String volumeId = cloudInstance.getInstanceId() + "_" + uuid;
+                CloudResource volumeResource = generateResource("cloudvolume" + uuid, cloudContext, cloudInstance, volumeId,
+                        ResourceType.MOCK_VOLUME);
+                ret.add(new CloudResourceStatus(volumeResource, CREATED));
+            }
             ret.add(new CloudResourceStatus(instanceResource, CREATED));
         }
         return ret;
     }
 
-    private CloudResource generateResource(String name, CloudContext cloudContext, CloudInstance cloudInstance, ResourceType type) {
+    private CloudResource generateResource(String name, CloudContext cloudContext, CloudInstance cloudInstance, String instanceId, ResourceType type) {
         CloudResource resource = new Builder()
                 .type(type)
                 .status(CommonStatus.CREATED)
                 .group(cloudInstance.getTemplate().getGroupName())
                 .name(name)
-                .instanceId(cloudInstance.getInstanceId())
+                .instanceId(instanceId)
                 .params(cloudInstance.getParameters())
                 .persistent(true)
                 .build();

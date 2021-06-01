@@ -99,6 +99,10 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
         return this;
     }
 
+    public DistroXInstanceGroupTestDto withTemplate(String key) {
+        return withTemplate((DistroXInstanceTemplateTestDto) getTestContext().get(key));
+    }
+
     public DistroXInstanceGroupTestDto withTemplate(DistroXInstanceTemplateTestDto template) {
         getRequest().setTemplate(template.getRequest());
         return this;

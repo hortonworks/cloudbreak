@@ -1,5 +1,6 @@
 package com.sequenceiq.mock.spi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -16,6 +17,7 @@ public class SpiDto {
     public SpiDto(String mockuuid, CloudStack cloudStack) {
         this.cloudStack = cloudStack;
         this.mockuuid = mockuuid;
+        this.vmMetaDataStatuses = new ArrayList<>();
     }
 
     public List<CloudVmMetaDataStatus> getVmMetaDataStatuses() {
@@ -24,5 +26,9 @@ public class SpiDto {
 
     public void setVmMetaDataStatuses(List<CloudVmMetaDataStatus> vmMetaDataStatuses) {
         this.vmMetaDataStatuses = vmMetaDataStatuses;
+    }
+
+    public CloudStack getCloudStack() {
+        return cloudStack;
     }
 }
