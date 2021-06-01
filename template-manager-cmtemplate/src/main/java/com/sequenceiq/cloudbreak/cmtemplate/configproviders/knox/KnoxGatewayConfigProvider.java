@@ -19,12 +19,12 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.GatewayView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -84,8 +84,6 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         GeneralClusterConfigs generalClusterConfigs = source.getGeneralClusterConfigs();
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
         String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
-        String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
-                "" : source.getBlueprintView().getProcessor().getStackVersion();
         VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
         String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.KNOX_ADMIN.getRight());
 
@@ -103,7 +101,8 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                     config.add(config(GATEWAY_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
                     config.add(getGatewayWhitelistConfig(source));
                 }
-                if (source.getProductDetailsView() != null && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), cdhVersion)) {
+                if (source.getProductDetailsView() != null
+                        && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
                     config.add(config(GATEWAY_SERVICE_TOKENSTATE_IMPL, "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService"));
                 }
                 return config;

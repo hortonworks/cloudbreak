@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -70,7 +71,10 @@ public class KnoxServiceConfigProviderTest {
                 .withBlueprintView(blueprintView)
                 .withRdsSslCertificateFilePath("file://path")
                 .withRdsConfigs(Set.of(rdsConfig))
-                .withProductDetails(new ClouderaManagerRepo().withVersion(cmVersion), List.of())
+                .withProductDetails(new ClouderaManagerRepo().withVersion(cmVersion),
+                        List.of(new ClouderaManagerProduct()
+                                .withVersion(cdhVersion)
+                                .withName("CDH")))
                 .build();
 
         when(blueprintTextProcessor.getStackVersion()).thenReturn(cdhVersion);
@@ -82,13 +86,13 @@ public class KnoxServiceConfigProviderTest {
 
     static Object[][] cmCdhCombinations() {
         return new Object[][]{
-                { "7.2.10",     "7.4.2", 7 },
-                { "7.2.11",     "7.4.1", 1 },
-                { "7.2.11",     "7.4.2", 7 },
-                { "7.2.9.1",    "7.4.1", 7 },
-                { "7.2.8",      "7.4.2", 1 },
-                { "7.2.8",      "7.4.1", 1 },
-                { "7.2.9",      "7.4.2", 1 },
+                { "7.2.10",                         "7.4.2", 7 },
+                { "7.2.11",                         "7.4.1", 1 },
+                { "7.2.11",                         "7.4.2", 7 },
+                { "7.2.9-1.cdh7.2.9.p1.14166188",   "7.4.1", 7 },
+                { "7.2.8",                          "7.4.2", 1 },
+                { "7.2.8",                          "7.4.1", 1 },
+                { "7.2.9",                          "7.4.2", 1 },
         };
     }
 }

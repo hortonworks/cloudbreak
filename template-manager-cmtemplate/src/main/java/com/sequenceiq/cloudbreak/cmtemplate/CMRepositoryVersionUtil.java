@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 import java.util.Comparator;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -44,7 +46,7 @@ public class CMRepositoryVersionUtil {
 
     public static final Versioned CLOUDERA_STACK_VERSION_7_2_10 = () -> "7.2.10";
 
-    public static final Versioned CLOUDERA_STACK_VERSION_7_2_9_1 = () -> "7.2.9.1";
+    public static final Versioned CLOUDERA_STACK_VERSION_7_2_9 = () -> "7.2.9";
 
     public static final Versioned CFM_VERSION_2_0_0_0 = () -> "2.0.0.0";
 
@@ -88,16 +90,22 @@ public class CMRepositoryVersionUtil {
         return isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1);
     }
 
-    public static boolean isKnoxDatabaseSupported(ClouderaManagerRepo clouderaManagerRepoDetails, String cdhVersion) {
+    public static boolean isKnoxDatabaseSupported(ClouderaManagerRepo clouderaManagerRepoDetails,
+        Optional<ClouderaManagerProduct> cdhProduct,
+        Optional<Integer> cdhPatchVersion) {
         LOGGER.info("ClouderaManagerRepo is compared for knox database support");
         boolean supported = false;
-        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)) {
-            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_2)) {
-                supported = true;
-            }
-        } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9_1)) {
-            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
-                supported = true;
+        if (cdhProduct.isPresent()) {
+            String cdhVersion = cdhProduct.get().getVersion().split("-")[0];
+            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_10)) {
+                if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_2)) {
+                    supported = true;
+                }
+            } else if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9)) {
+                if (cdhPatchVersion.isPresent() && cdhPatchVersion.get() >= 1
+                        && isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
+                    supported = true;
+                }
             }
         }
         return supported;
