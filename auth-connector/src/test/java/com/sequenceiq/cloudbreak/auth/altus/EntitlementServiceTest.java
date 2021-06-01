@@ -146,7 +146,10 @@ class EntitlementServiceTest {
                 {"CDP_CONCLUSION_CHECKER_SEND_USER_EVENT", (EntitlementCheckFunction) EntitlementService::conclusionCheckerSendUserEventEnabled, true},
 
                 {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, false},
-                {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, true}
+                {"CDP_NODESTATUS_ENABLE_SALT_PING", (EntitlementCheckFunction) EntitlementService::nodestatusSaltPingEnabled, true},
+
+                {"DEACTIVATE_USER", (EntitlementCheckFunction) EntitlementService::deactivateUserEnabled, false},
+                {"DEACTIVATE_USER", (EntitlementCheckFunction) EntitlementService::deactivateUserEnabled, true}
         };
     }
 
